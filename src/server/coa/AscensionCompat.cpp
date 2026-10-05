@@ -4,6 +4,7 @@
  * https://github.com/azerothcore/azerothcore-wotlk/blob/master/LICENSE-AGPL3
  */
 
+#include "AbilityPracticeRankPolicy.h"
 #include "AccountMgr.h"
 #include "AscensionFelsworn.h"
 #include "AscensionItemScaling.h"
@@ -805,7 +806,8 @@ public:
           progressionSpell.ClassId != player->getClass() ||
           progressionSpell.RequiredLevel > player->GetLevel() ||
           !CanGrantAscensionRacialSpell(player, progressionSpell.SpellId) ||
-          player->HasSpell(progressionSpell.SpellId))
+          player->HasSpell(progressionSpell.SpellId) ||
+          !CoAAbilityPractice::CanLearnRank(player, progressionSpell.SpellId))
         continue;
 
       if (!sSpellMgr->GetSpellInfo(progressionSpell.SpellId))
@@ -835,7 +837,8 @@ public:
     {
         if (!automaticProgression || rank.ClassId != player->getClass() ||
             rank.RequiredLevel > player->GetLevel() ||
-            !player->HasSpell(rank.FirstSpellId) || player->HasSpell(rank.SpellId))
+            !player->HasSpell(rank.FirstSpellId) || player->HasSpell(rank.SpellId) ||
+            !CoAAbilityPractice::CanLearnRank(player, rank.SpellId))
             continue;
 
         if (sSpellMgr->GetSpellInfo(rank.SpellId))

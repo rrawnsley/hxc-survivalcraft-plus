@@ -266,3 +266,34 @@ no player pointers are retained. The release catalog and multi-class session acc
 
 Source/native build passed at `.cache/verify-all/20261005-044931/report.json`; C++ lint and Lua 5.1 syntax passed.
 Slot/class switching, stale changed-class packets and relog/in-game behavior still require runtime qualification.
+
+## Experimental rank-learning connection
+
+`AbilityPractice.AllowDevelopmentRankLearning = 0` is an additional switch. Observation remains unchanged with
+that switch off. All three enable/development/rank switches plus validated startup data are required for rank rules.
+The module registers an optional atomic provider. Without an active provider, all ranks are unmanaged and normal
+learning continues. Only stronger ranks of the three source-reviewed Pyromancer class-grant abilities are managed;
+introductory spells, other abilities/classes and bots retain their normal acquisition behavior.
+
+The provider reads cached practice, preserves currently known ranks or higher ranks, and evaluates level, practice
+and the previous rank. Corrupt/incompatible records block new managed ranks. Normal `Player::learnSpell` consults
+the provider before adding a new rank. Ascension class/generated progression consults it before counted grants.
+Spellbook rows for unlearned managed ranks are unavailable before purchase/bulk learning; forged book requests
+cannot fall through to another trainer path. Trainers also reject managed ranks, including direct learn-effect
+targets, before charging. At a paced dirty refresh the module automatically learns ready ranks without a book fee.
+The three introductory roots are class grants with no raw advancement-node references in the current review export;
+this does not approve the same ownership rule for other abilities.
+
+A narrow shared provider and three core learning/progression/trainer sites were needed because existing module
+learn hooks run after the grant and cannot veto it or protect trainer charges. No Player header/ABI change, SQL,
+per-cast query or launcher change was added. The public header belongs to the existing game Player include surface;
+the first native build exposed an incorrect placement under CoA, corrected before the passing build.
+
+**Not ready for activation:** direct `addSpell`/temporary helper routes, saved class-slot/prestige restoration,
+talent ownership/point charging, wrapped/nested trainer learning and all-class definitions still need integration
+and runtime qualification. A saved inactive class has not yet had a full migration before restoration; do not enable
+rank rules for a live character. The switch is intended only for future isolated qualification fixtures.
+
+Source/native build passed at `.cache/verify-all/20261005-050036/report.json`; the failed placement attempt remains
+`.cache/verify-all/20261005-045747/report.json`. C++ lint and whitespace passed. No runtime rank grants, trainer fee
+checks, class changes or other gameplay cases were run. No server was installed, started or restarted.

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "AbilityPracticeDevelopment.h"
+#include "AbilityPracticeRankPolicy.h"
 #include "AbilityPracticeOutcome.h"
 #include "AbilityPracticeWire.h"
 #include "Chat.h"
@@ -28,6 +29,8 @@ std::recursive_mutex Mutex;
 bool Requested = false;
 bool DevelopmentAllowed = false;
 bool Ready = false;
+bool RankRequested = false;
+std::atomic<bool> RankActive = false;
 std::atomic<bool> Active = false;
 std::uint32_t Revision = 0;
 using Clock = std::chrono::steady_clock;
@@ -98,6 +101,46 @@ std::vector<std::uint32_t> Learned(Player const* player, Practice::AbilityDefini
     return spells;
 }
 
+CoAAbilityPractice::RankDecision EvaluateRank(Player const* player, std::uint32_t spellId)
+{
+    using Decision = CoAAbilityPractice::RankDecision;
+    if (!RankActive.load() || !IsDevelopmentPlayer(player))
+        return Decision::Unmanaged;
+    auto const* ability = Dev::Find(spellId);
+    if (!ability || spellId == ability->Ranks.front().SpellId)
+        return Decision::Unmanaged;
+    std::lock_guard lock(Mutex);
+    if (!RankRequested || !Affects(player))
+        return Decision::Unmanaged;
+    auto const desired = std::find_if(ability->Ranks.begin(), ability->Ranks.end(),
+        [spellId](Practice::AbilityRank const& rank) { return rank.SpellId == spellId; });
+    if (desired == ability->Ranks.end())
+        return Decision::Blocked;
+    auto const learned = Learned(player, *ability);
+    for (Practice::AbilityRank const& rank : ability->Ranks)
+        if (rank.RankNumber >= desired->RankNumber && Practice::KnowsSpell(learned, rank.SpellId))
+            return Decision::Allowed;
+    auto const loaded = Practice::ReadPlayerProgress(*player, ability->ClassId, ability->AbilityId,
+        Dev::Policy, Dev::DefinitionVersion);
+    auto const record = Practice::MigrateLearnedRanks(*ability, Dev::Policy, loaded, learned);
+    if (!record)
+        return Decision::Blocked;
+    auto const view = Practice::DescribeRank(*ability, static_cast<std::size_t>(desired - ability->Ranks.begin()),
+        Dev::Policy, record->State, player->GetLevel(), learned, true);
+    return view.State == Practice::RankState::Ready ? Decision::Allowed : Decision::Blocked;
+}
+
+void PromoteRanks(Player* player)
+{
+    if (!RankActive.load() || !Affects(player))
+        return;
+    for (Practice::AbilityDefinition const& ability : Dev::Abilities)
+        for (Practice::AbilityRank const& rank : ability.Ranks)
+            if (rank.RankNumber > 1 && !player->HasSpell(rank.SpellId) &&
+                EvaluateRank(player, rank.SpellId) == CoAAbilityPractice::RankDecision::Allowed)
+                player->learnSpell(rank.SpellId, false);
+}
+
 bool Send(Player* player, MenuSession const& session)
 {
     if (!Requested || !DevelopmentAllowed || !Ready || !IsHumanPlayer(player) ||
@@ -137,6 +180,7 @@ void Refresh(Player* player, MenuSession& session, Clock::time_point now)
     if (!session.Dirty || now < session.NextRefresh)
         return;
     session.NextRefresh = now + RefreshInterval;
+    PromoteRanks(player);
     if (Send(player, session))
     {
         session.Dirty = false;
@@ -165,7 +209,9 @@ public:
         std::lock_guard lock(Mutex);
         Requested = sConfigMgr->GetOption<bool>("AbilityPractice.Enable", false);
         DevelopmentAllowed = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentObservation", false);
+        RankRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentRankLearning", false);
         Active.store(Requested && DevelopmentAllowed && Ready);
+        RankActive.store(Requested && DevelopmentAllowed && Ready && RankRequested);
     }
 
     void OnStartup() override
@@ -174,6 +220,7 @@ public:
         if (!Requested || !DevelopmentAllowed)
         {
             Active.store(false);
+            RankActive.store(false);
             LOG_INFO("module.ability_practice", "Development observation disabled");
             return;
         }
@@ -187,6 +234,7 @@ public:
                     Ready = false;
             }
         Active.store(Requested && DevelopmentAllowed && Ready);
+        RankActive.store(Requested && DevelopmentAllowed && Ready && RankRequested);
         LOG_INFO("module.ability_practice", "Development observation: requested={}, allowed={}, data ready={}",
             Requested, DevelopmentAllowed, Ready);
     }
@@ -319,6 +367,7 @@ public:
 
 void AddSC_ability_practice()
 {
+    CoAAbilityPractice::SetRankProvider(EvaluateRank);
     new PracticeWorld();
     new PracticePlayer();
     new PracticeSpell();

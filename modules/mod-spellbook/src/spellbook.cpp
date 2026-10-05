@@ -33,6 +33,7 @@
  * invented here, so the book can never offer something the realm would not have given.
  */
 
+#include "AbilityPracticeRankPolicy.h"
 #include "Chat.h"
 #include "Configuration/Config.h"
 #include "Creature.h"
@@ -401,7 +402,8 @@ namespace
             // unavailable - exactly as the original window showed it - and the requirement the
             // row carries is what the client draws under it. A purchase re-sends the window so
             // the row it unlocked turns available; see HandlePurchase.
-            else if (player->GetLevel() < row.RequiredLevel ||
+            else if (CoAAbilityPractice::ManagesRank(player, row.SpellId) ||
+                     player->GetLevel() < row.RequiredLevel ||
                      (row.RequiredAbility && !player->HasSpell(row.RequiredAbility)))
                 row.State = RowState::Unavailable;
             else
@@ -565,7 +567,8 @@ namespace
         // client is never left waiting on a purchase nothing will handle.
         if (found == rows.end())
         {
-            if (!AscensionFelsworn::CanLearnRift(player, wanted) ||
+            if (CoAAbilityPractice::ManagesRank(player, wanted) ||
+                !AscensionFelsworn::CanLearnRift(player, wanted) ||
                 IsTreeSpell(uint32(player->getClass()), wanted) ||
                 HasRankOrBetter(player, wanted) ||
                 (player->getClass() == CLASS_GUARDIAN && AscensionGuardian::Ballad(wanted)))

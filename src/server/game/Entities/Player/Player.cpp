@@ -17,6 +17,7 @@
 
 #include "Player.h"
 #include "AccountMgr.h"
+#include "AbilityPracticeRankPolicy.h"
 #include "AchievementMgr.h"
 #include "AreaDefines.h"
 #include "ArenaSpectator.h"
@@ -3549,6 +3550,9 @@ void Player::learnSpell(uint32 spellId, bool temporary /*= false*/, bool learnFr
         LOG_DEBUG("entities.player", "Player ({}) tries to learn already active spell: {}", GetGUID().ToString(), spellId);
         return;
     }
+
+    if (!CoAAbilityPractice::CanLearnRank(this, spellId))
+        return;
 
     uint8 const specMask = GetLearnSpellSpecMask(spellId);
 

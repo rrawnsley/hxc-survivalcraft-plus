@@ -1,5 +1,8 @@
-# Development observation only. No learned-rank enforcement or combat bonuses.
+# Development feature. Disabled by default; enable only on an isolated test server.
 # Both flags must be enabled in an isolated test server to observe the three Pyromancer fixtures.
 # The numerical training profile is illustrative, not approved production balance.
 AbilityPractice.Enable = 0
 AbilityPractice.AllowDevelopmentObservation = 0
+
+# Additional experimental rank gating and automatic upgrades. Leave off for observation-only sessions.
+AbilityPractice.AllowDevelopmentRankLearning = 0

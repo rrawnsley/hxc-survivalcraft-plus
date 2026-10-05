@@ -16,6 +16,7 @@
  */
 
 #include "Trainer.h"
+#include "AbilityPracticeRankPolicy.h"
 #include "Creature.h"
 #include "DBCStores.h"
 #include "NPCPackets.h"
@@ -274,6 +275,9 @@ namespace Trainer
         if (player->HasSpell(trainerSpell->SpellId))
             return SpellState::Known;
 
+        if (CoAAbilityPractice::ManagesRank(player, trainerSpell->SpellId))
+            return SpellState::Unavailable;
+
         // check race/class requirement
         bool const wildcardRanks = _trainerId == WILDCARD_RANK_TRAINER_ID;
         if (!wildcardRanks && !player->IsSpellFitByClassAndRace(trainerSpell->SpellId))
@@ -312,6 +316,10 @@ namespace Trainer
             if (SpellInfo const* learnedSpellInfo = sSpellMgr->GetSpellInfo(spellEffectInfo.TriggerSpell))
                 if (TeachesProfessionBeyondExpansion(learnedSpellInfo, expansion))
                     return SpellState::Unavailable;
+
+            if (!player->HasSpell(spellEffectInfo.TriggerSpell) &&
+                CoAAbilityPractice::ManagesRank(player, spellEffectInfo.TriggerSpell))
+                return SpellState::Unavailable;
 
             hasLearnSpellEffect = true;
             if (SpellLearnSkillNode const* learnedSkill = sSpellMgr->GetSpellLearnSkill(spellEffectInfo.TriggerSpell))
