@@ -33,10 +33,17 @@ def render_header(drafts):
         route = next((route for route in priority if route in draft['candidateOutcomeRoutes']), None)
         if route is None:
             raise ValueError('Unsupported candidate outcome')
+        reviewed_hybrids = {(18, 704159): ('interrupt', 'DamageOrInterrupt'),
+                            (27, 800617): ('dispel', 'DamageOrDispel')}
+        outcome = routes[route]
+        if (class_id, ability_id) in reviewed_hybrids:
+            utility, outcome = reviewed_hybrids[(class_id, ability_id)]
+            if 'damage' not in draft['candidateOutcomeRoutes'] or utility not in draft['candidateOutcomeRoutes']:
+                raise ValueError('Reviewed hybrid no longer has both raw outcome routes')
         profiles.append(['    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,',
                          '        { ' + str(class_id) + ', ' + str(ability_id) + ', AbilityKind::Ranked, Ranks' +
                          name + ', Caps' + name + ' },',
-                         '        Development::Policy, OutcomeKind::' + routes[route] + ' }'])
+                         '        Development::Policy, OutcomeKind::' + outcome + ' }'])
     lines.append('inline constexpr std::array Profiles = {')
     for index, profile in enumerate(profiles):
         lines.extend(profile[:-1] + [profile[-1] + (',' if index + 1 < len(profiles) else '')])

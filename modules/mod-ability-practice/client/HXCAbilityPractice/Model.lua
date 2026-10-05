@@ -179,7 +179,7 @@ local function Ability(value, schema, characterLevel)
     local rewards, catchup
     if schema == 4 then
         if value.acquisitionSource ~= nil and not Integer(value.acquisitionSource, 1, 4) then return nil end
-        if not session or not Integer(value.kind, 1, 3) or not Integer(value.route, 1, 7)
+        if not session or not Integer(value.kind, 1, 3) or not Integer(value.route, 1, 9)
             or not Integer(value.ruleSet, 1, 6)
             or ((value.ruleSet == 3 or value.ruleSet == 6) and (value.kind ~= 1 or value.route ~= 2))
             or ((value.kind == 3) ~= (value.route == 6)) then return nil end
@@ -559,6 +559,11 @@ function Model.PracticeRules(ability)
         [4] = "Successfully remove an aura. Offensive dispels require a level-appropriate PvE opponent;"
             .. " defensive dispels require a friendly unit in a qualifying PvE encounter.",
         [5] = "Successfully steal a beneficial aura from a live, level-appropriate PvE opponent.",
+        [8] = "Deal direct damage or actually stop a cast by a level-appropriate PvE opponent."
+            .. " Damage and interruption share one award for the original cast. An idle, undamaged target does not count.",
+        [9] = "Deal direct damage to a level-appropriate PvE opponent or successfully remove an aura"
+            .. " in a qualifying PvE encounter. Offensive dispels require an eligible opponent; defensive dispels"
+            .. " require a friendly unit in the encounter. Damage and dispelling share one award for the original cast.",
         [7] = "Restore missing health in a qualifying PvE fight, or absorb actual damage from a level-appropriate"
             .. " PvE opponent with this ability's shield on a friendly unit."
             .. " Applying an unused shield or fully overhealing alone does not count."

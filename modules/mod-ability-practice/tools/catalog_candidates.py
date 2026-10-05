@@ -445,6 +445,7 @@ def main():
                          'modules/mod-ability-practice/src/AbilityPracticeDevelopmentFixed.h',
                          'modules/mod-ability-practice/src/AbilityPracticeDevelopmentAbsorption.h',
                          'src/server/coa/AscensionVenomancerAbilities.cpp',
+                         'src/server/coa/AscensionSunClericAbilities.cpp',
                          'src/server/coa/AscensionVenomancerAuras.cpp',
                          'src/server/coa/AscensionReaperTalentProcs.h',
                          'src/server/coa/AscensionReaperTalentProcs.cpp',

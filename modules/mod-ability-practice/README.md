@@ -30,7 +30,7 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   Shared native race/racial and faction-rift eligibility is checked at preparation, award and new upgrades;
   class/race/talent-set/custom-specialization changes refresh the owner state. Normal database save/reload/failure
   behavior and broader acquisition entitlements remain unqualified.
-- Menu: addon 0.4.27-development; unpublished protocol 4 includes B11 instance identity/realm cap/session learning, T11 kind/session/rules/reward
+- Menu: addon 0.4.28-development; unpublished protocol 4 includes B11 instance identity/realm cap/session learning, T11 kind/session/rules/reward
   count/acquisition source and M mastery entries,
   mandatory C future-cap metadata, packed D parts and F8 unreadable-progress responses. Typed delivery is
   bounded/paced; saved views/ages/session totals are labeled. Existing schema 1/2/3 formats are preserved.
@@ -1960,3 +1960,26 @@ Source/native build passed in .cache/verify-all/20261005-235126/report.json (thr
 native build); C++ style and whitespace passed. Authoring exports now hash 60 provenance sources, adding the
 rank provider interface and implementation. Catalog counts remain 123 unique/125 declared. Tests/runtime
 replacement-transition/menu qualification remain deferred; no production deployment/startup was performed.
+
+
+## Ranked hybrid utility checkpoint — 5 October 2026
+
+Shield of Denial (class 18, root 704159, five ranks) and Gavel of Wrath (class 27, root 800617, five ranks)
+now explicitly accept direct damage or their native successful interrupt/dispel outcome respectively. Both
+already existed in the broad ranked catalog; no new profile/rank or practice-rate change is introduced.
+The native receipt/award ledger still shares exactly one award across original cast results and targets.
+Wrong utility kinds, unsuccessful attempts, ineligible opponents and triggered copies remain excluded.
+Gavel's native additional triggered casts do not mint original-cast receipts. Startup requires every rank
+to retain direct damage and the respective utility effect; runtime data qualification remains pending.
+
+The authoring generator explicitly selects only these two reviewed source identities and refuses their
+hybrid definitions if either raw common route disappears. Other mixed candidates are not automatically
+classified. Menu protocol 4 adds routes 8/9 without changing record layouts; addon 0.4.28 explains each
+eligible result and the one-award rule. Older unpublished typed-4 addons reject these new routes and the
+staged pair needs joint qualification. Fixed/mastery route restrictions are retained.
+
+Source/native build passed in .cache/verify-all/20261005-235704/report.json (two source checks, 31.7-second
+native build), with five Lua 5.1 syntax-only compilations and C++ style/whitespace checks passing. Refreshed
+exports preserve 61 provenance sources including Sun Cleric's triggered-cast consumer. Counts remain
+123 unique/125 declarations, with 724 pending definitions; all production/runtime approvals remain false.
+Unit/harness/gameplay skipped. No native/addon startup or production modifications were performed.

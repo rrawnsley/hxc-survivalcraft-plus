@@ -215,6 +215,8 @@ Practice::PracticeRoute RouteFor(Practice::OutcomeKind outcome)
         case Practice::OutcomeKind::Dispel: return Practice::PracticeRoute::Dispel;
         case Practice::OutcomeKind::Steal: return Practice::PracticeRoute::Steal;
         case Practice::OutcomeKind::None: return Practice::PracticeRoute::Fixed;
+        case Practice::OutcomeKind::DamageOrInterrupt: return Practice::PracticeRoute::DamageOrInterrupt;
+        case Practice::OutcomeKind::DamageOrDispel: return Practice::PracticeRoute::DamageOrDispel;
     }
     return Practice::PracticeRoute::Unknown;
 }
@@ -223,10 +225,14 @@ bool HasSupportedOutcome(SpellInfo const* info, Practice::OutcomeKind outcome)
 {
     if (!info)
         return false;
+    bool const directDamage = info->HasEffect(SPELL_EFFECT_SCHOOL_DAMAGE) ||
+        info->HasEffect(SPELL_EFFECT_WEAPON_DAMAGE) || info->HasEffect(SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL) ||
+        info->HasEffect(SPELL_EFFECT_NORMALIZED_WEAPON_DMG) || info->HasEffect(SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
+    if (outcome == Practice::OutcomeKind::DamageOrInterrupt || outcome == Practice::OutcomeKind::DamageOrDispel)
+        return directDamage && HasSupportedOutcome(info, outcome == Practice::OutcomeKind::DamageOrInterrupt
+            ? Practice::OutcomeKind::Interrupt : Practice::OutcomeKind::Dispel);
     if (outcome == Practice::OutcomeKind::Damage)
-        return info->HasEffect(SPELL_EFFECT_SCHOOL_DAMAGE) || info->HasEffect(SPELL_EFFECT_WEAPON_DAMAGE) ||
-            info->HasEffect(SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL) || info->HasEffect(SPELL_EFFECT_NORMALIZED_WEAPON_DMG) ||
-            info->HasEffect(SPELL_EFFECT_WEAPON_PERCENT_DAMAGE) || (PeriodicRequested &&
+        return directDamage || (PeriodicRequested &&
                 (info->HasAura(SPELL_AURA_PERIODIC_DAMAGE) || info->HasAura(SPELL_AURA_PERIODIC_DAMAGE_PERCENT) ||
                     info->HasAura(SPELL_AURA_PERIODIC_LEECH)));
     if (outcome == Practice::OutcomeKind::Healing)
@@ -449,7 +455,8 @@ bool HasDevelopmentEncounter(Player const* player, Unit const* recipient)
 bool QualifiesDevelopmentOutcome(Practice::OutcomeKind outcome, Player const* player, Unit const* target,
     uint32 damage, uint32 healing)
 {
-    if (outcome == Practice::OutcomeKind::Damage)
+    if (outcome == Practice::OutcomeKind::Damage || outcome == Practice::OutcomeKind::DamageOrInterrupt ||
+        outcome == Practice::OutcomeKind::DamageOrDispel)
         return damage && IsDevelopmentOpponent(player, target);
     return outcome == Practice::OutcomeKind::Healing && healing && player->IsFriendlyTo(target) &&
         HasDevelopmentEncounter(player, target);
@@ -832,7 +839,9 @@ void AwardUtilityOutcome(Spell* spell, Unit* target, Practice::OutcomeKind kind,
     if (!IsProfiledPlayer(player))
         return;
     auto const* profile = FindProfile(player, spell->GetSpellInfo()->Id);
-    if (!profile || profile->Outcome != kind)
+    if (!profile || (profile->Outcome != kind &&
+        !(profile->Outcome == Practice::OutcomeKind::DamageOrInterrupt && kind == Practice::OutcomeKind::Interrupt) &&
+        !(profile->Outcome == Practice::OutcomeKind::DamageOrDispel && kind == Practice::OutcomeKind::Dispel)))
         return;
     bool const qualified = player->IsFriendlyTo(target) ?
         kind == Practice::OutcomeKind::Dispel && HasDevelopmentEncounter(player, target) :
@@ -1349,10 +1358,7 @@ public:
         if (!IsProfiledPlayer(player))
             return;
         auto const* profile = FindProfile(player, spell->GetSpellInfo()->Id);
-        if (!profile || (profile->Outcome != Practice::OutcomeKind::Damage &&
-                profile->Outcome != Practice::OutcomeKind::Healing) ||
-            (profile->Outcome == Practice::OutcomeKind::Damage ? !damage : !healing) ||
-            !QualifiesDevelopmentOutcome(profile->Outcome, player, target, damage, healing))
+        if (!profile || !QualifiesDevelopmentOutcome(profile->Outcome, player, target, damage, healing))
             return;
         AwardOutcome(player, spell, *profile);
     }
