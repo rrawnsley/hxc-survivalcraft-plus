@@ -6,6 +6,7 @@
 #include <sstream>
 #include <locale>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace AbilityPractice
@@ -27,6 +28,56 @@ std::string WireLine(char kind, Values... values)
     stream << kind;
     ((stream << '|' << values), ...);
     return stream.str();
+}
+
+inline std::vector<std::string> PackTypedMessages(std::span<std::string const> lines, std::uint32_t revision)
+{
+    std::vector<std::string> packed;
+    packed.reserve(lines.size());
+    std::string const prefix = WireLine('D', revision) + '|';
+    std::string batch;
+    std::size_t records = 0;
+    auto const flush = [&packed, &batch, &records]()
+    {
+        if (!batch.empty())
+        {
+            packed.push_back(std::move(batch));
+            batch.clear();
+        }
+        records = 0;
+    };
+    for (std::string const& line : lines)
+    {
+        if (line.empty() || std::string_view("ACPRTKL").find(line.front()) == std::string_view::npos)
+        {
+            flush();
+            packed.push_back(line);
+            continue;
+        }
+        std::string const recordPrefix = std::string(1, line.front()) + '|' + std::to_string(revision) + '|';
+        if (!line.starts_with(recordPrefix))
+        {
+            flush();
+            packed.push_back(line);
+            continue;
+        }
+        std::string const compact = std::string(1, line.front()) + '|' + line.substr(recordPrefix.size());
+        if (prefix.size() + compact.size() > 240)
+        {
+            flush();
+            packed.push_back(line);
+            continue;
+        }
+        if (!batch.empty() && (records == 32 || batch.size() + 1 + compact.size() > 240))
+            flush();
+        if (batch.empty())
+            batch = prefix + compact;
+        else
+            batch += ';' + compact;
+        ++records;
+    }
+    flush();
+    return packed;
 }
 }
 
@@ -166,6 +217,8 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
     for (std::string const& line : lines)
         if (line.size() > 240)
             return std::nullopt;
+    if (includeKinds)
+        return Detail::PackTypedMessages(lines, revision);
     return lines;
 }
 }

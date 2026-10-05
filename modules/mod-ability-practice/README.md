@@ -825,3 +825,25 @@ This narrows review work without expanding the three native development profiles
 or bypassing talent/spec/item/other acquisition routes. ProductionApproved remains0. Source checks passed
 at `.cache/verify-all/20261005-101017/report.json`; Python syntax/whitespace passed. No tests ran; no runtime
 or production change occurred. Effective SQL/scripts/DBC normalization and real ownership remain unqualified.
+
+
+## Compact typed-menu packets
+
+Unreleased protocol4 can carry D|revision|kind|fields;kind|fields... envelopes for ability/rank records
+(A,C,P,R,T,K,L). Repeated revision values are supplied by the envelope. Header, session, snapshot end and
+failure records remain individual, preserving the atomic completion boundary. Native packing retains order,
+bounds each packet to240bytes and32subrecords, and sends individually any record too large for an envelope.
+Older schemas are unchanged. Native pacing operates on physical packed packets; queue count/byte/time bounds
+remain. This reduces redundant framing and combines small records, without a claimed runtime speedup.
+
+Addon0.4.8-development validates envelope size, canonical revision, current typed assembly and subrecord
+kind/count, then routes each reconstructed part through the existing strict parser. Empty/nested/boundary/
+malformed/duplicate parts refuse and discard the whole pending assembly. An unrelated revision does not
+extend deadlines; only a wholly accepted envelope advances idle time. No complete snapshot can be committed
+inside an envelope, and all model/roadmap/cap/rule/counter validation remains at the separate snapshot end.
+Unpacked typed messages still work. The superseded development formats were never published.
+
+Final source/native build passed at `.cache/verify-all/20261005-101411/report.json` (initial build101317);
+C++ lint/whitespace and five Lua5.1 syntax compilations passed. No tests ran. Packing/unpacking/boundaries/
+malformation/order/timeout, exact counters and real packet/latency reduction need runtime acceptance.
+No production changes or active addon installation occurred.

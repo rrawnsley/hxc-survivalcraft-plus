@@ -169,8 +169,38 @@ local function Accept(message, now, currentRevision)
     return nil
 end
 
+local function AcceptPacked(message, now, currentRevision)
+    if type(now) ~= "number" or now ~= now or now == math.huge or now == -math.huge then
+        return Reject("Invalid clock")
+    end
+    if #message > 240 then return Reject("Packed progress message is too large") end
+    local revisionText, body = string.match(message, "^D|(%d+)|(.+)$")
+    if not revisionText or #revisionText > 10 or string.sub(revisionText, 1, 1) == "0"
+        or tonumber(revisionText) > 4294967295 then return Reject("Invalid packed progress revision") end
+    if not pending then return nil, "No snapshot in progress" end
+    if pending.schemaVersion ~= 4 then return Reject("Packed progress requires typed snapshot") end
+    if tonumber(revisionText) ~= pending.revision then return nil, "Unrelated packed progress message" end
+    local parts = {}
+    for part in string.gmatch(body .. ";", "([^;]*);") do
+        local kind, fields = string.match(part, "^([ACPRTKL])|(.+)$")
+        if not kind or #parts >= 32 then return Reject("Invalid packed progress part") end
+        parts[#parts + 1] = kind .. "|" .. revisionText .. "|" .. fields
+    end
+    if #parts == 0 then return Reject("Empty packed progress message") end
+    for _, part in ipairs(parts) do
+        local snapshot, reason, failure = Accept(part, now, currentRevision)
+        if snapshot or failure or reason then return Reject(reason or "Unexpected packed progress result") end
+    end
+    return nil
+end
+
 function Wire.Accept(message, now, currentRevision)
-    local snapshot, reason, failure = Accept(message, now, currentRevision)
+    local snapshot, reason, failure
+    if type(message) == "string" and string.sub(message, 1, 2) == "D|" then
+        snapshot, reason, failure = AcceptPacked(message, now, currentRevision)
+    else
+        snapshot, reason, failure = Accept(message, now, currentRevision)
+    end
     if pending and not reason then pending.lastPart = now end
     return snapshot, reason, failure
 end
