@@ -20,7 +20,8 @@ enum class AcquisitionSource
 enum class DirectOutcome
 {
     Damage,
-    Healing
+    Healing,
+    None
 };
 
 struct AbilityProfile
@@ -44,7 +45,8 @@ inline bool ValidateProfiles(std::span<AbilityProfile const> profiles)
             ability.ClassId > 255 ||
             ValidateDefinition(ability) != CatalogError::None || ability.Kind == AbilityKind::Mastery ||
             !ValidPolicy(profile.Policy) ||
-            (profile.Outcome != DirectOutcome::Damage && profile.Outcome != DirectOutcome::Healing) ||
+            (ability.Kind == AbilityKind::Fixed ? profile.Outcome != DirectOutcome::None :
+                profile.Outcome != DirectOutcome::Damage && profile.Outcome != DirectOutcome::Healing) ||
             ability.Ranks.size() > 64)
             return false;
         for (AbilityRank const& rank : ability.Ranks)

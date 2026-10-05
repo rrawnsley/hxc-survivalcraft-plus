@@ -526,3 +526,20 @@ original-action ownership or runtime qualification. It neither generates profile
 
 Source checks passed at `.cache/verify-all/20261005-084424/report.json`; whitespace passed. Export generation
 was read-only against the existing extracted DBC/inventory and wrote only ignored cache files. No tests ran.
+
+## Fixed utility and passive profile support
+
+Profiles can now declare Fixed with DirectOutcome::None. Validation requires this pairing, keeps a single
+rank and no proficiency caps through the existing definition rules, and still limits acquisition to explicitly
+reviewed ClassGrant. Native startup checks the fixed spell exists without requiring damage/healing or rejecting
+its passive flag. Ranked profiles retain the existing nonpassive direct-outcome checks; None cannot be used
+for a trainable profile, and Mastery is still refused until explicit rewards exist.
+
+Fixed outcomes return before encounter checks, session creation and progress reads/writes. Existing menu
+building exposes normal acquisition/level states, and a learned fixed entry uses the no-practice presentation.
+No fixed production ability was classified or added; the three sample ranked profiles are unchanged. Protocol
+3 has no persistent kind field, so an unlearned fixed entry currently uses normal introductory presentation;
+full kind-specific upcoming labels remain future menu work.
+
+Source/native build passed at `.cache/verify-all/20261005-084624/report.json`; C++ lint and whitespace passed.
+No tests ran. Runtime fixed acquisition/display and passive behavior remain unqualified. No deployment occurred.

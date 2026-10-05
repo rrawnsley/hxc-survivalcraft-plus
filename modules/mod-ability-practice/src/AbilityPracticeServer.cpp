@@ -335,9 +335,11 @@ public:
             for (Practice::AbilityRank const& rank : profile.Definition.Ranks)
             {
                 SpellInfo const* info = sSpellMgr->GetSpellInfo(rank.SpellId);
-                bool const expectedOutcome = info && (profile.Outcome == Practice::DirectOutcome::Damage ?
-                    info->HasEffect(SPELL_EFFECT_SCHOOL_DAMAGE) : info->HasEffect(SPELL_EFFECT_HEAL));
-                if (!info || info->IsPassive() || !expectedOutcome)
+                bool const fixed = profile.Definition.Kind == Practice::AbilityKind::Fixed;
+                bool const expectedOutcome = info && (fixed ||
+                    (profile.Outcome == Practice::DirectOutcome::Damage ?
+                        info->HasEffect(SPELL_EFFECT_SCHOOL_DAMAGE) : info->HasEffect(SPELL_EFFECT_HEAL)));
+                if (!info || (!fixed && info->IsPassive()) || !expectedOutcome)
                 {
                     Ready = false;
                     LOG_ERROR("module.ability_practice", "Rejected development profile: class={}, ability={}, spell={}",
@@ -466,7 +468,8 @@ public:
         if (!IsProfiledPlayer(player))
             return;
         auto const* profile = FindProfile(player, spell->GetSpellInfo()->Id);
-        if (!profile || (profile->Outcome == Practice::DirectOutcome::Damage ? !damage : !healing) ||
+        if (!profile || profile->Outcome == Practice::DirectOutcome::None ||
+            (profile->Outcome == Practice::DirectOutcome::Damage ? !damage : !healing) ||
             !QualifiesDevelopmentOutcome(player, target, damage, healing))
             return;
         std::lock_guard lock(Mutex);
