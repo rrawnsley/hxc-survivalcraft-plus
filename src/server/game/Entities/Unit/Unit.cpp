@@ -16,6 +16,7 @@
  */
 
 #include "Unit.h"
+#include "AbilityPracticeCastReceipt.h"
 #include "AbilityPracticeMasteryPolicy.h"
 #include "AbstractFollower.h"
 #include "AreaDefines.h"
@@ -2654,6 +2655,12 @@ void Unit::CalcAbsorbResist(DamageInfo& dmgInfo, bool Splited)
         AddPct(currentAbsorb, -auraAbsorbMod);
 
         dmgInfo.AbsorbDamage(currentAbsorb);
+
+        if (currentAbsorb > 0 && attacker && absorbAurEff->GetBase()->GetPracticeCast())
+            if (Unit* caster = absorbAurEff->GetCaster(); caster && caster->IsFriendlyTo(victim))
+                CoAAbilityPractice::ReportAuraOutcome(caster, attacker, absorbAurEff->GetId(),
+                    SPELL_AURA_SCHOOL_ABSORB, static_cast<uint32>(currentAbsorb), 0,
+                    absorbAurEff->GetBase()->GetPracticeCast());
 
         tempAbsorb = currentAbsorb;
         absorbAurEff->GetBase()->CallScriptEffectAfterAbsorbHandlers(absorbAurEff, aurApp, dmgInfo, tempAbsorb);

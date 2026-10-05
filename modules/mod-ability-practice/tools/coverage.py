@@ -9,7 +9,7 @@ from profile_drafts import verify_provenance
 
 PROFILE_HEADERS = ('AbilityPracticeDevelopmentRanked.h', 'AbilityPracticeDevelopmentPeriodic.h',
                    'AbilityPracticeDevelopmentMastery.h', 'AbilityPracticeDevelopmentHelpers.h',
-                   'AbilityPracticeDevelopmentFixed.h')
+                   'AbilityPracticeDevelopmentFixed.h', 'AbilityPracticeDevelopmentAbsorption.h')
 PROFILE_PATTERN = re.compile(
     r'AbilityProfile\s*\{\s*Development::DefinitionVersion,\s*AcquisitionSource::ClassGrant,\s*'
     r'\{\s*(\d+),\s*(\d+),\s*AbilityKind::(Ranked|Mastery|Fixed)\b')

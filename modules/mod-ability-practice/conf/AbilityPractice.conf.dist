@@ -43,3 +43,8 @@ AbilityPractice.AllowDevelopmentFixedCatalog = 0
 AbilityPractice.AllowDevelopmentCatchup = 0
 AbilityPractice.DevelopmentCatchupGap = 40
 AbilityPractice.DevelopmentCatchupMultiplier = 2
+
+# Experimental Emerald Veil actual school-absorption observation. Startup-only; disabled by default.
+# Adds/reuses its six-rank Healing profile. Direct healing and actual PvE shielding share one original-cast award.
+# No shield magnitude, native mechanics or mastery benefit changes. Other shields and mana shields unsupported.
+AbilityPractice.AllowDevelopmentAbsorption = 0

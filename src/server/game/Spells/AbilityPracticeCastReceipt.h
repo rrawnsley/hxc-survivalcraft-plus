@@ -43,7 +43,7 @@ inline void SetPeriodicOutcomeProvider(PeriodicOutcomeProvider provider)
     PeriodicOutcomeHandler.store(provider);
 }
 
-inline void ReportPeriodicOutcome(Unit* caster, Unit* target, std::uint32_t spellId, std::uint32_t auraType,
+inline void ReportAuraOutcome(Unit* caster, Unit* target, std::uint32_t spellId, std::uint32_t auraType,
     std::uint32_t damage, std::uint32_t healing, std::shared_ptr<CastReceipt> const& receipt)
 {
     if (!receipt || receipt->IsConsumed() || (!damage && !healing))
@@ -51,6 +51,12 @@ inline void ReportPeriodicOutcome(Unit* caster, Unit* target, std::uint32_t spel
     auto const provider = PeriodicOutcomeHandler.load();
     if (provider)
         provider(caster, target, spellId, auraType, damage, healing, receipt);
+}
+
+inline void ReportPeriodicOutcome(Unit* caster, Unit* target, std::uint32_t spellId, std::uint32_t auraType,
+    std::uint32_t damage, std::uint32_t healing, std::shared_ptr<CastReceipt> const& receipt)
+{
+    ReportAuraOutcome(caster, target, spellId, auraType, damage, healing, receipt);
 }
 }
 

@@ -175,7 +175,7 @@ local function Ability(value, schema, characterLevel)
     local rewards, catchup
     if schema == 4 then
         if value.acquisitionSource ~= nil and not Integer(value.acquisitionSource, 1, 4) then return nil end
-        if not session or not Integer(value.kind, 1, 3) or not Integer(value.route, 1, 6)
+        if not session or not Integer(value.kind, 1, 3) or not Integer(value.route, 1, 7)
             or not Integer(value.ruleSet, 1, 6)
             or ((value.ruleSet == 3 or value.ruleSet == 6) and (value.kind ~= 1 or value.route ~= 2))
             or ((value.kind == 3) ~= (value.route == 6)) then return nil end
@@ -512,7 +512,7 @@ function Model.PracticeRules(ability)
     if Model.IsFixed(ability) then
         return "This ability has no practice levels. " .. LearnText(ability.acquisitionSource)
     end
-    local ruleSet = ability.ruleSet and ((ability.ruleSet - 1) % 3 + 1) or nil
+    local ruleSet = Integer(ability.ruleSet, 1, 6) and ((ability.ruleSet - 1) % 3 + 1) or nil
     if not ruleSet then
         return "Practice rules are unavailable in this update. Refresh to request the current rules."
     end
@@ -524,6 +524,10 @@ function Model.PracticeRules(ability)
         [4] = "Successfully remove an aura. Offensive dispels require a level-appropriate PvE opponent;"
             .. " defensive dispels require a friendly unit in a qualifying PvE encounter.",
         [5] = "Successfully steal a beneficial aura from a live, level-appropriate PvE opponent.",
+        [7] = "Restore missing health in a qualifying PvE fight, or absorb actual damage from a level-appropriate"
+            .. " PvE opponent with this ability's shield on a friendly unit."
+            .. " Applying an unused shield or fully overhealing alone does not count."
+            .. " Healing and absorption share one award for the original cast.",
     }
     local rule = rules[ability.route]
     if not rule then return "Practice rules are unavailable in this update." end

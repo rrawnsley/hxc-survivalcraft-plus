@@ -142,7 +142,8 @@ enum class PracticeRoute
     Interrupt = 3,
     Dispel = 4,
     Steal = 5,
-    Fixed = 6
+    Fixed = 6,
+    HealingAbsorption = 7
 };
 
 inline constexpr std::uint32_t HumanPvERuleSet = 1;

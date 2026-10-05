@@ -14,7 +14,8 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   profiles to the selected catalog (nine/29/111 unique profiles respectively, reusing the shared Shadra's Prayer
   definition in the broad ranked mode). Optional Hand of Elune mastery adds one more
   profile. Optional scripted observation adds Manafeed and an independent fixed-utility option adds two
-  nontraining profiles; the largest staged catalog has 115 unique profiles.
+  nontraining profiles. Optional Emerald Veil absorption reuses its existing six ranked definitions;
+  the largest staged catalog has 115 unique profiles from 117 source declarations.
   All development settings default off. A nonempty explicit `AbilityPractice.DevelopmentCharacterGuids`
   selection is also required; unselected characters keep native progression and receive no practice effects.
 - Outcomes: resolved direct damage/healing, successful interruption, dispel and beneficial-aura steal.
@@ -23,13 +24,14 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   cannot mint the request identity. Optional native periodic damage/percent-damage/healing shares one receipt
   with the original cast, including direct results and multiple targets. Repeat-fire, summoned/pet/helper
   attribution remain unfinished. A separate optional Manafeed observer covers its scripted drain/heal result;
-  other replacement ticks and all newly added runtime behavior remain unqualified.
+  other replacement ticks and all newly added runtime behavior remain unqualified. Optional Emerald Veil
+  observation also shares one award between its effective heal and actual school-shield absorption.
 - Ranks/storage: cached versioned settings, once-only learned-rank seeding, monotonic writes, exact saved-row
   restoration scope and stronger-rank learning guards. Corrupt or incompatible progress stays blocked.
   Shared native race/racial and faction-rift eligibility is checked at preparation, award and new upgrades;
   class/race/talent-set/custom-specialization changes refresh the owner state. Normal database save/reload/failure
   behavior and broader acquisition entitlements remain unqualified.
-- Menu: addon 0.4.21-development; unpublished protocol 4 includes B11 instance identity/realm cap/session learning, T11 kind/session/rules/reward
+- Menu: addon 0.4.22-development; unpublished protocol 4 includes B11 instance identity/realm cap/session learning, T11 kind/session/rules/reward
   count/acquisition source and M mastery entries,
   mandatory C future-cap metadata, packed D parts and F8 unreadable-progress responses. Typed delivery is
   bounded/paced; saved views/ages/session totals are labeled. Existing schema 1/2/3 formats are preserved.
@@ -1717,3 +1719,28 @@ as part of the build but were not executed. Unit/harness/gameplay stages skipped
 whitespace passed. Addon unchanged since0.4.21-development syntax compilation. Authoring provenance/coverage
 is refreshed separately. No production server/client/configuration/database/launcher installation, start or
 restart; CoA process42440 remains the original process.
+
+
+## Emerald Veil meaningful shield use — 5 October 2026
+
+Optional startup-only AllowDevelopmentAbsorption defaults off and adds the six-rank Emerald Veil
+(class29, root800926) profile, exactly reusing its broad-ranked definition. A thin native school-absorb
+observer reports positive damage actually absorbed after native clamping/ignore-absorb handling and before
+native post-absorb callbacks or aura removal. It requires a live caster friendly to the shield recipient;
+the module requires the original cast receipt, exact current owner/session, native acquisition and a
+qualifying level-appropriate PvE attacker. Applying an unused shield earns nothing. The shield and effective
+direct healing share one original-cast receipt; ticks, targets and later absorption cannot add a second award.
+Only the reviewed Emerald Veil profile accepts this route. Mana shields and other shields remain unsupported.
+Shield power, native heal/damage/script/depletion handling and mastery are unchanged.
+
+Addon0.4.22-development adds explicit healing-or-absorption rules through typed route7, with existing
+forecasts/catch-up/progress storage retained. All six raw DBC ranks have direct healing and school-absorb
+effects; native Venomancer abilities/auras join source provenance.42 source hashes;115 unique profiles from
+117 declarations;2 shared identities. These are source evidence, not gameplay qualification.
+
+Initial compile failed for a missing receipt header. Diff inspection also removed an unintended copy of the
+observer from the mana-shield path before retry. Corrected source/native build passed
+.cache/verify-all/20261005-213123/report.json (two source checks;32.5-second isolated build). Changed C++ style,
+whitespace and five Lua5.1 syntax compilations passed with no addon chunks executed. Authoring exports
+completed. Unit/harness/gameplay stages skipped; no runtime startup or production server/client/config/DB/
+launcher installation, update or restart.

@@ -8,6 +8,7 @@
 #include "AbilityPracticeDevelopmentMastery.h"
 #include "AbilityPracticeDevelopmentHelpers.h"
 #include "AbilityPracticeDevelopmentFixed.h"
+#include "AbilityPracticeDevelopmentAbsorption.h"
 #include "AbilityPracticeProfiles.h"
 #include "AbilityPracticeRankPolicy.h"
 #include "AbilityPracticeMasteryPolicy.h"
@@ -152,6 +153,7 @@ bool RankRequested = false;
 bool PeriodicRequested = false;
 bool MasteryRequested = false;
 bool HelpersRequested = false;
+bool AbsorptionRequested = false;
 Practice::CatchupSettings Catchup;
 std::uint64_t NextActionSession = 0;
 std::atomic<bool> RankActive = false;
@@ -616,7 +618,8 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
                     rank.State = Practice::RankState::MissingPrerequisite;
             if (view.NextRank)
                 view.NextRank = view.Ranks[view.NextRank->RankNumber - 1];
-            view.Route = RouteFor(profile.Outcome);
+            view.Route = AbsorptionRequested && Practice::DevelopmentAbsorption::IsEmeraldVeil(profile)
+                ? Practice::PracticeRoute::HealingAbsorption : RouteFor(profile.Outcome);
             view.AcquisitionSourceId = static_cast<std::uint32_t>(profile.Acquisition);
             view.RuleSet = HelpersRequested && Practice::DevelopmentHelpers::IsManafeed(profile) ?
                 Practice::HumanPvEScriptedHealRuleSet :
@@ -772,19 +775,23 @@ void AwardPeriodicOutcome(Unit* caster, Unit* target, std::uint32_t auraSpellId,
     auto const* profile = FindProfile(player, receipt->SpellId);
     bool const scripted = profile && HelpersRequested && Practice::DevelopmentHelpers::IsManafeed(*profile) &&
         auraType == SPELL_AURA_PERIODIC_DUMMY;
-    if (!profile || (!scripted && (profile->Outcome == Practice::OutcomeKind::Damage ?
+    bool const absorption = profile && AbsorptionRequested &&
+        Practice::DevelopmentAbsorption::IsEmeraldVeil(*profile) && auraType == SPELL_AURA_SCHOOL_ABSORB;
+    if (!profile || (!scripted && !absorption && (profile->Outcome == Practice::OutcomeKind::Damage ?
             auraType != SPELL_AURA_PERIODIC_DAMAGE && auraType != SPELL_AURA_PERIODIC_DAMAGE_PERCENT &&
                 auraType != SPELL_AURA_PERIODIC_LEECH :
             profile->Outcome != Practice::OutcomeKind::Healing || auraType != SPELL_AURA_PERIODIC_HEAL)) ||
         std::none_of(profile->Definition.Ranks.begin(), profile->Definition.Ranks.end(),
             [auraSpellId](Practice::AbilityRank const& rank) { return rank.SpellId == auraSpellId; }) ||
-        (scripted ? !healing || !target->IsAlive() || !IsDevelopmentOpponent(player, target) ||
+        (absorption ? !damage || !IsDevelopmentOpponent(player, target) :
+            scripted ? !healing || !target->IsAlive() || !IsDevelopmentOpponent(player, target) ||
             !HasDevelopmentEncounter(player, player) :
             !QualifiesDevelopmentOutcome(profile->Outcome, player, target, damage, healing)))
         return;
     std::lock_guard lock(Mutex);
     auto const found = Sessions.find(player->GetGUID().GetRawValue());
-    if ((!scripted && !PeriodicRequested) || (scripted && !HelpersRequested) ||
+    if ((!scripted && !absorption && !PeriodicRequested) || (scripted && !HelpersRequested) ||
+        (absorption && !AbsorptionRequested) ||
         !Affects(player) || player->isBeingLoaded() || found == Sessions.end() ||
         !ReceiptMatches(player, found->second, *receipt) ||
         !AcquisitionAllowed(player, profile->Definition, receipt->SpellId))
@@ -963,6 +970,7 @@ public:
         PeriodicRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentPeriodicObservation", false);
         MasteryRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentMastery", false);
         HelpersRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentScriptedObservation", false);
+        AbsorptionRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentAbsorption", false);
         if (!Requested || !DevelopmentAllowed)
         {
             Active.store(false);
@@ -990,11 +998,13 @@ public:
             AppendProfiles(RuntimeProfiles, Practice::DevelopmentMastery::Profiles);
         bool const helpersValid = !HelpersRequested ||
             AppendProfiles(RuntimeProfiles, Practice::DevelopmentHelpers::Profiles);
+        bool const absorptionValid = !AbsorptionRequested ||
+            AppendProfiles(RuntimeProfiles, Practice::DevelopmentAbsorption::Profiles);
         bool const fixedValid = !fixedCatalog || AppendProfiles(RuntimeProfiles, Practice::DevelopmentFixed::Profiles);
         std::span<Practice::AbilityProfile const> const profiles(RuntimeProfiles);
         ProfileLookup.emplace(profiles);
         Ready = ProfileLookup->IsValid() && periodicValid && masteryValid && helpersValid && fixedValid &&
-            Practice::ValidCatchupSettings(Catchup);
+            absorptionValid && Practice::ValidCatchupSettings(Catchup);
         for (Practice::AbilityProfile const& profile : profiles)
         {
             std::uint32_t const maximumCap = profile.Definition.Caps.empty() ? 1 :
@@ -1025,7 +1035,11 @@ public:
                     HasSupportedHelperOutcome(info, profile)) &&
                     (profile.Definition.Kind != Practice::AbilityKind::Mastery ||
                         (!info->HasAura(SPELL_AURA_PERIODIC_HEAL) && !info->HasAura(SPELL_AURA_PERIODIC_LEECH)));
-                if (!info || info->IsDeprecatedForPlayers || (!fixed && info->IsPassive()) || !expectedOutcome)
+                bool const expectedAbsorption = !AbsorptionRequested ||
+                    !Practice::DevelopmentAbsorption::IsEmeraldVeil(profile) ||
+                    (info && info->HasAura(SPELL_AURA_SCHOOL_ABSORB));
+                if (!info || info->IsDeprecatedForPlayers || (!fixed && info->IsPassive()) ||
+                    !expectedOutcome || !expectedAbsorption)
                 {
                     Ready = false;
                     LOG_ERROR("module.ability_practice", "Rejected development profile: class={}, ability={}, spell={}",
@@ -1044,6 +1058,7 @@ public:
         LOG_INFO("module.ability_practice", "Development mastery: enabled={}", MasteryRequested);
         LOG_INFO("module.ability_practice", "Development scripted observation: enabled={}", HelpersRequested);
         LOG_INFO("module.ability_practice", "Development fixed catalog: enabled={}", fixedCatalog);
+        LOG_INFO("module.ability_practice", "Development absorption observation: enabled={}", AbsorptionRequested);
     }
 };
 
