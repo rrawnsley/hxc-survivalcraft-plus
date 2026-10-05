@@ -387,6 +387,8 @@ def main():
     result['nativeOutcomeSources'] = [
         {'path': relative, 'sha256': hashlib.sha256((args.root / relative).read_bytes()).hexdigest()}
         for relative in ('modules/mod-ability-practice/src/AbilityPracticeServer.cpp',
+                         'modules/mod-ability-practice/src/AbilityPracticeDevelopment.h',
+                         'modules/mod-ability-practice/src/AbilityPracticeDevelopmentSamples.h',
                          'modules/mod-ability-practice/src/AbilityPracticeProfiles.h',
                          'src/server/shared/SharedDefines.h')]
     if args.dbc:

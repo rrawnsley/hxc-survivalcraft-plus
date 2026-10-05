@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "AbilityPracticeDevelopment.h"
+#include "AbilityPracticeDevelopmentSamples.h"
 #include "AbilityPracticeProfiles.h"
 #include "AbilityPracticeRankPolicy.h"
 #include "AbilityPracticeOutcome.h"
@@ -40,6 +41,14 @@ constexpr std::array Profiles = {
     Practice::AbilityProfile{ Dev::DefinitionVersion, Practice::AcquisitionSource::ClassGrant,
         Dev::Abilities[2], Dev::Policy, Practice::OutcomeKind::Healing }
 };
+constexpr auto AllClassSampleProfiles = []
+{
+    std::array<Practice::AbilityProfile, Profiles.size() + Practice::DevelopmentSamples::Profiles.size()> result{};
+    std::copy(Profiles.begin(), Profiles.end(), result.begin());
+    std::copy(Practice::DevelopmentSamples::Profiles.begin(), Practice::DevelopmentSamples::Profiles.end(),
+        result.begin() + Profiles.size());
+    return result;
+}();
 std::optional<Practice::ProfileIndex> ProfileLookup;
 std::recursive_mutex Mutex;
 bool Requested = false;
@@ -546,9 +555,13 @@ public:
             if (!ServerGeneration)
                 ServerGeneration = 1;
         }
-        ProfileLookup.emplace(Profiles);
+        bool const classSamples = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentClassSamples", false);
+        std::span<Practice::AbilityProfile const> const profiles = classSamples ?
+            std::span<Practice::AbilityProfile const>(AllClassSampleProfiles) :
+            std::span<Practice::AbilityProfile const>(Profiles);
+        ProfileLookup.emplace(profiles);
         Ready = ProfileLookup->IsValid();
-        for (Practice::AbilityProfile const& profile : Profiles)
+        for (Practice::AbilityProfile const& profile : profiles)
         {
             if (!MatchesNativeClassGrant(profile))
             {
@@ -573,6 +586,8 @@ public:
         RankActive.store(Requested && DevelopmentAllowed && Ready && RankRequested);
         LOG_INFO("module.ability_practice", "Development observation: requested={}, allowed={}, data ready={}",
             Requested, DevelopmentAllowed, Ready);
+        LOG_INFO("module.ability_practice", "Development class samples: enabled={}, profile count={}",
+            classSamples, profiles.size());
     }
 };
 

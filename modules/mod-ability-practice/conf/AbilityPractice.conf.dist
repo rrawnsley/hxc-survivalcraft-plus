@@ -6,3 +6,7 @@ AbilityPractice.AllowDevelopmentObservation = 0
 
 # Additional experimental rank gating and automatic upgrades. Leave off for observation-only sessions.
 AbilityPractice.AllowDevelopmentRankLearning = 0
+
+# Additional representative class-grant fixtures for all 21 CoA classes. Read once at startup.
+# The default catalog remains the original three Pyromancer fixtures. Neither catalog is production balance.
+AbilityPractice.AllowDevelopmentClassSamples = 0

@@ -12,6 +12,8 @@ def verify_provenance(candidates, root, dbc):
         raise ValueError('Missing source provenance')
     native_sources = candidates.get('nativeOutcomeSources')
     expected = {'modules/mod-ability-practice/src/AbilityPracticeServer.cpp',
+                'modules/mod-ability-practice/src/AbilityPracticeDevelopment.h',
+                'modules/mod-ability-practice/src/AbilityPracticeDevelopmentSamples.h',
                 'modules/mod-ability-practice/src/AbilityPracticeProfiles.h', 'src/server/shared/SharedDefines.h'}
     if not isinstance(native_sources, list) or len(native_sources) != len(expected) or {
             source.get('path') for source in native_sources} != expected:

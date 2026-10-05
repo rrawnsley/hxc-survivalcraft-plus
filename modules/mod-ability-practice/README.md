@@ -8,7 +8,8 @@ The module and addon are staged in this checkout. Nothing is installed or activa
 ## Current state — 5 October 2026
 
 - Native prototype: three Pyromancer class-grant profiles, with draft tuning. The full rollout still targets
-  all 21 CoA classes. Default development and rank-learning flags are off.
+  all 21 CoA classes. An optional startup-only sample catalog adds 20 ranked class-grant profiles for the other
+  classes, for 23 profiles across all 21 classes. Default development, rank-learning and class-sample flags are off.
 - Outcomes: resolved direct damage/healing, successful interruption, dispel and beneficial-aura steal.
   Each profile requires its own outcome route. The existing client-cast callback records numeric class/spell
   identity; preparation requires that identity and rejects item/aura-triggered sources. Script-created casts
@@ -51,6 +52,32 @@ Source checks and the isolated native build passed in `.cache/verify-all/2026100
 C++ lint, whitespace and five addon Lua 5.1 syntax compilations passed. No behavioral tests ran. Candidate
 and draft discovery artifacts were regenerated against the changed native source hashes. Production remains
 untouched and the draft tuning and three prototype profiles are unchanged.
+
+## Representative all-class catalog — 5 October 2026
+
+`AbilityPractice.AllowDevelopmentClassSamples = 1` selects an expanded development catalog at startup,
+provided the existing enable and observation flags are also enabled. It does not enable rank learning; that
+still requires its independent flag. Reloading configuration does not change the selected static catalog.
+The default remains the original three Pyromancer profiles. No configuration or server was changed live.
+
+`AbilityPracticeDevelopmentSamples.h` contains 20 explicit ranked samples for custom class IDs 12–23 and
+25–32. Each has a source-consistent root class grant and complete generated rank chain, and a common raw
+native damage or healing route. IDs and character levels came from the current provenance-checked draft
+artifact. Existing native startup validation still checks the complete source grant chain and each effective
+SpellInfo's supported direct outcome and nonpassive status. Any rejected selected sample leaves observation
+and rank learning inactive. Startup has not yet been exercised with the expanded catalog.
+
+Proficiency requirements follow the existing illustrative 1/10/20/40/60 sequence; the existing draft training
+bands and capped five-points-per-character-level curve are reused. These are development values, not approved
+class balance. Native character-level requirements are preserved, including Call Lightning's last rank at 84;
+the module does not raise the realm level limit. Pyromancer's three existing definitions remain unchanged.
+These samples do not constitute a complete ability catalog, reviewed acquisition entitlement, utility/pet/
+periodic support, or unranked mastery rewards.
+
+Discovery provenance now also hashes both development catalog headers. Candidate and unapproved draft artifacts
+were regenerated; the 847 draft groups and 179 common-outcome candidates are unchanged. Source checks and the
+isolated native build passed in `.cache/verify-all/20261005-134959/report.json`; changed C++ lint and whitespace
+passed. No behavioral tests or live client/server checks ran.
 
 `src/AbilityPracticeProgression.h` provides configurable training bands, progression after a qualifying action,
 exact action forecasts across catch-up/rate changes, cap handling and separate character-level/practice eligibility.
