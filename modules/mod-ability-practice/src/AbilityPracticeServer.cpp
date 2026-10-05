@@ -17,6 +17,7 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
+#include <array>
 #include <atomic>
 #include <chrono>
 #include <mutex>
@@ -133,6 +134,39 @@ CoAAbilityPractice::RankDecision EvaluateRank(Player const* player, std::uint32_
     auto const view = Practice::DescribeRank(*ability, static_cast<std::size_t>(desired - ability->Ranks.begin()),
         Dev::Policy, record->State, player->GetLevel(), learned, true);
     return view.State == Practice::RankState::Ready ? Decision::Allowed : Decision::Blocked;
+}
+
+bool CanPurchaseSpell(Player const* player, std::uint32_t spellId)
+{
+    if (!RankActive.load() || !IsDevelopmentPlayer(player))
+        return true;
+    std::lock_guard lock(Mutex);
+    if (!RankRequested || !Affects(player))
+        return true;
+    std::array<std::uint32_t, 128> spells{};
+    spells[0] = spellId;
+    std::size_t count = 1;
+    for (std::size_t index = 0; index < count; ++index)
+    {
+        std::uint32_t const current = spells[index];
+        if (!player->HasSpell(current) && EvaluateRank(player, current) != CoAAbilityPractice::RankDecision::Unmanaged)
+            return false;
+        SpellInfo const* info = sSpellMgr->GetSpellInfo(current);
+        if (!info)
+            return false;
+        for (SpellEffectInfo const& effect : info->GetEffects())
+        {
+            if (!effect.IsEffect(SPELL_EFFECT_LEARN_SPELL) || !effect.TriggerSpell)
+                continue;
+            auto const end = spells.begin() + count;
+            if (std::find(spells.begin(), end, effect.TriggerSpell) != end)
+                continue;
+            if (count == spells.size())
+                return false;
+            spells[count++] = effect.TriggerSpell;
+        }
+    }
+    return true;
 }
 
 void PromoteRanks(Player* player)
@@ -401,6 +435,7 @@ public:
 void AddSC_ability_practice()
 {
     CoAAbilityPractice::SetRankProvider(EvaluateRank);
+    CoAAbilityPractice::SetPurchaseProvider(CanPurchaseSpell);
     new PracticeWorld();
     new PracticePlayer();
     new PracticeSpell();

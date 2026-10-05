@@ -5,6 +5,7 @@
 namespace
 {
 std::atomic<CoAAbilityPractice::RankProvider> Provider = nullptr;
+std::atomic<CoAAbilityPractice::PurchaseProvider> PurchasePolicy = nullptr;
 }
 
 void CoAAbilityPractice::SetRankProvider(RankProvider provider)
@@ -26,4 +27,15 @@ bool CoAAbilityPractice::CanLearnRank(Player const* player, std::uint32_t spellI
 bool CoAAbilityPractice::ManagesRank(Player const* player, std::uint32_t spellId)
 {
     return EvaluateRank(player, spellId) != RankDecision::Unmanaged;
+}
+
+void CoAAbilityPractice::SetPurchaseProvider(CoAAbilityPractice::PurchaseProvider provider)
+{
+    PurchasePolicy.store(provider);
+}
+
+bool CoAAbilityPractice::CanPurchaseSpell(Player const* player, std::uint32_t spellId)
+{
+    auto const provider = PurchasePolicy.load();
+    return !provider || provider(player, spellId);
 }

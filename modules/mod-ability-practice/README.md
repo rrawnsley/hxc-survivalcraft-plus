@@ -370,3 +370,22 @@ Source/native build passed at `.cache/verify-all/20261005-073325/report.json`; C
 Lua 5.1 syntax compiled using the previously cached runtime; the first syntax attempt omitted its import path and
 was corrected. No new cases or behavioral tests ran. Packet round trips, incomplete version-3 snapshots, scrolling,
 small-screen layout and in-game rendering still require acceptance. No production payload was installed/published.
+
+## Nested trainer acquisition checks
+
+A second optional provider checks trainer purchases before pricing/charging. The module returns immediately when
+development rank rules are inactive or the actor is outside the reviewed slice. Active checks follow explicit
+LEARN_SPELL targets through at most 128 unique spell IDs, deduplicate cycles, refuse missing references/overflow,
+and reject purchases that reach an unlearned managed rank even when its practice requirements are ready (ready
+managed ranks are learned automatically). Already-known managed targets can coexist with other legitimate grants.
+Trainer listing and purchase share this state check; the previous immediate-only checks use this provider now.
+
+This follows literal nested learn effects, not arbitrary scripts, triggered casts, runtime-selected spell IDs or
+item learning. Those remain review gaps. It does not change talent buying or specialization restoration: paid
+entitlements and preservation need an independent design before the broader catalog can manage such abilities.
+Normal trainer behavior remains default with no purchase provider or with all module flags off.
+
+Source/native build passed at `.cache/verify-all/20261005-074256/report.json`; C++ lint and whitespace passed.
+The first build failed because an atomic variable shared the provider type alias's name; renaming the atomic
+fixed compilation. That failed report is `.cache/verify-all/20261005-074109/report.json`. No runtime fee, cycle,
+nested wrapper or off-mode cases ran, and no server was installed/started/restarted.
