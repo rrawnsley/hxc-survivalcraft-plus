@@ -5,6 +5,7 @@
 #include "AbilityPracticeDevelopmentPeriodic.h"
 #include "AbilityPracticeDevelopmentRanked.h"
 #include "AbilityPracticeDevelopmentMastery.h"
+#include "AbilityPracticeDevelopmentHelpers.h"
 #include "AbilityPracticeProfiles.h"
 #include "AbilityPracticeRankPolicy.h"
 #include "AbilityPracticeMasteryPolicy.h"
@@ -34,6 +35,7 @@
 #include <chrono>
 #include <mutex>
 #include <unordered_map>
+#include <vector>
 
 namespace
 {
@@ -107,6 +109,7 @@ std::span<Practice::AbilityProfile const> SelectProfiles(bool classSamples, bool
     return mastery ? std::span<Practice::AbilityProfile const>(MasteryProfiles) :
         std::span<Practice::AbilityProfile const>(Profiles);
 }
+std::vector<Practice::AbilityProfile> RuntimeProfiles;
 std::optional<Practice::ProfileIndex> ProfileLookup;
 std::recursive_mutex Mutex;
 bool Requested = false;
@@ -115,6 +118,7 @@ bool Ready = false;
 bool RankRequested = false;
 bool PeriodicRequested = false;
 bool MasteryRequested = false;
+bool HelpersRequested = false;
 std::uint64_t NextActionSession = 0;
 std::atomic<bool> RankActive = false;
 std::atomic<bool> Active = false;
@@ -193,6 +197,13 @@ bool HasSupportedOutcome(SpellInfo const* info, Practice::OutcomeKind outcome)
     if (outcome == Practice::OutcomeKind::Steal)
         return info->HasEffect(SPELL_EFFECT_STEAL_BENEFICIAL_BUFF);
     return false;
+}
+
+bool HasSupportedHelperOutcome(SpellInfo const* info, Practice::AbilityProfile const& profile)
+{
+    return HelpersRequested && info && Practice::DevelopmentHelpers::IsManafeed(profile) &&
+        info->Effects[EFFECT_0].Effect == SPELL_EFFECT_APPLY_AURA &&
+        info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_PERIODIC_DUMMY;
 }
 
 bool MatchesNativeClassGrant(Practice::AbilityProfile const& profile)
@@ -522,7 +533,9 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
             if (view.NextRank)
                 view.NextRank = view.Ranks[view.NextRank->RankNumber - 1];
             view.Route = RouteFor(profile.Outcome);
-            view.RuleSet = PeriodicRequested ? Practice::HumanPvEPeriodicRuleSet : Practice::HumanPvERuleSet;
+            view.RuleSet = HelpersRequested && Practice::DevelopmentHelpers::IsManafeed(profile) ?
+                Practice::HumanPvEScriptedHealRuleSet :
+                PeriodicRequested ? Practice::HumanPvEPeriodicRuleSet : Practice::HumanPvERuleSet;
             view.Session = {};
             if (currentProgress != session.Progress.end())
             {
@@ -639,16 +652,21 @@ void AwardPeriodicOutcome(Unit* caster, Unit* target, std::uint32_t auraSpellId,
     if (!IsProfiledPlayer(player))
         return;
     auto const* profile = FindProfile(player, receipt->SpellId);
-    if (!profile || (profile->Outcome == Practice::OutcomeKind::Damage ?
+    bool const scripted = profile && HelpersRequested && Practice::DevelopmentHelpers::IsManafeed(*profile) &&
+        auraType == SPELL_AURA_PERIODIC_DUMMY;
+    if (!profile || (!scripted && (profile->Outcome == Practice::OutcomeKind::Damage ?
             auraType != SPELL_AURA_PERIODIC_DAMAGE && auraType != SPELL_AURA_PERIODIC_DAMAGE_PERCENT :
-            profile->Outcome != Practice::OutcomeKind::Healing || auraType != SPELL_AURA_PERIODIC_HEAL) ||
+            profile->Outcome != Practice::OutcomeKind::Healing || auraType != SPELL_AURA_PERIODIC_HEAL)) ||
         std::none_of(profile->Definition.Ranks.begin(), profile->Definition.Ranks.end(),
             [auraSpellId](Practice::AbilityRank const& rank) { return rank.SpellId == auraSpellId; }) ||
-        !QualifiesDevelopmentOutcome(profile->Outcome, player, target, damage, healing))
+        (scripted ? !healing || !target->IsAlive() || !IsDevelopmentOpponent(player, target) ||
+            !HasDevelopmentEncounter(player, player) :
+            !QualifiesDevelopmentOutcome(profile->Outcome, player, target, damage, healing)))
         return;
     std::lock_guard lock(Mutex);
     auto const found = Sessions.find(player->GetGUID().GetRawValue());
-    if (!PeriodicRequested || !Affects(player) || player->isBeingLoaded() || found == Sessions.end() ||
+    if ((!scripted && !PeriodicRequested) || (scripted && !HelpersRequested) ||
+        !Affects(player) || player->isBeingLoaded() || found == Sessions.end() ||
         !ReceiptMatches(player, found->second, *receipt) ||
         !AcquisitionAllowed(player, profile->Definition, receipt->SpellId))
         return;
@@ -750,8 +768,17 @@ public:
     void OnStartup() override
     {
         std::lock_guard lock(Mutex);
+        if (ProfileLookup)
+        {
+            Ready = false;
+            Active.store(false);
+            RankActive.store(false);
+            LOG_ERROR("module.ability_practice", "Rejected repeated development catalog initialization");
+            return;
+        }
         PeriodicRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentPeriodicObservation", false);
         MasteryRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentMastery", false);
+        HelpersRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentScriptedObservation", false);
         if (!Requested || !DevelopmentAllowed)
         {
             Active.store(false);
@@ -769,8 +796,13 @@ public:
         }
         bool const classSamples = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentClassSamples", false);
         bool const rankedCatalog = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentRankedCatalog", false);
-        std::span<Practice::AbilityProfile const> const profiles =
+        std::span<Practice::AbilityProfile const> const selected =
             SelectProfiles(classSamples, rankedCatalog, PeriodicRequested, MasteryRequested);
+        RuntimeProfiles.assign(selected.begin(), selected.end());
+        if (HelpersRequested)
+            RuntimeProfiles.insert(RuntimeProfiles.end(), Practice::DevelopmentHelpers::Profiles.begin(),
+                Practice::DevelopmentHelpers::Profiles.end());
+        std::span<Practice::AbilityProfile const> const profiles(RuntimeProfiles);
         ProfileLookup.emplace(profiles);
         Ready = ProfileLookup->IsValid();
         for (Practice::AbilityProfile const& profile : profiles)
@@ -791,7 +823,8 @@ public:
             {
                 SpellInfo const* info = sSpellMgr->GetSpellInfo(rank.SpellId);
                 bool const fixed = profile.Definition.Kind == Practice::AbilityKind::Fixed;
-                bool const expectedOutcome = info && (fixed || HasSupportedOutcome(info, profile.Outcome)) &&
+                bool const expectedOutcome = info && (fixed || HasSupportedOutcome(info, profile.Outcome) ||
+                    HasSupportedHelperOutcome(info, profile)) &&
                     (profile.Definition.Kind != Practice::AbilityKind::Mastery ||
                         !info->HasAura(SPELL_AURA_PERIODIC_HEAL));
                 if (!info || (!fixed && info->IsPassive()) || !expectedOutcome)
@@ -811,6 +844,7 @@ public:
         LOG_INFO("module.ability_practice", "Development periodic observation: enabled={}", PeriodicRequested);
         LOG_INFO("module.ability_practice", "Development ranked catalog: enabled={}", rankedCatalog);
         LOG_INFO("module.ability_practice", "Development mastery: enabled={}", MasteryRequested);
+        LOG_INFO("module.ability_practice", "Development scripted observation: enabled={}", HelpersRequested);
     }
 };
 
@@ -981,7 +1015,9 @@ public:
             AcquisitionAllowed(player, profile->Definition, spell->GetSpellInfo()->Id);
         std::uint64_t const source = direct ? request : std::numeric_limits<std::uint64_t>::max();
         spell->SetScriptValue(PracticeCastSourceKey, source);
-        if (direct && PeriodicRequested && Affects(player) && !player->isBeingLoaded() &&
+        if (direct && (PeriodicRequested ||
+                (HelpersRequested && Practice::DevelopmentHelpers::IsManafeed(*profile))) &&
+            Affects(player) && !player->isBeingLoaded() &&
             (profile->Outcome == Practice::OutcomeKind::Damage || profile->Outcome == Practice::OutcomeKind::Healing))
         {
             auto& session = Sessions[player->GetGUID().GetRawValue()];

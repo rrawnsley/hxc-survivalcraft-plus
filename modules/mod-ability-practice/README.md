@@ -12,13 +12,15 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   classes, for 23 profiles across all 21 classes. An optional broader ranked catalog selects 106 profiles and
   888 authored ranks across all 21 classes, taking priority over class samples. Periodic observation adds two
   profiles to the selected catalog (five/25/108 respectively). Optional Hand of Elune mastery adds one more
-  profile. All development settings default off.
+  profile. Optional scripted observation adds Manafeed; the largest staged catalog has 110 profiles.
+  All development settings default off.
 - Outcomes: resolved direct damage/healing, successful interruption, dispel and beneficial-aura steal.
   Each profile requires its own outcome route. The existing client-cast callback records numeric class/spell
   identity; preparation requires that identity and rejects item/aura-triggered sources. Script-created casts
   cannot mint the request identity. Optional native periodic damage/percent-damage/healing shares one receipt
   with the original cast, including direct results and multiple targets. Repeat-fire, summoned/pet/helper
-  attribution and scripted replacement ticks remain unfinished; periodic runtime behavior is unqualified.
+  attribution remain unfinished. A separate optional Manafeed observer covers its scripted drain/heal result;
+  other replacement ticks and all newly added runtime behavior remain unqualified.
 - Ranks/storage: cached versioned settings, once-only learned-rank seeding, monotonic writes, exact saved-row
   restoration scope and stronger-rank learning guards. Corrupt or incompatible progress stays blocked.
   Shared native race/racial and faction-rift eligibility is checked at preparation, award and new upgrades;
@@ -1228,3 +1230,44 @@ discovery still contains 847 unapproved drafts/179 outcome candidates. Original 
 in progress; these changes require later integration and affected native build. No behavioral tests ran.
 All mastery rates/rewards and real healing/menu/migration/lifecycle behavior remain runtime qualification.
 Production server, client, configuration, DB and launcher remain untouched.
+
+
+## Explicit scripted Manafeed observation — 5 October 2026
+
+Startup-only `AbilityPractice.AllowDevelopmentScriptedObservation` defaults off and adds Felsworn Manafeed
+(class 14, root 552210, ranks 552210–552213 at authored levels 24/36/44/56). Draft proficiency requirements
+are 1/10/20/40, with the existing illustrative training/cap curve. Original observation/rank-learning flags
+remain independent. All options together select 110 development profiles; this is still incomplete production
+coverage and unapproved balance.
+
+AscensionFelswornAuras.cpp now snapshots the original cast receipt and observes the existing HealBySpell return
+only after Manafeed actually drains mana and restores positive health. Its native mana drain/heal behavior is
+unchanged. The module accepts this known periodic-dummy result only for the mapped ranked healing profile,
+with an actual member aura spell ID, receipt ownership/session context, current known spell/acquisition/cap
+and cached-state checks. The drained opponent must be a live eligible PvE creature and the caster must be in
+a qualifying PvE encounter. This prevents credit for draining a player/pet or unrelated target simply because
+the caster is also fighting a PvE mob. No-drain/full-overheal outcomes do not award.
+
+The shared receipt makes multiple ticks/effects/targets one use for the original client cast; triggered/item/
+script-created casts cannot acquire that provenance. Scripted observation creates receipts for this mapped
+profile even when the separate native-periodic flag is off. Other profiles still need the periodic setting
+for periodic credit. Startup checks Manafeed's actual effect-zero APPLY_AURA/PERIODIC_DUMMY route and complete
+source grant/chain. Raw periodic-heal DBC evidence is not used to approve this scripted route. Other helpers,
+pets, summons, repeat-fire and replacement ticks still require individual implementation/review.
+
+The selected profiles are copied once into module-owned storage before index construction. The storage is
+never resized after publication; config reload keeps its selected catalog and repeated startup initialization
+is refused. Rank/cap/policy/reward spans still refer to static authored data. This allows an independently
+selected explicit helper profile without proliferating mode combinations or retaining gameplay objects.
+
+Rule set 3 explains Manafeed's drain/self-heal PvE eligibility. Native and Lua require its ranked healing
+route. Addon 0.4.11 and unpublished protocol-4 B7/T10/M/C/D/F8 shapes are unchanged from the prior milestone.
+Mastery remains a separate direct-heal prototype. Discovery now includes the explicit helper definition,
+Felsworn aura observer and Felsworn effective contracts in source provenance (28 entries); automatic raw
+candidate classification remains conservative and unapproved.
+
+Source-only checks passed `.cache/verify-all/20261005-163500/report.json` in the catalog worktree; changed C++
+style, whitespace and five Lua 5.1 syntax compilations passed. Candidate/draft artifacts regenerated with the
+same 847 unapproved drafts/179 outcome candidates. The frozen main native rebuild remains in progress.
+Integration, affected incremental build and real scripted-result/lifecycle/menu/PvE acceptance remain pending.
+No behavioral tests were added/run. No live server/configuration/client/database/launcher change occurred.

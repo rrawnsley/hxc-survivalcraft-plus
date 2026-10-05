@@ -173,7 +173,8 @@ local function Ability(value, schema, characterLevel)
     local rewards
     if schema == 4 then
         if not session or not Integer(value.kind, 1, 3) or not Integer(value.route, 1, 6)
-            or (value.ruleSet ~= 1 and value.ruleSet ~= 2)
+            or (value.ruleSet ~= 1 and value.ruleSet ~= 2 and value.ruleSet ~= 3)
+            or (value.ruleSet == 3 and (value.kind ~= 1 or value.route ~= 2))
             or ((value.kind == 3) ~= (value.route == 6)) then return nil end
         if not ConsistentTypedRoadmap(value, ranks, rank, point, characterLevel) then return nil end
         rewards = Rewards(value.rewards, value, ranks, characterLevel)
@@ -337,7 +338,7 @@ function Model.PracticeRules(ability)
     if Model.IsFixed(ability) then
         return "This ability has no practice levels. Learn it through your normal ability source."
     end
-    if ability.ruleSet ~= 1 and ability.ruleSet ~= 2 then
+    if ability.ruleSet ~= 1 and ability.ruleSet ~= 2 and ability.ruleSet ~= 3 then
         return "Practice rules are unavailable in this update. Refresh to request the current rules."
     end
     local rules = {
@@ -351,7 +352,11 @@ function Model.PracticeRules(ability)
     }
     local rule = rules[ability.route]
     if not rule then return "Practice rules are unavailable in this update." end
-    if ability.route == 1 or ability.route == 2 then
+    if ability.ruleSet == 3 then
+        rule = "Drain mana from a live, level-appropriate PvE opponent while this ability restores your missing health."
+            .. " You must be in a qualifying PvE fight. No mana drained or full overhealing does not count."
+            .. " Drain-and-heal ticks count once for your original cast."
+    elseif ability.route == 1 or ability.route == 2 then
         rule = rule .. (ability.ruleSet == 2 and
             " Supported damage/healing-over-time ticks can count once for the original cast."
             or " Only direct damage or healing counts in the current rules.")

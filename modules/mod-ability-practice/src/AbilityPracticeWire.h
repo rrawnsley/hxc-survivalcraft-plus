@@ -230,7 +230,10 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
             if (!Detail::ConsistentTypedRoadmap(view, characterLevel) ||
                 !Detail::ConsistentTypedMastery(view, characterLevel))
                 return std::nullopt;
-            if ((view.RuleSet != HumanPvERuleSet && view.RuleSet != HumanPvEPeriodicRuleSet) ||
+            if ((view.RuleSet != HumanPvERuleSet && view.RuleSet != HumanPvEPeriodicRuleSet &&
+                    view.RuleSet != HumanPvEScriptedHealRuleSet) ||
+                (view.RuleSet == HumanPvEScriptedHealRuleSet &&
+                    (view.Route != PracticeRoute::Healing || view.Kind != AbilityKind::Ranked)) ||
                 view.Route < PracticeRoute::Damage ||
                 view.Route > PracticeRoute::Fixed ||
                 ((view.Kind == AbilityKind::Fixed) != (view.Route == PracticeRoute::Fixed)))

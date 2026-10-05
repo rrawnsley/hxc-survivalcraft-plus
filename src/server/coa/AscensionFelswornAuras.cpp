@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionFelsworn.h"
+#include "AbilityPracticeCastReceipt.h"
 #include "MotionMaster.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
@@ -161,13 +162,17 @@ class aura_ascension_felsworn_lifecycle : public AuraScript
         }
         if (id >= 552210 && id <= 552213 && effect->GetEffIndex() == EFFECT_0)
         {
+            auto const practiceCast = GetAura()->GetPracticeCast();
             PreventDefaultAction();
             Unit* target = GetTarget();
             uint32 drained = -target->ModifyPower(POWER_MANA, -std::max(0, effect->GetAmount()));
             if (drained)
             {
                 HealInfo heal(player, player, drained, GetSpellInfo(), GetSpellInfo()->GetSchoolMask());
-                player->HealBySpell(heal);
+                int32 const gain = player->HealBySpell(heal);
+                if (gain > 0)
+                    CoAAbilityPractice::ReportPeriodicOutcome(player, target, id,
+                        SPELL_AURA_PERIODIC_DUMMY, 0, static_cast<uint32>(gain), practiceCast);
             }
         }
     }

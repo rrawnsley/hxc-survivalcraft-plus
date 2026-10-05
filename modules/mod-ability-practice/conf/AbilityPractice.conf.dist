@@ -22,3 +22,7 @@ AbilityPractice.AllowDevelopmentPeriodicObservation = 0
 # Experimental Hand of Elune practice and up to 2% PvE healing mastery. Read once at startup.
 # This applies draft healing benefits when observation is enabled; it is not observation-only.
 AbilityPractice.AllowDevelopmentMastery = 0
+
+# Experimental original-cast observation of Manafeed's scripted drain-and-heal result. Startup-only.
+# This adds its ranked development profile; other scripted/helper abilities remain unsupported.
+AbilityPractice.AllowDevelopmentScriptedObservation = 0
