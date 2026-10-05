@@ -96,6 +96,23 @@ Source checks and the isolated native build passed in `.cache/verify-all/2026100
 C++ lint, whitespace and five Lua 5.1 syntax compilations passed. Malformed/valid snapshot behavioral
 acceptance remains pending explicit testing authorization. Production remains untouched.
 
+## Effective rank-chain consistency — 5 October 2026
+
+Startup now refuses a selected profile if its class-grant root has duplicate source grant rows, even when one
+row happens to match the requested level. When SpellMgr supplies native rank-chain nodes, every profile rank
+must have a node with the same first/last spell, rank number and preceding/following spell. Partial native
+chains and foreign, reordered or extended chains refuse the selected catalog before observation/learning.
+
+An ability with no native chain nodes remains supported by its independently checked CoA source progression.
+The module does not assume generated CoA ranks require database `spell_ranks` rows, and does not manufacture
+or rewrite such rows. This guard checks present effective chains for contradictions; it does not prove absent
+chains are runtime-correct, or complete acquisition ownership. It is startup-only; rank-data reload after
+activation remains unqualified. No production database was queried or changed.
+
+Source checks and the isolated native build passed in `.cache/verify-all/20261005-140040/report.json`;
+changed C++ lint and whitespace passed. Discovery artifacts were regenerated for the changed native hash.
+No behavioral tests or expanded-catalog startup ran. Production remains untouched.
+
 `src/AbilityPracticeProgression.h` provides configurable training bands, progression after a qualifying action,
 exact action forecasts across catch-up/rate changes, cap handling and separate character-level/practice eligibility.
 Definitions contain no final balance constants: proficiency caps and policy bands are supplied by the caller.

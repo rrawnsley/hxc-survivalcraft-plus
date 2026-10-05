@@ -133,6 +133,12 @@ bool MatchesNativeClassGrant(Practice::AbilityProfile const& profile)
     if (profile.Acquisition != Practice::AcquisitionSource::ClassGrant || ability.Ranks.empty())
         return false;
     Practice::AbilityRank const& first = ability.Ranks.front();
+    if (std::count_if(AscensionCompatData::ClassSpells.begin(), AscensionCompatData::ClassSpells.end(),
+            [&ability, &first](AscensionCompatData::ClassSpell const& entry)
+            {
+                return entry.ClassId == ability.ClassId && entry.SpellId == first.SpellId;
+            }) != 1)
+        return false;
     auto const grant = std::find_if(AscensionCompatData::ClassSpells.begin(), AscensionCompatData::ClassSpells.end(),
         [&ability, &first](AscensionCompatData::ClassSpell const& entry)
         {
@@ -166,6 +172,26 @@ bool MatchesNativeClassGrant(Practice::AbilityProfile const& profile)
                 }) != 1)
             return false;
     return true;
+}
+
+bool MatchesEffectiveRankChain(Practice::AbilityDefinition const& ability)
+{
+    std::size_t present = 0;
+    for (std::size_t index = 0; index < ability.Ranks.size(); ++index)
+    {
+        Practice::AbilityRank const& rank = ability.Ranks[index];
+        SpellChainNode const* node = sSpellMgr->GetSpellChainNode(rank.SpellId);
+        if (!node)
+            continue;
+        ++present;
+        std::uint32_t const previous = index ? ability.Ranks[index - 1].SpellId : 0;
+        std::uint32_t const next = index + 1 < ability.Ranks.size() ? ability.Ranks[index + 1].SpellId : 0;
+        if (!node->first || !node->last || node->first->Id != ability.Ranks.front().SpellId ||
+            node->last->Id != ability.Ranks.back().SpellId || node->rank != rank.RankNumber ||
+            (node->prev ? node->prev->Id : 0) != previous || (node->next ? node->next->Id : 0) != next)
+            return false;
+    }
+    return !present || present == ability.Ranks.size();
 }
 
 bool IsHumanPlayer(Player const* player)
@@ -567,6 +593,12 @@ public:
             {
                 Ready = false;
                 LOG_ERROR("module.ability_practice", "Rejected class-grant acquisition: class={}, ability={}",
+                    profile.Definition.ClassId, profile.Definition.AbilityId);
+            }
+            if (!MatchesEffectiveRankChain(profile.Definition))
+            {
+                Ready = false;
+                LOG_ERROR("module.ability_practice", "Rejected effective rank chain: class={}, ability={}",
                     profile.Definition.ClassId, profile.Definition.AbilityId);
             }
             for (Practice::AbilityRank const& rank : profile.Definition.Ranks)
