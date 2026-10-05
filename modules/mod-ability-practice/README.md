@@ -897,3 +897,17 @@ Source/native build passed `.cache/verify-all/20261005-102712/report.json`; fina
 `.cache/verify-all/20261005-102842/report.json`. C++ lint/whitespace/five Lua5.1 syntax compilations passed.
 No tests ran. Real restart/reconnect, new-instance failure first, partial assembly, same-instance stale/class/
 reload behavior, exact64-bit identities and saved labels require runtime acceptance. Production untouched.
+
+
+## Route-specific mixed-result qualification
+
+Direct result qualification now takes the profile's selected outcome. Damage profiles require effective
+damage against the eligible PvE opponent; healing profiles require effective healing of a friendly recipient
+in a qualifying live encounter. A mixed damage/healing callback cannot use its other result to bypass the
+configured route's target/encounter requirements. Utility routes still use their separate successful callbacks.
+Per-cast deduplication, current eligibility and progression behavior are unchanged.
+
+This closes a source-level OR-condition gap; no live exploit or reproduction was observed. Source/native
+build passed `.cache/verify-all/20261005-103115/report.json`; C++ lint/whitespace passed. No tests ran.
+Mixed-result/friend/enemy/zero-effect behavior remains runtime acceptance. The same three development profiles
+remain, all development flags default off, and production was untouched.

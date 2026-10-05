@@ -206,11 +206,13 @@ bool HasDevelopmentEncounter(Player const* player, Unit const* recipient)
     return false;
 }
 
-bool QualifiesDevelopmentOutcome(Player const* player, Unit const* target, uint32 damage, uint32 healing)
+bool QualifiesDevelopmentOutcome(Practice::OutcomeKind outcome, Player const* player, Unit const* target,
+    uint32 damage, uint32 healing)
 {
-    if (damage && IsDevelopmentOpponent(player, target))
-        return true;
-    return healing && player->IsFriendlyTo(target) && HasDevelopmentEncounter(player, target);
+    if (outcome == Practice::OutcomeKind::Damage)
+        return damage && IsDevelopmentOpponent(player, target);
+    return outcome == Practice::OutcomeKind::Healing && healing && player->IsFriendlyTo(target) &&
+        HasDevelopmentEncounter(player, target);
 }
 
 std::vector<std::uint32_t> Learned(Player const* player, Practice::AbilityDefinition const& ability)
@@ -688,7 +690,7 @@ public:
         if (!profile || (profile->Outcome != Practice::OutcomeKind::Damage &&
                 profile->Outcome != Practice::OutcomeKind::Healing) ||
             (profile->Outcome == Practice::OutcomeKind::Damage ? !damage : !healing) ||
-            !QualifiesDevelopmentOutcome(player, target, damage, healing))
+            !QualifiesDevelopmentOutcome(profile->Outcome, player, target, damage, healing))
             return;
         AwardOutcome(player, spell, *profile);
     }
