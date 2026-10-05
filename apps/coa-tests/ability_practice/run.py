@@ -57,6 +57,20 @@ def check_inventory():
         except ValueError:
             continue
         raise AssertionError('Malformed inventory source accepted: ' + content)
+    sample = {'spells': [
+        {'classId': 24, 'spellId': 101, 'reviewFlags': ['effective-data-unverified']},
+        {'classId': 24, 'spellId': 102, 'reviewFlags': ['effective-data-unverified']},
+        {'classId': 24, 'spellId': 103, 'reviewFlags': ['effective-data-unverified']},
+    ], 'summary': {}}
+    evidence = {101: {'name': 'Test', 'rankLabel': 'Rank 1', 'passive': True},
+                102: {'name': 'Test', 'rankLabel': 'Rank 2', 'passive': False}}
+    inventory_module.annotate_dbc(sample, evidence.get, {'manifest_match': False})
+    assert sample['spells'][0]['rawRankNumber'] == 1
+    assert 'raw-dbc-passive-review' in sample['spells'][0]['reviewFlags']
+    assert 'stale-extraction-manifest' in sample['spells'][1]['reviewFlags']
+    assert 'missing-raw-dbc-record' in sample['spells'][2]['reviewFlags']
+    assert sample['summary']['nameRankCandidateCount'] == 1
+    assert all('effective-data-unverified' in row['reviewFlags'] for row in sample['spells'])
     print('PASS: deterministic 21-class source inventory, provenance and malformed-source rejection')
 
 

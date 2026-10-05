@@ -46,6 +46,11 @@ Callers must resolve callbacks to the correct live session rather than retaining
 including hashes and the meaning of each rank reference. It records all 21 classes and 7,678 class/spell identities
 without conflating acquisition predecessors with ability roots. These are source candidates, including talent,
 passive and support spells; no entry is yet approved as trainable or verified against effective DBC/SQL/runtime data.
+Optional `--dbc <directory>` reuses the repository's reviewed read-only DBC parser to add names, raw rank labels,
+levels, passive flags and effect IDs while preserving source evidence. Same-name/rank groups are candidates only;
+they do not become ability identities. Missing records, field errors and stale/unknown extraction provenance stay
+explicit. The current local Spell data produced 761 name/rank candidates and 3,286 passive review flags; its extraction
+manifest is stale relative to the actual file hash. SQL corrections, scripted behavior and live runtime remain unobserved.
 
 `src/AbilityPracticeMenu.h` builds authoritative per-ability view data from the same calculation/catalog APIs,
 including learned rank, proficiency, current cap, next-point forecast and upcoming rank state. It preserves earned

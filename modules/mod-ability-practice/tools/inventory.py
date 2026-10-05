@@ -4,6 +4,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import sys
 
 
 SOURCES = (
@@ -122,12 +123,86 @@ def build_inventory(root):
     }
 
 
+def annotate_dbc(inventory, lookup, origin):
+    inventory['dbcOrigin'] = origin
+    groups = {}
+    for entry in inventory['spells']:
+        evidence = lookup(entry['spellId'])
+        if evidence is None:
+            entry['reviewFlags'].append('missing-raw-dbc-record')
+            continue
+        entry['rawDbc'] = evidence
+        if evidence.get('passive'):
+            entry['reviewFlags'].append('raw-dbc-passive-review')
+        if evidence.get('fieldErrors'):
+            entry['reviewFlags'].append('raw-dbc-field-errors')
+        if origin.get('manifest_match') is False:
+            entry['reviewFlags'].append('stale-extraction-manifest')
+        elif origin.get('manifest_match') is None:
+            entry['reviewFlags'].append('unknown-extraction-origin')
+        label = evidence.get('rankLabel') or ''
+        match = re.fullmatch(r'Rank\s+(\d+)', label)
+        if match and int(match.group(1)) > 0:
+            entry['rawRankNumber'] = int(match.group(1))
+            key = (entry['classId'], evidence.get('name') or '')
+            groups.setdefault(key, []).append({
+                'spellId': entry['spellId'], 'rawRankNumber': entry['rawRankNumber'],
+            })
+    inventory['nameRankCandidates'] = [
+        {'classId': class_id, 'name': name, 'members': sorted(members, key=lambda row: (
+            row['rawRankNumber'], row['spellId'])), 'scope': 'name-and-label-candidate-not-verified-ability-identity'}
+        for (class_id, name), members in sorted(groups.items()) if name and len(members) > 1
+    ]
+    counts = Counter(flag for entry in inventory['spells'] for flag in entry['reviewFlags'])
+    inventory['summary']['reviewFlags'] = dict(sorted(counts.items()))
+    inventory['summary']['nameRankCandidateCount'] = len(inventory['nameRankCandidates'])
+    return inventory
+
+
+def load_dbc_lookup(root, directory):
+    sys.path.insert(0, str(root / 'apps/coa-dbc'))
+    from inspect_dbc import DataSet
+    dataset = DataSet(directory, root=root)
+    table, schema, index, origin = dataset.load('Spell')
+    names = ('SpellName[enUS]', 'Rank[enUS]', 'Attributes', 'BaseLevel', 'SpellLevel',
+             'Effect[0]', 'Effect[1]', 'Effect[2]')
+    columns = {field.name: field for field in schema.columns}
+    if any(name not in columns for name in names):
+        raise ValueError('Reviewed Spell schema is missing a required inventory field')
+    passive = next(value for value, label in dataset.enums['SpellAttr0'].items() if label == 'SPELL_ATTR0_PASSIVE')
+
+    def lookup(spell_id):
+        if spell_id not in index:
+            return None
+        values, errors = {}, {}
+        for name in names:
+            value, error = dataset.value(table, index[spell_id], columns[name])
+            values[name] = value
+            if error:
+                errors[name] = error
+        result = {
+            'name': values['SpellName[enUS]'], 'rankLabel': values['Rank[enUS]'],
+            'baseLevel': values['BaseLevel'], 'spellLevel': values['SpellLevel'],
+            'attributes': values['Attributes'], 'passive': bool(values['Attributes'] & passive),
+            'effects': [values['Effect[' + str(effect) + ']'] for effect in range(3)],
+        }
+        if errors:
+            result['fieldErrors'] = errors
+        return result
+
+    return lookup, origin
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--root', type=Path, default=Path(__file__).resolve().parents[3])
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--dbc', type=Path)
     arguments = parser.parse_args()
     inventory = build_inventory(arguments.root)
+    if arguments.dbc:
+        lookup, origin = load_dbc_lookup(arguments.root, arguments.dbc)
+        annotate_dbc(inventory, lookup, origin)
     arguments.output.parent.mkdir(parents=True, exist_ok=True)
     arguments.output.write_text(json.dumps(inventory, indent=2) + '\n', encoding='utf-8')
     print(json.dumps(inventory['summary'], sort_keys=True))
