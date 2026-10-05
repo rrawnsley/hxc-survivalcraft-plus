@@ -36,13 +36,19 @@ listener:SetScript("OnEvent", function(_, event, prefix, message, channel, sende
         return
     end
     if prefix ~= PREFIX or channel ~= "WHISPER" or sender ~= UnitName("player") then return end
-    local snapshot, _, failure = Wire.Accept(message, GetTime(), revision)
+    local snapshot, reason, failure = Wire.Accept(message, GetTime(), revision)
     if snapshot and API.ApplyServerSnapshot(snapshot) then
         revision = snapshot.revision
         deadline = nil
     elseif failure and API.ApplyServerFailure(failure) then
         revision = failure.revision
         deadline = nil
+    elseif not reason then
+        local assemblyDeadline = Wire.GetDeadline()
+        if assemblyDeadline then
+            deadline = assemblyDeadline
+            API.SetSyncState("waiting")
+        end
     end
 end)
 listener:SetScript("OnUpdate", function(_, delta)

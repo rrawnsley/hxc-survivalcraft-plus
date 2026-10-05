@@ -23,7 +23,13 @@ end
 
 function Wire.Reset() pending = nil end
 
-function Wire.Accept(message, now, currentRevision)
+function Wire.GetDeadline()
+    if not pending then return nil end
+    if pending.schemaVersion == 4 then return math.min(pending.started + 90, pending.lastPart + 6) end
+    return pending.started + 5
+end
+
+local function Accept(message, now, currentRevision)
     if type(now) ~= "number" or now ~= now or now == math.huge or now == -math.huge then
         return Reject("Invalid clock")
     end
@@ -53,11 +59,11 @@ function Wire.Accept(message, now, currentRevision)
             return nil, "Stale snapshot header"
         end
         pending = { schemaVersion = schema, revision = revision, classId = classId, characterLevel = level,
-            count = count, started = now, parts = {}, rankCount = 0, receivedRanks = 0 }
+            count = count, started = now, lastPart = now, parts = {}, rankCount = 0, receivedRanks = 0 }
         return nil
     end
     if not pending then return nil, "No snapshot in progress" end
-    if now < pending.started or now - pending.started > 5 then return Reject("Snapshot expired") end
+    if now < pending.lastPart or now >= Wire.GetDeadline() then return Reject("Snapshot expired") end
     if tonumber(fields[2]) ~= pending.revision then return nil, "Unrelated snapshot message" end
     if kind == "E" then
         if #fields ~= 2 then return Reject("Invalid snapshot end") end
@@ -161,4 +167,10 @@ function Wire.Accept(message, now, currentRevision)
             practice = { status = tonumber(fields[10]), uses = fields[11] } }
     else return Reject("Invalid snapshot part") end
     return nil
+end
+
+function Wire.Accept(message, now, currentRevision)
+    local snapshot, reason, failure = Accept(message, now, currentRevision)
+    if pending and not reason then pending.lastPart = now end
+    return snapshot, reason, failure
 end

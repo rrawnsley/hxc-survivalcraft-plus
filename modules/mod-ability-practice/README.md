@@ -782,3 +782,28 @@ No runtime profiles, thresholds or class coverage were enabled by this discovery
 is `.cache/ability-practice/catalog-candidates.json`. Source checks passed at
 `.cache/verify-all/20261005-100224/report.json`; Python syntax and whitespace passed. No tests ran; this was
 source/data discovery only. Production was untouched.
+
+
+## Bounded typed-menu delivery
+
+Protocol-4 snapshots and progress failures now queue only numeric/string messages in the GUID-keyed native
+session and send at most eight messages per100ms. Batch timing carries across snapshot completion/cancellation
+so immediate replacement cannot create a second batch in the same interval. No Player/Spell pointer is retained.
+The queue is bounded by the encoder's512abilities/2048ranks/240-byte-line limits and5123messages, with a90s
+absolute lifetime. Completion/cancellation releases its vector storage. Already-started snapshots may finish
+past the30s interest window; new snapshots still require interest. Practice changes during delivery mark a
+new snapshot dirty and do not restart the current stable capture. Old protocols preserve immediate delivery.
+
+Class changes, protocol changes, config reload/disable and logout/login cancel queued data. Expired queues
+leave dirty state for a later eligible refresh. The receiving addon0.4.7-development uses a6s idle deadline and
+90s absolute assembly deadline for typed snapshots; older schemas retain5s total. Only accepted messages
+advance idle time. Transport follows assembly deadlines and marks the saved view refreshing; malformed/stale/
+unrelated messages do not prolong assembly. A complete validated snapshot is still the only progress update.
+Pacing changes no practice, rank, session counters or storage. Maximum-size snapshots can take about64s even
+at the intended batch cadence; this is a bound, not an acceptable final all-class latency target. A compact or
+delta format may still be needed after actual size/throughput measurement.
+
+Source/native build passed at `.cache/verify-all/20261005-100646/report.json`; C++ lint/whitespace and five
+Lua5.1 syntax compilations passed. No tests ran. Tick cadence, cancellation, ordering/idle/absolute timeouts,
+changed progress during delivery, memory/packet cost and maximum real-class latency remain runtime acceptance.
+Production server/client/database/launcher are untouched; development flags default off.

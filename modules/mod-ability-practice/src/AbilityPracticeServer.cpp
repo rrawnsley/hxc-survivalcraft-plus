@@ -50,6 +50,10 @@ std::uint32_t Revision = 0;
 using Clock = std::chrono::steady_clock;
 constexpr auto RefreshInterval = std::chrono::seconds(2);
 constexpr auto InterestDuration = std::chrono::seconds(30);
+constexpr auto DeliveryInterval = std::chrono::milliseconds(100);
+constexpr auto DeliveryDuration = std::chrono::seconds(90);
+constexpr std::size_t DeliveryBatchSize = 8;
+constexpr std::size_t MaxQueuedMessages = 512 * 6 + 2048 + 3;
 struct ClassSession
 {
     Practice::SessionPractice Totals;
@@ -66,6 +70,11 @@ struct MenuSession
     bool Initialized = false;
     std::uint32_t Protocol = Practice::MenuSchemaVersion;
     std::uint32_t LastClass = 0;
+    std::uint32_t OutgoingClass = 0;
+    std::vector<std::string> Outgoing;
+    std::size_t NextMessage = 0;
+    Clock::time_point NextDelivery{};
+    Clock::time_point DeliveryDeadline{};
     std::unordered_map<std::uint32_t, ClassSession> Progress;
 };
 std::unordered_map<std::uint64_t, MenuSession> Sessions;
@@ -298,7 +307,36 @@ void SendMenuMessage(Player* player, std::string const& message)
     player->SendDirectMessage(&packet);
 }
 
-bool Send(Player* player, MenuSession const& session)
+void ClearDelivery(MenuSession& session)
+{
+    std::vector<std::string>().swap(session.Outgoing);
+    session.NextMessage = 0;
+    session.OutgoingClass = 0;
+    session.DeliveryDeadline = {};
+}
+
+void QueueDelivery(MenuSession& session, std::uint32_t classId, std::vector<std::string> messages,
+    Clock::time_point now)
+{
+    session.Outgoing = std::move(messages);
+    session.NextMessage = 0;
+    session.OutgoingClass = classId;
+    session.DeliveryDeadline = now + DeliveryDuration;
+}
+
+void Deliver(Player* player, MenuSession& session, Clock::time_point now)
+{
+    if (session.Outgoing.empty() || now < session.NextDelivery)
+        return;
+    std::size_t const end = std::min(session.Outgoing.size(), session.NextMessage + DeliveryBatchSize);
+    while (session.NextMessage < end)
+        SendMenuMessage(player, session.Outgoing[session.NextMessage++]);
+    session.NextDelivery = now + DeliveryInterval;
+    if (session.NextMessage == session.Outgoing.size())
+        ClearDelivery(session);
+}
+
+bool Send(Player* player, MenuSession& session, Clock::time_point now)
 {
     if (!Requested || !DevelopmentAllowed || !Ready || !IsHumanPlayer(player) ||
         Revision == std::numeric_limits<std::uint32_t>::max())
@@ -328,7 +366,7 @@ bool Send(Player* player, MenuSession const& session)
                         ability.AbilityId, ability.Ranks.front().SpellId);
                     if (!failure)
                         return false;
-                    SendMenuMessage(player, *failure);
+                    QueueDelivery(session, player->getClass(), { *failure }, now);
                     return true;
                 }
                 state = migrated->State;
@@ -347,12 +385,17 @@ bool Send(Player* player, MenuSession const& session)
         }
     auto const progress = !supported ? Practice::SessionPractice{ false, 0, 0 } :
         currentProgress == session.Progress.end() ? Practice::SessionPractice{} : currentProgress->second.Totals;
-    auto const messages = Practice::EncodeMenuSnapshot(player->getClass(), player->GetLevel(), ++Revision, views,
+    auto messages = Practice::EncodeMenuSnapshot(player->getClass(), player->GetLevel(), ++Revision, views,
         session.Protocol >= Practice::SessionMenuSchemaVersion
             ? std::optional<Practice::SessionPractice>(progress) : std::nullopt,
         session.Protocol >= Practice::RoadmapMenuSchemaVersion, session.Protocol == Practice::TypedMenuSchemaVersion);
-    if (!messages)
+    if (!messages || messages->size() > MaxQueuedMessages)
         return false;
+    if (session.Protocol == Practice::TypedMenuSchemaVersion)
+    {
+        QueueDelivery(session, player->getClass(), std::move(*messages), now);
+        return true;
+    }
     for (std::string const& message : *messages)
         SendMenuMessage(player, message);
     return true;
@@ -360,13 +403,28 @@ bool Send(Player* player, MenuSession const& session)
 
 void Refresh(Player* player, MenuSession& session, Clock::time_point now)
 {
+    if (!session.Outgoing.empty())
+    {
+        if (session.OutgoingClass != player->getClass() || now >= session.DeliveryDeadline)
+        {
+            ClearDelivery(session);
+            session.Dirty = true;
+        }
+        else
+        {
+            Deliver(player, session, now);
+            if (!session.Outgoing.empty())
+                return;
+        }
+    }
     if (!session.Dirty || now < session.NextRefresh || now >= session.InterestedUntil)
         return;
     session.NextRefresh = now + RefreshInterval;
-    if (Send(player, session))
+    if (Send(player, session, now))
     {
         session.Dirty = false;
         session.LastClass = player->getClass();
+        Deliver(player, session, now);
     }
 }
 
@@ -454,6 +512,7 @@ public:
         RankActive.store(Requested && DevelopmentAllowed && Ready && RankRequested);
         for (auto& entry : Sessions)
         {
+            ClearDelivery(entry.second);
             entry.second.Dirty = true;
             entry.second.CheckRanks = true;
         }
@@ -591,9 +650,12 @@ public:
             return false;
         session.LastRequest = now;
         session.InterestedUntil = now + InterestDuration;
-        session.Protocol = message == "HXAP\tHELLO|4" ? Practice::TypedMenuSchemaVersion :
+        std::uint32_t const protocol = message == "HXAP\tHELLO|4" ? Practice::TypedMenuSchemaVersion :
             message == "HXAP\tHELLO|3" ? Practice::RoadmapMenuSchemaVersion :
             message == "HXAP\tHELLO|2" ? Practice::SessionMenuSchemaVersion : Practice::MenuSchemaVersion;
+        if (protocol != session.Protocol)
+            ClearDelivery(session);
+        session.Protocol = protocol;
         session.Dirty = true;
         Refresh(player, session, now);
         return false;
