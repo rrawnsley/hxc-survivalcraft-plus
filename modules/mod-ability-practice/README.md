@@ -30,7 +30,7 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   Shared native race/racial and faction-rift eligibility is checked at preparation, award and new upgrades;
   class/race/talent-set/custom-specialization changes refresh the owner state. Normal database save/reload/failure
   behavior and broader acquisition entitlements remain unqualified.
-- Menu: addon 0.4.26-development; unpublished protocol 4 includes B11 instance identity/realm cap/session learning, T11 kind/session/rules/reward
+- Menu: addon 0.4.27-development; unpublished protocol 4 includes B11 instance identity/realm cap/session learning, T11 kind/session/rules/reward
   count/acquisition source and M mastery entries,
   mandatory C future-cap metadata, packed D parts and F8 unreadable-progress responses. Typed delivery is
   bounded/paced; saved views/ages/session totals are labeled. Existing schema 1/2/3 formats are preserved.
@@ -1934,3 +1934,13 @@ rules and their consumer. Coverage reports 123 unique/125 declared profiles (118
 two fixed) and 724 groups still awaiting definitions. All classifications/balance/runtime qualifications
 remain unapproved. Unit, harness and gameplay stages were skipped. No production deployment or startup
 was performed by this task.
+
+
+## Filter overview checkpoint — 5 October 2026
+
+Addon 0.4.27 displays the selected filter's matching ability count. Its tooltip summarizes All/Training/At cap/
+Paused/Not learned for the current tab and search before applying the selected filter. Categories can overlap;
+fixed abilities need not appear in Training/At cap. Saved snapshots are explicitly labeled and counts are derived
+only from the received snapshot. Refreshing progress also refreshes an owned filter tooltip. No layout expansion,
+server protocol, training policy, persistence or gameplay change is needed. Source checks and five Lua 5.1 syntax
+compilations passed without addon chunk execution. Rendered client behavior remains unqualified.

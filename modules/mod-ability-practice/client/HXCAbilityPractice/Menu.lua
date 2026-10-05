@@ -19,6 +19,7 @@ local roadmapRows = {}
 local roadmapButton
 local sortButton
 local filterButton
+local filterCounts
 local filterModes = { "all", "training", "capped", "paused", "unlearned" }
 local filterLabels = { all = "All", training = "Training", capped = "At cap",
     paused = "Paused", unlearned = "Not learned" }
@@ -330,6 +331,7 @@ Refresh = function()
     local sortMode = SortPreference()
     if sortButton then sortButton:SetText("Sort: " .. sortLabels[sortMode]) end
     local filterMode = FilterPreference()
+    filterCounts = snapshot and { all = 0, training = 0, capped = 0, paused = 0, unlearned = 0 } or nil
     if filterButton then filterButton:SetText("Filter: " .. filterLabels[filterMode]) end
     local session = snapshot and snapshot.session
     sessionText:SetText(session and session.available and
@@ -351,8 +353,11 @@ Refresh = function()
                         and (ability.session.uses ~= "0" or ability.session.proficiencyGained ~= "0"))))
             local matchesSearch = search == "" or string.find(string.lower(SpellName(ability.displaySpellId)),
                 search, 1, true)
-            if matchesTab and matchesSearch and MatchesFilter(ability, filterMode) then
-                visible[#visible + 1] = ability
+            if matchesTab and matchesSearch then
+                for _, mode in ipairs(filterModes) do
+                    if MatchesFilter(ability, mode) then filterCounts[mode] = filterCounts[mode] + 1 end
+                end
+                if MatchesFilter(ability, filterMode) then visible[#visible + 1] = ability end
             end
         end
         table.sort(visible, function(a, b)
@@ -384,6 +389,9 @@ Refresh = function()
         RenderDetail(chosen)
         local emptyText = syncState == "current" and "The server has no practice abilities configured for this class."
             or "This saved view contains no configured practice abilities."
+        if filterButton then
+            filterButton:SetText("Filter: " .. filterLabels[filterMode] .. " (" .. filterCounts[filterMode] .. ")")
+        end
         local emptyView = "No abilities in this view."
         if search ~= "" then emptyView = "No abilities match your search and filter in this view."
         elseif filterMode ~= "all" then emptyView = "No abilities match this filter. Select Filter: All to see more."
@@ -453,7 +461,8 @@ Refresh = function()
     end
     if GameTooltip and GameTooltip:IsShown() then
         local owner = GameTooltip:GetOwner()
-        if owner == practiceHelp and owner:IsShown() then owner:GetScript("OnEnter")(owner)
+        if (owner == practiceHelp or owner == filterButton) and owner:IsShown() then
+            owner:GetScript("OnEnter")(owner)
         else
             for _, row in ipairs(rows) do
                 if owner == row and row:IsShown() then row:GetScript("OnEnter")(row); break end
@@ -508,7 +517,8 @@ for index = 1, 9 do
         for _, event in ipairs(Model.SessionMasteries(snapshot, ability.abilityId)) do
             GameTooltip:AddLine((syncState == "current" and "Earned this session: +" or "Saved session reward: +")
                 .. string.format("%.2f", Model.MasteryBonusAmount(event) / 100):gsub("0+$", ""):gsub("%.$", "")
-                .. "% " .. Model.MasteryEffectText(event) .. " mastery · Proficiency " .. event.proficiency, 0.55, 0.9, 0.6, true)
+                .. "% " .. Model.MasteryEffectText(event) .. " mastery · Proficiency " .. event.proficiency,
+                0.55, 0.9, 0.6, true)
         end
         local learns = Model.SessionLearns(snapshot, ability.abilityId)
         for index = math.max(1, #learns - 2), #learns do
@@ -563,6 +573,15 @@ filterButton:SetScript("OnEnter", function(self)
     if not GameTooltip then return end
     GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
     GameTooltip:SetText("Filter abilities")
+    if filterCounts then
+        GameTooltip:AddLine(syncState == "current" and "In this tab and search:" or
+            "In this saved tab and search:", 1, 0.82, 0, true)
+        for _, mode in ipairs(filterModes) do
+            GameTooltip:AddDoubleLine(filterLabels[mode], tostring(filterCounts[mode]), 1, 1, 1, 1, 1, 1)
+        end
+        GameTooltip:AddLine("Counts show matching abilities before the selected filter. Categories can overlap.",
+            0.75, 0.75, 0.75, true)
+    end
     GameTooltip:AddLine("Click to cycle All, Training, At cap, Paused and Not learned."
         .. " Your choice is saved for this class and applies to the selected tab and search.", 1, 1, 1, true)
     GameTooltip:AddLine("Training: the server currently permits practice. At cap: no more proficiency can be"
