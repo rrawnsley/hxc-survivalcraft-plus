@@ -257,13 +257,30 @@ end
 
 function Model.NextMilestone(ability) return ability.nextRank or Model.NextMastery(ability) end
 
+local function HealingBonusText(basisPoints)
+    local bonus = string.format("%.2f", basisPoints / 100):gsub("0+$", ""):gsub("%.$", "")
+    return "+" .. bonus .. "%"
+end
+
+function Model.CurrentMasteryText(ability, saved)
+    if not Model.IsMastery(ability) then return "" end
+    local prefix = saved and "Saved benefit: " or "Current benefit: "
+    if ability.learnedRank == 0 then return prefix .. "learn the ability first." end
+    if ability.availability == 2 then return prefix .. "paused; prerequisites missing." end
+    if ability.availability == 3 then return prefix .. "paused; character level required." end
+    local earned
+    for _, reward in ipairs(ability.rewards or {}) do
+        if reward.state == 1 then earned = reward end
+    end
+    return prefix .. (earned and (HealingBonusText(earned.healingBonusBasisPoints)
+        .. " healing in qualifying PvE.") or "none earned yet.")
+end
+
 function Model.MasteryText(reward)
-    if not reward then return "Mastery complete. All defined benefits are active." end
-    local bonus = string.format("%.2f", reward.healingBonusBasisPoints / 100)
-        :gsub("0+$", ""):gsub("%.$", "")
-    local benefit = "+" .. bonus .. "% healing in qualifying PvE combat."
+    if not reward then return "Mastery complete. Only the highest earned benefit applies." end
+    local benefit = HealingBonusText(reward.healingBonusBasisPoints) .. " healing in qualifying PvE combat."
     local requirement = "Character level " .. reward.characterLevel .. " · Proficiency " .. reward.proficiency
-    if reward.state == 1 then return "Active: " .. benefit .. "\n" .. requirement end
+    if reward.state == 1 then return "Earned: " .. benefit .. "\n" .. requirement end
     local state = reward.state == 2 and "Learn the ability through its normal source."
         or reward.state == 3 and "Current acquisition requirements are not met."
         or reward.state == 5 and "Practice earned; waiting for character level."
@@ -287,7 +304,7 @@ function Model.PointText(ability)
         or "This ability unlocks at a higher character level." end
     if state == 5 then
         if not Model.NextMilestone(ability) then
-            return Model.IsMastery(ability) and "Mastery complete. All defined benefits are active."
+            return Model.IsMastery(ability) and "Mastery complete. Only the highest earned benefit applies."
                 or "Training complete. All defined ranks learned."
         end
         if ability.nextTrainingCap then

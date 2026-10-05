@@ -177,7 +177,8 @@ local function RenderDetail(ability)
     end
     local rankText = ability.learnedRank > 0 and ((fixed or mastery) and "Learned ability" or
         ("Learned rank " .. ability.learnedRank)) or "Not yet learned"
-    rankLabel:SetText(rankText .. (requiredLevel and (" - Required level " .. requiredLevel) or ""))
+    rankLabel:SetText(rankText .. (requiredLevel and (" - Required level " .. requiredLevel) or "")
+        .. (mastery and ("\n" .. Model.CurrentMasteryText(ability, syncState ~= "current")) or ""))
     local trains = ability.learnedRank > 0 and ability.pointsPerLevel > 0 and not Model.IsFixed(ability)
     local skillText = ability.proficiency > ability.cap and ("Saved proficiency " .. ability.proficiency
         .. " - current cap " .. ability.cap) or ("Proficiency " .. ability.proficiency .. " / " .. ability.cap)

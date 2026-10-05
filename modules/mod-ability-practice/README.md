@@ -26,7 +26,7 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   Shared native race/racial and faction-rift eligibility is checked at preparation, award and new upgrades;
   class/race/talent-set/custom-specialization changes refresh the owner state. Normal database save/reload/failure
   behavior and broader acquisition entitlements remain unqualified.
-- Menu: addon 0.4.11-development; unpublished protocol 4 includes B7 instance identity, T10 kind/session/rules/reward
+- Menu: addon 0.4.12-development; unpublished protocol 4 includes B7 instance identity, T10 kind/session/rules/reward
   count and M mastery entries,
   mandatory C future-cap metadata, packed D parts and F8 unreadable-progress responses. Typed delivery is
   bounded/paced; saved views/ages/session totals are labeled. Existing schema 1/2/3 formats are preserved.
@@ -1322,3 +1322,21 @@ behavior. Both discovery provenance lists use the new path. No additional includ
 is needed; no new compilation unit was introduced. The failed build report is
 `.cache/verify-all/20261005-172309/report.json` in the main development worktree. Repair integration and the
 affected rebuild are pending. No behavioral tests or production changes occurred.
+
+The repair and learning-marker checks were integrated as 5932a106e2. Its source/native rebuild passed in
+`.cache/verify-all/20261005-172602/report.json` in the main development worktree (five source checks, 48.9s native
+build; unit/harness/gameplay skipped). The output was neither installed nor started.
+
+## Show the currently earned mastery benefit — 5 October 2026
+
+Addon 0.4.12-development adds a compact current-benefit line beneath the learned-ability label. It selects the
+highest reward whose authoritative snapshot state is earned, describes its qualifying PvE healing condition,
+and explicitly labels saved views. Unlearned abilities, missing prerequisites, insufficient character level
+and no earned reward have distinct text. No bonus is calculated from a client counter or inferred history.
+The roadmap now says Earned for completed milestones, and completion text explains that only the highest
+benefit applies. Lower earned benefits are not described as simultaneously active. Protocol shape is unchanged;
+no native code changed after the successful integrated build.
+
+Source checks passed `.cache/verify-all/20261005-172956/report.json` (two checks; other stages skipped), whitespace
+passed and all five Lua 5.1 files compiled for syntax only. No addon chunks, gameplay or behavioral tests ran;
+in-game appearance and lifecycle acceptance remain outstanding. The staged addon was not installed or published.
