@@ -389,6 +389,7 @@ def main():
         for relative in ('modules/mod-ability-practice/src/AbilityPracticeServer.cpp',
                          'modules/mod-ability-practice/src/AbilityPracticeDevelopment.h',
                          'modules/mod-ability-practice/src/AbilityPracticeDevelopmentSamples.h',
+                         'modules/mod-ability-practice/src/AbilityPracticeDevelopmentPeriodic.h',
                          'modules/mod-ability-practice/src/AbilityPracticeProfiles.h',
                          'src/server/coa/AscensionSpellEligibility.h',
                          'src/server/coa/AscensionRacialAbilities.h',
@@ -400,6 +401,7 @@ def main():
                          'src/server/game/Spells/Auras/SpellAuras.h',
                          'src/server/game/Spells/Auras/SpellAuras.cpp',
                          'src/server/game/Spells/Auras/SpellAuraEffects.cpp',
+                         'src/server/game/Spells/Auras/SpellAuraEffects.h',
                          'src/server/game/Entities/Unit/Unit.h', 'src/server/game/Entities/Unit/Unit.cpp',
                          'src/server/shared/SharedDefines.h')]
     if args.dbc:

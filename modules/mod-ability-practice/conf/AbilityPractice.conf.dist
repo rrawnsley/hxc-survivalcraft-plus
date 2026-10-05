@@ -12,5 +12,5 @@ AbilityPractice.AllowDevelopmentRankLearning = 0
 AbilityPractice.AllowDevelopmentClassSamples = 0
 
 # Experimental original-cast observation of native periodic damage and healing. Read once at startup.
-# Leave off until qualified on an isolated server.
+# Adds Cindergrip and Shadra's Prayer development profiles; leave off until isolated qualification.
 AbilityPractice.AllowDevelopmentPeriodicObservation = 0

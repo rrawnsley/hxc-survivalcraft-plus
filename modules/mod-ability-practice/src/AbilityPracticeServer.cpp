@@ -2,6 +2,7 @@
 
 #include "AbilityPracticeDevelopment.h"
 #include "AbilityPracticeDevelopmentSamples.h"
+#include "AbilityPracticeDevelopmentPeriodic.h"
 #include "AbilityPracticeProfiles.h"
 #include "AbilityPracticeRankPolicy.h"
 #include "AbilityPracticeCastReceipt.h"
@@ -51,6 +52,17 @@ constexpr auto AllClassSampleProfiles = []
         result.begin() + Profiles.size());
     return result;
 }();
+template<std::size_t Count>
+constexpr auto WithPeriodicProfiles(std::array<Practice::AbilityProfile, Count> const& profiles)
+{
+    std::array<Practice::AbilityProfile, Count + Practice::DevelopmentPeriodic::Profiles.size()> result{};
+    std::copy(profiles.begin(), profiles.end(), result.begin());
+    std::copy(Practice::DevelopmentPeriodic::Profiles.begin(), Practice::DevelopmentPeriodic::Profiles.end(),
+        result.begin() + Count);
+    return result;
+}
+constexpr auto PeriodicProfiles = WithPeriodicProfiles(Profiles);
+constexpr auto AllClassPeriodicProfiles = WithPeriodicProfiles(AllClassSampleProfiles);
 std::optional<Practice::ProfileIndex> ProfileLookup;
 std::recursive_mutex Mutex;
 bool Requested = false;
@@ -705,9 +717,11 @@ public:
                 ServerGeneration = 1;
         }
         bool const classSamples = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentClassSamples", false);
-        std::span<Practice::AbilityProfile const> const profiles = classSamples ?
-            std::span<Practice::AbilityProfile const>(AllClassSampleProfiles) :
-            std::span<Practice::AbilityProfile const>(Profiles);
+        std::span<Practice::AbilityProfile const> const profiles = PeriodicRequested ?
+            (classSamples ? std::span<Practice::AbilityProfile const>(AllClassPeriodicProfiles) :
+                std::span<Practice::AbilityProfile const>(PeriodicProfiles)) :
+            (classSamples ? std::span<Practice::AbilityProfile const>(AllClassSampleProfiles) :
+                std::span<Practice::AbilityProfile const>(Profiles));
         ProfileLookup.emplace(profiles);
         Ready = ProfileLookup->IsValid();
         for (Practice::AbilityProfile const& profile : profiles)
@@ -743,6 +757,7 @@ public:
             Requested, DevelopmentAllowed, Ready);
         LOG_INFO("module.ability_practice", "Development class samples: enabled={}, profile count={}",
             classSamples, profiles.size());
+        LOG_INFO("module.ability_practice", "Development periodic observation: enabled={}", PeriodicRequested);
     }
 };
 

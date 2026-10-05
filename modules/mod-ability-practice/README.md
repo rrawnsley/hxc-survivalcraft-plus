@@ -9,12 +9,14 @@ The module and addon are staged in this checkout. Nothing is installed or activa
 
 - Native prototype: three Pyromancer class-grant profiles, with draft tuning. The full rollout still targets
   all 21 CoA classes. An optional startup-only sample catalog adds 20 ranked class-grant profiles for the other
-  classes, for 23 profiles across all 21 classes. Default development, rank-learning and class-sample flags are off.
+  classes, for 23 profiles across all 21 classes. Optional periodic observation adds two profiles (five without
+  class samples, 25 with them). All development, rank-learning, class-sample and periodic flags default off.
 - Outcomes: resolved direct damage/healing, successful interruption, dispel and beneficial-aura steal.
   Each profile requires its own outcome route. The existing client-cast callback records numeric class/spell
   identity; preparation requires that identity and rejects item/aura-triggered sources. Script-created casts
-  cannot mint the request identity. One award per cast remains; periodic, repeat-fire, summoned/pet and helper
-  attribution still need work.
+  cannot mint the request identity. Optional native periodic damage/percent-damage/healing shares one receipt
+  with the original cast, including direct results and multiple targets. Repeat-fire, summoned/pet/helper
+  attribution and scripted replacement ticks remain unfinished; periodic runtime behavior is unqualified.
 - Ranks/storage: cached versioned settings, once-only learned-rank seeding, monotonic writes, exact saved-row
   restoration scope and stronger-rank learning guards. Corrupt or incompatible progress stays blocked.
   Shared native race/racial and faction-rift eligibility is checked at preparation, award and new upgrades;
@@ -1104,3 +1106,45 @@ routing or entitlement. Real read-only regeneration retained444outcome candidate
 candidates/847unapproved drafts across21classes. No runtime profile or balance was activated.
 Source checks passed `.cache/verify-all/20261005-104729/report.json`; Python syntax/whitespace passed.
 No tests ran; rejection cases remain qualification. Production untouched.
+
+
+## Original-cast periodic development path — 5 October 2026
+
+A startup-only `AbilityPractice.AllowDevelopmentPeriodicObservation` flag enables optional native periodic
+observation and selects two additional development profiles: Cindergrip (Pyromancer, class 24, root 805476) and
+Shadra's Prayer (Venomancer, class 29, root 800870). Their five and ten authored rank levels come from the complete
+source class-grant/progression chains. Requirements, caps and training bands reuse illustrative development
+values; they are not final balance. Selected effective SpellInfo and chain checks still gate activation at startup.
+Observation/rank learning retain independent enable flags; every supplied default remains disabled.
+
+A numeric shared cast receipt is created only for eligible profiled human client casts in this mode. Spell and
+Aura own it without retaining Player/Spell pointers. Native direct results and eligible periodic damage, percent
+damage and healing consume the same receipt once. Multiple targets/effects/ticks cannot create extra practice
+uses for that original cast. A capped qualifying result also consumes the receipt. No global action registry,
+time-based deduplication expiry or DB query was added. A null shared pointer adds storage to each Spell/Aura,
+even when disabled; no runtime performance/cost measurement is claimed.
+
+The receipt is passed into native aura create/refresh before application or reapplication processing, including
+persistent area auras. Refresh from an unqualified source clears earlier provenance. Tick observers snapshot the
+receipt before result callbacks so reentrant refresh cannot relabel that completed tick. Numeric login/context
+epochs reject pending awards after logout, class/race/talent-set/custom-specialization changes or config reload.
+Saved/restored auras do not acquire fresh-cast provenance. Helper spells and leech/funnel/regen replacements are
+not silently credited. Runtime application/refresh/death/reentrancy behavior still requires qualification.
+
+Shadra's Prayer's native healing effect can qualify while its auxiliary effect remains excluded. Inspected
+AscensionVenomancerContracts.cpp changes its auxiliary effect to a periodic dummy and clears its trigger;
+AscensionVenomancerAuras.cpp handles that slot separately. Manafeed was deliberately excluded: inspected
+AscensionFelswornAuras.cpp prevents the default tick and directly performs a mana drain/heal. This demonstrates
+why raw DBC periodic traits alone do not prove effective routing. No replacement-tick observer is implemented.
+
+The menu accepts rule set 2 and describes periodic eligibility/one use per original cast. Rule set 1 remains
+direct-only. Unpublished protocol-4 record shapes and addon version 0.4.10-development are unchanged. Discovery
+provenance covers the receipt, spell/aura/unit plumbing and periodic sample header; automatic candidate routing
+remains conservative and does not approve periodic definitions.
+
+Main worktree source commit `a5ea9902f` has source/style/whitespace/Lua syntax passes and its native build is
+still running at `.cache/verify-all/20261005-153458/report.json`; its first build was stopped after a missing
+AuraEffect friend declaration, corrected before the retry. Catalog additions are developed separately while
+that checkout remains stable. Their source-only checks passed in the catalog worktree at
+`.cache/verify-all/20261005-155041/report.json`; native integration/build remains pending. No behavioral tests
+were added or run. No production server/client/configuration/database/launcher change was made.
