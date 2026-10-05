@@ -5,6 +5,8 @@
 #include "AbilityPracticeRankPolicy.h"
 #include "AbilityPracticeOutcome.h"
 #include "AbilityPracticeWire.h"
+#include "AscensionCustomClassData.h"
+#include "AscensionSpellProgressionData.h"
 #include "Chat.h"
 #include "Config.h"
 #include "CombatManager.h"
@@ -61,6 +63,47 @@ struct MenuSession
     std::unordered_map<std::uint32_t, Practice::SessionPractice> Progress;
 };
 std::unordered_map<std::uint64_t, MenuSession> Sessions;
+
+bool MatchesNativeClassGrant(Practice::AbilityProfile const& profile)
+{
+    Practice::AbilityDefinition const& ability = profile.Definition;
+    if (profile.Acquisition != Practice::AcquisitionSource::ClassGrant || ability.Ranks.empty())
+        return false;
+    Practice::AbilityRank const& first = ability.Ranks.front();
+    auto const grant = std::find_if(AscensionCompatData::ClassSpells.begin(), AscensionCompatData::ClassSpells.end(),
+        [&ability, &first](AscensionCompatData::ClassSpell const& entry)
+        {
+            return entry.ClassId == ability.ClassId && entry.SpellId == first.SpellId &&
+                entry.RequiredLevel == first.Requirement.CharacterLevel;
+        });
+    if (grant == AscensionCompatData::ClassSpells.end())
+        return false;
+    std::size_t count = 0;
+    for (AscensionProgression::Rank const& entry : AscensionProgression::Ranks)
+    {
+        if (entry.ClassId != ability.ClassId || entry.FirstSpellId != first.SpellId)
+            continue;
+        ++count;
+        auto const found = std::find_if(ability.Ranks.begin() + 1, ability.Ranks.end(),
+            [&entry](Practice::AbilityRank const& rank)
+            {
+                return rank.SpellId == entry.SpellId && rank.Requirement.CharacterLevel == entry.RequiredLevel;
+            });
+        if (found == ability.Ranks.end())
+            return false;
+    }
+    if (count != ability.Ranks.size() - 1)
+        return false;
+    for (auto const& rank : ability.Ranks.subspan(1))
+        if (std::count_if(AscensionProgression::Ranks.begin(), AscensionProgression::Ranks.end(),
+                [&ability, &first, &rank](AscensionProgression::Rank const& entry)
+                {
+                    return entry.ClassId == ability.ClassId && entry.FirstSpellId == first.SpellId &&
+                        entry.SpellId == rank.SpellId;
+                }) != 1)
+            return false;
+    return true;
+}
 
 bool IsHumanPlayer(Player const* player)
 {
@@ -332,6 +375,13 @@ public:
         ProfileLookup.emplace(Profiles);
         Ready = ProfileLookup->IsValid();
         for (Practice::AbilityProfile const& profile : Profiles)
+        {
+            if (!MatchesNativeClassGrant(profile))
+            {
+                Ready = false;
+                LOG_ERROR("module.ability_practice", "Rejected class-grant acquisition: class={}, ability={}",
+                    profile.Definition.ClassId, profile.Definition.AbilityId);
+            }
             for (Practice::AbilityRank const& rank : profile.Definition.Ranks)
             {
                 SpellInfo const* info = sSpellMgr->GetSpellInfo(rank.SpellId);
@@ -346,6 +396,7 @@ public:
                         profile.Definition.ClassId, profile.Definition.AbilityId, rank.SpellId);
                 }
             }
+        }
         Active.store(Requested && DevelopmentAllowed && Ready);
         RankActive.store(Requested && DevelopmentAllowed && Ready && RankRequested);
         LOG_INFO("module.ability_practice", "Development observation: requested={}, allowed={}, data ready={}",

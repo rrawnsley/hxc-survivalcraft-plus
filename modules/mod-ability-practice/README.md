@@ -567,3 +567,21 @@ All four addon files passed Lua 5.1 syntax compilation after a corrected missing
 editing. Final addon source checks passed at `.cache/verify-all/20261005-085212/report.json`. No behavioral or
 in-game tests ran; type transport, compatibility, fixed rendering and throughput remain runtime acceptance.
 No active client/server/launcher files were changed.
+
+## Match class-grant profiles to native acquisition data
+
+Requested startup observation now verifies a profile's introductory spell and exact character-level gate
+against AscensionCompatData::ClassSpells. Every native generated rank for that class/root must appear with
+its exact spell ID and level in the profile, and every higher profile rank must have exactly one native entry.
+An incomplete, extra, duplicate or foreign rank chain refuses catalog activation. Fixed class grants require
+no generated higher ranks. Logs identify the rejected class/ability. Checks run only at requested startup;
+no per-cast scan, query or player ownership pointer was added.
+
+This is a narrow proof against the two active source arrays used by AscensionCompat progression. It does not
+approve raw advancement/talent/item entries, rank numbering, effective spell behavior, runtime ownership,
+racial conditions or future policy changes. Existing root ownership and per-rank prerequisite checks remain.
+No new profiles were added; the three development definitions match the inspected native source rows.
+
+Source/native build passed at `.cache/verify-all/20261005-085619/report.json`; C++ lint and whitespace passed.
+No tests ran. Startup rejection and effective acquisition behavior remain isolated runtime qualification.
+No production changes occurred.
