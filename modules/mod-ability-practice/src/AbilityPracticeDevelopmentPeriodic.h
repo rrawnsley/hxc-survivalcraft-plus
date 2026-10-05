@@ -76,6 +76,42 @@ inline constexpr std::array Decomposition = {
 };
 inline constexpr auto DecompositionCaps = Development::RankCaps(Decomposition);
 
+inline constexpr std::array TaldaramsTorment = {
+    AbilityRank{ 800772, 1, { 2, 1 } },
+    AbilityRank{ 802568, 2, { 10, 10 } },
+    AbilityRank{ 802569, 3, { 20, 20 } },
+    AbilityRank{ 802570, 4, { 28, 40 } },
+    AbilityRank{ 802571, 5, { 34, 60 } },
+    AbilityRank{ 802572, 6, { 42, 80 } },
+    AbilityRank{ 802573, 7, { 50, 100 } },
+    AbilityRank{ 802580, 8, { 56, 120 } }
+};
+inline constexpr auto TaldaramsTormentCaps = Development::RankCaps(TaldaramsTorment);
+
+inline constexpr std::array Blaze = {
+    AbilityRank{ 805500, 1, { 8, 1 } },
+    AbilityRank{ 534600, 2, { 14, 10 } },
+    AbilityRank{ 534601, 3, { 22, 20 } },
+    AbilityRank{ 534602, 4, { 28, 40 } },
+    AbilityRank{ 534603, 5, { 34, 60 } },
+    AbilityRank{ 534604, 6, { 42, 80 } },
+    AbilityRank{ 572159, 7, { 50, 100 } },
+    AbilityRank{ 572160, 8, { 58, 120 } }
+};
+inline constexpr auto BlazeCaps = Development::RankCaps(Blaze);
+
+inline constexpr std::array SeismicCrash = {
+    AbilityRank{ 803981, 1, { 2, 1 } },
+    AbilityRank{ 503258, 2, { 16, 10 } },
+    AbilityRank{ 503259, 3, { 24, 20 } },
+    AbilityRank{ 503260, 4, { 30, 40 } },
+    AbilityRank{ 503261, 5, { 38, 60 } },
+    AbilityRank{ 503262, 6, { 46, 80 } },
+    AbilityRank{ 503263, 7, { 52, 100 } },
+    AbilityRank{ 503264, 8, { 60, 120 } }
+};
+inline constexpr auto SeismicCrashCaps = Development::RankCaps(SeismicCrash);
+
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 24, 805476, AbilityKind::Ranked, Cindergrip, CindergripCaps },
@@ -94,6 +130,15 @@ inline constexpr std::array Profiles = {
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 22, 800856, AbilityKind::Ranked, Decomposition, DecompositionCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 20, 800772, AbilityKind::Ranked, TaldaramsTorment, TaldaramsTormentCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 24, 805500, AbilityKind::Ranked, Blaze, BlazeCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 31, 803981, AbilityKind::Ranked, SeismicCrash, SeismicCrashCaps },
         Development::Policy, OutcomeKind::Damage }
 };
 }

@@ -10,12 +10,12 @@ The module and addon are staged in this checkout. Nothing is installed or activa
 - Native prototype: three Pyromancer class-grant profiles, with draft tuning. The full rollout still targets
   all 21 CoA classes. An optional startup-only sample catalog adds 20 ranked class-grant profiles for the other
   classes, for 23 profiles across all 21 classes. An optional broader ranked catalog selects 106 profiles and
-  888 authored ranks across all 21 classes, taking priority over class samples. Periodic observation adds six
-  profiles to the selected catalog (nine/29/111 unique profiles respectively, reusing the shared Shadra's Prayer
+  888 authored ranks across all 21 classes, taking priority over class samples. Periodic observation adds nine
+  profiles to the selected catalog (12/32/114 unique profiles respectively, reusing the shared Shadra's Prayer
   definition in the broad ranked mode). Optional Hand of Elune mastery adds one more
   profile. Optional scripted observation adds Manafeed and an independent fixed-utility option adds two
   nontraining profiles. Optional Emerald Veil absorption reuses its existing six ranked definitions;
-  the largest staged catalog has 115 unique profiles from 117 source declarations.
+  the largest staged catalog has 118 unique profiles from 120 source declarations.
   All development settings default off. A nonempty explicit `AbilityPractice.DevelopmentCharacterGuids`
   selection is also required; unselected characters keep native progression and receive no practice effects.
 - Outcomes: resolved direct damage/healing, successful interruption, dispel and beneficial-aura steal.
@@ -1760,3 +1760,26 @@ available on the same toolbar. No wire/native changes. Actual rendered toolbar f
 
 Source passed .cache/verify-all/20261005-213613/report.json (two checks);five Lua5.1 syntax compilations
 and whitespace passed. No addon chunks, behavioral tests, native rebuild, runtime startup or production changes.
+
+
+## Three more native periodic damage profiles — 5 October 2026
+
+The disabled periodic catalog now includes Taldaram's Torment (Bloodmage20/root800772,8ranks), Blaze
+(Pyromancer24/root805500,8ranks) and Seismic Crash (Primalist31/root803981,8ranks). Native class-grant and
+rank-progression source levels author all24 ranks; each raw rank carries native periodic damage aura3.
+The existing actual-damage observer, numeric original-cast receipt, owner/session/acquisition/PvE guards,
+one-award accounting, learned-rank seeding, catch-up and exact forecasts apply. No new outcome bridge,
+spell effect, native damage/resource/proc/modifier/spread behavior or wire/addon change.
+
+Linked Bloodmage energize and Primalist cast-resource handlers do not replace the native damage outcome.
+Pyromancer's aura/modifier/spread paths were inspected: native Blaze ticks can carry the original cast receipt,
+while AddAura-created spreads do not inherit it. Script-created/triggered resource/proc casts cannot mint
+client request identity. This defines supported direct-origin practice; full rotations and runtime behavior
+remain unqualified.49 native source hashes include linked native code. Nine periodic profiles/70authored ranks;
+118 unique profiles/120 declarations/two shared identities in the largest catalog.729 source groups still
+need design/definition review (129 ranked,600 standalone); none is automatically approved as trainable.
+
+Source/native passed .cache/verify-all/20261005-225938/report.json (two source checks;33.2-second isolated
+build);changed C++ style/whitespace and authoring provenance/coverage passed. Addon unchanged since0.4.23
+syntax checks. Unit/harness/gameplay stages skipped; no native startup or production install/restart/client/
+configuration/database/launcher changes. Live CoA remains process42440, started4October2026 21:36:56 local.
