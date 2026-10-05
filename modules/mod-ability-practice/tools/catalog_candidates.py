@@ -101,6 +101,55 @@ def native_outcome_review(members):
                                'no-current-native-outcome-route')
 
 
+def native_class_grant_review(root_spell, members):
+    root = next((member for member in members if member['spellId'] == root_spell), None)
+    grants = [entry for entry in (root or {}).get('evidence', [])
+              if entry['source'] == 'class-grants' and not entry.get('referenceOnly')]
+    result = {'scope': 'source-class-grant-chain-consistency-not-runtime-entitlement',
+              'sources': ['src/server/coa/AscensionCustomClassData.h',
+                          'src/server/coa/AscensionSpellProgressionData.h'],
+              'sourceChainConsistent': False, 'blockingFlags': [], 'sourceRanks': []}
+    if not grants:
+        return {**result, 'status': 'no-class-grant-root'}
+    flags = set()
+    if len(members) > 64:
+        flags.add('native-profile-rank-limit-exceeded')
+    ranks = []
+    for member in members:
+        is_root = member['spellId'] == root_spell
+        source = 'class-grants' if is_root else 'generated-progression'
+        evidence = [entry for entry in member['evidence']
+                    if entry['source'] == source and not entry.get('referenceOnly')]
+        if len(evidence) != 1:
+            flags.add('missing-or-duplicate-native-level-row')
+            continue
+        level = evidence[0].get('requiredLevel')
+        if type(level) is not int or not 1 <= level <= 255:
+            flags.add('native-level-outside-profile-range')
+            continue
+        ranks.append({'spellId': member['spellId'], 'characterLevel': level,
+                      'rawRankNumber': member.get('rawRankNumber')})
+    if len(members) > 1:
+        raw_ranks = [rank['rawRankNumber'] for rank in ranks]
+        if len(ranks) != len(members) or any(type(rank) is not int or rank < 1 for rank in raw_ranks):
+            flags.add('raw-rank-order-unresolved')
+        elif sorted(raw_ranks) != list(range(1, len(members) + 1)):
+            flags.add('raw-rank-sequence-conflict')
+        else:
+            ranks.sort(key=lambda rank: rank['rawRankNumber'])
+            if ranks[0]['spellId'] != root_spell:
+                flags.add('class-grant-is-not-first-raw-rank')
+            if any(later['characterLevel'] < earlier['characterLevel']
+                   for earlier, later in zip(ranks, ranks[1:])):
+                flags.add('native-level-order-conflict')
+    consistent = not flags
+    return {**result, 'sourceChainConsistent': consistent, 'blockingFlags': sorted(flags),
+            'sourceRanks': ranks,
+            'status': 'blocked-by-source-rank-evidence' if flags else
+                      'needs-unranked-kind-and-effective-review' if len(members) == 1 else
+                      'needs-effective-data-and-design-review'}
+
+
 def build_candidates(inventory):
     if inventory.get('schemaVersion') != 1:
         raise ValueError('Unsupported source inventory schema')
@@ -166,6 +215,7 @@ def build_candidates(inventory):
             'rawActionReview': action_review(members),
             'nativeDirectReview': native_direct_review(members),
             'nativeOutcomeReview': native_outcome_review(members),
+            'nativeClassGrantReview': native_class_grant_review(root[1], members),
             'members': members,
             'acquisitionReferences': sorted(acquisition, key=lambda row: (
                 row['spellId'], row['referenceSpellId'], row['source'])),
@@ -190,6 +240,10 @@ def build_candidates(inventory):
                 row['nativeOutcomeReview']['status'] for row in candidates).items())),
             'rawNativeOutcomeCommonRoutes': dict(sorted(Counter(route for row in candidates
                 for route in row['nativeOutcomeReview']['commonRoutes']).items())),
+            'nativeClassGrantStatuses': dict(sorted(Counter(
+                row['nativeClassGrantReview']['status'] for row in candidates).items())),
+            'sourceClassGrantOutcomeCandidateCount': sum(row['nativeClassGrantReview']['sourceChainConsistent']
+                and bool(row['nativeOutcomeReview']['commonRoutes']) for row in candidates),
             'rawActionTraits': dict(sorted(Counter(trait for candidate in candidates
                 for trait in candidate['rawActionReview']['traits']).items())),
         },
@@ -199,6 +253,10 @@ def build_candidates(inventory):
                                                 for row in candidates if row['classId'] == class_id),
             'rawNativeOutcomeCandidateCount': sum(bool(row['nativeOutcomeReview']['commonRoutes'])
                                                  for row in candidates if row['classId'] == class_id),
+            'sourceClassGrantOutcomeCandidateCount': sum(
+                row['nativeClassGrantReview']['sourceChainConsistent']
+                and bool(row['nativeOutcomeReview']['commonRoutes'])
+                for row in candidates if row['classId'] == class_id),
         } for class_id, count in sorted(counts.items())],
         'candidates': candidates,
     }

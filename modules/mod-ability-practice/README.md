@@ -807,3 +807,21 @@ Source/native build passed at `.cache/verify-all/20261005-100646/report.json`; C
 Lua5.1 syntax compilations passed. No tests ran. Tick cadence, cancellation, ordering/idle/absolute timeouts,
 changed progress during delivery, memory/packet cost and maximum real-class latency remain runtime acceptance.
 Production server/client/database/launcher are untouched; development flags default off.
+
+
+## Source-consistent class-grant review candidates
+
+Candidate discovery adds nativeClassGrantReview with exact source rows/levels and raw rank order. Root grants
+must have one non-reference ClassSpells row; higher members must each have one generated-progression row.
+Levels must fit native/profile1..255, ranked raw numbers must be contiguous1..N with the grant first and
+nondecreasing native levels, and chains fit64ranks. Missing/duplicate/conflicting rows and order are blocking
+flags. sourceChainConsistent denotes only this source comparison, never runtime entitlement or balance approval.
+Standalone groups explicitly still need fixed/mastery classification and effective behavior review.
+
+Read-only regeneration found847source-consistent grant groups:244ranked and603standalone, with4122groups
+lacking a class-grant root.179groups also have a common current native outcome (106ranked,73standalone),
+covering all21classes. Their route counts overlap: damage131/healing26/dispel15/interrupt7/steal2.
+This narrows review work without expanding the three native development profiles, approving rewards/rates,
+or bypassing talent/spec/item/other acquisition routes. ProductionApproved remains0. Source checks passed
+at `.cache/verify-all/20261005-101017/report.json`; Python syntax/whitespace passed. No tests ran; no runtime
+or production change occurred. Effective SQL/scripts/DBC normalization and real ownership remain unqualified.
