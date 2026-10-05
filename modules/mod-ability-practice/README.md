@@ -233,3 +233,19 @@ marker still deduplicates multi-target outcomes.
 Source/native build passed at `.cache/verify-all/20261005-044148/report.json`; C++ lint and whitespace passed.
 Lethal-hit, scaled/gray target, healing combat references and dummy behavior remain pending gameplay qualification.
 These are conservative development rules, not approved PvP, encounter, frequency or deliberate-training policy.
+
+## Raw action and pacing review evidence
+
+The read-only all-class inventory now retains labeled effects/auras, triggered spell IDs, implicit target IDs and
+raw cast/cooldown timing. Labels come from the existing reviewed inspector's native enum parser. Candidate groups
+summarize direct, periodic, utility, scripted, pet/summon and triggered-attribution review traits without merging
+helper spells into player abilities or approving classification. Raw cooldowns are not measured play frequency.
+
+The current export covers all 21 classes and 4,969 candidates: 410 direct-outcome, 362 periodic-attribution,
+76 utility-outcome, 105 pet/summon, 645 scripted-behavior and 1,934 triggered-attribution review candidates.
+Traits overlap. There are also 134 candidates with unknown raw aura labels and 25 with unknown raw effect labels;
+these remain explicit review gaps. Every candidate remains unapproved. Spell provenance still has a stale extraction
+manifest and no observed SQL/runtime layer. No source metadata is promoted to effective gameplay evidence.
+
+Source checks passed at `.cache/verify-all/20261005-044531/report.json`. The read-only exporters completed against
+`C:/Azerothcore-CoA/server-data/dbc`, writing only this checkout's ignored cache. No new tests or runtime actions ran.

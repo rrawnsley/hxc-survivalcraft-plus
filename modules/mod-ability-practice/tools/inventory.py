@@ -187,7 +187,10 @@ def load_dbc_lookup(root, directory):
     dataset = DataSet(directory, root=root)
     table, schema, index, origin = dataset.load('Spell')
     names = ('SpellName[enUS]', 'Rank[enUS]', 'Attributes', 'BaseLevel', 'SpellLevel',
-             'Effect[0]', 'Effect[1]', 'Effect[2]')
+             'CastingTimeIndex', 'RecoveryTime', 'CategoryRecoveryTime', 'StartRecoveryTime') + tuple(
+        name + '[' + str(effect) + ']' for name in (
+            'Effect', 'EffectApplyAuraName', 'EffectTriggerSpell', 'EffectImplicitTargetA', 'EffectImplicitTargetB')
+        for effect in range(3))
     columns = {field.name: field for field in schema.columns}
     if any(name not in columns for name in names):
         raise ValueError('Reviewed Spell schema is missing a required inventory field')
@@ -207,6 +210,23 @@ def load_dbc_lookup(root, directory):
             'baseLevel': values['BaseLevel'], 'spellLevel': values['SpellLevel'],
             'attributes': values['Attributes'], 'passive': bool(values['Attributes'] & passive),
             'effects': [values['Effect[' + str(effect) + ']'] for effect in range(3)],
+            'effectDetails': [{
+                'index': effect,
+                'effectId': values['Effect[' + str(effect) + ']'],
+                'effectName': dataset.enums['SpellEffects'].get(values['Effect[' + str(effect) + ']']),
+                'auraId': values['EffectApplyAuraName[' + str(effect) + ']'],
+                'auraName': dataset.enums['AuraType'].get(values['EffectApplyAuraName[' + str(effect) + ']']),
+                'triggerSpellId': values['EffectTriggerSpell[' + str(effect) + ']'],
+                'implicitTargetA': values['EffectImplicitTargetA[' + str(effect) + ']'],
+                'implicitTargetB': values['EffectImplicitTargetB[' + str(effect) + ']'],
+            } for effect in range(3)],
+            'castProfile': {
+                'castingTimeIndex': values['CastingTimeIndex'],
+                'recoveryMilliseconds': values['RecoveryTime'],
+                'categoryRecoveryMilliseconds': values['CategoryRecoveryTime'],
+                'startRecoveryMilliseconds': values['StartRecoveryTime'],
+                'scope': 'raw-dbc-timing-not-measured-use-frequency',
+            },
         }
         if errors:
             result['fieldErrors'] = errors

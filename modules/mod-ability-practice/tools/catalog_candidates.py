@@ -5,6 +5,51 @@ from pathlib import Path
 import sys
 
 
+def action_review(members):
+    traits, triggers, timing = set(), set(), []
+    direct = {'SPELL_EFFECT_SCHOOL_DAMAGE', 'SPELL_EFFECT_WEAPON_DAMAGE',
+              'SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL', 'SPELL_EFFECT_NORMALIZED_WEAPON_DMG',
+              'SPELL_EFFECT_HEAL', 'SPELL_EFFECT_HEAL_PCT', 'SPELL_EFFECT_HEAL_MAX_HEALTH',
+              'SPELL_EFFECT_HEALTH_LEECH'}
+    utility = {'SPELL_EFFECT_INTERRUPT_CAST', 'SPELL_EFFECT_DISPEL', 'SPELL_EFFECT_DISPEL_MECHANIC',
+               'SPELL_EFFECT_STEAL_BENEFICIAL_BUFF', 'SPELL_EFFECT_RESURRECT', 'SPELL_EFFECT_RESURRECT_NEW'}
+    for member in members:
+        raw = member.get('rawDbc')
+        if not raw or raw.get('fieldErrors'):
+            traits.add('missing-or-invalid-raw-effect-evidence')
+            continue
+        if raw.get('passive'):
+            traits.add('passive-flag-review')
+        details = raw.get('effectDetails')
+        if not details:
+            traits.add('missing-or-invalid-raw-effect-evidence')
+        for effect in details or []:
+            name, aura = effect.get('effectName') or '', effect.get('auraName') or ''
+            if name in direct:
+                traits.add('direct-outcome-review')
+            if name in utility:
+                traits.add('utility-outcome-review')
+            if aura.startswith('SPELL_AURA_PERIODIC_'):
+                traits.add('periodic-attribution-review')
+            if name.startswith('SPELL_EFFECT_SUMMON') or name == 'SPELL_EFFECT_CREATE_TAMED_PET':
+                traits.add('pet-or-summon-ownership-review')
+            trigger = effect.get('triggerSpellId', 0)
+            if trigger:
+                triggers.add(trigger)
+            if trigger or 'TRIGGER' in name or 'TRIGGER' in aura:
+                traits.add('triggered-attribution-review')
+            if name in {'SPELL_EFFECT_DUMMY', 'SPELL_EFFECT_SCRIPT_EFFECT'} or aura == 'SPELL_AURA_DUMMY':
+                traits.add('scripted-behavior-review')
+            if effect.get('effectId') and not name:
+                traits.add('unknown-raw-effect-review')
+            if effect.get('auraId') and not aura:
+                traits.add('unknown-raw-aura-review')
+        if raw.get('castProfile'):
+            timing.append({'spellId': member['spellId'], **raw['castProfile']})
+    return {'traits': sorted(traits), 'triggerSpellIds': sorted(triggers), 'castProfiles': timing,
+            'scope': 'raw-action-routing-review-not-runtime-qualification'}
+
+
 def build_candidates(inventory):
     if inventory.get('schemaVersion') != 1:
         raise ValueError('Unsupported source inventory schema')
@@ -67,6 +112,7 @@ def build_candidates(inventory):
             'classId': root[0], 'sourceReferenceSpellId': root[1],
             'sourceKind': 'claimed-root-group' if claimed else 'standalone-source',
             'classification': 'pending', 'productionApproved': False,
+            'rawActionReview': action_review(members),
             'members': members,
             'acquisitionReferences': sorted(acquisition, key=lambda row: (
                 row['spellId'], row['referenceSpellId'], row['source'])),
@@ -83,6 +129,8 @@ def build_candidates(inventory):
             'conflictingMembershipCount': sum('conflicting-chain-membership' in row['reviewFlags']
                                              for row in candidates),
             'productionApprovedCount': 0,
+            'rawActionTraits': dict(sorted(Counter(trait for candidate in candidates
+                for trait in candidate['rawActionReview']['traits']).items())),
         },
         'classes': [{'classId': class_id, 'candidateCount': count} for class_id, count in sorted(counts.items())],
         'candidates': candidates,
