@@ -3356,6 +3356,9 @@ bool Player::_addSpell(uint32 spellId, uint8 addSpecMask, bool temporary, bool l
     if (!SpellMgr::CheckSpellValid(spellInfo, spellId, false))
         return false;
 
+    if (!isBeingLoaded() && !CoAAbilityPractice::CanLearnRank(this, spellId))
+        return false;
+
     // pussywizard: already found and temporary, nothing to do
     PlayerSpellMap::iterator itr = m_spells.find(spellId);
     if (itr != m_spells.end() && itr->second->State == PLAYERSPELL_TEMPORARY)

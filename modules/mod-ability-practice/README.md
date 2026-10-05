@@ -289,7 +289,7 @@ learn hooks run after the grant and cannot veto it or protect trainer charges. N
 per-cast query or launcher change was added. The public header belongs to the existing game Player include surface;
 the first native build exposed an incorrect placement under CoA, corrected before the passing build.
 
-**Not ready for activation:** direct `addSpell`/temporary helper routes, saved class-slot/prestige restoration,
+**Not ready for activation:** load-time default/temporary helper routes, specialization/prestige restoration,
 talent ownership/point charging, wrapped/nested trainer learning and all-class definitions still need integration
 and runtime qualification. A saved inactive class has not yet had a full migration before restoration; do not enable
 rank rules for a live character. The switch is intended only for future isolated qualification fixtures.
@@ -332,3 +332,18 @@ Session totals are labeled class skills rather than implying the selected abilit
 Source/native build passed at `.cache/verify-all/20261005-055814/report.json`; C++ lint, whitespace and Lua 5.1
 syntax passed. Actual neutral/gray fights, healing reference suppression and retained-progress rendering remain
 pending runtime qualification. No production server, database, launcher or active client was changed.
+
+## Direct runtime grants
+
+`Player::_addSpell` now consults the same optional rank provider before runtime spell-map changes or temporary
+learn packets. This closes direct `addSpell` and recursive temporary-helper routes for the three managed
+abilities while keeping the existing `learnSpell` check. Character loading is exempt: saved spells load before
+practice settings, and blocking that restoration would conflict with preservation of existing ranks.
+
+The loading exemption also means load-time default/baseline/skill helper grants require separate review; it is
+not a complete acquisition boundary. Talent point and wrapped trainer fee validation must still happen before
+costs, rather than relying on a low-level blocked grant. The default-off provider leaves ordinary learning alone.
+Runtime temporary grants, restoration and cost behavior remain unqualified.
+
+Source/native build passed at `.cache/verify-all/20261005-060450/report.json`; C++ lint and whitespace passed.
+No runtime tests, installation or production changes were performed.
