@@ -127,8 +127,16 @@ local function RenderDetail(ability)
     abilitySessionText:SetText(fixed and "" or (session and session.available and
         ("This session: " .. session.uses .. " practice uses\n+" .. session.proficiencyGained .. " proficiency")
         or "Ability session totals unavailable"))
-    rankLabel:SetText(ability.learnedRank > 0 and (fixed and "Learned ability" or
-        ("Learned rank " .. ability.learnedRank)) or "Not yet learned")
+    local requiredLevel
+    for _, rank in ipairs(ability.ranks or {}) do
+        if rank.spellId == ability.displaySpellId then requiredLevel = rank.characterLevel; break end
+    end
+    if not requiredLevel and ability.learnedRank == 0 and ability.nextRank then
+        requiredLevel = ability.nextRank.characterLevel
+    end
+    local rankText = ability.learnedRank > 0 and (fixed and "Learned ability" or
+        ("Learned rank " .. ability.learnedRank)) or "Not yet learned"
+    rankLabel:SetText(rankText .. (requiredLevel and (" - Required level " .. requiredLevel) or ""))
     local trains = ability.learnedRank > 0 and ability.pointsPerLevel > 0 and not Model.IsFixed(ability)
     local skillText = ability.proficiency > ability.cap and ("Saved proficiency " .. ability.proficiency
         .. " - current cap " .. ability.cap) or ("Proficiency " .. ability.proficiency .. " / " .. ability.cap)

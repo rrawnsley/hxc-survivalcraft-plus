@@ -659,3 +659,14 @@ changed, and no utility profile or mastery reward was enabled.
 Source/native build passed at `.cache/verify-all/20261005-091054/report.json`; C++ lint/whitespace passed.
 No tests ran. Actual removals/transfers, resists/empty lists, PvE support, deduplication and script behavior remain
 isolated runtime qualification. Development flags default off and production remains untouched.
+
+## Selected rank's character-level requirement
+
+Addon 0.4.2-development shows the selected display spell's required character level beside its learned rank
+(or fixed ability label), using the authoritative roadmap entry. Unlearned legacy views can use their next-rank
+requirement; learned legacy views without a roadmap omit this value instead of guessing. This is the rank's
+character-level requirement, not a raw DBC effect/scaling level. Protocol 4 and counters remain unchanged.
+
+Source checks passed at `.cache/verify-all/20261005-091320/report.json`; whitespace and all four Lua 5.1
+syntax compilations passed. No tests ran. Text layout and display during upgrades remain in-game acceptance.
+No active client or launcher payload was updated.
