@@ -35,11 +35,14 @@ std::atomic<bool> Active = false;
 std::uint32_t Revision = 0;
 using Clock = std::chrono::steady_clock;
 constexpr auto RefreshInterval = std::chrono::seconds(2);
+constexpr auto InterestDuration = std::chrono::seconds(30);
 struct MenuSession
 {
     Clock::time_point LastRequest{};
     Clock::time_point NextRefresh{};
+    Clock::time_point InterestedUntil{};
     bool Dirty = true;
+    bool CheckRanks = true;
     std::uint32_t Protocol = Practice::MenuSchemaVersion;
     std::uint32_t LastClass = 0;
     Practice::SessionPractice Progress;
@@ -132,11 +135,12 @@ CoAAbilityPractice::RankDecision EvaluateRank(Player const* player, std::uint32_
 
 void PromoteRanks(Player* player)
 {
-    if (!RankActive.load() || !Affects(player))
+    if (!RankActive.load() || !IsDevelopmentPlayer(player))
         return;
     for (Practice::AbilityDefinition const& ability : Dev::Abilities)
         for (Practice::AbilityRank const& rank : ability.Ranks)
-            if (rank.RankNumber > 1 && !player->HasSpell(rank.SpellId) &&
+            if (RankActive.load() && IsDevelopmentPlayer(player) && rank.RankNumber > 1 &&
+                !player->HasSpell(rank.SpellId) &&
                 EvaluateRank(player, rank.SpellId) == CoAAbilityPractice::RankDecision::Allowed)
                 player->learnSpell(rank.SpellId, false);
 }
@@ -177,10 +181,9 @@ bool Send(Player* player, MenuSession const& session)
 
 void Refresh(Player* player, MenuSession& session, Clock::time_point now)
 {
-    if (!session.Dirty || now < session.NextRefresh)
+    if (!session.Dirty || now < session.NextRefresh || now >= session.InterestedUntil)
         return;
     session.NextRefresh = now + RefreshInterval;
-    PromoteRanks(player);
     if (Send(player, session))
     {
         session.Dirty = false;
@@ -195,7 +198,10 @@ void MarkDirty(Player* player)
     std::lock_guard lock(Mutex);
     auto const found = Sessions.find(player->GetGUID().GetRawValue());
     if (Affects(player) && found != Sessions.end())
+    {
         found->second.Dirty = true;
+        found->second.CheckRanks = true;
+    }
 }
 
 class PracticeWorld : public WorldScript
@@ -212,6 +218,11 @@ public:
         RankRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentRankLearning", false);
         Active.store(Requested && DevelopmentAllowed && Ready);
         RankActive.store(Requested && DevelopmentAllowed && Ready && RankRequested);
+        for (auto& entry : Sessions)
+        {
+            entry.second.Dirty = true;
+            entry.second.CheckRanks = true;
+        }
     }
 
     void OnStartup() override
@@ -268,20 +279,35 @@ public:
         }
         auto& session = Sessions[player->GetGUID().GetRawValue()];
         session = {};
-        Refresh(player, session, Clock::now());
+        session.LastClass = player->getClass();
     }
 
     void OnPlayerUpdate(Player* player, uint32) override
     {
         if (!Active.load() || !IsHumanPlayer(player))
             return;
+        bool checkRanks = false;
+        {
+            std::lock_guard lock(Mutex);
+            auto const found = Sessions.find(player->GetGUID().GetRawValue());
+            if (found == Sessions.end())
+                return;
+            MenuSession& session = found->second;
+            if (session.LastClass != player->getClass())
+            {
+                session.LastClass = player->getClass();
+                session.Dirty = true;
+                session.CheckRanks = true;
+            }
+            checkRanks = session.CheckRanks;
+            session.CheckRanks = false;
+        }
+        if (checkRanks)
+            PromoteRanks(player);
         std::lock_guard lock(Mutex);
         auto const found = Sessions.find(player->GetGUID().GetRawValue());
-        if (found == Sessions.end())
-            return;
-        if (found->second.LastClass != player->getClass())
-            found->second.Dirty = true;
-        Refresh(player, found->second, Clock::now());
+        if (found != Sessions.end())
+            Refresh(player, found->second, Clock::now());
     }
 
     void OnPlayerLevelChanged(Player* player, uint8) override
@@ -323,6 +349,7 @@ public:
         if (now - session.LastRequest < RefreshInterval)
             return false;
         session.LastRequest = now;
+        session.InterestedUntil = now + InterestDuration;
         session.Protocol = message == "HXAP\tHELLO|2" ? Practice::SessionMenuSchemaVersion : Practice::MenuSchemaVersion;
         session.Dirty = true;
         Refresh(player, session, now);
@@ -359,6 +386,7 @@ public:
         {
             found->second.Progress.RecordAward(award.ProficiencyGained);
             found->second.Dirty = true;
+            found->second.CheckRanks = true;
             Refresh(player, found->second, Clock::now());
         }
     }

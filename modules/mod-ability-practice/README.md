@@ -280,7 +280,7 @@ and the previous rank. Corrupt/incompatible records block new managed ranks. Nor
 the provider before adding a new rank. Ascension class/generated progression consults it before counted grants.
 Spellbook rows for unlearned managed ranks are unavailable before purchase/bulk learning; forged book requests
 cannot fall through to another trainer path. Trainers also reject managed ranks, including direct learn-effect
-targets, before charging. At a paced dirty refresh the module automatically learns ready ranks without a book fee.
+targets, before charging. On the next eligible player update the module automatically learns ready ranks without a book fee.
 The three introductory roots are class grants with no raw advancement-node references in the current review export;
 this does not approve the same ownership rule for other abilities.
 
@@ -297,3 +297,22 @@ rank rules for a live character. The switch is intended only for future isolated
 Source/native build passed at `.cache/verify-all/20261005-050036/report.json`; the failed placement attempt remains
 `.cache/verify-all/20261005-045747/report.json`. C++ lint and whitespace passed. No runtime rank grants, trainer fee
 checks, class changes or other gameplay cases were run. No server was installed, started or restarted.
+
+## Menu interest and separate rank updates
+
+A valid self-whisper request grants thirty seconds of snapshot interest. The open menu's ten-second requests
+renew it; after interest expires the server retains dirty progress but stops automatic menu packets. Login does
+not push unsolicited snapshots. Practice awards and session counters continue regardless of menu interest.
+Snapshot sends still share the two-second interval, and opening the menu rebuilds the current full view.
+
+Rank checks are separate dirty work scheduled by login, config changes, level/spell/class changes and awarded
+practice. Only player updates perform automatic upgrades. Requests and effective-hit callbacks do not learn ranks.
+The module releases its mutex before calling normal learning and reacquires the session by GUID afterward; it
+holds no map iterator or session reference across learning callbacks. New learn events can queue another check.
+Rank progress therefore works without the addon, with no per-tick catalog scan after the dirty work is handled.
+
+Source/native build passed at `.cache/verify-all/20261005-052123/report.json`; C++ lint and whitespace passed.
+Interest expiry/reopen, closed-menu advancement, reentrant callbacks and owner-context behavior still need runtime
+qualification. The class-change module inspected here strips other class kits and clears specialization slots;
+the reviewed slot structure stores class-scoped talent entries/actions, not a separate inactive class spellbook.
+Further migration/restore work should follow these actual sources rather than assume an unobserved storage model.
