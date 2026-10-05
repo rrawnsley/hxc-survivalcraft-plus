@@ -6,11 +6,13 @@
 #include <cstdint>
 #include <limits>
 #include <optional>
+#include <vector>
 
 namespace AbilityPractice
 {
 inline constexpr std::uint32_t MenuSchemaVersion = 1;
 inline constexpr std::uint32_t SessionMenuSchemaVersion = 2;
+inline constexpr std::uint32_t RoadmapMenuSchemaVersion = 3;
 
 struct SessionPractice
 {
@@ -58,6 +60,7 @@ struct AbilityView
     PracticeAvailability Availability = PracticeAvailability::Invalid;
     Forecast NextPoint;
     std::optional<RankView> NextRank;
+    std::vector<RankView> Ranks;
 };
 
 inline AbilityView BuildAbilityView(AbilityDefinition const& ability, TrainingPolicy policy,
@@ -85,20 +88,23 @@ inline AbilityView BuildAbilityView(AbilityDefinition const& ability, TrainingPo
         view.LearnedRank = rank.RankNumber;
         nextRank = index + 1;
     }
-    if (nextRank < ability.Ranks.size())
+    for (std::size_t index = 0; index < ability.Ranks.size(); ++index)
     {
         if (ability.Kind == AbilityKind::Fixed)
         {
-            AbilityRank const& rank = ability.Ranks[nextRank];
-            RankState const state = !acquisitionPrerequisitesMet ? RankState::MissingPrerequisite :
+            AbilityRank const& rank = ability.Ranks[index];
+            RankState const state = KnowsSpell(learnedSpells, rank.SpellId) ? RankState::Learned :
+                !acquisitionPrerequisitesMet ? RankState::MissingPrerequisite :
                 characterLevel < rank.Requirement.CharacterLevel ? RankState::NeedsCharacterLevel :
                 RankState::AcquireIntroductoryAbility;
-            view.NextRank = RankView{ rank.SpellId, rank.RankNumber, rank.Requirement, state, {} };
+            view.Ranks.push_back({ rank.SpellId, rank.RankNumber, rank.Requirement, state, {} });
         }
         else
-            view.NextRank = DescribeRank(ability, nextRank, policy, progress, characterLevel,
-                learnedSpells, acquisitionPrerequisitesMet);
+            view.Ranks.push_back(DescribeRank(ability, index, policy, progress, characterLevel,
+                learnedSpells, acquisitionPrerequisitesMet));
     }
+    if (nextRank < view.Ranks.size())
+        view.NextRank = view.Ranks[nextRank];
 
     if (ability.Kind != AbilityKind::Fixed && view.LearnedRank)
         view.PointsPerLevel = policy.Bands[Detail::BandIndex(policy, progress.Proficiency)].PointsPerLevel;

@@ -34,13 +34,13 @@ function Wire.Accept(message, now, currentRevision)
         if #fields ~= 6 then return Reject("Invalid snapshot header") end
         local schema, revision, classId, level, count = tonumber(fields[2]), tonumber(fields[3]),
             tonumber(fields[4]), tonumber(fields[5]), tonumber(fields[6])
-        if (schema ~= 1 and schema ~= 2) or revision < 1 or revision > 4294967295 or classId < 1 or classId > 255
+        if (schema ~= 1 and schema ~= 2 and schema ~= 3) or revision < 1 or revision > 4294967295 or classId < 1 or classId > 255
             or level < 1 or level > 255 or count > 512 then return Reject("Unsupported snapshot header") end
         if revision <= (currentRevision or 0) or (pending and revision <= pending.revision) then
             return nil, "Stale snapshot header"
         end
         pending = { schemaVersion = schema, revision = revision, classId = classId, characterLevel = level,
-            count = count, started = now, parts = {} }
+            count = count, started = now, parts = {}, rankCount = 0, receivedRanks = 0 }
         return nil
     end
     if not pending then return nil, "No snapshot in progress" end
@@ -48,7 +48,7 @@ function Wire.Accept(message, now, currentRevision)
     if tonumber(fields[2]) ~= pending.revision then return nil, "Unrelated snapshot message" end
     if kind == "E" then
         if #fields ~= 2 then return Reject("Invalid snapshot end") end
-        if pending.schemaVersion == 2 and not pending.session then return Reject("Missing session progress") end
+        if pending.schemaVersion >= 2 and not pending.session then return Reject("Missing session progress") end
         local snapshot = { schemaVersion = pending.schemaVersion, revision = pending.revision,
             classId = pending.classId, characterLevel = pending.characterLevel, session = pending.session, abilities = {} }
         for index = 1, pending.count do
@@ -57,13 +57,21 @@ function Wire.Accept(message, now, currentRevision)
             local ability = part.A
             ability.nextPoint = part.P
             ability.nextRank = part.R ~= true and part.R or nil
+            if pending.schemaVersion == 3 then
+                if not part.K then return Reject("Missing rank roadmap") end
+                ability.ranks = {}
+                for ordinal = 1, part.K do
+                    if not part.L or not part.L[ordinal] then return Reject("Incomplete rank roadmap") end
+                    ability.ranks[ordinal] = part.L[ordinal]
+                end
+            end
             snapshot.abilities[index] = ability
         end
         pending = nil
         return Model.Validate(snapshot)
     end
     if kind == "S" then
-        if pending.schemaVersion ~= 2 or pending.session or #fields ~= 5
+        if pending.schemaVersion < 2 or pending.session or #fields ~= 5
             or (fields[3] ~= "0" and fields[3] ~= "1") then return Reject("Invalid session progress") end
         pending.session = { available = fields[3] == "1", uses = fields[4],
             proficiencyGained = fields[5] }
@@ -73,6 +81,33 @@ function Wire.Accept(message, now, currentRevision)
     if not index or index < 1 or index > pending.count then return Reject("Invalid ability index") end
     local part = pending.parts[index] or {}
     pending.parts[index] = part
+    if kind == "K" then
+        local count = tonumber(fields[4])
+        if pending.schemaVersion ~= 3 or part.K or #fields ~= 4 or not count or count < 1 or count > 64
+            then return Reject("Invalid rank roadmap count") end
+        pending.rankCount = pending.rankCount + count
+        if pending.rankCount > 2048 then return Reject("Rank roadmap is too large") end
+        part.K = count
+        if part.L then
+            for ordinal in pairs(part.L) do
+                if ordinal > count then return Reject("Invalid rank roadmap ordinal") end
+            end
+        end
+        return nil
+    end
+    if kind == "L" then
+        local ordinal = tonumber(fields[4])
+        if pending.schemaVersion ~= 3 or #fields ~= 11 or not ordinal or ordinal < 1 or ordinal > 64
+            or (part.K and ordinal > part.K) then return Reject("Invalid rank roadmap entry") end
+        part.L = part.L or {}
+        if part.L[ordinal] then return Reject("Duplicate rank roadmap entry") end
+        pending.receivedRanks = pending.receivedRanks + 1
+        if pending.receivedRanks > 2048 then return Reject("Rank roadmap is too large") end
+        part.L[ordinal] = { spellId = tonumber(fields[5]), rankNumber = tonumber(fields[6]),
+            characterLevel = tonumber(fields[7]), proficiency = tonumber(fields[8]), state = tonumber(fields[9]),
+            practice = { status = tonumber(fields[10]), uses = fields[11] } }
+        return nil
+    end
     if part[kind] then return Reject("Duplicate snapshot part") end
     if kind == "A" and #fields == 11 then
         part.A = { abilityId = tonumber(fields[4]), displaySpellId = tonumber(fields[5]),

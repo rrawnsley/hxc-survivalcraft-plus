@@ -32,13 +32,26 @@ std::string WireLine(char kind, Values... values)
 
 inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t classId,
     std::uint32_t characterLevel, std::uint32_t revision, std::span<AbilityView const> abilities,
-    std::optional<SessionPractice> session = std::nullopt)
+    std::optional<SessionPractice> session = std::nullopt, bool includeRoadmap = false)
 {
     if (!classId || classId > 255 || !characterLevel || characterLevel > 255 || !revision || abilities.size() > 512)
         return std::nullopt;
+    if (includeRoadmap && !session)
+        return std::nullopt;
+    std::size_t rankCount = 0;
+    if (includeRoadmap)
+        for (AbilityView const& view : abilities)
+        {
+            if (view.Ranks.empty() || view.Ranks.size() > 64)
+                return std::nullopt;
+            rankCount += view.Ranks.size();
+            if (rankCount > 2048)
+                return std::nullopt;
+        }
     std::vector<std::string> lines;
-    lines.reserve(abilities.size() * 3 + 3);
-    lines.push_back(Detail::WireLine('B', session ? SessionMenuSchemaVersion : MenuSchemaVersion,
+    lines.reserve(abilities.size() * (includeRoadmap ? 4 : 3) + rankCount + 3);
+    lines.push_back(Detail::WireLine('B', includeRoadmap ? RoadmapMenuSchemaVersion :
+        session ? SessionMenuSchemaVersion : MenuSchemaVersion,
         revision, classId, characterLevel, abilities.size()));
     for (std::size_t index = 0; index < abilities.size(); ++index)
     {
@@ -73,6 +86,29 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
         }
         else
             lines.push_back(Detail::WireLine('R', revision, index + 1, 0));
+        if (includeRoadmap)
+        {
+            lines.push_back(Detail::WireLine('K', revision, index + 1, view.Ranks.size()));
+            for (std::size_t ordinal = 0; ordinal < view.Ranks.size(); ++ordinal)
+            {
+                RankView const& rank = view.Ranks[ordinal];
+                if (!rank.SpellId || !rank.RankNumber || !rank.Requirement.CharacterLevel ||
+                    rank.Requirement.CharacterLevel > 255 || !rank.Requirement.Proficiency ||
+                    rank.State < RankState::Learned || rank.State > RankState::Ready || !ValidForecast(rank.Practice))
+                    return std::nullopt;
+                if (ordinal && (rank.RankNumber <= view.Ranks[ordinal - 1].RankNumber ||
+                    rank.Requirement.CharacterLevel < view.Ranks[ordinal - 1].Requirement.CharacterLevel ||
+                    rank.Requirement.Proficiency < view.Ranks[ordinal - 1].Requirement.Proficiency))
+                    return std::nullopt;
+                for (std::size_t other = 0; other < ordinal; ++other)
+                    if (view.Ranks[other].SpellId == rank.SpellId)
+                        return std::nullopt;
+                lines.push_back(Detail::WireLine('L', revision, index + 1, ordinal + 1, rank.SpellId,
+                    rank.RankNumber, rank.Requirement.CharacterLevel, rank.Requirement.Proficiency,
+                    static_cast<std::uint32_t>(rank.State), static_cast<std::uint32_t>(rank.Practice.Status),
+                    rank.Practice.Uses));
+            }
+        }
     }
     if (session)
     {

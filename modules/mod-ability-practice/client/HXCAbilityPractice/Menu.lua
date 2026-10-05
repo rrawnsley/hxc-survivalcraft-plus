@@ -10,9 +10,13 @@ local rows = {}
 local search = ""
 local Refresh
 local searchBox
+local showRoadmap = false
+local rankOffset = 0
+local roadmapRows = {}
+local roadmapButton
 
 local panel = CreateFrame("Frame", "HXCAbilityPracticePanel", UIParent)
-panel:SetSize(760, 490)
+panel:SetSize(760, 610)
 panel:SetPoint("CENTER")
 panel:SetFrameStrata("DIALOG")
 panel:SetMovable(true)
@@ -37,13 +41,13 @@ end
 local title = Text(panel, "GameFontNormalLarge", 28, -24, 610)
 title:SetText("Abilities & Practice")
 local subtitle = Text(panel, "GameFontHighlightSmall", 28, -52, 660)
-local footer = Text(panel, "GameFontHighlightSmall", 28, -462, 704)
-local sessionText = Text(panel, "GameFontHighlightSmall", 28, -438, 704)
+local footer = Text(panel, "GameFontHighlightSmall", 28, -582, 704)
+local sessionText = Text(panel, "GameFontHighlightSmall", 28, -558, 704)
 local close = CreateFrame("Button", nil, panel, "UIPanelCloseButton")
 close:SetPoint("TOPRIGHT", -6, -6)
 local detail = CreateFrame("Frame", nil, panel)
 detail:SetPoint("TOPLEFT", 285, -110)
-detail:SetSize(442, 320)
+detail:SetSize(442, 430)
 local name = Text(detail, "GameFontNormalLarge", 0, 0, 440)
 local rankLabel = Text(detail, "GameFontHighlight", 0, -32, 440)
 local proficiency = Text(detail, "GameFontNormal", 0, -68, 440)
@@ -59,7 +63,7 @@ progressBackground:SetTexture(0.12, 0.12, 0.12, 1)
 local progressLabel = progress:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 progressLabel:SetPoint("CENTER")
 local pointText = Text(detail, "GameFontHighlight", 0, -130, 430)
-local nextTitle = Text(detail, "GameFontNormal", 0, -195, 440)
+local nextTitle = Text(detail, "GameFontNormal", 0, -195, 280)
 local nextText = Text(detail, "GameFontHighlight", 0, -221, 430)
 
 local function SpellName(spellId)
@@ -108,6 +112,42 @@ local function RenderDetail(ability)
         .. SpellName(nextRank.spellId) .. " (Rank " .. nextRank.rankNumber .. ")") or "Rank progression")
     nextText:SetText(ability.availability == 6 and "This ability works at full effectiveness without practice."
         or Model.RankText(nextRank))
+    local ranks = ability.ranks
+    roadmapButton:SetText(showRoadmap and "Next rank" or "All ranks")
+    if ranks then roadmapButton:Show() else roadmapButton:Hide() end
+    local displayRoadmap = showRoadmap and ranks
+    if displayRoadmap then
+        nextText:Hide()
+        rankOffset = math.max(0, math.min(rankOffset, math.max(0, #ranks - #roadmapRows)))
+        nextTitle:SetText("Rank roadmap - " .. (rankOffset + 1) .. " to "
+            .. math.min(rankOffset + #roadmapRows, #ranks) .. " of " .. #ranks)
+    else nextText:Show() end
+    for index, row in ipairs(roadmapRows) do
+        local rank = displayRoadmap and ranks[index + rankOffset]
+        if rank then
+            row:Show()
+            row.title:SetText("Rank " .. rank.rankNumber .. " - " .. SpellName(rank.spellId))
+            row.info:SetText(ability.availability == 6 and ("Character level " .. rank.characterLevel
+                .. " - No practice required.\n" .. (rank.state == 1 and "Learned." or "Normal acquisition required."))
+                or Model.RankText(rank))
+        else row:Hide() end
+    end
+end
+
+roadmapButton = CreateFrame("Button", nil, detail, "UIPanelButtonTemplate")
+roadmapButton:SetSize(135, 24)
+roadmapButton:SetPoint("TOPLEFT", 295, -190)
+roadmapButton:SetScript("OnClick", function() showRoadmap = not showRoadmap; rankOffset = 0; Refresh() end)
+for index = 1, 3 do
+    local row = CreateFrame("Frame", nil, detail)
+    row:SetSize(430, 72)
+    row:SetPoint("TOPLEFT", 0, -222 - (index - 1) * 72)
+    row.title = Text(row, "GameFontNormal", 0, 0, 430)
+    row.info = Text(row, "GameFontHighlightSmall", 0, -20, 430)
+    row:EnableMouseWheel(true)
+    row:SetScript("OnMouseWheel", function(_, delta) rankOffset = rankOffset - delta; Refresh() end)
+    row:Hide()
+    roadmapRows[index] = row
 end
 
 Refresh = function()
@@ -147,13 +187,16 @@ Refresh = function()
         local chosen
         for _, ability in ipairs(visible) do if ability.abilityId == selectedId then chosen = ability end end
         chosen = chosen or visible[1]
+        if not chosen or chosen.abilityId ~= selectedId then rankOffset = 0 end
         selectedId = chosen and chosen.abilityId or nil
         RenderDetail(chosen)
         local emptyText = syncState == "current" and "The server has no practice abilities configured for this class."
             or "This saved view contains no configured practice abilities."
         footer:SetText(#snapshot.abilities == 0 and emptyText or
             (#visible == 0 and "No abilities in this view." or
-            (#visible .. " abilities · Use the mouse wheel to browse · Forecasts count qualifying uses")))
+            (#visible .. " abilities · " .. (showRoadmap and chosen and chosen.ranks
+                and "Use the mouse wheel over ranks to browse" or "Use the mouse wheel to browse")
+                .. " · Forecasts count qualifying uses")))
     end
     for index, row in ipairs(rows) do
         local ability = visible[index + offset]
@@ -177,6 +220,7 @@ for index = 1, 7 do
     row.label = Text(row, "GameFontNormal", 2, -3, 226)
     row.info = Text(row, "GameFontHighlightSmall", 2, -24, 226)
     row:SetScript("OnClick", function(self)
+        if selectedId ~= self.ability.abilityId then rankOffset = 0 end
         selectedId = self.ability.abilityId
         Refresh()
     end)
@@ -256,6 +300,8 @@ function API.Reset()
     selectedId = nil
     offset = 0
     tab = "skills"
+    showRoadmap = false
+    rankOffset = 0
     search = ""
     searchBox:SetText("")
     Refresh()

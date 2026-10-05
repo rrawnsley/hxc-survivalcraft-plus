@@ -41,7 +41,28 @@ local function Rank(value)
         proficiency = value.proficiency, state = value.state, practice = practice }
 end
 
-local function Ability(value)
+local function Ranks(value)
+    if type(value) ~= "table" or #value == 0 or #value > 64 then return nil end
+    local count = 0
+    for key in pairs(value) do
+        if not Integer(key, 1, #value) then return nil end
+        count = count + 1
+    end
+    if count ~= #value then return nil end
+    local result, seen = {}, {}
+    for index, entry in ipairs(value) do
+        local rank = Rank(entry)
+        if not rank or rank.state == 0 or seen[rank.spellId] then return nil end
+        local previous = result[index - 1]
+        if previous and (rank.rankNumber <= previous.rankNumber or rank.characterLevel < previous.characterLevel
+            or rank.proficiency < previous.proficiency) then return nil end
+        result[index] = rank
+        seen[rank.spellId] = true
+    end
+    return result
+end
+
+local function Ability(value, schema)
     if type(value) ~= "table" then return nil end
     local positive = { "abilityId", "displaySpellId", "proficiency", "cap" }
     for _, field in ipairs(positive) do
@@ -58,23 +79,39 @@ local function Ability(value)
     if not point then return nil end
     local rank = value.nextRank and Rank(value.nextRank) or nil
     if value.nextRank and not rank then return nil end
-    return { abilityId = value.abilityId, displaySpellId = value.displaySpellId, learnedRank = value.learnedRank,
+    local ranks = schema == 3 and Ranks(value.ranks) or nil
+    if schema == 3 and not ranks then return nil end
+    if schema ~= 3 and value.ranks ~= nil then return nil end
+    if rank and ranks then
+        local matched = false
+        for _, entry in ipairs(ranks) do
+            if entry.spellId == rank.spellId and entry.rankNumber == rank.rankNumber
+                and entry.characterLevel == rank.characterLevel and entry.proficiency == rank.proficiency
+                and entry.state == rank.state and entry.practice.status == rank.practice.status
+                and entry.practice.uses == rank.practice.uses then matched = true end
+        end
+        if not matched then return nil end
+    end
+    return { ranks = ranks, abilityId = value.abilityId, displaySpellId = value.displaySpellId,
+        learnedRank = value.learnedRank,
         proficiency = value.proficiency, points = value.points, cap = value.cap, pointsPerLevel = value.pointsPerLevel,
         availability = value.availability, nextPoint = point, nextRank = rank }
 end
 
 function Model.Validate(snapshot)
-    if type(snapshot) ~= "table" or (snapshot.schemaVersion ~= 1 and snapshot.schemaVersion ~= 2)
+    if type(snapshot) ~= "table"
+        or (snapshot.schemaVersion ~= 1 and snapshot.schemaVersion ~= 2 and snapshot.schemaVersion ~= 3)
         or not Integer(snapshot.revision, 1, 4294967295) or not Integer(snapshot.classId, 1, 255)
         or not Integer(snapshot.characterLevel, 1, 255) or type(snapshot.abilities) ~= "table"
         or #snapshot.abilities > 512 then return nil, "Unsupported or incomplete progress update" end
-    local session = snapshot.schemaVersion == 2 and Session(snapshot.session) or nil
-    if snapshot.schemaVersion == 2 and not session then return nil, "Incomplete session progress" end
+    local session = snapshot.schemaVersion >= 2 and Session(snapshot.session) or nil
+    if snapshot.schemaVersion >= 2 and not session then return nil, "Incomplete session progress" end
     if snapshot.schemaVersion == 1 and snapshot.session ~= nil then return nil, "Unexpected session progress" end
     local result = { schemaVersion = snapshot.schemaVersion, session = session, revision = snapshot.revision,
         classId = snapshot.classId,
         characterLevel = snapshot.characterLevel, abilities = {} }
     local seen = {}
+    local rankCount = 0
     local count = 0
     for key in pairs(snapshot.abilities) do
         if not Integer(key, 1, #snapshot.abilities) then return nil, "Invalid ability list" end
@@ -82,8 +119,10 @@ function Model.Validate(snapshot)
     end
     if count ~= #snapshot.abilities then return nil, "Incomplete ability list" end
     for _, value in ipairs(snapshot.abilities) do
-        local ability = Ability(value)
+        local ability = Ability(value, snapshot.schemaVersion)
         if not ability or seen[ability.abilityId] then return nil, "Invalid or duplicate ability" end
+        rankCount = rankCount + (ability.ranks and #ability.ranks or 0)
+        if rankCount > 2048 then return nil, "Rank roadmap is too large" end
         seen[ability.abilityId] = true
         result.abilities[#result.abilities + 1] = ability
     end
@@ -108,8 +147,14 @@ end
 function Model.RankText(rank)
     if not rank then return "All currently defined ranks learned." end
     local requirement = "Character level " .. rank.characterLevel .. " · Proficiency " .. rank.proficiency
+    if rank.state == 1 then return "Learned.\n" .. requirement end
     if rank.state == 2 then return "Learn through your normal ability source.\n" .. requirement end
-    if rank.state == 3 then return "Requires the previous rank and the appropriate talent or specialization.\n" .. requirement end
+    if rank.state == 3 then
+        local forecast = rank.practice.status == 1 and (rank.practice.uses
+            .. " qualifying uses to the proficiency requirement.\n")
+            or (rank.practice.status == 3 and "Practice exceeds the current cap.\n" or "")
+        return "Requires earlier ranks or normal acquisition prerequisites.\n" .. forecast .. requirement
+    end
     if rank.state == 7 then return "Requirements met.\n" .. requirement end
     if rank.state == 5 then
         return (rank.rankNumber == 1 and "Waiting for character level.\n" or

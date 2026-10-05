@@ -347,3 +347,26 @@ Runtime temporary grants, restoration and cost behavior remain unqualified.
 
 Source/native build passed at `.cache/verify-all/20261005-060450/report.json`; C++ lint and whitespace passed.
 No runtime tests, installation or production changes were performed.
+
+## Complete rank roadmap transport
+
+Development addon `0.3.0-development` requests `HELLO|3`. The server retains version 1/2 responses for their
+respective requests; version 3 carries mandatory session totals plus a declared per-ability rank count and one
+record per rank. Every record includes server-derived level/proficiency requirements, acquisition/readiness state
+and a cap-aware exact-use forecast. No character progress or rank grants occur when the roadmap is requested.
+
+Encoding/assembly/model validation bound each ability to 64 ranks and the snapshot to 2,048 ranks, retain the
+512-ability/240-byte record limits, reject duplicate/missing/out-of-range entries, and preserve uint64 counts as
+strings. The model copies dense ordered roadmaps, checks unique spell IDs/nondecreasing requirements and matches
+the next-rank view to its roadmap entry. The existing five-second assembly timeout remains; large all-class payload
+throughput requires runtime qualification. Old snapshots omit roadmap data and hide the control.
+
+The taller menu offers All ranks/Next rank views and three scrollable roadmap rows. Learned ranks, future level
+requirements, prerequisite waits and available practice forecasts are visible. Known fixed abilities explicitly
+show no practice requirement. Search, class tracking and retained-progress display remain. Future ranks can need
+an earlier rank even when their proficiency threshold is already satisfied; that restriction is displayed.
+
+Source/native build passed at `.cache/verify-all/20261005-073325/report.json`; C++ lint and whitespace passed.
+Lua 5.1 syntax compiled using the previously cached runtime; the first syntax attempt omitted its import path and
+was corrected. No new cases or behavioral tests ran. Packet round trips, incomplete version-3 snapshots, scrolling,
+small-screen layout and in-game rendering still require acceptance. No production payload was installed/published.

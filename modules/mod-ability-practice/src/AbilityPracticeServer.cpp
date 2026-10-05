@@ -168,8 +168,9 @@ bool Send(Player* player, MenuSession const& session)
         }
     auto const progress = supported ? session.Progress : Practice::SessionPractice{ false, 0, 0 };
     auto const messages = Practice::EncodeMenuSnapshot(player->getClass(), player->GetLevel(), ++Revision, views,
-        session.Protocol == Practice::SessionMenuSchemaVersion
-            ? std::optional<Practice::SessionPractice>(progress) : std::nullopt);
+        session.Protocol >= Practice::SessionMenuSchemaVersion
+            ? std::optional<Practice::SessionPractice>(progress) : std::nullopt,
+        session.Protocol == Practice::RoadmapMenuSchemaVersion);
     if (!messages)
         return false;
     for (std::string const& message : *messages)
@@ -344,7 +345,8 @@ public:
         std::lock_guard lock(Mutex);
         if (!Requested || !DevelopmentAllowed || !Ready)
             return true;
-        if (receiver != player || (message != "HXAP\tHELLO|1" && message != "HXAP\tHELLO|2"))
+        if (receiver != player || (message != "HXAP\tHELLO|1" && message != "HXAP\tHELLO|2" &&
+            message != "HXAP\tHELLO|3"))
             return false;
         auto const now = Clock::now();
         auto& session = Sessions[player->GetGUID().GetRawValue()];
@@ -352,7 +354,8 @@ public:
             return false;
         session.LastRequest = now;
         session.InterestedUntil = now + InterestDuration;
-        session.Protocol = message == "HXAP\tHELLO|2" ? Practice::SessionMenuSchemaVersion : Practice::MenuSchemaVersion;
+        session.Protocol = message == "HXAP\tHELLO|3" ? Practice::RoadmapMenuSchemaVersion :
+            message == "HXAP\tHELLO|2" ? Practice::SessionMenuSchemaVersion : Practice::MenuSchemaVersion;
         session.Dirty = true;
         Refresh(player, session, now);
         return false;
