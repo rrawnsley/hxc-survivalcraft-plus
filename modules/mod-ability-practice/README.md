@@ -146,9 +146,9 @@ cap schedule, catch-up bands and the ten-level target window are illustrative de
 production balance. The release scope remains all 21 CoA classes.
 
 The slice seeds already learned ranks once and records qualifying practice through the existing settings cache.
-Only non-triggered, learned direct casts with effective hostile damage or friendly healing qualify, while the player
-is in combat and the target meets the development level window. Human sessions only; damaging player targets are
-excluded. The cast-owned marker limits multi-target hits to one award. Successful awards queue authoritative views
+Only non-triggered, learned direct casts with effective hostile creature damage or friendly healing qualify.
+Damage uses the hostile opponent directly, including lethal hits. Healing requires a live eligible hostile opponent
+in the recipient's unsuppressed PvE combat references. Human sessions only; player opponents are excluded. The cast-owned marker limits multi-target hits to one award. Successful awards queue authoritative views
 for the three abilities, coalesced to at most one snapshot every two seconds. Opening `/practice` requests a fresh snapshot; malformed, foreign and stale messages fail
 closed. No rank is learned, removed or replaced; no combat power is modified. Utility/periodic/pet attribution,
 training-exploit protection, final acquisition gates, owner-thread/cache lifecycle and network pacing still need runtime
@@ -220,3 +220,16 @@ The addon version is now `0.2.0-development`. The existing widget fixture gained
 by the controls, without new cases. Source checks passed at `.cache/verify-all/20261005-043620/report.json` and
 Lua 5.1 syntax compiled. Search/tracking behavior, persistence and client layout still need runtime acceptance.
 No addon was installed, cataloged or published.
+
+## Development encounter qualification
+
+Opponent level uses `getLevelForTarget(player)` so the existing scaled encounter level is respected, within the
+illustrative ten-level window. Player-controlled creatures, pets, totems, critters and the two named core training
+or target-dummy scripts do not qualify. Healing checks an actual live eligible opponent of its recipient instead
+of using the friendly recipient's level or a generic caster combat flag. Effective hostile damage does not require
+combat state after impact, so a killing blow is not excluded solely because that state ended. The original-cast
+marker still deduplicates multi-target outcomes.
+
+Source/native build passed at `.cache/verify-all/20261005-044148/report.json`; C++ lint and whitespace passed.
+Lethal-hit, scaled/gray target, healing combat references and dummy behavior remain pending gameplay qualification.
+These are conservative development rules, not approved PvP, encounter, frequency or deliberate-training policy.

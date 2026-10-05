@@ -5,6 +5,8 @@
 #include "AbilityPracticeWire.h"
 #include "Chat.h"
 #include "Config.h"
+#include "CombatManager.h"
+#include "Creature.h"
 #include "Log.h"
 #include "Player.h"
 #include "ScriptMgr.h"
@@ -48,6 +50,37 @@ bool IsDevelopmentPlayer(Player const* player)
 bool Affects(Player const* player)
 {
     return Requested && DevelopmentAllowed && Ready && IsDevelopmentPlayer(player);
+}
+
+bool IsDevelopmentOpponent(Player const* player, Unit const* opponent)
+{
+    if (!opponent || !opponent->IsCreature() || opponent->IsControlledByPlayer() || opponent->IsPet() ||
+        opponent->IsTotem() || opponent->IsCritter() || !player->IsHostileTo(opponent) ||
+        opponent->getLevelForTarget(player) + 10 < player->GetLevel())
+        return false;
+    std::string const script = opponent->ToCreature()->GetScriptName();
+    return script != "npc_training_dummy" && script != "npc_target_dummy";
+}
+
+bool HasDevelopmentEncounter(Player const* player, Unit const* recipient)
+{
+    for (auto const& entry : recipient->GetCombatManager().GetPvECombatRefs())
+    {
+        CombatReference const* reference = entry.second;
+        if (!reference || reference->IsSuppressedFor(recipient))
+            continue;
+        Unit const* opponent = reference->GetOther(recipient);
+        if (opponent->IsAlive() && IsDevelopmentOpponent(player, opponent))
+            return true;
+    }
+    return false;
+}
+
+bool QualifiesDevelopmentOutcome(Player const* player, Unit const* target, uint32 damage, uint32 healing)
+{
+    if (damage && IsDevelopmentOpponent(player, target))
+        return true;
+    return healing && player->IsFriendlyTo(target) && HasDevelopmentEncounter(player, target);
 }
 
 std::vector<std::uint32_t> Learned(Player const* player, Practice::AbilityDefinition const& ability)
@@ -245,11 +278,10 @@ public:
         if (!spell || !spell->GetCaster() || !target || miss != SPELL_MISS_NONE || (!damage && !healing))
             return;
         Player* player = spell->GetCaster()->ToPlayer();
-        if (!IsDevelopmentPlayer(player) || (target->IsPlayer() && damage) || !player->IsInCombat() ||
-            target->GetLevel() + 10 < player->GetLevel())
+        if (!IsDevelopmentPlayer(player))
             return;
         auto const* ability = Dev::Find(spell->GetSpellInfo()->Id);
-        if (!ability)
+        if (!ability || !QualifiesDevelopmentOutcome(player, target, damage, healing))
             return;
         std::lock_guard lock(Mutex);
         if (!Affects(player))
@@ -257,8 +289,7 @@ public:
         auto const found = Sessions.find(player->GetGUID().GetRawValue());
         if (found == Sessions.end())
             return;
-        Practice::OutcomeContext const context{ true, true, true,
-            (damage && player->IsHostileTo(target)) || (healing && player->IsFriendlyTo(target)), player->GetLevel() };
+        Practice::OutcomeContext const context{ true, true, true, true, player->GetLevel() };
         auto const award = Practice::HandleOutcome(*player, *spell, *ability, Dev::Policy, Dev::DefinitionVersion, context);
         if (award.Status == Practice::OutcomeStatus::Awarded)
         {
