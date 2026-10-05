@@ -6,6 +6,7 @@ import sys
 
 
 DIRECT_ROUTES = {'damage': {2, 17, 31, 58, 121}, 'healing': {10, 67, 136}}
+OUTCOME_ROUTES = {**DIRECT_ROUTES, 'interrupt': {68}, 'dispel': {38}, 'steal': {126}}
 
 
 def action_review(members):
@@ -54,8 +55,8 @@ def action_review(members):
             'scope': 'raw-action-routing-review-not-runtime-qualification'}
 
 
-def native_direct_review(members):
-    routes = {'damage', 'healing'}
+def native_route_review(members, route_ids, scope, missing_reason):
+    routes = set(route_ids)
     blocked = []
     for member in members:
         raw = member.get('rawDbc')
@@ -70,22 +71,34 @@ def native_direct_review(members):
                     type(effect) is not int or effect < 0 for effect in effects):
                 reasons.append('missing-or-invalid-raw-effects')
             else:
-                supported = {route for route, identities in DIRECT_ROUTES.items()
+                supported = {route for route, identities in route_ids.items()
                              if identities.intersection(effects)}
                 if not supported:
-                    reasons.append('no-current-direct-route')
+                    reasons.append(missing_reason)
                 routes.intersection_update(supported)
         if reasons:
             blocked.append({'spellId': member['spellId'], 'reasons': reasons})
     if blocked:
         routes.clear()
     return {
-        'scope': 'raw-native-direct-route-comparison-not-effective-data-approval',
+        'scope': scope,
         'nativeSource': 'modules/mod-ability-practice/src/AbilityPracticeServer.cpp',
         'commonRoutes': sorted(routes), 'blockedMembers': blocked,
         'status': 'needs-effective-data-and-acquisition-review' if routes else
                   'needs-outcome-adapter-review' if not blocked else 'blocked-by-member-evidence',
     }
+
+
+def native_direct_review(members):
+    return native_route_review(members, DIRECT_ROUTES,
+                               'raw-native-direct-route-comparison-not-effective-data-approval',
+                               'no-current-direct-route')
+
+
+def native_outcome_review(members):
+    return native_route_review(members, OUTCOME_ROUTES,
+                               'raw-native-outcome-route-comparison-not-effective-data-approval',
+                               'no-current-native-outcome-route')
 
 
 def build_candidates(inventory):
@@ -152,6 +165,7 @@ def build_candidates(inventory):
             'classification': 'pending', 'productionApproved': False,
             'rawActionReview': action_review(members),
             'nativeDirectReview': native_direct_review(members),
+            'nativeOutcomeReview': native_outcome_review(members),
             'members': members,
             'acquisitionReferences': sorted(acquisition, key=lambda row: (
                 row['spellId'], row['referenceSpellId'], row['source'])),
@@ -172,6 +186,10 @@ def build_candidates(inventory):
                 row['nativeDirectReview']['status'] for row in candidates).items())),
             'rawNativeCommonRoutes': dict(sorted(Counter(route for row in candidates
                 for route in row['nativeDirectReview']['commonRoutes']).items())),
+            'rawNativeOutcomeStatuses': dict(sorted(Counter(
+                row['nativeOutcomeReview']['status'] for row in candidates).items())),
+            'rawNativeOutcomeCommonRoutes': dict(sorted(Counter(route for row in candidates
+                for route in row['nativeOutcomeReview']['commonRoutes']).items())),
             'rawActionTraits': dict(sorted(Counter(trait for candidate in candidates
                 for trait in candidate['rawActionReview']['traits']).items())),
         },
@@ -179,6 +197,8 @@ def build_candidates(inventory):
             'classId': class_id, 'candidateCount': count,
             'rawNativeDirectCandidateCount': sum(bool(row['nativeDirectReview']['commonRoutes'])
                                                 for row in candidates if row['classId'] == class_id),
+            'rawNativeOutcomeCandidateCount': sum(bool(row['nativeOutcomeReview']['commonRoutes'])
+                                                 for row in candidates if row['classId'] == class_id),
         } for class_id, count in sorted(counts.items())],
         'candidates': candidates,
     }

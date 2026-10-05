@@ -766,3 +766,19 @@ mutation remains refused; other valid abilities are not globally paused. No stor
 Source/native build passed at `.cache/verify-all/20261005-095928/report.json`; C++ lint/whitespace and five
 Lua 5.1 syntax compilations passed. No tests ran. Failure/recovery, ordering/expiry, saved age, class changes,
 layout and DB preservation need runtime acceptance. All defaults remain off; production remains untouched.
+
+
+## All-class native outcome comparison
+
+Candidate discovery retains its direct-only fields and adds nativeOutcomeReview for the current five native
+routes. Shared raw-member validation refuses missing/invalid evidence and passive members; a route must occur
+in every member. Native effect IDs for utility routes were read from SharedDefines.h (dispel38, interrupt68,
+steal126). Mechanic-only dispel, resurrection, leech, periodic and scripted/helper behavior are not inferred.
+
+Read-only regeneration found 444 common-route groups across the 21-class inventory, compared with 404
+direct-only groups. Route counts (overlap possible): damage349, healing57, dispel26, interrupt17, steal2.
+All classifications and effective acquisition/outcome behavior remain unreviewed, productionApproved=0.
+No runtime profiles, thresholds or class coverage were enabled by this discovery output. The ignored artifact
+is `.cache/ability-practice/catalog-candidates.json`. Source checks passed at
+`.cache/verify-all/20261005-100224/report.json`; Python syntax and whitespace passed. No tests ran; this was
+source/data discovery only. Production was untouched.
