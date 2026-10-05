@@ -1,4 +1,6 @@
 import os
+import re
+import copy
 import importlib.util
 from pathlib import Path
 import shutil
@@ -26,6 +28,8 @@ def check_client(wire_path):
         runtime.execute(path.read_text(encoding='utf-8'))
     runtime.globals().EncodedPracticeSnapshot = runtime.table_from(wire_path.read_text().splitlines())
     runtime.execute((HERE / 'client_wire_cases.lua').read_text(encoding='utf-8'))
+    runtime.execute((client / 'Transport.lua').read_text(encoding='utf-8'))
+    runtime.execute((HERE / 'client_transport_cases.lua').read_text(encoding='utf-8'))
 
 
 def check_inventory():
@@ -38,6 +42,12 @@ def check_inventory():
     assert len(inventory['sources']) == 6
     assert [source['rows'] for source in inventory['sources']] == [847, 2709, 116, 27, 41, 3937]
     assert inventory == inventory_module.build_inventory(ROOT)
+    development = (ROOT / 'modules/mod-ability-practice/src/AbilityPracticeDevelopment.h').read_text()
+    defined = re.findall(r'AbilityRank\{\s*(\d+),\s*\d+,\s*\{\s*(\d+),\s*\d+\s*\}\s*\}', development)
+    assert len(defined) == 27
+    source_levels = {row['spellId']: row['reportedLevels'] for row in inventory['spells'] if row['classId'] == 24}
+    for spell, level in defined:
+        assert int(level) in source_levels[int(spell)]
     for spell in inventory['spells']:
         assert spell['evidence']
         assert 'effective-data-unverified' in spell['reviewFlags']
@@ -85,7 +95,63 @@ def check_inventory():
     assert set(ambiguous['nameRankCandidates'][0]['reviewFlags']) == {
         'duplicate-raw-rank-number', 'missing-raw-first-rank', 'raw-rank-gap'}
     assert all('ambiguous-name-rank-candidate' in row['reviewFlags'] for row in ambiguous['spells'])
+    check_catalog_candidates(inventory)
     print('PASS: deterministic 21-class source inventory, provenance and malformed-source rejection')
+
+
+def check_catalog_candidates(inventory):
+    path = ROOT / 'modules/mod-ability-practice/tools/catalog_candidates.py'
+    spec = importlib.util.spec_from_file_location('practice_catalog_candidates', path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    before = copy.deepcopy(inventory)
+    result = module.build_candidates(inventory)
+    assert inventory == before
+    assert result == module.build_candidates(inventory)
+    assert result['summary']['classCount'] == 21
+    assert result['summary']['productionApprovedCount'] == 0
+    assert all(row['classification'] == 'pending' and not row['productionApproved'] for row in result['candidates'])
+    observed = {(row['classId'], member['spellId']) for row in result['candidates'] for member in row['members']}
+    assert observed == {(row['classId'], row['spellId']) for row in inventory['spells']}
+    sample = {'schemaVersion': 1, 'sources': [], 'relationships': [], 'spells': [
+        {'classId': 24, 'spellId': spell, 'reportedLevels': [1], 'reviewFlags': [],
+         'rawRankNumber': 1, 'rawDbc': {'name': 'Same name'}} for spell in (101, 102, 103)]}
+    sample['relationships'] = [{'classId': 24, 'spellId': 103, 'referenceSpellId': 101,
+                                'meaning': 'acquisition-reference', 'source': 'captured-offers'}]
+    separate = module.build_candidates(sample)
+    assert len(separate['candidates']) == 3
+    assert all(len(row['members']) == 1 for row in separate['candidates'])
+    assert 'external-acquisition-prerequisite' in separate['candidates'][2]['reviewFlags']
+    sample['relationships'] += [{'classId': 24, 'spellId': 103, 'referenceSpellId': root,
+                                 'meaning': 'claimed-root', 'source': 'generated-progression'} for root in (101, 102)]
+    conflicting = module.build_candidates(sample)
+    assert len(conflicting['candidates']) == 2
+    assert conflicting['summary']['conflictingMembershipCount'] == 2
+    assert all('claimed-chain-raw-rank-conflict' in row['reviewFlags'] for row in conflicting['candidates'])
+    assert all('shared-reported-levels' in row['reviewFlags'] for row in conflicting['candidates'])
+    node = {'id': 7, 'values': {'RequiredLevel': 14, 'RankSpell[0]': 103},
+            'scope': 'raw-data-reference-not-character-entitlement'}
+    module.annotate_acquisition(conflicting, lambda spell: [node, node] if spell == 103 else [], [])
+    assert conflicting['summary']['withRawAcquisitionCount'] == 2
+    assert all(row['rawAcquisition'] == [node] for row in conflicting['candidates'])
+    assert all('native-acquisition-filtering-unobserved' in row['reviewFlags'] for row in conflicting['candidates'])
+    assert all(not row['productionApproved'] and row['classification'] == 'pending'
+               for row in conflicting['candidates'])
+    module.annotate_acquisition(separate, lambda spell: [], [])
+    assert separate['summary']['withRawAcquisitionCount'] == 0
+    malformed = copy.deepcopy(sample)
+    malformed['spells'].append(copy.deepcopy(malformed['spells'][0]))
+    missing = copy.deepcopy(sample)
+    missing['spells'].pop()
+    unknown = copy.deepcopy(sample)
+    unknown['relationships'][0]['meaning'] = 'guessed-root'
+    for invalid in (malformed, missing, unknown, {**sample, 'schemaVersion': 2}):
+        try:
+            module.build_candidates(invalid)
+        except ValueError:
+            continue
+        raise AssertionError('Malformed source candidate inventory accepted')
+    print('PASS: all-class source grouping preserves acquisition references, conflicts and pending review')
 
 
 def main():

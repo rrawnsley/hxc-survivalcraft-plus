@@ -164,7 +164,18 @@ function API.ApplySnapshot(value)
 end
 
 function API.Toggle()
-    if panel:IsShown() then panel:Hide() else Refresh(); panel:Show() end
+    if panel:IsShown() then panel:Hide() else
+        Refresh()
+        panel:Show()
+        if API.Request then API.Request() end
+    end
+end
+
+function API.Reset()
+    snapshot = nil
+    selectedId = nil
+    offset = 0
+    Refresh()
 end
 
 SLASH_HXCABILITYPRACTICE1 = "/practice"

@@ -6,6 +6,7 @@
 #include "AbilityPracticeWire.h"
 #include "AbilityPracticePersistence.h"
 #include "AbilityPracticeOutcome.h"
+#include "AbilityPracticeDevelopment.h"
 
 #include <array>
 #include <cassert>
@@ -438,6 +439,15 @@ int main(int argc, char** argv)
     CheckMenu(policy);
     CheckPersistence(policy);
     CheckOutcome(policy);
+    assert(ValidateCatalog(Development::Abilities) == CatalogError::None);
+    assert(Development::Find(503232)->AbilityId == 803950);
+    assert(Development::Find(803825)->AbilityId == 803819);
+    assert(!Development::Find(101));
+    std::array const pyroLearned = { 503232U };
+    AbilityView const pyro = BuildAbilityView(Development::Abilities[0], Development::Policy,
+        { 23, 18 }, 16, pyroLearned, true);
+    assert(pyro.Cap == 80 && pyro.LearnedRank == 3 && pyro.NextPoint.Uses == 12);
+    assert(pyro.NextRank->SpellId == 503233 && pyro.NextRank->Practice.Uses == 492);
     if (argc > 1)
     {
         std::array const ranks = { AbilityRank{ 101, 1, { 4, 1 } }, AbilityRank{ 102, 2, { 16, 20 } },

@@ -1,8 +1,8 @@
 # Ability practice — development foundation
 
 This module is under development on `codex/ability-practice`. It implements the deterministic
-practice policy, explicit catalog model and bounded original-action accounting. There is no loader, player hook, database
-migration, installed addon, runtime configuration or production activation in this checkpoint.
+practice policy, explicit catalog model, bounded original-action accounting and a development observation path.
+The module and addon are staged in this checkout. Nothing is installed or activated in production.
 
 `src/AbilityPracticeProgression.h` provides configurable training bands, progression after a qualifying action,
 exact action forecasts across catch-up/rate changes, cap handling and separate character-level/practice eligibility.
@@ -16,8 +16,8 @@ Forecasts report complete, trainable, beyond current cap or invalid; beyond-cap 
 zero-use result. Large intervals are calculated by bands rather than simulated cast by cast.
 
 The function name `ApplyQualifyingUse` requires its future caller to establish eligibility and deduplicate the
-original action. This header does not claim to identify casts, effective healing or anti-grind rules. Event policy,
-live cast attribution, persistence, acquisition enforcement, migration and versioned addon snapshots remain future stages.
+original action. This header does not claim to identify casts, effective healing or anti-grind rules. The development path handles direct cast outcomes; complete event qualification, periodic attribution and
+acquisition enforcement remain future stages.
 
 `src/AbilityPracticeCatalog.h` defines class-scoped stable ability identities, explicit rank requirements, ranked/mastery/
 fixed kinds, and level-cap schedules. Validation rejects duplicate ability/spell ownership, malformed ranks and caps.
@@ -49,7 +49,7 @@ versions, proficiency and partial points. Unknown/corrupt versions are refused; 
 or undo a migration marker. Learned-rank seeding runs once. Reads do not create missing settings or execute queries;
 writes change only the player cache. The existing character save appends these settings through prepared statements
 alongside learned spells in the character transaction, including with optional player preferences disabled. No new
-table or SQL migration is required for this backend. This adapter is not yet called by a registered player hook;
+table or SQL migration is required for this backend. The development player/outcome hooks call this adapter;
 normal autosave/logout reliability and load-failure behavior still require integration qualification. The separate
 save-coordination state API remains available if an independent async backend becomes necessary.
 
@@ -59,8 +59,9 @@ and version conflicts. The cast-owned script value key `0x41505243` (APRC) is re
 existing spell-ID keys, and marks one award across delayed/multiple target outcomes without retaining cast pointers.
 It does not use the shared 32-bit script event mask (whose upper slots already serve Ranger mechanics). The callback
 must establish meaningful effective outcomes and serialize player-cache access on its owning execution context.
-No rank is granted by this helper, and no player hook calls it yet. Current harness compiles the actual adapter using
-mock Player/Spell interfaces; native server compilation and event/lifecycle qualification remain required.
+No rank is granted by this helper. The development outcome hook calls it for effective direct damage/healing.
+The isolated harness compiles the actual adapter using mock Player/Spell interfaces; event/lifecycle qualification
+remains required in addition to native compilation.
 
 `tools/inventory.py --output <path>` produces a deterministic read-only inventory of six class/spellbook sources,
 including hashes and the meaning of each rank reference. It records all 21 classes and 7,678 class/spell identities
@@ -74,6 +75,19 @@ manifest is stale relative to the actual file hash. SQL corrections, scripted be
 Candidate groups also flag duplicate rank labels, absent rank-one labels and gaps instead of silently repairing them.
 Seventeen local groups (113 class/spell entries) carry at least one of these review flags.
 
+`tools/catalog_candidates.py --inventory <inventory.json> --output <candidates.json>` groups only the source's
+explicit claimed-root relationships. Acquisition references are retained as prerequisites and never treated as
+ability roots; same-name spells are not merged. Membership conflicts, uncertain rank order, repeated levels and
+raw rank disagreement remain explicit review flags. Records outside a claimed chain stay separate pending
+classification as ranked, mastery, fixed, passive, pet or support actions. Every candidate has
+`productionApproved: false`; this file is review evidence, not a runtime catalog. The current inventory yields
+456 claimed-root groups and 4,513 standalone source records across all 21 classes, without losing any source identity.
+Optional `--dbc <directory>` uses the reviewed DBC reader to include advancement entry levels, AE/TE costs,
+required entry IDs, rank spells and class/tab context. Table hashes and extraction provenance are retained separately.
+The current local data gives 3,943 candidates at least one raw advancement reference. Native class/spec filtering,
+identity-level normalization and dependency exceptions are not reproduced or asserted by this export; source levels
+are never silently replaced with raw tree levels. Those nodes are acquisition evidence, not character entitlement.
+
 `src/AbilityPracticeMenu.h` builds authoritative per-ability view data from the same calculation/catalog APIs,
 including learned rank, proficiency, current cap, next-point forecast and upcoming rank state. It preserves earned
 above-cap progress and leaves fixed abilities without practice requirements. `MenuSchemaVersion` is 1.
@@ -82,8 +96,8 @@ above-cap progress and leaves fixed abilities without practice requirements. `Me
 selection, a next-point progress bar, exact qualifying-use text and character-level/rank requirement states. `/practice`
 opens it. Without server data it displays a waiting state; there are no demo values or client-calculated awards.
 The model validates and copies complete snapshots, rejects stale/class-mismatched updates and preserves large
-use counts as decimal strings rather than imprecise Lua floating-point numbers. The server transport is not wired,
-so this addon is not functional against production and is not installed or listed in any launcher payload/catalog.
+use counts as decimal strings rather than imprecise Lua floating-point numbers. A self-whisper request/response transport is staged for the development slice. It is not installed or listed
+in any production launcher payload/catalog.
 Session summaries, tracking preferences, filters/search, final visual polish and in-game acceptance remain future work.
 
 The snapshot adapter must send the C++ view fields as the camel-case Lua model fields, with numeric enum states,
@@ -98,8 +112,9 @@ one each of `A` (ability), `P` (next-point forecast) and `R` (rank or absent mar
 then `E|revision`. Records are at most 240 bytes; snapshots contain at most 512 abilities. Enum values are explicit
 and counts remain decimal strings. Duplicate parts and incomplete/expired snapshots are rejected; stale unrelated
 frames do not replace newer pending data. The receiver has a five-second assembly deadline. Live transport must
-bound/throttle delivery to meet it or revise the protocol coherently. There is no network listener/sender yet; a
-C++ encoded snapshot is round-tripped into the actual Lua 5.1 reader by the isolated harness.
+bound/throttle delivery to meet it or revise the protocol coherently. The development listener resets revisions on
+login, rate-limits requests and accepts only self-whispers with prefix HXAP. A C++ encoded snapshot is round-tripped
+through the actual Lua 5.1 event listener by the isolated harness.
 
 The future menu will distinguish character level, learned rank and trained proficiency, with exact qualifying uses
 to the next point/milestone. No random fizzles, magic-school categories or automatic upgrades on unrelated abilities
@@ -116,3 +131,36 @@ is isolated in `.cache/ability-practice/lua-runtime` (installed with `py -m pip 
 .cache/ability-practice/lua-runtime lupa`, version 2.8 at this checkpoint). It neither
 builds a worldserver nor accesses any server/database. Full build and gameplay qualification remain required before
 integration or deployment. Keep all development in this checkout while the user plays.
+
+## Development observation slice
+
+`AbilityPracticeServer.cpp` and the standard module loader register config/startup, login/logout, addon request
+and actual hit-result hooks. Both `AbilityPractice.Enable` and `AbilityPractice.AllowDevelopmentObservation`
+default to zero in `conf/AbilityPractice.conf.dist`. With either off, the frequent outcome/chat/login paths return
+without touching practice or sending snapshots. Enabling after an initially disabled startup requires a restart
+of an isolated development server so its spell validation can run. Do not enable this slice in production.
+
+`AbilityPracticeDevelopment.h` explicitly defines Lava Shard, Cinderheart and Kindle for Pyromancer (class 24).
+Their 27 rank IDs and character levels are checked against the committed source inventory. Proficiency milestones,
+cap schedule, catch-up bands and the ten-level target window are illustrative development settings, not approved
+production balance. The release scope remains all 21 CoA classes.
+
+The slice seeds already learned ranks once and records qualifying practice through the existing settings cache.
+Only non-triggered, learned direct casts with effective hostile damage or friendly healing qualify, while the player
+is in combat and the target meets the development level window. Human sessions only; damaging player targets are
+excluded. The cast-owned marker limits multi-target hits to one award. Successful awards send authoritative views
+for the three abilities. Opening `/practice` requests a fresh snapshot; malformed, foreign and stale messages fail
+closed. No rank is learned, removed or replaced; no combat power is modified. Utility/periodic/pet attribution,
+training-exploit protection, final acquisition gates, owner-thread/cache lifecycle and network pacing still need
+qualification before full progression integration.
+
+The isolated native build uses a checkout-specific build directory and one build worker at reduced process priority.
+Its process tree is limited to two logical processors; Visual Studio can otherwise spawn multiple compiler workers.
+Verification never installs or restarts a server. In-game rendering, effective SQL-adjusted spell data and gameplay
+acceptance are still outstanding.
+
+The combined `--stages source,build,harness --base 36117f3e9 --harness ability_practice --jobs 1` run passed
+at `.cache/verify-all/20261005-034752/report.json`. Both native module files were compiled and the isolated
+worldserver linked. The Windows test dependency needs `-Dgtest_force_shared_crt=ON` to match the server runtime;
+that option is recorded only in this checkout's ignored build settings. Unit executables were built, but the unit
+stage was not run. No gameplay test server, database, installed client or launcher was accessed by this run.

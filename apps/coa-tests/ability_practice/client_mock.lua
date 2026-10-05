@@ -13,7 +13,7 @@ function methods:IsShown() return self.shown end
 local setters = { "SetSize", "SetWidth", "SetPoint", "SetFrameStrata", "SetMovable", "EnableMouse",
     "RegisterForDrag", "SetBackdrop", "SetJustifyH", "SetStatusBarTexture", "SetStatusBarColor",
     "SetMinMaxValues", "SetAllPoints", "SetTexture", "SetHighlightTexture", "EnableMouseWheel",
-    "StartMoving", "StopMovingOrSizing" }
+    "StartMoving", "StopMovingOrSizing", "RegisterEvent" }
 for _, method in ipairs(setters) do methods[method] = function() end end
 function CreateFrame(_, name)
     local frame = Widget()
@@ -25,3 +25,10 @@ UIParent = Widget()
 UISpecialFrames = {}
 SlashCmdList = {}
 tinsert = table.insert
+MockTime = 0
+MockMessages = {}
+function GetTime() return MockTime end
+function UnitName() return "TestPlayer" end
+function SendAddonMessage(prefix, message, channel, target)
+    MockMessages[#MockMessages + 1] = { prefix, message, channel, target }
+end
