@@ -134,7 +134,7 @@ inline std::vector<std::string> PackTypedMessages(std::span<std::string const> l
     };
     for (std::string const& line : lines)
     {
-        if (line.empty() || std::string_view("ACPRTKLMN").find(line.front()) == std::string_view::npos)
+        if (line.empty() || std::string_view("ACPRTKLMNG").find(line.front()) == std::string_view::npos)
         {
             flush();
             packed.push_back(line);
@@ -246,9 +246,8 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
             if (!Detail::ConsistentTypedRoadmap(view, characterLevel) ||
                 !Detail::ConsistentTypedMastery(view, characterLevel))
                 return std::nullopt;
-            if ((view.RuleSet != HumanPvERuleSet && view.RuleSet != HumanPvEPeriodicRuleSet &&
-                    view.RuleSet != HumanPvEScriptedHealRuleSet) ||
-                (view.RuleSet == HumanPvEScriptedHealRuleSet &&
+            if (view.RuleSet < 1 || view.RuleSet > 6 ||
+                ((view.RuleSet == HumanPvEScriptedHealRuleSet || view.RuleSet == 6) &&
                     (view.Route != PracticeRoute::Healing || view.Kind != AbilityKind::Ranked)) ||
                 view.Route < PracticeRoute::Damage ||
                 view.Route > PracticeRoute::Fixed ||
@@ -267,8 +266,22 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
                     view.Ranks.front().State != RankState::MissingPrerequisite &&
                     view.Ranks.front().State != RankState::NeedsCharacterLevel)))
                 return std::nullopt;
-            if (view.AcquisitionSourceId > 4)
+            if (view.AcquisitionSourceId > 4 || (view.RuleSet > 3) != view.Catchup.has_value())
                 return std::nullopt;
+            if (view.Catchup)
+            {
+                CatchupView const& catchup = *view.Catchup;
+                bool const boosted = view.State.Proficiency < view.Cap &&
+                    view.Cap - view.State.Proficiency >= catchup.Gap;
+                std::uint64_t const expected = std::uint64_t(catchup.BasePointsPerUse) *
+                    (boosted ? catchup.Multiplier : 1);
+                if (view.Kind == AbilityKind::Fixed || !catchup.Gap || catchup.Gap > 500 ||
+                    catchup.Multiplier < 2 || catchup.Multiplier > 4 || !catchup.BasePointsPerUse ||
+                    expected != catchup.EffectivePointsPerUse || boosted != catchup.Boosted)
+                    return std::nullopt;
+                lines.push_back(Detail::WireLine('G', revision, index + 1, catchup.Gap, catchup.Multiplier,
+                    catchup.BasePointsPerUse, catchup.EffectivePointsPerUse, catchup.Boosted ? 1 : 0));
+            }
             if (!view.Session.Available && (view.Session.Uses || view.Session.ProficiencyGained))
                 return std::nullopt;
             lines.push_back(Detail::WireLine('T', revision, index + 1, static_cast<std::uint32_t>(view.Kind) + 1,

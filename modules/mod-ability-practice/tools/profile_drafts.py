@@ -13,6 +13,7 @@ def verify_provenance(candidates, root, dbc):
     native_sources = candidates.get('nativeOutcomeSources')
     expected = {'modules/mod-ability-practice/src/AbilityPracticeServer.cpp',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopment.h',
+                         'modules/mod-ability-practice/src/AbilityPracticeCatchup.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentSamples.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentPeriodic.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentRanked.h',

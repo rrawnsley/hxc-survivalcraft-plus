@@ -172,13 +172,27 @@ local function Ability(value, schema, characterLevel)
         if not matched then return nil end
     end
     local session = schema == 4 and Session(value.session) or nil
-    local rewards
+    local rewards, catchup
     if schema == 4 then
         if value.acquisitionSource ~= nil and not Integer(value.acquisitionSource, 1, 4) then return nil end
         if not session or not Integer(value.kind, 1, 3) or not Integer(value.route, 1, 6)
-            or (value.ruleSet ~= 1 and value.ruleSet ~= 2 and value.ruleSet ~= 3)
-            or (value.ruleSet == 3 and (value.kind ~= 1 or value.route ~= 2))
+            or not Integer(value.ruleSet, 1, 6)
+            or ((value.ruleSet == 3 or value.ruleSet == 6) and (value.kind ~= 1 or value.route ~= 2))
             or ((value.kind == 3) ~= (value.route == 6)) then return nil end
+        if (value.ruleSet > 3) ~= (value.catchup ~= nil) then return nil end
+        if value.catchup then
+            local policy = value.catchup
+            if type(policy) ~= "table" or value.kind == 3 or not Integer(policy.gap, 1, 500)
+                or not Integer(policy.multiplier, 2, 4) or not Integer(policy.basePointsPerUse, 1, 4294967295)
+                or not Integer(policy.effectivePointsPerUse, 1, 4294967295)
+                or type(policy.boosted) ~= "boolean" then return nil end
+            local boosted = value.proficiency < value.cap and value.cap - value.proficiency >= policy.gap
+            local expected = policy.basePointsPerUse * (boosted and policy.multiplier or 1)
+            if boosted ~= policy.boosted or expected ~= policy.effectivePointsPerUse then return nil end
+            catchup = { gap = policy.gap, multiplier = policy.multiplier,
+                basePointsPerUse = policy.basePointsPerUse, effectivePointsPerUse = policy.effectivePointsPerUse,
+                boosted = policy.boosted }
+        end
         if not ConsistentTypedRoadmap(value, ranks, rank, point, characterLevel) then return nil end
         rewards = Rewards(value.rewards, value, ranks, characterLevel)
         if not rewards then return nil end
@@ -197,12 +211,13 @@ local function Ability(value, schema, characterLevel)
                     and ranks[1].state ~= 5) then return nil end
         elseif value.availability == 6 then return nil end
     elseif value.kind ~= nil or value.session ~= nil or value.route ~= nil or value.ruleSet ~= nil
-        or value.nextTrainingCap ~= nil or value.rewards ~= nil or value.acquisitionSource ~= nil then return nil end
+        or value.nextTrainingCap ~= nil or value.rewards ~= nil or value.acquisitionSource ~= nil
+        or value.catchup ~= nil then return nil end
     local cap = value.nextTrainingCap
     return { nextTrainingCap = cap and { characterLevel = cap.characterLevel, proficiency = cap.proficiency } or nil,
         hasCapInfo = schema == 4, kind = value.kind, session = session,
         route = value.route, ruleSet = value.ruleSet, acquisitionSource = value.acquisitionSource,
-        ranks = ranks, rewards = rewards,
+        ranks = ranks, rewards = rewards, catchup = catchup,
         abilityId = value.abilityId, displaySpellId = value.displaySpellId,
         learnedRank = value.learnedRank,
         proficiency = value.proficiency, points = value.points, cap = value.cap, pointsPerLevel = value.pointsPerLevel,
@@ -439,7 +454,8 @@ function Model.PracticeRules(ability)
     if Model.IsFixed(ability) then
         return "This ability has no practice levels. " .. LearnText(ability.acquisitionSource)
     end
-    if ability.ruleSet ~= 1 and ability.ruleSet ~= 2 and ability.ruleSet ~= 3 then
+    local ruleSet = ability.ruleSet and ((ability.ruleSet - 1) % 3 + 1) or nil
+    if not ruleSet then
         return "Practice rules are unavailable in this update. Refresh to request the current rules."
     end
     local rules = {
@@ -453,12 +469,12 @@ function Model.PracticeRules(ability)
     }
     local rule = rules[ability.route]
     if not rule then return "Practice rules are unavailable in this update." end
-    if ability.ruleSet == 3 then
+    if ruleSet == 3 then
         rule = "Drain mana from a live, level-appropriate PvE opponent while this ability restores your missing health."
             .. " You must be in a qualifying PvE fight. No mana drained or full overhealing does not count."
             .. " Drain-and-heal ticks count once for your original cast."
     elseif ability.route == 1 or ability.route == 2 then
-        rule = rule .. (ability.ruleSet == 2 and
+        rule = rule .. (ruleSet == 2 and
             (ability.route == 1 and
                 " Supported damage-over-time and health-leech damage ticks can count once for the original cast."
                 or " Supported healing-over-time ticks can count once for the original cast.")
@@ -467,6 +483,15 @@ function Model.PracticeRules(ability)
     if Model.IsMastery(ability) then
         rule = rule .. " Mastery improves this ability's healing in the same qualifying PvE encounters."
             .. " Only the highest earned benefit applies; mastery benefits do not add together."
+    end
+    if ability.catchup then
+        rule = rule .. "\n\nCatch-up grants " .. ability.catchup.multiplier .. "x practice while this ability is "
+            .. ability.catchup.gap .. " or more proficiency behind its current cap."
+            .. " The boost ends when the gap falls below " .. ability.catchup.gap .. "."
+            .. " Uses-remaining forecasts include the change in rate."
+        if ability.availability == 4 then
+            rule = rule .. (ability.catchup.boosted and " Catch-up is active." or " Normal training rate is active.")
+        end
     end
     return rule .. "\n\nOpponents that are too low level, players, player-controlled units, pets, totems"
         .. " and critters do not qualify."

@@ -105,6 +105,15 @@ enum class PracticeRoute
 
 inline constexpr std::uint32_t HumanPvERuleSet = 1;
 
+struct CatchupView
+{
+    std::uint32_t Gap;
+    std::uint32_t Multiplier;
+    std::uint32_t BasePointsPerUse;
+    std::uint32_t EffectivePointsPerUse;
+    bool Boosted;
+};
+
 struct AbilityView
 {
     std::uint32_t SchemaVersion = MenuSchemaVersion;
@@ -126,6 +135,7 @@ struct AbilityView
     std::uint32_t RuleSet = 0;
     std::optional<ProficiencyCap> NextTrainingCap;
     std::uint32_t AcquisitionSourceId = 0;
+    std::optional<CatchupView> Catchup;
 };
 
 inline std::optional<ProficiencyCap> FindNextTrainingCap(AbilityDefinition const& ability,

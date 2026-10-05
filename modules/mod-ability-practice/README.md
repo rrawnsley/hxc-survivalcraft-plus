@@ -29,7 +29,7 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   Shared native race/racial and faction-rift eligibility is checked at preparation, award and new upgrades;
   class/race/talent-set/custom-specialization changes refresh the owner state. Normal database save/reload/failure
   behavior and broader acquisition entitlements remain unqualified.
-- Menu: addon 0.4.18-development; unpublished protocol 4 includes B11 instance identity/realm cap/session learning, T11 kind/session/rules/reward
+- Menu: addon 0.4.19-development; unpublished protocol 4 includes B11 instance identity/realm cap/session learning, T11 kind/session/rules/reward
   count/acquisition source and M mastery entries,
   mandatory C future-cap metadata, packed D parts and F8 unreadable-progress responses. Typed delivery is
   bounded/paced; saved views/ages/session totals are labeled. Existing schema 1/2/3 formats are preserved.
@@ -1584,3 +1584,34 @@ Native damage/healing/utility mechanics, persistence, rank eligibility and wire 
 Source/native passed `.cache/verify-all/20261005-192840/report.json` (two source checks;36.4-second build);
 C++ style/whitespace and authoring regeneration passed. Ownership/lifecycle/gameplay acceptance remains
 pending; no tests or production server/client/configuration/database/launcher changes or restart.
+
+
+## Neglected-ability catch-up — 5 October 2026
+
+Optional startup-only AllowDevelopmentCatchup defaults off. Draft Gap40/Multiplier2 settings are configurable
+within Gap1-500/Multiplier2-4. A qualifying original cast earns multiplied practice while proficiency is
+at least Gap behind the current character-level cap; the boost ends below that gap. Introductory early
+training bands remain, so their existing rate is also multiplied while sufficiently behind. These numbers
+are illustrative development balance, not approved all-class tuning. Native action eligibility, damage,
+healing, level gates, cap and original-cast aggregation are unchanged.
+
+A stack-owned bounded derived training policy preserves every PointsPerLevel cost and inserts a normal-rate
+band at cap-Gap+1. It uses no per-award heap allocation or config/DB lookup. Direct, periodic and Manafeed
+awards and all next-point/rank/mastery forecasts use the same current-cap policy. Costs and persisted
+partial points/proficiency/version/migration are unchanged; earned progress is not retroactively multiplied.
+Policy construction validates settings, band capacity and multiplication overflow; invalid enabled settings
+or profile policy leave startup readiness off. Runtime rate/forecast equivalence still requires qualification.
+
+Addon0.4.19-development adds authoritative catch-up metadata. Unpublished typed rules4/5/6 correspond to
+existing direct/periodic/scripted rules1/2/3 with catch-up. Mandatory G8 for rules4-6 supplies gap, multiplier,
+base/effective practice rate and current boost eligibility. Native/client validate field bounds, fixed-kind
+exclusion, cap-gap consistency and exact multiplied rate. Missing/unexpected/inconsistent G rejects the
+whole typed snapshot. G is included in packed D and bounded delivery. Flag-off typed and legacy schemas
+retain existing formats; enabled development catch-up requires the matching staged addon. No published
+launcher/addon compatibility claim is made. The rules tooltip explains the cutoff, forecast schedule and
+active versus normal training for trainable abilities; paused/unlearned abilities do not claim active use.
+
+Source/native passed .cache/verify-all/20261005-200448/report.json (two source checks;36.7-second build).
+C++ style/whitespace and five Lua5.1 syntax compilations passed; no addon chunks executed. Authoring
+provenance regenerated with37 native sources; catalog remains115 unique/116 declarations. No unit/harness/
+gameplay tests, runtime startup or live server/client/configuration/database/launcher changes or restart.

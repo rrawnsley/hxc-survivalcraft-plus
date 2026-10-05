@@ -115,6 +115,7 @@ local function Accept(message, now, currentRevision, currentGeneration)
                 ability.route = part.T.route
                 ability.ruleSet = part.T.ruleSet
                 ability.acquisitionSource = part.T.acquisitionSource
+                ability.catchup = part.G
                 ability.nextTrainingCap = part.C ~= true and part.C or nil
                 ability.rewards = {}
                 for ordinal = 1, part.T.rewardCount do
@@ -158,6 +159,14 @@ local function Accept(message, now, currentRevision, currentGeneration)
     if not index or index < 1 or index > pending.count then return Reject("Invalid ability index") end
     local part = pending.parts[index] or {}
     pending.parts[index] = part
+    if kind == "G" then
+        if pending.schemaVersion ~= 4 or part.G or #fields ~= 8
+            or (fields[8] ~= "0" and fields[8] ~= "1") then return Reject("Invalid catch-up policy") end
+        part.G = { gap = tonumber(fields[4]), multiplier = tonumber(fields[5]),
+            basePointsPerUse = tonumber(fields[6]), effectivePointsPerUse = tonumber(fields[7]),
+            boosted = fields[8] == "1" }
+        return nil
+    end
     if kind == "C" then
         if pending.schemaVersion ~= 4 or part.C then return Reject("Invalid training cap update") end
         if #fields == 4 and fields[4] == "0" then part.C = true
@@ -258,7 +267,7 @@ local function AcceptPacked(message, now, currentRevision, currentGeneration)
     if tonumber(revisionText) ~= pending.revision then return nil, "Unrelated packed progress message" end
     local parts = {}
     for part in string.gmatch(body .. ";", "([^;]*);") do
-        local kind, fields = string.match(part, "^([ACPRTKLMN])|(.+)$")
+        local kind, fields = string.match(part, "^([ACPRTKLMNG])|(.+)$")
         if not kind or #parts >= 32 then return Reject("Invalid packed progress part") end
         parts[#parts + 1] = kind .. "|" .. revisionText .. "|" .. fields
     end

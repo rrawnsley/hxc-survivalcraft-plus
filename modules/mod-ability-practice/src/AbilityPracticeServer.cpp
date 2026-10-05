@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "AbilityPracticeDevelopment.h"
+#include "AbilityPracticeCatchup.h"
 #include "AbilityPracticeDevelopmentSamples.h"
 #include "AbilityPracticeDevelopmentPeriodic.h"
 #include "AbilityPracticeDevelopmentRanked.h"
@@ -151,6 +152,7 @@ bool RankRequested = false;
 bool PeriodicRequested = false;
 bool MasteryRequested = false;
 bool HelpersRequested = false;
+Practice::CatchupSettings Catchup;
 std::uint64_t NextActionSession = 0;
 std::atomic<bool> RankActive = false;
 std::atomic<bool> Active = false;
@@ -162,7 +164,7 @@ constexpr auto InterestDuration = std::chrono::seconds(30);
 constexpr auto DeliveryInterval = std::chrono::milliseconds(100);
 constexpr auto DeliveryDuration = std::chrono::seconds(90);
 constexpr std::size_t DeliveryBatchSize = 8;
-constexpr std::size_t MaxQueuedMessages = 512 * 7 + 2048 + Practice::MaximumSessionLearns + 3;
+constexpr std::size_t MaxQueuedMessages = 512 * 8 + 2048 + Practice::MaximumSessionLearns + 3;
 constexpr std::uint32_t PracticeCastSourceKey = 0x41504353;
 constexpr std::uint32_t PracticeClientRequestKey = 0x41504352;
 std::string const ActiveSpecializationSource = "core.ascension_active_spec";
@@ -591,9 +593,14 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
                 state = migrated->State;
             }
             bool const acquisition = AcquisitionAllowed(player, ability, ability.Ranks.front().SpellId);
-            auto view = Practice::BuildAbilityView(ability, profile.Policy, state, player->GetLevel(), learned, acquisition);
+            auto const effective = Practice::BuildCatchupPolicy(profile.Policy,
+                Practice::CapAtLevel(ability, player->GetLevel()), Catchup);
+            if (!effective)
+                return false;
+            auto view = Practice::BuildAbilityView(ability, effective->View(), state,
+                player->GetLevel(), learned, acquisition);
             if (ability.Kind == Practice::AbilityKind::Mastery)
-                view.Rewards = Practice::DescribeMasteryRewards(ability, profile.Rewards, profile.Policy,
+                view.Rewards = Practice::DescribeMasteryRewards(ability, profile.Rewards, effective->View(),
                     state, player->GetLevel(), !learned.empty(), acquisition);
             for (Practice::RankView& rank : view.Ranks)
                 if (rank.State != Practice::RankState::Learned && !AcquisitionAllowed(player, ability, rank.SpellId))
@@ -605,6 +612,16 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
             view.RuleSet = HelpersRequested && Practice::DevelopmentHelpers::IsManafeed(profile) ?
                 Practice::HumanPvEScriptedHealRuleSet :
                 PeriodicRequested ? Practice::HumanPvEPeriodicRuleSet : Practice::HumanPvERuleSet;
+            if (Catchup.Enabled && ability.Kind != Practice::AbilityKind::Fixed)
+            {
+                view.RuleSet += 3;
+                auto const base = profile.Policy.Bands[Practice::Detail::BandIndex(profile.Policy, state.Proficiency)];
+                auto const rate = effective->View().Bands[
+                    Practice::Detail::BandIndex(effective->View(), state.Proficiency)];
+                view.Catchup = Practice::CatchupView{ Catchup.Gap, Catchup.Multiplier,
+                    base.PointsPerUse, rate.PointsPerUse,
+                    state.Proficiency < view.Cap && view.Cap - state.Proficiency >= Catchup.Gap };
+            }
             view.Session = {};
             if (currentProgress != session.Progress.end())
             {
@@ -692,8 +709,12 @@ void AwardOutcome(Player* player, Spell* spell, Practice::AbilityProfile const& 
         return;
     auto& session = found->second;
     Practice::OutcomeContext const context{ true, true, true, true, player->GetLevel() };
+    auto const effective = Practice::BuildCatchupPolicy(profile.Policy,
+        Practice::CapAtLevel(profile.Definition, player->GetLevel()), Catchup);
+    if (!effective)
+        return;
     auto const award = Practice::HandleOutcome(*player, *spell, profile.Definition,
-        profile.Policy, profile.DefinitionVersion, context);
+        effective->View(), profile.DefinitionVersion, context);
     if (award.Status == Practice::OutcomeStatus::Awarded || award.Status == Practice::OutcomeStatus::Capped)
         receipt->MarkConsumed();
     RecordAward(player, session, profile, award);
@@ -749,8 +770,12 @@ void AwardPeriodicOutcome(Unit* caster, Unit* target, std::uint32_t auraSpellId,
         return;
     PeriodicCast cast{ player, sSpellMgr->GetSpellInfo(receipt->SpellId), *receipt };
     Practice::OutcomeContext const context{ true, true, true, true, player->GetLevel() };
+    auto const effective = Practice::BuildCatchupPolicy(profile->Policy,
+        Practice::CapAtLevel(profile->Definition, player->GetLevel()), Catchup);
+    if (!effective)
+        return;
     auto const award = Practice::HandleOutcome(*player, cast, profile->Definition,
-        profile->Policy, profile->DefinitionVersion, context);
+        effective->View(), profile->DefinitionVersion, context);
     RecordAward(player, found->second, *profile, award);
 }
 
@@ -871,6 +896,9 @@ public:
             LOG_ERROR("module.ability_practice", "Rejected repeated development catalog initialization");
             return;
         }
+        Catchup.Enabled = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentCatchup", false);
+        Catchup.Gap = sConfigMgr->GetOption<std::uint32_t>("AbilityPractice.DevelopmentCatchupGap", 40);
+        Catchup.Multiplier = sConfigMgr->GetOption<std::uint32_t>("AbilityPractice.DevelopmentCatchupMultiplier", 2);
         PeriodicRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentPeriodicObservation", false);
         MasteryRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentMastery", false);
         HelpersRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentScriptedObservation", false);
@@ -904,9 +932,18 @@ public:
         bool const fixedValid = !fixedCatalog || AppendProfiles(RuntimeProfiles, Practice::DevelopmentFixed::Profiles);
         std::span<Practice::AbilityProfile const> const profiles(RuntimeProfiles);
         ProfileLookup.emplace(profiles);
-        Ready = ProfileLookup->IsValid() && periodicValid && masteryValid && helpersValid && fixedValid;
+        Ready = ProfileLookup->IsValid() && periodicValid && masteryValid && helpersValid && fixedValid &&
+            Practice::ValidCatchupSettings(Catchup);
         for (Practice::AbilityProfile const& profile : profiles)
         {
+            std::uint32_t const maximumCap = profile.Definition.Caps.empty() ? 1 :
+                profile.Definition.Caps.back().Proficiency;
+            if (!Practice::BuildCatchupPolicy(profile.Policy, maximumCap, Catchup))
+            {
+                Ready = false;
+                LOG_ERROR("module.ability_practice", "Rejected catch-up policy: class={}, ability={}",
+                    profile.Definition.ClassId, profile.Definition.AbilityId);
+            }
             if (!MatchesNativeClassGrant(profile))
             {
                 Ready = false;
