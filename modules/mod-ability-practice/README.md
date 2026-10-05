@@ -624,3 +624,20 @@ No more than the existing three development profiles is enabled.
 Source/native build passed at `.cache/verify-all/20261005-090344/report.json`; C++ lint/whitespace passed.
 Read-only export generation wrote ignored cache files only. No tests ran. Individual weapon/heal routes,
 script interactions, encounter outcomes and live rendering remain unqualified. Production is untouched.
+
+## Successful interrupt outcome support
+
+Profile outcome enum is now OutcomeKind (Damage, Healing, Interrupt, None). Trainable Interrupt profiles
+must contain the native interrupt effect; fixed entries still require None. The existing successful-interrupt
+hook fires after at least one interruptible cast is actually stopped. The module accepts eligible live PvE
+opponents only and funnels awards through the same cached progress, known spell, actor, triggered-cast,
+cap and once-per-original-cast checks as damage/healing. Idle targets do not produce this callback.
+Damage/healing hit callbacks explicitly ignore utility profiles, preventing cross-route awards.
+
+Common AwardOutcome centralizes counting, dirty state and paced refresh across outcomes. No core hook,
+spell effect, interrupt duration or combat calculation was edited. No Interrupt profile was classified or added;
+Mastery profiles/rewards remain unsupported and the three sample definitions retain their original routes.
+
+Source/native build passed at `.cache/verify-all/20261005-090714/report.json`; C++ lint/whitespace passed.
+No tests ran. Actual interrupt, idle/immune/miss cases, original-cast deduplication and PvE qualification remain
+runtime acceptance. All development activation flags remain off by default; production is untouched.

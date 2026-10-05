@@ -32,11 +32,11 @@ namespace Practice = AbilityPractice;
 namespace Dev = AbilityPractice::Development;
 constexpr std::array Profiles = {
     Practice::AbilityProfile{ Dev::DefinitionVersion, Practice::AcquisitionSource::ClassGrant,
-        Dev::Abilities[0], Dev::Policy, Practice::DirectOutcome::Damage },
+        Dev::Abilities[0], Dev::Policy, Practice::OutcomeKind::Damage },
     Practice::AbilityProfile{ Dev::DefinitionVersion, Practice::AcquisitionSource::ClassGrant,
-        Dev::Abilities[1], Dev::Policy, Practice::DirectOutcome::Healing },
+        Dev::Abilities[1], Dev::Policy, Practice::OutcomeKind::Healing },
     Practice::AbilityProfile{ Dev::DefinitionVersion, Practice::AcquisitionSource::ClassGrant,
-        Dev::Abilities[2], Dev::Policy, Practice::DirectOutcome::Healing }
+        Dev::Abilities[2], Dev::Policy, Practice::OutcomeKind::Healing }
 };
 std::optional<Practice::ProfileIndex> ProfileLookup;
 std::recursive_mutex Mutex;
@@ -70,17 +70,19 @@ struct MenuSession
 };
 std::unordered_map<std::uint64_t, MenuSession> Sessions;
 
-bool HasDirectOutcome(SpellInfo const* info, Practice::DirectOutcome outcome)
+bool HasOutcomeKind(SpellInfo const* info, Practice::OutcomeKind outcome)
 {
     if (!info)
         return false;
-    if (outcome == Practice::DirectOutcome::Damage)
+    if (outcome == Practice::OutcomeKind::Damage)
         return info->HasEffect(SPELL_EFFECT_SCHOOL_DAMAGE) || info->HasEffect(SPELL_EFFECT_WEAPON_DAMAGE) ||
             info->HasEffect(SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL) || info->HasEffect(SPELL_EFFECT_NORMALIZED_WEAPON_DMG) ||
             info->HasEffect(SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
-    if (outcome == Practice::DirectOutcome::Healing)
+    if (outcome == Practice::OutcomeKind::Healing)
         return info->HasEffect(SPELL_EFFECT_HEAL) || info->HasEffect(SPELL_EFFECT_HEAL_PCT) ||
             info->HasEffect(SPELL_EFFECT_HEAL_MAX_HEALTH);
+    if (outcome == Practice::OutcomeKind::Interrupt)
+        return info->HasEffect(SPELL_EFFECT_INTERRUPT_CAST);
     return false;
 }
 
@@ -336,6 +338,25 @@ void Refresh(Player* player, MenuSession& session, Clock::time_point now)
     }
 }
 
+void AwardOutcome(Player* player, Spell* spell, Practice::AbilityProfile const& profile)
+{
+    std::lock_guard lock(Mutex);
+    if (!Affects(player) || player->isBeingLoaded())
+        return;
+    auto& session = Sessions[player->GetGUID().GetRawValue()];
+    Practice::OutcomeContext const context{ true, true, true, true, player->GetLevel() };
+    auto const award = Practice::HandleOutcome(*player, *spell, profile.Definition,
+        profile.Policy, profile.DefinitionVersion, context);
+    if (award.Status != Practice::OutcomeStatus::Awarded)
+        return;
+    ClassSession& progress = session.Progress[player->getClass()];
+    progress.Totals.RecordAward(award.ProficiencyGained);
+    progress.Abilities[profile.Definition.AbilityId].RecordAward(award.ProficiencyGained);
+    session.Dirty = true;
+    session.CheckRanks = true;
+    Refresh(player, session, Clock::now());
+}
+
 void InitializeProgress(Player* player)
 {
     for (Practice::AbilityProfile const* indexed : ProfilesForClass(player->getClass()))
@@ -413,7 +434,7 @@ public:
             {
                 SpellInfo const* info = sSpellMgr->GetSpellInfo(rank.SpellId);
                 bool const fixed = profile.Definition.Kind == Practice::AbilityKind::Fixed;
-                bool const expectedOutcome = info && (fixed || HasDirectOutcome(info, profile.Outcome));
+                bool const expectedOutcome = info && (fixed || HasOutcomeKind(info, profile.Outcome));
                 if (!info || (!fixed && info->IsPassive()) || !expectedOutcome)
                 {
                     Ready = false;
@@ -533,7 +554,8 @@ public:
 class PracticeSpell : public AllSpellScript
 {
 public:
-    PracticeSpell() : AllSpellScript("AbilityPracticeSpell", { ALLSPELLHOOK_ON_HIT_RESULT }) { }
+    PracticeSpell() : AllSpellScript("AbilityPracticeSpell",
+        { ALLSPELLHOOK_ON_HIT_RESULT, ALLSPELLHOOK_ON_SUCCESSFUL_INTERRUPT }) { }
 
     void OnSpellHitResult(Spell* spell, Unit* target, uint8 miss, uint32 damage, uint32 healing, bool) override
     {
@@ -545,28 +567,26 @@ public:
         if (!IsProfiledPlayer(player))
             return;
         auto const* profile = FindProfile(player, spell->GetSpellInfo()->Id);
-        if (!profile || profile->Outcome == Practice::DirectOutcome::None ||
-            (profile->Outcome == Practice::DirectOutcome::Damage ? !damage : !healing) ||
+        if (!profile || (profile->Outcome != Practice::OutcomeKind::Damage &&
+                profile->Outcome != Practice::OutcomeKind::Healing) ||
+            (profile->Outcome == Practice::OutcomeKind::Damage ? !damage : !healing) ||
             !QualifiesDevelopmentOutcome(player, target, damage, healing))
             return;
-        std::lock_guard lock(Mutex);
-        if (!Affects(player))
+        AwardOutcome(player, spell, *profile);
+    }
+
+    void OnSpellSuccessfulInterrupt(Spell* spell, Unit* target) override
+    {
+        if (!Active.load() || !spell || !spell->GetCaster() || !target || !target->IsAlive())
             return;
-        if (player->isBeingLoaded())
+        Player* player = spell->GetCaster()->ToPlayer();
+        if (!IsProfiledPlayer(player))
             return;
-        auto& session = Sessions[player->GetGUID().GetRawValue()];
-        Practice::OutcomeContext const context{ true, true, true, true, player->GetLevel() };
-        auto const award = Practice::HandleOutcome(*player, *spell, profile->Definition,
-            profile->Policy, profile->DefinitionVersion, context);
-        if (award.Status == Practice::OutcomeStatus::Awarded)
-        {
-            ClassSession& progress = session.Progress[player->getClass()];
-            progress.Totals.RecordAward(award.ProficiencyGained);
-            progress.Abilities[profile->Definition.AbilityId].RecordAward(award.ProficiencyGained);
-            session.Dirty = true;
-            session.CheckRanks = true;
-            Refresh(player, session, Clock::now());
-        }
+        auto const* profile = FindProfile(player, spell->GetSpellInfo()->Id);
+        if (!profile || profile->Outcome != Practice::OutcomeKind::Interrupt ||
+            !IsDevelopmentOpponent(player, target))
+            return;
+        AwardOutcome(player, spell, *profile);
     }
 };
 }
