@@ -4,13 +4,89 @@
 #include "AbilityPracticeState.h"
 #include "AbilityPracticeMenu.h"
 #include "AbilityPracticeWire.h"
+#include "AbilityPracticePersistence.h"
 
 #include <array>
 #include <cassert>
 #include <iostream>
 #include <fstream>
+#include <map>
 
 using namespace AbilityPractice;
+
+struct SettingsPlayer
+{
+    struct Setting
+    {
+        std::uint32_t value;
+    };
+    std::map<std::string, std::vector<Setting>> Settings;
+
+    std::vector<Setting> const* FindPlayerSettings(std::string const& source) const
+    {
+        auto const found = Settings.find(source);
+        return found == Settings.end() ? nullptr : &found->second;
+    }
+
+    void UpdatePlayerSetting(std::string const& source, std::uint32_t index, std::uint32_t value)
+    {
+        auto& fields = Settings[source];
+        fields.resize(std::max(fields.size(), std::size_t(index) + 1));
+        fields[index].value = value;
+    }
+};
+
+void CheckPersistence(TrainingPolicy policy)
+{
+    assert(StorageSource(255, 4294967295U).size() == 40);
+    assert(StorageSource(0, 1001).empty() && StorageSource(256, 1001).empty());
+    assert(StorageSource(24, 0).empty());
+    SettingsPlayer player;
+    auto const missing = ReadPlayerProgress(player, 24, 1001, policy, 7);
+    assert(missing.Status == LoadStatus::Missing && player.Settings.empty());
+    std::array const ranks = { AbilityRank{ 101, 1, { 4, 1 } }, AbilityRank{ 102, 2, { 16, 20 } } };
+    std::array const caps = { ProficiencyCap{ 1, 10 }, ProficiencyCap{ 16, 30 } };
+    AbilityDefinition const ability{ 24, 1001, AbilityKind::Ranked, ranks, caps };
+    std::array const known = { 102U };
+    auto const migrated = MigrateLearnedRanks(ability, policy, missing, known);
+    assert(migrated && migrated->State.Proficiency == 20 && migrated->MigrationVersion == 1);
+    assert(CachePlayerProgress(player, 24, 1001, policy, *migrated));
+    auto const loaded = ReadPlayerProgress(player, 24, 1001, policy, 7);
+    assert(loaded.Status == LoadStatus::Loaded && loaded.Record.State.Proficiency == 20);
+    assert(loaded.Record.DefinitionVersion == 7 && loaded.Record.MigrationVersion == 1);
+    assert(ReadPlayerProgress(player, 24, 1001, policy, 8).Status == LoadStatus::DefinitionMismatch);
+    assert(ReadPlayerProgress(player, 25, 1001, policy, 7).Status == LoadStatus::Missing);
+    assert(ReadPlayerProgress(player, 24, 1002, policy, 7).Status == LoadStatus::Missing);
+    auto const fields = EncodeStoredProgress(policy, loaded.Record);
+    assert(fields && (*fields)[3] == 20 && (*fields)[4] == 0);
+    std::array broken = *fields;
+    broken[0] = 2;
+    assert(DecodeStoredProgress(policy, 7, broken, true).Status == LoadStatus::UnsupportedSchema);
+    broken = *fields;
+    broken[2] = 2;
+    assert(DecodeStoredProgress(policy, 7, broken, true).Status == LoadStatus::UnsupportedMigration);
+    broken = *fields;
+    broken[3] = 0;
+    assert(DecodeStoredProgress(policy, 7, broken, true).Status == LoadStatus::Invalid);
+    broken = *fields;
+    broken[4] = 30;
+    assert(DecodeStoredProgress(policy, 7, broken, true).Status == LoadStatus::Invalid);
+    assert(DecodeStoredProgress(policy, 7, std::span(*fields).first(4), true).Status == LoadStatus::Invalid);
+    LoadedProgress once{ LoadStatus::Loaded, { 7, 1, { 1, 0 } } };
+    auto const notReseeded = MigrateLearnedRanks(ability, policy, once, known);
+    assert(notReseeded && notReseeded->State.Proficiency == 1);
+    assert(!MigrateLearnedRanks(ability, policy, { LoadStatus::UnsupportedSchema, {} }, known));
+    auto const before = player.Settings;
+    assert(!CachePlayerProgress(player, 24, 1001, policy, { 0, 1, { 1, 0 } }));
+    assert(player.Settings.size() == before.size());
+    assert(ReadPlayerProgress(player, 24, 1001, policy, 7).Record.State.Proficiency == 20);
+    assert(!CachePlayerProgress(player, 24, 1001, policy, { 8, 1, { 20, 0 } }));
+    assert(!CachePlayerProgress(player, 24, 1001, policy, { 7, 0, { 20, 0 } }));
+    assert(!CachePlayerProgress(player, 24, 1001, policy, { 7, 1, { 19, 0 } }));
+    assert(CachePlayerProgress(player, 24, 1001, policy, { 7, 1, { 20, 5 } }));
+    assert(!CachePlayerProgress(player, 24, 1001, policy, { 7, 1, { 20, 4 } }));
+    assert(CachePlayerProgress(player, 24, 1001, policy, { 7, 1, { 21, 0 } }));
+}
 
 void CheckMenu(TrainingPolicy policy)
 {
@@ -281,6 +357,7 @@ int main(int argc, char** argv)
     CheckActions();
     CheckState(policy);
     CheckMenu(policy);
+    CheckPersistence(policy);
     if (argc > 1)
     {
         std::array const ranks = { AbilityRank{ 101, 1, { 4, 1 } }, AbilityRank{ 102, 2, { 16, 20 } },

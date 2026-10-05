@@ -42,6 +42,17 @@ callbacks from a previous attempt of the same revision. This is save coordinatio
 prepared statements, bounded async scheduling, transactional migration and logout/shutdown drains remain outstanding.
 Callers must resolve callbacks to the correct live session rather than retaining a raw player pointer.
 
+`src/AbilityPracticePersistence.h` adapts versioned practice records to the existing player-settings cache using
+`FindPlayerSettings` and `UpdatePlayerSetting`. Keys are class/ability scoped under `core.hxc.ability_practice.`
+and fit the existing 40-character database source column. Five uint32 fields store schema, definition and migration
+versions, proficiency and partial points. Unknown/corrupt versions are refused; writes cannot reduce cached practice
+or undo a migration marker. Learned-rank seeding runs once. Reads do not create missing settings or execute queries;
+writes change only the player cache. The existing character save appends these settings through prepared statements
+alongside learned spells in the character transaction, including with optional player preferences disabled. No new
+table or SQL migration is required for this backend. This adapter is not yet called by a registered player hook;
+normal autosave/logout reliability and load-failure behavior still require integration qualification. The separate
+save-coordination state API remains available if an independent async backend becomes necessary.
+
 `tools/inventory.py --output <path>` produces a deterministic read-only inventory of six class/spellbook sources,
 including hashes and the meaning of each rank reference. It records all 21 classes and 7,678 class/spell identities
 without conflating acquisition predecessors with ability roots. These are source candidates, including talent,
