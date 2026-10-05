@@ -670,3 +670,17 @@ character-level requirement, not a raw DBC effect/scaling level. Protocol 4 and 
 Source checks passed at `.cache/verify-all/20261005-091320/report.json`; whitespace and all four Lua 5.1
 syntax compilations passed. No tests ran. Text layout and display during upgrades remain in-game acceptance.
 No active client or launcher payload was updated.
+
+## Spellbook entry point
+
+Addon 0.4.3-development adds a Practice button to AscensionSpellbookFrame when present, with SpellBookFrame
+as a fallback. Read-only inspection of the saved CoA SpellBookFrame stub and launcher ElvUI skin established
+that the custom Ascension frame is the relevant parent; no active client file was modified. The entry listens
+for login, addon load and combat exit, defers creation/reparenting during combat and reuses one button if the
+custom frame becomes available after the fallback. No polling, secure action mutation or server request is
+performed by attachment. Clicking uses the existing menu toggle/request path; /practice remains available.
+
+The top-right header placement is a development position that still needs acceptance with CoA/ElvUI skins.
+Source checks passed at `.cache/verify-all/20261005-091901/report.json`; whitespace and all five Lua 5.1 syntax
+compilations passed. No tests ran. Load order, combat deferral, custom/fallback parent, click behavior and actual
+layout remain unqualified. The addon is not installed or published.
