@@ -18,6 +18,10 @@ local rankOffset = 0
 local roadmapRows = {}
 local roadmapButton
 local sortButton
+local filterButton
+local filterModes = { "all", "training", "capped", "paused", "unlearned" }
+local filterLabels = { all = "All", training = "Training", capped = "At cap",
+    paused = "Paused", unlearned = "Not learned" }
 local sortModes = { "default", "name", "uses" }
 local sortLabels = { default = "Default", name = "Name", uses = "Uses" }
 
@@ -151,6 +155,22 @@ local function SortPreference()
     if type(HXCAbilityPracticePreferences.sorts) ~= "table" then HXCAbilityPracticePreferences.sorts = {} end
     local value = key and HXCAbilityPracticePreferences.sorts[key]
     return sortLabels[value] and value or "default", key
+end
+
+local function FilterPreference()
+    TrackedAbilities()
+    local key = snapshot and tostring(snapshot.classId)
+    if type(HXCAbilityPracticePreferences.filters) ~= "table" then HXCAbilityPracticePreferences.filters = {} end
+    local value = key and HXCAbilityPracticePreferences.filters[key]
+    return filterLabels[value] and value or "all", key
+end
+
+local function MatchesFilter(ability, mode)
+    if mode == "training" then return ability.availability == 4 end
+    if mode == "capped" then return ability.availability == 5 end
+    if mode == "paused" then return ability.availability == 2 or ability.availability == 3 end
+    if mode == "unlearned" then return ability.learnedRank == 0 end
+    return true
 end
 
 local function TrainableMilestoneUses(ability)
@@ -308,6 +328,8 @@ Refresh = function()
     visible = {}
     local sortMode = SortPreference()
     if sortButton then sortButton:SetText("Sort: " .. sortLabels[sortMode]) end
+    local filterMode = FilterPreference()
+    if filterButton then filterButton:SetText("Filter: " .. filterLabels[filterMode]) end
     local session = snapshot and snapshot.session
     sessionText:SetText(session and session.available and
         ((syncState == "current" and "Class skills this session: " or "Saved class session: ") .. session.uses
@@ -328,7 +350,9 @@ Refresh = function()
                         and (ability.session.uses ~= "0" or ability.session.proficiencyGained ~= "0"))))
             local matchesSearch = search == "" or string.find(string.lower(SpellName(ability.displaySpellId)),
                 search, 1, true)
-            if matchesTab and matchesSearch then visible[#visible + 1] = ability end
+            if matchesTab and matchesSearch and MatchesFilter(ability, filterMode) then
+                visible[#visible + 1] = ability
+            end
         end
         table.sort(visible, function(a, b)
             if sortMode == "uses" then
@@ -360,7 +384,8 @@ Refresh = function()
         local emptyText = syncState == "current" and "The server has no practice abilities configured for this class."
             or "This saved view contains no configured practice abilities."
         local emptyView = "No abilities in this view."
-        if search ~= "" then emptyView = "No abilities match your search in this view."
+        if search ~= "" then emptyView = "No abilities match your search and filter in this view."
+        elseif filterMode ~= "all" then emptyView = "No abilities match this filter. Select Filter: All to see more."
         elseif tab == "session" then
             emptyView = (snapshot.schemaVersion ~= 4 or not session or not session.available)
                 and "Per-ability session progress is unavailable in this snapshot."
@@ -517,6 +542,38 @@ for index = 1, 9 do
 end
 panel:EnableMouseWheel(true)
 panel:SetScript("OnMouseWheel", function(_, delta) offset = offset - delta; Refresh() end)
+
+filterButton = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
+filterButton:SetSize(230, 24)
+filterButton:SetPoint("TOPLEFT", 28, -526)
+filterButton:SetScript("OnClick", function()
+    local mode, key = FilterPreference()
+    if not key then return end
+    for index, value in ipairs(filterModes) do
+        if value == mode then
+            HXCAbilityPracticePreferences.filters[key] = filterModes[index % #filterModes + 1]
+            break
+        end
+    end
+    offset = 0
+    Refresh()
+end)
+filterButton:SetScript("OnEnter", function(self)
+    if not GameTooltip then return end
+    GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+    GameTooltip:SetText("Filter abilities")
+    GameTooltip:AddLine("Click to cycle All, Training, At cap, Paused and Not learned."
+        .. " Your choice is saved for this class and applies to the selected tab and search.", 1, 1, 1, true)
+    GameTooltip:AddLine("Training: the server currently permits practice. At cap: no more proficiency can be"
+        .. " earned at your current cap, including completed skills.", 1, 1, 1, true)
+    GameTooltip:AddLine("Paused: current character level or acquisition requirements are not met."
+        .. " Not learned: the introductory ability has not been learned.", 1, 1, 1, true)
+    GameTooltip:AddLine("Saved views use their last received state. Filtering does not change training.",
+        1, 0.82, 0, true)
+    GameTooltip:Show()
+end)
+filterButton:SetScript("OnLeave", HidePracticeTooltip)
+filterButton:SetScript("OnHide", HidePracticeTooltip)
 
 local function Tab(label, value, x)
     local button = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")

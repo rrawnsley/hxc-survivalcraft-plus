@@ -31,7 +31,7 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   Shared native race/racial and faction-rift eligibility is checked at preparation, award and new upgrades;
   class/race/talent-set/custom-specialization changes refresh the owner state. Normal database save/reload/failure
   behavior and broader acquisition entitlements remain unqualified.
-- Menu: addon 0.4.23-development; unpublished protocol 4 includes B11 instance identity/realm cap/session learning, T11 kind/session/rules/reward
+- Menu: addon 0.4.24-development; unpublished protocol 4 includes B11 instance identity/realm cap/session learning, T11 kind/session/rules/reward
   count/acquisition source and M mastery entries,
   mandatory C future-cap metadata, packed D parts and F8 unreadable-progress responses. Typed delivery is
   bounded/paced; saved views/ages/session totals are labeled. Existing schema 1/2/3 formats are preserved.
@@ -1805,3 +1805,18 @@ Source passed .cache/verify-all/20261005-230533/report.json (two checks;6.2s), C
 updated authoring exports passed. Native compilation is pending because another C:/Build-CoA build occupies
 the host; no competing build was started or other process changed. Unit/harness/gameplay skipped. Addon
 unchanged since0.4.23 syntax checks. Runtime rotations/gameplay remain unqualified. No production changes.
+
+
+## Browse by reported training state — 5 October 2026
+
+Addon0.4.24-development adds a filter beneath the ability list: All, Training, At cap, Paused and Not learned.
+Filters use validated server availability/learned-rank fields, work with the selected tab and search, and save
+per character/class. At cap includes complete abilities; paused means current level/acquisition requirements
+are unmet. The same saved/current snapshot supplies the state. Filtering changes no eligibility, training or
+forecast. Empty filtered lists explain how to return to All, without claiming no session events exist.
+Existing selection stays when visible; scroll resets on filter changes. No native/wire change. Button bounds
+fit the unused left-column space by source coordinates; actual rendered layout/callback qualification pending.
+
+Source passed .cache/verify-all/20261005-231216/report.json (two checks;10.2s);five Lua5.1 syntax compilations
+and whitespace passed. No addon chunks, behavioral tests, native rebuild, runtime startup or production changes.
+The pending Ranger/Chronomancer native compilation still waits for the unrelated C:/Build-CoA build.
