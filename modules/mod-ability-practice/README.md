@@ -65,6 +65,15 @@ The snapshot adapter must send the C++ view fields as the camel-case Lua model f
 them atomically after complete assembly; Lua validation does not authenticate a sender. No client request may change
 proficiency or learn a rank. Revision rollover/reconnect behavior must be defined when transport is integrated.
 
+`src/AbilityPracticeWire.h` encodes validated complete snapshots as bounded ASCII records, and client `Wire.lua`
+assembles them atomically before model validation. The format is `B|schema|revision|class|level|count`, followed by
+one each of `A` (ability), `P` (next-point forecast) and `R` (rank or absent marker) per one-based ability index,
+then `E|revision`. Records are at most 240 bytes; snapshots contain at most 512 abilities. Enum values are explicit
+and counts remain decimal strings. Duplicate parts and incomplete/expired snapshots are rejected; stale unrelated
+frames do not replace newer pending data. The receiver has a five-second assembly deadline. Live transport must
+bound/throttle delivery to meet it or revise the protocol coherently. There is no network listener/sender yet; a
+C++ encoded snapshot is round-tripped into the actual Lua 5.1 reader by the isolated harness.
+
 The future menu will distinguish character level, learned rank and trained proficiency, with exact qualifying uses
 to the next point/milestone. No random fizzles, magic-school categories or automatic upgrades on unrelated abilities
 are part of the accepted design. Existing learned abilities must survive migration. Unranked rewards and numerical

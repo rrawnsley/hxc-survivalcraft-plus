@@ -11,13 +11,13 @@ inline constexpr std::uint32_t MenuSchemaVersion = 1;
 
 enum class PracticeAvailability
 {
-    Invalid,
-    AcquireAbility,
-    MissingPrerequisite,
-    NeedsCharacterLevel,
-    Training,
-    Capped,
-    Fixed
+    Invalid = 0,
+    AcquireAbility = 1,
+    MissingPrerequisite = 2,
+    NeedsCharacterLevel = 3,
+    Training = 4,
+    Capped = 5,
+    Fixed = 6
 };
 
 struct AbilityView

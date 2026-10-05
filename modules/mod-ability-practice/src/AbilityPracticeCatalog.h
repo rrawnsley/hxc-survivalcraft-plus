@@ -147,14 +147,14 @@ inline Progress SeedLearnedRanks(AbilityDefinition const& ability, Progress exis
 
 enum class RankState
 {
-    Invalid,
-    Learned,
-    AcquireIntroductoryAbility,
-    MissingPrerequisite,
-    NeedsPractice,
-    NeedsCharacterLevel,
-    NeedsBoth,
-    Ready
+    Invalid = 0,
+    Learned = 1,
+    AcquireIntroductoryAbility = 2,
+    MissingPrerequisite = 3,
+    NeedsPractice = 4,
+    NeedsCharacterLevel = 5,
+    NeedsBoth = 6,
+    Ready = 7
 };
 
 struct RankView

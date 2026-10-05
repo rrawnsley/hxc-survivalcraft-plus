@@ -42,10 +42,10 @@ struct Award
 
 enum class ForecastStatus
 {
-    Invalid,
-    Training,
-    Complete,
-    BeyondCap
+    Invalid = 0,
+    Training = 1,
+    Complete = 2,
+    BeyondCap = 3
 };
 
 struct Forecast

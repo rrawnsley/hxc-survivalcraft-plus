@@ -3,10 +3,12 @@
 #include "AbilityPracticeActions.h"
 #include "AbilityPracticeState.h"
 #include "AbilityPracticeMenu.h"
+#include "AbilityPracticeWire.h"
 
 #include <array>
 #include <cassert>
 #include <iostream>
+#include <fstream>
 
 using namespace AbilityPractice;
 
@@ -271,7 +273,7 @@ void CheckCatalog(TrainingPolicy policy)
     assert(ValidateDefinition(changed) == CatalogError::InvalidCap);
 }
 
-int main()
+int main(int argc, char** argv)
 {
     std::array const bands = { TrainingBand{ 1, 30, 2 }, TrainingBand{ 20, 30, 1 } };
     TrainingPolicy const policy{ bands };
@@ -279,6 +281,31 @@ int main()
     CheckActions();
     CheckState(policy);
     CheckMenu(policy);
+    if (argc > 1)
+    {
+        std::array const ranks = { AbilityRank{ 101, 1, { 4, 1 } }, AbilityRank{ 102, 2, { 16, 20 } },
+            AbilityRank{ 103, 3, { 24, 40 } } };
+        std::array const caps = { ProficiencyCap{ 1, 10 }, ProficiencyCap{ 16, 30 }, ProficiencyCap{ 24, 60 } };
+        AbilityDefinition const ability{ 24, 1001, AbilityKind::Ranked, ranks, caps };
+        std::array const known = { 101U, 102U };
+        std::array views = { BuildAbilityView(ability, policy, { 23, 18 }, 24, known, true) };
+        auto const encoded = EncodeMenuSnapshot(24, 24, 10, views);
+        assert(encoded && encoded->size() == 5);
+        std::ofstream output(argv[1]);
+        for (std::string const& line : *encoded)
+        {
+            assert(line.size() <= 240);
+            output << line << '\n';
+        }
+        assert(output.good());
+        assert(!EncodeMenuSnapshot(25, 24, 10, views));
+        assert(!EncodeMenuSnapshot(24, 24, 0, views));
+        views[0].NextPoint = { ForecastStatus::Training, 9007199254740993ULL };
+        auto const exact = EncodeMenuSnapshot(24, 24, 11, views);
+        assert(exact && (*exact)[2].find("9007199254740993") != std::string::npos);
+        views[0].NextPoint = { ForecastStatus::Complete, 1 };
+        assert(!EncodeMenuSnapshot(24, 24, 11, views));
+    }
     assert(ValidPolicy(policy));
     assert(UsesUntil(policy, { 23, 18 }, 24, 80).Uses == 12);
     assert(UsesUntil(policy, { 27, 24 }, 28, 80).Uses == 6);
