@@ -689,7 +689,8 @@ void Refresh(Player* player, MenuSession& session, Clock::time_point now)
     }
 }
 
-void ObserveMastery(Player* player, MenuSession& session, bool baseline);
+void ObserveMastery(Player* player, MenuSession& session, bool baseline,
+    std::uint32_t characterLevel = 0);
 
 void RecordAward(Player* player, MenuSession& session, Practice::AbilityProfile const& profile,
     Practice::OutcomeAward const& award)
@@ -725,6 +726,8 @@ void AwardOutcome(Player* player, Spell* spell, Practice::AbilityProfile const& 
         Practice::CapAtLevel(profile.Definition, player->GetLevel()), Catchup);
     if (!effective)
         return;
+    if (profile.Definition.Kind == Practice::AbilityKind::Mastery)
+        ObserveMastery(player, session, false);
     auto const award = Practice::HandleOutcome(*player, *spell, profile.Definition,
         effective->View(), profile.DefinitionVersion, context);
     if (award.Status == Practice::OutcomeStatus::Awarded || award.Status == Practice::OutcomeStatus::Capped)
@@ -827,10 +830,11 @@ void InitializeProgress(Player* player)
     }
 }
 
-void ObserveMastery(Player* player, MenuSession& session, bool baseline)
+void ObserveMastery(Player* player, MenuSession& session, bool baseline, std::uint32_t characterLevel)
 {
     if (!MasteryRequested || !Affects(player) || player->isBeingLoaded())
         return;
+    std::uint32_t const observedLevel = characterLevel ? characterLevel : player->GetLevel();
     ClassSession& progress = session.Progress[player->getClass()];
     for (Practice::AbilityProfile const* profile : ProfilesForClass(player->getClass()))
     {
@@ -852,7 +856,7 @@ void ObserveMastery(Player* player, MenuSession& session, bool baseline)
         {
             auto const& reward = profile->Rewards[index];
             std::uint32_t const bit = std::uint32_t(1) << index;
-            if ((seen & bit) || player->GetLevel() < reward.Requirement.CharacterLevel ||
+            if ((seen & bit) || observedLevel < reward.Requirement.CharacterLevel ||
                 migrated->State.Proficiency < reward.Requirement.Proficiency || (!establishBaseline && !eligible))
                 continue;
             seen |= bit;
@@ -1087,8 +1091,15 @@ public:
         }
     }
 
-    void OnPlayerLevelChanged(Player* player, uint8) override
+    void OnPlayerLevelChanged(Player* player, uint8 previousLevel) override
     {
+        if (Active.load() && IsProfiledPlayer(player) && !player->isBeingLoaded())
+        {
+            std::lock_guard lock(Mutex);
+            auto const found = Sessions.find(player->GetGUID().GetRawValue());
+            if (previousLevel && Affects(player) && found != Sessions.end())
+                ObserveMastery(player, found->second, true, previousLevel);
+        }
         MarkDirty(player);
     }
 

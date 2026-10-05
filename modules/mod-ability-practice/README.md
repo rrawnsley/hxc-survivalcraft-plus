@@ -1667,3 +1667,20 @@ and runtime qualification remain false. Source evidence is not proof of live eff
 
 Source/Lua passed .cache/verify-all/20261005-201427/report.json (two source checks;five Lua5.1 syntax
 compilations with no chunk execution); coverage export completed. Final source check after a Python line wrap passed .cache/verify-all/20261005-201519/report.json. No tests, runtime startup, native rebuild or production server/client/config/DB/launcher change.
+
+
+## Mastery baseline before new casts and levels — 5 October 2026
+
+A mastery cast observes cached progress before HandleOutcome, then records milestone changes after the
+award. First valid observation silently baselines pre-cast progress, so delayed login/update ordering cannot
+silently absorb the current cast's new milestone into historical progress. A level-change callback baselines
+against previousLevel before marking state dirty; later observation uses current level. Existing rewards stay
+silent while newly met level requirements can appear as session events. Baselines/seen masks still suppress
+historical/migrated/repeated milestones; unlearned/ineligible/no-loading guards remain. No per-cast DB queries,
+new player pointers, power, training rates or wire changes. These are lifecycle safeguards; no gameplay defect
+reproduction or runtime callback-ordering proof is claimed.
+
+Source/native passed .cache/verify-all/20261005-201807/report.json (two source checks;39.2-second build).
+C++ style/whitespace and updated37-source authoring provenance/coverage passed. Addon unchanged since its
+0.4.21-development syntax check. Unit/harness/gameplay tests skipped. No production installation/start/restart/
+server/client/configuration/database/launcher changes.
