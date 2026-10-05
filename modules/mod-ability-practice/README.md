@@ -478,3 +478,18 @@ catalog/progression APIs remain unchanged; this does not invent rewards or recla
 Source/native build passed at `.cache/verify-all/20261005-081526/report.json`; C++ lint, whitespace and Lua 5.1
 syntax passed. No new cases or behavioral tests ran. Final-cap awards, retained excess progress, level waits and
 complete-state rendering remain runtime qualification work. The feature is still off and not deployed.
+
+## Progress freshness and viewport fit
+
+Development addon `0.3.1-development` timestamps only completed validated snapshots and shows their age while
+current, refreshing or unavailable. One-second listener updates refresh the age label only while the panel is
+shown; relog/class reset clears the timestamp. Client time measures receipt age, not server clock time.
+
+The taller window scales to the available UIParent width/height with margins, clamps dragging to the screen and
+refits when shown or display size changes. Nine ability rows use native spell icons with a question-mark fallback;
+Upcoming rows show the next rank/new ability's level requirement directly. The widget fixture gained only the
+viewport/scale methods required by these changes, with no new behavioral cases.
+
+Source checks passed at `.cache/verify-all/20261005-082424/report.json`; whitespace and Lua 5.1 syntax passed.
+No behavioral tests ran. Actual font wrapping, resize/dragging, age updates and in-game layout remain acceptance
+work. Nothing was installed or published, and native protocol 3 is unchanged.

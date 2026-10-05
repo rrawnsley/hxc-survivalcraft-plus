@@ -7,11 +7,13 @@ function methods:CreateTexture() return Widget() end
 function methods:SetScript(event, callback) self.scripts[event] = callback end
 function methods:SetText(value) self.text = value end
 function methods:GetText() return self.text end
+function methods:GetWidth() return 1024 end
+function methods:GetHeight() return 768 end
 function methods:SetValue(value) self.value = value end
 function methods:Show() self.shown = true end
 function methods:Hide() self.shown = false end
 function methods:IsShown() return self.shown end
-local setters = { "SetSize", "SetWidth", "SetPoint", "SetFrameStrata", "SetMovable", "EnableMouse",
+local setters = { "SetSize", "SetWidth", "SetPoint", "SetScale", "SetClampedToScreen", "SetFrameStrata", "SetMovable", "EnableMouse",
     "RegisterForDrag", "SetBackdrop", "SetJustifyH", "SetStatusBarTexture", "SetStatusBarColor",
     "SetMinMaxValues", "SetAllPoints", "SetTexture", "SetHighlightTexture", "EnableMouseWheel",
     "StartMoving", "StopMovingOrSizing", "RegisterEvent", "SetAutoFocus", "SetMaxLetters", "ClearFocus" }

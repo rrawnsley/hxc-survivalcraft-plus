@@ -1,7 +1,7 @@
 HXCAbilityPractice = {}
 local API = HXCAbilityPractice
 local Model = HXCAbilityPracticeModel
-local snapshot, selectedId
+local snapshot, selectedId, receivedAt
 local syncState = "waiting"
 local tab = "skills"
 local offset = 0
@@ -20,6 +20,7 @@ panel:SetSize(760, 610)
 panel:SetPoint("CENTER")
 panel:SetFrameStrata("DIALOG")
 panel:SetMovable(true)
+panel:SetClampedToScreen(true)
 panel:EnableMouse(true)
 panel:RegisterForDrag("LeftButton")
 panel:SetScript("OnDragStart", panel.StartMoving)
@@ -65,6 +66,32 @@ progressLabel:SetPoint("CENTER")
 local pointText = Text(detail, "GameFontHighlight", 0, -130, 430)
 local nextTitle = Text(detail, "GameFontNormal", 0, -195, 280)
 local nextText = Text(detail, "GameFontHighlight", 0, -221, 430)
+
+local function FitPanel()
+    local width = math.max(1, UIParent:GetWidth() - 32)
+    local height = math.max(1, UIParent:GetHeight() - 32)
+    panel:SetScale(math.min(1, width / 760, height / 610))
+end
+panel:SetScript("OnShow", FitPanel)
+panel:RegisterEvent("DISPLAY_SIZE_CHANGED")
+panel:SetScript("OnEvent", function() if panel:IsShown() then FitPanel() end end)
+
+local function UpdateSubtitle(now)
+    if not snapshot then
+        subtitle:SetText(syncState == "unavailable" and "Server progress is unavailable. Open this menu to retry."
+            or "Waiting for your server progress...")
+        return
+    end
+    local status = syncState == "current" and "Server progress received"
+        or (syncState == "waiting" and "Refreshing saved view..." or "Saved view - Server progress unavailable")
+    if #snapshot.abilities == 0 and syncState == "current" then status = "No practice catalog for this class" end
+    local age = type(now) == "number" and type(receivedAt) == "number" and now >= receivedAt
+        and now < math.huge and math.floor(now - receivedAt) or nil
+    local ageText = age and ((age < 60 and (age .. "s") or
+        (age < 3600 and (math.floor(age / 60) .. "m") or (math.floor(age / 3600) .. "h"))) .. " old")
+        or "Update age unavailable"
+    subtitle:SetText("Character level " .. snapshot.characterLevel .. " - " .. status .. " - " .. ageText)
+end
 
 local function SpellName(spellId)
     return GetSpellInfo(spellId) or ("Ability " .. spellId)
@@ -156,16 +183,11 @@ Refresh = function()
     sessionText:SetText(session and session.available and ("Class skills this session: " .. session.uses
         .. " uses that earned practice - +" .. session.proficiencyGained
         .. " proficiency") or "Session totals unavailable")
+    UpdateSubtitle(GetTime())
     if not snapshot then
-        subtitle:SetText(syncState == "unavailable" and "Server progress is unavailable. Open this menu to retry."
-            or "Waiting for your server progress...")
         footer:SetText("Practice counts meaningful uses. Your server determines eligibility and progression.")
         detail:Hide()
     else
-        local status = syncState == "current" and "Server progress received"
-            or (syncState == "waiting" and "Refreshing saved view..." or "Saved view - Server progress unavailable")
-        if #snapshot.abilities == 0 and syncState == "current" then status = "No practice catalog for this class" end
-        subtitle:SetText("Character level " .. snapshot.characterLevel .. " - " .. status)
         local tracked = TrackedAbilities()
         for _, ability in ipairs(snapshot.abilities) do
             local matchesTab = (tab == "skills" and ability.learnedRank > 0)
@@ -203,22 +225,31 @@ Refresh = function()
         row.ability = ability
         if ability then row:Show() else row:Hide() end
         if ability then
+            local _, _, icon = GetSpellInfo(ability.displaySpellId)
+            row.icon:SetTexture(icon or "Interface\\Icons\\INV_Misc_QuestionMark")
             row.label:SetText((ability.abilityId == selectedId and "|cffffd36b" or "|cffffffff")
                 .. SpellName(ability.displaySpellId) .. "|r")
-            row.info:SetText(ability.learnedRank == 0 and "Not yet learned" or
-                ("Rank " .. ability.learnedRank .. (ability.availability == 6 and " · Fixed" or
-                    " · Proficiency " .. ability.proficiency)))
+            local rank = ability.nextRank
+            row.info:SetText(tab == "upcoming" and rank and
+                ((ability.learnedRank == 0 and "New ability" or ("Next rank " .. rank.rankNumber))
+                    .. " · Req. level " .. rank.characterLevel) or
+                (ability.learnedRank == 0 and "Not yet learned" or
+                    ("Rank " .. ability.learnedRank .. (ability.availability == 6 and " · Fixed" or
+                        " · Proficiency " .. ability.proficiency))))
         end
     end
 end
 
-for index = 1, 7 do
+for index = 1, 9 do
     local row = CreateFrame("Button", nil, panel)
     row:SetSize(230, 42)
     row:SetPoint("TOPLEFT", 28, -110 - (index - 1) * 46)
     row:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
-    row.label = Text(row, "GameFontNormal", 2, -3, 226)
-    row.info = Text(row, "GameFontHighlightSmall", 2, -24, 226)
+    row.icon = row:CreateTexture(nil, "ARTWORK")
+    row.icon:SetSize(32, 32)
+    row.icon:SetPoint("TOPLEFT", 2, -4)
+    row.label = Text(row, "GameFontNormal", 40, -3, 186)
+    row.info = Text(row, "GameFontHighlightSmall", 40, -24, 186)
     row:SetScript("OnClick", function(self)
         if selectedId ~= self.ability.abilityId then rankOffset = 0 end
         selectedId = self.ability.abilityId
@@ -263,6 +294,7 @@ function API.ApplySnapshot(value)
         return false, "Stale or mismatched progress update"
     end
     snapshot = validated
+    receivedAt = GetTime()
     syncState = "current"
     Refresh()
     return true
@@ -278,6 +310,10 @@ end
 
 function API.IsShown()
     return panel:IsShown()
+end
+
+function API.UpdateAge(now)
+    if panel:IsShown() then UpdateSubtitle(now) end
 end
 
 function API.SetSyncState(value)
@@ -296,6 +332,7 @@ end
 
 function API.Reset()
     snapshot = nil
+    receivedAt = nil
     syncState = "waiting"
     selectedId = nil
     offset = 0

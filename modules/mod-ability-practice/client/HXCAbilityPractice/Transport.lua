@@ -47,6 +47,7 @@ listener:SetScript("OnUpdate", function(_, delta)
     if elapsed < 1 then return end
     elapsed = 0
     local now = GetTime()
+    API.UpdateAge(now)
     if deadline and now >= deadline then
         deadline = nil
         Wire.Reset()
