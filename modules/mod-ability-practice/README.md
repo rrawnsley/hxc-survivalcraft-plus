@@ -10,12 +10,12 @@ The module and addon are staged in this checkout. Nothing is installed or activa
 - Native prototype: three Pyromancer class-grant profiles, with draft tuning. The full rollout still targets
   all 21 CoA classes. An optional startup-only sample catalog adds 20 ranked class-grant profiles for the other
   classes, for 23 profiles across all 21 classes. An optional broader ranked catalog selects 106 profiles and
-  888 authored ranks across all 21 classes, taking priority over class samples. Periodic observation adds nine
-  profiles to the selected catalog (12/32/114 unique profiles respectively, reusing the shared Shadra's Prayer
+  888 authored ranks across all 21 classes, taking priority over class samples. Periodic observation adds twelve
+  profiles to the selected catalog (15/35/117 unique profiles respectively, reusing the shared Shadra's Prayer
   definition in the broad ranked mode). Optional Hand of Elune mastery adds one more
   profile. Optional scripted observation adds Manafeed and an independent fixed-utility option adds two
   nontraining profiles. Optional Emerald Veil absorption reuses its existing six ranked definitions;
-  the largest staged catalog has 118 unique profiles from 120 source declarations.
+  the largest staged catalog has 121 unique profiles from 123 source declarations.
   All development settings default off. A nonempty explicit `AbilityPractice.DevelopmentCharacterGuids`
   selection is also required; unselected characters keep native progression and receive no practice effects.
 - Outcomes: resolved direct damage/healing, successful interruption, dispel and beneficial-aura steal.
@@ -1783,3 +1783,25 @@ Source/native passed .cache/verify-all/20261005-225938/report.json (two source c
 build);changed C++ style/whitespace and authoring provenance/coverage passed. Addon unchanged since0.4.23
 syntax checks. Unit/harness/gameplay stages skipped; no native startup or production install/restart/client/
 configuration/database/launcher changes. Live CoA remains process42440, started4October2026 21:36:56 local.
+
+
+## Ranger and Chronomancer periodic rank profiles — 5 October 2026
+
+The disabled periodic catalog now adds Ranger21/Serrated Shot500073 (7ranks), Ranger21/Toxic Dart807237
+(8ranks) and Chronomancer22/Unmake804418 (11ranks), using source grant/progression levels. Every raw rank
+contains native periodic damage aura3. Existing original-cast receipt/actual-damage/owner/session/acquisition/
+PvE guards and one award per cast apply. Toxic Dart's native contract preserves that damage aura while
+redirecting a separate triggered helper; the helper and Ranger resource increments cannot mint practice
+identity. Unmake's linked original hit/periodic-result handlers trigger separate keeper/copy effects, which
+lack the original receipt. Native talent damage modifiers remain in their normal pipeline. Serrated Shot's
+trigger references in inactive raw effect slots do not establish active helper outcomes. No damage/resource/
+proc/trigger/talent or core outcome bridge changes are made.
+
+51 native source hashes;12 periodic profiles/96authored ranks;121 unique profiles/123 declarations/two
+shared identities in the largest catalog.726 source groups remain for review (126ranked,600standalone),
+with72 raw common-outcome groups. None is automatically approved or qualified as trainable.
+
+Source passed .cache/verify-all/20261005-230533/report.json (two checks;6.2s), C++ style/whitespace and
+updated authoring exports passed. Native compilation is pending because another C:/Build-CoA build occupies
+the host; no competing build was started or other process changed. Unit/harness/gameplay skipped. Addon
+unchanged since0.4.23 syntax checks. Runtime rotations/gameplay remain unqualified. No production changes.

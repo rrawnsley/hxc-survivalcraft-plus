@@ -413,6 +413,8 @@ def main():
                          'src/server/coa/AscensionVenomancerAuras.cpp',
                 'src/server/coa/AscensionBloodmageTalents.cpp',
                 'src/server/coa/AscensionPrimalistSeismicResources.cpp',
+                'src/server/coa/AscensionChronomancerSecondary.cpp',
+                'src/server/coa/AscensionChronomancerTalents.cpp',
                 'src/server/coa/AscensionCustomResourceData.h',
                 'src/server/coa/AscensionPyromancer.cpp',
                 'src/server/coa/AscensionPyromancerAbilities.cpp',
