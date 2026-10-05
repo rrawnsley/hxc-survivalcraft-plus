@@ -28,6 +28,7 @@ def verify_provenance(candidates, root, dbc):
                 'src/server/coa/AscensionFelswornAuras.cpp',
                 'src/server/coa/AscensionFelswornContracts.cpp', 'src/server/coa/AscensionCompat.cpp',
                 'src/server/coa/AscensionClassMechanics.cpp', 'src/server/game/Entities/Player/Player.cpp',
+                'src/server/coa/AscensionNecromancerContracts.cpp', 'src/server/coa/AscensionReaperDeathwind.cpp',
                 'src/server/game/Spells/AbilityPracticeCastReceipt.h', 'src/server/game/Spells/Spell.h',
                 'src/server/game/Spells/Spell.cpp', 'src/server/game/Spells/SpellEffects.cpp',
                 'src/server/game/Spells/Auras/SpellAuras.h', 'src/server/game/Spells/Auras/SpellAuras.cpp',

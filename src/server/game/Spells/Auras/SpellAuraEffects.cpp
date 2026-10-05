@@ -6636,6 +6636,9 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
 
 void AuraEffect::HandlePeriodicHealthLeechAuraTick(Unit* target, Unit* caster) const
 {
+    auto const practiceCast = GetBase()->GetPracticeCast();
+    uint32 const practiceSpellId = GetId();
+    uint32 const practiceAuraType = GetAuraType();
     if (!target->IsAlive())
         return;
 
@@ -6726,6 +6729,8 @@ void AuraEffect::HandlePeriodicHealthLeechAuraTick(Unit* target, Unit* caster) c
 
     new_damage = Unit::DealDamage(caster, target, damage, &cleanDamage, DOT, GetSpellInfo()->GetSchoolMask(), GetSpellInfo(), false);
     sScriptMgr->OnPeriodicDamageResult(target, caster, std::max(new_damage, 0), GetSpellInfo());
+    CoAAbilityPractice::ReportPeriodicOutcome(caster, target, practiceSpellId, practiceAuraType,
+        std::max(new_damage, 0), 0, practiceCast);
 
     Unit::ProcSkillsAndAuras(caster, target, caster ? procAttacker : 0, procVictim, procEx, damage, BASE_ATTACK, GetSpellInfo(), nullptr, GetEffIndex(), nullptr, &dmgInfo);
 

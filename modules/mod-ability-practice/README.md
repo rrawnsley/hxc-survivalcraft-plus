@@ -10,10 +10,10 @@ The module and addon are staged in this checkout. Nothing is installed or activa
 - Native prototype: three Pyromancer class-grant profiles, with draft tuning. The full rollout still targets
   all 21 CoA classes. An optional startup-only sample catalog adds 20 ranked class-grant profiles for the other
   classes, for 23 profiles across all 21 classes. An optional broader ranked catalog selects 106 profiles and
-  888 authored ranks across all 21 classes, taking priority over class samples. Periodic observation adds two
-  profiles to the selected catalog (five/25/108 respectively). Optional Hand of Elune mastery adds one more
+  888 authored ranks across all 21 classes, taking priority over class samples. Periodic observation adds four
+  profiles to the selected catalog (seven/27/110 respectively). Optional Hand of Elune mastery adds one more
   profile. Optional scripted observation adds Manafeed and an independent fixed-utility option adds two
-  nontraining profiles; the largest staged catalog has 112 profiles.
+  nontraining profiles; the largest staged catalog has 114 profiles.
   All development settings default off.
 - Outcomes: resolved direct damage/healing, successful interruption, dispel and beneficial-aura steal.
   Each profile requires its own outcome route. The existing client-cast callback records numeric class/spell
@@ -27,7 +27,7 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   Shared native race/racial and faction-rift eligibility is checked at preparation, award and new upgrades;
   class/race/talent-set/custom-specialization changes refresh the owner state. Normal database save/reload/failure
   behavior and broader acquisition entitlements remain unqualified.
-- Menu: addon 0.4.12-development; unpublished protocol 4 includes B7 instance identity, T10 kind/session/rules/reward
+- Menu: addon 0.4.13-development; unpublished protocol 4 includes B7 instance identity, T10 kind/session/rules/reward
   count and M mastery entries,
   mandatory C future-cap metadata, packed D parts and F8 unreadable-progress responses. Typed delivery is
   bounded/paced; saved views/ages/session totals are labeled. Existing schema 1/2/3 formats are preserved.
@@ -1364,3 +1364,29 @@ Affected source/native checks passed `.cache/verify-all/20261005-180153/report.j
 worktree (two source checks, 39.1s native build; unit/harness/gameplay skipped). Changed C++ style and whitespace
 passed; authoring artifacts regenerated with unchanged counts and 31 provenance entries. No behavioral tests,
 addon installation, server start, production configuration/database changes or deployment occurred.
+
+## Original-cast health-leech damage practice — 5 October 2026
+
+Native periodic observation now includes PERIODIC_LEECH damage. The tick handler snapshots the original cast
+receipt and numeric spell/aura identity before script hooks, then reports only actual positive DealDamage result
+after existing mitigation/absorption/overkill handling. Damage, self-healing, threat, procs and timer calculations
+are unchanged. The damage route uses the existing eligible-PvE opponent, class/acquisition/session/known-spell/
+progress/cap checks and shared receipt, so multiple ticks/targets and earlier direct outcomes remain one award
+per original client cast. Full self-overhealing does not prevent qualifying damage practice; the healing
+component never grants a second award. Item/script/triggered and restored aura sources do not gain provenance.
+
+The existing startup-only periodic option additionally selects Necromancer Harvest Plague (class23, root500968,
+six ranks at native levels16/24/32/40/48/56) and Reaper Deathwind (class30, root800174, seven ranks at native
+levels16/24/31/38/45/52/59). Draft proficiency requirements and capped practice bands use the existing development
+curve. Source grants, complete generated rank chains, raw leech effects and the relevant native Necromancer/
+Deathwind contracts were reviewed. Startup still requires effective outcome, exact acquisition/chain and
+nondeprecated/nonpassive data. The mastery prototype additionally refuses leech auras so its direct-healing
+scope is not expanded. Raw candidate routing remains conservative rather than automatically approving periodics.
+
+Addon 0.4.13 explains damage-over-time/health-leech damage separately from healing-over-time in rule set2;
+protocol shape is unchanged. Periodic profiles now total four, largest option catalog114, provenance33 entries.
+Authoring artifacts remain 847 unapproved drafts/179 common-outcome candidates. Source/native checks passed
+`.cache/verify-all/20261005-180921/report.json` (four source checks, 41.5s native build; unit/harness/gameplay skipped).
+Changed C++ style/whitespace and five Lua5.1 syntax compilations passed. No addon chunks or behavioral tests ran,
+and no live installation/start/restart/configuration/database/client/launcher change occurred. Runtime lifecycle,
+AoE/channel/target/source/save/menu acceptance and final balance remain outstanding.

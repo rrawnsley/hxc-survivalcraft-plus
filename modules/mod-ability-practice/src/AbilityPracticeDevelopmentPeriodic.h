@@ -29,13 +29,40 @@ inline constexpr std::array ShadrasPrayer = {
 };
 inline constexpr auto ShadrasPrayerCaps = Development::RankCaps(ShadrasPrayer);
 
+inline constexpr std::array HarvestPlague = {
+    AbilityRank{ 500968, 1, { 16, 1 } },
+    AbilityRank{ 501890, 2, { 24, 10 } },
+    AbilityRank{ 501891, 3, { 32, 20 } },
+    AbilityRank{ 501892, 4, { 40, 40 } },
+    AbilityRank{ 583255, 5, { 48, 60 } },
+    AbilityRank{ 583256, 6, { 56, 80 } }
+};
+inline constexpr auto HarvestPlagueCaps = Development::RankCaps(HarvestPlague);
+
+inline constexpr std::array Deathwind = {
+    AbilityRank{ 800174, 1, { 16, 1 } },
+    AbilityRank{ 502989, 2, { 24, 10 } },
+    AbilityRank{ 502990, 3, { 31, 20 } },
+    AbilityRank{ 502991, 4, { 38, 40 } },
+    AbilityRank{ 502992, 5, { 45, 60 } },
+    AbilityRank{ 502993, 6, { 52, 80 } },
+    AbilityRank{ 502994, 7, { 59, 100 } }
+};
+inline constexpr auto DeathwindCaps = Development::RankCaps(Deathwind);
+
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 24, 805476, AbilityKind::Ranked, Cindergrip, CindergripCaps },
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 29, 800870, AbilityKind::Ranked, ShadrasPrayer, ShadrasPrayerCaps },
-        Development::Policy, OutcomeKind::Healing }
+        Development::Policy, OutcomeKind::Healing },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 23, 500968, AbilityKind::Ranked, HarvestPlague, HarvestPlagueCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 30, 800174, AbilityKind::Ranked, Deathwind, DeathwindCaps },
+        Development::Policy, OutcomeKind::Damage }
 };
 }
 

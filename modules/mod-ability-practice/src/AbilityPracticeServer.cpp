@@ -186,7 +186,8 @@ bool HasSupportedOutcome(SpellInfo const* info, Practice::OutcomeKind outcome)
         return info->HasEffect(SPELL_EFFECT_SCHOOL_DAMAGE) || info->HasEffect(SPELL_EFFECT_WEAPON_DAMAGE) ||
             info->HasEffect(SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL) || info->HasEffect(SPELL_EFFECT_NORMALIZED_WEAPON_DMG) ||
             info->HasEffect(SPELL_EFFECT_WEAPON_PERCENT_DAMAGE) || (PeriodicRequested &&
-                (info->HasAura(SPELL_AURA_PERIODIC_DAMAGE) || info->HasAura(SPELL_AURA_PERIODIC_DAMAGE_PERCENT)));
+                (info->HasAura(SPELL_AURA_PERIODIC_DAMAGE) || info->HasAura(SPELL_AURA_PERIODIC_DAMAGE_PERCENT) ||
+                    info->HasAura(SPELL_AURA_PERIODIC_LEECH)));
     if (outcome == Practice::OutcomeKind::Healing)
         return info->HasEffect(SPELL_EFFECT_HEAL) || info->HasEffect(SPELL_EFFECT_HEAL_PCT) ||
             info->HasEffect(SPELL_EFFECT_HEAL_MAX_HEALTH) ||
@@ -656,7 +657,8 @@ void AwardPeriodicOutcome(Unit* caster, Unit* target, std::uint32_t auraSpellId,
     bool const scripted = profile && HelpersRequested && Practice::DevelopmentHelpers::IsManafeed(*profile) &&
         auraType == SPELL_AURA_PERIODIC_DUMMY;
     if (!profile || (!scripted && (profile->Outcome == Practice::OutcomeKind::Damage ?
-            auraType != SPELL_AURA_PERIODIC_DAMAGE && auraType != SPELL_AURA_PERIODIC_DAMAGE_PERCENT :
+            auraType != SPELL_AURA_PERIODIC_DAMAGE && auraType != SPELL_AURA_PERIODIC_DAMAGE_PERCENT &&
+                auraType != SPELL_AURA_PERIODIC_LEECH :
             profile->Outcome != Practice::OutcomeKind::Healing || auraType != SPELL_AURA_PERIODIC_HEAL)) ||
         std::none_of(profile->Definition.Ranks.begin(), profile->Definition.Ranks.end(),
             [auraSpellId](Practice::AbilityRank const& rank) { return rank.SpellId == auraSpellId; }) ||
@@ -835,7 +837,7 @@ public:
                 bool const expectedOutcome = info && (fixed || HasSupportedOutcome(info, profile.Outcome) ||
                     HasSupportedHelperOutcome(info, profile)) &&
                     (profile.Definition.Kind != Practice::AbilityKind::Mastery ||
-                        !info->HasAura(SPELL_AURA_PERIODIC_HEAL));
+                        (!info->HasAura(SPELL_AURA_PERIODIC_HEAL) && !info->HasAura(SPELL_AURA_PERIODIC_LEECH)));
                 if (!info || info->IsDeprecatedForPlayers || (!fixed && info->IsPassive()) || !expectedOutcome)
                 {
                     Ready = false;

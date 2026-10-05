@@ -416,6 +416,8 @@ def main():
                          'src/server/coa/AscensionFelswornContracts.cpp',
                          'src/server/coa/AscensionCompat.cpp',
                          'src/server/coa/AscensionClassMechanics.cpp',
+                         'src/server/coa/AscensionNecromancerContracts.cpp',
+                         'src/server/coa/AscensionReaperDeathwind.cpp',
                          'src/server/game/Entities/Player/Player.cpp',
                          'src/server/game/Spells/AbilityPracticeCastReceipt.h',
                          'src/server/game/Spells/Spell.h', 'src/server/game/Spells/Spell.cpp',

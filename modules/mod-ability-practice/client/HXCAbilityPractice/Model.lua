@@ -375,7 +375,9 @@ function Model.PracticeRules(ability)
             .. " Drain-and-heal ticks count once for your original cast."
     elseif ability.route == 1 or ability.route == 2 then
         rule = rule .. (ability.ruleSet == 2 and
-            " Supported damage/healing-over-time ticks can count once for the original cast."
+            (ability.route == 1 and
+                " Supported damage-over-time and health-leech damage ticks can count once for the original cast."
+                or " Supported healing-over-time ticks can count once for the original cast.")
             or " Only direct damage or healing counts in the current rules.")
     end
     if Model.IsMastery(ability) then
