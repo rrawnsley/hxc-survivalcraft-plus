@@ -973,3 +973,13 @@ No startup name cache, pointers retained beyond the callback or new DB calls are
 performance improvement is claimed. Source/native build passed at
 `.cache/verify-all/20261005-103935/report.json`; C++ lint/whitespace passed. No tests ran; runtime equivalence
 and cost still require qualification. Production untouched.
+
+
+## Keep menu identity separate from gameplay randomness
+
+Server-instance nonce initialization now uses the existing CryptoRandom eight-byte utility, folded into a
+uint64 with zero mapped to1. It does not consume native gameplay urand draws. Enabled-startup-only creation,
+reload stability, public ordering-only use, theoretical collision and exact-string protocol semantics remain.
+The prior urand implementation above is historical and superseded. No character/progress/network auth logic
+changed. Source/native build passed `.cache/verify-all/20261005-104244/report.json`; C++ lint/whitespace
+passed. No tests ran; instance creation/restart/lifecycle remains runtime qualification. Production untouched.

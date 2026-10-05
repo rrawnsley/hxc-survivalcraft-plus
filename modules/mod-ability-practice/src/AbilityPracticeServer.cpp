@@ -9,13 +9,13 @@
 #include "AscensionSpellProgressionData.h"
 #include "Chat.h"
 #include "Config.h"
+#include "CryptoRandom.h"
 #include "CombatManager.h"
 #include "Creature.h"
 #include "Formulas.h"
 #include "Log.h"
 #include "ObjectMgr.h"
 #include "Player.h"
-#include "Random.h"
 #include "ScriptMgr.h"
 #include "Spell.h"
 #include "SpellMgr.h"
@@ -538,8 +538,13 @@ public:
             return;
         }
         if (!ServerGeneration)
-            ServerGeneration = (static_cast<std::uint64_t>(urand(0, std::numeric_limits<std::uint32_t>::max())) << 32) |
-                urand(1, std::numeric_limits<std::uint32_t>::max());
+        {
+            auto const bytes = Acore::Crypto::GetRandomBytes<8>();
+            for (std::uint8_t byte : bytes)
+                ServerGeneration = (ServerGeneration << 8) | byte;
+            if (!ServerGeneration)
+                ServerGeneration = 1;
+        }
         ProfileLookup.emplace(Profiles);
         Ready = ProfileLookup->IsValid();
         for (Practice::AbilityProfile const& profile : Profiles)
