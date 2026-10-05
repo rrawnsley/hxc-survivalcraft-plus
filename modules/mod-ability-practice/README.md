@@ -29,7 +29,7 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   Shared native race/racial and faction-rift eligibility is checked at preparation, award and new upgrades;
   class/race/talent-set/custom-specialization changes refresh the owner state. Normal database save/reload/failure
   behavior and broader acquisition entitlements remain unqualified.
-- Menu: addon 0.4.15-development; unpublished protocol 4 includes B8 instance identity/realm cap, T10 kind/session/rules/reward
+- Menu: addon 0.4.16-development; unpublished protocol 4 includes B8 instance identity/realm cap, T10 kind/session/rules/reward
   count and M mastery entries,
   mandatory C future-cap metadata, packed D parts and F8 unreadable-progress responses. Typed delivery is
   bounded/paced; saved views/ages/session totals are labeled. Existing schema 1/2/3 formats are preserved.
@@ -1497,3 +1497,22 @@ necessarily trainable. Provenance now includes36 native sources, adding Templar 
 Affected source and native build passed `.cache/verify-all/20261005-185012/report.json`
 (two source checks;35.2-second build). C++ style/whitespace passed; authoring artifacts regenerated.
 No behavioral tests, runtime startup, active addon installation, live configuration/database changes or restart.
+
+## Dedicated session view — 5 October 2026
+
+Addon0.4.16-development adds a fourth Session tab alongside My Skills, Upcoming and Tracked.
+It lists only nonfixed abilities with actual recorded session uses or proficiency gains. Entries sort
+by proficiency gained, then recorded uses, descending; canonical uint64 decimal strings are compared
+by length/lexical order without converting counters to imprecise Lua numbers. Rows show uses and gained
+proficiency; hover detail adds those counters to the existing forecast/milestone information.
+The title identifies the selected view. Four80px tabs fit alongside the resized280px search input.
+
+Zero recorded activity, unavailable per-ability data (including older schemas), an empty configured catalog,
+search mismatches and saved snapshots have distinct messages. All values come from existing server
+snapshot counters; there are no client-inferred historical casts. Native session totals begin on login
+or first enrollment, persist for retained sessions on config reload and restart when a character is removed
+and later reenrolled. Class-specific counters persist across class changes during that session.
+Newly learned rank/mastery-event history is not yet recorded; this view only reports actual uses/proficiency.
+No native/protocol/storage change or rebuild. Source passed `.cache/verify-all/20261005-185501/report.json`
+(two source checks); five Lua5.1 files compiled for syntax without execution. In-game acceptance remains pending.
+No active addon installation or production changes.

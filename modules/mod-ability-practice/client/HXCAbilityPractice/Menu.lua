@@ -6,6 +6,7 @@ local serverRevision = 0
 local serverGeneration
 local syncState = "waiting"
 local tab = "skills"
+local tabLabels = { skills = "My Skills", upcoming = "Upcoming", tracked = "Tracked", session = "Session" }
 local offset = 0
 local visible = {}
 local rows = {}
@@ -102,6 +103,11 @@ local function UpdateSubtitle(now)
     subtitle:SetText("Level " .. snapshot.characterLevel
         .. (snapshot.realmMaximumLevel and (" / Realm cap " .. snapshot.realmMaximumLevel) or "")
         .. " - " .. status .. " - " .. ageText)
+end
+
+local function GreaterDecimal(left, right)
+    if #left ~= #right then return #left > #right end
+    return left > right
 end
 
 local function SpellName(spellId)
@@ -242,6 +248,7 @@ for index = 1, 3 do
 end
 
 Refresh = function()
+    title:SetText("Abilities & Practice - " .. tabLabels[tab])
     visible = {}
     local session = snapshot and snapshot.session
     sessionText:SetText(session and session.available and
@@ -258,11 +265,20 @@ Refresh = function()
             local matchesTab = (tab == "skills" and ability.learnedRank > 0)
                 or (tab == "upcoming" and Model.NextMilestone(ability))
                 or (tab == "tracked" and tracked[tostring(ability.abilityId)] == true)
+                or (tab == "session" and ability.session and ability.session.available
+                    and not Model.IsFixed(ability)
+                    and (ability.session.uses ~= "0" or ability.session.proficiencyGained ~= "0"))
             local matchesSearch = search == "" or string.find(string.lower(SpellName(ability.displaySpellId)),
                 search, 1, true)
             if matchesTab and matchesSearch then visible[#visible + 1] = ability end
         end
         table.sort(visible, function(a, b)
+            if tab == "session" then
+                if a.session.proficiencyGained ~= b.session.proficiencyGained then
+                    return GreaterDecimal(a.session.proficiencyGained, b.session.proficiencyGained)
+                end
+                if a.session.uses ~= b.session.uses then return GreaterDecimal(a.session.uses, b.session.uses) end
+            end
             if tab == "upcoming" and Model.NextMilestone(a).characterLevel ~= Model.NextMilestone(b).characterLevel then
                 return Model.NextMilestone(a).characterLevel < Model.NextMilestone(b).characterLevel
             end
@@ -279,8 +295,16 @@ Refresh = function()
         RenderDetail(chosen)
         local emptyText = syncState == "current" and "The server has no practice abilities configured for this class."
             or "This saved view contains no configured practice abilities."
+        local emptyView = "No abilities in this view."
+        if search ~= "" then emptyView = "No abilities match your search in this view."
+        elseif tab == "session" then
+            emptyView = (snapshot.schemaVersion ~= 4 or not session or not session.available)
+                and "Per-ability session progress is unavailable in this snapshot."
+                or (syncState == "current" and "No qualifying practice has been recorded this session."
+                    or "No qualifying practice was recorded in this saved view.")
+        end
         footer:SetText(#snapshot.abilities == 0 and emptyText or
-            (#visible == 0 and "No abilities in this view." or
+            (#visible == 0 and emptyView or
             (#visible .. " abilities · " .. (showRoadmap and chosen and chosen.ranks
                 and "Use the mouse wheel over milestones to browse" or "Use the mouse wheel to browse")
                 .. " · Forecasts count qualifying uses")))
@@ -311,7 +335,9 @@ Refresh = function()
                     else row.progress:SetStatusBarColor(0.35, 0.72, 0.43) end
                 else row.progress:SetStatusBarColor(0.81, 0.62, 0.24) end
             else row.progress:Hide() end
-            row.info:SetText(tab == "upcoming" and rank and
+            row.info:SetText(tab == "session" and ability.session and
+                (ability.session.uses .. " uses · +" .. ability.session.proficiencyGained .. " proficiency") or
+                tab == "upcoming" and rank and
                 ((ability.learnedRank == 0 and "New ability" or Model.IsMastery(ability) and "Next mastery benefit"
                     or ("Next rank " .. rank.rankNumber))
                     .. " · " .. (Model.BeyondRealmLevel(rank.characterLevel, snapshot.realmMaximumLevel,
@@ -367,6 +393,11 @@ for index = 1, 9 do
         end
         GameTooltip:AddLine(Model.PointText(ability, snapshot.realmMaximumLevel, snapshot.characterLevel),
             1, 1, 1, true)
+        if ability.session and ability.session.available and not Model.IsFixed(ability) then
+            GameTooltip:AddLine((syncState == "current" and "This session: " or "Saved session: ")
+                .. ability.session.uses .. " qualifying uses · +" .. ability.session.proficiencyGained .. " proficiency",
+                1, 0.82, 0, true)
+        end
         local milestone = Model.NextMilestone(ability)
         if milestone then
             local text = Model.IsMastery(ability) and not ability.nextRank
@@ -391,19 +422,20 @@ panel:SetScript("OnMouseWheel", function(_, delta) offset = offset - delta; Refr
 
 local function Tab(label, value, x)
     local button = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-    button:SetSize(90, 24)
+    button:SetSize(80, 24)
     button:SetPoint("TOPLEFT", x, -76)
     button:SetText(label)
     button:SetScript("OnClick", function() tab = value; offset = 0; Refresh() end)
 end
 Tab("My Skills", "skills", 28)
-Tab("Upcoming", "upcoming", 128)
-Tab("Tracked", "tracked", 228)
-local searchLabel = Text(panel, "GameFontHighlightSmall", 336, -82, 54)
+Tab("Upcoming", "upcoming", 116)
+Tab("Tracked", "tracked", 204)
+Tab("Session", "session", 292)
+local searchLabel = Text(panel, "GameFontHighlightSmall", 388, -82, 54)
 searchLabel:SetText("Search")
 searchBox = CreateFrame("EditBox", "HXCAbilityPracticeSearch", panel, "InputBoxTemplate")
-searchBox:SetSize(330, 24)
-searchBox:SetPoint("TOPLEFT", 395, -76)
+searchBox:SetSize(280, 24)
+searchBox:SetPoint("TOPLEFT", 445, -76)
 searchBox:SetAutoFocus(false)
 searchBox:SetMaxLetters(80)
 searchBox:SetScript("OnTextChanged", function(self)
