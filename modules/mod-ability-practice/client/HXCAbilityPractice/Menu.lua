@@ -124,7 +124,7 @@ end
 local function SessionMasteryText(ability)
     local highest
     for _, event in ipairs(Model.SessionMasteries(snapshot, ability.abilityId)) do
-        highest = math.max(highest or 0, event.healingBonusBasisPoints)
+        highest = math.max(highest or 0, Model.MasteryBonusAmount(event))
     end
     if not highest then return nil end
     return (syncState == "current" and "Mastery earned: +" or "Saved mastery: +")
@@ -507,8 +507,8 @@ for index = 1, 9 do
         end
         for _, event in ipairs(Model.SessionMasteries(snapshot, ability.abilityId)) do
             GameTooltip:AddLine((syncState == "current" and "Earned this session: +" or "Saved session reward: +")
-                .. string.format("%.2f", event.healingBonusBasisPoints / 100):gsub("0+$", ""):gsub("%.$", "")
-                .. "% healing mastery · Proficiency " .. event.proficiency, 0.55, 0.9, 0.6, true)
+                .. string.format("%.2f", Model.MasteryBonusAmount(event) / 100):gsub("0+$", ""):gsub("%.$", "")
+                .. "% " .. Model.MasteryEffectText(event) .. " mastery · Proficiency " .. event.proficiency, 0.55, 0.9, 0.6, true)
         end
         local learns = Model.SessionLearns(snapshot, ability.abilityId)
         for index = math.max(1, #learns - 2), #learns do

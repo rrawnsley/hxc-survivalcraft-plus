@@ -16,6 +16,7 @@
  */
 
 #include "Spell.h"
+#include "AbilityPracticeMasteryPolicy.h"
 #include "AscensionProfessionPolicy.h"
 #include "ArenaSpectator.h"
 #include "AscensionPooledVitality.h"
@@ -2876,6 +2877,9 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         }
         else
         {
+            m_damage = static_cast<int32>(CoAAbilityPractice::ModifyMasteryDamage(caster, unitTarget,
+                m_spellInfo->Id, static_cast<uint32>(m_damage), GetPracticeCast().get()));
+
             // Add bonuses and fill damageInfo struct
             // Dancing Rune Weapon...
             if (m_caster->GetEntry() == 27893)

@@ -108,7 +108,8 @@ bool SameProfile(Practice::AbilityProfile const& left, Practice::AbilityProfile 
             [](Practice::MasteryReward const& lhs, Practice::MasteryReward const& rhs)
             {
                 return SameMilestone(lhs.Requirement, rhs.Requirement) &&
-                    lhs.HealingBonusBasisPoints == rhs.HealingBonusBasisPoints;
+                    lhs.HealingBonusBasisPoints == rhs.HealingBonusBasisPoints &&
+                    lhs.DamageBonusBasisPoints == rhs.DamageBonusBasisPoints;
             });
 }
 
@@ -1050,7 +1051,10 @@ public:
                 bool const expectedOutcome = info && (fixed || HasSupportedOutcome(info, profile.Outcome) ||
                     HasSupportedHelperOutcome(info, profile)) &&
                     (profile.Definition.Kind != Practice::AbilityKind::Mastery ||
-                        (!info->HasAura(SPELL_AURA_PERIODIC_HEAL) && !info->HasAura(SPELL_AURA_PERIODIC_LEECH)));
+                        (!info->HasAura(SPELL_AURA_PERIODIC_HEAL) && !info->HasAura(SPELL_AURA_PERIODIC_LEECH) &&
+                            !info->HasAura(SPELL_AURA_PERIODIC_DAMAGE) &&
+                            !info->HasAura(SPELL_AURA_PERIODIC_DAMAGE_PERCENT) &&
+                            !info->HasEffect(SPELL_EFFECT_HEALTH_LEECH)));
                 bool const expectedAbsorption = !AbsorptionRequested ||
                     !Practice::DevelopmentAbsorption::IsEmeraldVeil(profile) ||
                     (info && info->HasAura(SPELL_AURA_SCHOOL_ABSORB));
@@ -1250,6 +1254,35 @@ std::uint32_t ModifyMasteryHealing(Unit* healer, Unit* target, std::uint32_t spe
     return Practice::ApplyHealingMastery(healing, bonus);
 }
 
+std::uint32_t ModifyMasteryDamage(Unit* caster, Unit* target, std::uint32_t spellId, std::uint32_t damage,
+    CoAAbilityPractice::CastReceipt const* receipt)
+{
+    if (!Active.load() || !MasteryRequested || !target || !caster || !spellId || !damage || !receipt ||
+        receipt->SpellId != spellId)
+        return damage;
+    Player* player = caster->ToPlayer();
+    if (!IsProfiledPlayer(player) || player->isBeingLoaded())
+        return damage;
+    auto const* profile = FindProfile(player, spellId);
+    if (!profile || profile->Definition.Kind != Practice::AbilityKind::Mastery ||
+        profile->Outcome != Practice::OutcomeKind::Damage ||
+        !QualifiesDevelopmentOutcome(Practice::OutcomeKind::Damage, player, target, damage, 0))
+        return damage;
+    std::lock_guard lock(Mutex);
+    auto const session = Sessions.find(player->GetGUID().GetRawValue());
+    if (!Affects(player) || session == Sessions.end() || !ReceiptOwnerMatches(player, session->second, *receipt) ||
+        !player->HasSpell(spellId) || !AcquisitionAllowed(player, profile->Definition, spellId))
+        return damage;
+    auto const loaded = Practice::ReadPlayerProgress(*player, profile->Definition.ClassId,
+        profile->Definition.AbilityId, profile->Policy, profile->DefinitionVersion);
+    if (loaded.Status != Practice::LoadStatus::Loaded ||
+        loaded.Record.MigrationVersion != Practice::LearnedRankMigrationVersion)
+        return damage;
+    std::uint32_t const bonus = Practice::DamageMasteryBonus(profile->Definition, profile->Rewards,
+        loaded.Record.State, player->GetLevel(), true, true);
+    return Practice::ApplyDamageMastery(damage, bonus);
+}
+
 class PracticeSpell : public AllSpellScript
 {
 public:
@@ -1330,6 +1363,7 @@ void AddSC_ability_practice()
     CoAAbilityPractice::SetPurchaseProvider(CanPurchaseSpell);
     CoAAbilityPractice::SetPeriodicOutcomeProvider(AwardPeriodicOutcome);
     CoAAbilityPractice::SetHealingMasteryProvider(ModifyMasteryHealing);
+    CoAAbilityPractice::SetDamageMasteryProvider(ModifyMasteryDamage);
     new PracticeWorld();
     new PracticePlayer();
     new PracticeClientCast();

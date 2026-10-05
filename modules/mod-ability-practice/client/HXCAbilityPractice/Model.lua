@@ -118,12 +118,16 @@ local function Rewards(value, ability, ranks, characterLevel)
         count = count + 1
     end
     if count ~= #value or (ability.kind ~= 2 and count ~= 0)
-        or (ability.kind == 2 and (count == 0 or ability.route ~= 2)) then return nil end
+        or (ability.kind == 2 and (count == 0 or (ability.route ~= 1 and ability.route ~= 2))) then return nil end
     local result, previousLevel, previousProficiency, previousBonus = {}, ranks[1].characterLevel, 1, 0
     for _, entry in ipairs(value) do
-        if type(entry) ~= "table" or not Integer(entry.characterLevel, previousLevel, 255)
+        if type(entry) ~= "table" then return nil end
+        local healing, damage = entry.healingBonusBasisPoints or 0, entry.damageBonusBasisPoints or 0
+        local bonus = ability.route == 2 and healing or damage
+        if (ability.route == 2 and damage ~= 0) or (ability.route == 1 and healing ~= 0)
+            or not Integer(entry.characterLevel, previousLevel, 255)
             or not Integer(entry.proficiency, previousProficiency + 1, 4294967295)
-            or not Integer(entry.healingBonusBasisPoints, previousBonus + 1, 200) then return nil end
+            or not Integer(bonus, previousBonus + 1, 200) then return nil end
         local practice = Forecast(entry.practice)
         if not practice then return nil end
         local levelMet, practiceMet = characterLevel >= entry.characterLevel,
@@ -133,9 +137,9 @@ local function Rewards(value, ability, ranks, characterLevel)
         local forecast = practiceMet and 2 or entry.proficiency > ability.cap and 3 or 1
         if entry.state ~= state or practice.status ~= forecast then return nil end
         result[#result + 1] = { characterLevel = entry.characterLevel, proficiency = entry.proficiency,
-            healingBonusBasisPoints = entry.healingBonusBasisPoints, state = entry.state, practice = practice }
-        previousLevel, previousProficiency, previousBonus = entry.characterLevel, entry.proficiency,
-            entry.healingBonusBasisPoints
+            healingBonusBasisPoints = healing, damageBonusBasisPoints = damage,
+            state = entry.state, practice = practice }
+        previousLevel, previousProficiency, previousBonus = entry.characterLevel, entry.proficiency, bonus
     end
     if ability.kind == 2 and ability.cap > previousProficiency then return nil end
     return result
@@ -288,10 +292,12 @@ local function MasteryHistory(value, abilities)
         local ability = byId[event.abilityId]
         local reward = ability and ability.kind == 2 and ability.rewards[event.ordinal]
         if not reward or event.characterLevel ~= reward.characterLevel or event.proficiency ~= reward.proficiency
-            or event.healingBonusBasisPoints ~= reward.healingBonusBasisPoints then return nil end
+            or (event.healingBonusBasisPoints or 0) ~= reward.healingBonusBasisPoints
+            or (event.damageBonusBasisPoints or 0) ~= reward.damageBonusBasisPoints then return nil end
         events[#events + 1] = { abilityId = event.abilityId, ordinal = event.ordinal,
             characterLevel = event.characterLevel, proficiency = event.proficiency,
-            healingBonusBasisPoints = event.healingBonusBasisPoints }
+            healingBonusBasisPoints = event.healingBonusBasisPoints or 0,
+            damageBonusBasisPoints = event.damageBonusBasisPoints or 0 }
     end
     return { available = value.available, total = value.total, events = events }
 end
@@ -393,6 +399,14 @@ local function HealingBonusText(basisPoints)
     return "+" .. bonus .. "%"
 end
 
+function Model.MasteryBonusAmount(reward)
+    return math.max(reward.healingBonusBasisPoints or 0, reward.damageBonusBasisPoints or 0)
+end
+
+function Model.MasteryEffectText(reward)
+    return (reward.damageBonusBasisPoints or 0) > 0 and "damage" or "healing"
+end
+
 function Model.CurrentMasteryText(ability, saved)
     if not Model.IsMastery(ability) then return "" end
     local prefix = saved and "Saved benefit: " or "Current benefit: "
@@ -403,8 +417,8 @@ function Model.CurrentMasteryText(ability, saved)
     for _, reward in ipairs(ability.rewards or {}) do
         if reward.state == 1 then earned = reward end
     end
-    return prefix .. (earned and (HealingBonusText(earned.healingBonusBasisPoints)
-        .. " healing in qualifying PvE.") or "none earned yet.")
+    return prefix .. (earned and (HealingBonusText(Model.MasteryBonusAmount(earned))
+        .. " " .. Model.MasteryEffectText(earned) .. " in qualifying PvE.") or "none earned yet.")
 end
 
 function Model.BeyondRealmLevel(required, realmMaximumLevel, characterLevel)
@@ -426,7 +440,8 @@ end
 
 function Model.MasteryText(reward, realmMaximumLevel, characterLevel, acquisitionSource)
     if not reward then return "Mastery complete. Only the highest earned benefit applies." end
-    local benefit = HealingBonusText(reward.healingBonusBasisPoints) .. " healing in qualifying PvE combat."
+    local benefit = HealingBonusText(Model.MasteryBonusAmount(reward)) .. " " .. Model.MasteryEffectText(reward)
+        .. " in qualifying PvE combat."
     local requirement = Model.LevelText(reward.characterLevel, realmMaximumLevel, characterLevel)
         .. " · Proficiency " .. reward.proficiency
     if reward.state == 1 then return "Earned: " .. benefit .. "\n" .. requirement end
@@ -563,7 +578,8 @@ function Model.PracticeRules(ability)
             or " Only direct damage or healing counts in the current rules.")
     end
     if Model.IsMastery(ability) then
-        rule = rule .. " Mastery improves this ability's healing in the same qualifying PvE encounters."
+        rule = rule .. " Mastery improves this ability's " .. (ability.route == 1 and "damage" or "healing")
+            .. " in the same qualifying PvE encounters."
             .. " Only the highest earned benefit applies; mastery benefits do not add together."
     end
     if ability.catchup then

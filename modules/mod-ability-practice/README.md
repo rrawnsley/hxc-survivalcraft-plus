@@ -12,10 +12,9 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   classes, for 23 profiles across all 21 classes. An optional broader ranked catalog selects 106 profiles and
   888 authored ranks across all 21 classes, taking priority over class samples. Periodic observation adds twelve
   profiles to the selected catalog (15/35/117 unique profiles respectively, reusing the shared Shadra's Prayer
-  definition in the broad ranked mode). Optional Hand of Elune mastery adds one more
-  profile. Optional scripted observation adds Manafeed and an independent fixed-utility option adds two
+  definition in the broad ranked mode). Optional mastery adds Hand of Elune, Vile Sting and Soulslam, each with an independently authored reward roadmap. Optional scripted observation adds Manafeed and an independent fixed-utility option adds two
   nontraining profiles. Optional Emerald Veil absorption reuses its existing six ranked definitions;
-  the largest staged catalog has 121 unique profiles from 123 source declarations.
+  the largest staged catalog has 123 unique profiles from 125 source declarations.
   All development settings default off. A nonempty explicit `AbilityPractice.DevelopmentCharacterGuids`
   selection is also required; unselected characters keep native progression and receive no practice effects.
 - Outcomes: resolved direct damage/healing, successful interruption, dispel and beneficial-aura steal.
@@ -31,7 +30,7 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   Shared native race/racial and faction-rift eligibility is checked at preparation, award and new upgrades;
   class/race/talent-set/custom-specialization changes refresh the owner state. Normal database save/reload/failure
   behavior and broader acquisition entitlements remain unqualified.
-- Menu: addon 0.4.25-development; unpublished protocol 4 includes B11 instance identity/realm cap/session learning, T11 kind/session/rules/reward
+- Menu: addon 0.4.26-development; unpublished protocol 4 includes B11 instance identity/realm cap/session learning, T11 kind/session/rules/reward
   count/acquisition source and M mastery entries,
   mandatory C future-cap metadata, packed D parts and F8 unreadable-progress responses. Typed delivery is
   bounded/paced; saved views/ages/session totals are labeled. Existing schema 1/2/3 formats are preserved.
@@ -1904,3 +1903,34 @@ Final source after shortening replacement text passed .cache/verify-all/20261005
 Affected C++ style/whitespace,56-source authoring exports and five Lua5.1 syntax compilations passed with no
 chunks executed. Unit/harness/gameplay skipped. No native startup or production server/client/config/DB/launcher
 installation, update or restart; development remains disabled and requires explicit enrollment.
+
+
+## Direct damage mastery checkpoint — 5 October 2026
+
+Optional unranked mastery now includes Venomancer Vile Sting (805097, introduction level 12) and Reaper
+Soulslam (504014, introduction level 20). Their draft reward chains require proficiency 40/70/100 and
+character levels 12/20/28 or 20/28/36 respectively, granting only the highest eligible direct damage bonus
+of 0.5%/1%/2%. These are development tuning choices, not approved balance. Native taunt, stun, venom and
+proc mechanics are retained; no ranks or utility scaling are invented.
+
+The damage bridge borrows the existing original-cast receipt and runs after damage immunity checks,
+before native critical/target mitigation handling. Exact spell/owner/session, learned ability, retained
+migration, current acquisition (including temporary native replacement) and qualifying human PvE checks
+match the healing path. Consumed receipts can retain their bonus for additional original targets while
+practice still awards once. Triggered/copy/helper casts without the original receipt receive no bonus.
+Periodic and health-leech mastery are rejected at startup. Integer multiplication uses wide arithmetic
+and clamps damage to the native signed damage range. Mixed healing/damage reward chains are rejected.
+
+Unpublished protocol 4 preserves healing M10/O8 records; damage M11/O9 records append effect code 2.
+Native and addon validation require the reward effect to match the ability route and session history
+must match the same snapshot's definition. Current benefit, roadmap, rules and session tooltips name
+damage or healing correctly. Older unpublished protocol-4 addons reject the new damage records, so the
+staged server/addon pair requires joint qualification. Protocols 1–3 retain their existing behavior.
+
+Source/native build passed in .cache/verify-all/20261005-234443/report.json (two source checks, 46.6-second
+native build). Five Lua 5.1 files compiled syntactically without executing chunks; C++ style and whitespace
+checks passed. The authoring exports now retain 58 provenance paths including the Reaper proc eligibility
+rules and their consumer. Coverage reports 123 unique/125 declared profiles (118 ranked, three mastery,
+two fixed) and 724 groups still awaiting definitions. All classifications/balance/runtime qualifications
+remain unapproved. Unit, harness and gameplay stages were skipped. No production deployment or startup
+was performed by this task.

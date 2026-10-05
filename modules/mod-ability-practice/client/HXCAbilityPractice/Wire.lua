@@ -154,13 +154,15 @@ local function Accept(message, now, currentRevision, currentGeneration)
     end
     if kind == "O" then
         local index = tonumber(fields[3])
-        if pending.schemaVersion ~= 4 or not pending.mastery or #fields ~= 8 or not index
+        if pending.schemaVersion ~= 4 or not pending.mastery or (#fields ~= 8 and #fields ~= 9)
+            or (#fields == 9 and fields[9] ~= "2") or not index
             or index < 1 or index > pending.masteryCount or pending.mastery.events[index] then
             return Reject("Invalid mastery history event")
         end
         pending.mastery.events[index] = { abilityId = tonumber(fields[4]), ordinal = tonumber(fields[5]),
             characterLevel = tonumber(fields[6]), proficiency = tonumber(fields[7]),
-            healingBonusBasisPoints = tonumber(fields[8]) }
+            healingBonusBasisPoints = #fields == 8 and tonumber(fields[8]) or 0,
+            damageBonusBasisPoints = #fields == 9 and tonumber(fields[8]) or 0 }
         return nil
     end
     if kind == "N" then
@@ -234,14 +236,16 @@ local function Accept(message, now, currentRevision, currentGeneration)
     end
     if kind == "M" then
         local ordinal = tonumber(fields[4])
-        if pending.schemaVersion ~= 4 or #fields ~= 10 or not ordinal or ordinal < 1 or ordinal > 8
+        if pending.schemaVersion ~= 4 or (#fields ~= 10 and #fields ~= 11)
+            or (#fields == 11 and fields[11] ~= "2") or not ordinal or ordinal < 1 or ordinal > 8
             or (part.T and ordinal > part.T.rewardCount) then return Reject("Invalid mastery roadmap entry") end
         part.M = part.M or {}
         if part.M[ordinal] then return Reject("Duplicate mastery roadmap entry") end
         pending.receivedRewards = pending.receivedRewards + 1
         if pending.receivedRewards > 512 then return Reject("Mastery roadmap is too large") end
         part.M[ordinal] = { characterLevel = tonumber(fields[5]), proficiency = tonumber(fields[6]),
-            healingBonusBasisPoints = tonumber(fields[7]), state = tonumber(fields[8]),
+            healingBonusBasisPoints = #fields == 10 and tonumber(fields[7]) or 0,
+            damageBonusBasisPoints = #fields == 11 and tonumber(fields[7]) or 0, state = tonumber(fields[8]),
             practice = { status = tonumber(fields[9]), uses = fields[10] } }
         return nil
     end

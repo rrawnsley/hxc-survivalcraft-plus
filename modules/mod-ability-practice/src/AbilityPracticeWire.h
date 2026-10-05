@@ -77,7 +77,8 @@ inline bool ConsistentTypedMastery(AbilityView const& view, std::uint32_t charac
 {
     if (view.Kind != AbilityKind::Mastery)
         return view.Rewards.empty();
-    if (view.Route != PracticeRoute::Healing || view.Rewards.empty() || view.Rewards.size() > MaximumMasteryRewards)
+    if ((view.Route != PracticeRoute::Healing && view.Route != PracticeRoute::Damage) ||
+        view.Rewards.empty() || view.Rewards.size() > MaximumMasteryRewards)
         return false;
     std::uint32_t previousLevel = view.Ranks.front().Requirement.CharacterLevel;
     std::uint32_t previousProficiency = 1;
@@ -86,8 +87,10 @@ inline bool ConsistentTypedMastery(AbilityView const& view, std::uint32_t charac
     {
         MasteryReward const& reward = entry.Reward;
         if (reward.Requirement.CharacterLevel < previousLevel || reward.Requirement.CharacterLevel > 255 ||
-            reward.Requirement.Proficiency <= previousProficiency || reward.HealingBonusBasisPoints <= previousBonus ||
-            reward.HealingBonusBasisPoints > MaximumHealingMasteryBasisPoints || !ValidForecast(entry.Practice))
+            reward.Requirement.Proficiency <= previousProficiency ||
+            !ValidMasteryEffect(reward, view.Route == PracticeRoute::Healing) ||
+            MasteryBonusAmount(reward) <= previousBonus ||
+            MasteryBonusAmount(reward) > MaximumMasteryBasisPoints || !ValidForecast(entry.Practice))
             return false;
         bool const levelMet = characterLevel >= reward.Requirement.CharacterLevel;
         bool const practiceMet = view.State.Proficiency >= reward.Requirement.Proficiency;
@@ -101,7 +104,7 @@ inline bool ConsistentTypedMastery(AbilityView const& view, std::uint32_t charac
             return false;
         previousLevel = reward.Requirement.CharacterLevel;
         previousProficiency = reward.Requirement.Proficiency;
-        previousBonus = reward.HealingBonusBasisPoints;
+        previousBonus = MasteryBonusAmount(reward);
     }
     return view.Cap <= view.Rewards.back().Reward.Requirement.Proficiency;
 }
@@ -308,8 +311,10 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
                 MasteryRewardView const& reward = view.Rewards[ordinal];
                 lines.push_back(Detail::WireLine('M', revision, index + 1, ordinal + 1,
                     reward.Reward.Requirement.CharacterLevel, reward.Reward.Requirement.Proficiency,
-                    reward.Reward.HealingBonusBasisPoints, static_cast<std::uint32_t>(reward.State),
+                    MasteryBonusAmount(reward.Reward), static_cast<std::uint32_t>(reward.State),
                     static_cast<std::uint32_t>(reward.Practice.Status), reward.Practice.Uses));
+                if (reward.Reward.DamageBonusBasisPoints)
+                    lines.back() += "|2";
             }
             if (view.NextTrainingCap)
             {
@@ -402,10 +407,13 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
             auto const& reward = ability->Rewards[event.Ordinal - 1].Reward;
             if (reward.Requirement.CharacterLevel != event.Reward.Requirement.CharacterLevel ||
                 reward.Requirement.Proficiency != event.Reward.Requirement.Proficiency ||
-                reward.HealingBonusBasisPoints != event.Reward.HealingBonusBasisPoints)
+                reward.HealingBonusBasisPoints != event.Reward.HealingBonusBasisPoints ||
+                reward.DamageBonusBasisPoints != event.Reward.DamageBonusBasisPoints)
                 return std::nullopt;
             lines.push_back(Detail::WireLine('O', revision, index + 1, event.AbilityId, event.Ordinal,
-                reward.Requirement.CharacterLevel, reward.Requirement.Proficiency, reward.HealingBonusBasisPoints));
+                reward.Requirement.CharacterLevel, reward.Requirement.Proficiency, MasteryBonusAmount(reward)));
+            if (reward.DamageBonusBasisPoints)
+                lines.back() += "|2";
         }
     }
     if (session)

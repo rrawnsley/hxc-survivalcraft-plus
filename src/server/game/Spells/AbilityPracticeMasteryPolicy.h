@@ -14,6 +14,22 @@ class CastReceipt;
 
 using HealingMasteryProvider = std::uint32_t (*)(Unit*, Unit*, std::uint32_t, std::uint32_t, CastReceipt const*);
 inline std::atomic<HealingMasteryProvider> HealingMasteryHandler = nullptr;
+using DamageMasteryProvider = std::uint32_t (*)(Unit*, Unit*, std::uint32_t, std::uint32_t, CastReceipt const*);
+inline std::atomic<DamageMasteryProvider> DamageMasteryHandler = nullptr;
+
+inline void SetDamageMasteryProvider(DamageMasteryProvider provider)
+{
+    DamageMasteryHandler.store(provider);
+}
+
+inline std::uint32_t ModifyMasteryDamage(Unit* caster, Unit* target, std::uint32_t spellId,
+    std::uint32_t damage, CastReceipt const* receipt)
+{
+    if (!receipt)
+        return damage;
+    auto const provider = DamageMasteryHandler.load();
+    return provider ? provider(caster, target, spellId, damage, receipt) : damage;
+}
 
 inline void SetHealingMasteryProvider(HealingMasteryProvider provider)
 {

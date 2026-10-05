@@ -28,6 +28,8 @@ def verify_provenance(candidates, root, dbc):
                          'modules/mod-ability-practice/src/AbilityPracticeDevelopmentAbsorption.h',
                          'src/server/coa/AscensionVenomancerAbilities.cpp',
                          'src/server/coa/AscensionVenomancerAuras.cpp',
+                         'src/server/coa/AscensionReaperTalentProcs.h',
+                         'src/server/coa/AscensionReaperTalentProcs.cpp',
                 'src/server/coa/AscensionBloodmageTalents.cpp',
                 'src/server/coa/AscensionBloodmageSecondary.cpp',
                 'src/server/coa/AscensionTalentReplacementData.h',

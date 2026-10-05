@@ -49,7 +49,9 @@ inline bool ValidateProfiles(std::span<AbilityProfile const> profiles)
         if (!profile.DefinitionVersion || profile.Acquisition != AcquisitionSource::ClassGrant ||
             ability.ClassId > 255 ||
             ValidateDefinition(ability) != CatalogError::None || !ValidateMasteryRewards(ability, profile.Rewards) ||
-            (ability.Kind == AbilityKind::Mastery && profile.Outcome != OutcomeKind::Healing) ||
+            (ability.Kind == AbilityKind::Mastery &&
+                ((profile.Outcome != OutcomeKind::Healing && profile.Outcome != OutcomeKind::Damage) ||
+                    !ValidMasteryEffect(profile.Rewards.front(), profile.Outcome == OutcomeKind::Healing))) ||
             !ValidPolicy(profile.Policy) ||
             (ability.Kind == AbilityKind::Fixed ? profile.Outcome != OutcomeKind::None :
                 profile.Outcome != OutcomeKind::Damage && profile.Outcome != OutcomeKind::Healing &&
