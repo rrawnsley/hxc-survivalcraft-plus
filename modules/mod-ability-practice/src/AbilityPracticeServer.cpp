@@ -4,6 +4,7 @@
 #include "AbilityPracticeDevelopmentSamples.h"
 #include "AbilityPracticeProfiles.h"
 #include "AbilityPracticeRankPolicy.h"
+#include "AbilityPracticeCastReceipt.h"
 #include "AbilityPracticeOutcome.h"
 #include "AbilityPracticeWire.h"
 #include "AscensionCustomClassData.h"
@@ -56,6 +57,8 @@ bool Requested = false;
 bool DevelopmentAllowed = false;
 bool Ready = false;
 bool RankRequested = false;
+bool PeriodicRequested = false;
+std::uint64_t NextActionSession = 0;
 std::atomic<bool> RankActive = false;
 std::atomic<bool> Active = false;
 std::uint32_t Revision = 0;
@@ -89,6 +92,7 @@ struct MenuSession
     std::uint32_t LastRace = 0;
     std::uint32_t LastSpec = 0;
     std::uint32_t LastCustomSpecialization = 0;
+    std::uint64_t ActionSession = 0;
     std::uint32_t OutgoingClass = 0;
     std::vector<std::string> Outgoing;
     std::size_t NextMessage = 0;
@@ -119,10 +123,12 @@ bool HasSupportedOutcome(SpellInfo const* info, Practice::OutcomeKind outcome)
     if (outcome == Practice::OutcomeKind::Damage)
         return info->HasEffect(SPELL_EFFECT_SCHOOL_DAMAGE) || info->HasEffect(SPELL_EFFECT_WEAPON_DAMAGE) ||
             info->HasEffect(SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL) || info->HasEffect(SPELL_EFFECT_NORMALIZED_WEAPON_DMG) ||
-            info->HasEffect(SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
+            info->HasEffect(SPELL_EFFECT_WEAPON_PERCENT_DAMAGE) || (PeriodicRequested &&
+                (info->HasAura(SPELL_AURA_PERIODIC_DAMAGE) || info->HasAura(SPELL_AURA_PERIODIC_DAMAGE_PERCENT)));
     if (outcome == Practice::OutcomeKind::Healing)
         return info->HasEffect(SPELL_EFFECT_HEAL) || info->HasEffect(SPELL_EFFECT_HEAL_PCT) ||
-            info->HasEffect(SPELL_EFFECT_HEAL_MAX_HEALTH);
+            info->HasEffect(SPELL_EFFECT_HEAL_MAX_HEALTH) ||
+            (PeriodicRequested && info->HasAura(SPELL_AURA_PERIODIC_HEAL));
     if (outcome == Practice::OutcomeKind::Interrupt)
         return info->HasEffect(SPELL_EFFECT_INTERRUPT_CAST);
     if (outcome == Practice::OutcomeKind::Dispel)
@@ -235,6 +241,19 @@ std::uint32_t CachedCustomSpecialization(Player const* player)
 {
     auto const* values = player->FindPlayerSettings(ActiveSpecializationSource);
     return values && !values->empty() ? values->front().value : 0;
+}
+
+std::uint64_t NewActionSession()
+{
+    return NextActionSession == std::numeric_limits<std::uint64_t>::max() ? 0 : ++NextActionSession;
+}
+
+bool ReceiptMatches(Player const* player, MenuSession const& session, CoAAbilityPractice::CastReceipt const& receipt)
+{
+    return session.Initialized && receipt.Session && receipt.Session == session.ActionSession &&
+        receipt.CasterGUID == player->GetGUID().GetRawValue() && receipt.ClassId == player->getClass() &&
+        receipt.RaceId == player->getRace() && receipt.TalentSet == player->GetActiveSpec() &&
+        receipt.Specialization == CachedCustomSpecialization(player) && !receipt.IsConsumed();
 }
 
 bool IsDevelopmentOpponent(Player const* player, Unit const* opponent)
@@ -441,7 +460,7 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
             if (view.NextRank)
                 view.NextRank = view.Ranks[view.NextRank->RankNumber - 1];
             view.Route = RouteFor(profile.Outcome);
-            view.RuleSet = Practice::HumanPvERuleSet;
+            view.RuleSet = PeriodicRequested ? Practice::HumanPvEPeriodicRuleSet : Practice::HumanPvERuleSet;
             view.Session = {};
             if (currentProgress != session.Progress.end())
             {
@@ -496,6 +515,19 @@ void Refresh(Player* player, MenuSession& session, Clock::time_point now)
     }
 }
 
+void RecordAward(Player* player, MenuSession& session, Practice::AbilityProfile const& profile,
+    Practice::OutcomeAward const& award)
+{
+    if (award.Status != Practice::OutcomeStatus::Awarded)
+        return;
+    ClassSession& progress = session.Progress[player->getClass()];
+    progress.Totals.RecordAward(award.ProficiencyGained);
+    progress.Abilities[profile.Definition.AbilityId].RecordAward(award.ProficiencyGained);
+    session.Dirty = true;
+    session.CheckRanks = true;
+    Refresh(player, session, Clock::now());
+}
+
 void AwardOutcome(Player* player, Spell* spell, Practice::AbilityProfile const& profile)
 {
     std::lock_guard lock(Mutex);
@@ -505,17 +537,64 @@ void AwardOutcome(Player* player, Spell* spell, Practice::AbilityProfile const& 
         !AcquisitionAllowed(player, profile.Definition, spell->GetSpellInfo()->Id))
         return;
     auto& session = Sessions[player->GetGUID().GetRawValue()];
+    auto const receipt = spell->GetPracticeCast();
+    if (receipt && (!ReceiptMatches(player, session, *receipt) || receipt->SpellId != spell->GetSpellInfo()->Id))
+        return;
     Practice::OutcomeContext const context{ true, true, true, true, player->GetLevel() };
     auto const award = Practice::HandleOutcome(*player, *spell, profile.Definition,
         profile.Policy, profile.DefinitionVersion, context);
-    if (award.Status != Practice::OutcomeStatus::Awarded)
+    if (receipt && (award.Status == Practice::OutcomeStatus::Awarded || award.Status == Practice::OutcomeStatus::Capped))
+        receipt->MarkConsumed();
+    RecordAward(player, session, profile, award);
+}
+
+struct PeriodicCast
+{
+    Player* Caster;
+    SpellInfo const* Info;
+    CoAAbilityPractice::CastReceipt& Receipt;
+
+    bool IsTriggered() const { return false; }
+    Player* GetCaster() const { return Caster; }
+    SpellInfo const* GetSpellInfo() const { return Info; }
+    std::uint64_t GetScriptValue(std::uint32_t key) const
+    {
+        return key == Practice::PracticeAwardScriptKey && Receipt.IsConsumed();
+    }
+    void SetScriptValue(std::uint32_t key, std::uint64_t value)
+    {
+        if (key == Practice::PracticeAwardScriptKey && value)
+            Receipt.MarkConsumed();
+    }
+};
+
+void AwardPeriodicOutcome(Unit* caster, Unit* target, std::uint32_t auraSpellId, std::uint32_t auraType,
+    std::uint32_t damage, std::uint32_t healing, std::shared_ptr<CoAAbilityPractice::CastReceipt> const& receipt)
+{
+    if (!Active.load() || !caster || !target || !receipt || receipt->IsConsumed())
         return;
-    ClassSession& progress = session.Progress[player->getClass()];
-    progress.Totals.RecordAward(award.ProficiencyGained);
-    progress.Abilities[profile.Definition.AbilityId].RecordAward(award.ProficiencyGained);
-    session.Dirty = true;
-    session.CheckRanks = true;
-    Refresh(player, session, Clock::now());
+    Player* player = caster->ToPlayer();
+    if (!IsProfiledPlayer(player))
+        return;
+    auto const* profile = FindProfile(player, receipt->SpellId);
+    if (!profile || (profile->Outcome == Practice::OutcomeKind::Damage ?
+            auraType != SPELL_AURA_PERIODIC_DAMAGE && auraType != SPELL_AURA_PERIODIC_DAMAGE_PERCENT :
+            profile->Outcome != Practice::OutcomeKind::Healing || auraType != SPELL_AURA_PERIODIC_HEAL) ||
+        std::none_of(profile->Definition.Ranks.begin(), profile->Definition.Ranks.end(),
+            [auraSpellId](Practice::AbilityRank const& rank) { return rank.SpellId == auraSpellId; }) ||
+        !QualifiesDevelopmentOutcome(profile->Outcome, player, target, damage, healing))
+        return;
+    std::lock_guard lock(Mutex);
+    auto const found = Sessions.find(player->GetGUID().GetRawValue());
+    if (!PeriodicRequested || !Affects(player) || player->isBeingLoaded() || found == Sessions.end() ||
+        !ReceiptMatches(player, found->second, *receipt) ||
+        !AcquisitionAllowed(player, profile->Definition, receipt->SpellId))
+        return;
+    PeriodicCast cast{ player, sSpellMgr->GetSpellInfo(receipt->SpellId), *receipt };
+    Practice::OutcomeContext const context{ true, true, true, true, player->GetLevel() };
+    auto const award = Practice::HandleOutcome(*player, cast, profile->Definition,
+        profile->Policy, profile->DefinitionVersion, context);
+    RecordAward(player, found->second, *profile, award);
 }
 
 void AwardUtilityOutcome(Spell* spell, Unit* target, Practice::OutcomeKind kind, std::uint32_t count)
@@ -554,6 +633,22 @@ void InitializeProgress(Player* player)
     }
 }
 
+void RefreshOwnerState(Player* player, MenuSession& session, std::uint32_t customSpecialization)
+{
+    if (session.Initialized && session.LastClass == player->getClass() && session.LastRace == player->getRace() &&
+        session.LastSpec == player->GetActiveSpec() && session.LastCustomSpecialization == customSpecialization)
+        return;
+    InitializeProgress(player);
+    session.Initialized = true;
+    session.LastClass = player->getClass();
+    session.LastRace = player->getRace();
+    session.LastSpec = player->GetActiveSpec();
+    session.LastCustomSpecialization = customSpecialization;
+    session.ActionSession = NewActionSession();
+    session.Dirty = true;
+    session.CheckRanks = true;
+}
+
 void MarkDirty(Player* player)
 {
     if (!Active.load() || !IsProfiledPlayer(player))
@@ -584,6 +679,7 @@ public:
         for (auto& entry : Sessions)
         {
             ClearDelivery(entry.second);
+            entry.second.ActionSession = NewActionSession();
             entry.second.Dirty = true;
             entry.second.CheckRanks = true;
         }
@@ -592,6 +688,7 @@ public:
     void OnStartup() override
     {
         std::lock_guard lock(Mutex);
+        PeriodicRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentPeriodicObservation", false);
         if (!Requested || !DevelopmentAllowed)
         {
             Active.store(false);
@@ -664,14 +761,9 @@ public:
         std::lock_guard lock(Mutex);
         if (!Requested || !DevelopmentAllowed || !Ready)
             return;
-        InitializeProgress(player);
         auto& session = Sessions[player->GetGUID().GetRawValue()];
         session = {};
-        session.LastClass = player->getClass();
-        session.LastRace = player->getRace();
-        session.LastSpec = player->GetActiveSpec();
-        session.LastCustomSpecialization = CachedCustomSpecialization(player);
-        session.Initialized = true;
+        RefreshOwnerState(player, session, CachedCustomSpecialization(player));
     }
 
     void OnPlayerUpdate(Player* player, uint32) override
@@ -685,19 +777,7 @@ public:
             if (!Requested || !DevelopmentAllowed || !Ready)
                 return;
             MenuSession& session = Sessions[player->GetGUID().GetRawValue()];
-            if (!session.Initialized || session.LastClass != player->getClass() ||
-                session.LastRace != player->getRace() || session.LastSpec != player->GetActiveSpec() ||
-                session.LastCustomSpecialization != customSpecialization)
-            {
-                InitializeProgress(player);
-                session.Initialized = true;
-                session.LastClass = player->getClass();
-                session.LastRace = player->getRace();
-                session.LastSpec = player->GetActiveSpec();
-                session.LastCustomSpecialization = customSpecialization;
-                session.Dirty = true;
-                session.CheckRanks = true;
-            }
+            RefreshOwnerState(player, session, customSpecialization);
             checkRanks = session.CheckRanks;
             session.CheckRanks = false;
         }
@@ -797,6 +877,8 @@ public:
         auto const* profile = FindProfile(player, spell->GetSpellInfo()->Id);
         if (!profile)
             return true;
+        std::lock_guard lock(Mutex);
+        spell->SetPracticeCast({});
         std::uint64_t const request = (static_cast<std::uint64_t>(player->getClass()) << 32) |
             spell->GetSpellInfo()->Id;
         bool const direct = spell->GetScriptValue(PracticeClientRequestKey) == request && !triggeredByAura &&
@@ -805,6 +887,16 @@ public:
             AcquisitionAllowed(player, profile->Definition, spell->GetSpellInfo()->Id);
         std::uint64_t const source = direct ? request : std::numeric_limits<std::uint64_t>::max();
         spell->SetScriptValue(PracticeCastSourceKey, source);
+        if (direct && PeriodicRequested && Affects(player) && !player->isBeingLoaded() &&
+            (profile->Outcome == Practice::OutcomeKind::Damage || profile->Outcome == Practice::OutcomeKind::Healing))
+        {
+            auto& session = Sessions[player->GetGUID().GetRawValue()];
+            RefreshOwnerState(player, session, CachedCustomSpecialization(player));
+            if (session.ActionSession)
+                spell->SetPracticeCast(std::make_shared<CoAAbilityPractice::CastReceipt>(
+                    player->GetGUID().GetRawValue(), session.ActionSession, player->getClass(), spell->GetSpellInfo()->Id,
+                    player->getRace(), player->GetActiveSpec(), session.LastCustomSpecialization));
+        }
         return true;
     }
 
@@ -847,6 +939,7 @@ void AddSC_ability_practice()
 {
     CoAAbilityPractice::SetRankProvider(EvaluateRank);
     CoAAbilityPractice::SetPurchaseProvider(CanPurchaseSpell);
+    CoAAbilityPractice::SetPeriodicOutcomeProvider(AwardPeriodicOutcome);
     new PracticeWorld();
     new PracticePlayer();
     new PracticeClientCast();

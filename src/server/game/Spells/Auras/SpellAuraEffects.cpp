@@ -16,6 +16,7 @@
  */
 
 #include "SpellAuraEffects.h"
+#include "AbilityPracticeCastReceipt.h"
 #include "AreaDefines.h"
 #include "BattlefieldMgr.h"
 #include "Battleground.h"
@@ -6469,6 +6470,9 @@ void AuraEffect::HandlePeriodicTriggerSpellWithValueAuraTick(Unit* target, Unit*
 
 void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
 {
+    auto const practiceCast = GetBase()->GetPracticeCast();
+    uint32 const practiceSpellId = GetId();
+    uint32 const practiceAuraType = GetAuraType();
     if (!target->IsAlive())
         return;
 
@@ -6624,6 +6628,9 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
     uint32 damageDealt = Unit::DealDamage(caster, target, damage, &cleanDamage, DOT, GetSpellInfo()->GetSchoolMask(), GetSpellInfo(), true);
     sScriptMgr->OnPeriodicDamageResult(target, caster, damageDealt, GetSpellInfo());
 
+    CoAAbilityPractice::ReportPeriodicOutcome(caster, target, practiceSpellId, practiceAuraType,
+        damageDealt, 0, practiceCast);
+
     Unit::ProcSkillsAndAuras(caster, target, caster ? procAttacker : 0, procVictim, procEx, damage, BASE_ATTACK, GetSpellInfo(), nullptr, GetEffIndex(), nullptr, &dmgInfo);
 }
 
@@ -6768,6 +6775,9 @@ void AuraEffect::HandlePeriodicHealthFunnelAuraTick(Unit* target, Unit* caster) 
 
 void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
 {
+    auto const practiceCast = GetBase()->GetPracticeCast();
+    uint32 const practiceSpellId = GetId();
+    uint32 const practiceAuraType = GetAuraType();
     if (!target->IsAlive())
         return;
 
@@ -6870,6 +6880,9 @@ void AuraEffect::HandlePeriodicHealAurasTick(Unit* target, Unit* caster) const
     Unit::CalcHealAbsorb(healInfo);
     int32 gain = Unit::DealHeal(caster, target, healInfo.GetHeal());
     healInfo.SetEffectiveHeal(gain);
+
+    CoAAbilityPractice::ReportPeriodicOutcome(caster, target, practiceSpellId, practiceAuraType,
+        0, uint32(std::max(gain, 0)), practiceCast);
 
     SpellPeriodicAuraLogInfo pInfo(this, healInfo.GetHeal(), healInfo.GetHeal() - healInfo.GetEffectiveHeal(), healInfo.GetAbsorb(), 0, 0.0f, crit);
     target->SendPeriodicAuraLog(&pInfo);

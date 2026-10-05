@@ -2187,7 +2187,8 @@ void Spell::EffectPersistentAA(SpellEffIndex effIndex)
             return;
         }
 
-        if (Aura* aura = Aura::TryCreate(m_spellInfo, MAX_EFFECT_MASK, dynObj, caster, &m_spellValue->EffectBasePoints[0]))
+        if (Aura* aura = Aura::TryCreate(m_spellInfo, MAX_EFFECT_MASK, dynObj, caster,
+                &m_spellValue->EffectBasePoints[0], nullptr, ObjectGuid::Empty, ObjectGuid::Empty, m_practiceCast))
         {
             m_spellAura = aura;
             // Persistent ground effects accept the same explicit duration as unit auras.

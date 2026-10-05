@@ -38,7 +38,9 @@ enum BrewfestEntries
 class AuraEffect
 {
     friend void Aura::_InitEffects(uint8 effMask, Unit* caster, int32* baseAmount);
-    friend Aura* Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint8 effMask, Unit* caster, int32* baseAmount, Item* castItem, ObjectGuid casterGUID, bool noPeriodicReset);
+    friend Aura* Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint8 effMask, Unit* caster,
+        int32* baseAmount, Item* castItem, ObjectGuid casterGUID, bool noPeriodicReset,
+        std::shared_ptr<CoAAbilityPractice::CastReceipt> const& practiceCast);
     friend Aura::~Aura();
 private:
     ~AuraEffect();

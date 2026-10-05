@@ -10,3 +10,7 @@ AbilityPractice.AllowDevelopmentRankLearning = 0
 # Additional representative class-grant fixtures for all 21 CoA classes. Read once at startup.
 # The default catalog remains the original three Pyromancer fixtures. Neither catalog is production balance.
 AbilityPractice.AllowDevelopmentClassSamples = 0
+
+# Experimental original-cast observation of native periodic damage and healing. Read once at startup.
+# Leave off until qualified on an isolated server.
+AbilityPractice.AllowDevelopmentPeriodicObservation = 0

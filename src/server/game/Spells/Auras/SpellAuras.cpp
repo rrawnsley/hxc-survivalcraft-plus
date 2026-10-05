@@ -269,7 +269,10 @@ uint8 Aura::BuildEffectMaskForOwner(SpellInfo const* spellProto, uint8 avalibleE
     return effMask & avalibleEffectMask;
 }
 
-Aura* Aura::TryRefreshStackOrCreate(SpellInfo const* spellproto, uint8 tryEffMask, WorldObject* owner, Unit* caster, int32* baseAmount /*= nullptr*/, Item* castItem /*= nullptr*/, ObjectGuid casterGUID /*= ObjectGuid::Empty*/, bool* refresh /*= nullptr*/, bool periodicReset /*= false*/)
+Aura* Aura::TryRefreshStackOrCreate(SpellInfo const* spellproto, uint8 tryEffMask, WorldObject* owner, Unit* caster,
+    int32* baseAmount /*= nullptr*/, Item* castItem /*= nullptr*/, ObjectGuid casterGUID /*= ObjectGuid::Empty*/,
+    bool* refresh /*= nullptr*/, bool periodicReset /*= false*/,
+    std::shared_ptr<CoAAbilityPractice::CastReceipt> const& practiceCast)
 {
     ASSERT_NODEBUGINFO(spellproto);
     ASSERT_NODEBUGINFO(owner);
@@ -280,7 +283,8 @@ Aura* Aura::TryRefreshStackOrCreate(SpellInfo const* spellproto, uint8 tryEffMas
     uint8 effMask = Aura::BuildEffectMaskForOwner(spellproto, tryEffMask, owner);
     if (!effMask)
         return nullptr;
-    if (Aura* foundAura = owner->ToUnit()->_TryStackingOrRefreshingExistingAura(spellproto, effMask, caster, baseAmount, castItem, casterGUID, periodicReset))
+    if (Aura* foundAura = owner->ToUnit()->_TryStackingOrRefreshingExistingAura(spellproto, effMask, caster,
+            baseAmount, castItem, casterGUID, periodicReset, practiceCast))
     {
         // we've here aura, which script triggered removal after modding stack amount
         // check the state here, so we won't create new Aura object
@@ -292,10 +296,18 @@ Aura* Aura::TryRefreshStackOrCreate(SpellInfo const* spellproto, uint8 tryEffMas
         return foundAura;
     }
     else
-        return Create(spellproto, effMask, owner, caster, baseAmount, castItem, casterGUID);
+    {
+        Aura* created = Create(spellproto, effMask, owner, caster, baseAmount, castItem, casterGUID);
+        if (created)
+            created->SetPracticeCast(practiceCast);
+        return created;
+    }
 }
 
-Aura* Aura::TryCreate(SpellInfo const* spellproto, uint8 tryEffMask, WorldObject* owner, Unit* caster, int32* baseAmount /*= nullptr*/, Item* castItem /*= nullptr*/, ObjectGuid casterGUID /*= ObjectGuid::Empty*/, ObjectGuid itemGUID /*= ObjectGuid::Empty*/)
+Aura* Aura::TryCreate(SpellInfo const* spellproto, uint8 tryEffMask, WorldObject* owner, Unit* caster,
+    int32* baseAmount /*= nullptr*/, Item* castItem /*= nullptr*/, ObjectGuid casterGUID /*= ObjectGuid::Empty*/,
+    ObjectGuid itemGUID /*= ObjectGuid::Empty*/,
+    std::shared_ptr<CoAAbilityPractice::CastReceipt> const& practiceCast)
 {
     ASSERT_NODEBUGINFO(spellproto);
     ASSERT_NODEBUGINFO(owner);
@@ -304,7 +316,10 @@ Aura* Aura::TryCreate(SpellInfo const* spellproto, uint8 tryEffMask, WorldObject
     uint8 effMask = Aura::BuildEffectMaskForOwner(spellproto, tryEffMask, owner);
     if (!effMask)
         return nullptr;
-    return Create(spellproto, effMask, owner, caster, baseAmount, castItem, casterGUID, itemGUID);
+    Aura* created = Create(spellproto, effMask, owner, caster, baseAmount, castItem, casterGUID, itemGUID);
+    if (created)
+        created->SetPracticeCast(practiceCast);
+    return created;
 }
 
 Aura* Aura::Create(SpellInfo const* spellproto, uint8 effMask, WorldObject* owner, Unit* caster, int32* baseAmount, Item* castItem, ObjectGuid casterGUID, ObjectGuid itemGUID /*= ObjectGuid::Empty*/)

@@ -3200,7 +3200,8 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
             bool refresh = false;
             bool refreshPeriodic = m_spellInfo->StackAmount < 2 && !HasTriggeredCastFlag(TRIGGERED_NO_PERIODIC_RESET);
             m_spellAura = Aura::TryRefreshStackOrCreate(aurSpellInfo, effectMask, unit, m_originalCaster,
-                          (aurSpellInfo == m_spellInfo) ? &m_spellValue->EffectBasePoints[0] : &basePoints[0], m_CastItem, ObjectGuid::Empty, &refresh, refreshPeriodic);
+                          (aurSpellInfo == m_spellInfo) ? &m_spellValue->EffectBasePoints[0] : &basePoints[0],
+                          m_CastItem, ObjectGuid::Empty, &refresh, refreshPeriodic, m_practiceCast);
 
             // xinef: if aura was not refreshed, add proc ex
             if (!refresh)

@@ -187,7 +187,8 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
         {
             if (!Detail::ConsistentTypedRoadmap(view, characterLevel))
                 return std::nullopt;
-            if (view.RuleSet != HumanPvERuleSet || view.Route < PracticeRoute::Damage ||
+            if ((view.RuleSet != HumanPvERuleSet && view.RuleSet != HumanPvEPeriodicRuleSet) ||
+                view.Route < PracticeRoute::Damage ||
                 view.Route > PracticeRoute::Fixed ||
                 ((view.Kind == AbilityKind::Fixed) != (view.Route == PracticeRoute::Fixed)))
                 return std::nullopt;

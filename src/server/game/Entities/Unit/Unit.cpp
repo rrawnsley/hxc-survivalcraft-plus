@@ -5156,7 +5156,9 @@ bool Unit::IsHighestExclusiveAuraEffect(SpellInfo const* spellInfo, AuraType aur
     return true;
 }
 
-Aura* Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint8 effMask, Unit* caster, int32* baseAmount /*= nullptr*/, Item* castItem /*= nullptr*/, ObjectGuid casterGUID /*= ObjectGuid::Empty*/, bool periodicReset /*= false*/)
+Aura* Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint8 effMask, Unit* caster,
+    int32* baseAmount /*= nullptr*/, Item* castItem /*= nullptr*/, ObjectGuid casterGUID /*= ObjectGuid::Empty*/,
+    bool periodicReset /*= false*/, std::shared_ptr<CoAAbilityPractice::CastReceipt> const& practiceCast)
 {
     ASSERT(casterGUID || caster);
     if (!casterGUID)
@@ -5181,6 +5183,8 @@ Aura* Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint8
             // let's just recreate aura
             if (effMask != foundAura->GetEffectMask())
                 return nullptr;
+
+            foundAura->SetPracticeCast(practiceCast);
 
             // update basepoints with new values - effect amount will be recalculated in ModStackAmount
             for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)

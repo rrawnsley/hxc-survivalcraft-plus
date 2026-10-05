@@ -96,13 +96,21 @@ public:
 
 class Aura
 {
-    friend Aura* Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint8 effMask, Unit* caster, int32* baseAmount, Item* castItem, ObjectGuid casterGUID, bool noPeriodicReset);
+    friend Aura* Unit::_TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint8 effMask, Unit* caster,
+        int32* baseAmount, Item* castItem, ObjectGuid casterGUID, bool noPeriodicReset,
+        std::shared_ptr<CoAAbilityPractice::CastReceipt> const& practiceCast);
 public:
     typedef std::map<ObjectGuid, AuraApplication*> ApplicationMap;
 
     static uint8 BuildEffectMaskForOwner(SpellInfo const* spellProto, uint8 avalibleEffectMask, WorldObject* owner);
-    static Aura* TryRefreshStackOrCreate(SpellInfo const* spellproto, uint8 tryEffMask, WorldObject* owner, Unit* caster, int32* baseAmount = nullptr, Item* castItem = nullptr, ObjectGuid casterGUID = ObjectGuid::Empty, bool* refresh = nullptr, bool periodicReset = false);
-    static Aura* TryCreate(SpellInfo const* spellproto, uint8 effMask, WorldObject* owner, Unit* caster, int32* baseAmount = nullptr, Item* castItem = nullptr, ObjectGuid casterGUID = ObjectGuid::Empty, ObjectGuid itemGUID = ObjectGuid::Empty);
+    static Aura* TryRefreshStackOrCreate(SpellInfo const* spellproto, uint8 tryEffMask, WorldObject* owner, Unit* caster,
+        int32* baseAmount = nullptr, Item* castItem = nullptr, ObjectGuid casterGUID = ObjectGuid::Empty,
+        bool* refresh = nullptr, bool periodicReset = false,
+        std::shared_ptr<CoAAbilityPractice::CastReceipt> const& practiceCast = {});
+    static Aura* TryCreate(SpellInfo const* spellproto, uint8 effMask, WorldObject* owner, Unit* caster,
+        int32* baseAmount = nullptr, Item* castItem = nullptr, ObjectGuid casterGUID = ObjectGuid::Empty,
+        ObjectGuid itemGUID = ObjectGuid::Empty,
+        std::shared_ptr<CoAAbilityPractice::CastReceipt> const& practiceCast = {});
     static Aura* Create(SpellInfo const* spellproto, uint8 effMask, WorldObject* owner, Unit* caster, int32* baseAmount, Item* castItem, ObjectGuid casterGUID, ObjectGuid itemGUID = ObjectGuid::Empty);
     explicit Aura(SpellInfo const* spellproto, WorldObject* owner, Unit* caster, Item* castItem, ObjectGuid casterGUID, ObjectGuid itemGUID = ObjectGuid::Empty);
     void _InitEffects(uint8 effMask, Unit* caster, int32* baseAmount);
@@ -138,6 +146,8 @@ public:
 
     time_t GetApplyTime() const { return m_applyTime; }
     uint64 GetApplySequence() const { return m_applySequence; }
+    void SetPracticeCast(std::shared_ptr<CoAAbilityPractice::CastReceipt> const& receipt) { m_practiceCast = receipt; }
+    std::shared_ptr<CoAAbilityPractice::CastReceipt> const& GetPracticeCast() const { return m_practiceCast; }
     // In-memory script snapshots belong to this aura instance, not to a unit-wide spell id.
     void SetScriptValue(uint32 key, uint64 value)
     {
@@ -278,6 +288,7 @@ public:
 private:
     void _DeleteRemovedApplications();
     std::map<uint32, uint64> m_scriptValues;
+    std::shared_ptr<CoAAbilityPractice::CastReceipt> m_practiceCast;
 
 protected:
     SpellInfo const* const m_spellInfo;

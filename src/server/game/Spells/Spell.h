@@ -644,6 +644,8 @@ public:
 
     // Script-owned snapshots live with the cast, including delayed targets. Keys are spell ids.
     void SetScriptValue(uint32 key, uint64 value) { m_scriptValues[key] = value; }
+    void SetPracticeCast(std::shared_ptr<CoAAbilityPractice::CastReceipt> const& receipt) { m_practiceCast = receipt; }
+    std::shared_ptr<CoAAbilityPractice::CastReceipt> const& GetPracticeCast() const { return m_practiceCast; }
     uint64 GetScriptValue(uint32 key) const
     {
         auto itr = m_scriptValues.find(key);
@@ -694,6 +696,7 @@ public:
     uint8 m_spellFlags;                                 // for spells whose target was changed in cast i.e. due to reflect
     mutable uint32 m_scriptEventMask;                   // per-cast bookkeeping, including read-only proc callbacks
     std::map<uint32, uint64> m_scriptValues;
+    std::shared_ptr<CoAAbilityPractice::CastReceipt> m_practiceCast;
     std::optional<float> m_jumpFinalOrientation;
     uint32 m_scriptHealthLeechDamage = 0;
     uint32 m_scriptHealingIncludingOverheal = 0;

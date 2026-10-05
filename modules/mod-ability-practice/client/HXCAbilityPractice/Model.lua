@@ -141,7 +141,8 @@ local function Ability(value, schema, characterLevel)
     local session = schema == 4 and Session(value.session) or nil
     if schema == 4 then
         if not session or not Integer(value.kind, 1, 3) or not Integer(value.route, 1, 6)
-            or value.ruleSet ~= 1 or ((value.kind == 3) ~= (value.route == 6)) then return nil end
+            or (value.ruleSet ~= 1 and value.ruleSet ~= 2)
+            or ((value.kind == 3) ~= (value.route == 6)) then return nil end
         if not ConsistentTypedRoadmap(value, ranks, rank, point, characterLevel) then return nil end
         if value.nextTrainingCap ~= nil then
             local cap = value.nextTrainingCap
@@ -270,7 +271,7 @@ function Model.PracticeRules(ability)
     if Model.IsFixed(ability) then
         return "This ability has no practice levels. Learn it through your normal ability source."
     end
-    if ability.ruleSet ~= 1 then
+    if ability.ruleSet ~= 1 and ability.ruleSet ~= 2 then
         return "Practice rules are unavailable in this update. Refresh to request the current rules."
     end
     local rules = {
@@ -284,9 +285,14 @@ function Model.PracticeRules(ability)
     }
     local rule = rules[ability.route]
     if not rule then return "Practice rules are unavailable in this update." end
+    if ability.route == 1 or ability.route == 2 then
+        rule = rule .. (ability.ruleSet == 2 and
+            " Supported damage/healing-over-time ticks can count once for the original cast."
+            or " Only direct damage or healing counts in the current rules.")
+    end
     return rule .. "\n\nOpponents that are too low level, players, player-controlled units, pets, totems"
         .. " and critters do not qualify."
         .. "\n\nOnly your learned ability casts requested through your client can count."
         .. " Triggered casts, item casts, script-created spells and aura-triggered helpers do not count."
-        .. " One award per cast, regardless of targets or removals. Practice stops at your current cap."
+        .. " One award per original cast, regardless of targets, ticks or removals. Practice stops at your current cap."
 end

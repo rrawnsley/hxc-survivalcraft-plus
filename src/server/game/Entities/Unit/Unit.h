@@ -33,6 +33,7 @@
 #include "UnitUtils.h"
 #include <boost/container/flat_map.hpp>
 #include <functional>
+#include <memory>
 #include <optional>
 #include <utility>
 
@@ -75,6 +76,11 @@ class Vehicle;
 class TransportBase;
 class SpellCastTargets;
 class AbstractFollower;
+
+namespace CoAAbilityPractice
+{
+    class CastReceipt;
+}
 
 typedef std::list<Unit*> UnitList;
 typedef std::list< std::pair<Aura*, uint8> > DispelChargesList;
@@ -1374,7 +1380,9 @@ public:
     bool IsHighestExclusiveAuraEffect(SpellInfo const* spellInfo, AuraType auraType, int32 effectAmount, uint8 auraEffectMask, bool removeOtherAuraApplications = false);
 
     // aura apply/remove helpers - you should better not use these
-    Aura* _TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint8 effMask, Unit* caster, int32* baseAmount = nullptr, Item* castItem = nullptr, ObjectGuid casterGUID = ObjectGuid::Empty, bool periodicReset = false);
+    Aura* _TryStackingOrRefreshingExistingAura(SpellInfo const* newAura, uint8 effMask, Unit* caster,
+        int32* baseAmount = nullptr, Item* castItem = nullptr, ObjectGuid casterGUID = ObjectGuid::Empty,
+        bool periodicReset = false, std::shared_ptr<CoAAbilityPractice::CastReceipt> const& practiceCast = {});
     void _AddAura(UnitAura* aura, Unit* caster);
     AuraApplication* _CreateAuraApplication(Aura* aura, uint8 effMask);
     void _ApplyAuraEffect(Aura* aura, uint8 effIndex);

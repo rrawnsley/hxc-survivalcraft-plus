@@ -16,7 +16,12 @@ def verify_provenance(candidates, root, dbc):
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentSamples.h',
                 'modules/mod-ability-practice/src/AbilityPracticeProfiles.h', 'src/server/shared/SharedDefines.h',
                 'src/server/coa/AscensionSpellEligibility.h', 'src/server/coa/AscensionRacialAbilities.h',
-                'src/server/coa/AscensionFelsworn.cpp', 'src/server/coa/AscensionCompat.cpp'}
+                'src/server/coa/AscensionFelsworn.cpp', 'src/server/coa/AscensionCompat.cpp',
+                'src/server/game/Spells/AbilityPracticeCastReceipt.h', 'src/server/game/Spells/Spell.h',
+                'src/server/game/Spells/Spell.cpp', 'src/server/game/Spells/SpellEffects.cpp',
+                'src/server/game/Spells/Auras/SpellAuras.h', 'src/server/game/Spells/Auras/SpellAuras.cpp',
+                'src/server/game/Spells/Auras/SpellAuraEffects.cpp',
+                'src/server/game/Entities/Unit/Unit.h', 'src/server/game/Entities/Unit/Unit.cpp'}
     if not isinstance(native_sources, list) or len(native_sources) != len(expected) or {
             source.get('path') for source in native_sources} != expected:
         raise ValueError('Missing native outcome provenance')

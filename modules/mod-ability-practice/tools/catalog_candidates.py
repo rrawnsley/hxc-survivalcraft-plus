@@ -394,6 +394,13 @@ def main():
                          'src/server/coa/AscensionRacialAbilities.h',
                          'src/server/coa/AscensionFelsworn.cpp',
                          'src/server/coa/AscensionCompat.cpp',
+                         'src/server/game/Spells/AbilityPracticeCastReceipt.h',
+                         'src/server/game/Spells/Spell.h', 'src/server/game/Spells/Spell.cpp',
+                         'src/server/game/Spells/SpellEffects.cpp',
+                         'src/server/game/Spells/Auras/SpellAuras.h',
+                         'src/server/game/Spells/Auras/SpellAuras.cpp',
+                         'src/server/game/Spells/Auras/SpellAuraEffects.cpp',
+                         'src/server/game/Entities/Unit/Unit.h', 'src/server/game/Entities/Unit/Unit.cpp',
                          'src/server/shared/SharedDefines.h')]
     if args.dbc:
         lookup, sources = load_acquisition_lookup(args.root, args.dbc)
