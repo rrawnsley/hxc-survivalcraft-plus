@@ -162,7 +162,7 @@ function Model.RankText(rank)
     end
     if rank.practice.status == 3 then return "Beyond your current proficiency cap.\n" .. requirement end
     if rank.practice.status == 1 then
-        return rank.practice.uses .. " qualifying uses remaining at your current training rate.\n" .. requirement
+        return rank.practice.uses .. " qualifying uses remaining under current training rules.\n" .. requirement
     end
     return requirement
 end

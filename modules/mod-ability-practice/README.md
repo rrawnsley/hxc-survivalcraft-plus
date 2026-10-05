@@ -389,3 +389,19 @@ Source/native build passed at `.cache/verify-all/20261005-074256/report.json`; C
 The first build failed because an atomic variable shared the provider type alias's name; renaming the atomic
 fixed compilation. That failed report is `.cache/verify-all/20261005-074109/report.json`. No runtime fee, cycle,
 nested wrapper or off-mode cases ran, and no server was installed/started/restarted.
+
+## Partial native acquisition filtering evidence
+
+The raw advancement review now annotates the native loader's basic custom-class, class range and three-rank
+filters, and distinguishes a reference belonging to another candidate class. Matching records remain pending:
+class/tab specialization joins, identity-level overrides, byte-width normalization and dependency rules are
+explicitly unresolved. No raw record is declared a character entitlement or production-approved ability.
+
+The current export retains all 4,969 candidates across 21 classes. Of 3,956 candidate/node references, 15 refer to
+non-custom class types and 10 to another custom class; 3,931 still need native review, across 3,929 candidates.
+Counts refer to candidate/node references and can repeat the same raw node; they are not unique talent counts.
+The exporter remains read-only and writes only ignored cache files. The menu now describes forecasts as using
+current training rules, since its exact calculation can cross rate bands rather than use one constant rate.
+
+Source checks passed at `.cache/verify-all/20261005-074726/report.json`; Lua 5.1 syntax passed. Raw exports completed;
+no new behavioral cases or tests ran and no production data changed.

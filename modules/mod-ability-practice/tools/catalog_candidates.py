@@ -137,19 +137,70 @@ def build_candidates(inventory):
     }
 
 
+def native_node_review(node, class_id):
+    result = {'scope': 'partial-source-filter-review-not-runtime-entitlement',
+              'source': 'src/server/coa/AscensionCoATalentData.cpp', 'status': 'needs-native-review'}
+    values = node.get('values', {})
+    class_type = node.get('classType', {})
+    class_values = class_type.get('values', {})
+    if node.get('fieldErrors') or class_type.get('fieldErrors') or not class_values:
+        return {**result, 'status': 'missing-or-invalid-class-evidence'}
+    native_class = class_values.get('ClassID')
+    custom = class_values.get('CustomClass')
+    if type(native_class) is not int or type(custom) is not int:
+        return {**result, 'status': 'missing-or-invalid-class-evidence'}
+    result['referencedClassId'] = native_class
+    if not custom:
+        return {**result, 'status': 'excluded-non-custom-class-type'}
+    if not 12 <= native_class <= 32:
+        return {**result, 'status': 'excluded-outside-custom-class-range'}
+    if native_class != class_id:
+        return {**result, 'status': 'foreign-custom-class-reference'}
+    spells = [values.get('RankSpell[' + str(index) + ']') for index in range(5)]
+    if any(type(spell) is not int or spell < 0 for spell in spells):
+        return {**result, 'status': 'missing-or-invalid-rank-evidence'}
+    result['rawRankCount'] = sum(bool(spell) for spell in spells)
+    if result['rawRankCount'] > 3:
+        return {**result, 'status': 'excluded-more-than-three-native-ranks'}
+    if not result['rawRankCount']:
+        return {**result, 'status': 'missing-or-invalid-rank-evidence'}
+    flags = ['native-level-cost-normalization-unobserved', 'native-dependency-identity-rules-unobserved']
+    if values.get('Tab') != 87:
+        flags.append('native-class-tab-specialization-join-unobserved')
+    for field in ('AbilityEssenceCost', 'TalentEssenceCost', 'RequiredLevel'):
+        value = values.get(field)
+        if type(value) is not int or value < 0:
+            flags.append('missing-or-invalid-cost-level-evidence')
+        elif value > 255:
+            flags.append('native-byte-width-normalization-review')
+    return {**result, 'reviewFlags': sorted(set(flags))}
+
+
 def annotate_acquisition(candidates, lookup, sources):
     candidates['rawAcquisitionSources'] = sources
+    statuses = Counter()
+    matching_candidates = 0
     for candidate in candidates['candidates']:
         nodes = {}
         for member in candidate['members']:
             for node in lookup(member['spellId']):
-                nodes[node['id']] = node
+                nodes[node['id']] = {**node}
         candidate['rawAcquisition'] = [nodes[identity] for identity in sorted(nodes)]
+        matching = False
+        for node in candidate['rawAcquisition']:
+            node['nativeLoaderReview'] = native_node_review(node, candidate['classId'])
+            status = node['nativeLoaderReview']['status']
+            statuses[status] += 1
+            matching = matching or status == 'needs-native-review'
+        matching_candidates += bool(matching)
+        candidate['hasPotentialNativeAcquisitionNode'] = matching
         if nodes:
             candidate['reviewFlags'] = sorted(set(candidate['reviewFlags']) | {
                 'native-acquisition-filtering-unobserved'})
     candidates['summary']['withRawAcquisitionCount'] = sum(bool(row['rawAcquisition'])
                                                           for row in candidates['candidates'])
+    candidates['summary']['potentialNativeAcquisitionCandidateCount'] = matching_candidates
+    candidates['summary']['rawAcquisitionReferenceStatuses'] = dict(sorted(statuses.items()))
     return candidates
 
 
