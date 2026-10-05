@@ -5,10 +5,14 @@ from pathlib import Path
 import sys
 
 
+DIRECT_ROUTES = {'damage': {2, 17, 31, 58, 121}, 'healing': {10, 67, 136}}
+
+
 def action_review(members):
     traits, triggers, timing = set(), set(), []
     direct = {'SPELL_EFFECT_SCHOOL_DAMAGE', 'SPELL_EFFECT_WEAPON_DAMAGE',
               'SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL', 'SPELL_EFFECT_NORMALIZED_WEAPON_DMG',
+              'SPELL_EFFECT_WEAPON_PERCENT_DAMAGE',
               'SPELL_EFFECT_HEAL', 'SPELL_EFFECT_HEAL_PCT', 'SPELL_EFFECT_HEAL_MAX_HEALTH',
               'SPELL_EFFECT_HEALTH_LEECH'}
     utility = {'SPELL_EFFECT_INTERRUPT_CAST', 'SPELL_EFFECT_DISPEL', 'SPELL_EFFECT_DISPEL_MECHANIC',
@@ -66,11 +70,8 @@ def native_direct_review(members):
                     type(effect) is not int or effect < 0 for effect in effects):
                 reasons.append('missing-or-invalid-raw-effects')
             else:
-                supported = set()
-                if 2 in effects:
-                    supported.add('damage')
-                if 10 in effects:
-                    supported.add('healing')
+                supported = {route for route, identities in DIRECT_ROUTES.items()
+                             if identities.intersection(effects)}
                 if not supported:
                     reasons.append('no-current-direct-route')
                 routes.intersection_update(supported)

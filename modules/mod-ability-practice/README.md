@@ -606,3 +606,21 @@ Source/native build passed at `.cache/verify-all/20261005-085938/report.json`; f
 at `.cache/verify-all/20261005-090100/report.json`. C++ lint, whitespace and all four Lua 5.1 syntax compilations
 passed. No cases added or behavioral tests ran. Award/class-switch/overflow/transport and in-game text layout
 remain runtime qualification; production is untouched.
+
+## Broader resolved direct effect support
+
+The native adapter now recognizes direct school damage and all four weapon-damage effect forms, plus normal,
+percentage and maximum-health heals. These effects feed the existing resolved damage/healing path inspected
+in SpellEffects.cpp and Spell.cpp; the hook uses resolved damage and post-HealBySpell gain. No coefficient,
+cast frequency, balance rate or core spell calculation changed. The existing positive-result, actor/ownership,
+PvE and original-cast deduplication rules remain, with no helper/periodic/pet inference added.
+
+The read-only comparison uses matching SharedDefines IDs: damage 2/17/31/58/121 and healing 10/67/136.
+The current raw export now finds 404 groups across all 21 classes, including 234 claimed rank groups;
+349 have damage and 57 healing routes, with two overlapping. This supersedes the narrow raw comparison's
+288 count. All groups remain pending; raw support does not qualify acquisition/effective scripts/runtime.
+No more than the existing three development profiles is enabled.
+
+Source/native build passed at `.cache/verify-all/20261005-090344/report.json`; C++ lint/whitespace passed.
+Read-only export generation wrote ignored cache files only. No tests ran. Individual weapon/heal routes,
+script interactions, encounter outcomes and live rendering remain unqualified. Production is untouched.

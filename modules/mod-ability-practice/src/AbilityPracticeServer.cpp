@@ -70,6 +70,20 @@ struct MenuSession
 };
 std::unordered_map<std::uint64_t, MenuSession> Sessions;
 
+bool HasDirectOutcome(SpellInfo const* info, Practice::DirectOutcome outcome)
+{
+    if (!info)
+        return false;
+    if (outcome == Practice::DirectOutcome::Damage)
+        return info->HasEffect(SPELL_EFFECT_SCHOOL_DAMAGE) || info->HasEffect(SPELL_EFFECT_WEAPON_DAMAGE) ||
+            info->HasEffect(SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL) || info->HasEffect(SPELL_EFFECT_NORMALIZED_WEAPON_DMG) ||
+            info->HasEffect(SPELL_EFFECT_WEAPON_PERCENT_DAMAGE);
+    if (outcome == Practice::DirectOutcome::Healing)
+        return info->HasEffect(SPELL_EFFECT_HEAL) || info->HasEffect(SPELL_EFFECT_HEAL_PCT) ||
+            info->HasEffect(SPELL_EFFECT_HEAL_MAX_HEALTH);
+    return false;
+}
+
 bool MatchesNativeClassGrant(Practice::AbilityProfile const& profile)
 {
     Practice::AbilityDefinition const& ability = profile.Definition;
@@ -399,9 +413,7 @@ public:
             {
                 SpellInfo const* info = sSpellMgr->GetSpellInfo(rank.SpellId);
                 bool const fixed = profile.Definition.Kind == Practice::AbilityKind::Fixed;
-                bool const expectedOutcome = info && (fixed ||
-                    (profile.Outcome == Practice::DirectOutcome::Damage ?
-                        info->HasEffect(SPELL_EFFECT_SCHOOL_DAMAGE) : info->HasEffect(SPELL_EFFECT_HEAL)));
+                bool const expectedOutcome = info && (fixed || HasDirectOutcome(info, profile.Outcome));
                 if (!info || (!fixed && info->IsPassive()) || !expectedOutcome)
                 {
                     Ready = false;
