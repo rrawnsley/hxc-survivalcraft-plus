@@ -1271,3 +1271,18 @@ style, whitespace and five Lua 5.1 syntax compilations passed. Candidate/draft a
 same 847 unapproved drafts/179 outcome candidates. The frozen main native rebuild remains in progress.
 Integration, affected incremental build and real scripted-result/lifecycle/menu/PvE acceptance remain pending.
 No behavioral tests were added/run. No live server/configuration/client/database/launcher change occurred.
+
+
+## Cancel outdated owner snapshots — 5 October 2026
+
+Owner class/race/talent-set/custom-specialization changes and profiled level/learn/forget events now discard
+unsent menu delivery and request a fresh snapshot at the next eligible delivery opportunity. Partial older
+responses can no longer finish from that unsent queue after these events. Packet pacing remains unchanged.
+Practice-use updates retain the normal coalescing cadence; class/session use counters and earned state remain.
+A packet already sent before the change cannot be withdrawn. No runtime race reproduction is claimed.
+
+Source checks passed `.cache/verify-all/20261005-165052/report.json` in the catalog worktree; changed C++ lint
+and whitespace passed. The initial main-worktree source/native rebuild completed successfully at
+`.cache/verify-all/20261005-153458/report.json` against frozen a5ea9902f; unit/harness/gameplay stages were skipped.
+Catalog changes still need main-branch integration and the affected incremental build. No behavioral tests ran
+and no production files/process/config/client/DB/launcher changed.

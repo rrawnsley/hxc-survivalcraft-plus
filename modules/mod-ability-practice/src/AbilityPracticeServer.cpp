@@ -718,6 +718,8 @@ void RefreshOwnerState(Player* player, MenuSession& session, std::uint32_t custo
     if (session.Initialized && session.LastClass == player->getClass() && session.LastRace == player->getRace() &&
         session.LastSpec == player->GetActiveSpec() && session.LastCustomSpecialization == customSpecialization)
         return;
+    ClearDelivery(session);
+    session.NextRefresh = {};
     InitializeProgress(player);
     session.Initialized = true;
     session.LastClass = player->getClass();
@@ -737,6 +739,8 @@ void MarkDirty(Player* player)
     auto const found = Sessions.find(player->GetGUID().GetRawValue());
     if (Affects(player) && found != Sessions.end())
     {
+        ClearDelivery(found->second);
+        found->second.NextRefresh = {};
         found->second.Dirty = true;
         found->second.CheckRanks = true;
     }
