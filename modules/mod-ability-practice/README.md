@@ -1684,3 +1684,36 @@ Source/native passed .cache/verify-all/20261005-201807/report.json (two source c
 C++ style/whitespace and updated37-source authoring provenance/coverage passed. Addon unchanged since its
 0.4.21-development syntax check. Unit/harness/gameplay tests skipped. No production installation/start/restart/
 server/client/configuration/database/launcher changes.
+
+
+## Original-cast provenance for direct healing mastery — 5 October 2026
+
+Direct native Spell healing passes the existing CastReceipt synchronously through an optional HealBySpell
+parameter to the mastery provider. Other callers default to a null receipt and retain normal healing.
+A null receipt skips provider lookup. The module requires exact spell ID and current owner GUID/session/
+class/race/native talent set/cached custom specialization plus existing known ability, acquisition, saved
+progress, character level and qualifying PvE recipient checks. No additional receipt allocation, object
+layout, stored Player/Spell pointer, per-cast DB/config read or normal heal validation/modifier/absorb/logging
+ordering change. This tightens the development feature's source contract; no production exploit or runtime
+defect reproduction is claimed.
+
+ReceiptOwnerMatches excludes consumption state; practice ReceiptMatches additionally refuses consumed
+receipts. Thus later eligible targets of the same original cast retain earned mastery benefits after its
+one practice credit is consumed. Item/trigger/script/helper casts without their own valid original client
+receipt and stale owner/session casts receive ordinary healing. Mastery does not mint/consume receipts or
+award extra practice. Periodic healing/leech mastery remains unsupported and rejected at startup. Runtime
+source/lifecycle/multiple-target behavior and performance still require qualification.
+
+Source inspection of Starcaller abilities/events confirms extra targets added to the original Spell remain
+on that Spell; separately triggered sibling effects have their own spell IDs/context. These two reviewed
+sources join catalog provenance (39 sources), without claiming complete native class/rotation acceptance.
+Transport.lua passes all authenticated self-whisper records to Wire.Accept, so H/O/G are not filtered before
+decoding; this is source inspection, not a runtime codec/addon test.
+
+Source/full native build passed .cache/verify-all/20261005-202509/report.json (two source checks;3021.4s).
+The build was BelowNormal on two logical processors initially, expanded to four of24 after confirming ample
+free memory; only its verified process descendants were adjusted. Existing unit test executables compiled
+as part of the build but were not executed. Unit/harness/gameplay stages skipped. Changed C++ style and
+whitespace passed. Addon unchanged since0.4.21-development syntax compilation. Authoring provenance/coverage
+is refreshed separately. No production server/client/configuration/database/launcher installation, start or
+restart; CoA process42440 remains the original process.

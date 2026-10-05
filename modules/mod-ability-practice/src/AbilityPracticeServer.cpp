@@ -389,12 +389,18 @@ std::uint64_t NewActionSession()
     return NextActionSession == std::numeric_limits<std::uint64_t>::max() ? 0 : ++NextActionSession;
 }
 
-bool ReceiptMatches(Player const* player, MenuSession const& session, CoAAbilityPractice::CastReceipt const& receipt)
+bool ReceiptOwnerMatches(Player const* player, MenuSession const& session,
+    CoAAbilityPractice::CastReceipt const& receipt)
 {
     return session.Initialized && receipt.Session && receipt.Session == session.ActionSession &&
         receipt.CasterGUID == player->GetGUID().GetRawValue() && receipt.ClassId == player->getClass() &&
         receipt.RaceId == player->getRace() && receipt.TalentSet == player->GetActiveSpec() &&
-        receipt.Specialization == CachedCustomSpecialization(player) && !receipt.IsConsumed();
+        receipt.Specialization == CachedCustomSpecialization(player);
+}
+
+bool ReceiptMatches(Player const* player, MenuSession const& session, CoAAbilityPractice::CastReceipt const& receipt)
+{
+    return !receipt.IsConsumed() && ReceiptOwnerMatches(player, session, receipt);
 }
 
 bool IsDevelopmentOpponent(Player const* player, Unit const* opponent)
@@ -1181,9 +1187,11 @@ public:
     }
 };
 
-std::uint32_t ModifyMasteryHealing(Unit* healer, Unit* target, std::uint32_t spellId, std::uint32_t healing)
+std::uint32_t ModifyMasteryHealing(Unit* healer, Unit* target, std::uint32_t spellId, std::uint32_t healing,
+    CoAAbilityPractice::CastReceipt const* receipt)
 {
-    if (!Active.load() || !MasteryRequested || !target || !healer || !spellId || !healing)
+    if (!Active.load() || !MasteryRequested || !target || !healer || !spellId || !healing || !receipt ||
+        receipt->SpellId != spellId)
         return healing;
     Player* player = healer->ToPlayer();
     if (!IsProfiledPlayer(player) || player->isBeingLoaded())
@@ -1194,8 +1202,9 @@ std::uint32_t ModifyMasteryHealing(Unit* healer, Unit* target, std::uint32_t spe
         !QualifiesDevelopmentOutcome(Practice::OutcomeKind::Healing, player, target, 0, healing))
         return healing;
     std::lock_guard lock(Mutex);
-    if (!Affects(player) || !player->HasSpell(spellId) ||
-        !AcquisitionAllowed(player, profile->Definition, spellId))
+    auto const session = Sessions.find(player->GetGUID().GetRawValue());
+    if (!Affects(player) || session == Sessions.end() || !ReceiptOwnerMatches(player, session->second, *receipt) ||
+        !player->HasSpell(spellId) || !AcquisitionAllowed(player, profile->Definition, spellId))
         return healing;
     auto const loaded = Practice::ReadPlayerProgress(*player, profile->Definition.ClassId,
         profile->Definition.AbilityId, profile->Policy, profile->DefinitionVersion);

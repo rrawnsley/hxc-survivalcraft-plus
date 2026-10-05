@@ -1651,7 +1651,8 @@ public:
     // Healling spells
     static int32 DealHeal(Unit* healer, Unit* victim, uint32 addhealth);
     void SendHealSpellLog(HealInfo const& healInfo, bool critical = false);
-    int32 HealBySpell(HealInfo& healInfo, bool critical = false);
+    int32 HealBySpell(HealInfo& healInfo, bool critical = false,
+        CoAAbilityPractice::CastReceipt const* receipt = nullptr);
 
     int32 SpellBaseHealingBonusDone(SpellSchoolMask schoolMask);
     float SpellPctHealingModsDone(Unit* victim, SpellInfo const* spellProto, DamageEffectType damagetype, bool includeHealingDonePct = true);

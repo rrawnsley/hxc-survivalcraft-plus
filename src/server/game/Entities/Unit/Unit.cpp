@@ -8974,12 +8974,12 @@ void Unit::SendHealSpellLog(HealInfo const& healInfo, bool critical)
     SendMessageToSet(&data, true);
 }
 
-int32 Unit::HealBySpell(HealInfo& healInfo, bool critical)
+int32 Unit::HealBySpell(HealInfo& healInfo, bool critical, CoAAbilityPractice::CastReceipt const* receipt)
 {
     uint32 heal = healInfo.GetHeal();
     sScriptMgr->ModifyHealReceived(this, healInfo.GetTarget(), heal, healInfo.GetSpellInfo());
     heal = CoAAbilityPractice::ModifyMasteryHealing(healInfo.GetHealer(), healInfo.GetTarget(),
-        healInfo.GetSpellInfo()->Id, heal);
+        healInfo.GetSpellInfo()->Id, heal, receipt);
     healInfo.SetHeal(heal);
 
     // calculate heal absorb and reduce healing

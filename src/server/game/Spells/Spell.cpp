@@ -2838,7 +2838,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
             healInfo.AddHitMask(PROC_HIT_CRITICAL);
         }
 
-        int32 gain = caster->HealBySpell(healInfo, crit);
+        int32 gain = caster->HealBySpell(healInfo, crit, GetPracticeCast().get());
         m_scriptHealingIncludingOverheal = healInfo.GetHeal();
         float threat = float(gain) * 0.5f;
         if (caster->IsClass(CLASS_PALADIN))

@@ -10,7 +10,9 @@ class Unit;
 
 namespace CoAAbilityPractice
 {
-using HealingMasteryProvider = std::uint32_t (*)(Unit*, Unit*, std::uint32_t, std::uint32_t);
+class CastReceipt;
+
+using HealingMasteryProvider = std::uint32_t (*)(Unit*, Unit*, std::uint32_t, std::uint32_t, CastReceipt const*);
 inline std::atomic<HealingMasteryProvider> HealingMasteryHandler = nullptr;
 
 inline void SetHealingMasteryProvider(HealingMasteryProvider provider)
@@ -19,10 +21,12 @@ inline void SetHealingMasteryProvider(HealingMasteryProvider provider)
 }
 
 inline std::uint32_t ModifyMasteryHealing(Unit* healer, Unit* recipient, std::uint32_t spellId,
-    std::uint32_t healing)
+    std::uint32_t healing, CastReceipt const* receipt)
 {
+    if (!receipt)
+        return healing;
     auto const provider = HealingMasteryHandler.load();
-    return provider ? provider(healer, recipient, spellId, healing) : healing;
+    return provider ? provider(healer, recipient, spellId, healing, receipt) : healing;
 }
 }
 
