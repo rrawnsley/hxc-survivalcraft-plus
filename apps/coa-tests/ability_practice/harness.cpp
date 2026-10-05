@@ -5,6 +5,7 @@
 #include "AbilityPracticeMenu.h"
 #include "AbilityPracticeWire.h"
 #include "AbilityPracticePersistence.h"
+#include "AbilityPracticeOutcome.h"
 
 #include <array>
 #include <cassert>
@@ -21,6 +22,11 @@ struct SettingsPlayer
         std::uint32_t value;
     };
     std::map<std::string, std::vector<Setting>> Settings;
+    std::uint32_t ClassId = 24;
+    std::vector<std::uint32_t> Learned = { 101 };
+
+    std::uint32_t getClass() const { return ClassId; }
+    bool HasSpell(std::uint32_t spellId) const { return KnowsSpell(Learned, spellId); }
 
     std::vector<Setting> const* FindPlayerSettings(std::string const& source) const
     {
@@ -35,6 +41,79 @@ struct SettingsPlayer
         fields[index].value = value;
     }
 };
+
+struct OutcomeSpell
+{
+    struct Info
+    {
+        std::uint32_t Id = 101;
+        bool Passive = false;
+        bool IsPassive() const { return Passive; }
+    };
+    Info SpellInfo;
+    SettingsPlayer* Caster;
+    bool Triggered = false;
+    std::map<std::uint32_t, std::uint64_t> Values;
+
+    bool IsTriggered() const { return Triggered; }
+    SettingsPlayer* GetCaster() const { return Caster; }
+    Info const* GetSpellInfo() const { return &SpellInfo; }
+    std::uint64_t GetScriptValue(std::uint32_t key) const
+    {
+        auto const found = Values.find(key);
+        return found == Values.end() ? 0 : found->second;
+    }
+    void SetScriptValue(std::uint32_t key, std::uint64_t value) { Values[key] = value; }
+};
+
+void CheckOutcome(TrainingPolicy policy)
+{
+    std::array const ranks = { AbilityRank{ 101, 1, { 4, 1 } }, AbilityRank{ 102, 2, { 16, 20 } } };
+    std::array const caps = { ProficiencyCap{ 1, 10 }, ProficiencyCap{ 16, 30 } };
+    AbilityDefinition const ability{ 24, 1001, AbilityKind::Ranked, ranks, caps };
+    SettingsPlayer player;
+    OutcomeSpell spell{ {}, &player, false, {} };
+    OutcomeContext enabled{ true, true, true, true, 16 };
+    assert(HandleOutcome(player, spell, ability, policy, 1, {}).Status == OutcomeStatus::Disabled);
+    assert(player.Settings.empty() && spell.Values.empty());
+    OutcomeContext ineligible = enabled;
+    ineligible.QualifiedOutcome = false;
+    assert(HandleOutcome(player, spell, ability, policy, 1, ineligible).Status == OutcomeStatus::Unqualified);
+    assert(player.Settings.empty() && spell.Values.empty());
+    spell.Triggered = true;
+    assert(HandleOutcome(player, spell, ability, policy, 1, enabled).Status == OutcomeStatus::Unqualified);
+    spell.Triggered = false;
+    spell.SpellInfo.Passive = true;
+    assert(HandleOutcome(player, spell, ability, policy, 1, enabled).Status == OutcomeStatus::Unqualified);
+    spell.SpellInfo.Passive = false;
+    OutcomeAward const first = HandleOutcome(player, spell, ability, policy, 1, enabled);
+    assert(first.Status == OutcomeStatus::Awarded && first.Record.State.Points == 2);
+    assert(first.Record.MigrationVersion == 1);
+    for (std::uint32_t target = 0; target < 100; ++target)
+        assert(HandleOutcome(player, spell, ability, policy, 1, enabled).Status == OutcomeStatus::AlreadyAwarded);
+    assert(ReadPlayerProgress(player, 24, 1001, policy, 1).Record.State.Points == 2);
+    OutcomeSpell next{ {}, &player, false, {} };
+    assert(HandleOutcome(player, next, ability, policy, 1, enabled).Record.State.Points == 4);
+    OutcomeSpell mismatch{ {}, &player, false, {} };
+    assert(HandleOutcome(player, mismatch, ability, policy, 2, enabled).Status == OutcomeStatus::StateConflict);
+    assert(mismatch.Values.empty());
+    player.ClassId = 25;
+    assert(HandleOutcome(player, mismatch, ability, policy, 1, enabled).Status == OutcomeStatus::Invalid);
+    player.ClassId = 24;
+    mismatch.SpellInfo.Id = 999;
+    assert(HandleOutcome(player, mismatch, ability, policy, 1, enabled).Status == OutcomeStatus::Unqualified);
+    SettingsPlayer existing;
+    existing.Learned = { 102 };
+    OutcomeSpell knownRank{ { 102, false }, &existing, false, {} };
+    OutcomeAward const seeded = HandleOutcome(existing, knownRank, ability, policy, 1, enabled);
+    assert(seeded.Status == OutcomeStatus::Awarded && seeded.Record.State.Proficiency == 20);
+    assert(seeded.Record.State.Points == 1);
+    assert(!existing.HasSpell(101));
+    assert(CachePlayerProgress(existing, 24, 1001, policy, { 1, 1, { 40, 0 } }));
+    OutcomeSpell capped{ { 102, false }, &existing, false, {} };
+    auto const atCap = HandleOutcome(existing, capped, ability, policy, 1, enabled);
+    assert(atCap.Status == OutcomeStatus::Capped && atCap.Record.State.Proficiency == 40);
+}
 
 void CheckPersistence(TrainingPolicy policy)
 {
@@ -358,6 +437,7 @@ int main(int argc, char** argv)
     CheckState(policy);
     CheckMenu(policy);
     CheckPersistence(policy);
+    CheckOutcome(policy);
     if (argc > 1)
     {
         std::array const ranks = { AbilityRank{ 101, 1, { 4, 1 } }, AbilityRank{ 102, 2, { 16, 20 } },

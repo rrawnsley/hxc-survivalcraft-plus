@@ -53,6 +53,15 @@ table or SQL migration is required for this backend. This adapter is not yet cal
 normal autosave/logout reliability and load-failure behavior still require integration qualification. The separate
 save-coordination state API remains available if an independent async backend becomes necessary.
 
+`src/AbilityPracticeOutcome.h` joins the calculation, one-time migration and cache persistence APIs at a qualifying
+outcome. It refuses disabled/ineligible contexts, triggered/passive/foreign casts, unlearned spells, class mismatches
+and version conflicts. The cast-owned script value key `0x41505243` (APRC) is reserved by this module, separate from
+existing spell-ID keys, and marks one award across delayed/multiple target outcomes without retaining cast pointers.
+It does not use the shared 32-bit script event mask (whose upper slots already serve Ranger mechanics). The callback
+must establish meaningful effective outcomes and serialize player-cache access on its owning execution context.
+No rank is granted by this helper, and no player hook calls it yet. Current harness compiles the actual adapter using
+mock Player/Spell interfaces; native server compilation and event/lifecycle qualification remain required.
+
 `tools/inventory.py --output <path>` produces a deterministic read-only inventory of six class/spellbook sources,
 including hashes and the meaning of each rank reference. It records all 21 classes and 7,678 class/spell identities
 without conflating acquisition predecessors with ability roots. These are source candidates, including talent,
