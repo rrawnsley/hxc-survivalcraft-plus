@@ -103,7 +103,7 @@ local function RenderDetail(ability)
     if trains then
         local capped = ability.proficiency >= ability.cap
         progress:SetValue(capped and 1 or ability.points / ability.pointsPerLevel)
-        progressLabel:SetText(capped and "Current cap reached" or
+        progressLabel:SetText(capped and (not ability.nextRank and "Training complete" or "Current cap reached") or
             (math.floor(100 * ability.points / ability.pointsPerLevel) .. "% to the next proficiency point"))
     end
     pointText:SetText(Model.PointText(ability))

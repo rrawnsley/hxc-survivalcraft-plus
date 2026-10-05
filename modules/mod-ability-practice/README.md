@@ -462,3 +462,19 @@ The registry still contains only the three reviewed development entries, not the
 Source/native build passed at `.cache/verify-all/20261005-080446/report.json`; C++ lint and whitespace passed.
 Final cleanup build passed at `.cache/verify-all/20261005-080724/report.json`. Throughput, shared-ID isolation and startup/
 reload behavior remain runtime qualification work. No behavioral tests or production actions ran.
+
+## End training at a defined benefit
+
+Development caps retain the illustrative level curve but are bounded separately by each ability's final rank
+requirement: Lava Shard/Cinderheart 160, Kindle 100. These are derived from the existing draft thresholds, not
+new balance approvals. Learned-rank preservation and stored above-cap progress remain intact; no proficiency is
+reduced or erased. Rank upgrades still need their separate character-level gates. The menu labels a capped,
+fully learned ability Training complete instead of suggesting more benefit from additional uses.
+
+Native profile validation now requires at least two ranks for Ranked and a final cap equal to the final rank
+threshold. Mastery profiles are refused until explicit rewards and their integration exist. The generic pure
+catalog/progression APIs remain unchanged; this does not invent rewards or reclassify any production ability.
+
+Source/native build passed at `.cache/verify-all/20261005-081526/report.json`; C++ lint, whitespace and Lua 5.1
+syntax passed. No new cases or behavioral tests ran. Final-cap awards, retained excess progress, level waits and
+complete-state rendering remain runtime qualification work. The feature is still off and not deployed.

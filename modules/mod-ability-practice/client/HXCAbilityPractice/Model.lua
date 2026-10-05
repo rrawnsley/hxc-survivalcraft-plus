@@ -135,7 +135,10 @@ function Model.PointText(ability)
     if state == 2 then return "Requires the appropriate talent or specialization." end
     if state == 3 then return ability.learnedRank > 0 and "Practice requires a higher character level."
         or "This ability unlocks at a higher character level." end
-    if state == 5 then return "Current proficiency cap reached. Check the next rank for remaining requirements." end
+    if state == 5 then
+        return not ability.nextRank and "Training complete. All defined ranks learned."
+            or "Current proficiency cap reached. Check the next rank for remaining requirements."
+    end
     if state == 6 then return "Fixed ability — no practice required." end
     if ability.nextPoint.status == 1 then
         local uses = ability.nextPoint.uses

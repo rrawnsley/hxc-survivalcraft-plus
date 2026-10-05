@@ -39,10 +39,24 @@ inline constexpr std::array Kindle = {
     AbilityRank{ 803823, 5, { 44, 60 } }, AbilityRank{ 803824, 6, { 52, 80 } },
     AbilityRank{ 803825, 7, { 60, 100 } }
 };
+template<std::size_t Count>
+inline constexpr auto RankCaps(std::array<AbilityRank, Count> const& ranks)
+{
+    static_assert(Count > 0);
+    auto result = Caps;
+    for (ProficiencyCap& cap : result)
+        cap.Proficiency = std::min(cap.Proficiency, ranks.back().Requirement.Proficiency);
+    return result;
+}
+
+inline constexpr auto LavaShardCaps = RankCaps(LavaShard);
+inline constexpr auto CinderheartCaps = RankCaps(Cinderheart);
+inline constexpr auto KindleCaps = RankCaps(Kindle);
+
 inline constexpr std::array Abilities = {
-    AbilityDefinition{ ClassId, 803950, AbilityKind::Ranked, LavaShard, Caps },
-    AbilityDefinition{ ClassId, 800806, AbilityKind::Ranked, Cinderheart, Caps },
-    AbilityDefinition{ ClassId, 803819, AbilityKind::Ranked, Kindle, Caps }
+    AbilityDefinition{ ClassId, 803950, AbilityKind::Ranked, LavaShard, LavaShardCaps },
+    AbilityDefinition{ ClassId, 800806, AbilityKind::Ranked, Cinderheart, CinderheartCaps },
+    AbilityDefinition{ ClassId, 803819, AbilityKind::Ranked, Kindle, KindleCaps }
 };
 
 inline AbilityDefinition const* Find(std::uint32_t spellId)

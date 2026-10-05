@@ -42,7 +42,8 @@ inline bool ValidateProfiles(std::span<AbilityProfile const> profiles)
         AbilityDefinition const& ability = profile.Definition;
         if (!profile.DefinitionVersion || profile.Acquisition != AcquisitionSource::ClassGrant ||
             ability.ClassId > 255 ||
-            ValidateDefinition(ability) != CatalogError::None || !ValidPolicy(profile.Policy) ||
+            ValidateDefinition(ability) != CatalogError::None || ability.Kind == AbilityKind::Mastery ||
+            !ValidPolicy(profile.Policy) ||
             (profile.Outcome != DirectOutcome::Damage && profile.Outcome != DirectOutcome::Healing) ||
             ability.Ranks.size() > 64)
             return false;
@@ -52,8 +53,8 @@ inline bool ValidateProfiles(std::span<AbilityProfile const> profiles)
         for (ProficiencyCap const& cap : ability.Caps)
             if (cap.CharacterLevel > 255)
                 return false;
-        if (ability.Kind != AbilityKind::Fixed &&
-            CapAtLevel(ability, 255) < ability.Ranks.back().Requirement.Proficiency)
+        if (ability.Kind == AbilityKind::Ranked && (ability.Ranks.size() < 2 ||
+            CapAtLevel(ability, 255) != ability.Ranks.back().Requirement.Proficiency))
             return false;
         std::size_t classAbilities = 0;
         std::size_t classRanks = 0;
