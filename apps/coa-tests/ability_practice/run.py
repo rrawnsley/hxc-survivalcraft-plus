@@ -70,7 +70,21 @@ def check_inventory():
     assert 'stale-extraction-manifest' in sample['spells'][1]['reviewFlags']
     assert 'missing-raw-dbc-record' in sample['spells'][2]['reviewFlags']
     assert sample['summary']['nameRankCandidateCount'] == 1
+    assert sample['summary']['ambiguousNameRankCandidateCount'] == 0
     assert all('effective-data-unverified' in row['reviewFlags'] for row in sample['spells'])
+    ambiguous = {'spells': [
+        {'classId': 24, 'spellId': 201, 'reviewFlags': []},
+        {'classId': 24, 'spellId': 202, 'reviewFlags': []},
+        {'classId': 24, 'spellId': 203, 'reviewFlags': []},
+    ], 'summary': {}}
+    ranks = {201: {'name': 'Test', 'rankLabel': 'Rank 2'},
+             202: {'name': 'Test', 'rankLabel': 'Rank 2'},
+             203: {'name': 'Test', 'rankLabel': 'Rank 4'}}
+    inventory_module.annotate_dbc(ambiguous, ranks.get, {'manifest_match': True})
+    assert ambiguous['summary']['ambiguousNameRankCandidateCount'] == 1
+    assert set(ambiguous['nameRankCandidates'][0]['reviewFlags']) == {
+        'duplicate-raw-rank-number', 'missing-raw-first-rank', 'raw-rank-gap'}
+    assert all('ambiguous-name-rank-candidate' in row['reviewFlags'] for row in ambiguous['spells'])
     print('PASS: deterministic 21-class source inventory, provenance and malformed-source rejection')
 
 

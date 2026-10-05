@@ -148,14 +148,36 @@ def annotate_dbc(inventory, lookup, origin):
             groups.setdefault(key, []).append({
                 'spellId': entry['spellId'], 'rawRankNumber': entry['rawRankNumber'],
             })
-    inventory['nameRankCandidates'] = [
-        {'classId': class_id, 'name': name, 'members': sorted(members, key=lambda row: (
-            row['rawRankNumber'], row['spellId'])), 'scope': 'name-and-label-candidate-not-verified-ability-identity'}
-        for (class_id, name), members in sorted(groups.items()) if name and len(members) > 1
-    ]
+    candidates = []
+    ambiguous = set()
+    for (class_id, name), members in sorted(groups.items()):
+        if not name or len(members) < 2:
+            continue
+        rank_counts = Counter(member['rawRankNumber'] for member in members)
+        ordered = sorted(rank_counts)
+        review = []
+        if any(count > 1 for count in rank_counts.values()):
+            review.append('duplicate-raw-rank-number')
+        if ordered[0] != 1:
+            review.append('missing-raw-first-rank')
+        if any(right != left + 1 for left, right in zip(ordered, ordered[1:])):
+            review.append('raw-rank-gap')
+        if review:
+            ambiguous.update((class_id, member['spellId']) for member in members)
+        candidates.append({
+            'classId': class_id, 'name': name,
+            'members': sorted(members, key=lambda row: (row['rawRankNumber'], row['spellId'])),
+            'reviewFlags': review, 'scope': 'name-and-label-candidate-not-verified-ability-identity',
+        })
+    inventory['nameRankCandidates'] = candidates
+    for entry in inventory['spells']:
+        if (entry['classId'], entry['spellId']) in ambiguous:
+            entry['reviewFlags'].append('ambiguous-name-rank-candidate')
     counts = Counter(flag for entry in inventory['spells'] for flag in entry['reviewFlags'])
     inventory['summary']['reviewFlags'] = dict(sorted(counts.items()))
     inventory['summary']['nameRankCandidateCount'] = len(inventory['nameRankCandidates'])
+    inventory['summary']['ambiguousNameRankCandidateCount'] = sum(
+        bool(candidate['reviewFlags']) for candidate in candidates)
     return inventory
 
 

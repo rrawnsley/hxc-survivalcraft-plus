@@ -51,6 +51,8 @@ levels, passive flags and effect IDs while preserving source evidence. Same-name
 they do not become ability identities. Missing records, field errors and stale/unknown extraction provenance stay
 explicit. The current local Spell data produced 761 name/rank candidates and 3,286 passive review flags; its extraction
 manifest is stale relative to the actual file hash. SQL corrections, scripted behavior and live runtime remain unobserved.
+Candidate groups also flag duplicate rank labels, absent rank-one labels and gaps instead of silently repairing them.
+Seventeen local groups (113 class/spell entries) carry at least one of these review flags.
 
 `src/AbilityPracticeMenu.h` builds authoritative per-ability view data from the same calculation/catalog APIs,
 including learned rank, proficiency, current cap, next-point forecast and upcoming rank state. It preserves earned
