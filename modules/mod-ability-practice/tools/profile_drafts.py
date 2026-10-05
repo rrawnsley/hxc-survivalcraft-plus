@@ -18,6 +18,9 @@ def verify_provenance(candidates, root, dbc):
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentPeriodic.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentRanked.h',
                 'modules/mod-ability-practice/tools/ranked_development.py',
+                'modules/mod-ability-practice/tools/catalog_candidates.py',
+                'modules/mod-ability-practice/tools/profile_drafts.py',
+                'modules/mod-ability-practice/tools/coverage.py',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentMastery.h',
                 'modules/mod-ability-practice/src/AbilityPracticeMastery.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentHelpers.h',
@@ -128,13 +131,20 @@ def build_drafts(candidates):
         if not isinstance(routes, list) or len(set(routes)) != len(routes) or any(route not in {
                 'damage', 'healing', 'interrupt', 'dispel', 'steal'} for route in routes):
             raise ValueError('Invalid candidate outcome routes')
+        periodic = candidate.get('nativePeriodicReview', {}).get('commonRoutes', [])
+        if not isinstance(periodic, list) or len(set(periodic)) != len(periodic) or any(
+                route not in {'damage', 'healing'} for route in periodic):
+            raise ValueError('Invalid candidate periodic outcome routes')
         required = ['effective-data', 'classification', 'acquisition-ownership', 'meaningful-outcome',
                     'practice-rates-and-caps', 'persistence-and-migration', 'menu-and-gameplay-qualification']
+        if periodic:
+            required.append('periodic-original-cast-attribution')
         if len(ranks) == 1:
             required.append('unranked-mastery-or-fixed-design')
         drafts.append({'classId': class_id, 'abilityId': ability_id, 'definitionVersion': None,
                        'acquisitionSource': 'class-grant-source-evidence', 'productionApproved': False,
-                       'kind': None, 'outcome': None, 'candidateOutcomeRoutes': list(routes), 'ranks': ranks,
+                       'kind': None, 'outcome': None, 'candidateOutcomeRoutes': list(routes),
+                       'candidatePeriodicOutcomeRoutes': list(periodic), 'ranks': ranks,
                        'proficiencyCaps': [], 'trainingBands': [], 'masteryRewards': [],
                        'reviewFlags': list(candidate['reviewFlags']),
                        'actionTraits': list(candidate['rawActionReview']['traits']),
@@ -147,7 +157,9 @@ def build_drafts(candidates):
             'summary': {'classCount': len(classes), 'draftCount': len(drafts),
                         'rankedSourceGroupCount': sum(len(draft['ranks']) > 1 for draft in drafts),
                         'standaloneSourceGroupCount': sum(len(draft['ranks']) == 1 for draft in drafts),
-                        'withCandidateOutcomeCount': sum(bool(draft['candidateOutcomeRoutes']) for draft in drafts)},
+                        'withCandidateOutcomeCount': sum(bool(draft['candidateOutcomeRoutes']) for draft in drafts),
+                        'withCandidatePeriodicOutcomeCount': sum(bool(draft['candidatePeriodicOutcomeRoutes'])
+                                                                for draft in drafts)},
             'classes': [{'classId': identity, 'draftCount': count} for identity, count in sorted(classes.items())],
             'drafts': drafts}
 

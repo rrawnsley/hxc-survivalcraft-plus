@@ -36,7 +36,8 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   mandatory C future-cap metadata, packed D parts and F8 unreadable-progress responses. Typed delivery is
   bounded/paced; saved views/ages/session totals are labeled. Existing schema 1/2/3 formats are preserved.
 - All-class preparation: 847 unapproved source-consistent class-grant definition drafts, including 244 ranked
-  and 603 standalone groups. 179 have common current native outcomes across all 21 classes. Definitions,
+  and 603 standalone groups. 179 have common current direct/removal outcomes across all 21 classes; a separate raw review
+  finds17 with common native periodic outcomes. These sets can overlap. Definitions,
   caps, practice rates and rewards are not automatically approved or installed.
 - Startup refuses deprecated player spells, matching CoA's native learning restriction. Raw discovery also
   flags the native deprecated/depreacated whole-word markers in English spell names and rank labels.
@@ -1820,3 +1821,31 @@ fit the unused left-column space by source coordinates; actual rendered layout/c
 Source passed .cache/verify-all/20261005-231216/report.json (two checks;10.2s);five Lua5.1 syntax compilations
 and whitespace passed. No addon chunks, behavioral tests, native rebuild, runtime startup or production changes.
 The pending Ranger/Chronomancer native compilation still waits for the unrelated C:/Build-CoA build.
+
+
+## Explicit raw periodic review evidence — 5 October 2026
+
+Read-only candidate discovery now compares native periodic damage/percent-damage/leech (aura3/89/53) and
+healing (aura8), separately from direct/removal routes. It requires nonpassive/nondeprecated valid raw evidence
+for every member, three position-consistent effect details and an active APPLY_AURA6 slot. Missing/inconsistent
+details block the group; mixed routes without a common one remain adapter review. It does not interpret
+inactive trigger slots or other aura application forms as qualified outcomes. Raw evidence does not prove
+effective data, original client cast attribution or meaningful use.
+
+Definition drafts preserve separate candidatePeriodicOutcomeRoutes and require periodic-original-cast-
+attribution review. Coverage carries those routes into a separate pending queue and raw-periodic count;
+missing-common-outcome now accounts for either direct/removal or native periodic evidence. The ranked generator
+still selects only its existing direct/removal candidates, so no runtime catalog expands automatically.
+Unranked groups still require individual mastery-or-fixed design. Candidate/draft/coverage Python sources now
+join exact provenance hashing, rejecting stale exports after their authoring logic changes.54 source paths.
+
+Actual exports find71 raw periodic candidate groups (59damage/12healing);17 have source-consistent class grants.
+Of726 pending definition/design groups,3 unranked groups have raw periodic evidence: Bane of Betrayal (class14),
+Blood Curse (class20), Control Mechanical (class28). These remain unreviewed; especially raw damage in a control
+ability does not establish that it should train as damage.179 direct/removal source candidates,847 drafts,
+121 declared unique profiles/123 declarations remain unchanged. Raw routes/review queues may overlap; do not
+sum them as unique abilities or automatically approve training.
+
+Source passed .cache/verify-all/20261005-231841/report.json (two checks;9.5s), whitespace and all three updated
+read-only exports passed. No tests, native rebuild, addon execution/startup or production changes. The earlier
+Ranger/Chronomancer native compilation is still pending the other C:/Build-CoA build.

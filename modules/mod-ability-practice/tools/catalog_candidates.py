@@ -9,6 +9,7 @@ import sys
 
 DIRECT_ROUTES = {'damage': {2, 17, 31, 58, 121}, 'healing': {10, 67, 136}}
 OUTCOME_ROUTES = {**DIRECT_ROUTES, 'interrupt': {68}, 'dispel': {38}, 'steal': {126}}
+PERIODIC_ROUTES = {'damage': {3, 53, 89}, 'healing': {8}}
 DEPRECATED_WORD = re.compile(r'(?<![a-z0-9_])(?:deprecated|depreacated)(?![a-z0-9_])', re.IGNORECASE | re.ASCII)
 
 
@@ -65,7 +66,18 @@ def action_review(members):
             'scope': 'raw-action-routing-review-not-runtime-qualification'}
 
 
-def native_route_review(members, route_ids, scope, missing_reason):
+def raw_periodic_auras(raw, effects):
+    details = raw.get('effectDetails')
+    if not isinstance(details, list) or len(details) != 3 or any(
+            not isinstance(detail, dict) or detail.get('index') != index
+            or type(detail.get('effectId')) is not int or detail['effectId'] != effects[index]
+            or type(detail.get('auraId')) is not int or detail['auraId'] < 0
+            for index, detail in enumerate(details)):
+        return None
+    return {detail['auraId'] for detail in details if detail['effectId'] == 6}
+
+
+def native_route_review(members, route_ids, scope, missing_reason, periodic=False):
     routes = set(route_ids)
     blocked = []
     for member in members:
@@ -83,11 +95,14 @@ def native_route_review(members, route_ids, scope, missing_reason):
                     type(effect) is not int or effect < 0 for effect in effects):
                 reasons.append('missing-or-invalid-raw-effects')
             else:
-                supported = {route for route, identities in route_ids.items()
-                             if identities.intersection(effects)}
-                if not supported:
-                    reasons.append(missing_reason)
-                routes.intersection_update(supported)
+                identities = raw_periodic_auras(raw, effects) if periodic else effects
+                if identities is None:
+                    reasons.append('missing-or-invalid-raw-aura-details')
+                else:
+                    supported = {route for route, values in route_ids.items() if values.intersection(identities)}
+                    if not supported:
+                        reasons.append(missing_reason)
+                    routes.intersection_update(supported)
         if reasons:
             blocked.append({'spellId': member['spellId'], 'reasons': reasons})
     if blocked:
@@ -111,6 +126,12 @@ def native_outcome_review(members):
     return native_route_review(members, OUTCOME_ROUTES,
                                'raw-native-outcome-route-comparison-not-effective-data-approval',
                                'no-current-native-outcome-route')
+
+
+def native_periodic_review(members):
+    return native_route_review(members, PERIODIC_ROUTES,
+                               'raw-native-periodic-route-comparison-not-attribution-or-effective-data-approval',
+                               'no-current-native-periodic-route', periodic=True)
 
 
 def native_class_grant_review(root_spell, members):
@@ -227,6 +248,7 @@ def build_candidates(inventory):
             'rawActionReview': action_review(members),
             'nativeDirectReview': native_direct_review(members),
             'nativeOutcomeReview': native_outcome_review(members),
+            'nativePeriodicReview': native_periodic_review(members),
             'nativeClassGrantReview': native_class_grant_review(root[1], members),
             'members': members,
             'acquisitionReferences': sorted(acquisition, key=lambda row: (
@@ -252,6 +274,12 @@ def build_candidates(inventory):
                 row['nativeOutcomeReview']['status'] for row in candidates).items())),
             'rawNativeOutcomeCommonRoutes': dict(sorted(Counter(route for row in candidates
                 for route in row['nativeOutcomeReview']['commonRoutes']).items())),
+            'rawNativePeriodicStatuses': dict(sorted(Counter(
+                row['nativePeriodicReview']['status'] for row in candidates).items())),
+            'rawNativePeriodicCommonRoutes': dict(sorted(Counter(route for row in candidates
+                for route in row['nativePeriodicReview']['commonRoutes']).items())),
+            'sourceClassGrantPeriodicCandidateCount': sum(row['nativeClassGrantReview']['sourceChainConsistent']
+                and bool(row['nativePeriodicReview']['commonRoutes']) for row in candidates),
             'nativeClassGrantStatuses': dict(sorted(Counter(
                 row['nativeClassGrantReview']['status'] for row in candidates).items())),
             'sourceClassGrantOutcomeCandidateCount': sum(row['nativeClassGrantReview']['sourceChainConsistent']
@@ -265,6 +293,10 @@ def build_candidates(inventory):
                                                 for row in candidates if row['classId'] == class_id),
             'rawNativeOutcomeCandidateCount': sum(bool(row['nativeOutcomeReview']['commonRoutes'])
                                                  for row in candidates if row['classId'] == class_id),
+            'sourceClassGrantPeriodicCandidateCount': sum(
+                row['nativeClassGrantReview']['sourceChainConsistent']
+                and bool(row['nativePeriodicReview']['commonRoutes'])
+                for row in candidates if row['classId'] == class_id),
             'sourceClassGrantOutcomeCandidateCount': sum(
                 row['nativeClassGrantReview']['sourceChainConsistent']
                 and bool(row['nativeOutcomeReview']['commonRoutes'])
@@ -404,6 +436,9 @@ def main():
                          'modules/mod-ability-practice/src/AbilityPracticeDevelopmentPeriodic.h',
                          'modules/mod-ability-practice/src/AbilityPracticeDevelopmentRanked.h',
                          'modules/mod-ability-practice/tools/ranked_development.py',
+                'modules/mod-ability-practice/tools/catalog_candidates.py',
+                'modules/mod-ability-practice/tools/profile_drafts.py',
+                'modules/mod-ability-practice/tools/coverage.py',
                          'modules/mod-ability-practice/src/AbilityPracticeDevelopmentMastery.h',
                          'modules/mod-ability-practice/src/AbilityPracticeMastery.h',
                          'modules/mod-ability-practice/src/AbilityPracticeDevelopmentHelpers.h',

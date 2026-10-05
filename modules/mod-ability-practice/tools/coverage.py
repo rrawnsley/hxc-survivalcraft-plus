@@ -40,9 +40,12 @@ def declared_profiles(root):
 def review_queues(draft):
     traits = draft.get('actionTraits')
     routes = draft.get('candidateOutcomeRoutes')
-    if not isinstance(traits, list) or not isinstance(routes, list) or any(
-            not isinstance(value, str) for value in traits + routes):
+    periodic = draft.get('candidatePeriodicOutcomeRoutes', [])
+    if not isinstance(traits, list) or not isinstance(routes, list) or not isinstance(periodic, list) or any(
+            not isinstance(value, str) for value in traits + routes + periodic):
         raise ValueError('Invalid action traits or candidate routes')
+    if len(set(periodic)) != len(periodic) or any(route not in {'damage', 'healing'} for route in periodic):
+        raise ValueError('Invalid periodic candidate routes')
     mapping = {'passive-flag-review': 'passive-classification',
                'triggered-attribution-review': 'triggered-attribution',
                'pet-or-summon-ownership-review': 'pet-or-summon-ownership',
@@ -56,7 +59,9 @@ def review_queues(draft):
         queues.add('utility-classification-and-meaningful-use')
     if len(draft['ranks']) > 1 and set(routes) & {'damage', 'healing'}:
         queues.add('ranked-common-outcome')
-    if not routes:
+    if periodic:
+        queues.add('native-periodic-outcome-and-attribution')
+    if not routes and not periodic:
         queues.add('missing-common-supported-outcome')
     return sorted(queues)
 
@@ -80,6 +85,7 @@ def build_coverage(drafts, declarations):
                      'nameFromRawDbc': draft['ranks'][0].get('nameFromRawDbc'),
                      'sourceRankCount': len(draft['ranks']), 'declaredDevelopmentProfile': declaration,
                      'candidateOutcomeRoutes': draft['candidateOutcomeRoutes'],
+                     'candidatePeriodicOutcomeRoutes': draft.get('candidatePeriodicOutcomeRoutes', []),
                      'actionTraits': draft['actionTraits'], 'requiredReviews': draft['requiredReviews'],
                      'reviewFlags': draft['reviewFlags'],
                      'pendingReviewQueues': [] if declaration else review_queues(draft),
@@ -101,6 +107,8 @@ def build_coverage(drafts, declarations):
                     row['declaredDevelopmentProfile']['requiresRuntimeEquivalenceCheck']) for row in selected),
                 'declaredDevelopmentKinds': dict(sorted(kinds.items())), 'needsDefinitionCount': len(pending),
                 'needsDefinitionWithRawOutcomeCount': sum(bool(row['candidateOutcomeRoutes']) for row in pending),
+                'needsDefinitionWithRawPeriodicOutcomeCount': sum(bool(row['candidatePeriodicOutcomeRoutes'])
+                                                                for row in pending),
                 'pendingRankedGroupCount': sum(row['sourceRankCount'] > 1 for row in pending),
                 'pendingStandaloneGroupCount': sum(row['sourceRankCount'] == 1 for row in pending),
                 'pendingReviewQueueCounts': dict(sorted(Counter(queue for row in pending
