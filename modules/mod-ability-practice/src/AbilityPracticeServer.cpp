@@ -58,6 +58,7 @@ constexpr auto DeliveryDuration = std::chrono::seconds(90);
 constexpr std::size_t DeliveryBatchSize = 8;
 constexpr std::size_t MaxQueuedMessages = 512 * 6 + 2048 + 3;
 constexpr std::uint32_t PracticeCastSourceKey = 0x41504353;
+constexpr std::uint32_t PracticeClientRequestKey = 0x41504352;
 struct ClassSession
 {
     Practice::SessionPractice Totals;
@@ -679,6 +680,24 @@ public:
     }
 };
 
+class PracticeClientCast : public MiscScript
+{
+public:
+    PracticeClientCast() : MiscScript("AbilityPracticeClientCast",
+        { MISCHOOK_VALIDATE_SPELL_AT_CAST_SPELL_RESULT }) { }
+
+    void ValidateSpellAtCastSpellResult(Player* player, Unit* mover, Spell* spell, uint32, uint32) override
+    {
+        if (!Active.load() || !IsProfiledPlayer(player) || mover != player || !spell ||
+            spell->GetCaster() != player || !spell->GetSpellInfo() ||
+            !FindProfile(player, spell->GetSpellInfo()->Id))
+            return;
+        std::uint64_t const request = (static_cast<std::uint64_t>(player->getClass()) << 32) |
+            spell->GetSpellInfo()->Id;
+        spell->SetScriptValue(PracticeClientRequestKey, request);
+    }
+};
+
 class PracticeSpell : public AllSpellScript
 {
 public:
@@ -693,10 +712,12 @@ public:
         Player* player = spell->GetCaster()->ToPlayer();
         if (!IsProfiledPlayer(player) || !FindProfile(player, spell->GetSpellInfo()->Id))
             return true;
-        bool const direct = !triggeredByAura && !spell->IsTriggered() && !spell->m_CastItem &&
-            spell->m_castItemGUID.IsEmpty() && spell->GetOriginalCasterGUID() == player->GetGUID();
-        std::uint64_t const source = direct ? (static_cast<std::uint64_t>(player->getClass()) << 32) |
-            spell->GetSpellInfo()->Id : std::numeric_limits<std::uint64_t>::max();
+        std::uint64_t const request = (static_cast<std::uint64_t>(player->getClass()) << 32) |
+            spell->GetSpellInfo()->Id;
+        bool const direct = spell->GetScriptValue(PracticeClientRequestKey) == request && !triggeredByAura &&
+            !spell->IsTriggered() && !spell->m_CastItem && spell->m_castItemGUID.IsEmpty() &&
+            spell->GetOriginalCasterGUID() == player->GetGUID();
+        std::uint64_t const source = direct ? request : std::numeric_limits<std::uint64_t>::max();
         spell->SetScriptValue(PracticeCastSourceKey, source);
         return true;
     }
@@ -742,5 +763,6 @@ void AddSC_ability_practice()
     CoAAbilityPractice::SetPurchaseProvider(CanPurchaseSpell);
     new PracticeWorld();
     new PracticePlayer();
+    new PracticeClientCast();
     new PracticeSpell();
 }

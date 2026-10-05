@@ -10,9 +10,10 @@ The module and addon are staged in this checkout. Nothing is installed or activa
 - Native prototype: three Pyromancer class-grant profiles, with draft tuning. The full rollout still targets
   all 21 CoA classes. Default development and rank-learning flags are off.
 - Outcomes: resolved direct damage/healing, successful interruption, dispel and beneficial-aura steal.
-  Each profile requires its own outcome route. Early preparation records numeric class/spell source, rejects
-  item/aura-triggered sources and preserves one award per cast. Arbitrary unflagged scripts and periodic,
-  summoned/pet and helper attribution still need work.
+  Each profile requires its own outcome route. The existing client-cast callback records numeric class/spell
+  identity; preparation requires that identity and rejects item/aura-triggered sources. Script-created casts
+  cannot mint the request identity. One award per cast remains; periodic, repeat-fire, summoned/pet and helper
+  attribution still need work.
 - Ranks/storage: cached versioned settings, once-only learned-rank seeding, monotonic writes, exact saved-row
   restoration scope and stronger-rank learning guards. Corrupt or incompatible progress stays blocked.
   Normal database save/reload/failure behavior and broader acquisition entitlements remain unqualified.
@@ -31,6 +32,25 @@ The module and addon are staged in this checkout. Nothing is installed or activa
 
 Later sections are chronological implementation notes. Their older protocol/addon shapes are historical;
 the current unpublished shape above takes precedence. Source checking/building is not release acceptance.
+
+## Client-request attribution checkpoint — 5 October 2026
+
+The module registers the existing `MISCHOOK_VALIDATE_SPELL_AT_CAST_SPELL_RESULT` observer. Its current core
+caller is `WorldSession::HandleCastSpellOpcode`, after the cast has its resolved spell identity and before
+preparation. An enabled profiled human casting as themselves receives a numeric class/spell request stamp on
+that Spell. Preparation requires the matching stamp in addition to the earlier item/aura/trigger/original-caster
+checks. The observer does not mutate targets, spell identities, validation results or normal casting.
+
+Ordinary script-created spells, even without trigger flags, lack the request stamp. Item-use and pet command
+paths do not issue it. Queued casts return through the same handler; downranked positive casts use the actual
+Spell identity. Those source paths were inspected; they have not been exercised in a running client/server.
+No stamp propagates to helper spells or repeat-fire instances. Explicit attribution for those and periodic
+auras remains future work. This is a trusted internal source marker, not a client authentication mechanism.
+
+Source checks and the isolated native build passed in `.cache/verify-all/20261005-134326/report.json`;
+C++ lint, whitespace and five addon Lua 5.1 syntax compilations passed. No behavioral tests ran. Candidate
+and draft discovery artifacts were regenerated against the changed native source hashes. Production remains
+untouched and the draft tuning and three prototype profiles are unchanged.
 
 `src/AbilityPracticeProgression.h` provides configurable training bands, progression after a qualifying action,
 exact action forecasts across catch-up/rate changes, cap handling and separate character-level/practice eligibility.

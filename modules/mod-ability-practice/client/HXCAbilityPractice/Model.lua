@@ -253,7 +253,7 @@ function Model.PracticeRules(ability)
     if not rule then return "Practice rules are unavailable in this update." end
     return rule .. "\n\nOpponents that are too low level, players, player-controlled units, pets, totems"
         .. " and critters do not qualify."
-        .. "\n\nOnly your learned ability casts can count. Triggered casts do not count."
-        .. " Item casts and aura-triggered helpers do not count."
+        .. "\n\nOnly your learned ability casts requested through your client can count."
+        .. " Triggered casts, item casts, script-created spells and aura-triggered helpers do not count."
         .. " One award per cast, regardless of targets or removals. Practice stops at your current cap."
 end
