@@ -31,7 +31,7 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   Shared native race/racial and faction-rift eligibility is checked at preparation, award and new upgrades;
   class/race/talent-set/custom-specialization changes refresh the owner state. Normal database save/reload/failure
   behavior and broader acquisition entitlements remain unqualified.
-- Menu: addon 0.4.22-development; unpublished protocol 4 includes B11 instance identity/realm cap/session learning, T11 kind/session/rules/reward
+- Menu: addon 0.4.23-development; unpublished protocol 4 includes B11 instance identity/realm cap/session learning, T11 kind/session/rules/reward
   count/acquisition source and M mastery entries,
   mandatory C future-cap metadata, packed D parts and F8 unreadable-progress responses. Typed delivery is
   bounded/paced; saved views/ages/session totals are labeled. Existing schema 1/2/3 formats are preserved.
@@ -1744,3 +1744,19 @@ observer from the mana-shield path before retry. Corrected source/native build p
 whitespace and five Lua5.1 syntax compilations passed with no addon chunks executed. Authoring exports
 completed. Unit/harness/gameplay stages skipped; no runtime startup or production server/client/config/DB/
 launcher installation, update or restart.
+
+
+## Browse by exact next-milestone forecast — 5 October 2026
+
+Addon0.4.23-development adds a compact Default/Name/Uses sort button beside search. Default preserves
+required-level ordering for Upcoming and actual-gains ordering for Session. Uses prioritizes learned,
+currently training abilities whose next rank or mastery milestone needs practice and has no unmet level or
+acquisition requirement. Their server-provided qualifying-use forecasts compare as exact unsigned decimal
+strings, without Lua floating-point conversion. Other abilities follow alphabetically; equal names tie by
+ability ID. Sorting uses the same live/saved snapshot as the rest of the menu and changes no progression.
+Each character saves the chosen order independently per class alongside existing tracking preferences.
+Selected visible abilities remain selected; list scrolling resets when the order is changed. Search remains
+available on the same toolbar. No wire/native changes. Actual rendered toolbar fit and callbacks are pending.
+
+Source passed .cache/verify-all/20261005-213613/report.json (two checks);five Lua5.1 syntax compilations
+and whitespace passed. No addon chunks, behavioral tests, native rebuild, runtime startup or production changes.

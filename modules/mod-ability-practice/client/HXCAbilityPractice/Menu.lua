@@ -17,6 +17,9 @@ local showRoadmap = false
 local rankOffset = 0
 local roadmapRows = {}
 local roadmapButton
+local sortButton
+local sortModes = { "default", "name", "uses" }
+local sortLabels = { default = "Default", name = "Name", uses = "Uses" }
 
 local panel = CreateFrame("Frame", "HXCAbilityPracticePanel", UIParent)
 panel:SetSize(760, 610)
@@ -140,6 +143,22 @@ local function TrackedAbilities()
     if not key then return {} end
     if type(HXCAbilityPracticePreferences[key]) ~= "table" then HXCAbilityPracticePreferences[key] = {} end
     return HXCAbilityPracticePreferences[key]
+end
+
+local function SortPreference()
+    TrackedAbilities()
+    local key = snapshot and tostring(snapshot.classId)
+    if type(HXCAbilityPracticePreferences.sorts) ~= "table" then HXCAbilityPracticePreferences.sorts = {} end
+    local value = key and HXCAbilityPracticePreferences.sorts[key]
+    return sortLabels[value] and value or "default", key
+end
+
+local function TrainableMilestoneUses(ability)
+    local milestone = Model.NextMilestone(ability)
+    if ability.availability ~= 4 or ability.learnedRank == 0 or not milestone
+        or milestone.state ~= 4 or milestone.characterLevel > snapshot.characterLevel
+        or milestone.practice.status ~= 1 then return nil end
+    return milestone.practice.uses
 end
 
 local track = CreateFrame("Button", nil, detail, "UIPanelButtonTemplate")
@@ -287,6 +306,8 @@ end
 Refresh = function()
     title:SetText("Abilities & Practice - " .. tabLabels[tab])
     visible = {}
+    local sortMode = SortPreference()
+    if sortButton then sortButton:SetText("Sort: " .. sortLabels[sortMode]) end
     local session = snapshot and snapshot.session
     sessionText:SetText(session and session.available and
         ((syncState == "current" and "Class skills this session: " or "Saved class session: ") .. session.uses
@@ -310,13 +331,19 @@ Refresh = function()
             if matchesTab and matchesSearch then visible[#visible + 1] = ability end
         end
         table.sort(visible, function(a, b)
-            if tab == "session" then
+            if sortMode == "uses" then
+                local leftUses, rightUses = TrainableMilestoneUses(a), TrainableMilestoneUses(b)
+                if (leftUses ~= nil) ~= (rightUses ~= nil) then return leftUses ~= nil end
+                if leftUses and leftUses ~= rightUses then return GreaterDecimal(rightUses, leftUses) end
+            end
+            if sortMode == "default" and tab == "session" then
                 if a.session.proficiencyGained ~= b.session.proficiencyGained then
                     return GreaterDecimal(a.session.proficiencyGained, b.session.proficiencyGained)
                 end
                 if a.session.uses ~= b.session.uses then return GreaterDecimal(a.session.uses, b.session.uses) end
             end
-            if tab == "upcoming" and Model.NextMilestone(a).characterLevel ~= Model.NextMilestone(b).characterLevel then
+            if sortMode == "default" and tab == "upcoming"
+                and Model.NextMilestone(a).characterLevel ~= Model.NextMilestone(b).characterLevel then
                 return Model.NextMilestone(a).characterLevel < Model.NextMilestone(b).characterLevel
             end
             local left, right = SpellName(a.displaySpellId), SpellName(b.displaySpellId)
@@ -502,11 +529,42 @@ Tab("My Skills", "skills", 28)
 Tab("Upcoming", "upcoming", 116)
 Tab("Tracked", "tracked", 204)
 Tab("Session", "session", 292)
-local searchLabel = Text(panel, "GameFontHighlightSmall", 388, -82, 54)
+sortButton = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
+sortButton:SetSize(124, 24)
+sortButton:SetPoint("TOPLEFT", 388, -76)
+sortButton:SetScript("OnClick", function()
+    local mode, key = SortPreference()
+    if not key then return end
+    for index, value in ipairs(sortModes) do
+        if value == mode then
+            HXCAbilityPracticePreferences.sorts[key] = sortModes[index % #sortModes + 1]
+            break
+        end
+    end
+    offset = 0
+    Refresh()
+end)
+sortButton:SetScript("OnEnter", function(self)
+    if not GameTooltip then return end
+    GameTooltip:SetOwner(self, "ANCHOR_BOTTOM")
+    GameTooltip:SetText("Sort abilities")
+    GameTooltip:AddLine("Click to cycle Default, Name and Uses. Your choice is saved for this class.", 1, 1, 1, true)
+    GameTooltip:AddLine("Default orders upcoming milestones by required level and session progress by gains.",
+        1, 1, 1, true)
+    GameTooltip:AddLine("Uses puts currently trainable next ranks or mastery benefits first, ordered by the"
+        .. " server's exact qualifying-use forecast. Blocked, paused and completed abilities follow by name.",
+        1, 1, 1, true)
+    GameTooltip:AddLine("Saved views use their last received forecasts. Sorting does not change training.",
+        1, 0.82, 0, true)
+    GameTooltip:Show()
+end)
+sortButton:SetScript("OnLeave", HidePracticeTooltip)
+sortButton:SetScript("OnHide", HidePracticeTooltip)
+local searchLabel = Text(panel, "GameFontHighlightSmall", 524, -82, 54)
 searchLabel:SetText("Search")
 searchBox = CreateFrame("EditBox", "HXCAbilityPracticeSearch", panel, "InputBoxTemplate")
-searchBox:SetSize(280, 24)
-searchBox:SetPoint("TOPLEFT", 445, -76)
+searchBox:SetSize(147, 24)
+searchBox:SetPoint("TOPLEFT", 578, -76)
 searchBox:SetAutoFocus(false)
 searchBox:SetMaxLetters(80)
 searchBox:SetScript("OnTextChanged", function(self)
