@@ -390,6 +390,10 @@ def main():
                          'modules/mod-ability-practice/src/AbilityPracticeDevelopment.h',
                          'modules/mod-ability-practice/src/AbilityPracticeDevelopmentSamples.h',
                          'modules/mod-ability-practice/src/AbilityPracticeProfiles.h',
+                         'src/server/coa/AscensionSpellEligibility.h',
+                         'src/server/coa/AscensionRacialAbilities.h',
+                         'src/server/coa/AscensionFelsworn.cpp',
+                         'src/server/coa/AscensionCompat.cpp',
                          'src/server/shared/SharedDefines.h')]
     if args.dbc:
         lookup, sources = load_acquisition_lookup(args.root, args.dbc)

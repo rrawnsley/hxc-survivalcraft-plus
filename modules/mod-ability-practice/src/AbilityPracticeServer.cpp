@@ -8,6 +8,7 @@
 #include "AbilityPracticeWire.h"
 #include "AscensionCustomClassData.h"
 #include "AscensionSpellProgressionData.h"
+#include "AscensionSpellEligibility.h"
 #include "Chat.h"
 #include "Config.h"
 #include "CryptoRandom.h"
@@ -68,6 +69,7 @@ constexpr std::size_t DeliveryBatchSize = 8;
 constexpr std::size_t MaxQueuedMessages = 512 * 6 + 2048 + 3;
 constexpr std::uint32_t PracticeCastSourceKey = 0x41504353;
 constexpr std::uint32_t PracticeClientRequestKey = 0x41504352;
+std::string const ActiveSpecializationSource = "core.ascension_active_spec";
 struct ClassSession
 {
     Practice::SessionPractice Totals;
@@ -84,6 +86,9 @@ struct MenuSession
     bool Initialized = false;
     std::uint32_t Protocol = Practice::MenuSchemaVersion;
     std::uint32_t LastClass = 0;
+    std::uint32_t LastRace = 0;
+    std::uint32_t LastSpec = 0;
+    std::uint32_t LastCustomSpecialization = 0;
     std::uint32_t OutgoingClass = 0;
     std::vector<std::string> Outgoing;
     std::size_t NextMessage = 0;
@@ -219,6 +224,19 @@ bool Affects(Player const* player)
     return Requested && DevelopmentAllowed && Ready && IsProfiledPlayer(player);
 }
 
+bool AcquisitionAllowed(Player const* player, Practice::AbilityDefinition const& ability, std::uint32_t spellId)
+{
+    return player && player->getClass() == ability.ClassId && !ability.Ranks.empty() &&
+        AscensionAcquisition::CanLearnRacialSpell(player, ability.Ranks.front().SpellId) &&
+        AscensionAcquisition::CanLearnRacialSpell(player, spellId);
+}
+
+std::uint32_t CachedCustomSpecialization(Player const* player)
+{
+    auto const* values = player->FindPlayerSettings(ActiveSpecializationSource);
+    return values && !values->empty() ? values->front().value : 0;
+}
+
 bool IsDevelopmentOpponent(Player const* player, Unit const* opponent)
 {
     if (!opponent || !opponent->IsCreature() || opponent->IsControlledByPlayer() || opponent->IsPet() ||
@@ -282,6 +300,8 @@ CoAAbilityPractice::RankDecision EvaluateRank(Player const* player, std::uint32_
     for (Practice::AbilityRank const& rank : ability->Ranks)
         if (rank.RankNumber >= desired->RankNumber && Practice::KnowsSpell(learned, rank.SpellId))
             return Decision::Allowed;
+    if (!AcquisitionAllowed(player, *ability, spellId))
+        return Decision::Blocked;
     auto const loaded = Practice::ReadPlayerProgress(*player, ability->ClassId, ability->AbilityId,
         profile->Policy, profile->DefinitionVersion);
     auto const record = Practice::MigrateLearnedRanks(*ability, profile->Policy, loaded, learned);
@@ -413,7 +433,13 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
                 }
                 state = migrated->State;
             }
-            auto view = Practice::BuildAbilityView(ability, profile.Policy, state, player->GetLevel(), learned, true);
+            bool const acquisition = AcquisitionAllowed(player, ability, ability.Ranks.front().SpellId);
+            auto view = Practice::BuildAbilityView(ability, profile.Policy, state, player->GetLevel(), learned, acquisition);
+            for (Practice::RankView& rank : view.Ranks)
+                if (rank.State != Practice::RankState::Learned && !AcquisitionAllowed(player, ability, rank.SpellId))
+                    rank.State = Practice::RankState::MissingPrerequisite;
+            if (view.NextRank)
+                view.NextRank = view.Ranks[view.NextRank->RankNumber - 1];
             view.Route = RouteFor(profile.Outcome);
             view.RuleSet = Practice::HumanPvERuleSet;
             view.Session = {};
@@ -466,7 +492,6 @@ void Refresh(Player* player, MenuSession& session, Clock::time_point now)
     if (Send(player, session, now))
     {
         session.Dirty = false;
-        session.LastClass = player->getClass();
         Deliver(player, session, now);
     }
 }
@@ -476,7 +501,8 @@ void AwardOutcome(Player* player, Spell* spell, Practice::AbilityProfile const& 
     std::lock_guard lock(Mutex);
     std::uint64_t const source = (static_cast<std::uint64_t>(profile.Definition.ClassId) << 32) |
         spell->GetSpellInfo()->Id;
-    if (!Affects(player) || player->isBeingLoaded() || spell->GetScriptValue(PracticeCastSourceKey) != source)
+    if (!Affects(player) || player->isBeingLoaded() || spell->GetScriptValue(PracticeCastSourceKey) != source ||
+        !AcquisitionAllowed(player, profile.Definition, spell->GetSpellInfo()->Id))
         return;
     auto& session = Sessions[player->GetGUID().GetRawValue()];
     Practice::OutcomeContext const context{ true, true, true, true, player->GetLevel() };
@@ -642,6 +668,9 @@ public:
         auto& session = Sessions[player->GetGUID().GetRawValue()];
         session = {};
         session.LastClass = player->getClass();
+        session.LastRace = player->getRace();
+        session.LastSpec = player->GetActiveSpec();
+        session.LastCustomSpecialization = CachedCustomSpecialization(player);
         session.Initialized = true;
     }
 
@@ -649,17 +678,23 @@ public:
     {
         if (!Active.load() || !IsHumanPlayer(player) || player->isBeingLoaded())
             return;
+        std::uint32_t const customSpecialization = CachedCustomSpecialization(player);
         bool checkRanks = false;
         {
             std::lock_guard lock(Mutex);
             if (!Requested || !DevelopmentAllowed || !Ready)
                 return;
             MenuSession& session = Sessions[player->GetGUID().GetRawValue()];
-            if (!session.Initialized || session.LastClass != player->getClass())
+            if (!session.Initialized || session.LastClass != player->getClass() ||
+                session.LastRace != player->getRace() || session.LastSpec != player->GetActiveSpec() ||
+                session.LastCustomSpecialization != customSpecialization)
             {
                 InitializeProgress(player);
                 session.Initialized = true;
                 session.LastClass = player->getClass();
+                session.LastRace = player->getRace();
+                session.LastSpec = player->GetActiveSpec();
+                session.LastCustomSpecialization = customSpecialization;
                 session.Dirty = true;
                 session.CheckRanks = true;
             }
@@ -757,13 +792,17 @@ public:
         if (!Active.load() || !spell || !spell->GetCaster() || !spell->GetSpellInfo())
             return true;
         Player* player = spell->GetCaster()->ToPlayer();
-        if (!IsProfiledPlayer(player) || !FindProfile(player, spell->GetSpellInfo()->Id))
+        if (!IsProfiledPlayer(player))
+            return true;
+        auto const* profile = FindProfile(player, spell->GetSpellInfo()->Id);
+        if (!profile)
             return true;
         std::uint64_t const request = (static_cast<std::uint64_t>(player->getClass()) << 32) |
             spell->GetSpellInfo()->Id;
         bool const direct = spell->GetScriptValue(PracticeClientRequestKey) == request && !triggeredByAura &&
             !spell->IsTriggered() && !spell->m_CastItem && spell->m_castItemGUID.IsEmpty() &&
-            spell->GetOriginalCasterGUID() == player->GetGUID();
+            spell->GetOriginalCasterGUID() == player->GetGUID() &&
+            AcquisitionAllowed(player, profile->Definition, spell->GetSpellInfo()->Id);
         std::uint64_t const source = direct ? request : std::numeric_limits<std::uint64_t>::max();
         spell->SetScriptValue(PracticeCastSourceKey, source);
         return true;

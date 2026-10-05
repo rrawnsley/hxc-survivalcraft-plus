@@ -214,7 +214,7 @@ function Model.PointText(ability)
         return Model.IsFixed(ability) and "Learn through your normal ability source. No practice required."
             or "Learn this ability to begin practicing."
     end
-    if state == 2 then return "Requires the appropriate talent or specialization." end
+    if state == 2 then return "Current acquisition requirements are not met." end
     if state == 3 and Model.IsFixed(ability) then
         return "This ability requires a higher character level. No practice required."
     end

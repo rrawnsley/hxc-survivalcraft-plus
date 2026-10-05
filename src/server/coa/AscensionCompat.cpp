@@ -61,6 +61,7 @@
 #include "AscensionVenomancerCatalyst.h"
 #include "AscensionSpecialization.h"
 #include "AscensionSpellProgressionData.h"
+#include "AscensionSpellEligibility.h"
 #include "AscensionTalentReplacementData.h"
 #include "AscensionTaughtAbilityData.h"
 #include "AscensionPooledVitality.h"
@@ -655,18 +656,7 @@ constexpr std::array<FelswornRiftGrant, 3> FelswornHordeCapitalRifts =
 
 bool CanGrantAscensionRacialSpell(Player const* player, uint32 spellId)
 {
-    if (!AscensionFelsworn::CanLearnRift(player, spellId))
-        return false;
-    bool racial = false;
-    auto const bounds = sSpellMgr->GetSkillLineAbilityMapBounds(spellId);
-    for (auto itr = bounds.first; itr != bounds.second; ++itr)
-        if (AscensionRacialAbilities::GetRace(itr->second->SkillLine))
-        {
-            racial = true;
-            if (AscensionRacialAbilities::CanLearn(*itr->second, player->getRace(), player->getClass()))
-                return true;
-        }
-    return !racial;
+    return AscensionAcquisition::CanLearnRacialSpell(player, spellId);
 }
 
 std::vector<AscensionSpecializationSwitchGuard>& SpecializationSwitchGuards()

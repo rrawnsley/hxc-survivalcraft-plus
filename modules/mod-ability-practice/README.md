@@ -17,7 +17,9 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   attribution still need work.
 - Ranks/storage: cached versioned settings, once-only learned-rank seeding, monotonic writes, exact saved-row
   restoration scope and stronger-rank learning guards. Corrupt or incompatible progress stays blocked.
-  Normal database save/reload/failure behavior and broader acquisition entitlements remain unqualified.
+  Shared native race/racial and faction-rift eligibility is checked at preparation, award and new upgrades;
+  class/race/talent-set/custom-specialization changes refresh the owner state. Normal database save/reload/failure
+  behavior and broader acquisition entitlements remain unqualified.
 - Menu: addon 0.4.10-development; unpublished protocol 4 includes B7 instance identity, T9 kind/session/rules,
   mandatory C future-cap metadata, packed D parts and F8 unreadable-progress responses. Typed delivery is
   bounded/paced; saved views/ages/session totals are labeled. Existing schema 1/2/3 formats are preserved.
@@ -112,6 +114,32 @@ activation remains unqualified. No production database was queried or changed.
 Source checks and the isolated native build passed in `.cache/verify-all/20261005-140040/report.json`;
 changed C++ lint and whitespace passed. Discovery artifacts were regenerated for the changed native hash.
 No behavioral tests or expanded-catalog startup ran. Production remains untouched.
+
+## Shared acquisition and owner-state refresh — 5 October 2026
+
+`AscensionSpellEligibility.h` extracts the existing native racial/faction-rift acquisition check into a shared
+inline helper. AscensionCompat's existing grant path uses the same check through its old wrapper. Practice
+preparation and actual awards require eligible root and cast spells; new higher-rank learning requires eligible
+root and desired spells. Already learned ranks are retained, and previously earned proficiency is not removed.
+The new helper is a cached SkillLineAbility lookup, with no database query or casting mutation.
+
+The menu applies the root acquisition state and marks ineligible unlearned roadmap ranks as missing
+prerequisites, keeping its next-rank record consistent. Acquisition wait text now covers normal acquisition
+requirements rather than naming only talents/specs. Native talent/item/specialization profile types remain
+unsupported; this check does not claim complete acquisition entitlement.
+
+Owner updates detect class, race, native active talent set and the cached CoA active specialization setting.
+Detection schedules idempotent progress initialization, rank checks and a fresh snapshot without resetting
+session awards. The CoA setting is read with FindPlayerSettings, avoiding the mutating/possibly database-backed
+GetPlayerSetting fallback. Sending a snapshot no longer changes the initialized-class identity, so a request
+received during a class transition cannot suppress the next owner initialization.
+
+Candidate provenance additionally includes the shared eligibility, racial, Felsworn and AscensionCompat sources.
+Discovery artifacts were regenerated, retaining 847 unapproved drafts and 179 common-outcome candidates.
+Source/native build passed in `.cache/verify-all/20261005-151230/report.json`; changed C++ lint, whitespace and
+five Lua 5.1 syntax compilations passed. An earlier build also passed at 151004 before the final preparation
+eligibility check. No behavioral tests ran. Race/spec/slot/class transition and menu acceptance remain pending.
+Production server/client/configuration/DB were not changed.
 
 `src/AbilityPracticeProgression.h` provides configurable training bands, progression after a qualifying action,
 exact action forecasts across catch-up/rate changes, cap handling and separate character-level/practice eligibility.
