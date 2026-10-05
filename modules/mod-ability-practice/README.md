@@ -1284,5 +1284,20 @@ A packet already sent before the change cannot be withdrawn. No runtime race rep
 Source checks passed `.cache/verify-all/20261005-165052/report.json` in the catalog worktree; changed C++ lint
 and whitespace passed. The initial main-worktree source/native rebuild completed successfully at
 `.cache/verify-all/20261005-153458/report.json` against frozen a5ea9902f; unit/harness/gameplay stages were skipped.
-Catalog changes still need main-branch integration and the affected incremental build. No behavioral tests ran
+Catalog changes subsequently merged into the main development branch; the affected incremental build is pending.
+No behavioral tests ran
 and no production files/process/config/client/DB/launcher changed.
+
+## Shared receipt consumption in both award routes — 5 October 2026
+
+Direct outcome awards now refuse an already consumed original-cast receipt. Periodic outcomes already consult
+that same receipt through their award adapter. This closes the reverse ordering where a periodic award preceded
+a later direct outcome from the same spell and the direct spell-local award marker was still unset. Both routes
+remain serialized by the module mutex; unqualified outcomes leave the receipt available. Source inspection found
+this gap; no runtime reproduction or behavioral test is claimed.
+
+Source checks passed `.cache/verify-all/20261005-170158/report.json` in the main development worktree, with five
+checks passing and all other stages skipped. C++ style and whitespace passed. The previous successful native
+build qualifies only frozen a5ea9902f; the integrated catalog/mastery/helper/menu changes and this guard still
+need an affected rebuild. An independent worldserver build targets C:/Build-Survival, so no concurrent build
+was started. Production remains unchanged.
