@@ -54,6 +54,7 @@ struct MenuSession
     Clock::time_point InterestedUntil{};
     bool Dirty = true;
     bool CheckRanks = true;
+    bool Initialized = false;
     std::uint32_t Protocol = Practice::MenuSchemaVersion;
     std::uint32_t LastClass = 0;
     std::unordered_map<std::uint32_t, Practice::SessionPractice> Progress;
@@ -252,6 +253,24 @@ void Refresh(Player* player, MenuSession& session, Clock::time_point now)
     }
 }
 
+void InitializeProgress(Player* player)
+{
+    for (Practice::AbilityProfile const& profile : Profiles)
+    {
+        Practice::AbilityDefinition const& ability = profile.Definition;
+        if (ability.ClassId != player->getClass() || ability.Kind == Practice::AbilityKind::Fixed)
+            continue;
+        auto const learned = Learned(player, ability);
+        if (learned.empty())
+            continue;
+        auto const loaded = Practice::ReadPlayerProgress(*player, ability.ClassId, ability.AbilityId,
+            profile.Policy, profile.DefinitionVersion);
+        auto const record = Practice::MigrateLearnedRanks(ability, profile.Policy, loaded, learned);
+        if (record)
+            Practice::CachePlayerProgress(*player, ability.ClassId, ability.AbilityId, profile.Policy, *record);
+    }
+}
+
 void MarkDirty(Player* player)
 {
     if (!Active.load() || !IsProfiledPlayer(player))
@@ -332,38 +351,27 @@ public:
         std::lock_guard lock(Mutex);
         if (!Requested || !DevelopmentAllowed || !Ready)
             return;
-        for (Practice::AbilityProfile const& profile : Profiles)
-        {
-            Practice::AbilityDefinition const& ability = profile.Definition;
-            if (ability.ClassId != player->getClass() || ability.Kind == Practice::AbilityKind::Fixed)
-                continue;
-            auto const learned = Learned(player, ability);
-            if (learned.empty())
-                continue;
-            auto const loaded = Practice::ReadPlayerProgress(*player, ability.ClassId, ability.AbilityId,
-                profile.Policy, profile.DefinitionVersion);
-            auto const record = Practice::MigrateLearnedRanks(ability, profile.Policy, loaded, learned);
-            if (record)
-                Practice::CachePlayerProgress(*player, ability.ClassId, ability.AbilityId, profile.Policy, *record);
-        }
+        InitializeProgress(player);
         auto& session = Sessions[player->GetGUID().GetRawValue()];
         session = {};
         session.LastClass = player->getClass();
+        session.Initialized = true;
     }
 
     void OnPlayerUpdate(Player* player, uint32) override
     {
-        if (!Active.load() || !IsHumanPlayer(player))
+        if (!Active.load() || !IsHumanPlayer(player) || player->isBeingLoaded())
             return;
         bool checkRanks = false;
         {
             std::lock_guard lock(Mutex);
-            auto const found = Sessions.find(player->GetGUID().GetRawValue());
-            if (found == Sessions.end())
+            if (!Requested || !DevelopmentAllowed || !Ready)
                 return;
-            MenuSession& session = found->second;
-            if (session.LastClass != player->getClass())
+            MenuSession& session = Sessions[player->GetGUID().GetRawValue()];
+            if (!session.Initialized || session.LastClass != player->getClass())
             {
+                InitializeProgress(player);
+                session.Initialized = true;
                 session.LastClass = player->getClass();
                 session.Dirty = true;
                 session.CheckRanks = true;
@@ -449,18 +457,18 @@ public:
         std::lock_guard lock(Mutex);
         if (!Affects(player))
             return;
-        auto const found = Sessions.find(player->GetGUID().GetRawValue());
-        if (found == Sessions.end())
+        if (player->isBeingLoaded())
             return;
+        auto& session = Sessions[player->GetGUID().GetRawValue()];
         Practice::OutcomeContext const context{ true, true, true, true, player->GetLevel() };
         auto const award = Practice::HandleOutcome(*player, *spell, profile->Definition,
             profile->Policy, profile->DefinitionVersion, context);
         if (award.Status == Practice::OutcomeStatus::Awarded)
         {
-            found->second.Progress[player->getClass()].RecordAward(award.ProficiencyGained);
-            found->second.Dirty = true;
-            found->second.CheckRanks = true;
-            Refresh(player, found->second, Clock::now());
+            session.Progress[player->getClass()].RecordAward(award.ProficiencyGained);
+            session.Dirty = true;
+            session.CheckRanks = true;
+            Refresh(player, session, Clock::now());
         }
     }
 };

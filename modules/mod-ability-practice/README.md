@@ -429,3 +429,20 @@ Source/native build passed at `.cache/verify-all/20261005-075453/report.json`; C
 Initial profile-only build also passed at `.cache/verify-all/20261005-075251/report.json`. No behavioral tests ran.
 Multi-class duplicate IDs, independent policies, wrong effective outcomes, class switching without the addon and
 session totals remain runtime qualification work. Production remains untouched and all three flags default off.
+
+## Initialization independent of addon requests
+
+Cached learned-rank migration is shared by login and first eligible owner update, and runs again on a class change.
+An initialized flag distinguishes a menu-created transient session from one initialized by the owner lifecycle.
+Already-online humans can therefore begin practice after re-enabling previously startup-validated observation
+without an addon request. First eligible hits can create transient counters; they still use the authoritative
+per-ability migration/award path. Loading-time updates/hits are excluded. Menu requests remain read-only.
+
+Initial startup with observation off still needs an isolated restart to validate data; config reload alone does
+not turn an unvalidated catalog on. Existing progress/session counters are retained when observation is toggled
+within a login. Unsupported classes create no practice records. No extra query or per-tick catalog scan was added
+after initialization/class change.
+
+Source/native build passed at `.cache/verify-all/20261005-080044/report.json`; C++ lint/whitespace passed.
+No behavioral tests ran. Re-enable without an addon, first-hit/update ordering, map/loading lifecycle and class
+migration remain runtime acceptance work. No production actions occurred.
