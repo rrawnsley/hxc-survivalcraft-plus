@@ -22,6 +22,8 @@ enum class OutcomeKind
     Damage,
     Healing,
     Interrupt,
+    Dispel,
+    Steal,
     None
 };
 
@@ -48,7 +50,8 @@ inline bool ValidateProfiles(std::span<AbilityProfile const> profiles)
             !ValidPolicy(profile.Policy) ||
             (ability.Kind == AbilityKind::Fixed ? profile.Outcome != OutcomeKind::None :
                 profile.Outcome != OutcomeKind::Damage && profile.Outcome != OutcomeKind::Healing &&
-                    profile.Outcome != OutcomeKind::Interrupt) ||
+                    profile.Outcome != OutcomeKind::Interrupt && profile.Outcome != OutcomeKind::Dispel &&
+                    profile.Outcome != OutcomeKind::Steal) ||
             ability.Ranks.size() > 64)
             return false;
         for (AbilityRank const& rank : ability.Ranks)

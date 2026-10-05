@@ -641,3 +641,21 @@ Mastery profiles/rewards remain unsupported and the three sample definitions ret
 Source/native build passed at `.cache/verify-all/20261005-090714/report.json`; C++ lint/whitespace passed.
 No tests ran. Actual interrupt, idle/immune/miss cases, original-cast deduplication and PvE qualification remain
 runtime acceptance. All development activation flags remain off by default; production is untouched.
+
+## Successful dispel and beneficial-aura steal support
+
+OutcomeKind adds Dispel and Steal through existing post-success callbacks. Trainable profiles require native
+DISPEL or STEAL_BENEFICIAL_BUFF effects respectively. A positive native success count is required; multiple
+removals/targets/effect slots still award at most once through the original cast marker. Ordinary hit processing
+ignores utility routes. Interrupt, dispel and steal share AwardUtilityOutcome and the cached award path.
+
+Defensive dispels require a friendly live recipient with a live, unsuppressed qualifying PvE encounter;
+offensive dispels/steals and interrupts require eligible live PvE opponents. Actor, learned-spell, loading,
+triggered-cast, passive, cap and corruption protections remain. Native success means its success list was
+applied; per-spell script interactions still need qualification. Mechanic-only dispels, resurrection, absorbs,
+periodic support and pets are not inferred from this callback. No core behavior or dispel/steal calculations
+changed, and no utility profile or mastery reward was enabled.
+
+Source/native build passed at `.cache/verify-all/20261005-091054/report.json`; C++ lint/whitespace passed.
+No tests ran. Actual removals/transfers, resists/empty lists, PvE support, deduplication and script behavior remain
+isolated runtime qualification. Development flags default off and production remains untouched.
