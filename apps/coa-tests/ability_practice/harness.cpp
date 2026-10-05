@@ -1,12 +1,75 @@
 #include "AbilityPracticeProgression.h"
 #include "AbilityPracticeCatalog.h"
 #include "AbilityPracticeActions.h"
+#include "AbilityPracticeState.h"
 
 #include <array>
 #include <cassert>
 #include <iostream>
 
 using namespace AbilityPractice;
+
+void CheckState(TrainingPolicy policy)
+{
+    ProgressState state(501, 24, 1001, 1);
+    assert(!state.Ready() && !state.Dirty() && !state.BeginSave());
+    assert(state.Apply(policy, 80).Status == AwardStatus::Invalid);
+    assert(!state.Replace(policy, { 1, 0 }));
+    assert(!state.Initialize(policy, { 1, 30 }, false));
+    assert(state.Initialize(policy, { 1, 0 }, false));
+    assert(state.Ready() && !state.Dirty());
+    assert(!state.Initialize(policy, { 40, 0 }, true));
+    assert(state.Apply(policy, 80).Status == AwardStatus::Applied);
+    assert(state.Get().Points == 2 && state.Dirty());
+    auto const first = state.BeginSave();
+    assert(first && first->State.Points == 2 && first->DefinitionVersion == 1);
+    assert(!state.BeginSave());
+    assert(state.Apply(policy, 80).Status == AwardStatus::Applied);
+    assert(state.Get().Points == 4);
+    SaveTicket wrong = first->Ticket;
+    ++wrong.Session;
+    assert(!state.CompleteSave(wrong, true));
+    wrong = first->Ticket;
+    ++wrong.AbilityId;
+    assert(!state.CompleteSave(wrong, true));
+    wrong = first->Ticket;
+    ++wrong.ClassId;
+    assert(!state.CompleteSave(wrong, true));
+    assert(state.CompleteSave(first->Ticket, true) && state.Dirty());
+    assert(!state.CompleteSave(first->Ticket, true));
+
+    auto const second = state.BeginSave();
+    assert(second && second->State.Points == 4 && second->Ticket.Revision > first->Ticket.Revision);
+    assert(!state.CompleteSave(first->Ticket, true));
+    assert(state.CompleteSave(second->Ticket, false) && state.Dirty());
+    auto const retry = state.BeginSave();
+    assert(retry && retry->Ticket.Revision == second->Ticket.Revision);
+    assert(retry->Ticket.Attempt > second->Ticket.Attempt);
+    assert(!state.CompleteSave(second->Ticket, true));
+    assert(state.CompleteSave(retry->Ticket, true) && !state.Dirty());
+    assert(!state.BeginSave());
+    assert(state.Replace(policy, state.Get()) && !state.Dirty());
+    assert(!state.Replace(policy, { 0, 0 }) && !state.Dirty());
+    assert(state.Replace(policy, { 80, 0 }) && state.Dirty());
+    auto const last = state.BeginSave();
+    assert(last && state.CompleteSave(last->Ticket, true) && !state.Dirty());
+    assert(state.Apply(policy, 80).Status == AwardStatus::Capped && !state.Dirty());
+
+    ProgressState migrated(502, 24, 1001, 1);
+    assert(migrated.Initialize(policy, { 40, 0 }, true) && migrated.Dirty());
+    auto const migration = migrated.BeginSave();
+    assert(migration && migration->State.Proficiency == 40);
+    assert(!migrated.CompleteSave(last->Ticket, true));
+    assert(migrated.CompleteSave(migration->Ticket, true) && !migrated.Dirty());
+    ProgressState invalidSession(0, 24, 1001, 1);
+    ProgressState invalidClass(501, 0, 1001, 1);
+    ProgressState invalidAbility(501, 24, 0, 1);
+    ProgressState invalidVersion(501, 24, 1001, 0);
+    assert(!invalidSession.Initialize(policy, { 1, 0 }, true));
+    assert(!invalidClass.Initialize(policy, { 1, 0 }, true));
+    assert(!invalidAbility.Initialize(policy, { 1, 0 }, true));
+    assert(!invalidVersion.Initialize(policy, { 1, 0 }, true));
+}
 
 void CheckActions()
 {
@@ -164,6 +227,7 @@ int main()
     TrainingPolicy const policy{ bands };
     CheckCatalog(policy);
     CheckActions();
+    CheckState(policy);
     assert(ValidPolicy(policy));
     assert(UsesUntil(policy, { 23, 18 }, 24, 80).Uses == 12);
     assert(UsesUntil(policy, { 27, 24 }, 28, 80).Uses == 6);

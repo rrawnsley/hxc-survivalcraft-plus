@@ -35,6 +35,18 @@ must assign unique session IDs, identify original actions, close their complete 
 passive actions where appropriate, and establish meaningful-use qualification. No current player hook provides all
 of that attribution by itself. Neither API stores live player pointers or performs database writes.
 
+`src/AbilityPracticeState.h` provides a per-ability load/dirty/save state machine. Awards wait for a valid load;
+only one save is in flight for that ability. Snapshots carry session, class, ability, revision, attempt and definition
+version. Successful older saves do not clear newer practice, failed saves remain dirty, and retry attempts reject
+callbacks from a previous attempt of the same revision. This is save coordination, not a database adapter: actual
+prepared statements, bounded async scheduling, transactional migration and logout/shutdown drains remain outstanding.
+Callers must resolve callbacks to the correct live session rather than retaining a raw player pointer.
+
+`tools/inventory.py --output <path>` produces a deterministic read-only inventory of six class/spellbook sources,
+including hashes and the meaning of each rank reference. It records all 21 classes and 7,678 class/spell identities
+without conflating acquisition predecessors with ability roots. These are source candidates, including talent,
+passive and support spells; no entry is yet approved as trainable or verified against effective DBC/SQL/runtime data.
+
 The future menu will distinguish character level, learned rank and trained proficiency, with exact qualifying uses
 to the next point/milestone. No random fizzles, magic-school categories or automatic upgrades on unrelated abilities
 are part of the accepted design. Existing learned abilities must survive migration. Unranked rewards and numerical
@@ -43,6 +55,6 @@ training profiles still need balance review.
 Verification runs through `python -B tools/verify_all.py --stages source,harness --base 36117f3e9
 --harness ability_practice --jobs 1`. This focused harness compiles the actual header and exercises forecast/award
 agreement, changing bands, over-cap retention, malformed inputs, large counts, catalog/acquisition states, migration
-seeding and action deduplication/session isolation. It neither
+seeding, action deduplication/session isolation, save retries/stale callbacks and deterministic source inventory. It neither
 builds a worldserver nor accesses any server/database. Full build and gameplay qualification remain required before
 integration or deployment. Keep all development in this checkout while the user plays.

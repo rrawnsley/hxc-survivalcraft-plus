@@ -1,4 +1,5 @@
 import os
+import importlib.util
 from pathlib import Path
 import shutil
 import subprocess
@@ -9,7 +10,40 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
 
 
+def check_inventory():
+    path = ROOT / 'modules/mod-ability-practice/tools/inventory.py'
+    spec = importlib.util.spec_from_file_location('practice_inventory', path)
+    inventory_module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(inventory_module)
+    inventory = inventory_module.build_inventory(ROOT)
+    assert inventory['summary']['classCount'] == 21
+    assert len(inventory['sources']) == 6
+    assert [source['rows'] for source in inventory['sources']] == [847, 2709, 116, 27, 41, 3937]
+    assert inventory == inventory_module.build_inventory(ROOT)
+    for spell in inventory['spells']:
+        assert spell['evidence']
+        assert 'effective-data-unverified' in spell['reviewFlags']
+        assert 'practice-classification-unreviewed' in spell['reviewFlags']
+    assert any('tree-acquisition-gate' in spell['reviewFlags'] for spell in inventory['spells'])
+    assert any('level-unresolved' in spell['reviewFlags'] for spell in inventory['spells'])
+    assert any(row['meaning'] == 'acquisition-reference' for row in inventory['relationships'])
+    columns = ('class', 'spell')
+    valid = 'inline constexpr std::array<Row, 1> Test = {{ { 12, 100 }, }};'
+    assert inventory_module.read_rows(valid, 'Test', columns) == [{'class': 12, 'spell': 100}]
+    malformed = [valid.replace('Row, 1', 'Row, 2'), valid.replace('100', 'invalid'),
+                 valid.replace('12, 100', '12, 100, 2'), valid.replace('12, 100', '0, 100'),
+                 valid + valid, valid.replace('Test', 'Other')]
+    for content in malformed:
+        try:
+            inventory_module.read_rows(content, 'Test', columns)
+        except ValueError:
+            continue
+        raise AssertionError('Malformed inventory source accepted: ' + content)
+    print('PASS: deterministic 21-class source inventory, provenance and malformed-source rejection')
+
+
 def main():
+    check_inventory()
     compiler = shutil.which(os.environ.get('CXX', 'cl.exe' if os.name == 'nt' else 'c++'))
     if not compiler:
         raise RuntimeError('Enable a C++20 compiler for the isolated ability practice harness.')
