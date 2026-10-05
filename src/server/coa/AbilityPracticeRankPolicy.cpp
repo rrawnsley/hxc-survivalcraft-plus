@@ -7,6 +7,7 @@ namespace
 {
 std::atomic<CoAAbilityPractice::RankProvider> Provider = nullptr;
 std::atomic<CoAAbilityPractice::PurchaseProvider> PurchasePolicy = nullptr;
+std::atomic<CoAAbilityPractice::ReplacementChangedProvider> ReplacementChanged = nullptr;
 thread_local std::uint64_t RestoringPlayerGUID = 0;
 thread_local std::uint32_t RestoringSpellId = 0;
 }
@@ -14,6 +15,18 @@ thread_local std::uint32_t RestoringSpellId = 0;
 void CoAAbilityPractice::SetRankProvider(RankProvider provider)
 {
     Provider.store(provider);
+}
+
+void CoAAbilityPractice::SetReplacementChangedProvider(ReplacementChangedProvider provider)
+{
+    ReplacementChanged.store(provider);
+}
+
+void CoAAbilityPractice::NotifyReplacementChanged(Player* player, std::uint32_t originalSpellId)
+{
+    auto const provider = ReplacementChanged.load();
+    if (provider)
+        provider(player, originalSpellId);
 }
 
 CoAAbilityPractice::RankDecision CoAAbilityPractice::EvaluateRank(Player const* player, std::uint32_t spellId)

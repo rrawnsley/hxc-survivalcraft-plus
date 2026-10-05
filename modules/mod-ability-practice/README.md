@@ -1944,3 +1944,19 @@ fixed abilities need not appear in Training/At cap. Saved snapshots are explicit
 only from the received snapshot. Refreshing progress also refreshes an owned filter tooltip. No layout expansion,
 server protocol, training policy, persistence or gameplay change is needed. Source checks and five Lua 5.1 syntax
 compilations passed without addon chunk execution. Rendered client behavior remains unqualified.
+
+
+## Native replacement notification checkpoint — 5 October 2026
+
+The existing native replacement setter now notifies the optional practice provider only after a real mapping
+change. The module accepts enrolled, nonloading players with an existing session and a managed original spell;
+then it cancels unsent menu delivery, schedules rank/menu refresh and rotates the original-action session token.
+Old original casts cannot cross a replacement transition and resume earning practice or mastery after a later
+return. Known ranks and stored proficiency are retained. Updates are event-driven, with no per-update scan,
+configuration/database reads, stored gameplay pointer or changed native replacement packet/entitlement rules.
+The provider defaults to null and the module's development flags/enrollment checks remain required.
+
+Source/native build passed in .cache/verify-all/20261005-235126/report.json (three source checks, 70.6-second
+native build); C++ style and whitespace passed. Authoring exports now hash 60 provenance sources, adding the
+rank provider interface and implementation. Catalog counts remain 123 unique/125 declared. Tests/runtime
+replacement-transition/menu qualification remain deferred; no production deployment/startup was performed.

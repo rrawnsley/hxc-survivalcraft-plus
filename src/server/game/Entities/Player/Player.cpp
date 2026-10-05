@@ -13910,6 +13910,8 @@ void Player::SetTemporarySpellReplacement(uint32 original, uint32 replacement)
         packet << previous << replacement;
         GetSession()->SendPacket(&packet);
     }
+    if (previous != replacement)
+        CoAAbilityPractice::NotifyReplacementChanged(this, original);
 }
 
 uint32 Player::GetTemporarySpellReplacement(uint32 original) const

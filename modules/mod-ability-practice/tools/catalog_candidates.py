@@ -476,6 +476,8 @@ def main():
                          'src/server/coa/AscensionTemplarAbilities.cpp',
                          'src/server/coa/AscensionTemplarEvents.cpp',
                          'src/server/game/Entities/Player/Player.cpp',
+                         'src/server/game/Entities/Player/AbilityPracticeRankPolicy.h',
+                         'src/server/coa/AbilityPracticeRankPolicy.cpp',
                          'src/server/game/Spells/AbilityPracticeCastReceipt.h',
                          'src/server/game/Spells/Spell.h', 'src/server/game/Spells/Spell.cpp',
                          'src/server/game/Spells/SpellEffects.cpp',

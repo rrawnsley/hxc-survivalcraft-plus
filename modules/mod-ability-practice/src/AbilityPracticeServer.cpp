@@ -933,6 +933,23 @@ void MarkDirty(Player* player)
     }
 }
 
+void ReplacementChanged(Player* player, std::uint32_t originalSpellId)
+{
+    if (!Active.load() || !IsProfiledPlayer(player) || player->isBeingLoaded() ||
+        !FindProfile(player, originalSpellId))
+        return;
+    std::lock_guard lock(Mutex);
+    auto const found = Sessions.find(player->GetGUID().GetRawValue());
+    if (!Affects(player) || found == Sessions.end())
+        return;
+    MenuSession& session = found->second;
+    ClearDelivery(session);
+    session.NextRefresh = {};
+    session.ActionSession = NewActionSession();
+    session.Dirty = true;
+    session.CheckRanks = true;
+}
+
 class PracticeWorld : public WorldScript
 {
 public:
@@ -1361,6 +1378,7 @@ void AddSC_ability_practice()
 {
     CoAAbilityPractice::SetRankProvider(EvaluateRank);
     CoAAbilityPractice::SetPurchaseProvider(CanPurchaseSpell);
+    CoAAbilityPractice::SetReplacementChangedProvider(ReplacementChanged);
     CoAAbilityPractice::SetPeriodicOutcomeProvider(AwardPeriodicOutcome);
     CoAAbilityPractice::SetHealingMasteryProvider(ModifyMasteryHealing);
     CoAAbilityPractice::SetDamageMasteryProvider(ModifyMasteryDamage);

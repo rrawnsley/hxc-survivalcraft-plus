@@ -50,6 +50,8 @@ def verify_provenance(candidates, root, dbc):
                 'src/server/coa/AscensionStarcallerAbilities.cpp',
                          'src/server/coa/AscensionStarcallerEvents.cpp',
                          'src/server/coa/AscensionClassMechanics.cpp', 'src/server/game/Entities/Player/Player.cpp',
+                         'src/server/game/Entities/Player/AbilityPracticeRankPolicy.h',
+                         'src/server/coa/AbilityPracticeRankPolicy.cpp',
                 'src/server/coa/AscensionNecromancerContracts.cpp', 'src/server/coa/AscensionReaperDeathwind.cpp',
                 'src/server/coa/AscensionTemplar.cpp',
                 'src/server/coa/AscensionTemplarAbilities.cpp',
