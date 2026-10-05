@@ -3,6 +3,9 @@ local API = HXCAbilityPractice
 local Wire = HXCAbilityPracticeWire
 local revision = 0
 local nextRequest = 0
+local deadline
+local nextPoll = 0
+local elapsed = 0
 
 function API.Request()
     local now = GetTime()
@@ -10,6 +13,9 @@ function API.Request()
     local player = UnitName("player")
     if not player then return false end
     nextRequest = now + 2
+    deadline = now + 6
+    nextPoll = now + 10
+    API.SetSyncState("waiting")
     SendAddonMessage(PREFIX, "HELLO|1", "WHISPER", player)
     return true
 end
@@ -23,10 +29,28 @@ listener:SetScript("OnEvent", function(_, event, prefix, message, channel, sende
         API.Reset()
         revision = 0
         nextRequest = 0
+        deadline = nil
+        nextPoll = 0
+        elapsed = 0
         API.Request()
         return
     end
     if prefix ~= PREFIX or channel ~= "WHISPER" or sender ~= UnitName("player") then return end
     local snapshot = Wire.Accept(message, GetTime(), revision)
-    if snapshot and API.ApplySnapshot(snapshot) then revision = snapshot.revision end
+    if snapshot and API.ApplySnapshot(snapshot) then
+        revision = snapshot.revision
+        deadline = nil
+    end
+end)
+listener:SetScript("OnUpdate", function(_, delta)
+    elapsed = elapsed + delta
+    if elapsed < 1 then return end
+    elapsed = 0
+    local now = GetTime()
+    if deadline and now >= deadline then
+        deadline = nil
+        Wire.Reset()
+        API.SetSyncState("unavailable")
+    end
+    if not deadline and API.IsShown() and now >= nextPoll then API.Request() end
 end)

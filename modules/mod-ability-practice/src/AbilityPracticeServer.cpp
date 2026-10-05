@@ -28,12 +28,24 @@ bool DevelopmentAllowed = false;
 bool Ready = false;
 std::atomic<bool> Active = false;
 std::uint32_t Revision = 0;
-std::unordered_map<std::uint64_t, std::chrono::steady_clock::time_point> Requests;
+using Clock = std::chrono::steady_clock;
+constexpr auto RefreshInterval = std::chrono::seconds(2);
+struct MenuSession
+{
+    Clock::time_point LastRequest{};
+    Clock::time_point NextRefresh{};
+    bool Dirty = true;
+};
+std::unordered_map<std::uint64_t, MenuSession> Sessions;
+
+bool IsDevelopmentPlayer(Player const* player)
+{
+    return player && player->GetSession() && !player->GetSession()->IsBot() && player->getClass() == Dev::ClassId;
+}
 
 bool Affects(Player const* player)
 {
-    return Requested && DevelopmentAllowed && Ready && player && player->GetSession() &&
-        !player->GetSession()->IsBot() && player->getClass() == Dev::ClassId;
+    return Requested && DevelopmentAllowed && Ready && IsDevelopmentPlayer(player);
 }
 
 std::vector<std::uint32_t> Learned(Player const* player, Practice::AbilityDefinition const& ability)
@@ -45,10 +57,10 @@ std::vector<std::uint32_t> Learned(Player const* player, Practice::AbilityDefini
     return spells;
 }
 
-void Send(Player* player)
+bool Send(Player* player)
 {
     if (!Affects(player) || Revision == std::numeric_limits<std::uint32_t>::max())
-        return;
+        return false;
     std::vector<Practice::AbilityView> views;
     for (Practice::AbilityDefinition const& ability : Dev::Abilities)
     {
@@ -57,19 +69,39 @@ void Send(Player* player)
             Dev::Policy, Dev::DefinitionVersion);
         auto const migrated = Practice::MigrateLearnedRanks(ability, Dev::Policy, loaded, learned);
         if (!migrated)
-            return;
+            return false;
         views.push_back(Practice::BuildAbilityView(ability, Dev::Policy, migrated->State,
             player->GetLevel(), learned, true));
     }
     auto const messages = Practice::EncodeMenuSnapshot(Dev::ClassId, player->GetLevel(), ++Revision, views);
     if (!messages)
-        return;
+        return false;
     for (std::string const& message : *messages)
     {
         WorldPacket packet;
         ChatHandler::BuildChatPacket(packet, CHAT_MSG_WHISPER, LANG_ADDON, player, nullptr, "HXAP\t" + message);
         player->SendDirectMessage(&packet);
     }
+    return true;
+}
+
+void Refresh(Player* player, MenuSession& session, Clock::time_point now)
+{
+    if (!session.Dirty || now < session.NextRefresh)
+        return;
+    session.NextRefresh = now + RefreshInterval;
+    if (Send(player))
+        session.Dirty = false;
+}
+
+void MarkDirty(Player* player)
+{
+    if (!Active.load() || !IsDevelopmentPlayer(player))
+        return;
+    std::lock_guard lock(Mutex);
+    auto const found = Sessions.find(player->GetGUID().GetRawValue());
+    if (Affects(player) && found != Sessions.end())
+        found->second.Dirty = true;
 }
 
 class PracticeWorld : public WorldScript
@@ -114,11 +146,13 @@ class PracticePlayer : public PlayerScript
 {
 public:
     PracticePlayer() : PlayerScript("AbilityPracticePlayer",
-        { PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_CAN_PLAYER_USE_PRIVATE_CHAT }) { }
+        { PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_CAN_PLAYER_USE_PRIVATE_CHAT,
+            PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_LEVEL_CHANGED, PLAYERHOOK_ON_LEARN_SPELL,
+            PLAYERHOOK_ON_FORGOT_SPELL }) { }
 
     void OnPlayerLogin(Player* player) override
     {
-        if (!Active.load())
+        if (!Active.load() || !IsDevelopmentPlayer(player))
             return;
         std::lock_guard lock(Mutex);
         if (!Affects(player))
@@ -134,32 +168,62 @@ public:
             if (record)
                 Practice::CachePlayerProgress(*player, ability.ClassId, ability.AbilityId, Dev::Policy, *record);
         }
-        Send(player);
+        auto& session = Sessions[player->GetGUID().GetRawValue()];
+        session = {};
+        Refresh(player, session, Clock::now());
+    }
+
+    void OnPlayerUpdate(Player* player, uint32) override
+    {
+        if (!Active.load() || !IsDevelopmentPlayer(player))
+            return;
+        std::lock_guard lock(Mutex);
+        auto const found = Sessions.find(player->GetGUID().GetRawValue());
+        if (Affects(player) && found != Sessions.end())
+            Refresh(player, found->second, Clock::now());
+    }
+
+    void OnPlayerLevelChanged(Player* player, uint8) override
+    {
+        MarkDirty(player);
+    }
+
+    void OnPlayerLearnSpell(Player* player, uint32 spellId) override
+    {
+        if (Dev::Find(spellId))
+            MarkDirty(player);
+    }
+
+    void OnPlayerForgotSpell(Player* player, uint32 spellId) override
+    {
+        if (Dev::Find(spellId))
+            MarkDirty(player);
     }
 
     void OnPlayerLogout(Player* player) override
     {
         std::lock_guard lock(Mutex);
         if (player)
-            Requests.erase(player->GetGUID().GetRawValue());
+            Sessions.erase(player->GetGUID().GetRawValue());
     }
 
     bool OnPlayerCanUseChat(Player* player, uint32, uint32 language, std::string& message, Player* receiver) override
     {
-        if (!Active.load())
+        if (!Active.load() || !IsDevelopmentPlayer(player) || language != LANG_ADDON ||
+            message.rfind("HXAP\t", 0) != 0)
             return true;
         std::lock_guard lock(Mutex);
-        if (!Affects(player) || language != LANG_ADDON || message.rfind("HXAP\t", 0) != 0)
+        if (!Affects(player))
             return true;
         if (receiver != player || message != "HXAP\tHELLO|1")
             return false;
-        auto const now = std::chrono::steady_clock::now();
-        auto const key = player->GetGUID().GetRawValue();
-        auto const found = Requests.find(key);
-        if (found != Requests.end() && now - found->second < std::chrono::seconds(2))
+        auto const now = Clock::now();
+        auto& session = Sessions[player->GetGUID().GetRawValue()];
+        if (now - session.LastRequest < RefreshInterval)
             return false;
-        Requests[key] = now;
-        Send(player);
+        session.LastRequest = now;
+        session.Dirty = true;
+        Refresh(player, session, now);
         return false;
     }
 };
@@ -173,21 +237,29 @@ public:
     {
         if (!Active.load())
             return;
-        std::lock_guard lock(Mutex);
         if (!spell || !spell->GetCaster() || !target || miss != SPELL_MISS_NONE || (!damage && !healing))
             return;
         Player* player = spell->GetCaster()->ToPlayer();
-        if (!Affects(player) || (target->IsPlayer() && damage) || !player->IsInCombat() ||
+        if (!IsDevelopmentPlayer(player) || (target->IsPlayer() && damage) || !player->IsInCombat() ||
             target->GetLevel() + 10 < player->GetLevel())
             return;
         auto const* ability = Dev::Find(spell->GetSpellInfo()->Id);
         if (!ability)
             return;
+        std::lock_guard lock(Mutex);
+        if (!Affects(player))
+            return;
+        auto const found = Sessions.find(player->GetGUID().GetRawValue());
+        if (found == Sessions.end())
+            return;
         Practice::OutcomeContext const context{ true, true, true,
             (damage && player->IsHostileTo(target)) || (healing && player->IsFriendlyTo(target)), player->GetLevel() };
         auto const award = Practice::HandleOutcome(*player, *spell, *ability, Dev::Policy, Dev::DefinitionVersion, context);
         if (award.Status == Practice::OutcomeStatus::Awarded)
-            Send(player);
+        {
+            found->second.Dirty = true;
+            Refresh(player, found->second, Clock::now());
+        }
     }
 };
 }

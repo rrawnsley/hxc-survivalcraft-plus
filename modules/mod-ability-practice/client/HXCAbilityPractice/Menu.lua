@@ -2,6 +2,7 @@ HXCAbilityPractice = {}
 local API = HXCAbilityPractice
 local Model = HXCAbilityPracticeModel
 local snapshot, selectedId
+local syncState = "waiting"
 local tab = "skills"
 local offset = 0
 local visible = {}
@@ -86,11 +87,14 @@ end
 local function Refresh()
     visible = {}
     if not snapshot then
-        subtitle:SetText("Progress will appear when the server provides your ability data.")
+        subtitle:SetText(syncState == "unavailable" and "Server progress is unavailable. Open this menu to retry."
+            or "Waiting for your server progress...")
         footer:SetText("Practice counts meaningful uses. Your server determines eligibility and progression.")
         detail:Hide()
     else
-        subtitle:SetText("Character level " .. snapshot.characterLevel .. " · Ability proficiency is tracked separately")
+        local status = syncState == "current" and "Server progress received"
+            or (syncState == "waiting" and "Refreshing saved view..." or "Saved view - Server progress unavailable")
+        subtitle:SetText("Character level " .. snapshot.characterLevel .. " - " .. status)
         for _, ability in ipairs(snapshot.abilities) do
             if (tab == "skills" and ability.learnedRank > 0)
                 or (tab == "upcoming" and ability.nextRank) then visible[#visible + 1] = ability end
@@ -159,7 +163,18 @@ function API.ApplySnapshot(value)
         return false, "Stale or mismatched progress update"
     end
     snapshot = validated
+    syncState = "current"
     Refresh()
+    return true
+end
+
+function API.IsShown()
+    return panel:IsShown()
+end
+
+function API.SetSyncState(value)
+    if value ~= "current" and value ~= "waiting" and value ~= "unavailable" then return false end
+    if syncState ~= value then syncState = value; Refresh() end
     return true
 end
 
@@ -173,6 +188,7 @@ end
 
 function API.Reset()
     snapshot = nil
+    syncState = "waiting"
     selectedId = nil
     offset = 0
     Refresh()

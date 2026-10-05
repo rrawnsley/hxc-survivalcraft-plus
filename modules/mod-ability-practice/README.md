@@ -148,10 +148,10 @@ production balance. The release scope remains all 21 CoA classes.
 The slice seeds already learned ranks once and records qualifying practice through the existing settings cache.
 Only non-triggered, learned direct casts with effective hostile damage or friendly healing qualify, while the player
 is in combat and the target meets the development level window. Human sessions only; damaging player targets are
-excluded. The cast-owned marker limits multi-target hits to one award. Successful awards send authoritative views
-for the three abilities. Opening `/practice` requests a fresh snapshot; malformed, foreign and stale messages fail
+excluded. The cast-owned marker limits multi-target hits to one award. Successful awards queue authoritative views
+for the three abilities, coalesced to at most one snapshot every two seconds. Opening `/practice` requests a fresh snapshot; malformed, foreign and stale messages fail
 closed. No rank is learned, removed or replaced; no combat power is modified. Utility/periodic/pet attribution,
-training-exploit protection, final acquisition gates, owner-thread/cache lifecycle and network pacing still need
+training-exploit protection, final acquisition gates, owner-thread/cache lifecycle and network pacing still need runtime
 qualification before full progression integration.
 
 The isolated native build uses a checkout-specific build directory and one build worker at reduced process priority.
@@ -177,3 +177,18 @@ SQL migration, extra query or player-header/ABI change was added.
 
 Source/native build passed at `.cache/verify-all/20261005-035958/report.json`. MySQL empty-result and failure-path
 runtime qualification remains outstanding; this build does not establish those runtime outcomes.
+
+## Paced refresh and availability
+
+The development module stores menu timing and dirty flags by character GUID only, clears them on logout and
+reinitializes them on login. Practice awards, character level changes and learning/forgetting a reviewed spell
+queue a refresh; player updates flush the latest complete view when the two-second interval permits. Requests
+share the same snapshot limit. Failed view construction stays dirty for a bounded retry. Unrelated actors, spells
+and chat are filtered before taking the module lock. Observation requires an initialized menu session.
+
+The addon requests a fresh view every ten seconds while open. A six-second unanswered request changes the menu
+to unavailable and identifies retained data as a saved view. Only a complete validated snapshot clears that state.
+This does not implement class-switch resynchronization, session totals or the full launch catalog.
+
+Native source/build passed at `.cache/verify-all/20261005-042638/report.json`; the addon files compile as Lua 5.1
+syntax. Timing, disconnect/reconnect, load/forget ordering and in-game presentation still need runtime acceptance.
