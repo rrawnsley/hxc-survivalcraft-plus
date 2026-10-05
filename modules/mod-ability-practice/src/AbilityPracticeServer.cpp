@@ -6,6 +6,7 @@
 #include "AbilityPracticeDevelopmentRanked.h"
 #include "AbilityPracticeDevelopmentMastery.h"
 #include "AbilityPracticeDevelopmentHelpers.h"
+#include "AbilityPracticeDevelopmentFixed.h"
 #include "AbilityPracticeProfiles.h"
 #include "AbilityPracticeRankPolicy.h"
 #include "AbilityPracticeMasteryPolicy.h"
@@ -800,12 +801,16 @@ public:
         }
         bool const classSamples = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentClassSamples", false);
         bool const rankedCatalog = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentRankedCatalog", false);
+        bool const fixedCatalog = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentFixedCatalog", false);
         std::span<Practice::AbilityProfile const> const selected =
             SelectProfiles(classSamples, rankedCatalog, PeriodicRequested, MasteryRequested);
         RuntimeProfiles.assign(selected.begin(), selected.end());
         if (HelpersRequested)
             RuntimeProfiles.insert(RuntimeProfiles.end(), Practice::DevelopmentHelpers::Profiles.begin(),
                 Practice::DevelopmentHelpers::Profiles.end());
+        if (fixedCatalog)
+            RuntimeProfiles.insert(RuntimeProfiles.end(), Practice::DevelopmentFixed::Profiles.begin(),
+                Practice::DevelopmentFixed::Profiles.end());
         std::span<Practice::AbilityProfile const> const profiles(RuntimeProfiles);
         ProfileLookup.emplace(profiles);
         Ready = ProfileLookup->IsValid();
@@ -849,6 +854,7 @@ public:
         LOG_INFO("module.ability_practice", "Development ranked catalog: enabled={}", rankedCatalog);
         LOG_INFO("module.ability_practice", "Development mastery: enabled={}", MasteryRequested);
         LOG_INFO("module.ability_practice", "Development scripted observation: enabled={}", HelpersRequested);
+        LOG_INFO("module.ability_practice", "Development fixed catalog: enabled={}", fixedCatalog);
     }
 };
 

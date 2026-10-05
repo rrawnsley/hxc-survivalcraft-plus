@@ -12,7 +12,8 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   classes, for 23 profiles across all 21 classes. An optional broader ranked catalog selects 106 profiles and
   888 authored ranks across all 21 classes, taking priority over class samples. Periodic observation adds two
   profiles to the selected catalog (five/25/108 respectively). Optional Hand of Elune mastery adds one more
-  profile. Optional scripted observation adds Manafeed; the largest staged catalog has 110 profiles.
+  profile. Optional scripted observation adds Manafeed and an independent fixed-utility option adds two
+  nontraining profiles; the largest staged catalog has 112 profiles.
   All development settings default off.
 - Outcomes: resolved direct damage/healing, successful interruption, dispel and beneficial-aura steal.
   Each profile requires its own outcome route. The existing client-cast callback records numeric class/spell
@@ -1340,3 +1341,26 @@ no native code changed after the successful integrated build.
 Source checks passed `.cache/verify-all/20261005-172956/report.json` (two checks; other stages skipped), whitespace
 passed and all five Lua 5.1 files compiled for syntax only. No addon chunks, gameplay or behavioral tests ran;
 in-game appearance and lifecycle acceptance remain outstanding. The staged addon was not installed or published.
+
+## Fixed utility menu examples — 5 October 2026
+
+The optional startup-only `AbilityPractice.AllowDevelopmentFixedCatalog` setting appends two explicit fixed
+definitions: class 13 Spiritual Recall (583092, native level 20) and class 22 Teleport: Caverns of Time (804753,
+native level 40). Source grants and absence of generated rank-chain members were reviewed against current
+discovery; raw effects are destroy-all-totems and teleport/script/aura respectively. These functional utilities
+retain normal acquisition and effectiveness. They award no practice, create no progression storage, have no
+mastery rewards or proficiency caps, and do not invent additional spell ranks. The menu uses its existing fixed
+kind to show the normal unlock level, learned/acquisition/level wait states and no practice requirement/bar.
+
+The option defaults off and appends independently to the selected base catalog before immutable index publication.
+Native startup still checks exact source grant, effective rank-chain consistency, existence and deprecated flags;
+fixed definitions do not need damage/healing/utility outcome attribution. They never take part in automatic rank
+promotion or outcome awards. No teleport/totem mechanics, native grants or learning paths changed. This covers
+only these two selected utilities; unranked abilities are not automatically classified as fixed. The largest
+development catalog is now 112 profiles. Discovery provenance includes the new header (31 entries); the authoring
+candidate count is unchanged. Gameplay and menu qualification remain outstanding.
+
+Affected source/native checks passed `.cache/verify-all/20261005-180153/report.json` in the main development
+worktree (two source checks, 39.1s native build; unit/harness/gameplay skipped). Changed C++ style and whitespace
+passed; authoring artifacts regenerated with unchanged counts and 31 provenance entries. No behavioral tests,
+addon installation, server start, production configuration/database changes or deployment occurred.

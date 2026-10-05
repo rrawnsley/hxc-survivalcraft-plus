@@ -406,6 +406,7 @@ def main():
                          'modules/mod-ability-practice/src/AbilityPracticeDevelopmentMastery.h',
                          'modules/mod-ability-practice/src/AbilityPracticeMastery.h',
                          'modules/mod-ability-practice/src/AbilityPracticeDevelopmentHelpers.h',
+                         'modules/mod-ability-practice/src/AbilityPracticeDevelopmentFixed.h',
                          'modules/mod-ability-practice/src/AbilityPracticeProfiles.h',
                          'src/server/game/Spells/AbilityPracticeMasteryPolicy.h',
                          'src/server/coa/AscensionSpellEligibility.h',
