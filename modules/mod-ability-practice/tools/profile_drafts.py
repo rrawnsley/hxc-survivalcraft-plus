@@ -10,7 +10,13 @@ def verify_provenance(candidates, root, dbc):
     sources = candidates.get('sources')
     if not isinstance(sources, list) or not sources:
         raise ValueError('Missing source provenance')
-    for source in sources:
+    native_sources = candidates.get('nativeOutcomeSources')
+    expected = {'modules/mod-ability-practice/src/AbilityPracticeServer.cpp',
+                'modules/mod-ability-practice/src/AbilityPracticeProfiles.h', 'src/server/shared/SharedDefines.h'}
+    if not isinstance(native_sources, list) or len(native_sources) != len(expected) or {
+            source.get('path') for source in native_sources} != expected:
+        raise ValueError('Missing native outcome provenance')
+    for source in sources + native_sources:
         relative, expected = source.get('path'), source.get('sha256')
         if not isinstance(relative, str) or not isinstance(expected, str) or not re.fullmatch(
                 r'[0-9a-f]{64}', expected):
@@ -96,7 +102,8 @@ def build_drafts(candidates):
     drafts.sort(key=lambda draft: (draft['classId'], draft['abilityId']))
     classes = Counter(draft['classId'] for draft in drafts)
     return {'schemaVersion': 1, 'scope': 'unapproved-definition-drafts-not-runtime-profiles',
-            'productionApproved': False, 'sources': candidates['sources'], 'dbcOrigin': candidates['dbcOrigin'],
+            'productionApproved': False, 'sources': candidates['sources'],
+            'nativeOutcomeSources': candidates['nativeOutcomeSources'], 'dbcOrigin': candidates['dbcOrigin'],
             'summary': {'classCount': len(classes), 'draftCount': len(drafts),
                         'rankedSourceGroupCount': sum(len(draft['ranks']) > 1 for draft in drafts),
                         'standaloneSourceGroupCount': sum(len(draft['ranks']) == 1 for draft in drafts),

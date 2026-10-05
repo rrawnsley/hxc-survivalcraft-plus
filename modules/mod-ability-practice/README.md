@@ -983,3 +983,15 @@ reload stability, public ordering-only use, theoretical collision and exact-stri
 The prior urand implementation above is historical and superseded. No character/progress/network auth logic
 changed. Source/native build passed `.cache/verify-all/20261005-104244/report.json`; C++ lint/whitespace
 passed. No tests ran; instance creation/restart/lifecycle remains runtime qualification. Production untouched.
+
+
+## Native adapter provenance in review artifacts
+
+Candidate output now records nativeOutcomeSources hashes for AbilityPracticeServer.cpp, AbilityPracticeProfiles.h
+and SharedDefines.h. Draft export requires exactly those paths, validates their current bytes alongside the
+inventory/DBC provenance and retains them in output. A later native edit requires candidate regeneration;
+older artifacts without these hashes cannot export. This is provenance checking, not proof of effective
+routing or entitlement. Real read-only regeneration retained444outcome candidates/179class-grant outcome
+candidates/847unapproved drafts across21classes. No runtime profile or balance was activated.
+Source checks passed `.cache/verify-all/20261005-104729/report.json`; Python syntax/whitespace passed.
+No tests ran; rejection cases remain qualification. Production untouched.

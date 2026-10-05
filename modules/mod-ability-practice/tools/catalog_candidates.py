@@ -1,5 +1,6 @@
 import argparse
 from collections import Counter, defaultdict
+import hashlib
 import json
 from pathlib import Path
 import sys
@@ -383,6 +384,11 @@ def main():
     parser.add_argument('--root', type=Path, default=Path(__file__).resolve().parents[3])
     args = parser.parse_args()
     result = build_candidates(json.loads(args.inventory.read_text(encoding='utf-8')))
+    result['nativeOutcomeSources'] = [
+        {'path': relative, 'sha256': hashlib.sha256((args.root / relative).read_bytes()).hexdigest()}
+        for relative in ('modules/mod-ability-practice/src/AbilityPracticeServer.cpp',
+                         'modules/mod-ability-practice/src/AbilityPracticeProfiles.h',
+                         'src/server/shared/SharedDefines.h')]
     if args.dbc:
         lookup, sources = load_acquisition_lookup(args.root, args.dbc)
         annotate_acquisition(result, lookup, sources)
