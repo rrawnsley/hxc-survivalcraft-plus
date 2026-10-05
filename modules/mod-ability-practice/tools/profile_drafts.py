@@ -29,6 +29,8 @@ def verify_provenance(candidates, root, dbc):
                          'src/server/coa/AscensionVenomancerAbilities.cpp',
                          'src/server/coa/AscensionVenomancerAuras.cpp',
                 'src/server/coa/AscensionBloodmageTalents.cpp',
+                'src/server/coa/AscensionBloodmageSecondary.cpp',
+                'src/server/coa/AscensionTalentReplacementData.h',
                 'src/server/coa/AscensionPrimalistSeismicResources.cpp',
                 'src/server/coa/AscensionChronomancerSecondary.cpp',
                 'src/server/coa/AscensionChronomancerTalents.cpp',

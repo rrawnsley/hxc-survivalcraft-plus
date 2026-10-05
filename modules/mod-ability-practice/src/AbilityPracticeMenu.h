@@ -178,6 +178,7 @@ struct AbilityView
     std::uint32_t RuleSet = 0;
     std::optional<ProficiencyCap> NextTrainingCap;
     std::uint32_t AcquisitionSourceId = 0;
+    std::uint32_t ReplacementSpellId = 0;
     std::optional<CatchupView> Catchup;
 };
 

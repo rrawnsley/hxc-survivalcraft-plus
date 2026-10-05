@@ -272,7 +272,8 @@ local function RenderDetail(ability)
             progress:SetStatusBarColor(0.35, 0.72, 0.43)
         else progress:SetStatusBarColor(0.81, 0.62, 0.24) end
     end
-    pointText:SetText(Model.PointText(ability, snapshot.realmMaximumLevel, snapshot.characterLevel))
+    pointText:SetText(ability.replacementSpellId and Model.ReplacementText(ability, syncState ~= "current")
+        or Model.PointText(ability, snapshot.realmMaximumLevel, snapshot.characterLevel))
     local nextRank = ability.nextRank
     local nextReward = Model.NextMastery(ability)
     nextTitle:SetText(nextRank and ((ability.learnedRank == 0 and "Upcoming ability: " or "Next rank: ")

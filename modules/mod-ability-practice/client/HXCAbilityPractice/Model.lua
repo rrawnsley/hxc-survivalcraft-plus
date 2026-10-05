@@ -179,6 +179,12 @@ local function Ability(value, schema, characterLevel)
             or not Integer(value.ruleSet, 1, 6)
             or ((value.ruleSet == 3 or value.ruleSet == 6) and (value.kind ~= 1 or value.route ~= 2))
             or ((value.kind == 3) ~= (value.route == 6)) then return nil end
+        if value.replacementSpellId ~= nil then
+            if not Integer(value.replacementSpellId, 1, 4294967295) or value.availability ~= 2 then return nil end
+            for _, entry in ipairs(ranks) do
+                if entry.spellId == value.replacementSpellId then return nil end
+            end
+        end
         if (value.ruleSet > 3) ~= (value.catchup ~= nil) then return nil end
         if value.catchup then
             local policy = value.catchup
@@ -212,11 +218,12 @@ local function Ability(value, schema, characterLevel)
         elseif value.availability == 6 then return nil end
     elseif value.kind ~= nil or value.session ~= nil or value.route ~= nil or value.ruleSet ~= nil
         or value.nextTrainingCap ~= nil or value.rewards ~= nil or value.acquisitionSource ~= nil
-        or value.catchup ~= nil then return nil end
+        or value.catchup ~= nil or value.replacementSpellId ~= nil then return nil end
     local cap = value.nextTrainingCap
     return { nextTrainingCap = cap and { characterLevel = cap.characterLevel, proficiency = cap.proficiency } or nil,
         hasCapInfo = schema == 4, kind = value.kind, session = session,
         route = value.route, ruleSet = value.ruleSet, acquisitionSource = value.acquisitionSource,
+        replacementSpellId = value.replacementSpellId,
         ranks = ranks, rewards = rewards, catchup = catchup,
         abilityId = value.abilityId, displaySpellId = value.displaySpellId,
         learnedRank = value.learnedRank,
@@ -432,7 +439,16 @@ function Model.MasteryText(reward, realmMaximumLevel, characterLevel, acquisitio
     return benefit .. "\n" .. state .. "\n" .. requirement
 end
 
+function Model.ReplacementText(ability, saved)
+    if not ability.replacementSpellId then return nil end
+    local spell = type(GetSpellInfo) == "function" and GetSpellInfo(ability.replacementSpellId)
+        or ("Ability " .. ability.replacementSpellId)
+    return (saved and "Saved replacement: " or "Replaced by ") .. spell
+        .. ".\nOriginal practice paused; progress retained."
+end
+
 function Model.PointText(ability, realmMaximumLevel, characterLevel)
+    if ability.replacementSpellId then return Model.ReplacementText(ability) end
     local state = ability.availability
     if state == 1 then
         return LearnText(ability.acquisitionSource)
@@ -509,6 +525,10 @@ function Model.CatchupText(ability, saved)
 end
 
 function Model.PracticeRules(ability)
+    if ability.replacementSpellId then
+        return Model.ReplacementText(ability) .. "\n\nUse the replacement from your spellbook."
+            .. " The original ability can resume practice when it is available again."
+    end
     if Model.IsFixed(ability) then
         return "This ability has no practice levels. " .. LearnText(ability.acquisitionSource)
     end

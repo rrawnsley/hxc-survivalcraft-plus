@@ -31,7 +31,7 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   Shared native race/racial and faction-rift eligibility is checked at preparation, award and new upgrades;
   class/race/talent-set/custom-specialization changes refresh the owner state. Normal database save/reload/failure
   behavior and broader acquisition entitlements remain unqualified.
-- Menu: addon 0.4.24-development; unpublished protocol 4 includes B11 instance identity/realm cap/session learning, T11 kind/session/rules/reward
+- Menu: addon 0.4.25-development; unpublished protocol 4 includes B11 instance identity/realm cap/session learning, T11 kind/session/rules/reward
   count/acquisition source and M mastery entries,
   mandatory C future-cap metadata, packed D parts and F8 unreadable-progress responses. Typed delivery is
   bounded/paced; saved views/ages/session totals are labeled. Existing schema 1/2/3 formats are preserved.
@@ -41,8 +41,8 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   caps, practice rates and rewards are not automatically approved or installed.
 - Startup refuses deprecated player spells, matching CoA's native learning restriction. Raw discovery also
   flags the native deprecated/depreacated whole-word markers in English spell names and rank labels.
-- Latest isolated source/native build passed .cache/verify-all/20261005-232101/report.json
-  (two source checks;35.6-second build), including Ranger/Chronomancer profiles. No build remains pending.
+- Latest isolated source/native build passed .cache/verify-all/20261005-232949/report.json
+  (two source checks;32.7-second build), including native replacement awareness. No build remains pending.
 - Verification on this resumed run: source checks, isolated native builds, C++ lint, whitespace and Lua 5.1
   syntax compilation only. No behavioral tests or live play checks ran. Earlier harness results below do not
   qualify the new changes. A validation-scope question is pending; explicit testing authorization is needed.
@@ -1867,3 +1867,40 @@ remains0.4.24-development, with five Lua5.1 syntax compilations and no chunk exe
 stages skipped; compile success does not qualify runtime outcomes, callbacks, persistence, balance or release.
 Live CoA process42440 remains unchanged, started4October2026 21:36:56 local. No production installation,
 server/client/configuration/database/launcher update, native startup or restart was performed.
+
+
+## Native replacement ownership and menu explanation — 5 October 2026
+
+Development acquisition checks now consult Player::GetTemporarySpellReplacement across the original rank
+chain. That existing cached native getter returns the original spell when no active replacement exists;
+only a different spell outside the same profile's rank chain pauses original practice, new practice-rank
+learning and mastery. Current native replacement spellbook state is authoritative; no duplicate talent table
+policy, DB/config reads, gameplay pointer storage or native replacement/mechanic changes. Original learned
+ranks and saved proficiency remain. When replacement ends, normal original eligibility is checked again.
+Replacement abilities retain their current native behavior; full replacement/talent/item practice entitlement
+and any shared proficiency design remain future work. No runtime defect reproduction or exploit claim.
+
+Unprofiled learn/forget callbacks now dirty enrolled class snapshots and cancel unsent delivery too, since
+parent/replacement learning can change eligibility. Only actual profiled learning contributes session history;
+no parent/helper/replacement learns are reported as original ability ranks. Rank promotion remains deferred
+to player update. Callback ordering and map-transition runtime behavior remain unqualified.
+
+Addon0.4.25-development adds optional J4 native replacement metadata to the unpublished typed protocol4.
+Native/client validation requires positive external spell identity and MissingPrerequisite/paused availability;
+duplicate/malformed/conflicting metadata rejects the complete view. J is supported by packed D records;
+bounded maximum delivery allowance gains one potential record per ability. Protocol1/2/3 stay unchanged;
+older typed snapshots without J remain readable. An older unpublished protocol4 addon cannot decode J and
+will reject such replacement snapshots, so the staged server/addon must be qualified together. No published
+launcher/catalog or installed client change is required or made at this checkpoint. Menu names the replacement,
+retained progress and paused original practice, with saved replacement labels. Actual rendered fit remains pending.
+
+The raw Blood Curse healing candidate was inspected before choosing any mastery: native sources treat it as
+Cursed Form, with specialization replacements. It remains unclassified; raw periodic healing alone does not
+approve repeat-cast healing mastery. Bloodmage secondary and native replacement data join provenance (56paths).
+121 unique/123 declared profiles and balance remain unchanged; no new Blood Curse profile or reward.
+
+Source/native passed .cache/verify-all/20261005-232949/report.json (two checks;32.7-second isolated build).
+Final source after shortening replacement text passed .cache/verify-all/20261005-233207/report.json (two checks).
+Affected C++ style/whitespace,56-source authoring exports and five Lua5.1 syntax compilations passed with no
+chunks executed. Unit/harness/gameplay skipped. No native startup or production server/client/config/DB/launcher
+installation, update or restart; development remains disabled and requires explicit enrollment.

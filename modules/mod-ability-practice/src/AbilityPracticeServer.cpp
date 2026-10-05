@@ -166,7 +166,7 @@ constexpr auto InterestDuration = std::chrono::seconds(30);
 constexpr auto DeliveryInterval = std::chrono::milliseconds(100);
 constexpr auto DeliveryDuration = std::chrono::seconds(90);
 constexpr std::size_t DeliveryBatchSize = 8;
-constexpr std::size_t MaxQueuedMessages = 512 * 8 + 2048 + Practice::MaximumSessionLearns +
+constexpr std::size_t MaxQueuedMessages = 512 * 9 + 2048 + Practice::MaximumSessionLearns +
     Practice::MaximumSessionMasteries + 4;
 constexpr std::uint32_t PracticeCastSourceKey = 0x41504353;
 constexpr std::uint32_t PracticeClientRequestKey = 0x41504352;
@@ -373,9 +373,24 @@ bool Affects(Player const* player)
     return Requested && DevelopmentAllowed && Ready && IsProfiledPlayer(player);
 }
 
+std::uint32_t NativeReplacement(Player const* player, Practice::AbilityDefinition const& ability)
+{
+    if (!player || player->getClass() != ability.ClassId)
+        return 0;
+    for (Practice::AbilityRank const& rank : ability.Ranks)
+    {
+        std::uint32_t const replacement = player->GetTemporarySpellReplacement(rank.SpellId);
+        if (replacement != rank.SpellId && std::none_of(ability.Ranks.begin(), ability.Ranks.end(),
+                [replacement](Practice::AbilityRank const& existing) { return existing.SpellId == replacement; }))
+            return replacement;
+    }
+    return 0;
+}
+
 bool AcquisitionAllowed(Player const* player, Practice::AbilityDefinition const& ability, std::uint32_t spellId)
 {
     return player && player->getClass() == ability.ClassId && !ability.Ranks.empty() &&
+        !NativeReplacement(player, ability) &&
         AscensionAcquisition::CanLearnRacialSpell(player, ability.Ranks.front().SpellId) &&
         AscensionAcquisition::CanLearnRacialSpell(player, spellId);
 }
@@ -621,6 +636,7 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
             view.Route = AbsorptionRequested && Practice::DevelopmentAbsorption::IsEmeraldVeil(profile)
                 ? Practice::PracticeRoute::HealingAbsorption : RouteFor(profile.Outcome);
             view.AcquisitionSourceId = static_cast<std::uint32_t>(profile.Acquisition);
+            view.ReplacementSpellId = NativeReplacement(player, ability);
             view.RuleSet = HelpersRequested && Practice::DevelopmentHelpers::IsManafeed(profile) ?
                 Practice::HumanPvEScriptedHealRuleSet :
                 PeriodicRequested ? Practice::HumanPvEPeriodicRuleSet : Practice::HumanPvERuleSet;
@@ -1130,7 +1146,10 @@ public:
             return;
         auto const* profile = FindProfile(player, spellId);
         if (!profile)
+        {
+            MarkDirty(player);
             return;
+        }
         auto const rank = std::find_if(profile->Definition.Ranks.begin(), profile->Definition.Ranks.end(),
             [spellId](Practice::AbilityRank const& entry) { return entry.SpellId == spellId; });
         std::lock_guard lock(Mutex);
@@ -1142,9 +1161,9 @@ public:
         MarkDirty(player);
     }
 
-    void OnPlayerForgotSpell(Player* player, uint32 spellId) override
+    void OnPlayerForgotSpell(Player* player, uint32) override
     {
-        if (Active.load() && FindProfile(player, spellId))
+        if (Active.load() && IsProfiledPlayer(player) && !player->isBeingLoaded())
             MarkDirty(player);
     }
 

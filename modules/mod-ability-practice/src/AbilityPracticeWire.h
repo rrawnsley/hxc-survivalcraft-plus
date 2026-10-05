@@ -134,7 +134,7 @@ inline std::vector<std::string> PackTypedMessages(std::span<std::string const> l
     };
     for (std::string const& line : lines)
     {
-        if (line.empty() || std::string_view("ACPRTKLMNGO").find(line.front()) == std::string_view::npos)
+        if (line.empty() || std::string_view("ACPRTKLMNGOJ").find(line.front()) == std::string_view::npos)
         {
             flush();
             packed.push_back(line);
@@ -274,6 +274,14 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
                 return std::nullopt;
             if (view.AcquisitionSourceId > 4 || (view.RuleSet > 3) != view.Catchup.has_value())
                 return std::nullopt;
+            if (view.ReplacementSpellId)
+            {
+                if (view.Availability != PracticeAvailability::MissingPrerequisite ||
+                    std::any_of(view.Ranks.begin(), view.Ranks.end(), [&view](RankView const& rank)
+                        { return rank.SpellId == view.ReplacementSpellId; }))
+                    return std::nullopt;
+                lines.push_back(Detail::WireLine('J', revision, index + 1, view.ReplacementSpellId));
+            }
             if (view.Catchup)
             {
                 CatchupView const& catchup = *view.Catchup;
