@@ -14,6 +14,21 @@ enum class RankDecision
     Allowed
 };
 
+class SavedSpellRestoration
+{
+public:
+    SavedSpellRestoration(Player const* player, std::uint32_t spellId);
+    ~SavedSpellRestoration();
+    SavedSpellRestoration(SavedSpellRestoration const&) = delete;
+    SavedSpellRestoration& operator=(SavedSpellRestoration const&) = delete;
+
+private:
+    std::uint64_t PreviousPlayerGUID;
+    std::uint32_t PreviousSpellId;
+};
+
+bool IsRestoringSavedSpell(Player const* player, std::uint32_t spellId);
+
 using RankProvider = RankDecision (*)(Player const*, std::uint32_t);
 using PurchaseProvider = bool (*)(Player const*, std::uint32_t);
 void SetRankProvider(RankProvider provider);

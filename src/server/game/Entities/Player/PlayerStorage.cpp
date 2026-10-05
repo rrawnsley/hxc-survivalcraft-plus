@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "AbilityPracticeRankPolicy.h"
 #include "AccountMgr.h"
 #include "AchievementMgr.h"
 #include "ArenaTeam.h"
@@ -6659,6 +6660,7 @@ void Player::_LoadSpells(PreparedQueryResult result)
 
             // CoA allows any race with any class and its classes share spells across class skill lines, so
             // SkillRaceClassInfo.dbc cannot decide which spells a character may keep.
+            CoAAbilityPractice::SavedSpellRestoration const restoration(this, spellId);
             addSpell(spellId, specMask, true);
         } while (result->NextRow());
     }

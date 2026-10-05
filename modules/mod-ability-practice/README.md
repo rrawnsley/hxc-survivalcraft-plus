@@ -684,3 +684,24 @@ The top-right header placement is a development position that still needs accept
 Source checks passed at `.cache/verify-all/20261005-091901/report.json`; whitespace and all five Lua 5.1 syntax
 compilations passed. No tests ran. Load order, combat deferral, custom/fallback parent, click behavior and actual
 layout remain unqualified. The addon is not installed or published.
+
+## Narrow saved-rank restoration during login
+
+The private spell-add guard no longer exempts every action while Player::isBeingLoaded is true. Only an exact
+spell row restored by _LoadSpells gets the saved-rank exemption. A scoped SavedSpellRestoration records the
+nonzero character GUID and spell ID on the loading thread, supports nested restoration by restoring previous
+values at scope exit and retains no Player/Spell pointers. The private guard requires both loading state and
+an exact saved-row match. Default/custom/skill/helper additions with other IDs consult the active rank policy.
+The public spell-add signatures and character settings/DB load order are unchanged.
+
+This preserves explicit saved ranks without treating loading as general authorization for new stronger ranks.
+Absent/inactive providers still allow ordinary behavior. Derived talent/equipment ownership, saved helper
+reconstruction and future non-ClassGrant profiles remain separate integration work; this does not blanket
+approve helpers merely because their parent is saved. Current three profiles remain class grants only.
+The source gap was established from _addSpell's broad loading exemption and LearnCustomSpells direct additions;
+no live exploit or runtime reproduction was observed.
+
+Source/native build passed at `.cache/verify-all/20261005-092402/report.json`; final nonzero-context guard build
+passed at `.cache/verify-all/20261005-092728/report.json`. C++ lint and whitespace passed. No tests ran.
+Actual login/restoration/default/skill/helper interactions, nested/thread isolation and feature-off equivalence
+remain runtime acceptance. No production server, data or active client was changed.
