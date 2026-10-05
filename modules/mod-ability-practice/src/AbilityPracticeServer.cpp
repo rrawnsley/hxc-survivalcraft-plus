@@ -56,6 +56,7 @@ constexpr auto DeliveryInterval = std::chrono::milliseconds(100);
 constexpr auto DeliveryDuration = std::chrono::seconds(90);
 constexpr std::size_t DeliveryBatchSize = 8;
 constexpr std::size_t MaxQueuedMessages = 512 * 6 + 2048 + 3;
+constexpr std::uint32_t PracticeCastSourceKey = 0x41504353;
 struct ClassSession
 {
     Practice::SessionPractice Totals;
@@ -436,7 +437,9 @@ void Refresh(Player* player, MenuSession& session, Clock::time_point now)
 void AwardOutcome(Player* player, Spell* spell, Practice::AbilityProfile const& profile)
 {
     std::lock_guard lock(Mutex);
-    if (!Affects(player) || player->isBeingLoaded())
+    std::uint64_t const source = (static_cast<std::uint64_t>(profile.Definition.ClassId) << 32) |
+        spell->GetSpellInfo()->Id;
+    if (!Affects(player) || player->isBeingLoaded() || spell->GetScriptValue(PracticeCastSourceKey) != source)
         return;
     auto& session = Sessions[player->GetGUID().GetRawValue()];
     Practice::OutcomeContext const context{ true, true, true, true, player->GetLevel() };
@@ -674,8 +677,23 @@ class PracticeSpell : public AllSpellScript
 {
 public:
     PracticeSpell() : AllSpellScript("AbilityPracticeSpell",
-        { ALLSPELLHOOK_ON_HIT_RESULT, ALLSPELLHOOK_ON_SUCCESSFUL_INTERRUPT,
+        { ALLSPELLHOOK_CAN_PREPARE, ALLSPELLHOOK_ON_HIT_RESULT, ALLSPELLHOOK_ON_SUCCESSFUL_INTERRUPT,
             ALLSPELLHOOK_ON_SUCCESSFUL_DISPEL, ALLSPELLHOOK_ON_SUCCESSFUL_STEAL }) { }
+
+    bool CanPrepare(Spell* spell, SpellCastTargets const*, AuraEffect const* triggeredByAura) override
+    {
+        if (!Active.load() || !spell || !spell->GetCaster() || !spell->GetSpellInfo())
+            return true;
+        Player* player = spell->GetCaster()->ToPlayer();
+        if (!IsProfiledPlayer(player) || !FindProfile(player, spell->GetSpellInfo()->Id))
+            return true;
+        bool const direct = !triggeredByAura && !spell->IsTriggered() && !spell->m_CastItem &&
+            spell->m_castItemGUID.IsEmpty() && spell->GetOriginalCasterGUID() == player->GetGUID();
+        std::uint64_t const source = direct ? (static_cast<std::uint64_t>(player->getClass()) << 32) |
+            spell->GetSpellInfo()->Id : std::numeric_limits<std::uint64_t>::max();
+        spell->SetScriptValue(PracticeCastSourceKey, source);
+        return true;
+    }
 
     void OnSpellHitResult(Spell* spell, Unit* target, uint8 miss, uint32 damage, uint32 healing, bool) override
     {

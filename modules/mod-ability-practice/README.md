@@ -911,3 +911,26 @@ This closes a source-level OR-condition gap; no live exploit or reproduction was
 build passed `.cache/verify-all/20261005-103115/report.json`; C++ lint/whitespace passed. No tests ran.
 Mixed-result/friend/enemy/zero-effect behavior remains runtime acceptance. The same three development profiles
 remain, all development flags default off, and production was untouched.
+
+
+## Early cast-source qualification
+
+The existing CanPrepare hook records eligible profiled human cast source before reagent/item consumption and
+instant execution. OnSpellPrepare was unsuitable because instant spells can already have resolved at that
+point. The module always returns true and does not change cast validation/gameplay. Its distinct Spell script
+key stores only the preparing class/spell pair, or a refusal sentinel; no pointers or DB work are retained.
+Eligible preparation has no cast item/GUID, no aura-trigger argument, no triggered flag and the same original
+caster GUID. All native award routes require a matching class/spell stamp before the existing outcome adapter.
+Unknown preparations (including casts begun while disabled), item casts, aura helpers and cross-class casts
+are refused for practice. Current ownership/effective outcome/cap/corruption/dedup checks still apply.
+
+This preserves origin evidence before m_CastItem/m_castItemGUID can be cleared. It does not prove a client
+opcode initiated the cast: arbitrary scripts creating ordinary casts without item/aura/trigger metadata still
+need helper attribution review. It adds no periodic/parent-cast grouping, mastery rewards or new profiles.
+Addon0.4.10-development help explicitly excludes item casts/aura helpers. No final deliberate training/PvP/
+bot policy is implied. Source hook ordering was inspected; no live exploit or runtime reproduction observed.
+
+Source/native build passed `.cache/verify-all/20261005-103605/report.json`; C++ lint/whitespace and five
+Lua5.1 syntax compilations passed. No tests ran. Instant/delayed/item/reagent/aura/triggered/class-change/
+disable transitions, script interaction and original-action attribution remain runtime acceptance.
+Production server/client/database/launcher untouched; all flags default off.
