@@ -91,11 +91,13 @@ local function RenderDetail(ability)
     track:SetText(TrackedAbilities()[tostring(ability.abilityId)] == true and "Stop tracking" or "Track ability")
     name:SetText(SpellName(ability.displaySpellId))
     rankLabel:SetText(ability.learnedRank > 0 and ("Learned rank " .. ability.learnedRank) or "Not yet learned")
-    local trains = ability.availability == 4 or ability.availability == 5
-    proficiency:SetText(trains and ("Proficiency " .. ability.proficiency .. " / " .. ability.cap) or "")
+    local trains = ability.learnedRank > 0 and ability.pointsPerLevel > 0 and ability.availability ~= 6
+    local skillText = ability.proficiency > ability.cap and ("Saved proficiency " .. ability.proficiency
+        .. " - current cap " .. ability.cap) or ("Proficiency " .. ability.proficiency .. " / " .. ability.cap)
+    proficiency:SetText(trains and skillText or "")
     if trains then progress:Show() else progress:Hide() end
     if trains then
-        local capped = ability.availability == 5
+        local capped = ability.proficiency >= ability.cap
         progress:SetValue(capped and 1 or ability.points / ability.pointsPerLevel)
         progressLabel:SetText(capped and "Current cap reached" or
             (math.floor(100 * ability.points / ability.pointsPerLevel) .. "% to the next proficiency point"))
@@ -111,7 +113,7 @@ end
 Refresh = function()
     visible = {}
     local session = snapshot and snapshot.session
-    sessionText:SetText(session and session.available and ("This session: " .. session.uses
+    sessionText:SetText(session and session.available and ("Class skills this session: " .. session.uses
         .. " uses that earned practice - +" .. session.proficiencyGained
         .. " proficiency") or "Session totals unavailable")
     if not snapshot then

@@ -8,6 +8,7 @@
 #include "Config.h"
 #include "CombatManager.h"
 #include "Creature.h"
+#include "Formulas.h"
 #include "Log.h"
 #include "Player.h"
 #include "ScriptMgr.h"
@@ -67,8 +68,8 @@ bool Affects(Player const* player)
 bool IsDevelopmentOpponent(Player const* player, Unit const* opponent)
 {
     if (!opponent || !opponent->IsCreature() || opponent->IsControlledByPlayer() || opponent->IsPet() ||
-        opponent->IsTotem() || opponent->IsCritter() || !player->IsHostileTo(opponent) ||
-        opponent->getLevelForTarget(player) + 10 < player->GetLevel())
+        opponent->IsTotem() || opponent->IsCritter() || player->IsFriendlyTo(opponent) ||
+        opponent->getLevelForTarget(player) <= Acore::XP::GetGrayLevel(player->GetLevel()))
         return false;
     std::string const script = opponent->ToCreature()->GetScriptName();
     return script != "npc_training_dummy" && script != "npc_target_dummy";
@@ -82,7 +83,8 @@ bool HasDevelopmentEncounter(Player const* player, Unit const* recipient)
         if (!reference || reference->IsSuppressedFor(recipient))
             continue;
         Unit const* opponent = reference->GetOther(recipient);
-        if (opponent->IsAlive() && IsDevelopmentOpponent(player, opponent))
+        if (!reference->IsSuppressedFor(opponent) && opponent->IsAlive() &&
+            IsDevelopmentOpponent(player, opponent))
             return true;
     }
     return false;

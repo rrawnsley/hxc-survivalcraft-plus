@@ -223,8 +223,8 @@ No addon was installed, cataloged or published.
 
 ## Development encounter qualification
 
-Opponent level uses `getLevelForTarget(player)` so the existing scaled encounter level is respected, within the
-illustrative ten-level window. Player-controlled creatures, pets, totems, critters and the two named core training
+Opponent level uses `getLevelForTarget(player)` so the existing scaled encounter level is respected, using
+the existing XP gray threshold (without requiring an XP award). Player-controlled creatures, pets, totems, critters and the two named core training
 or target-dummy scripts do not qualify. Healing checks an actual live eligible opponent of its recipient instead
 of using the friendly recipient's level or a generic caster combat flag. Effective hostile damage does not require
 combat state after impact, so a killing blow is not excluded solely because that state ended. The original-cast
@@ -316,3 +316,19 @@ Interest expiry/reopen, closed-menu advancement, reentrant callbacks and owner-c
 qualification. The class-change module inspected here strips other class kits and clears specialization slots;
 the reviewed slot structure stores class-scoped talent entries/actions, not a separate inactive class spellbook.
 Further migration/restore work should follow these actual sources rather than assume an unobserved storage model.
+
+## Gray targets and retained progress display
+
+Effective damage to neutral or hostile creatures can qualify; friendly creatures remain excluded. Opponent level
+uses the server's existing gray threshold and scaled target level. Healing requires a live eligible PvE opponent
+with neither side of its combat reference suppressed. Dummy and player-controlled creature exclusions remain.
+These are development qualification rules; PvP and deliberate training policy remain undecided.
+
+The menu keeps learned trainable proficiency visible even when current level or prerequisites prevent practice.
+Retained proficiency above a reduced cap is explicitly labeled saved, with a full cap bar. Availability text
+separates practice restrictions from a new ability's unlock and does not promise a cap increase at every level.
+Session totals are labeled class skills rather than implying the selected ability alone.
+
+Source/native build passed at `.cache/verify-all/20261005-055814/report.json`; C++ lint, whitespace and Lua 5.1
+syntax passed. Actual neutral/gray fights, healing reference suppression and retained-progress rendering remain
+pending runtime qualification. No production server, database, launcher or active client was changed.

@@ -100,6 +100,9 @@ inline AbilityView BuildAbilityView(AbilityDefinition const& ability, TrainingPo
                 learnedSpells, acquisitionPrerequisitesMet);
     }
 
+    if (ability.Kind != AbilityKind::Fixed && view.LearnedRank)
+        view.PointsPerLevel = policy.Bands[Detail::BandIndex(policy, progress.Proficiency)].PointsPerLevel;
+
     if (!acquisitionPrerequisitesMet)
         view.Availability = PracticeAvailability::MissingPrerequisite;
     else if (characterLevel < ability.Ranks.front().Requirement.CharacterLevel)
@@ -110,7 +113,6 @@ inline AbilityView BuildAbilityView(AbilityDefinition const& ability, TrainingPo
         view.Availability = PracticeAvailability::Fixed;
     else
     {
-        view.PointsPerLevel = policy.Bands[Detail::BandIndex(policy, progress.Proficiency)].PointsPerLevel;
         view.Availability = progress.Proficiency >= view.Cap ? PracticeAvailability::Capped :
             PracticeAvailability::Training;
         view.NextPoint = progress.Proficiency == std::numeric_limits<std::uint32_t>::max() ?
