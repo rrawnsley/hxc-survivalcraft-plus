@@ -9,8 +9,9 @@ The module and addon are staged in this checkout. Nothing is installed or activa
 
 - Native prototype: three Pyromancer class-grant profiles, with draft tuning. The full rollout still targets
   all 21 CoA classes. An optional startup-only sample catalog adds 20 ranked class-grant profiles for the other
-  classes, for 23 profiles across all 21 classes. Optional periodic observation adds two profiles (five without
-  class samples, 25 with them). All development, rank-learning, class-sample and periodic flags default off.
+  classes, for 23 profiles across all 21 classes. An optional broader ranked catalog selects 106 profiles and
+  888 authored ranks across all 21 classes, taking priority over class samples. Periodic observation adds two
+  profiles to the selected catalog (five/25/108 respectively). All development settings default off.
 - Outcomes: resolved direct damage/healing, successful interruption, dispel and beneficial-aura steal.
   Each profile requires its own outcome route. The existing client-cast callback records numeric class/spell
   identity; preparation requires that identity and rejects item/aura-triggered sources. Script-created casts
@@ -1148,3 +1149,34 @@ AuraEffect friend declaration, corrected before the retry. Catalog additions are
 that checkout remains stable. Their source-only checks passed in the catalog worktree at
 `.cache/verify-all/20261005-155041/report.json`; native integration/build remains pending. No behavioral tests
 were added or run. No production server/client/configuration/database/launcher change was made.
+
+
+## Broader ranked development catalog — 5 October 2026
+
+`AbilityPractice.AllowDevelopmentRankedCatalog = 1` selects 106 source-consistent ranked class-grant profiles
+covering 888 authored ranks across all 21 custom classes. It takes priority over the representative sample flag;
+otherwise the three-profile or 23-profile modes remain available. Adding periodic observation yields 108
+profiles. The new flag defaults off and is read only at startup. It never enables observation or learning by
+itself. Native exact grant/chain/effective-outcome checks still guard every selected profile; one invalid
+selected definition keeps the module inactive rather than silently running a partial catalog.
+
+`tools/ranked_development.py` verifies current source/DBC provenance, builds existing unapproved drafts, then
+selects ranked groups with a raw common outcome route. It requires all 21 custom class IDs. Route priority is
+damage, healing, interrupt, dispel, steal; the two mixed damage/utility groups deliberately use their damage
+route. The resulting 82 damage and 24 healing profiles share the existing illustrative training schedule.
+Authored character levels are retained; proficiency follows 1/10/20/40/60/... and caps reuse the existing draft
+curve. Earlier representative profiles use the same definitions/rates. Neither generated code nor a successful
+startup validates balance, complete ownership or actual outcome behavior. Raw/effective differences can still
+reject definitions, and scripted replacements can still need individual review.
+
+`AbilityPracticeDevelopmentRanked.h` is a saved deterministic development artifact, with its generator included
+in native provenance. Candidate regeneration is required after native/header/generator changes. Regenerate
+the header from the newly verified candidates, then refresh candidates again if the emitted bytes changed.
+This authoring path does not mark drafts production-approved. Standalone/unranked/passive/pet/helper and blocked
+ranked groups are excluded. Remaining class abilities still require individual classification and implementation.
+
+Source-only checks passed `.cache/verify-all/20261005-155720/report.json` in the catalog worktree; changed C++
+style and whitespace passed. Discovery regeneration retains 847 unapproved drafts/179 outcome candidates,
+with 22 native source provenance entries. The original native rebuild remains running in the frozen main
+worktree. Integration and incremental native build of these catalog additions remain pending. No behavioral
+tests ran and no production server, config, database, launcher or client was changed.

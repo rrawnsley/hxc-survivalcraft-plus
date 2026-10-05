@@ -3,6 +3,7 @@
 #include "AbilityPracticeDevelopment.h"
 #include "AbilityPracticeDevelopmentSamples.h"
 #include "AbilityPracticeDevelopmentPeriodic.h"
+#include "AbilityPracticeDevelopmentRanked.h"
 #include "AbilityPracticeProfiles.h"
 #include "AbilityPracticeRankPolicy.h"
 #include "AbilityPracticeCastReceipt.h"
@@ -63,6 +64,7 @@ constexpr auto WithPeriodicProfiles(std::array<Practice::AbilityProfile, Count> 
 }
 constexpr auto PeriodicProfiles = WithPeriodicProfiles(Profiles);
 constexpr auto AllClassPeriodicProfiles = WithPeriodicProfiles(AllClassSampleProfiles);
+constexpr auto RankedPeriodicProfiles = WithPeriodicProfiles(Practice::DevelopmentRanked::Profiles);
 std::optional<Practice::ProfileIndex> ProfileLookup;
 std::recursive_mutex Mutex;
 bool Requested = false;
@@ -717,10 +719,13 @@ public:
                 ServerGeneration = 1;
         }
         bool const classSamples = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentClassSamples", false);
+        bool const rankedCatalog = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentRankedCatalog", false);
         std::span<Practice::AbilityProfile const> const profiles = PeriodicRequested ?
-            (classSamples ? std::span<Practice::AbilityProfile const>(AllClassPeriodicProfiles) :
+            (rankedCatalog ? std::span<Practice::AbilityProfile const>(RankedPeriodicProfiles) :
+                classSamples ? std::span<Practice::AbilityProfile const>(AllClassPeriodicProfiles) :
                 std::span<Practice::AbilityProfile const>(PeriodicProfiles)) :
-            (classSamples ? std::span<Practice::AbilityProfile const>(AllClassSampleProfiles) :
+            (rankedCatalog ? std::span<Practice::AbilityProfile const>(Practice::DevelopmentRanked::Profiles) :
+                classSamples ? std::span<Practice::AbilityProfile const>(AllClassSampleProfiles) :
                 std::span<Practice::AbilityProfile const>(Profiles));
         ProfileLookup.emplace(profiles);
         Ready = ProfileLookup->IsValid();
@@ -758,6 +763,7 @@ public:
         LOG_INFO("module.ability_practice", "Development class samples: enabled={}, profile count={}",
             classSamples, profiles.size());
         LOG_INFO("module.ability_practice", "Development periodic observation: enabled={}", PeriodicRequested);
+        LOG_INFO("module.ability_practice", "Development ranked catalog: enabled={}", rankedCatalog);
     }
 };
 

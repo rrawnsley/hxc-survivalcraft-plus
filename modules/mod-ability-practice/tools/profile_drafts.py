@@ -15,6 +15,8 @@ def verify_provenance(candidates, root, dbc):
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopment.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentSamples.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentPeriodic.h',
+                'modules/mod-ability-practice/src/AbilityPracticeDevelopmentRanked.h',
+                'modules/mod-ability-practice/tools/ranked_development.py',
                 'modules/mod-ability-practice/src/AbilityPracticeProfiles.h', 'src/server/shared/SharedDefines.h',
                 'src/server/coa/AscensionSpellEligibility.h', 'src/server/coa/AscensionRacialAbilities.h',
                 'src/server/coa/AscensionFelsworn.cpp', 'src/server/coa/AscensionCompat.cpp',
