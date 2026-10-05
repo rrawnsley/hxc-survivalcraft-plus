@@ -3,6 +3,9 @@
 
 #include "AbilityPracticeCatalog.h"
 
+#include <unordered_map>
+#include <vector>
+
 namespace AbilityPractice
 {
 enum class AcquisitionSource
@@ -28,23 +31,6 @@ struct AbilityProfile
     TrainingPolicy Policy;
     DirectOutcome Outcome;
 };
-
-inline AbilityProfile const* FindProfile(std::span<AbilityProfile const> profiles,
-    std::uint32_t classId, std::uint32_t spellId)
-{
-    for (AbilityProfile const& profile : profiles)
-        if (profile.Definition.ClassId == classId)
-            for (AbilityRank const& rank : profile.Definition.Ranks)
-                if (rank.SpellId == spellId)
-                    return &profile;
-    return nullptr;
-}
-
-inline bool HasProfiles(std::span<AbilityProfile const> profiles, std::uint32_t classId)
-{
-    return std::any_of(profiles.begin(), profiles.end(), [classId](AbilityProfile const& profile)
-        { return profile.Definition.ClassId == classId; });
-}
 
 inline bool ValidateProfiles(std::span<AbilityProfile const> profiles)
 {
@@ -92,6 +78,50 @@ inline bool ValidateProfiles(std::span<AbilityProfile const> profiles)
     }
     return true;
 }
+
+class ProfileIndex
+{
+public:
+    explicit ProfileIndex(std::span<AbilityProfile const> profiles) : Valid(ValidateProfiles(profiles))
+    {
+        if (!Valid)
+            return;
+        for (AbilityProfile const& profile : profiles)
+        {
+            Classes[profile.Definition.ClassId].push_back(&profile);
+            for (AbilityRank const& rank : profile.Definition.Ranks)
+                Spells.emplace(Key(profile.Definition.ClassId, rank.SpellId), &profile);
+        }
+    }
+
+    bool IsValid() const { return Valid; }
+
+    bool HasClass(std::uint32_t classId) const { return Classes.contains(classId); }
+
+    AbilityProfile const* Find(std::uint32_t classId, std::uint32_t spellId) const
+    {
+        auto const found = Spells.find(Key(classId, spellId));
+        return found == Spells.end() ? nullptr : found->second;
+    }
+
+    std::span<AbilityProfile const* const> ForClass(std::uint32_t classId) const
+    {
+        auto const found = Classes.find(classId);
+        if (found == Classes.end())
+            return {};
+        return found->second;
+    }
+
+private:
+    static std::uint64_t Key(std::uint32_t classId, std::uint32_t spellId)
+    {
+        return (static_cast<std::uint64_t>(classId) << 32) | spellId;
+    }
+
+    bool Valid;
+    std::unordered_map<std::uint64_t, AbilityProfile const*> Spells;
+    std::unordered_map<std::uint32_t, std::vector<AbilityProfile const*>> Classes;
+};
 }
 
 #endif

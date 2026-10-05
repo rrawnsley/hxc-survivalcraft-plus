@@ -446,3 +446,19 @@ after initialization/class change.
 Source/native build passed at `.cache/verify-all/20261005-080044/report.json`; C++ lint/whitespace passed.
 No behavioral tests ran. Re-enable without an addon, first-hit/update ordering, map/loading lifecycle and class
 migration remain runtime acceptance work. No production actions occurred.
+
+## Indexed profile lookup
+
+When startup observation is requested, the validated immutable catalog builds an index by class/spell and a
+per-class list in source order. Class membership and spell event lookup use that index; menu building, seeding
+and rank updates visit only the actor's class. Keys include both 32-bit identifiers, retaining separate ownership
+for shared spell IDs. Invalid catalogs yield no index entries. The source profile array, rank/cap data and policy
+bands must outlive the index; native integration uses immutable static data and never replaces the index on reload.
+
+Inactive learn/forget hooks return before lookup. An initially disabled module does not construct the index;
+re-enabling startup-validated data retains it. No Player pointers or cast objects are stored in the index.
+The registry still contains only the three reviewed development entries, not the full release catalog.
+
+Source/native build passed at `.cache/verify-all/20261005-080446/report.json`; C++ lint and whitespace passed.
+Final cleanup build passed at `.cache/verify-all/20261005-080724/report.json`. Throughput, shared-ID isolation and startup/
+reload behavior remain runtime qualification work. No behavioral tests or production actions ran.

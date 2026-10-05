@@ -36,6 +36,7 @@ constexpr std::array Profiles = {
     Practice::AbilityProfile{ Dev::DefinitionVersion, Practice::AcquisitionSource::ClassGrant,
         Dev::Abilities[2], Dev::Policy, Practice::DirectOutcome::Healing }
 };
+std::optional<Practice::ProfileIndex> ProfileLookup;
 std::recursive_mutex Mutex;
 bool Requested = false;
 bool DevelopmentAllowed = false;
@@ -66,9 +67,19 @@ bool IsHumanPlayer(Player const* player)
     return player && player->GetSession() && !player->GetSession()->IsBot();
 }
 
+Practice::AbilityProfile const* FindProfile(Player const* player, std::uint32_t spellId)
+{
+    return player && ProfileLookup ? ProfileLookup->Find(player->getClass(), spellId) : nullptr;
+}
+
+std::span<Practice::AbilityProfile const* const> ProfilesForClass(std::uint32_t classId)
+{
+    return ProfileLookup ? ProfileLookup->ForClass(classId) : std::span<Practice::AbilityProfile const* const>{};
+}
+
 bool IsProfiledPlayer(Player const* player)
 {
-    return IsHumanPlayer(player) && Practice::HasProfiles(Profiles, player->getClass());
+    return IsHumanPlayer(player) && ProfileLookup && ProfileLookup->HasClass(player->getClass());
 }
 
 bool Affects(Player const* player)
@@ -122,7 +133,7 @@ CoAAbilityPractice::RankDecision EvaluateRank(Player const* player, std::uint32_
     using Decision = CoAAbilityPractice::RankDecision;
     if (!RankActive.load() || !IsProfiledPlayer(player))
         return Decision::Unmanaged;
-    auto const* profile = Practice::FindProfile(Profiles, player->getClass(), spellId);
+    auto const* profile = FindProfile(player, spellId);
     if (!profile || spellId == profile->Definition.Ranks.front().SpellId)
         return Decision::Unmanaged;
     auto const* ability = &profile->Definition;
@@ -184,8 +195,9 @@ void PromoteRanks(Player* player)
 {
     if (!RankActive.load() || !IsProfiledPlayer(player))
         return;
-    for (Practice::AbilityProfile const& profile : Profiles)
+    for (Practice::AbilityProfile const* indexed : ProfilesForClass(player->getClass()))
     {
+        Practice::AbilityProfile const& profile = *indexed;
         if (profile.Definition.ClassId != player->getClass())
             continue;
         for (Practice::AbilityRank const& rank : profile.Definition.Ranks)
@@ -204,8 +216,9 @@ bool Send(Player* player, MenuSession const& session)
     std::vector<Practice::AbilityView> views;
     bool const supported = Affects(player);
     if (supported)
-        for (Practice::AbilityProfile const& profile : Profiles)
+        for (Practice::AbilityProfile const* indexed : ProfilesForClass(player->getClass()))
         {
+            Practice::AbilityProfile const& profile = *indexed;
             Practice::AbilityDefinition const& ability = profile.Definition;
             if (ability.ClassId != player->getClass())
                 continue;
@@ -255,8 +268,9 @@ void Refresh(Player* player, MenuSession& session, Clock::time_point now)
 
 void InitializeProgress(Player* player)
 {
-    for (Practice::AbilityProfile const& profile : Profiles)
+    for (Practice::AbilityProfile const* indexed : ProfilesForClass(player->getClass()))
     {
+        Practice::AbilityProfile const& profile = *indexed;
         Practice::AbilityDefinition const& ability = profile.Definition;
         if (ability.ClassId != player->getClass() || ability.Kind == Practice::AbilityKind::Fixed)
             continue;
@@ -315,7 +329,8 @@ public:
             LOG_INFO("module.ability_practice", "Development observation disabled");
             return;
         }
-        Ready = Practice::ValidateProfiles(Profiles);
+        ProfileLookup.emplace(Profiles);
+        Ready = ProfileLookup->IsValid();
         for (Practice::AbilityProfile const& profile : Profiles)
             for (Practice::AbilityRank const& rank : profile.Definition.Ranks)
             {
@@ -394,13 +409,13 @@ public:
 
     void OnPlayerLearnSpell(Player* player, uint32 spellId) override
     {
-        if (player && Practice::FindProfile(Profiles, player->getClass(), spellId))
+        if (Active.load() && FindProfile(player, spellId))
             MarkDirty(player);
     }
 
     void OnPlayerForgotSpell(Player* player, uint32 spellId) override
     {
-        if (player && Practice::FindProfile(Profiles, player->getClass(), spellId))
+        if (Active.load() && FindProfile(player, spellId))
             MarkDirty(player);
     }
 
@@ -450,7 +465,7 @@ public:
         Player* player = spell->GetCaster()->ToPlayer();
         if (!IsProfiledPlayer(player))
             return;
-        auto const* profile = Practice::FindProfile(Profiles, player->getClass(), spell->GetSpellInfo()->Id);
+        auto const* profile = FindProfile(player, spell->GetSpellInfo()->Id);
         if (!profile || (profile->Outcome == Practice::DirectOutcome::Damage ? !damage : !healing) ||
             !QualifiesDevelopmentOutcome(player, target, damage, healing))
             return;
