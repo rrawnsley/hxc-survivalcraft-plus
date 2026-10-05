@@ -1290,14 +1290,15 @@ and no production files/process/config/client/DB/launcher changed.
 
 ## Shared receipt consumption in both award routes — 5 October 2026
 
-Direct outcome awards now refuse an already consumed original-cast receipt. Periodic outcomes already consult
-that same receipt through their award adapter. This closes the reverse ordering where a periodic award preceded
-a later direct outcome from the same spell and the direct spell-local award marker was still unset. Both routes
-remain serialized by the module mutex; unqualified outcomes leave the receipt available. Source inspection found
-this gap; no runtime reproduction or behavioral test is claimed.
+The initial review incorrectly claimed a reverse-order duplicate-award gap. `ReceiptMatches` already refuses
+consumed receipts, including in frozen a5ea9902f, and the direct award route already calls that helper. Periodic
+outcomes consult the same receipt through their award adapter. d920d6b651 added a redundant explicit check;
+the catalog worktree removes that duplicate while preserving the existing guard. No behavioral defect was
+established, and no runtime reproduction or behavioral test is claimed. Both routes remain serialized by the
+module mutex; unqualified outcomes leave the receipt available.
 
 Source checks passed `.cache/verify-all/20261005-170158/report.json` in the main development worktree, with five
 checks passing and all other stages skipped. C++ style and whitespace passed. The previous successful native
-build qualifies only frozen a5ea9902f; the integrated catalog/mastery/helper/menu changes and this guard still
+build qualifies only frozen a5ea9902f; the integrated catalog/mastery/helper/menu changes still
 need an affected rebuild. An independent worldserver build targets C:/Build-Survival, so no concurrent build
 was started. Production remains unchanged.

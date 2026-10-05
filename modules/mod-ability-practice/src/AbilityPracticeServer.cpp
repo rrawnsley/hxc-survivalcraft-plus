@@ -613,8 +613,7 @@ void AwardOutcome(Player* player, Spell* spell, Practice::AbilityProfile const& 
         return;
     auto& session = Sessions[player->GetGUID().GetRawValue()];
     auto const receipt = spell->GetPracticeCast();
-    if (receipt && (receipt->IsConsumed() || !ReceiptMatches(player, session, *receipt) ||
-            receipt->SpellId != spell->GetSpellInfo()->Id))
+    if (receipt && (!ReceiptMatches(player, session, *receipt) || receipt->SpellId != spell->GetSpellInfo()->Id))
         return;
     Practice::OutcomeContext const context{ true, true, true, true, player->GetLevel() };
     auto const award = Practice::HandleOutcome(*player, *spell, profile.Definition,
