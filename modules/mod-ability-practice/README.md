@@ -4,6 +4,34 @@ This module is under development on `codex/ability-practice`. It implements the 
 practice policy, explicit catalog model, bounded original-action accounting and a development observation path.
 The module and addon are staged in this checkout. Nothing is installed or activated in production.
 
+
+## Current state — 5 October 2026
+
+- Native prototype: three Pyromancer class-grant profiles, with draft tuning. The full rollout still targets
+  all 21 CoA classes. Default development and rank-learning flags are off.
+- Outcomes: resolved direct damage/healing, successful interruption, dispel and beneficial-aura steal.
+  Each profile requires its own outcome route. Early preparation records numeric class/spell source, rejects
+  item/aura-triggered sources and preserves one award per cast. Arbitrary unflagged scripts and periodic,
+  summoned/pet and helper attribution still need work.
+- Ranks/storage: cached versioned settings, once-only learned-rank seeding, monotonic writes, exact saved-row
+  restoration scope and stronger-rank learning guards. Corrupt or incompatible progress stays blocked.
+  Normal database save/reload/failure behavior and broader acquisition entitlements remain unqualified.
+- Menu: addon 0.4.10-development; unpublished protocol 4 includes B7 instance identity, T9 kind/session/rules,
+  mandatory C future-cap metadata, packed D parts and F8 unreadable-progress responses. Typed delivery is
+  bounded/paced; saved views/ages/session totals are labeled. Existing schema 1/2/3 formats are preserved.
+- All-class preparation: 847 unapproved source-consistent class-grant definition drafts, including 244 ranked
+  and 603 standalone groups. 179 have common current native outcomes across all 21 classes. Definitions,
+  caps, practice rates and rewards are not automatically approved or installed.
+- Verification on this resumed run: source checks, isolated native builds, C++ lint, whitespace and Lua 5.1
+  syntax compilation only. No behavioral tests or live play checks ran. Earlier harness results below do not
+  qualify the new changes. A validation-scope question is pending; explicit testing authorization is needed.
+- Release work: reviewed all-class definitions, final balance, unranked rewards, remaining attribution and
+  acquisition ownership, isolated runtime acceptance and a coordinated production opportunity compatible
+  with the player's continued live use. No production deployment/restart/configuration/DB/client change.
+
+Later sections are chronological implementation notes. Their older protocol/addon shapes are historical;
+the current unpublished shape above takes precedence. Source checking/building is not release acceptance.
+
 `src/AbilityPracticeProgression.h` provides configurable training bands, progression after a qualifying action,
 exact action forecasts across catch-up/rate changes, cap handling and separate character-level/practice eligibility.
 Definitions contain no final balance constants: proficiency caps and policy bands are supplied by the caller.
@@ -934,3 +962,14 @@ Source/native build passed `.cache/verify-all/20261005-103605/report.json`; C++ 
 Lua5.1 syntax compilations passed. No tests ran. Instant/delayed/item/reagent/aura/triggered/class-change/
 disable transitions, script interaction and original-action attribution remain runtime acceptance.
 Production server/client/database/launcher untouched; all flags default off.
+
+
+## Avoid script-name copies during encounter qualification
+
+The opponent filter now reads ObjectMgr's current script-name reference using Creature::GetScriptId, matching
+Creature::GetScriptName's implementation while avoiding that wrapper's string-by-value copy per check.
+It compares the same two dummy-script names, keeps the reference local and changes no eligibility policy.
+No startup name cache, pointers retained beyond the callback or new DB calls are introduced. No runtime
+performance improvement is claimed. Source/native build passed at
+`.cache/verify-all/20261005-103935/report.json`; C++ lint/whitespace passed. No tests ran; runtime equivalence
+and cost still require qualification. Production untouched.

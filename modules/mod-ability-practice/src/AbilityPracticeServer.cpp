@@ -13,6 +13,7 @@
 #include "Creature.h"
 #include "Formulas.h"
 #include "Log.h"
+#include "ObjectMgr.h"
 #include "Player.h"
 #include "Random.h"
 #include "ScriptMgr.h"
@@ -188,7 +189,7 @@ bool IsDevelopmentOpponent(Player const* player, Unit const* opponent)
         opponent->IsTotem() || opponent->IsCritter() || player->IsFriendlyTo(opponent) ||
         opponent->getLevelForTarget(player) <= Acore::XP::GetGrayLevel(player->GetLevel()))
         return false;
-    std::string const script = opponent->ToCreature()->GetScriptName();
+    std::string const& script = sObjectMgr->GetScriptName(opponent->ToCreature()->GetScriptId());
     return script != "npc_training_dummy" && script != "npc_target_dummy";
 }
 
