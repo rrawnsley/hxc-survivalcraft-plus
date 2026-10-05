@@ -48,6 +48,19 @@ enum class PracticeAvailability
     Fixed = 6
 };
 
+enum class PracticeRoute
+{
+    Unknown = 0,
+    Damage = 1,
+    Healing = 2,
+    Interrupt = 3,
+    Dispel = 4,
+    Steal = 5,
+    Fixed = 6
+};
+
+inline constexpr std::uint32_t HumanPvERuleSet = 1;
+
 struct AbilityView
 {
     std::uint32_t SchemaVersion = MenuSchemaVersion;
@@ -64,6 +77,8 @@ struct AbilityView
     std::optional<RankView> NextRank;
     std::vector<RankView> Ranks;
     SessionPractice Session{ false, 0, 0 };
+    PracticeRoute Route = PracticeRoute::Unknown;
+    std::uint32_t RuleSet = 0;
 };
 
 inline AbilityView BuildAbilityView(AbilityDefinition const& ability, TrainingPolicy policy,

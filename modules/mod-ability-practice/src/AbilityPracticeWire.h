@@ -70,6 +70,10 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
                 return std::nullopt;
         if (includeKinds)
         {
+            if (view.RuleSet != HumanPvERuleSet || view.Route < PracticeRoute::Damage ||
+                view.Route > PracticeRoute::Fixed ||
+                ((view.Kind == AbilityKind::Fixed) != (view.Route == PracticeRoute::Fixed)))
+                return std::nullopt;
             if (view.Kind != AbilityKind::Ranked && view.Kind != AbilityKind::Mastery && view.Kind != AbilityKind::Fixed)
                 return std::nullopt;
             if (view.Kind != AbilityKind::Fixed && view.Availability == PracticeAvailability::Fixed)
@@ -86,7 +90,8 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
             if (!view.Session.Available && (view.Session.Uses || view.Session.ProficiencyGained))
                 return std::nullopt;
             lines.push_back(Detail::WireLine('T', revision, index + 1, static_cast<std::uint32_t>(view.Kind) + 1,
-                view.Session.Available ? 1 : 0, view.Session.Uses, view.Session.ProficiencyGained));
+                view.Session.Available ? 1 : 0, view.Session.Uses, view.Session.ProficiencyGained,
+                static_cast<std::uint32_t>(view.Route), view.RuleSet));
         }
         lines.push_back(Detail::WireLine('A', revision, index + 1, view.AbilityId, view.DisplaySpellId,
             view.LearnedRank, view.State.Proficiency, view.State.Points, view.Cap, view.PointsPerLevel,

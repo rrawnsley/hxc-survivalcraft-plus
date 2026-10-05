@@ -70,6 +70,20 @@ struct MenuSession
 };
 std::unordered_map<std::uint64_t, MenuSession> Sessions;
 
+Practice::PracticeRoute RouteFor(Practice::OutcomeKind outcome)
+{
+    switch (outcome)
+    {
+        case Practice::OutcomeKind::Damage: return Practice::PracticeRoute::Damage;
+        case Practice::OutcomeKind::Healing: return Practice::PracticeRoute::Healing;
+        case Practice::OutcomeKind::Interrupt: return Practice::PracticeRoute::Interrupt;
+        case Practice::OutcomeKind::Dispel: return Practice::PracticeRoute::Dispel;
+        case Practice::OutcomeKind::Steal: return Practice::PracticeRoute::Steal;
+        case Practice::OutcomeKind::None: return Practice::PracticeRoute::Fixed;
+    }
+    return Practice::PracticeRoute::Unknown;
+}
+
 bool HasSupportedOutcome(SpellInfo const* info, Practice::OutcomeKind outcome)
 {
     if (!info)
@@ -304,6 +318,8 @@ bool Send(Player* player, MenuSession const& session)
                 state = migrated->State;
             }
             auto view = Practice::BuildAbilityView(ability, profile.Policy, state, player->GetLevel(), learned, true);
+            view.Route = RouteFor(profile.Outcome);
+            view.RuleSet = Practice::HumanPvERuleSet;
             view.Session = {};
             if (currentProgress != session.Progress.end())
             {

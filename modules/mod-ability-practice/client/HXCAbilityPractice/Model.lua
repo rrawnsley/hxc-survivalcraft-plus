@@ -94,7 +94,8 @@ local function Ability(value, schema)
     end
     local session = schema == 4 and Session(value.session) or nil
     if schema == 4 then
-        if not session or not Integer(value.kind, 1, 3) then return nil end
+        if not session or not Integer(value.kind, 1, 3) or not Integer(value.route, 1, 6)
+            or value.ruleSet ~= 1 or ((value.kind == 3) ~= (value.route == 6)) then return nil end
         if value.kind == 3 then
             if #ranks ~= 1 or value.learnedRank > 1 or value.proficiency ~= 1 or value.cap ~= 1
                 or value.points ~= 0 or value.pointsPerLevel ~= 0 or point.status ~= 0
@@ -102,8 +103,8 @@ local function Ability(value, schema)
                 or (ranks[1].state ~= 1 and ranks[1].state ~= 2 and ranks[1].state ~= 3
                     and ranks[1].state ~= 5) then return nil end
         elseif value.availability == 6 then return nil end
-    elseif value.kind ~= nil or value.session ~= nil then return nil end
-    return { kind = value.kind, session = session, ranks = ranks, abilityId = value.abilityId, displaySpellId = value.displaySpellId,
+    elseif value.kind ~= nil or value.session ~= nil or value.route ~= nil or value.ruleSet ~= nil then return nil end
+    return { kind = value.kind, session = session, route = value.route, ruleSet = value.ruleSet, ranks = ranks, abilityId = value.abilityId, displaySpellId = value.displaySpellId,
         learnedRank = value.learnedRank,
         proficiency = value.proficiency, points = value.points, cap = value.cap, pointsPerLevel = value.pointsPerLevel,
         availability = value.availability, nextPoint = point, nextRank = rank }
@@ -195,4 +196,20 @@ function Model.RankText(rank, fixed)
         return rank.practice.uses .. " qualifying uses remaining under current training rules.\n" .. requirement
     end
     return requirement
+end
+
+function Model.PracticeRules(ability)
+    if Model.IsFixed(ability) then return "This ability has no practice levels. Learn it through your normal ability source." end
+    if ability.ruleSet ~= 1 then return "Practice rules are unavailable in this update. Refresh to request the current rules." end
+    local rules = {
+        [1] = "Deal damage to a level-appropriate PvE opponent with the learned ability.",
+        [2] = "Restore missing health on a friendly unit fighting a live, level-appropriate PvE opponent. Full overhealing does not count.",
+        [3] = "Actually stop a cast by a live, level-appropriate PvE opponent. An idle target does not count.",
+        [4] = "Successfully remove an aura. Offensive dispels require a level-appropriate PvE opponent; defensive dispels require a friendly unit in a qualifying PvE encounter.",
+        [5] = "Successfully steal a beneficial aura from a live, level-appropriate PvE opponent.",
+    }
+    local rule = rules[ability.route]
+    if not rule then return "Practice rules are unavailable in this update." end
+    return rule .. "\n\nOpponents that are too low level, players, player-controlled units, pets, totems and critters do not qualify."
+        .. "\n\nOnly your learned ability casts can count. Triggered casts do not count. One award per cast, regardless of targets or removals. Practice stops at your current cap."
 end

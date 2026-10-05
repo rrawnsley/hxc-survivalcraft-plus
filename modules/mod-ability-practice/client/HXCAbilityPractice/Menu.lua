@@ -50,7 +50,7 @@ local detail = CreateFrame("Frame", nil, panel)
 detail:SetPoint("TOPLEFT", 285, -110)
 detail:SetSize(442, 430)
 local name = Text(detail, "GameFontNormalLarge", 0, 0, 440)
-local rankLabel = Text(detail, "GameFontHighlight", 0, -32, 440)
+local rankLabel = Text(detail, "GameFontHighlight", 0, -32, 400)
 local proficiency = Text(detail, "GameFontNormal", 0, -68, 440)
 local progress = CreateFrame("StatusBar", nil, detail)
 progress:SetPoint("TOPLEFT", 0, -96)
@@ -116,6 +116,29 @@ track:SetScript("OnClick", function()
     tracked[key] = tracked[key] ~= true and true or nil
     Refresh()
 end)
+
+local practiceHelp = CreateFrame("Button", nil, detail, "UIPanelButtonTemplate")
+practiceHelp:SetSize(22, 22)
+practiceHelp:SetPoint("TOPLEFT", 408, -30)
+practiceHelp:SetText("?")
+practiceHelp:SetScript("OnEnter", function(self)
+    if not snapshot or not selectedId or not GameTooltip then return end
+    for _, ability in ipairs(snapshot.abilities) do
+        if ability.abilityId == selectedId then
+            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+            GameTooltip:SetText("What earns practice?")
+            GameTooltip:AddLine(Model.PracticeRules(ability), 1, 1, 1, true)
+            if syncState ~= "current" then
+                GameTooltip:AddLine("These rules are from your saved view.", 1, 0.82, 0, true)
+            end
+            GameTooltip:Show()
+            return
+        end
+    end
+end)
+local function HidePracticeTooltip() if GameTooltip then GameTooltip:Hide() end end
+practiceHelp:SetScript("OnLeave", HidePracticeTooltip)
+practiceHelp:SetScript("OnHide", HidePracticeTooltip)
 
 local function RenderDetail(ability)
     if not ability then detail:Hide(); return end

@@ -705,3 +705,24 @@ Source/native build passed at `.cache/verify-all/20261005-092402/report.json`; f
 passed at `.cache/verify-all/20261005-092728/report.json`. C++ lint and whitespace passed. No tests ran.
 Actual login/restoration/default/skill/helper interactions, nested/thread isolation and feature-off equivalence
 remain runtime acceptance. No production server, data or active client was changed.
+
+## Versioned per-ability practice explanations
+
+Addon 0.4.4-development adds a selected-ability help tooltip. Unreleased protocol 4 T now has nine fields:
+T|revision|index|kind|available|uses|proficiencyGained|route|ruleSet. Earlier development T shapes are superseded;
+none was published. Native Send maps the validated profile outcome explicitly to stable routes 1..6 and stamps
+HumanPvERuleSet=1. Unknown rules/routes or fixed/type mismatches refuse typed encoding and client validation.
+The pure builder defaults rules/route unknown; it cannot invent a rule for an arbitrary definition.
+
+The tooltip describes the selected current route: effective damage, effective encounter healing, actual
+interrupt, native successful dispel or beneficial-aura steal; fixed entries say no practice. It explains the
+shared low-level/player-controlled/pet/totem/critter opponent exclusions, learned/triggered-cast rules,
+once-per-cast accounting and cap. Saved views are marked explicitly; older formats with unknown rules show
+unavailable rather than guessing. The tooltip closes when its owner hides. Recognized dummy-script exclusion
+is still a native qualification rule; the explanatory text does not enumerate every creature-specific filter.
+This is the current human/PvE development rule set, not approval of final bot/PvP/training policy.
+
+Source/native build passed at `.cache/verify-all/20261005-093333/report.json`; final addon source checks passed
+at `.cache/verify-all/20261005-093503/report.json`. C++ lint, whitespace and all five Lua 5.1 syntax compilations
+passed. No tests ran. Rule transport, tooltip accuracy against real outcomes, rendering and skin/owner behavior
+remain runtime acceptance. No active client/server/launcher changes occurred.
