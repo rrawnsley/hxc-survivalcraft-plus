@@ -82,20 +82,21 @@ inline std::vector<std::string> PackTypedMessages(std::span<std::string const> l
 }
 
 inline std::optional<std::string> EncodeMenuProgressFailure(std::uint32_t revision, std::uint32_t classId,
-    std::uint32_t abilityId, std::uint32_t spellId)
+    std::uint32_t abilityId, std::uint32_t spellId, std::uint64_t generation)
 {
-    if (!revision || !classId || classId > 255 || !abilityId || !spellId)
+    if (!revision || !classId || classId > 255 || !abilityId || !spellId || !generation)
         return std::nullopt;
-    return Detail::WireLine('F', TypedMenuSchemaVersion, revision, classId, abilityId, spellId, 1);
+    return Detail::WireLine('F', TypedMenuSchemaVersion, revision, classId, abilityId, spellId, 1, generation);
 }
 
 inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t classId,
     std::uint32_t characterLevel, std::uint32_t revision, std::span<AbilityView const> abilities,
-    std::optional<SessionPractice> session = std::nullopt, bool includeRoadmap = false, bool includeKinds = false)
+    std::optional<SessionPractice> session = std::nullopt, bool includeRoadmap = false, bool includeKinds = false,
+    std::uint64_t generation = 0)
 {
     if (!classId || classId > 255 || !characterLevel || characterLevel > 255 || !revision || abilities.size() > 512)
         return std::nullopt;
-    if ((includeRoadmap && !session) || (includeKinds && !includeRoadmap))
+    if ((includeRoadmap && !session) || (includeKinds && (!includeRoadmap || !generation)))
         return std::nullopt;
     std::size_t rankCount = 0;
     if (includeRoadmap)
@@ -113,6 +114,8 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
         includeRoadmap ? RoadmapMenuSchemaVersion :
         session ? SessionMenuSchemaVersion : MenuSchemaVersion,
         revision, classId, characterLevel, abilities.size()));
+    if (includeKinds)
+        lines.front() += '|' + std::to_string(generation);
     for (std::size_t index = 0; index < abilities.size(); ++index)
     {
         AbilityView const& view = abilities[index];

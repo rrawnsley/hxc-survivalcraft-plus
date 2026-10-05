@@ -871,3 +871,29 @@ with a current common outcome. Output `.cache/ability-practice/profile-drafts.js
 Final source checks passed `.cache/verify-all/20261005-102154/report.json` (initial102105); Python syntax and
 whitespace passed. No tests ran. Provenance-rejection paths and eventual reviewed-profile import remain
 qualification; export is a planning/source artifact only. Production remains untouched.
+
+
+## Server-instance-scoped menu revisions
+
+Native observation initializes a nonzero64-bit server-instance nonce at enabled startup using the existing
+urand uint32 distribution; it stays fixed across config reloads. This is an ordering identifier, not an auth
+secret or a persisted character value. Unreleased protocol4 B gains a seventh generation field and F gains
+an eighth generation field. Typed encoding refuses zero identity; older formats preserve their shapes.
+
+Addon0.4.9-development validates the identity as a canonical nonzero uint64 decimal string, preserving exact
+values beyond Lua's integer range. Header/failure stale checks use revision ordering within the same identity;
+a new instance permits a low revision and discards old pending assembly. Transport and menu reset their
+revision floors on an accepted new identity, retain the same-class saved view/last-success age and mark it
+refreshing. Only a full valid snapshot or explicit failure completes the new response. Class changes still
+clear incompatible saved data. Same-instance stale updates remain refused. Login resets the client identity;
+config reload does not reset it. Saved class/ability session totals are explicitly labeled saved until current.
+
+This addresses the source-level restart counter-reset issue; no server restart/reconnect was performed.
+Random nonce collision is theoretically possible; no stronger uniqueness or authentication property is claimed.
+Protocol4's earlier development shapes were never published and are superseded. D packed records inherit the
+current header's instance context. No character progress, counters, learning or DB schema changed.
+
+Source/native build passed `.cache/verify-all/20261005-102712/report.json`; final addon source checks passed
+`.cache/verify-all/20261005-102842/report.json`. C++ lint/whitespace/five Lua5.1 syntax compilations passed.
+No tests ran. Real restart/reconnect, new-instance failure first, partial assembly, same-instance stale/class/
+reload behavior, exact64-bit identities and saved labels require runtime acceptance. Production untouched.

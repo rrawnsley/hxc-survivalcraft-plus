@@ -2,6 +2,7 @@ local PREFIX = "HXAP"
 local API = HXCAbilityPractice
 local Wire = HXCAbilityPracticeWire
 local revision = 0
+local generation
 local nextRequest = 0
 local deadline
 local nextPoll = 0
@@ -28,6 +29,7 @@ listener:SetScript("OnEvent", function(_, event, prefix, message, channel, sende
         Wire.Reset()
         API.Reset()
         revision = 0
+        generation = nil
         nextRequest = 0
         deadline = nil
         nextPoll = 0
@@ -36,7 +38,14 @@ listener:SetScript("OnEvent", function(_, event, prefix, message, channel, sende
         return
     end
     if prefix ~= PREFIX or channel ~= "WHISPER" or sender ~= UnitName("player") then return end
-    local snapshot, reason, failure = Wire.Accept(message, GetTime(), revision)
+    local snapshot, reason, failure = Wire.Accept(message, GetTime(), revision, generation)
+    local incoming = snapshot and snapshot.generation or failure and failure.generation
+        or (not reason and Wire.GetGeneration())
+    if incoming and incoming ~= generation then
+        API.BeginServerGeneration(incoming)
+        generation = incoming
+        revision = 0
+    end
     if snapshot and API.ApplyServerSnapshot(snapshot) then
         revision = snapshot.revision
         deadline = nil

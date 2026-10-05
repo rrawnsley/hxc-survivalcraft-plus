@@ -14,6 +14,7 @@
 #include "Formulas.h"
 #include "Log.h"
 #include "Player.h"
+#include "Random.h"
 #include "ScriptMgr.h"
 #include "Spell.h"
 #include "SpellMgr.h"
@@ -47,6 +48,7 @@ bool RankRequested = false;
 std::atomic<bool> RankActive = false;
 std::atomic<bool> Active = false;
 std::uint32_t Revision = 0;
+std::uint64_t ServerGeneration = 0;
 using Clock = std::chrono::steady_clock;
 constexpr auto RefreshInterval = std::chrono::seconds(2);
 constexpr auto InterestDuration = std::chrono::seconds(30);
@@ -363,7 +365,7 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
                     if (session.Protocol != Practice::TypedMenuSchemaVersion)
                         return false;
                     auto const failure = Practice::EncodeMenuProgressFailure(++Revision, ability.ClassId,
-                        ability.AbilityId, ability.Ranks.front().SpellId);
+                        ability.AbilityId, ability.Ranks.front().SpellId, ServerGeneration);
                     if (!failure)
                         return false;
                     QueueDelivery(session, player->getClass(), { *failure }, now);
@@ -388,7 +390,8 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
     auto messages = Practice::EncodeMenuSnapshot(player->getClass(), player->GetLevel(), ++Revision, views,
         session.Protocol >= Practice::SessionMenuSchemaVersion
             ? std::optional<Practice::SessionPractice>(progress) : std::nullopt,
-        session.Protocol >= Practice::RoadmapMenuSchemaVersion, session.Protocol == Practice::TypedMenuSchemaVersion);
+        session.Protocol >= Practice::RoadmapMenuSchemaVersion, session.Protocol == Practice::TypedMenuSchemaVersion,
+        ServerGeneration);
     if (!messages || messages->size() > MaxQueuedMessages)
         return false;
     if (session.Protocol == Practice::TypedMenuSchemaVersion)
@@ -528,6 +531,9 @@ public:
             LOG_INFO("module.ability_practice", "Development observation disabled");
             return;
         }
+        if (!ServerGeneration)
+            ServerGeneration = (static_cast<std::uint64_t>(urand(0, std::numeric_limits<std::uint32_t>::max())) << 32) |
+                urand(1, std::numeric_limits<std::uint32_t>::max());
         ProfileLookup.emplace(Profiles);
         Ready = ProfileLookup->IsValid();
         for (Practice::AbilityProfile const& profile : Profiles)

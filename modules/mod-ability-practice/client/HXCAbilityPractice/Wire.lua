@@ -29,7 +29,11 @@ function Wire.GetDeadline()
     return pending.started + 5
 end
 
-local function Accept(message, now, currentRevision)
+function Wire.GetGeneration()
+    return pending and pending.generation or nil
+end
+
+local function Accept(message, now, currentRevision, currentGeneration)
     if type(now) ~= "number" or now ~= now or now == math.huge or now == -math.huge then
         return Reject("Invalid clock")
     end
@@ -37,29 +41,35 @@ local function Accept(message, now, currentRevision)
     if not fields then return Reject("Invalid progress message") end
     local kind = fields[1]
     if kind == "F" then
-        if #fields ~= 7 then return Reject("Invalid saved-progress issue") end
+        if #fields ~= 8 then return Reject("Invalid saved-progress issue") end
         local failure, reason = Model.ValidateFailure({ schemaVersion = tonumber(fields[2]),
             revision = tonumber(fields[3]), classId = tonumber(fields[4]), abilityId = tonumber(fields[5]),
-            spellId = tonumber(fields[6]), issueCode = tonumber(fields[7]) })
+            spellId = tonumber(fields[6]), issueCode = tonumber(fields[7]), generation = fields[8] })
         if not failure then return Reject(reason) end
-        if failure.revision <= (currentRevision or 0) or (pending and failure.revision < pending.revision) then
+        local floor = failure.generation == currentGeneration and (currentRevision or 0) or 0
+        if failure.revision <= floor or (pending and pending.generation == failure.generation
+            and failure.revision < pending.revision) then
             return nil, "Stale saved-progress issue"
         end
         pending = nil
         return nil, nil, failure
     end
     if kind == "B" then
-        if #fields ~= 6 then return Reject("Invalid snapshot header") end
+        if #fields ~= 6 and #fields ~= 7 then return Reject("Invalid snapshot header") end
         local schema, revision, classId, level, count = tonumber(fields[2]), tonumber(fields[3]),
             tonumber(fields[4]), tonumber(fields[5]), tonumber(fields[6])
         if (schema ~= 1 and schema ~= 2 and schema ~= 3 and schema ~= 4)
             or revision < 1 or revision > 4294967295 or classId < 1 or classId > 255
             or level < 1 or level > 255 or count > 512 then return Reject("Unsupported snapshot header") end
-        if revision <= (currentRevision or 0) or (pending and revision <= pending.revision) then
+        local generation = schema == 4 and fields[7] or nil
+        if (schema == 4 and (#fields ~= 7 or not Model.ValidGeneration(generation)))
+            or (schema ~= 4 and #fields ~= 6) then return Reject("Invalid server instance identity") end
+        local floor = generation and generation ~= currentGeneration and 0 or (currentRevision or 0)
+        if revision <= floor or (pending and pending.generation == generation and revision <= pending.revision) then
             return nil, "Stale snapshot header"
         end
         pending = { schemaVersion = schema, revision = revision, classId = classId, characterLevel = level,
-            count = count, started = now, lastPart = now, parts = {}, rankCount = 0, receivedRanks = 0 }
+            count = count, generation = generation, started = now, lastPart = now, parts = {}, rankCount = 0, receivedRanks = 0 }
         return nil
     end
     if not pending then return nil, "No snapshot in progress" end
@@ -69,7 +79,8 @@ local function Accept(message, now, currentRevision)
         if #fields ~= 2 then return Reject("Invalid snapshot end") end
         if pending.schemaVersion >= 2 and not pending.session then return Reject("Missing session progress") end
         local snapshot = { schemaVersion = pending.schemaVersion, revision = pending.revision,
-            classId = pending.classId, characterLevel = pending.characterLevel, session = pending.session, abilities = {} }
+            classId = pending.classId, characterLevel = pending.characterLevel, generation = pending.generation,
+            session = pending.session, abilities = {} }
         for index = 1, pending.count do
             local part = pending.parts[index]
             if not part or not part.A or not part.P or not part.R then return Reject("Incomplete snapshot") end
@@ -169,7 +180,7 @@ local function Accept(message, now, currentRevision)
     return nil
 end
 
-local function AcceptPacked(message, now, currentRevision)
+local function AcceptPacked(message, now, currentRevision, currentGeneration)
     if type(now) ~= "number" or now ~= now or now == math.huge or now == -math.huge then
         return Reject("Invalid clock")
     end
@@ -188,18 +199,18 @@ local function AcceptPacked(message, now, currentRevision)
     end
     if #parts == 0 then return Reject("Empty packed progress message") end
     for _, part in ipairs(parts) do
-        local snapshot, reason, failure = Accept(part, now, currentRevision)
+        local snapshot, reason, failure = Accept(part, now, currentRevision, currentGeneration)
         if snapshot or failure or reason then return Reject(reason or "Unexpected packed progress result") end
     end
     return nil
 end
 
-function Wire.Accept(message, now, currentRevision)
+function Wire.Accept(message, now, currentRevision, currentGeneration)
     local snapshot, reason, failure
     if type(message) == "string" and string.sub(message, 1, 2) == "D|" then
-        snapshot, reason, failure = AcceptPacked(message, now, currentRevision)
+        snapshot, reason, failure = AcceptPacked(message, now, currentRevision, currentGeneration)
     else
-        snapshot, reason, failure = Accept(message, now, currentRevision)
+        snapshot, reason, failure = Accept(message, now, currentRevision, currentGeneration)
     end
     if pending and not reason then pending.lastPart = now end
     return snapshot, reason, failure

@@ -3,6 +3,7 @@ local API = HXCAbilityPractice
 local Model = HXCAbilityPracticeModel
 local snapshot, selectedId, receivedAt, serverFailure
 local serverRevision = 0
+local serverGeneration
 local syncState = "waiting"
 local tab = "skills"
 local offset = 0
@@ -163,7 +164,8 @@ local function RenderDetail(ability)
     local fixed = Model.IsFixed(ability)
     local session = ability.session
     abilitySessionText:SetText(fixed and "" or (session and session.available and
-        ("This session: " .. session.uses .. " practice uses\n+" .. session.proficiencyGained .. " proficiency")
+        ((syncState == "current" and "This session: " or "Saved session: ") .. session.uses
+            .. " practice uses\n+" .. session.proficiencyGained .. " proficiency")
         or "Ability session totals unavailable"))
     local requiredLevel
     for _, rank in ipairs(ability.ranks or {}) do
@@ -231,7 +233,8 @@ end
 Refresh = function()
     visible = {}
     local session = snapshot and snapshot.session
-    sessionText:SetText(session and session.available and ("Class skills this session: " .. session.uses
+    sessionText:SetText(session and session.available and
+        ((syncState == "current" and "Class skills this session: " or "Saved class session: ") .. session.uses
         .. " uses that earned practice - +" .. session.proficiencyGained
         .. " proficiency") or "Session totals unavailable")
     UpdateSubtitle(GetTime())
@@ -342,10 +345,22 @@ searchBox:SetScript("OnEnterPressed", searchBox.ClearFocus)
 searchBox:SetText("")
 panel:SetScript("OnHide", function() searchBox:ClearFocus() end)
 
+function API.BeginServerGeneration(value)
+    if not Model.ValidGeneration(value) or value == serverGeneration then return false end
+    serverGeneration = value
+    serverRevision = 0
+    serverFailure = nil
+    syncState = "waiting"
+    Refresh()
+    return true
+end
+
 function API.ApplySnapshot(value)
     local validated, reason = Model.Validate(value)
     if not validated then return false, reason end
-    if validated.revision <= serverRevision or (snapshot and validated.classId ~= snapshot.classId) then
+    if snapshot and validated.classId ~= snapshot.classId then return false, "Mismatched progress update" end
+    if validated.generation then API.BeginServerGeneration(validated.generation) end
+    if validated.revision <= serverRevision then
         return false, "Stale or mismatched progress update"
     end
     snapshot = validated
@@ -360,7 +375,8 @@ end
 function API.ApplyServerSnapshot(value)
     local validated, reason = Model.Validate(value)
     if not validated then return false, reason end
-    if validated.revision <= serverRevision then return false, "Stale progress update" end
+    if (not validated.generation or validated.generation == serverGeneration)
+        and validated.revision <= serverRevision then return false, "Stale progress update" end
     local previousClass = snapshot and snapshot.classId or (serverFailure and serverFailure.classId)
     if previousClass and validated.classId ~= previousClass then API.Reset() end
     return API.ApplySnapshot(validated)
@@ -369,9 +385,12 @@ end
 function API.ApplyServerFailure(value)
     local validated, reason = Model.ValidateFailure(value)
     if not validated then return false, reason end
-    if validated.revision <= serverRevision then return false, "Stale saved-progress issue" end
+    if validated.generation == serverGeneration and validated.revision <= serverRevision then
+        return false, "Stale saved-progress issue"
+    end
     local previousClass = snapshot and snapshot.classId or (serverFailure and serverFailure.classId)
     if previousClass and validated.classId ~= previousClass then API.Reset() end
+    API.BeginServerGeneration(validated.generation)
     serverFailure = validated
     serverRevision = validated.revision
     syncState = "issue"
@@ -405,6 +424,7 @@ function API.Reset()
     snapshot = nil
     serverFailure = nil
     serverRevision = 0
+    serverGeneration = nil
     receivedAt = nil
     syncState = "waiting"
     selectedId = nil

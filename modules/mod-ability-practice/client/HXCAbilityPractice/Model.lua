@@ -5,20 +5,25 @@ local function Integer(value, minimum, maximum)
     return type(value) == "number" and value >= minimum and value <= maximum and value == math.floor(value)
 end
 
-function Model.ValidateFailure(value)
-    if type(value) ~= "table" or value.schemaVersion ~= 4
-        or not Integer(value.revision, 1, 4294967295) or not Integer(value.classId, 1, 255)
-        or not Integer(value.abilityId, 1, 4294967295) or not Integer(value.spellId, 1, 4294967295)
-        or value.issueCode ~= 1 then return nil, "Invalid saved-progress issue" end
-    return { schemaVersion = 4, revision = value.revision, classId = value.classId,
-        abilityId = value.abilityId, spellId = value.spellId, issueCode = 1 }
-end
-
 local function Counter(value)
     return type(value) == "string" and string.match(value, "^%d+$") and #value <= 20
         and (#value == 1 or string.sub(value, 1, 1) ~= "0")
         and (#value < 20 or value <= "18446744073709551615")
 end
+
+function Model.ValidGeneration(value)
+    return Counter(value) and value ~= "0"
+end
+
+function Model.ValidateFailure(value)
+    if type(value) ~= "table" or value.schemaVersion ~= 4
+        or not Integer(value.revision, 1, 4294967295) or not Integer(value.classId, 1, 255)
+        or not Integer(value.abilityId, 1, 4294967295) or not Integer(value.spellId, 1, 4294967295)
+        or not Model.ValidGeneration(value.generation) or value.issueCode ~= 1 then return nil, "Invalid saved-progress issue" end
+    return { schemaVersion = 4, revision = value.revision, classId = value.classId,
+        abilityId = value.abilityId, spellId = value.spellId, issueCode = 1, generation = value.generation }
+end
+
 
 local function Session(value)
     if type(value) ~= "table" or type(value.available) ~= "boolean"
@@ -138,11 +143,14 @@ function Model.Validate(snapshot)
         or not Integer(snapshot.revision, 1, 4294967295) or not Integer(snapshot.classId, 1, 255)
         or not Integer(snapshot.characterLevel, 1, 255) or type(snapshot.abilities) ~= "table"
         or #snapshot.abilities > 512 then return nil, "Unsupported or incomplete progress update" end
+    if snapshot.schemaVersion == 4 and not Model.ValidGeneration(snapshot.generation) then
+        return nil, "Missing server instance identity"
+    end
     local session = snapshot.schemaVersion >= 2 and Session(snapshot.session) or nil
     if snapshot.schemaVersion >= 2 and not session then return nil, "Incomplete session progress" end
     if snapshot.schemaVersion == 1 and snapshot.session ~= nil then return nil, "Unexpected session progress" end
     local result = { schemaVersion = snapshot.schemaVersion, session = session, revision = snapshot.revision,
-        classId = snapshot.classId,
+        classId = snapshot.classId, generation = snapshot.schemaVersion == 4 and snapshot.generation or nil,
         characterLevel = snapshot.characterLevel, abilities = {} }
     local seen = {}
     local rankCount = 0
