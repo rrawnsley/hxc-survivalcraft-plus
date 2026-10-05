@@ -34,6 +34,7 @@ struct OutcomeAward
     OutcomeStatus Status = OutcomeStatus::Invalid;
     StoredProgress Record;
     std::uint32_t AwardedPoints = 0;
+    std::uint32_t ProficiencyGained = 0;
 };
 
 template<typename PlayerType, typename SpellType>
@@ -76,7 +77,7 @@ OutcomeAward HandleOutcome(PlayerType& player, SpellType& spell, AbilityDefiniti
         return { OutcomeStatus::StateConflict, {}, 0 };
     spell.SetScriptValue(PracticeAwardScriptKey, 1);
     return { award.Status == AwardStatus::Applied ? OutcomeStatus::Awarded : OutcomeStatus::Capped,
-        record, award.AwardedPoints };
+        record, award.AwardedPoints, award.State.Proficiency - migrated->State.Proficiency };
 }
 }
 

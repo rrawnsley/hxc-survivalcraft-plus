@@ -35,6 +35,8 @@ struct MenuSession
     Clock::time_point LastRequest{};
     Clock::time_point NextRefresh{};
     bool Dirty = true;
+    std::uint32_t Protocol = Practice::MenuSchemaVersion;
+    Practice::SessionPractice Progress;
 };
 std::unordered_map<std::uint64_t, MenuSession> Sessions;
 
@@ -57,7 +59,7 @@ std::vector<std::uint32_t> Learned(Player const* player, Practice::AbilityDefini
     return spells;
 }
 
-bool Send(Player* player)
+bool Send(Player* player, MenuSession const& session)
 {
     if (!Affects(player) || Revision == std::numeric_limits<std::uint32_t>::max())
         return false;
@@ -73,7 +75,9 @@ bool Send(Player* player)
         views.push_back(Practice::BuildAbilityView(ability, Dev::Policy, migrated->State,
             player->GetLevel(), learned, true));
     }
-    auto const messages = Practice::EncodeMenuSnapshot(Dev::ClassId, player->GetLevel(), ++Revision, views);
+    auto const messages = Practice::EncodeMenuSnapshot(Dev::ClassId, player->GetLevel(), ++Revision, views,
+        session.Protocol == Practice::SessionMenuSchemaVersion
+            ? std::optional<Practice::SessionPractice>(session.Progress) : std::nullopt);
     if (!messages)
         return false;
     for (std::string const& message : *messages)
@@ -90,7 +94,7 @@ void Refresh(Player* player, MenuSession& session, Clock::time_point now)
     if (!session.Dirty || now < session.NextRefresh)
         return;
     session.NextRefresh = now + RefreshInterval;
-    if (Send(player))
+    if (Send(player, session))
         session.Dirty = false;
 }
 
@@ -215,13 +219,14 @@ public:
         std::lock_guard lock(Mutex);
         if (!Affects(player))
             return true;
-        if (receiver != player || message != "HXAP\tHELLO|1")
+        if (receiver != player || (message != "HXAP\tHELLO|1" && message != "HXAP\tHELLO|2"))
             return false;
         auto const now = Clock::now();
         auto& session = Sessions[player->GetGUID().GetRawValue()];
         if (now - session.LastRequest < RefreshInterval)
             return false;
         session.LastRequest = now;
+        session.Protocol = message == "HXAP\tHELLO|2" ? Practice::SessionMenuSchemaVersion : Practice::MenuSchemaVersion;
         session.Dirty = true;
         Refresh(player, session, now);
         return false;
@@ -257,6 +262,7 @@ public:
         auto const award = Practice::HandleOutcome(*player, *spell, *ability, Dev::Policy, Dev::DefinitionVersion, context);
         if (award.Status == Practice::OutcomeStatus::Awarded)
         {
+            found->second.Progress.RecordAward(award.ProficiencyGained);
             found->second.Dirty = true;
             Refresh(player, found->second, Clock::now());
         }

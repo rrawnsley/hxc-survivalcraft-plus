@@ -5,6 +5,22 @@ local function Integer(value, minimum, maximum)
     return type(value) == "number" and value >= minimum and value <= maximum and value == math.floor(value)
 end
 
+local function Counter(value)
+    return type(value) == "string" and string.match(value, "^%d+$") and #value <= 20
+        and (#value == 1 or string.sub(value, 1, 1) ~= "0")
+        and (#value < 20 or value <= "18446744073709551615")
+end
+
+local function Session(value)
+    if type(value) ~= "table" or type(value.available) ~= "boolean"
+        or not Counter(value.uses) or not Counter(value.proficiencyGained) then return nil end
+    if not value.available and (value.uses ~= "0" or value.proficiencyGained ~= "0") then
+        return nil
+    end
+    return { available = value.available, uses = value.uses,
+        proficiencyGained = value.proficiencyGained }
+end
+
 local function Forecast(value)
     if type(value) ~= "table" or not Integer(value.status, 0, 3) then return nil end
     if type(value.uses) ~= "string" or not string.match(value.uses, "^%d+$") then return nil end
@@ -48,11 +64,15 @@ local function Ability(value)
 end
 
 function Model.Validate(snapshot)
-    if type(snapshot) ~= "table" or snapshot.schemaVersion ~= 1
+    if type(snapshot) ~= "table" or (snapshot.schemaVersion ~= 1 and snapshot.schemaVersion ~= 2)
         or not Integer(snapshot.revision, 1, 4294967295) or not Integer(snapshot.classId, 1, 255)
         or not Integer(snapshot.characterLevel, 1, 255) or type(snapshot.abilities) ~= "table"
         or #snapshot.abilities > 512 then return nil, "Unsupported or incomplete progress update" end
-    local result = { schemaVersion = 1, revision = snapshot.revision, classId = snapshot.classId,
+    local session = snapshot.schemaVersion == 2 and Session(snapshot.session) or nil
+    if snapshot.schemaVersion == 2 and not session then return nil, "Incomplete session progress" end
+    if snapshot.schemaVersion == 1 and snapshot.session ~= nil then return nil, "Unexpected session progress" end
+    local result = { schemaVersion = snapshot.schemaVersion, session = session, revision = snapshot.revision,
+        classId = snapshot.classId,
         characterLevel = snapshot.characterLevel, abilities = {} }
     local seen = {}
     local count = 0

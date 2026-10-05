@@ -34,7 +34,7 @@ function Wire.Accept(message, now, currentRevision)
         if #fields ~= 6 then return Reject("Invalid snapshot header") end
         local schema, revision, classId, level, count = tonumber(fields[2]), tonumber(fields[3]),
             tonumber(fields[4]), tonumber(fields[5]), tonumber(fields[6])
-        if schema ~= 1 or revision < 1 or revision > 4294967295 or classId < 1 or classId > 255
+        if (schema ~= 1 and schema ~= 2) or revision < 1 or revision > 4294967295 or classId < 1 or classId > 255
             or level < 1 or level > 255 or count > 512 then return Reject("Unsupported snapshot header") end
         if revision <= (currentRevision or 0) or (pending and revision <= pending.revision) then
             return nil, "Stale snapshot header"
@@ -48,8 +48,9 @@ function Wire.Accept(message, now, currentRevision)
     if tonumber(fields[2]) ~= pending.revision then return nil, "Unrelated snapshot message" end
     if kind == "E" then
         if #fields ~= 2 then return Reject("Invalid snapshot end") end
+        if pending.schemaVersion == 2 and not pending.session then return Reject("Missing session progress") end
         local snapshot = { schemaVersion = pending.schemaVersion, revision = pending.revision,
-            classId = pending.classId, characterLevel = pending.characterLevel, abilities = {} }
+            classId = pending.classId, characterLevel = pending.characterLevel, session = pending.session, abilities = {} }
         for index = 1, pending.count do
             local part = pending.parts[index]
             if not part or not part.A or not part.P or not part.R then return Reject("Incomplete snapshot") end
@@ -60,6 +61,13 @@ function Wire.Accept(message, now, currentRevision)
         end
         pending = nil
         return Model.Validate(snapshot)
+    end
+    if kind == "S" then
+        if pending.schemaVersion ~= 2 or pending.session or #fields ~= 5
+            or (fields[3] ~= "0" and fields[3] ~= "1") then return Reject("Invalid session progress") end
+        pending.session = { available = fields[3] == "1", uses = fields[4],
+            proficiencyGained = fields[5] }
+        return nil
     end
     local index = tonumber(fields[3])
     if not index or index < 1 or index > pending.count then return Reject("Invalid ability index") end

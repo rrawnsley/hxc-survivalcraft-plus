@@ -3,7 +3,7 @@ local event = HXCAbilityPracticeListener.scripts.OnEvent
 MockTime = 0
 assert(API.Request())
 assert(#MockMessages == 1)
-assert(MockMessages[1][1] == "HXAP" and MockMessages[1][2] == "HELLO|1")
+assert(MockMessages[1][1] == "HXAP" and MockMessages[1][2] == "HELLO|2")
 assert(MockMessages[1][3] == "WHISPER" and MockMessages[1][4] == "TestPlayer")
 assert(not API.Request())
 MockTime = 2

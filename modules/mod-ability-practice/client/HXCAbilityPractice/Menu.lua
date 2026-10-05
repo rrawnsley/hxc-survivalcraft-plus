@@ -34,7 +34,8 @@ end
 local title = Text(panel, "GameFontNormalLarge", 28, -24, 610)
 title:SetText("Abilities & Practice")
 local subtitle = Text(panel, "GameFontHighlightSmall", 28, -52, 660)
-local footer = Text(panel, "GameFontHighlightSmall", 28, -446, 704)
+local footer = Text(panel, "GameFontHighlightSmall", 28, -462, 704)
+local sessionText = Text(panel, "GameFontHighlightSmall", 28, -438, 704)
 local close = CreateFrame("Button", nil, panel, "UIPanelCloseButton")
 close:SetPoint("TOPRIGHT", -6, -6)
 local detail = CreateFrame("Frame", nil, panel)
@@ -86,6 +87,10 @@ end
 
 local function Refresh()
     visible = {}
+    local session = snapshot and snapshot.session
+    sessionText:SetText(session and session.available and ("This session: " .. session.uses
+        .. " uses that earned practice - +" .. session.proficiencyGained
+        .. " proficiency") or "Session totals unavailable")
     if not snapshot then
         subtitle:SetText(syncState == "unavailable" and "Server progress is unavailable. Open this menu to retry."
             or "Waiting for your server progress...")

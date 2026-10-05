@@ -31,13 +31,15 @@ std::string WireLine(char kind, Values... values)
 }
 
 inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t classId,
-    std::uint32_t characterLevel, std::uint32_t revision, std::span<AbilityView const> abilities)
+    std::uint32_t characterLevel, std::uint32_t revision, std::span<AbilityView const> abilities,
+    std::optional<SessionPractice> session = std::nullopt)
 {
     if (!classId || classId > 255 || !characterLevel || characterLevel > 255 || !revision || abilities.size() > 512)
         return std::nullopt;
     std::vector<std::string> lines;
-    lines.reserve(abilities.size() * 3 + 2);
-    lines.push_back(Detail::WireLine('B', MenuSchemaVersion, revision, classId, characterLevel, abilities.size()));
+    lines.reserve(abilities.size() * 3 + 3);
+    lines.push_back(Detail::WireLine('B', session ? SessionMenuSchemaVersion : MenuSchemaVersion,
+        revision, classId, characterLevel, abilities.size()));
     for (std::size_t index = 0; index < abilities.size(); ++index)
     {
         AbilityView const& view = abilities[index];
@@ -71,6 +73,13 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
         }
         else
             lines.push_back(Detail::WireLine('R', revision, index + 1, 0));
+    }
+    if (session)
+    {
+        if (!session->Available && (session->Uses || session->ProficiencyGained))
+            return std::nullopt;
+        lines.push_back(Detail::WireLine('S', revision, session->Available ? 1 : 0,
+            session->Uses, session->ProficiencyGained));
     }
     lines.push_back(Detail::WireLine('E', revision));
     for (std::string const& line : lines)

@@ -16,7 +16,7 @@ function API.Request()
     deadline = now + 6
     nextPoll = now + 10
     API.SetSyncState("waiting")
-    SendAddonMessage(PREFIX, "HELLO|1", "WHISPER", player)
+    SendAddonMessage(PREFIX, "HELLO|2", "WHISPER", player)
     return true
 end
 

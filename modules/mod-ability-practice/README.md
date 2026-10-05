@@ -192,3 +192,19 @@ This does not implement class-switch resynchronization, session totals or the fu
 
 Native source/build passed at `.cache/verify-all/20261005-042638/report.json`; the addon files compile as Lua 5.1
 syntax. Timing, disconnect/reconnect, load/forget ordering and in-game presentation still need runtime acceptance.
+
+## Authoritative session totals
+
+Version-two snapshots add one mandatory `S|revision|available|uses|proficiencyGained` record before the end frame.
+The addon validates decimal uint64 strings without converting them to floating-point numbers and refuses duplicate,
+missing or malformed session parts before applying the complete snapshot. Version-one requests still receive the
+original format; the new addon requests version two and can read both versions. Existing abilities retain their
+version-one record layout. The existing transport fixture's expected request was updated; no new cases were added.
+
+Session totals count only original casts which actually earned practice and proficiency gained after migration.
+Starting proficiency seeded from learned ranks, capped uses and repeated hits do not increase them. Totals clear
+on login/logout and are not persisted. Overflow explicitly makes totals unavailable rather than wrapping or showing
+an exact saturated value. These totals currently cover only the three reviewed development abilities.
+
+Source/native build passed at `.cache/verify-all/20261005-043328/report.json`; C++ lint, whitespace and Lua 5.1
+syntax compilation passed. Protocol round-trip, counter behavior and gameplay acceptance remain unqualified.

@@ -3,11 +3,36 @@
 
 #include "AbilityPracticeCatalog.h"
 
+#include <cstdint>
+#include <limits>
 #include <optional>
 
 namespace AbilityPractice
 {
 inline constexpr std::uint32_t MenuSchemaVersion = 1;
+inline constexpr std::uint32_t SessionMenuSchemaVersion = 2;
+
+struct SessionPractice
+{
+    bool Available = true;
+    std::uint64_t Uses = 0;
+    std::uint64_t ProficiencyGained = 0;
+
+    void RecordAward(std::uint32_t proficiencyGained)
+    {
+        if (!Available)
+            return;
+        constexpr auto maximum = std::numeric_limits<std::uint64_t>::max();
+        if (Uses == maximum || ProficiencyGained > maximum - proficiencyGained)
+        {
+            Available = false;
+            Uses = ProficiencyGained = 0;
+            return;
+        }
+        ++Uses;
+        ProficiencyGained += proficiencyGained;
+    }
+};
 
 enum class PracticeAvailability
 {
