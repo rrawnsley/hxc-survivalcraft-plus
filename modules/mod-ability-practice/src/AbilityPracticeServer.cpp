@@ -58,57 +58,80 @@ constexpr auto AllClassSampleProfiles = []
         result.begin() + Profiles.size());
     return result;
 }();
-template<std::size_t Count>
-constexpr auto WithPeriodicProfiles(std::array<Practice::AbilityProfile, Count> const& profiles)
-{
-    std::array<Practice::AbilityProfile, Count + Practice::DevelopmentPeriodic::Profiles.size()> result{};
-    std::copy(profiles.begin(), profiles.end(), result.begin());
-    std::copy(Practice::DevelopmentPeriodic::Profiles.begin(), Practice::DevelopmentPeriodic::Profiles.end(),
-        result.begin() + Count);
-    return result;
-}
-constexpr auto PeriodicProfiles = WithPeriodicProfiles(Profiles);
-constexpr auto AllClassPeriodicProfiles = WithPeriodicProfiles(AllClassSampleProfiles);
-constexpr auto RankedPeriodicProfiles = WithPeriodicProfiles(Practice::DevelopmentRanked::Profiles);
-template<std::size_t Count>
-constexpr auto WithMasteryProfiles(std::array<Practice::AbilityProfile, Count> const& profiles)
-{
-    std::array<Practice::AbilityProfile, Count + Practice::DevelopmentMastery::Profiles.size()> result{};
-    std::copy(profiles.begin(), profiles.end(), result.begin());
-    std::copy(Practice::DevelopmentMastery::Profiles.begin(), Practice::DevelopmentMastery::Profiles.end(),
-        result.begin() + Count);
-    return result;
-}
-constexpr auto MasteryProfiles = WithMasteryProfiles(Profiles);
-constexpr auto AllClassMasteryProfiles = WithMasteryProfiles(AllClassSampleProfiles);
-constexpr auto RankedMasteryProfiles = WithMasteryProfiles(Practice::DevelopmentRanked::Profiles);
-constexpr auto PeriodicMasteryProfiles = WithMasteryProfiles(PeriodicProfiles);
-constexpr auto AllClassPeriodicMasteryProfiles = WithMasteryProfiles(AllClassPeriodicProfiles);
-constexpr auto RankedPeriodicMasteryProfiles = WithMasteryProfiles(RankedPeriodicProfiles);
-
-std::span<Practice::AbilityProfile const> SelectProfiles(bool classSamples, bool ranked, bool periodic, bool mastery)
+std::span<Practice::AbilityProfile const> SelectProfiles(bool classSamples, bool ranked)
 {
     if (ranked)
-    {
-        if (periodic)
-            return mastery ? std::span<Practice::AbilityProfile const>(RankedPeriodicMasteryProfiles) :
-                std::span<Practice::AbilityProfile const>(RankedPeriodicProfiles);
-        return mastery ? std::span<Practice::AbilityProfile const>(RankedMasteryProfiles) :
-            std::span<Practice::AbilityProfile const>(Practice::DevelopmentRanked::Profiles);
-    }
+        return Practice::DevelopmentRanked::Profiles;
     if (classSamples)
+        return AllClassSampleProfiles;
+    return Profiles;
+}
+
+bool SameMilestone(Practice::Milestone const& left, Practice::Milestone const& right)
+{
+    return left.CharacterLevel == right.CharacterLevel && left.Proficiency == right.Proficiency;
+}
+
+bool SameProfile(Practice::AbilityProfile const& left, Practice::AbilityProfile const& right)
+{
+    auto const& first = left.Definition;
+    auto const& second = right.Definition;
+    return left.DefinitionVersion == right.DefinitionVersion && left.Acquisition == right.Acquisition &&
+        left.Outcome == right.Outcome && first.ClassId == second.ClassId && first.AbilityId == second.AbilityId &&
+        first.Kind == second.Kind &&
+        std::equal(first.Ranks.begin(), first.Ranks.end(), second.Ranks.begin(), second.Ranks.end(),
+            [](Practice::AbilityRank const& lhs, Practice::AbilityRank const& rhs)
+            {
+                return lhs.SpellId == rhs.SpellId && lhs.RankNumber == rhs.RankNumber &&
+                    SameMilestone(lhs.Requirement, rhs.Requirement);
+            }) &&
+        std::equal(first.Caps.begin(), first.Caps.end(), second.Caps.begin(), second.Caps.end(),
+            [](Practice::ProficiencyCap const& lhs, Practice::ProficiencyCap const& rhs)
+            {
+                return lhs.CharacterLevel == rhs.CharacterLevel && lhs.Proficiency == rhs.Proficiency;
+            }) &&
+        std::equal(left.Policy.Bands.begin(), left.Policy.Bands.end(),
+            right.Policy.Bands.begin(), right.Policy.Bands.end(),
+            [](Practice::TrainingBand const& lhs, Practice::TrainingBand const& rhs)
+            {
+                return lhs.FirstProficiency == rhs.FirstProficiency && lhs.PointsPerLevel == rhs.PointsPerLevel &&
+                    lhs.PointsPerUse == rhs.PointsPerUse;
+            }) &&
+        std::equal(left.Rewards.begin(), left.Rewards.end(), right.Rewards.begin(), right.Rewards.end(),
+            [](Practice::MasteryReward const& lhs, Practice::MasteryReward const& rhs)
+            {
+                return SameMilestone(lhs.Requirement, rhs.Requirement) &&
+                    lhs.HealingBonusBasisPoints == rhs.HealingBonusBasisPoints;
+            });
+}
+
+bool AppendProfiles(std::vector<Practice::AbilityProfile>& destination,
+    std::span<Practice::AbilityProfile const> additions)
+{
+    if (!Practice::ValidateProfiles(additions))
     {
-        if (periodic)
-            return mastery ? std::span<Practice::AbilityProfile const>(AllClassPeriodicMasteryProfiles) :
-                std::span<Practice::AbilityProfile const>(AllClassPeriodicProfiles);
-        return mastery ? std::span<Practice::AbilityProfile const>(AllClassMasteryProfiles) :
-            std::span<Practice::AbilityProfile const>(AllClassSampleProfiles);
+        LOG_ERROR("module.ability_practice", "Rejected invalid optional development profile group");
+        return false;
     }
-    if (periodic)
-        return mastery ? std::span<Practice::AbilityProfile const>(PeriodicMasteryProfiles) :
-            std::span<Practice::AbilityProfile const>(PeriodicProfiles);
-    return mastery ? std::span<Practice::AbilityProfile const>(MasteryProfiles) :
-        std::span<Practice::AbilityProfile const>(Profiles);
+    bool valid = true;
+    for (Practice::AbilityProfile const& profile : additions)
+    {
+        auto const existing = std::find_if(destination.begin(), destination.end(),
+            [&profile](Practice::AbilityProfile const& entry)
+            {
+                return entry.Definition.ClassId == profile.Definition.ClassId &&
+                    entry.Definition.AbilityId == profile.Definition.AbilityId;
+            });
+        if (existing == destination.end())
+            destination.push_back(profile);
+        else if (!SameProfile(*existing, profile))
+        {
+            valid = false;
+            LOG_ERROR("module.ability_practice", "Conflicting development profile: class={}, ability={}",
+                profile.Definition.ClassId, profile.Definition.AbilityId);
+        }
+    }
+    return valid;
 }
 std::vector<Practice::AbilityProfile> RuntimeProfiles;
 std::optional<Practice::ProfileIndex> ProfileLookup;
@@ -805,17 +828,18 @@ public:
         bool const rankedCatalog = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentRankedCatalog", false);
         bool const fixedCatalog = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentFixedCatalog", false);
         std::span<Practice::AbilityProfile const> const selected =
-            SelectProfiles(classSamples, rankedCatalog, PeriodicRequested, MasteryRequested);
+            SelectProfiles(classSamples, rankedCatalog);
         RuntimeProfiles.assign(selected.begin(), selected.end());
-        if (HelpersRequested)
-            RuntimeProfiles.insert(RuntimeProfiles.end(), Practice::DevelopmentHelpers::Profiles.begin(),
-                Practice::DevelopmentHelpers::Profiles.end());
-        if (fixedCatalog)
-            RuntimeProfiles.insert(RuntimeProfiles.end(), Practice::DevelopmentFixed::Profiles.begin(),
-                Practice::DevelopmentFixed::Profiles.end());
+        bool const periodicValid = !PeriodicRequested ||
+            AppendProfiles(RuntimeProfiles, Practice::DevelopmentPeriodic::Profiles);
+        bool const masteryValid = !MasteryRequested ||
+            AppendProfiles(RuntimeProfiles, Practice::DevelopmentMastery::Profiles);
+        bool const helpersValid = !HelpersRequested ||
+            AppendProfiles(RuntimeProfiles, Practice::DevelopmentHelpers::Profiles);
+        bool const fixedValid = !fixedCatalog || AppendProfiles(RuntimeProfiles, Practice::DevelopmentFixed::Profiles);
         std::span<Practice::AbilityProfile const> const profiles(RuntimeProfiles);
         ProfileLookup.emplace(profiles);
-        Ready = ProfileLookup->IsValid();
+        Ready = ProfileLookup->IsValid() && periodicValid && masteryValid && helpersValid && fixedValid;
         for (Practice::AbilityProfile const& profile : profiles)
         {
             if (!MatchesNativeClassGrant(profile))

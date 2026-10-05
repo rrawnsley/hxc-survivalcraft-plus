@@ -11,9 +11,10 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   all 21 CoA classes. An optional startup-only sample catalog adds 20 ranked class-grant profiles for the other
   classes, for 23 profiles across all 21 classes. An optional broader ranked catalog selects 106 profiles and
   888 authored ranks across all 21 classes, taking priority over class samples. Periodic observation adds four
-  profiles to the selected catalog (seven/27/110 respectively). Optional Hand of Elune mastery adds one more
+  profiles to the selected catalog (seven/27/109 unique profiles respectively, reusing the shared Shadra's Prayer
+  definition in the broad ranked mode). Optional Hand of Elune mastery adds one more
   profile. Optional scripted observation adds Manafeed and an independent fixed-utility option adds two
-  nontraining profiles; the largest staged catalog has 114 profiles.
+  nontraining profiles; the largest staged catalog has 113 unique profiles.
   All development settings default off.
 - Outcomes: resolved direct damage/healing, successful interruption, dispel and beneficial-aura steal.
   Each profile requires its own outcome route. The existing client-cast callback records numeric class/spell
@@ -1390,3 +1391,38 @@ Authoring artifacts remain 847 unapproved drafts/179 common-outcome candidates. 
 Changed C++ style/whitespace and five Lua5.1 syntax compilations passed. No addon chunks or behavioral tests ran,
 and no live installation/start/restart/configuration/database/client/launcher change occurred. Runtime lifecycle,
 AoE/channel/target/source/save/menu acceptance and final balance remain outstanding.
+
+## Compose shared catalog definitions and report coverage — 5 October 2026
+
+Authoring coverage found Shadra's Prayer in both the broad ranked and optional periodic declarations. The old
+combined array would include its class/ability identity twice, and existing ProfileIndex validation would refuse
+the selected catalog. No runtime startup reproduction is claimed. Composition now copies only the selected base
+catalog and appends optional groups before index publication. Every optional group is validated on its own.
+An overlapping identity is reused only when version, acquisition, kind, route, all rank IDs/ordinals/requirements,
+caps, training bands and mastery rewards match exactly. Disagreement logs the class/ability and leaves readiness
+and observation/rank learning disabled; no existing definition is overwritten. Final combined validation still
+rejects duplicate spell ownership and class bounds. Storage is never changed after index publication.
+
+`tools/coverage.py` checks source/DBC provenance and reports the broad-ranked-plus-all-options declaration set,
+per class and per source group. It refuses unsupported declaration syntax, conflicting kinds, repeated declarations
+within one header, duplicate drafts and declarations without source-consistent drafts. Shared definitions list
+their source headers and require the native equivalence check; textual coverage does not prove full equivalence
+or runtime activation. The report is explicitly unapproved/unqualified and does not edit definitions or databases.
+
+Current authoring output contains 114 declarations for 113 unique development profiles (110 ranked, one mastery,
+two fixed); one shared profile is Shadra's Prayer. Of 847 source-consistent groups, 734 lack a development
+definition: 134 ranked and 600 standalone, including 72 with raw common outcomes. These are review groups;
+they are not all intended to train. Passive/support/ownership/helper design and final runtime qualification
+remain necessary. Older 114-profile milestone counts included the repeated declaration.
+
+Generate the ignored review artifact with:
+
+```
+py -B modules/mod-ability-practice/tools/coverage.py --drafts .cache/ability-practice/profile-drafts.json --dbc C:/Azerothcore-CoA/server-data/dbc --output .cache/ability-practice/catalog-coverage.json
+```
+
+Source/native checks passed `.cache/verify-all/20261005-182220/report.json` (two source checks, 35.9s native build;
+unit/harness/gameplay skipped). Changed C++ style and whitespace passed; actual authoring generation produced
+the counts above. No new behavioral tests or runtime startup checks ran. This fixes the identified source
+composition conflict; effective-data readiness and in-game acceptance remain unqualified. Production remains
+unchanged and all development options default off.
