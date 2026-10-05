@@ -1,4 +1,4 @@
-# Ability practice — development foundation
+# Ability practice â€” development foundation
 
 This module is under development on `codex/ability-practice`. It implements the deterministic
 practice policy, explicit catalog model, bounded original-action accounting and a development observation path.
@@ -509,3 +509,20 @@ or recovery. No SQL or public parser interface changed.
 Source/native build passed at `.cache/verify-all/20261005-083435/report.json`; C++ lint and whitespace passed.
 No behavioral tests ran. Corrupt-row login, preservation and offline update behavior require isolated runtime
 qualification. No live data was inspected or changed.
+
+## Compare all-class candidates with current direct routes
+
+The read-only candidate exporter compares every member's raw effect IDs against the native adapter's current
+SCHOOL_DAMAGE (2) and HEAL (10) startup requirements. It records common routes across the entire claimed group,
+blocked member IDs/reasons and per-class counts. Passive, missing, malformed or unsupported member evidence
+prevents a common route. A chain whose members use different supported routes also needs adapter review.
+These IDs are grounded in `src/server/shared/SharedDefines.h`; this is not a broader direct-effect classifier.
+
+The current raw export contains 288 candidate groups with common routes across all 21 classes: 237 damage,
+53 healing, with two groups having both. Of those groups, 175 are claimed rank groups. Existing three development
+entries retain their expected raw routes. All 4,969 groups remain pending and productionApproved=false.
+Raw route agreement does not prove effective SQL/C++ behavior, player acquisition, suitable practice rates,
+original-action ownership or runtime qualification. It neither generates profiles nor enables more abilities.
+
+Source checks passed at `.cache/verify-all/20261005-084424/report.json`; whitespace passed. Export generation
+was read-only against the existing extracted DBC/inventory and wrote only ignored cache files. No tests ran.

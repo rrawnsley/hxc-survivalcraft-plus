@@ -50,6 +50,43 @@ def action_review(members):
             'scope': 'raw-action-routing-review-not-runtime-qualification'}
 
 
+def native_direct_review(members):
+    routes = {'damage', 'healing'}
+    blocked = []
+    for member in members:
+        raw = member.get('rawDbc')
+        reasons = []
+        if not raw or raw.get('fieldErrors') or type(raw.get('passive')) is not bool:
+            reasons.append('missing-or-invalid-raw-evidence')
+        elif raw['passive']:
+            reasons.append('passive-spell')
+        else:
+            effects = raw.get('effects')
+            if not isinstance(effects, list) or len(effects) != 3 or any(
+                    type(effect) is not int or effect < 0 for effect in effects):
+                reasons.append('missing-or-invalid-raw-effects')
+            else:
+                supported = set()
+                if 2 in effects:
+                    supported.add('damage')
+                if 10 in effects:
+                    supported.add('healing')
+                if not supported:
+                    reasons.append('no-current-direct-route')
+                routes.intersection_update(supported)
+        if reasons:
+            blocked.append({'spellId': member['spellId'], 'reasons': reasons})
+    if blocked:
+        routes.clear()
+    return {
+        'scope': 'raw-native-direct-route-comparison-not-effective-data-approval',
+        'nativeSource': 'modules/mod-ability-practice/src/AbilityPracticeServer.cpp',
+        'commonRoutes': sorted(routes), 'blockedMembers': blocked,
+        'status': 'needs-effective-data-and-acquisition-review' if routes else
+                  'needs-outcome-adapter-review' if not blocked else 'blocked-by-member-evidence',
+    }
+
+
 def build_candidates(inventory):
     if inventory.get('schemaVersion') != 1:
         raise ValueError('Unsupported source inventory schema')
@@ -113,6 +150,7 @@ def build_candidates(inventory):
             'sourceKind': 'claimed-root-group' if claimed else 'standalone-source',
             'classification': 'pending', 'productionApproved': False,
             'rawActionReview': action_review(members),
+            'nativeDirectReview': native_direct_review(members),
             'members': members,
             'acquisitionReferences': sorted(acquisition, key=lambda row: (
                 row['spellId'], row['referenceSpellId'], row['source'])),
@@ -129,10 +167,18 @@ def build_candidates(inventory):
             'conflictingMembershipCount': sum('conflicting-chain-membership' in row['reviewFlags']
                                              for row in candidates),
             'productionApprovedCount': 0,
+            'rawNativeDirectStatuses': dict(sorted(Counter(
+                row['nativeDirectReview']['status'] for row in candidates).items())),
+            'rawNativeCommonRoutes': dict(sorted(Counter(route for row in candidates
+                for route in row['nativeDirectReview']['commonRoutes']).items())),
             'rawActionTraits': dict(sorted(Counter(trait for candidate in candidates
                 for trait in candidate['rawActionReview']['traits']).items())),
         },
-        'classes': [{'classId': class_id, 'candidateCount': count} for class_id, count in sorted(counts.items())],
+        'classes': [{
+            'classId': class_id, 'candidateCount': count,
+            'rawNativeDirectCandidateCount': sum(bool(row['nativeDirectReview']['commonRoutes'])
+                                                for row in candidates if row['classId'] == class_id),
+        } for class_id, count in sorted(counts.items())],
         'candidates': candidates,
     }
 
