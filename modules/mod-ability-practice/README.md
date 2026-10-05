@@ -847,3 +847,27 @@ Final source/native build passed at `.cache/verify-all/20261005-101411/report.js
 C++ lint/whitespace and five Lua5.1 syntax compilations passed. No tests ran. Packing/unpacking/boundaries/
 malformation/order/timeout, exact counters and real packet/latency reduction need runtime acceptance.
 No production changes or active addon installation occurred.
+
+
+## Provenance-checked definition draft export
+
+`tools/profile_drafts.py` exports source-consistent class-grant groups into structured unapproved drafts.
+Before export it checks every inventory source hash/path within the chosen repo, the Spell.dbc directory/hash
+and native DBC schema source hash. Changed/foreign/missing evidence refuses export. It validates bounded
+unique class/ability/rank identities, source level/rank order, raw outcome names and contradictory approval/
+consistency markers. This verifies artifact provenance and structure, not effective runtime ownership.
+
+Each draft carries source rank IDs/character levels/raw names, available outcome routes and review flags.
+Definition version, kind, selected outcome and proficiency requirements remain null; caps, training bands and
+mastery rewards remain empty. It explicitly requires effective-data/classification/acquisition/outcome/rates/
+migration/menu/gameplay review; standalone entries also need mastery-or-fixed design. There is no runtime
+profile writer, loader, auto-approval or default balance tuning. Export does not change server behavior.
+
+Actual source/data export produced847drafts across21classes:244ranked source groups,603standalone and179
+with a current common outcome. Output `.cache/ability-practice/profile-drafts.json` is ignored. Example:
+`py -B modules/mod-ability-practice/tools/profile_drafts.py --candidates .cache/ability-practice/catalog-candidates.json
+--dbc C:/Azerothcore-CoA/server-data/dbc --output .cache/ability-practice/profile-drafts.json`.
+
+Final source checks passed `.cache/verify-all/20261005-102154/report.json` (initial102105); Python syntax and
+whitespace passed. No tests ran. Provenance-rejection paths and eventual reviewed-profile import remain
+qualification; export is a planning/source artifact only. Production remains untouched.
