@@ -29,7 +29,7 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   Shared native race/racial and faction-rift eligibility is checked at preparation, award and new upgrades;
   class/race/talent-set/custom-specialization changes refresh the owner state. Normal database save/reload/failure
   behavior and broader acquisition entitlements remain unqualified.
-- Menu: addon 0.4.14-development; unpublished protocol 4 includes B8 instance identity/realm cap, T10 kind/session/rules/reward
+- Menu: addon 0.4.15-development; unpublished protocol 4 includes B8 instance identity/realm cap, T10 kind/session/rules/reward
   count and M mastery entries,
   mandatory C future-cap metadata, packed D parts and F8 unreadable-progress responses. Typed delivery is
   bounded/paced; saved views/ages/session totals are labeled. Existing schema 1/2/3 formats are preserved.
@@ -1461,3 +1461,15 @@ Affected source and isolated native build passed in `.cache/verify-all/20261005-
 (two source checks; 35.0-second build). Changed C++ style and whitespace passed.
 Runtime enrollment, reload/receipt behavior and persistence acceptance have not been exercised.
 All live server/client/configuration/database files remain unchanged.
+
+## Skill list progress and hover detail — 5 October 2026
+
+Addon0.4.15-development displays proficiency/current cap in skill rows and a thin bar using
+the authoritative partial points for the next proficiency level. Paused ownership/level states are grey,
+completed training green, and current training or a cap with future milestones gold. Fixed/unlearned
+abilities have no training bar. Row hover shows exact next-point uses, remaining milestone requirements,
+realm-cap notes and saved-view labels. Existing mastery/next-rank functions supply the text.
+Visible row/help tooltips refresh when data or sync state changes; hiding one row only hides a tooltip
+owned by that row. No gameplay, persistence or protocol changes. Source checks passed in
+`.cache/verify-all/20261005-184742/report.json`; five Lua5.1 syntax compilations passed without execution.
+In-game rendering/interaction remains unqualified. No addon installation or live changes.

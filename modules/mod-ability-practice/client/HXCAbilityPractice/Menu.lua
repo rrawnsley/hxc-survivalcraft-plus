@@ -154,7 +154,9 @@ practiceHelp:SetScript("OnEnter", function(self)
         end
     end
 end)
-local function HidePracticeTooltip() if GameTooltip then GameTooltip:Hide() end end
+local function HidePracticeTooltip(self)
+    if GameTooltip and GameTooltip:IsOwned(self) then GameTooltip:Hide() end
+end
 practiceHelp:SetScript("OnLeave", HidePracticeTooltip)
 practiceHelp:SetScript("OnHide", HidePracticeTooltip)
 
@@ -297,6 +299,18 @@ Refresh = function()
             row.label:SetText((ability.abilityId == selectedId and "|cffffd36b" or "|cffffffff")
                 .. SpellName(ability.displaySpellId) .. "|r")
             local rank = Model.NextMilestone(ability)
+            local hasTraining = ability.learnedRank > 0 and not Model.IsFixed(ability) and ability.pointsPerLevel > 0
+            if hasTraining then
+                row.progress:Show()
+                row.progress:SetValue(ability.proficiency >= ability.cap and 1
+                    or ability.points / ability.pointsPerLevel)
+                if ability.availability == 2 or ability.availability == 3 then
+                    row.progress:SetStatusBarColor(0.45, 0.45, 0.45)
+                elseif ability.availability == 5 then
+                    if rank then row.progress:SetStatusBarColor(0.81, 0.62, 0.24)
+                    else row.progress:SetStatusBarColor(0.35, 0.72, 0.43) end
+                else row.progress:SetStatusBarColor(0.81, 0.62, 0.24) end
+            else row.progress:Hide() end
             row.info:SetText(tab == "upcoming" and rank and
                 ((ability.learnedRank == 0 and "New ability" or Model.IsMastery(ability) and "Next mastery benefit"
                     or ("Next rank " .. rank.rankNumber))
@@ -305,8 +319,17 @@ Refresh = function()
                         or ("Req. level " .. rank.characterLevel))) or
                 (ability.learnedRank == 0 and "Not yet learned" or
                     (Model.IsFixed(ability) and "Fixed ability" or Model.IsMastery(ability) and
-                        ("Mastery · Proficiency " .. ability.proficiency) or
-                        ("Rank " .. ability.learnedRank .. " · Proficiency " .. ability.proficiency))))
+                        ("Mastery · Proficiency " .. ability.proficiency .. "/" .. ability.cap) or
+                        ("Rank " .. ability.learnedRank .. " · Proficiency " .. ability.proficiency .. "/" .. ability.cap))))
+        end
+    end
+    if GameTooltip and GameTooltip:IsShown() then
+        local owner = GameTooltip:GetOwner()
+        if owner == practiceHelp and owner:IsShown() then owner:GetScript("OnEnter")(owner)
+        else
+            for _, row in ipairs(rows) do
+                if owner == row and row:IsShown() then row:GetScript("OnEnter")(row); break end
+            end
         end
     end
 end
@@ -320,7 +343,42 @@ for index = 1, 9 do
     row.icon:SetSize(32, 32)
     row.icon:SetPoint("TOPLEFT", 2, -4)
     row.label = Text(row, "GameFontNormal", 40, -3, 186)
-    row.info = Text(row, "GameFontHighlightSmall", 40, -24, 186)
+    row.info = Text(row, "GameFontHighlightSmall", 40, -22, 186)
+    row.progress = CreateFrame("StatusBar", nil, row)
+    row.progress:SetPoint("TOPLEFT", 40, -37)
+    row.progress:SetSize(186, 3)
+    row.progress:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
+    row.progress:SetMinMaxValues(0, 1)
+    local background = row.progress:CreateTexture(nil, "BACKGROUND")
+    background:SetAllPoints()
+    background:SetTexture(0.12, 0.12, 0.12, 1)
+    row.progress:Hide()
+    row:SetScript("OnEnter", function(self)
+        if not snapshot or not self.ability or not GameTooltip then return end
+        local ability = self.ability
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:SetText(SpellName(ability.displaySpellId))
+        if not Model.IsFixed(ability) then
+            GameTooltip:AddLine("Proficiency " .. ability.proficiency .. " / Current cap " .. ability.cap,
+                1, 0.82, 0, true)
+            if ability.availability == 2 or ability.availability == 3 then
+                GameTooltip:AddLine("The bar shows retained progress; training is paused.", 1, 1, 1, true)
+            end
+        end
+        GameTooltip:AddLine(Model.PointText(ability, snapshot.realmMaximumLevel, snapshot.characterLevel),
+            1, 1, 1, true)
+        local milestone = Model.NextMilestone(ability)
+        if milestone then
+            local text = Model.IsMastery(ability) and not ability.nextRank
+                and Model.MasteryText(milestone, snapshot.realmMaximumLevel, snapshot.characterLevel)
+                or Model.RankText(milestone, Model.IsFixed(ability), snapshot.realmMaximumLevel, snapshot.characterLevel)
+            GameTooltip:AddLine(text, 1, 1, 1, true)
+        end
+        if syncState ~= "current" then GameTooltip:AddLine("This is your saved view.", 1, 0.82, 0, true) end
+        GameTooltip:Show()
+    end)
+    row:SetScript("OnLeave", HidePracticeTooltip)
+    row:SetScript("OnHide", HidePracticeTooltip)
     row:SetScript("OnClick", function(self)
         if selectedId ~= self.ability.abilityId then rankOffset = 0 end
         selectedId = self.ability.abilityId
