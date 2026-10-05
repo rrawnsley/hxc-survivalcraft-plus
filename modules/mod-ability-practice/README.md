@@ -29,7 +29,7 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   Shared native race/racial and faction-rift eligibility is checked at preparation, award and new upgrades;
   class/race/talent-set/custom-specialization changes refresh the owner state. Normal database save/reload/failure
   behavior and broader acquisition entitlements remain unqualified.
-- Menu: addon 0.4.20-development; unpublished protocol 4 includes B11 instance identity/realm cap/session learning, T11 kind/session/rules/reward
+- Menu: addon 0.4.21-development; unpublished protocol 4 includes B11 instance identity/realm cap/session learning, T11 kind/session/rules/reward
   count/acquisition source and M mastery entries,
   mandatory C future-cap metadata, packed D parts and F8 unreadable-progress responses. Typed delivery is
   bounded/paced; saved views/ages/session totals are labeled. Existing schema 1/2/3 formats are preserved.
@@ -1646,3 +1646,24 @@ Source/native passed .cache/verify-all/20261005-200956/report.json (two source c
 C++ style/whitespace and five Lua5.1 syntax compilations passed without executing addon chunks; authoring
 provenance/coverage regenerated (37 native sources;115 unique profiles/116 declarations). No live server/
 client/configuration/database/launcher changes, installation, startup or restart.
+
+
+## Visible catch-up and explicit remaining review queues — 5 October 2026
+
+Addon0.4.21-development shows eligible active catch-up on the selected progress bar, with saved boost
+labels for cached views. Row hover describes active/normal/capped/paused/unlearned catch-up without claiming
+paused practice earns credit. Selected bars use the same gray paused/gold training/green complete colors as
+rows. Session mastery row captions are shortened to fit compact rows; full reward records remain in hover.
+No wire/native/progression change; actual rendered fit still needs isolated client qualification.
+
+Coverage authoring now preserves review flags and lists overlapping pending review queues by ability and
+class. All practice decisions remain unreviewed; raw passive/triggered/pet/script/periodic/unknown effect
+signals only route review, never automatically exclude/train/classify a spell. Unranked common outcomes
+require individual mastery-or-fixed and utility design. Missing common native outcomes need their actual
+mechanic reviewed. This avoids interpreting732 pending source groups as732 abilities that must all train.
+Queues overlap and their totals must not be summed as unique ability counts. Existing115 unique definitions/
+116 declarations/847 source groups/72 pending raw-common-outcome groups remain unchanged; production approval
+and runtime qualification remain false. Source evidence is not proof of live effective data or gameplay.
+
+Source/Lua passed .cache/verify-all/20261005-201427/report.json (two source checks;five Lua5.1 syntax
+compilations with no chunk execution); coverage export completed. Final source check after a Python line wrap passed .cache/verify-all/20261005-201519/report.json. No tests, runtime startup, native rebuild or production server/client/config/DB/launcher change.

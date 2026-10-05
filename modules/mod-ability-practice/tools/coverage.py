@@ -37,6 +37,30 @@ def declared_profiles(root):
     return result
 
 
+def review_queues(draft):
+    traits = draft.get('actionTraits')
+    routes = draft.get('candidateOutcomeRoutes')
+    if not isinstance(traits, list) or not isinstance(routes, list) or any(
+            not isinstance(value, str) for value in traits + routes):
+        raise ValueError('Invalid action traits or candidate routes')
+    mapping = {'passive-flag-review': 'passive-classification',
+               'triggered-attribution-review': 'triggered-attribution',
+               'pet-or-summon-ownership-review': 'pet-or-summon-ownership',
+               'scripted-behavior-review': 'scripted-outcome',
+               'periodic-attribution-review': 'periodic-attribution',
+               'unknown-raw-aura-review': 'unknown-aura', 'unknown-raw-effect-review': 'unknown-effect'}
+    queues = {mapping[trait] for trait in traits if trait in mapping}
+    if len(draft['ranks']) == 1:
+        queues.add('unranked-mastery-or-fixed-design')
+    if set(routes) & {'interrupt', 'dispel', 'steal'}:
+        queues.add('utility-classification-and-meaningful-use')
+    if len(draft['ranks']) > 1 and set(routes) & {'damage', 'healing'}:
+        queues.add('ranked-common-outcome')
+    if not routes:
+        queues.add('missing-common-supported-outcome')
+    return sorted(queues)
+
+
 def build_coverage(drafts, declarations):
     if drafts.get('schemaVersion') != 1 or drafts.get('scope') != (
             'unapproved-definition-drafts-not-runtime-profiles') or drafts.get('productionApproved') is not False:
@@ -57,6 +81,9 @@ def build_coverage(drafts, declarations):
                      'sourceRankCount': len(draft['ranks']), 'declaredDevelopmentProfile': declaration,
                      'candidateOutcomeRoutes': draft['candidateOutcomeRoutes'],
                      'actionTraits': draft['actionTraits'], 'requiredReviews': draft['requiredReviews'],
+                     'reviewFlags': draft['reviewFlags'],
+                     'pendingReviewQueues': [] if declaration else review_queues(draft),
+                     'practiceDecision': 'unreviewed',
                      'productionApproved': False, 'runtimeQualified': False})
     if set(declarations) - seen:
         raise ValueError('Declared profile absent from source-consistent drafts')
@@ -75,7 +102,9 @@ def build_coverage(drafts, declarations):
                 'declaredDevelopmentKinds': dict(sorted(kinds.items())), 'needsDefinitionCount': len(pending),
                 'needsDefinitionWithRawOutcomeCount': sum(bool(row['candidateOutcomeRoutes']) for row in pending),
                 'pendingRankedGroupCount': sum(row['sourceRankCount'] > 1 for row in pending),
-                'pendingStandaloneGroupCount': sum(row['sourceRankCount'] == 1 for row in pending)}
+                'pendingStandaloneGroupCount': sum(row['sourceRankCount'] == 1 for row in pending),
+                'pendingReviewQueueCounts': dict(sorted(Counter(queue for row in pending
+                    for queue in row['pendingReviewQueues']).items()))}
 
     return {'schemaVersion': 1, 'scope': 'source-declaration-coverage-not-runtime-or-production-approval',
             'mode': 'broad-ranked-with-all-optional-development-profiles',

@@ -495,6 +495,19 @@ function Model.RankText(rank, fixed, realmMaximumLevel, characterLevel, acquisit
     return requirement
 end
 
+function Model.CatchupText(ability, saved)
+    if not ability.catchup then return nil end
+    local prefix = saved and "Saved catch-up: " or "Catch-up: "
+    if ability.availability == 4 then
+        return prefix .. (ability.catchup.boosted and (ability.catchup.multiplier .. "x training is active.")
+            or "normal training rate.")
+    end
+    if ability.availability == 5 then return prefix .. "inactive at the current cap." end
+    if ability.availability == 2 or ability.availability == 3 then return prefix .. "paused with training." end
+    return prefix .. "learn this ability first; the boost requires a gap of "
+        .. ability.catchup.gap .. " proficiency behind the current cap."
+end
+
 function Model.PracticeRules(ability)
     if Model.IsFixed(ability) then
         return "This ability has no practice levels. " .. LearnText(ability.acquisitionSource)

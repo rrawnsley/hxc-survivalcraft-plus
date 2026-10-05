@@ -120,8 +120,8 @@ local function SessionMasteryText(ability)
         highest = math.max(highest or 0, event.healingBonusBasisPoints)
     end
     if not highest then return nil end
-    return "Earned +" .. string.format("%.2f", highest / 100):gsub("0+$", ""):gsub("%.$", "")
-        .. "% healing mastery this session"
+    return (syncState == "current" and "Mastery earned: +" or "Saved mastery: +")
+        .. string.format("%.2f", highest / 100):gsub("0+$", ""):gsub("%.$", "") .. "%"
 end
 
 local function SessionLearnText(ability)
@@ -219,9 +219,19 @@ local function RenderDetail(ability)
     if trains then
         local capped = ability.proficiency >= ability.cap
         progress:SetValue(capped and 1 or ability.points / ability.pointsPerLevel)
-        progressLabel:SetText(capped and
+        local label = capped and
             (not Model.NextMilestone(ability) and "Training complete" or "Current cap reached") or
-            (math.floor(100 * ability.points / ability.pointsPerLevel) .. "% to the next proficiency point"))
+            (math.floor(100 * ability.points / ability.pointsPerLevel) .. "% to the next proficiency point")
+        if ability.catchup and ability.catchup.boosted and ability.availability == 4 then
+            label = label .. " · " .. ability.catchup.multiplier .. "x "
+                .. (syncState == "current" and "catch-up" or "saved boost")
+        end
+        progressLabel:SetText(label)
+        if ability.availability == 2 or ability.availability == 3 then
+            progress:SetStatusBarColor(0.45, 0.45, 0.45)
+        elseif capped and not Model.NextMilestone(ability) then
+            progress:SetStatusBarColor(0.35, 0.72, 0.43)
+        else progress:SetStatusBarColor(0.81, 0.62, 0.24) end
     end
     pointText:SetText(Model.PointText(ability, snapshot.realmMaximumLevel, snapshot.characterLevel))
     local nextRank = ability.nextRank
@@ -434,6 +444,8 @@ for index = 1, 9 do
         end
         GameTooltip:AddLine(Model.PointText(ability, snapshot.realmMaximumLevel, snapshot.characterLevel),
             1, 1, 1, true)
+        local catchup = Model.CatchupText(ability, syncState ~= "current")
+        if catchup then GameTooltip:AddLine(catchup, 1, 0.82, 0, true) end
         if ability.session and ability.session.available and not Model.IsFixed(ability) then
             GameTooltip:AddLine((syncState == "current" and "This session: " or "Saved session: ")
                 .. ability.session.uses .. " qualifying uses · +"
