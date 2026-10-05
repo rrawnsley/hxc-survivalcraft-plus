@@ -726,3 +726,22 @@ Source/native build passed at `.cache/verify-all/20261005-093333/report.json`; f
 at `.cache/verify-all/20261005-093503/report.json`. C++ lint, whitespace and all five Lua 5.1 syntax compilations
 passed. No tests ran. Rule transport, tooltip accuracy against real outcomes, rendering and skin/owner behavior
 remain runtime acceptance. No active client/server/launcher changes occurred.
+
+
+## Next character level for more practice capacity
+
+Addon 0.4.5-development shows the next character level that permits additional proficiency and its cap.
+Unreleased protocol 4 adds mandatory C per ability: C|revision|index|0, or
+C|revision|index|1|characterLevel|proficiency. Missing, duplicate, invalid or fixed-ability cap metadata is
+refused. Earlier development shapes were not published. Older protocol formats are preserved.
+
+The authoritative builder searches above both the current cap and retained proficiency, adjusts eligibility
+for the introductory rank's level and evaluates the cap at that actual level. This avoids promising further
+training when retained progress already exceeds the next cap. Capped wait text shows the level/cap; help also
+shows future capacity. Terminal definitions distinguish a highest cap with room remaining from no further
+practice capacity. No thresholds, caps, rates or stored progress changed.
+
+Source/native build passed at `.cache/verify-all/20261005-094252/report.json`; final addon source checks passed
+at `.cache/verify-all/20261005-094400/report.json`. C++ lint, whitespace and all five Lua 5.1 syntax compilations
+passed. No tests ran. Sparse/plateau caps, introductory levels, reduced levels, retained excess, terminal
+states, transport and rendering remain runtime acceptance. Production server/client/launcher are untouched.

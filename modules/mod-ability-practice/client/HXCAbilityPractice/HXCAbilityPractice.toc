@@ -2,7 +2,7 @@
 ## Title: HXC Abilities & Practice
 ## Notes: Ability practice progress and upcoming ranks for HXC SurvivalCraft+.
 ## Author: HXC
-## Version: 0.4.4-development
+## Version: 0.4.5-development
 ## SavedVariablesPerCharacter: HXCAbilityPracticePreferences
 
 Model.lua

@@ -128,6 +128,14 @@ practiceHelp:SetScript("OnEnter", function(self)
             GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
             GameTooltip:SetText("What earns practice?")
             GameTooltip:AddLine(Model.PracticeRules(ability), 1, 1, 1, true)
+            if ability.learnedRank > 0 and ability.hasCapInfo and not Model.IsFixed(ability) then
+                local cap = ability.nextTrainingCap
+                GameTooltip:AddLine(cap and ("More practice capacity at character level " .. cap.characterLevel
+                    .. " (cap " .. cap.proficiency .. ").") or
+                    (ability.proficiency >= ability.cap and
+                        "No additional practice beyond this proficiency in the current definition." or
+                        "This is the highest defined training cap."), 1, 0.82, 0, true)
+            end
             if syncState ~= "current" then
                 GameTooltip:AddLine("These rules are from your saved view.", 1, 0.82, 0, true)
             end

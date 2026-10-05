@@ -79,7 +79,26 @@ struct AbilityView
     SessionPractice Session{ false, 0, 0 };
     PracticeRoute Route = PracticeRoute::Unknown;
     std::uint32_t RuleSet = 0;
+    std::optional<ProficiencyCap> NextTrainingCap;
 };
+
+inline std::optional<ProficiencyCap> FindNextTrainingCap(AbilityDefinition const& ability,
+    std::uint32_t characterLevel, Progress state)
+{
+    if (ValidateDefinition(ability) != CatalogError::None || ability.Kind == AbilityKind::Fixed ||
+        !characterLevel || !state.Proficiency)
+        return std::nullopt;
+    std::uint32_t const boundary = std::max(state.Proficiency, CapAtLevel(ability, characterLevel));
+    auto const found = std::find_if(ability.Caps.begin(), ability.Caps.end(),
+        [characterLevel, boundary](ProficiencyCap const& cap)
+        {
+            return cap.CharacterLevel > characterLevel && cap.Proficiency > boundary;
+        });
+    if (found == ability.Caps.end())
+        return std::nullopt;
+    std::uint32_t const level = std::max(found->CharacterLevel, ability.Ranks.front().Requirement.CharacterLevel);
+    return ProficiencyCap{ level, CapAtLevel(ability, level) };
+}
 
 inline AbilityView BuildAbilityView(AbilityDefinition const& ability, TrainingPolicy policy,
     Progress progress, std::uint32_t characterLevel, std::span<std::uint32_t const> learnedSpells,
@@ -96,6 +115,7 @@ inline AbilityView BuildAbilityView(AbilityDefinition const& ability, TrainingPo
     view.DisplaySpellId = ability.Ranks.front().SpellId;
     view.State = ability.Kind == AbilityKind::Fixed ? Progress{} : progress;
     view.Cap = CapAtLevel(ability, characterLevel);
+    view.NextTrainingCap = FindNextTrainingCap(ability, characterLevel, progress);
 
     std::size_t nextRank = 0;
     for (std::size_t index = 0; index < ability.Ranks.size(); ++index)

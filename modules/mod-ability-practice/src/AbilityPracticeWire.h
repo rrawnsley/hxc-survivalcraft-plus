@@ -49,7 +49,7 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
                 return std::nullopt;
         }
     std::vector<std::string> lines;
-    lines.reserve(abilities.size() * (includeKinds ? 5 : includeRoadmap ? 4 : 3) + rankCount + 3);
+    lines.reserve(abilities.size() * (includeKinds ? 6 : includeRoadmap ? 4 : 3) + rankCount + 3);
     lines.push_back(Detail::WireLine('B', includeKinds ? TypedMenuSchemaVersion :
         includeRoadmap ? RoadmapMenuSchemaVersion :
         session ? SessionMenuSchemaVersion : MenuSchemaVersion,
@@ -92,6 +92,17 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
             lines.push_back(Detail::WireLine('T', revision, index + 1, static_cast<std::uint32_t>(view.Kind) + 1,
                 view.Session.Available ? 1 : 0, view.Session.Uses, view.Session.ProficiencyGained,
                 static_cast<std::uint32_t>(view.Route), view.RuleSet));
+            if (view.NextTrainingCap)
+            {
+                ProficiencyCap const& cap = *view.NextTrainingCap;
+                if (view.Kind == AbilityKind::Fixed || cap.CharacterLevel <= characterLevel || cap.CharacterLevel > 255 ||
+                    cap.CharacterLevel < view.Ranks.front().Requirement.CharacterLevel ||
+                    cap.Proficiency <= std::max(view.Cap, view.State.Proficiency))
+                    return std::nullopt;
+                lines.push_back(Detail::WireLine('C', revision, index + 1, 1, cap.CharacterLevel, cap.Proficiency));
+            }
+            else
+                lines.push_back(Detail::WireLine('C', revision, index + 1, 0));
         }
         lines.push_back(Detail::WireLine('A', revision, index + 1, view.AbilityId, view.DisplaySpellId,
             view.LearnedRank, view.State.Proficiency, view.State.Points, view.Cap, view.PointsPerLevel,

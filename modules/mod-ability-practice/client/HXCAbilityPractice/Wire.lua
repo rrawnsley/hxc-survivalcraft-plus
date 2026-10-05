@@ -57,11 +57,12 @@ function Wire.Accept(message, now, currentRevision)
             if not part or not part.A or not part.P or not part.R then return Reject("Incomplete snapshot") end
             local ability = part.A
             if pending.schemaVersion == 4 then
-                if not part.T then return Reject("Missing ability type") end
+                if not part.T or not part.C then return Reject("Missing ability rules or cap") end
                 ability.kind = part.T.kind
                 ability.session = part.T.session
                 ability.route = part.T.route
                 ability.ruleSet = part.T.ruleSet
+                ability.nextTrainingCap = part.C ~= true and part.C or nil
             end
             ability.nextPoint = part.P
             ability.nextRank = part.R ~= true and part.R or nil
@@ -89,6 +90,14 @@ function Wire.Accept(message, now, currentRevision)
     if not index or index < 1 or index > pending.count then return Reject("Invalid ability index") end
     local part = pending.parts[index] or {}
     pending.parts[index] = part
+    if kind == "C" then
+        if pending.schemaVersion ~= 4 or part.C then return Reject("Invalid training cap update") end
+        if #fields == 4 and fields[4] == "0" then part.C = true
+        elseif #fields == 6 and fields[4] == "1" then
+            part.C = { characterLevel = tonumber(fields[5]), proficiency = tonumber(fields[6]) }
+        else return Reject("Invalid training cap update") end
+        return nil
+    end
     if kind == "T" then
         local abilityKind = tonumber(fields[4])
         if pending.schemaVersion ~= 4 or part.T or #fields ~= 9 or not abilityKind

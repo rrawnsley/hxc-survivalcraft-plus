@@ -62,7 +62,7 @@ local function Ranks(value)
     return result
 end
 
-local function Ability(value, schema)
+local function Ability(value, schema, characterLevel)
     if type(value) ~= "table" then return nil end
     local positive = { "abilityId", "displaySpellId", "proficiency", "cap" }
     for _, field in ipairs(positive) do
@@ -96,6 +96,13 @@ local function Ability(value, schema)
     if schema == 4 then
         if not session or not Integer(value.kind, 1, 3) or not Integer(value.route, 1, 6)
             or value.ruleSet ~= 1 or ((value.kind == 3) ~= (value.route == 6)) then return nil end
+        if value.nextTrainingCap ~= nil then
+            local cap = value.nextTrainingCap
+            if type(cap) ~= "table" or not Integer(cap.characterLevel, characterLevel + 1, 255)
+                or not Integer(cap.proficiency, 1, 4294967295)
+                or cap.proficiency <= math.max(value.cap, value.proficiency)
+                or cap.characterLevel < ranks[1].characterLevel or value.kind == 3 then return nil end
+        end
         if value.kind == 3 then
             if #ranks ~= 1 or value.learnedRank > 1 or value.proficiency ~= 1 or value.cap ~= 1
                 or value.points ~= 0 or value.pointsPerLevel ~= 0 or point.status ~= 0
@@ -103,8 +110,13 @@ local function Ability(value, schema)
                 or (ranks[1].state ~= 1 and ranks[1].state ~= 2 and ranks[1].state ~= 3
                     and ranks[1].state ~= 5) then return nil end
         elseif value.availability == 6 then return nil end
-    elseif value.kind ~= nil or value.session ~= nil or value.route ~= nil or value.ruleSet ~= nil then return nil end
-    return { kind = value.kind, session = session, route = value.route, ruleSet = value.ruleSet, ranks = ranks, abilityId = value.abilityId, displaySpellId = value.displaySpellId,
+    elseif value.kind ~= nil or value.session ~= nil or value.route ~= nil or value.ruleSet ~= nil
+        or value.nextTrainingCap ~= nil then return nil end
+    local cap = value.nextTrainingCap
+    return { nextTrainingCap = cap and { characterLevel = cap.characterLevel, proficiency = cap.proficiency } or nil,
+        hasCapInfo = schema == 4, kind = value.kind, session = session,
+        route = value.route, ruleSet = value.ruleSet, ranks = ranks,
+        abilityId = value.abilityId, displaySpellId = value.displaySpellId,
         learnedRank = value.learnedRank,
         proficiency = value.proficiency, points = value.points, cap = value.cap, pointsPerLevel = value.pointsPerLevel,
         availability = value.availability, nextPoint = point, nextRank = rank }
@@ -132,7 +144,7 @@ function Model.Validate(snapshot)
     end
     if count ~= #snapshot.abilities then return nil, "Incomplete ability list" end
     for _, value in ipairs(snapshot.abilities) do
-        local ability = Ability(value, snapshot.schemaVersion)
+        local ability = Ability(value, snapshot.schemaVersion, snapshot.characterLevel)
         if not ability or seen[ability.abilityId] then return nil, "Invalid or duplicate ability" end
         rankCount = rankCount + (ability.ranks and #ability.ranks or 0)
         if rankCount > 2048 then return nil, "Rank roadmap is too large" end
@@ -148,8 +160,10 @@ end
 
 function Model.PointText(ability)
     local state = ability.availability
-    if state == 1 then return Model.IsFixed(ability) and "Learn through your normal ability source. No practice required."
-        or "Learn this ability to begin practicing." end
+    if state == 1 then
+        return Model.IsFixed(ability) and "Learn through your normal ability source. No practice required."
+            or "Learn this ability to begin practicing."
+    end
     if state == 2 then return "Requires the appropriate talent or specialization." end
     if state == 3 and Model.IsFixed(ability) then
         return "This ability requires a higher character level. No practice required."
@@ -157,8 +171,12 @@ function Model.PointText(ability)
     if state == 3 then return ability.learnedRank > 0 and "Practice requires a higher character level."
         or "This ability unlocks at a higher character level." end
     if state == 5 then
-        return not ability.nextRank and "Training complete. All defined ranks learned."
-            or "Current proficiency cap reached. Check the next rank for remaining requirements."
+        if not ability.nextRank then return "Training complete. All defined ranks learned." end
+        if ability.nextTrainingCap then
+            return "Current cap reached. More practice opens at character level "
+                .. ability.nextTrainingCap.characterLevel .. " (cap " .. ability.nextTrainingCap.proficiency .. ")."
+        end
+        return "Current proficiency cap reached. Check the next rank for remaining requirements."
     end
     if state == 6 then return "Fixed ability — no practice required." end
     if ability.nextPoint.status == 1 then
@@ -199,17 +217,25 @@ function Model.RankText(rank, fixed)
 end
 
 function Model.PracticeRules(ability)
-    if Model.IsFixed(ability) then return "This ability has no practice levels. Learn it through your normal ability source." end
-    if ability.ruleSet ~= 1 then return "Practice rules are unavailable in this update. Refresh to request the current rules." end
+    if Model.IsFixed(ability) then
+        return "This ability has no practice levels. Learn it through your normal ability source."
+    end
+    if ability.ruleSet ~= 1 then
+        return "Practice rules are unavailable in this update. Refresh to request the current rules."
+    end
     local rules = {
         [1] = "Deal damage to a level-appropriate PvE opponent with the learned ability.",
-        [2] = "Restore missing health on a friendly unit fighting a live, level-appropriate PvE opponent. Full overhealing does not count.",
+        [2] = "Restore missing health on a friendly unit fighting a live, level-appropriate PvE opponent."
+            .. " Full overhealing does not count.",
         [3] = "Actually stop a cast by a live, level-appropriate PvE opponent. An idle target does not count.",
-        [4] = "Successfully remove an aura. Offensive dispels require a level-appropriate PvE opponent; defensive dispels require a friendly unit in a qualifying PvE encounter.",
+        [4] = "Successfully remove an aura. Offensive dispels require a level-appropriate PvE opponent;"
+            .. " defensive dispels require a friendly unit in a qualifying PvE encounter.",
         [5] = "Successfully steal a beneficial aura from a live, level-appropriate PvE opponent.",
     }
     local rule = rules[ability.route]
     if not rule then return "Practice rules are unavailable in this update." end
-    return rule .. "\n\nOpponents that are too low level, players, player-controlled units, pets, totems and critters do not qualify."
-        .. "\n\nOnly your learned ability casts can count. Triggered casts do not count. One award per cast, regardless of targets or removals. Practice stops at your current cap."
+    return rule .. "\n\nOpponents that are too low level, players, player-controlled units, pets, totems"
+        .. " and critters do not qualify."
+        .. "\n\nOnly your learned ability casts can count. Triggered casts do not count."
+        .. " One award per cast, regardless of targets or removals. Practice stops at your current cap."
 end
