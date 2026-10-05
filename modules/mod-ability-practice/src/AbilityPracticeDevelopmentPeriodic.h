@@ -50,6 +50,32 @@ inline constexpr std::array Deathwind = {
 };
 inline constexpr auto DeathwindCaps = Development::RankCaps(Deathwind);
 
+inline constexpr std::array Condemn = {
+    AbilityRank{ 804906, 1, { 4, 1 } },
+    AbilityRank{ 806864, 2, { 12, 10 } },
+    AbilityRank{ 806865, 3, { 20, 20 } },
+    AbilityRank{ 806866, 4, { 28, 40 } },
+    AbilityRank{ 806867, 5, { 36, 60 } },
+    AbilityRank{ 806868, 6, { 44, 80 } },
+    AbilityRank{ 567538, 7, { 52, 100 } },
+    AbilityRank{ 567539, 8, { 60, 120 } },
+    AbilityRank{ 567540, 9, { 68, 140 } },
+    AbilityRank{ 567541, 10, { 76, 160 } }
+};
+inline constexpr auto CondemnCaps = Development::RankCaps(Condemn);
+
+inline constexpr std::array Decomposition = {
+    AbilityRank{ 800856, 1, { 2, 1 } },
+    AbilityRank{ 801028, 2, { 8, 10 } },
+    AbilityRank{ 801029, 3, { 18, 20 } },
+    AbilityRank{ 801030, 4, { 28, 40 } },
+    AbilityRank{ 801031, 5, { 34, 60 } },
+    AbilityRank{ 801032, 6, { 42, 80 } },
+    AbilityRank{ 801033, 7, { 48, 100 } },
+    AbilityRank{ 802597, 8, { 56, 120 } }
+};
+inline constexpr auto DecompositionCaps = Development::RankCaps(Decomposition);
+
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 24, 805476, AbilityKind::Ranked, Cindergrip, CindergripCaps },
@@ -62,6 +88,12 @@ inline constexpr std::array Profiles = {
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 30, 800174, AbilityKind::Ranked, Deathwind, DeathwindCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 19, 804906, AbilityKind::Ranked, Condemn, CondemnCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 22, 800856, AbilityKind::Ranked, Decomposition, DecompositionCaps },
         Development::Policy, OutcomeKind::Damage }
 };
 }

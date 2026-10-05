@@ -10,11 +10,11 @@ The module and addon are staged in this checkout. Nothing is installed or activa
 - Native prototype: three Pyromancer class-grant profiles, with draft tuning. The full rollout still targets
   all 21 CoA classes. An optional startup-only sample catalog adds 20 ranked class-grant profiles for the other
   classes, for 23 profiles across all 21 classes. An optional broader ranked catalog selects 106 profiles and
-  888 authored ranks across all 21 classes, taking priority over class samples. Periodic observation adds four
-  profiles to the selected catalog (seven/27/109 unique profiles respectively, reusing the shared Shadra's Prayer
+  888 authored ranks across all 21 classes, taking priority over class samples. Periodic observation adds six
+  profiles to the selected catalog (nine/29/111 unique profiles respectively, reusing the shared Shadra's Prayer
   definition in the broad ranked mode). Optional Hand of Elune mastery adds one more
   profile. Optional scripted observation adds Manafeed and an independent fixed-utility option adds two
-  nontraining profiles; the largest staged catalog has 113 unique profiles.
+  nontraining profiles; the largest staged catalog has 115 unique profiles.
   All development settings default off. A nonempty explicit `AbilityPractice.DevelopmentCharacterGuids`
   selection is also required; unselected characters keep native progression and receive no practice effects.
 - Outcomes: resolved direct damage/healing, successful interruption, dispel and beneficial-aura steal.
@@ -1473,3 +1473,27 @@ Visible row/help tooltips refresh when data or sync state changes; hiding one ro
 owned by that row. No gameplay, persistence or protocol changes. Source checks passed in
 `.cache/verify-all/20261005-184742/report.json`; five Lua5.1 syntax compilations passed without execution.
 In-game rendering/interaction remains unqualified. No addon installation or live changes.
+
+## Condemn and Decomposition periodic profiles — 5 October 2026
+
+The optional startup-only periodic group now includes Condemn (Templar/class19, root804906,
+ten ranks at4/12/20/28/36/44/52/60/68/76) and Decomposition (Chronomancer/class22, root800856,
+eight ranks at2/8/18/28/34/42/48/56). Every raw rank is nonpassive with native periodic-damage
+aura3/effect6. Authored current class-grant/generated levels are preserved; Decomposition uses the
+current level2 introduction rather than the reference-only legacy level4 row. Shared draft proficiency
+requirements/bands/caps are reused; this is not approved per-ability tuning.
+
+Existing native periodic damage observation supplies one award per original client cast, not per tick.
+Condemn SpreadCondemn uses Player::AddAura and copies amounts/timing without original-cast provenance,
+so those scripted copies cannot award practice. No Templar/Chronomancer damage, modifier or spreading
+mechanics changed. Native startup still validates effective spell definitions/acquisition/rank chains.
+Source/raw evidence is not effective runtime qualification.
+
+The periodic group has six definitions/46 ranks. Combined default/sample/broad catalogs have9/29/111
+unique profiles; broad plus mastery/helper/fixed has115 unique profiles. Authoring coverage reports
+116 declarations/115 unique (112 ranked,1 mastery,2 fixed),732 undecided groups (132 ranked/600
+standalone), still72 without definitions with raw common outcomes. Passive/support groups are not
+necessarily trainable. Provenance now includes36 native sources, adding Templar helper/ability/event files.
+Affected source and native build passed `.cache/verify-all/20261005-185012/report.json`
+(two source checks;35.2-second build). C++ style/whitespace passed; authoring artifacts regenerated.
+No behavioral tests, runtime startup, active addon installation, live configuration/database changes or restart.

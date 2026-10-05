@@ -21,7 +21,8 @@ AbilityPractice.AllowDevelopmentClassSamples = 0
 AbilityPractice.AllowDevelopmentRankedCatalog = 0
 
 # Experimental original-cast observation of native periodic damage and healing. Read once at startup.
-# Adds Cindergrip, Shadra's Prayer, Harvest Plague and Deathwind profiles; leave off until isolated qualification.
+# Adds Cindergrip, Shadra's Prayer, Harvest Plague, Deathwind, Condemn and Decomposition.
+# Leave off until isolated qualification; scripted spread/copies cannot earn extra practice.
 AbilityPractice.AllowDevelopmentPeriodicObservation = 0
 
 # Experimental Hand of Elune practice and up to 2% PvE healing mastery. Read once at startup.
