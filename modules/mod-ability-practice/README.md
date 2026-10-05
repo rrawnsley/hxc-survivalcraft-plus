@@ -188,7 +188,7 @@ and chat are filtered before taking the module lock. Observation requires an ini
 
 The addon requests a fresh view every ten seconds while open. A six-second unanswered request changes the menu
 to unavailable and identifies retained data as a saved view. Only a complete validated snapshot clears that state.
-This does not implement class-switch resynchronization, session totals or the full launch catalog.
+Subsequent milestones add class-switch resynchronization and session totals; the full launch catalog remains pending.
 
 Native source/build passed at `.cache/verify-all/20261005-042638/report.json`; the addon files compile as Lua 5.1
 syntax. Timing, disconnect/reconnect, load/forget ordering and in-game presentation still need runtime acceptance.
@@ -249,3 +249,20 @@ manifest and no observed SQL/runtime layer. No source metadata is promoted to ef
 
 Source checks passed at `.cache/verify-all/20261005-044531/report.json`. The read-only exporters completed against
 `C:/Azerothcore-CoA/server-data/dbc`, writing only this checkout's ignored cache. No new tests or runtime actions ran.
+
+## Class-switch resynchronization
+
+Tracked menu sessions watch the current class by GUID during player updates. A changed class queues a paced
+snapshot. Other human classes can request an authoritative empty catalog, with session totals unavailable,
+without receiving practice awards. Returning to Pyromancer restores its reviewed view and this login's retained
+Pyromancer counters. No ability/progress settings are created for unsupported classes by viewing the menu.
+
+Only a complete, validated, newer self-whisper server snapshot can reset the menu for a changed class. The
+ordinary `ApplySnapshot` entry point still rejects class mismatches; transport uses a separate authoritative
+entry point. Reset clears transient selection/search and keeps class-scoped tracked preferences. Empty catalog
+and saved/unavailable views have explicit text. All default-off paths still return before practice work. While
+development observation is enabled, human player updates check the GUID session map to detect class changes;
+no player pointers are retained. The release catalog and multi-class session accounting remain future work.
+
+Source/native build passed at `.cache/verify-all/20261005-044931/report.json`; C++ lint and Lua 5.1 syntax passed.
+Slot/class switching, stale changed-class packets and relog/in-game behavior still require runtime qualification.

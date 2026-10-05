@@ -37,7 +37,7 @@ listener:SetScript("OnEvent", function(_, event, prefix, message, channel, sende
     end
     if prefix ~= PREFIX or channel ~= "WHISPER" or sender ~= UnitName("player") then return end
     local snapshot = Wire.Accept(message, GetTime(), revision)
-    if snapshot and API.ApplySnapshot(snapshot) then
+    if snapshot and API.ApplyServerSnapshot(snapshot) then
         revision = snapshot.revision
         deadline = nil
     end

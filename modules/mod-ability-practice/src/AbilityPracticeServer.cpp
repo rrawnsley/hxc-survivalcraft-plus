@@ -38,13 +38,19 @@ struct MenuSession
     Clock::time_point NextRefresh{};
     bool Dirty = true;
     std::uint32_t Protocol = Practice::MenuSchemaVersion;
+    std::uint32_t LastClass = 0;
     Practice::SessionPractice Progress;
 };
 std::unordered_map<std::uint64_t, MenuSession> Sessions;
 
+bool IsHumanPlayer(Player const* player)
+{
+    return player && player->GetSession() && !player->GetSession()->IsBot();
+}
+
 bool IsDevelopmentPlayer(Player const* player)
 {
-    return player && player->GetSession() && !player->GetSession()->IsBot() && player->getClass() == Dev::ClassId;
+    return IsHumanPlayer(player) && player->getClass() == Dev::ClassId;
 }
 
 bool Affects(Player const* player)
@@ -94,23 +100,27 @@ std::vector<std::uint32_t> Learned(Player const* player, Practice::AbilityDefini
 
 bool Send(Player* player, MenuSession const& session)
 {
-    if (!Affects(player) || Revision == std::numeric_limits<std::uint32_t>::max())
+    if (!Requested || !DevelopmentAllowed || !Ready || !IsHumanPlayer(player) ||
+        Revision == std::numeric_limits<std::uint32_t>::max())
         return false;
     std::vector<Practice::AbilityView> views;
-    for (Practice::AbilityDefinition const& ability : Dev::Abilities)
-    {
-        auto const learned = Learned(player, ability);
-        auto const loaded = Practice::ReadPlayerProgress(*player, ability.ClassId, ability.AbilityId,
-            Dev::Policy, Dev::DefinitionVersion);
-        auto const migrated = Practice::MigrateLearnedRanks(ability, Dev::Policy, loaded, learned);
-        if (!migrated)
-            return false;
-        views.push_back(Practice::BuildAbilityView(ability, Dev::Policy, migrated->State,
-            player->GetLevel(), learned, true));
-    }
-    auto const messages = Practice::EncodeMenuSnapshot(Dev::ClassId, player->GetLevel(), ++Revision, views,
+    bool const supported = Affects(player);
+    if (supported)
+        for (Practice::AbilityDefinition const& ability : Dev::Abilities)
+        {
+            auto const learned = Learned(player, ability);
+            auto const loaded = Practice::ReadPlayerProgress(*player, ability.ClassId, ability.AbilityId,
+                Dev::Policy, Dev::DefinitionVersion);
+            auto const migrated = Practice::MigrateLearnedRanks(ability, Dev::Policy, loaded, learned);
+            if (!migrated)
+                return false;
+            views.push_back(Practice::BuildAbilityView(ability, Dev::Policy, migrated->State,
+                player->GetLevel(), learned, true));
+        }
+    auto const progress = supported ? session.Progress : Practice::SessionPractice{ false, 0, 0 };
+    auto const messages = Practice::EncodeMenuSnapshot(player->getClass(), player->GetLevel(), ++Revision, views,
         session.Protocol == Practice::SessionMenuSchemaVersion
-            ? std::optional<Practice::SessionPractice>(session.Progress) : std::nullopt);
+            ? std::optional<Practice::SessionPractice>(progress) : std::nullopt);
     if (!messages)
         return false;
     for (std::string const& message : *messages)
@@ -128,7 +138,10 @@ void Refresh(Player* player, MenuSession& session, Clock::time_point now)
         return;
     session.NextRefresh = now + RefreshInterval;
     if (Send(player, session))
+    {
         session.Dirty = false;
+        session.LastClass = player->getClass();
+    }
 }
 
 void MarkDirty(Player* player)
@@ -212,12 +225,15 @@ public:
 
     void OnPlayerUpdate(Player* player, uint32) override
     {
-        if (!Active.load() || !IsDevelopmentPlayer(player))
+        if (!Active.load() || !IsHumanPlayer(player))
             return;
         std::lock_guard lock(Mutex);
         auto const found = Sessions.find(player->GetGUID().GetRawValue());
-        if (Affects(player) && found != Sessions.end())
-            Refresh(player, found->second, Clock::now());
+        if (found == Sessions.end())
+            return;
+        if (found->second.LastClass != player->getClass())
+            found->second.Dirty = true;
+        Refresh(player, found->second, Clock::now());
     }
 
     void OnPlayerLevelChanged(Player* player, uint8) override
@@ -246,11 +262,11 @@ public:
 
     bool OnPlayerCanUseChat(Player* player, uint32, uint32 language, std::string& message, Player* receiver) override
     {
-        if (!Active.load() || !IsDevelopmentPlayer(player) || language != LANG_ADDON ||
+        if (!Active.load() || !IsHumanPlayer(player) || language != LANG_ADDON ||
             message.rfind("HXAP\t", 0) != 0)
             return true;
         std::lock_guard lock(Mutex);
-        if (!Affects(player))
+        if (!Requested || !DevelopmentAllowed || !Ready)
             return true;
         if (receiver != player || (message != "HXAP\tHELLO|1" && message != "HXAP\tHELLO|2"))
             return false;

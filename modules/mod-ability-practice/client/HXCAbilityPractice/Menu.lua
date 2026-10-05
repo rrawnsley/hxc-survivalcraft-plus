@@ -122,6 +122,7 @@ Refresh = function()
     else
         local status = syncState == "current" and "Server progress received"
             or (syncState == "waiting" and "Refreshing saved view..." or "Saved view - Server progress unavailable")
+        if #snapshot.abilities == 0 and syncState == "current" then status = "No practice catalog for this class" end
         subtitle:SetText("Character level " .. snapshot.characterLevel .. " - " .. status)
         local tracked = TrackedAbilities()
         for _, ability in ipairs(snapshot.abilities) do
@@ -146,8 +147,11 @@ Refresh = function()
         chosen = chosen or visible[1]
         selectedId = chosen and chosen.abilityId or nil
         RenderDetail(chosen)
-        footer:SetText(#visible == 0 and "No abilities in this view." or
-            (#visible .. " abilities · Use the mouse wheel to browse · Forecasts count qualifying uses"))
+        local emptyText = syncState == "current" and "The server has no practice abilities configured for this class."
+            or "This saved view contains no configured practice abilities."
+        footer:SetText(#snapshot.abilities == 0 and emptyText or
+            (#visible == 0 and "No abilities in this view." or
+            (#visible .. " abilities · Use the mouse wheel to browse · Forecasts count qualifying uses")))
     end
     for index, row in ipairs(rows) do
         local ability = visible[index + offset]
@@ -216,6 +220,14 @@ function API.ApplySnapshot(value)
     syncState = "current"
     Refresh()
     return true
+end
+
+function API.ApplyServerSnapshot(value)
+    local validated, reason = Model.Validate(value)
+    if not validated then return false, reason end
+    if snapshot and validated.revision <= snapshot.revision then return false, "Stale progress update" end
+    if snapshot and validated.classId ~= snapshot.classId then API.Reset() end
+    return API.ApplySnapshot(validated)
 end
 
 function API.IsShown()
