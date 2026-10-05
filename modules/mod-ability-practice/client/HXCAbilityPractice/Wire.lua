@@ -98,10 +98,15 @@ local function Accept(message, now, currentRevision, currentGeneration)
         local snapshot = { schemaVersion = pending.schemaVersion, revision = pending.revision,
             classId = pending.classId, characterLevel = pending.characterLevel, generation = pending.generation,
             realmMaximumLevel = pending.realmMaximumLevel, session = pending.session,
-            learning = pending.learning, abilities = {} }
+            learning = pending.learning, mastery = pending.mastery, abilities = {} }
         if pending.learning then
             for index = 1, pending.learnCount do
                 if not pending.learning.events[index] then return Reject("Incomplete session learning history") end
+            end
+        end
+        if pending.mastery then
+            for index = 1, pending.masteryCount do
+                if not pending.mastery.events[index] then return Reject("Incomplete mastery history") end
             end
         end
         for index = 1, pending.count do
@@ -137,6 +142,25 @@ local function Accept(message, now, currentRevision, currentGeneration)
         end
         pending = nil
         return Model.Validate(snapshot)
+    end
+    if kind == "H" then
+        local count = tonumber(fields[4])
+        if pending.schemaVersion ~= 4 or pending.mastery or #fields ~= 5 or not count or count > 32
+            or (fields[3] ~= "0" and fields[3] ~= "1") then return Reject("Invalid mastery history header") end
+        pending.mastery = { available = fields[3] == "1", total = fields[5], events = {} }
+        pending.masteryCount = count
+        return nil
+    end
+    if kind == "O" then
+        local index = tonumber(fields[3])
+        if pending.schemaVersion ~= 4 or not pending.mastery or #fields ~= 8 or not index
+            or index < 1 or index > pending.masteryCount or pending.mastery.events[index] then
+            return Reject("Invalid mastery history event")
+        end
+        pending.mastery.events[index] = { abilityId = tonumber(fields[4]), ordinal = tonumber(fields[5]),
+            characterLevel = tonumber(fields[6]), proficiency = tonumber(fields[7]),
+            healingBonusBasisPoints = tonumber(fields[8]) }
+        return nil
     end
     if kind == "N" then
         local index = tonumber(fields[3])
@@ -267,7 +291,7 @@ local function AcceptPacked(message, now, currentRevision, currentGeneration)
     if tonumber(revisionText) ~= pending.revision then return nil, "Unrelated packed progress message" end
     local parts = {}
     for part in string.gmatch(body .. ";", "([^;]*);") do
-        local kind, fields = string.match(part, "^([ACPRTKLMNG])|(.+)$")
+        local kind, fields = string.match(part, "^([ACPRTKLMNGO])|(.+)$")
         if not kind or #parts >= 32 then return Reject("Invalid packed progress part") end
         parts[#parts + 1] = kind .. "|" .. revisionText .. "|" .. fields
     end

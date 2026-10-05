@@ -164,7 +164,8 @@ constexpr auto InterestDuration = std::chrono::seconds(30);
 constexpr auto DeliveryInterval = std::chrono::milliseconds(100);
 constexpr auto DeliveryDuration = std::chrono::seconds(90);
 constexpr std::size_t DeliveryBatchSize = 8;
-constexpr std::size_t MaxQueuedMessages = 512 * 8 + 2048 + Practice::MaximumSessionLearns + 3;
+constexpr std::size_t MaxQueuedMessages = 512 * 8 + 2048 + Practice::MaximumSessionLearns +
+    Practice::MaximumSessionMasteries + 4;
 constexpr std::uint32_t PracticeCastSourceKey = 0x41504353;
 constexpr std::uint32_t PracticeClientRequestKey = 0x41504352;
 std::string const ActiveSpecializationSource = "core.ascension_active_spec";
@@ -172,6 +173,8 @@ struct ClassSession
 {
     Practice::SessionPractice Totals;
     Practice::SessionLearning Learning;
+    Practice::SessionMastery Mastery;
+    std::unordered_map<std::uint32_t, std::uint32_t> MasterySeen;
     std::unordered_map<std::uint32_t, Practice::SessionPractice> Abilities;
 };
 
@@ -642,6 +645,11 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
             ? std::optional<Practice::SessionLearningView>(!supported
                 ? Practice::SessionLearningView{ false, 0, {} } : currentProgress == session.Progress.end()
                     ? Practice::SessionLearningView{ true, 0, {} } : currentProgress->second.Learning.View())
+            : std::nullopt,
+        session.Protocol == Practice::TypedMenuSchemaVersion
+            ? std::optional<Practice::SessionMasteryView>(!supported
+                ? Practice::SessionMasteryView{ false, 0, {} } : currentProgress == session.Progress.end()
+                    ? Practice::SessionMasteryView{ true, 0, {} } : currentProgress->second.Mastery.View())
             : std::nullopt);
     if (!messages || messages->size() > MaxQueuedMessages)
         return false;
@@ -681,6 +689,8 @@ void Refresh(Player* player, MenuSession& session, Clock::time_point now)
     }
 }
 
+void ObserveMastery(Player* player, MenuSession& session, bool baseline);
+
 void RecordAward(Player* player, MenuSession& session, Practice::AbilityProfile const& profile,
     Practice::OutcomeAward const& award)
 {
@@ -689,6 +699,8 @@ void RecordAward(Player* player, MenuSession& session, Practice::AbilityProfile 
     ClassSession& progress = session.Progress[player->getClass()];
     progress.Totals.RecordAward(award.ProficiencyGained);
     progress.Abilities[profile.Definition.AbilityId].RecordAward(award.ProficiencyGained);
+    if (profile.Definition.Kind == Practice::AbilityKind::Mastery)
+        ObserveMastery(player, session, false);
     session.Dirty = true;
     session.CheckRanks = true;
     Refresh(player, session, Clock::now());
@@ -815,6 +827,44 @@ void InitializeProgress(Player* player)
     }
 }
 
+void ObserveMastery(Player* player, MenuSession& session, bool baseline)
+{
+    if (!MasteryRequested || !Affects(player) || player->isBeingLoaded())
+        return;
+    ClassSession& progress = session.Progress[player->getClass()];
+    for (Practice::AbilityProfile const* profile : ProfilesForClass(player->getClass()))
+    {
+        auto const& ability = profile->Definition;
+        if (ability.Kind != Practice::AbilityKind::Mastery)
+            continue;
+        auto const learned = Learned(player, ability);
+        auto const loaded = Practice::ReadPlayerProgress(*player, ability.ClassId, ability.AbilityId,
+            profile->Policy, profile->DefinitionVersion);
+        auto const migrated = Practice::MigrateLearnedRanks(ability, profile->Policy, loaded, learned);
+        if (!migrated)
+            continue;
+        auto const [found, firstObservation] = progress.MasterySeen.try_emplace(ability.AbilityId, 0);
+        std::uint32_t& seen = found->second;
+        bool const establishBaseline = baseline || firstObservation;
+        bool const eligible = !learned.empty() &&
+            AcquisitionAllowed(player, ability, ability.Ranks.front().SpellId);
+        for (std::size_t index = 0; index < profile->Rewards.size(); ++index)
+        {
+            auto const& reward = profile->Rewards[index];
+            std::uint32_t const bit = std::uint32_t(1) << index;
+            if ((seen & bit) || player->GetLevel() < reward.Requirement.CharacterLevel ||
+                migrated->State.Proficiency < reward.Requirement.Proficiency || (!establishBaseline && !eligible))
+                continue;
+            seen |= bit;
+            if (!establishBaseline)
+            {
+                progress.Mastery.Record(ability.AbilityId, static_cast<std::uint32_t>(index + 1), reward);
+                session.Dirty = true;
+            }
+        }
+    }
+}
+
 void RefreshOwnerState(Player* player, MenuSession& session, std::uint32_t customSpecialization)
 {
     if (session.Initialized && session.LastClass == player->getClass() && session.LastRace == player->getRace() &&
@@ -823,6 +873,7 @@ void RefreshOwnerState(Player* player, MenuSession& session, std::uint32_t custo
     ClearDelivery(session);
     session.NextRefresh = {};
     InitializeProgress(player);
+    ObserveMastery(player, session, true);
     session.Initialized = true;
     session.LastClass = player->getClass();
     session.LastRace = player->getRace();
@@ -1029,7 +1080,11 @@ public:
         std::lock_guard lock(Mutex);
         auto const found = Sessions.find(player->GetGUID().GetRawValue());
         if (found != Sessions.end())
+        {
+            if (checkRanks)
+                ObserveMastery(player, found->second, false);
             Refresh(player, found->second, Clock::now());
+        }
     }
 
     void OnPlayerLevelChanged(Player* player, uint8) override

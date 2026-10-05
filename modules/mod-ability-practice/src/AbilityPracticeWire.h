@@ -134,7 +134,7 @@ inline std::vector<std::string> PackTypedMessages(std::span<std::string const> l
     };
     for (std::string const& line : lines)
     {
-        if (line.empty() || std::string_view("ACPRTKLMNG").find(line.front()) == std::string_view::npos)
+        if (line.empty() || std::string_view("ACPRTKLMNGO").find(line.front()) == std::string_view::npos)
         {
             flush();
             packed.push_back(line);
@@ -179,7 +179,8 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
     std::uint32_t characterLevel, std::uint32_t revision, std::span<AbilityView const> abilities,
     std::optional<SessionPractice> session = std::nullopt, bool includeRoadmap = false, bool includeKinds = false,
     std::uint64_t generation = 0, std::optional<std::uint32_t> realmMaximumLevel = std::nullopt,
-    std::optional<SessionLearningView> learning = std::nullopt)
+    std::optional<SessionLearningView> learning = std::nullopt,
+    std::optional<SessionMasteryView> mastery = std::nullopt)
 {
     if (!classId || classId > 255 || !characterLevel || characterLevel > 255 || !revision || abilities.size() > 512)
         return std::nullopt;
@@ -192,6 +193,11 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
             (learning->Available && learning->Events.size() !=
                 std::min(learning->Total, static_cast<std::uint64_t>(MaximumSessionLearns))) ||
             (!learning->Available && (learning->Total || !learning->Events.empty()))))
+        return std::nullopt;
+    if (mastery && (!includeKinds || mastery->Events.size() > MaximumSessionMasteries ||
+        mastery->Total < mastery->Events.size() || (mastery->Available && mastery->Events.size() !=
+            std::min(mastery->Total, static_cast<std::uint64_t>(MaximumSessionMasteries))) ||
+        (!mastery->Available && (mastery->Total || !mastery->Events.empty()))))
         return std::nullopt;
     std::size_t rankCount = 0;
     std::size_t rewardCount = 0;
@@ -369,6 +375,31 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
             lines.push_back(Detail::WireLine('N', revision, index + 1, event.AbilityId, event.Rank.SpellId,
                 event.Rank.RankNumber, event.Rank.Requirement.CharacterLevel, event.Rank.Requirement.Proficiency));
         }
+    if (mastery)
+    {
+        lines.push_back(Detail::WireLine('H', revision, mastery->Available ? 1 : 0,
+            mastery->Events.size(), mastery->Total));
+        for (std::size_t index = 0; index < mastery->Events.size(); ++index)
+        {
+            auto const& event = mastery->Events[index];
+            for (std::size_t prior = 0; prior < index; ++prior)
+                if (mastery->Events[prior].AbilityId == event.AbilityId &&
+                    mastery->Events[prior].Ordinal == event.Ordinal)
+                    return std::nullopt;
+            auto const ability = std::find_if(abilities.begin(), abilities.end(),
+                [&event](AbilityView const& view) { return view.AbilityId == event.AbilityId; });
+            if (ability == abilities.end() || ability->Kind != AbilityKind::Mastery ||
+                !event.Ordinal || event.Ordinal > ability->Rewards.size())
+                return std::nullopt;
+            auto const& reward = ability->Rewards[event.Ordinal - 1].Reward;
+            if (reward.Requirement.CharacterLevel != event.Reward.Requirement.CharacterLevel ||
+                reward.Requirement.Proficiency != event.Reward.Requirement.Proficiency ||
+                reward.HealingBonusBasisPoints != event.Reward.HealingBonusBasisPoints)
+                return std::nullopt;
+            lines.push_back(Detail::WireLine('O', revision, index + 1, event.AbilityId, event.Ordinal,
+                reward.Requirement.CharacterLevel, reward.Requirement.Proficiency, reward.HealingBonusBasisPoints));
+        }
+    }
     if (session)
     {
         if (!session->Available && (session->Uses || session->ProficiencyGained))

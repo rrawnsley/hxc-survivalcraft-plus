@@ -114,6 +114,16 @@ local function SpellName(spellId)
     return GetSpellInfo(spellId) or ("Ability " .. spellId)
 end
 
+local function SessionMasteryText(ability)
+    local highest
+    for _, event in ipairs(Model.SessionMasteries(snapshot, ability.abilityId)) do
+        highest = math.max(highest or 0, event.healingBonusBasisPoints)
+    end
+    if not highest then return nil end
+    return "Earned +" .. string.format("%.2f", highest / 100):gsub("0+$", ""):gsub("%.$", "")
+        .. "% healing mastery this session"
+end
+
 local function SessionLearnText(ability)
     local highest = 0
     for _, event in ipairs(Model.SessionLearns(snapshot, ability.abilityId)) do
@@ -282,7 +292,7 @@ Refresh = function()
             local matchesTab = (tab == "skills" and ability.learnedRank > 0)
                 or (tab == "upcoming" and Model.NextMilestone(ability))
                 or (tab == "tracked" and tracked[tostring(ability.abilityId)] == true)
-                or (tab == "session" and (SessionLearnText(ability) or
+                or (tab == "session" and (SessionMasteryText(ability) or SessionLearnText(ability) or
                     (ability.session and ability.session.available and not Model.IsFixed(ability)
                         and (ability.session.uses ~= "0" or ability.session.proficiencyGained ~= "0"))))
             local matchesSearch = search == "" or string.find(string.lower(SpellName(ability.displaySpellId)),
@@ -318,8 +328,8 @@ Refresh = function()
             emptyView = (snapshot.schemaVersion ~= 4 or not session or not session.available)
                 and "Per-ability session progress is unavailable in this snapshot."
                 or (snapshot.learning and snapshot.learning.available
-                    and (syncState == "current" and "No practice or ability learning recorded this session."
-                        or "No practice or ability learning recorded in this saved view.")
+                    and (syncState == "current" and "No practice, learning or mastery recorded this session."
+                        or "No practice, learning or mastery recorded in this saved view.")
                     or (syncState == "current" and "No qualifying practice has been recorded this session."
                         or "No qualifying practice was recorded in this saved view."))
         end
@@ -330,7 +340,8 @@ Refresh = function()
                 .. " · Forecasts count qualifying uses")))
         if tab == "session" and #visible > 0 and snapshot.learning and snapshot.learning.available then
             footer:SetText(#visible .. " abilities · Learned ability/rank events: " .. snapshot.learning.total
-                .. " · Latest " .. #snapshot.learning.events .. " retained")
+                .. " · Mastery: " .. (snapshot.mastery and snapshot.mastery.available
+                    and snapshot.mastery.total or "unknown"))
         end
     end
     if serverFailure then
@@ -363,7 +374,7 @@ Refresh = function()
                 ((ability.session and ability.session.available and not Model.IsFixed(ability)
                     and (ability.session.uses ~= "0" or ability.session.proficiencyGained ~= "0"))
                     and (ability.session.uses .. " uses · +" .. ability.session.proficiencyGained .. " proficiency")
-                    or SessionLearnText(ability)) or
+                    or SessionMasteryText(ability) or SessionLearnText(ability)) or
                 tab == "upcoming" and rank and
                 ((ability.learnedRank == 0 and "New ability" or Model.IsMastery(ability) and "Next mastery benefit"
                     or ("Next rank " .. rank.rankNumber))
@@ -428,6 +439,11 @@ for index = 1, 9 do
                 .. ability.session.uses .. " qualifying uses · +"
                 .. ability.session.proficiencyGained .. " proficiency",
                 1, 0.82, 0, true)
+        end
+        for _, event in ipairs(Model.SessionMasteries(snapshot, ability.abilityId)) do
+            GameTooltip:AddLine((syncState == "current" and "Earned this session: +" or "Saved session reward: +")
+                .. string.format("%.2f", event.healingBonusBasisPoints / 100):gsub("0+$", ""):gsub("%.$", "")
+                .. "% healing mastery · Proficiency " .. event.proficiency, 0.55, 0.9, 0.6, true)
         end
         local learns = Model.SessionLearns(snapshot, ability.abilityId)
         for index = math.max(1, #learns - 2), #learns do

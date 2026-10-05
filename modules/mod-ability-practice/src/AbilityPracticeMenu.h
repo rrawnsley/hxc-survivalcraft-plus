@@ -81,6 +81,48 @@ struct SessionLearning
     SessionLearningView View() const { return { Available, Total, Events }; }
 };
 
+inline constexpr std::size_t MaximumSessionMasteries = 32;
+
+struct SessionMasteryEvent
+{
+    std::uint32_t AbilityId;
+    std::uint32_t Ordinal;
+    MasteryReward Reward;
+};
+
+struct SessionMasteryView
+{
+    bool Available;
+    std::uint64_t Total;
+    std::span<SessionMasteryEvent const> Events;
+};
+
+struct SessionMastery
+{
+    bool Available = true;
+    std::uint64_t Total = 0;
+    std::vector<SessionMasteryEvent> Events;
+
+    void Record(std::uint32_t abilityId, std::uint32_t ordinal, MasteryReward const& reward)
+    {
+        if (!Available)
+            return;
+        if (Total == std::numeric_limits<std::uint64_t>::max())
+        {
+            Available = false;
+            Total = 0;
+            Events.clear();
+            return;
+        }
+        ++Total;
+        if (Events.size() == MaximumSessionMasteries)
+            Events.erase(Events.begin());
+        Events.push_back({ abilityId, ordinal, reward });
+    }
+
+    SessionMasteryView View() const { return { Available, Total, Events }; }
+};
+
 enum class PracticeAvailability
 {
     Invalid = 0,

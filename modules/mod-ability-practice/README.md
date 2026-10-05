@@ -29,7 +29,7 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   Shared native race/racial and faction-rift eligibility is checked at preparation, award and new upgrades;
   class/race/talent-set/custom-specialization changes refresh the owner state. Normal database save/reload/failure
   behavior and broader acquisition entitlements remain unqualified.
-- Menu: addon 0.4.19-development; unpublished protocol 4 includes B11 instance identity/realm cap/session learning, T11 kind/session/rules/reward
+- Menu: addon 0.4.20-development; unpublished protocol 4 includes B11 instance identity/realm cap/session learning, T11 kind/session/rules/reward
   count/acquisition source and M mastery entries,
   mandatory C future-cap metadata, packed D parts and F8 unreadable-progress responses. Typed delivery is
   bounded/paced; saved views/ages/session totals are labeled. Existing schema 1/2/3 formats are preserved.
@@ -1615,3 +1615,34 @@ Source/native passed .cache/verify-all/20261005-200448/report.json (two source c
 C++ style/whitespace and five Lua5.1 syntax compilations passed; no addon chunks executed. Authoring
 provenance regenerated with37 native sources; catalog remains115 unique/116 declarations. No unit/harness/
 gameplay tests, runtime startup or live server/client/configuration/database/launcher changes or restart.
+
+
+## Recorded session mastery rewards — 5 October 2026
+
+Session mastery events are now server observations of newly met reward requirements, not client forecast
+inferences. Class/ability reward bitmasks establish a silent baseline from retained/migrated proficiency and
+character level at owner initialization or first valid observation. Loading/unreadable records cannot create
+historical reward events. Baseline includes existing level/proficiency rewards even if their ability is
+currently unlearned/ineligible, so restoring eligibility does not count existing milestones as newly earned.
+Later original-cast mastery awards and dirty-state player updates record first-time eligible level/proficiency
+milestones. A level-up can unlock previously earned practice; level loss/relearning/returning to a class cannot
+record a seen reward twice. Masks/history remain per class for the login/enrollment session, reset with session
+removal and are never persisted. Existing reward calculations/power/rank gates/progress storage remain unchanged.
+Normal nonmastery awards do not scan mastery rewards. Observer reads cached settings, with no new DB query.
+
+Bounded SessionMastery retains latest32 events and exact uint64 total; overflow marks history unavailable.
+Typed unpublished protocol4 adds H5 history availability/count/total and O8 ability/reward ordinal/requirements/
+benefit records. Native/client require exact same-snapshot reward definition, complete sequential entries,
+count=min(total,32), zero/empty unavailable history and no duplicate ability/ordinal events. Invalid history
+rejects the complete snapshot. O can pack in D; H precedes O and delivery bound allows history plus header.
+Older snapshots without H show unknown mastery history; they do not invent zero events. This unpublished
+extension requires matching staged addon0.4.20-development; no production launcher compatibility is claimed.
+Session view includes reward-only abilities, shows earned benefit for reward-only rows and retained events in
+hover details, labels saved records and reports exact total alongside actual ability/rank learning. Practice
+rows retain their uses/gains. Full menu visual fit/callback ordering/level/acquisition/lifecycle behavior remains
+unqualified; no runtime or behavior tests were run.
+
+Source/native passed .cache/verify-all/20261005-200956/report.json (two source checks;35.5-second build).
+C++ style/whitespace and five Lua5.1 syntax compilations passed without executing addon chunks; authoring
+provenance/coverage regenerated (37 native sources;115 unique profiles/116 declarations). No live server/
+client/configuration/database/launcher changes, installation, startup or restart.

@@ -258,6 +258,37 @@ local function Learning(value, abilities)
     return { available = value.available, total = value.total, events = events }
 end
 
+local function MasteryHistory(value, abilities)
+    if type(value) ~= "table" or type(value.available) ~= "boolean" or not Counter(value.total)
+        or type(value.events) ~= "table" or #value.events > 32 then return nil end
+    local expected = #value.total <= 2 and math.min(tonumber(value.total), 32) or 32
+    if not value.available and (value.total ~= "0" or #value.events ~= 0) then return nil end
+    if value.available and #value.events ~= expected then return nil end
+    local count = 0
+    for key in pairs(value.events) do
+        if not Integer(key, 1, #value.events) then return nil end
+        count = count + 1
+    end
+    if count ~= #value.events then return nil end
+    local byId, events, seen = {}, {}, {}
+    for _, ability in ipairs(abilities) do byId[ability.abilityId] = ability end
+    for _, event in ipairs(value.events) do
+        if type(event) ~= "table" or not Integer(event.abilityId, 1, 4294967295)
+            or not Integer(event.ordinal, 1, 8) then return nil end
+        local identity = event.abilityId .. ":" .. event.ordinal
+        if seen[identity] then return nil end
+        seen[identity] = true
+        local ability = byId[event.abilityId]
+        local reward = ability and ability.kind == 2 and ability.rewards[event.ordinal]
+        if not reward or event.characterLevel ~= reward.characterLevel or event.proficiency ~= reward.proficiency
+            or event.healingBonusBasisPoints ~= reward.healingBonusBasisPoints then return nil end
+        events[#events + 1] = { abilityId = event.abilityId, ordinal = event.ordinal,
+            characterLevel = event.characterLevel, proficiency = event.proficiency,
+            healingBonusBasisPoints = event.healingBonusBasisPoints }
+    end
+    return { available = value.available, total = value.total, events = events }
+end
+
 function Model.Validate(snapshot)
     if type(snapshot) ~= "table"
         or (snapshot.schemaVersion ~= 1 and snapshot.schemaVersion ~= 2 and snapshot.schemaVersion ~= 3
@@ -299,6 +330,20 @@ function Model.Validate(snapshot)
         if snapshot.schemaVersion ~= 4 then return nil, "Unexpected session learning history" end
         result.learning = Learning(snapshot.learning, result.abilities)
         if not result.learning then return nil, "Invalid session learning history" end
+    end
+    if snapshot.mastery ~= nil then
+        if snapshot.schemaVersion ~= 4 then return nil, "Unexpected mastery history" end
+        result.mastery = MasteryHistory(snapshot.mastery, result.abilities)
+        if not result.mastery then return nil, "Invalid mastery history" end
+    end
+    return result
+end
+
+function Model.SessionMasteries(snapshot, abilityId)
+    local result = {}
+    if not snapshot.mastery or not snapshot.mastery.available then return result end
+    for _, event in ipairs(snapshot.mastery.events) do
+        if event.abilityId == abilityId then result[#result + 1] = event end
     end
     return result
 end
