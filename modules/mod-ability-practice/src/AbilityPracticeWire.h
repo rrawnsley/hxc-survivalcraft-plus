@@ -178,11 +178,13 @@ inline std::optional<std::string> EncodeMenuProgressFailure(std::uint32_t revisi
 inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t classId,
     std::uint32_t characterLevel, std::uint32_t revision, std::span<AbilityView const> abilities,
     std::optional<SessionPractice> session = std::nullopt, bool includeRoadmap = false, bool includeKinds = false,
-    std::uint64_t generation = 0)
+    std::uint64_t generation = 0, std::optional<std::uint32_t> realmMaximumLevel = std::nullopt)
 {
     if (!classId || classId > 255 || !characterLevel || characterLevel > 255 || !revision || abilities.size() > 512)
         return std::nullopt;
     if ((includeRoadmap && !session) || (includeKinds && (!includeRoadmap || !generation)))
+        return std::nullopt;
+    if (includeKinds && realmMaximumLevel && (!*realmMaximumLevel || *realmMaximumLevel > 255))
         return std::nullopt;
     std::size_t rankCount = 0;
     std::size_t rewardCount = 0;
@@ -210,7 +212,11 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
         session ? SessionMenuSchemaVersion : MenuSchemaVersion,
         revision, classId, characterLevel, abilities.size()));
     if (includeKinds)
+    {
         lines.front() += '|' + std::to_string(generation);
+        if (realmMaximumLevel)
+            lines.front() += '|' + std::to_string(*realmMaximumLevel);
+    }
     for (std::size_t index = 0; index < abilities.size(); ++index)
     {
         AbilityView const& view = abilities[index];

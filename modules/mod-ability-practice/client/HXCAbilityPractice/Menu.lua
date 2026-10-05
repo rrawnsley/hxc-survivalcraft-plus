@@ -99,7 +99,9 @@ local function UpdateSubtitle(now)
     local ageText = age and ((age < 60 and (age .. "s") or
         (age < 3600 and (math.floor(age / 60) .. "m") or (math.floor(age / 3600) .. "h"))) .. " old")
         or "Update age unavailable"
-    subtitle:SetText("Character level " .. snapshot.characterLevel .. " - " .. status .. " - " .. ageText)
+    subtitle:SetText("Level " .. snapshot.characterLevel
+        .. (snapshot.realmMaximumLevel and (" / Realm cap " .. snapshot.realmMaximumLevel) or "")
+        .. " - " .. status .. " - " .. ageText)
 end
 
 local function SpellName(spellId)
@@ -138,8 +140,8 @@ practiceHelp:SetScript("OnEnter", function(self)
             GameTooltip:AddLine(Model.PracticeRules(ability), 1, 1, 1, true)
             if ability.learnedRank > 0 and ability.hasCapInfo and not Model.IsFixed(ability) then
                 local cap = ability.nextTrainingCap
-                GameTooltip:AddLine(cap and ("More practice capacity at character level " .. cap.characterLevel
-                    .. " (cap " .. cap.proficiency .. ").") or
+                GameTooltip:AddLine(cap and Model.TrainingCapText(cap, snapshot.realmMaximumLevel,
+                    snapshot.characterLevel) or
                     (ability.proficiency >= ability.cap and
                         "No additional practice beyond this proficiency in the current definition." or
                         "This is the highest defined training cap."), 1, 0.82, 0, true)
@@ -190,14 +192,14 @@ local function RenderDetail(ability)
         progressLabel:SetText(capped and (not Model.NextMilestone(ability) and "Training complete" or "Current cap reached") or
             (math.floor(100 * ability.points / ability.pointsPerLevel) .. "% to the next proficiency point"))
     end
-    pointText:SetText(Model.PointText(ability))
+    pointText:SetText(Model.PointText(ability, snapshot.realmMaximumLevel, snapshot.characterLevel))
     local nextRank = ability.nextRank
     local nextReward = Model.NextMastery(ability)
     nextTitle:SetText(nextRank and ((ability.learnedRank == 0 and "Upcoming ability: " or "Next rank: ")
         .. SpellName(nextRank.spellId) .. ((fixed or mastery) and "" or (" (Rank " .. nextRank.rankNumber .. ")")))
         or (fixed and "Ability details" or mastery and "Mastery benefits" or "Rank progression"))
-    nextText:SetText(mastery and not nextRank and Model.MasteryText(nextReward)
-        or Model.RankText(nextRank, fixed))
+    nextText:SetText(mastery and not nextRank and Model.MasteryText(nextReward, snapshot.realmMaximumLevel, snapshot.characterLevel)
+        or Model.RankText(nextRank, fixed, snapshot.realmMaximumLevel, snapshot.characterLevel))
     local ranks = mastery and ability.rewards or ability.ranks
     roadmapButton:SetText(mastery and (showRoadmap and "Next benefit" or "All mastery")
         or (showRoadmap and "Next rank" or "All ranks"))
@@ -215,7 +217,8 @@ local function RenderDetail(ability)
             row:Show()
             row.title:SetText(mastery and ("Mastery " .. (index + rankOffset))
                 or ("Rank " .. rank.rankNumber .. " - " .. SpellName(rank.spellId)))
-            row.info:SetText(mastery and Model.MasteryText(rank) or Model.RankText(rank, fixed))
+            row.info:SetText(mastery and Model.MasteryText(rank, snapshot.realmMaximumLevel, snapshot.characterLevel)
+                or Model.RankText(rank, fixed, snapshot.realmMaximumLevel, snapshot.characterLevel))
         else row:Hide() end
     end
 end
@@ -297,7 +300,9 @@ Refresh = function()
             row.info:SetText(tab == "upcoming" and rank and
                 ((ability.learnedRank == 0 and "New ability" or Model.IsMastery(ability) and "Next mastery benefit"
                     or ("Next rank " .. rank.rankNumber))
-                    .. " · Req. level " .. rank.characterLevel) or
+                    .. " · " .. (Model.BeyondRealmLevel(rank.characterLevel, snapshot.realmMaximumLevel,
+                        snapshot.characterLevel) and ("Above realm cap " .. snapshot.realmMaximumLevel)
+                        or ("Req. level " .. rank.characterLevel))) or
                 (ability.learnedRank == 0 and "Not yet learned" or
                     (Model.IsFixed(ability) and "Fixed ability" or Model.IsMastery(ability) and
                         ("Mastery · Proficiency " .. ability.proficiency) or

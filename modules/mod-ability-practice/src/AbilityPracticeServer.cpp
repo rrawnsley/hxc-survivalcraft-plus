@@ -28,6 +28,7 @@
 #include "ScriptMgr.h"
 #include "Spell.h"
 #include "SpellMgr.h"
+#include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 
@@ -576,7 +577,7 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
         session.Protocol >= Practice::SessionMenuSchemaVersion
             ? std::optional<Practice::SessionPractice>(progress) : std::nullopt,
         session.Protocol >= Practice::RoadmapMenuSchemaVersion, session.Protocol == Practice::TypedMenuSchemaVersion,
-        ServerGeneration);
+        ServerGeneration, sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL));
     if (!messages || messages->size() > MaxQueuedMessages)
         return false;
     if (session.Protocol == Practice::TypedMenuSchemaVersion)

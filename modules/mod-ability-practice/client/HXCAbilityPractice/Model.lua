@@ -215,12 +215,14 @@ function Model.Validate(snapshot)
     if snapshot.schemaVersion == 4 and not Model.ValidGeneration(snapshot.generation) then
         return nil, "Missing server instance identity"
     end
+    if snapshot.realmMaximumLevel ~= nil and (snapshot.schemaVersion ~= 4
+        or not Integer(snapshot.realmMaximumLevel, 1, 255)) then return nil, "Invalid realm level cap" end
     local session = snapshot.schemaVersion >= 2 and Session(snapshot.session) or nil
     if snapshot.schemaVersion >= 2 and not session then return nil, "Incomplete session progress" end
     if snapshot.schemaVersion == 1 and snapshot.session ~= nil then return nil, "Unexpected session progress" end
     local result = { schemaVersion = snapshot.schemaVersion, session = session, revision = snapshot.revision,
         classId = snapshot.classId, generation = snapshot.schemaVersion == 4 and snapshot.generation or nil,
-        characterLevel = snapshot.characterLevel, abilities = {} }
+        characterLevel = snapshot.characterLevel, realmMaximumLevel = snapshot.realmMaximumLevel, abilities = {} }
     local seen = {}
     local rankCount = 0
     local rewardCount = 0
@@ -276,10 +278,28 @@ function Model.CurrentMasteryText(ability, saved)
         .. " healing in qualifying PvE.") or "none earned yet.")
 end
 
-function Model.MasteryText(reward)
+function Model.BeyondRealmLevel(required, realmMaximumLevel, characterLevel)
+    return realmMaximumLevel and required > realmMaximumLevel and characterLevel and characterLevel < required
+end
+
+function Model.LevelText(required, realmMaximumLevel, characterLevel)
+    return "Character level " .. required .. (Model.BeyondRealmLevel(required, realmMaximumLevel, characterLevel)
+        and (" (above realm cap " .. realmMaximumLevel .. ")") or "")
+end
+
+function Model.TrainingCapText(cap, realmMaximumLevel, characterLevel)
+    local level = Model.LevelText(cap.characterLevel, realmMaximumLevel, characterLevel)
+    if Model.BeyondRealmLevel(cap.characterLevel, realmMaximumLevel, characterLevel) then
+        return "More practice requires " .. level .. "; proficiency cap " .. cap.proficiency .. "."
+    end
+    return "More practice opens at " .. level .. " (cap " .. cap.proficiency .. ")."
+end
+
+function Model.MasteryText(reward, realmMaximumLevel, characterLevel)
     if not reward then return "Mastery complete. Only the highest earned benefit applies." end
     local benefit = HealingBonusText(reward.healingBonusBasisPoints) .. " healing in qualifying PvE combat."
-    local requirement = "Character level " .. reward.characterLevel .. " · Proficiency " .. reward.proficiency
+    local requirement = Model.LevelText(reward.characterLevel, realmMaximumLevel, characterLevel)
+        .. " · Proficiency " .. reward.proficiency
     if reward.state == 1 then return "Earned: " .. benefit .. "\n" .. requirement end
     local state = reward.state == 2 and "Learn the ability through its normal source."
         or reward.state == 3 and "Current acquisition requirements are not met."
@@ -290,7 +310,7 @@ function Model.MasteryText(reward)
     return benefit .. "\n" .. state .. "\n" .. requirement
 end
 
-function Model.PointText(ability)
+function Model.PointText(ability, realmMaximumLevel, characterLevel)
     local state = ability.availability
     if state == 1 then
         return Model.IsFixed(ability) and "Learn through your normal ability source. No practice required."
@@ -308,8 +328,8 @@ function Model.PointText(ability)
                 or "Training complete. All defined ranks learned."
         end
         if ability.nextTrainingCap then
-            return "Current cap reached. More practice opens at character level "
-                .. ability.nextTrainingCap.characterLevel .. " (cap " .. ability.nextTrainingCap.proficiency .. ")."
+            return "Current cap reached. "
+                .. Model.TrainingCapText(ability.nextTrainingCap, realmMaximumLevel, characterLevel)
         end
         return "Current proficiency cap reached. Check the next milestone for remaining requirements."
     end
@@ -321,16 +341,18 @@ function Model.PointText(ability)
     return "Progress forecast unavailable."
 end
 
-function Model.RankText(rank, fixed)
+function Model.RankText(rank, fixed, realmMaximumLevel, characterLevel)
     if fixed then
         if not rank then return "This ability works at full effectiveness without practice." end
-        local requirement = "Character level " .. rank.characterLevel .. " - No practice required."
+        local requirement = Model.LevelText(rank.characterLevel, realmMaximumLevel, characterLevel)
+            .. " - No practice required."
         local state = rank.state == 1 and "Learned." or rank.state == 3 and "Normal acquisition prerequisites required."
             or rank.state == 5 and "Waiting for character level." or "Learn through your normal ability source."
         return state .. "\n" .. requirement
     end
     if not rank then return "All currently defined ranks learned." end
-    local requirement = "Character level " .. rank.characterLevel .. " · Proficiency " .. rank.proficiency
+    local requirement = Model.LevelText(rank.characterLevel, realmMaximumLevel, characterLevel)
+        .. " · Proficiency " .. rank.proficiency
     if rank.state == 1 then return "Learned.\n" .. requirement end
     if rank.state == 2 then return "Learn through your normal ability source.\n" .. requirement end
     if rank.state == 3 then

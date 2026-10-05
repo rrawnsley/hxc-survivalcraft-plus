@@ -28,7 +28,7 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   Shared native race/racial and faction-rift eligibility is checked at preparation, award and new upgrades;
   class/race/talent-set/custom-specialization changes refresh the owner state. Normal database save/reload/failure
   behavior and broader acquisition entitlements remain unqualified.
-- Menu: addon 0.4.13-development; unpublished protocol 4 includes B7 instance identity, T10 kind/session/rules/reward
+- Menu: addon 0.4.14-development; unpublished protocol 4 includes B8 instance identity/realm cap, T10 kind/session/rules/reward
   count and M mastery entries,
   mandatory C future-cap metadata, packed D parts and F8 unreadable-progress responses. Typed delivery is
   bounded/paced; saved views/ages/session totals are labeled. Existing schema 1/2/3 formats are preserved.
@@ -1426,3 +1426,17 @@ unit/harness/gameplay skipped). Changed C++ style and whitespace passed; actual 
 the counts above. No new behavioral tests or runtime startup checks ran. This fixes the identified source
 composition conflict; effective-data readiness and in-game acceptance remain unqualified. Production remains
 unchanged and all development options default off.
+
+## Realm maximum level metadata — 5 October 2026
+
+The typed snapshot now appends the server-configured MaxPlayerLevel to its header (B8).
+The new client also accepts older unpublished B7 snapshots with an unknown realm cap.
+Schemas 1/2/3 and existing typed ability records keep their formats. The maximum is validated
+as 1–255 without requiring it to exceed the character level, preserving existing above-cap characters.
+The subtitle shows the realm cap; rank/mastery requirements, upcoming entries and future-cap help
+identify milestones above that cap when the character has not reached the required level.
+This metadata does not change native rank requirements, practice policies, earned benefits or saved progress.
+Addon version is 0.4.14-development. Source checks and the isolated native build passed in
+`.cache/verify-all/20261005-183804/report.json` (two source checks; 35.5-second build).
+Five Lua 5.1 files compiled for syntax without execution. Behavioral/gameplay/UI acceptance remains pending.
+No production changes were made.

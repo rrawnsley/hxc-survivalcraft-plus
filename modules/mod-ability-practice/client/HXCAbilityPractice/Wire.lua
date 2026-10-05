@@ -55,21 +55,26 @@ local function Accept(message, now, currentRevision, currentGeneration)
         return nil, nil, failure
     end
     if kind == "B" then
-        if #fields ~= 6 and #fields ~= 7 then return Reject("Invalid snapshot header") end
+        if #fields ~= 6 and #fields ~= 7 and #fields ~= 8 then return Reject("Invalid snapshot header") end
         local schema, revision, classId, level, count = tonumber(fields[2]), tonumber(fields[3]),
             tonumber(fields[4]), tonumber(fields[5]), tonumber(fields[6])
         if (schema ~= 1 and schema ~= 2 and schema ~= 3 and schema ~= 4)
             or revision < 1 or revision > 4294967295 or classId < 1 or classId > 255
             or level < 1 or level > 255 or count > 512 then return Reject("Unsupported snapshot header") end
         local generation = schema == 4 and fields[7] or nil
-        if (schema == 4 and (#fields ~= 7 or not Model.ValidGeneration(generation)))
+        local realmMaximumLevel = schema == 4 and fields[8] and tonumber(fields[8]) or nil
+        if realmMaximumLevel and (realmMaximumLevel < 1 or realmMaximumLevel > 255) then
+            return Reject("Invalid realm level cap")
+        end
+        if (schema == 4 and ((#fields ~= 7 and #fields ~= 8) or not Model.ValidGeneration(generation)))
             or (schema ~= 4 and #fields ~= 6) then return Reject("Invalid server instance identity") end
         local floor = generation and generation ~= currentGeneration and 0 or (currentRevision or 0)
         if revision <= floor or (pending and pending.generation == generation and revision <= pending.revision) then
             return nil, "Stale snapshot header"
         end
         pending = { schemaVersion = schema, revision = revision, classId = classId, characterLevel = level,
-            count = count, generation = generation, started = now, lastPart = now, parts = {},
+            count = count, generation = generation, realmMaximumLevel = realmMaximumLevel, started = now,
+            lastPart = now, parts = {},
             rankCount = 0, receivedRanks = 0, rewardCount = 0, receivedRewards = 0 }
         return nil
     end
@@ -81,7 +86,7 @@ local function Accept(message, now, currentRevision, currentGeneration)
         if pending.schemaVersion >= 2 and not pending.session then return Reject("Missing session progress") end
         local snapshot = { schemaVersion = pending.schemaVersion, revision = pending.revision,
             classId = pending.classId, characterLevel = pending.characterLevel, generation = pending.generation,
-            session = pending.session, abilities = {} }
+            realmMaximumLevel = pending.realmMaximumLevel, session = pending.session, abilities = {} }
         for index = 1, pending.count do
             local part = pending.parts[index]
             if not part or not part.A or not part.P or not part.R then return Reject("Incomplete snapshot") end
