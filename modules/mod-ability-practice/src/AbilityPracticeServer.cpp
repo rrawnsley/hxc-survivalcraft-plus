@@ -291,6 +291,13 @@ void PromoteRanks(Player* player)
     }
 }
 
+void SendMenuMessage(Player* player, std::string const& message)
+{
+    WorldPacket packet;
+    ChatHandler::BuildChatPacket(packet, CHAT_MSG_WHISPER, LANG_ADDON, player, nullptr, "HXAP\t" + message);
+    player->SendDirectMessage(&packet);
+}
+
 bool Send(Player* player, MenuSession const& session)
 {
     if (!Requested || !DevelopmentAllowed || !Ready || !IsHumanPlayer(player) ||
@@ -314,7 +321,16 @@ bool Send(Player* player, MenuSession const& session)
                     profile.Policy, profile.DefinitionVersion);
                 auto const migrated = Practice::MigrateLearnedRanks(ability, profile.Policy, loaded, learned);
                 if (!migrated)
-                    return false;
+                {
+                    if (session.Protocol != Practice::TypedMenuSchemaVersion)
+                        return false;
+                    auto const failure = Practice::EncodeMenuProgressFailure(++Revision, ability.ClassId,
+                        ability.AbilityId, ability.Ranks.front().SpellId);
+                    if (!failure)
+                        return false;
+                    SendMenuMessage(player, *failure);
+                    return true;
+                }
                 state = migrated->State;
             }
             auto view = Practice::BuildAbilityView(ability, profile.Policy, state, player->GetLevel(), learned, true);
@@ -338,11 +354,7 @@ bool Send(Player* player, MenuSession const& session)
     if (!messages)
         return false;
     for (std::string const& message : *messages)
-    {
-        WorldPacket packet;
-        ChatHandler::BuildChatPacket(packet, CHAT_MSG_WHISPER, LANG_ADDON, player, nullptr, "HXAP\t" + message);
-        player->SendDirectMessage(&packet);
-    }
+        SendMenuMessage(player, message);
     return true;
 }
 

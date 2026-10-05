@@ -1,7 +1,8 @@
 HXCAbilityPractice = {}
 local API = HXCAbilityPractice
 local Model = HXCAbilityPracticeModel
-local snapshot, selectedId, receivedAt
+local snapshot, selectedId, receivedAt, serverFailure
+local serverRevision = 0
 local syncState = "waiting"
 local tab = "skills"
 local offset = 0
@@ -78,6 +79,11 @@ panel:RegisterEvent("DISPLAY_SIZE_CHANGED")
 panel:SetScript("OnEvent", function() if panel:IsShown() then FitPanel() end end)
 
 local function UpdateSubtitle(now)
+    if not snapshot and serverFailure then
+        subtitle:SetText(syncState == "waiting" and "Checking saved progress again..."
+            or "The server responded, but a skill's saved progress needs attention.")
+        return
+    end
     if not snapshot then
         subtitle:SetText(syncState == "unavailable" and "Server progress is unavailable. Open this menu to retry."
             or "Waiting for your server progress...")
@@ -85,6 +91,7 @@ local function UpdateSubtitle(now)
     end
     local status = syncState == "current" and "Server progress received"
         or (syncState == "waiting" and "Refreshing saved view..." or "Saved view - Server progress unavailable")
+    if serverFailure and syncState ~= "waiting" then status = "Saved view - Skill progress needs attention" end
     if #snapshot.abilities == 0 and syncState == "current" then status = "No practice catalog for this class" end
     local age = type(now) == "number" and type(receivedAt) == "number" and now >= receivedAt
         and now < math.huge and math.floor(now - receivedAt) or nil
@@ -264,6 +271,10 @@ Refresh = function()
                 and "Use the mouse wheel over ranks to browse" or "Use the mouse wheel to browse")
                 .. " · Forecasts count qualifying uses")))
     end
+    if serverFailure then
+        footer:SetText("Saved progress for " .. SpellName(serverFailure.spellId)
+            .. " could not be read safely. It was left unchanged; please report this.")
+    end
     for index, row in ipairs(rows) do
         local ability = visible[index + offset]
         row.ability = ability
@@ -334,10 +345,12 @@ panel:SetScript("OnHide", function() searchBox:ClearFocus() end)
 function API.ApplySnapshot(value)
     local validated, reason = Model.Validate(value)
     if not validated then return false, reason end
-    if snapshot and (validated.classId ~= snapshot.classId or validated.revision <= snapshot.revision) then
+    if validated.revision <= serverRevision or (snapshot and validated.classId ~= snapshot.classId) then
         return false, "Stale or mismatched progress update"
     end
     snapshot = validated
+    serverRevision = validated.revision
+    serverFailure = nil
     receivedAt = GetTime()
     syncState = "current"
     Refresh()
@@ -347,9 +360,23 @@ end
 function API.ApplyServerSnapshot(value)
     local validated, reason = Model.Validate(value)
     if not validated then return false, reason end
-    if snapshot and validated.revision <= snapshot.revision then return false, "Stale progress update" end
-    if snapshot and validated.classId ~= snapshot.classId then API.Reset() end
+    if validated.revision <= serverRevision then return false, "Stale progress update" end
+    local previousClass = snapshot and snapshot.classId or (serverFailure and serverFailure.classId)
+    if previousClass and validated.classId ~= previousClass then API.Reset() end
     return API.ApplySnapshot(validated)
+end
+
+function API.ApplyServerFailure(value)
+    local validated, reason = Model.ValidateFailure(value)
+    if not validated then return false, reason end
+    if validated.revision <= serverRevision then return false, "Stale saved-progress issue" end
+    local previousClass = snapshot and snapshot.classId or (serverFailure and serverFailure.classId)
+    if previousClass and validated.classId ~= previousClass then API.Reset() end
+    serverFailure = validated
+    serverRevision = validated.revision
+    syncState = "issue"
+    Refresh()
+    return true
 end
 
 function API.IsShown()
@@ -376,6 +403,8 @@ end
 
 function API.Reset()
     snapshot = nil
+    serverFailure = nil
+    serverRevision = 0
     receivedAt = nil
     syncState = "waiting"
     selectedId = nil

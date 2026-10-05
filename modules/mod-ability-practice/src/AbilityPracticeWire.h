@@ -30,6 +30,14 @@ std::string WireLine(char kind, Values... values)
 }
 }
 
+inline std::optional<std::string> EncodeMenuProgressFailure(std::uint32_t revision, std::uint32_t classId,
+    std::uint32_t abilityId, std::uint32_t spellId)
+{
+    if (!revision || !classId || classId > 255 || !abilityId || !spellId)
+        return std::nullopt;
+    return Detail::WireLine('F', TypedMenuSchemaVersion, revision, classId, abilityId, spellId, 1);
+}
+
 inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t classId,
     std::uint32_t characterLevel, std::uint32_t revision, std::span<AbilityView const> abilities,
     std::optional<SessionPractice> session = std::nullopt, bool includeRoadmap = false, bool includeKinds = false)

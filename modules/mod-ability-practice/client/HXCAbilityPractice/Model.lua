@@ -5,6 +5,15 @@ local function Integer(value, minimum, maximum)
     return type(value) == "number" and value >= minimum and value <= maximum and value == math.floor(value)
 end
 
+function Model.ValidateFailure(value)
+    if type(value) ~= "table" or value.schemaVersion ~= 4
+        or not Integer(value.revision, 1, 4294967295) or not Integer(value.classId, 1, 255)
+        or not Integer(value.abilityId, 1, 4294967295) or not Integer(value.spellId, 1, 4294967295)
+        or value.issueCode ~= 1 then return nil, "Invalid saved-progress issue" end
+    return { schemaVersion = 4, revision = value.revision, classId = value.classId,
+        abilityId = value.abilityId, spellId = value.spellId, issueCode = 1 }
+end
+
 local function Counter(value)
     return type(value) == "string" and string.match(value, "^%d+$") and #value <= 20
         and (#value == 1 or string.sub(value, 1, 1) ~= "0")

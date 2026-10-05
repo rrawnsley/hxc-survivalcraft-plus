@@ -745,3 +745,24 @@ Source/native build passed at `.cache/verify-all/20261005-094252/report.json`; f
 at `.cache/verify-all/20261005-094400/report.json`. C++ lint, whitespace and all five Lua 5.1 syntax compilations
 passed. No tests ran. Sparse/plateau caps, introductory levels, reduced levels, retained excess, terminal
 states, transport and rendering remain runtime acceptance. Production server/client/launcher are untouched.
+
+
+## Explicit unreadable-progress menu response
+
+Addon 0.4.6-development receives unreleased protocol-4 F|4|revision|class|ability|introSpell|1 when the native
+menu cannot safely migrate/read a selected profile's cached progress. This replaces a generic timeout for
+that condition; old protocol formats retain the existing unavailable path. The response has bounded numeric
+identities and a single stable issue code, contains no stored payload and does not perform recovery or DB writes.
+Native Send stops before emitting a partial snapshot; the first affected definition is reported.
+
+Wire validates failure metadata independently of snapshot assembly, refuses stale failures, clears incomplete
+assembly on accepted failure and passes a separately validated DTO to the menu. Transport clears its request
+deadline. The menu retains same-class saved data and its last successful timestamp, records the failure's
+revision to refuse older later updates, clears the view on class changes and clears the issue after a newer
+valid snapshot. Retry/age behavior remains. The text says saved progress could not be read safely rather than
+claiming corruption; it identifies the ability and asks the player to report the issue. Affected practice/rank
+mutation remains refused; other valid abilities are not globally paused. No stored record is replaced.
+
+Source/native build passed at `.cache/verify-all/20261005-095928/report.json`; C++ lint/whitespace and five
+Lua 5.1 syntax compilations passed. No tests ran. Failure/recovery, ordering/expiry, saved age, class changes,
+layout and DB preservation need runtime acceptance. All defaults remain off; production remains untouched.

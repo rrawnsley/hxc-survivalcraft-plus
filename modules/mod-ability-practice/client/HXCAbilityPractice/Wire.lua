@@ -30,6 +30,18 @@ function Wire.Accept(message, now, currentRevision)
     local fields = Fields(message)
     if not fields then return Reject("Invalid progress message") end
     local kind = fields[1]
+    if kind == "F" then
+        if #fields ~= 7 then return Reject("Invalid saved-progress issue") end
+        local failure, reason = Model.ValidateFailure({ schemaVersion = tonumber(fields[2]),
+            revision = tonumber(fields[3]), classId = tonumber(fields[4]), abilityId = tonumber(fields[5]),
+            spellId = tonumber(fields[6]), issueCode = tonumber(fields[7]) })
+        if not failure then return Reject(reason) end
+        if failure.revision <= (currentRevision or 0) or (pending and failure.revision < pending.revision) then
+            return nil, "Stale saved-progress issue"
+        end
+        pending = nil
+        return nil, nil, failure
+    end
     if kind == "B" then
         if #fields ~= 6 then return Reject("Invalid snapshot header") end
         local schema, revision, classId, level, count = tonumber(fields[2]), tonumber(fields[3]),
