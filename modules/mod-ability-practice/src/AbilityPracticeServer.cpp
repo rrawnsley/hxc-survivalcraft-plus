@@ -831,7 +831,7 @@ public:
                     HasSupportedHelperOutcome(info, profile)) &&
                     (profile.Definition.Kind != Practice::AbilityKind::Mastery ||
                         !info->HasAura(SPELL_AURA_PERIODIC_HEAL));
-                if (!info || (!fixed && info->IsPassive()) || !expectedOutcome)
+                if (!info || info->IsDeprecatedForPlayers || (!fixed && info->IsPassive()) || !expectedOutcome)
                 {
                     Ready = false;
                     LOG_ERROR("module.ability_practice", "Rejected development profile: class={}, ability={}, spell={}",

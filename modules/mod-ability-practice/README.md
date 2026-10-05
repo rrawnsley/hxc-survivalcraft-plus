@@ -33,6 +33,8 @@ The module and addon are staged in this checkout. Nothing is installed or activa
 - All-class preparation: 847 unapproved source-consistent class-grant definition drafts, including 244 ranked
   and 603 standalone groups. 179 have common current native outcomes across all 21 classes. Definitions,
   caps, practice rates and rewards are not automatically approved or installed.
+- Startup refuses deprecated player spells, matching CoA's native learning restriction. Raw discovery also
+  flags the native deprecated/depreacated whole-word markers in English spell names and rank labels.
 - Verification on this resumed run: source checks, isolated native builds, C++ lint, whitespace and Lua 5.1
   syntax compilation only. No behavioral tests or live play checks ran. Earlier harness results below do not
   qualify the new changes. A validation-scope question is pending; explicit testing authorization is needed.
@@ -1302,3 +1304,21 @@ checks passing and all other stages skipped. C++ style and whitespace passed. Th
 build qualifies only frozen a5ea9902f; the integrated catalog/mastery/helper/menu changes still
 need an affected rebuild. An independent worldserver build targets C:/Build-Survival, so no concurrent build
 was started. Production remains unchanged.
+
+## Native learning markers and mastery bridge build path — 5 October 2026
+
+Startup now refuses every selected rank marked `IsDeprecatedForPlayers`, including fixed definitions. CoA sets
+that flag from whole-word deprecated/depreacated markers in English spell names or ranks, and native player
+learning refuses those spells. Candidate discovery applies the same ASCII word boundaries, blocks their raw
+outcome candidacy and records a review trait. Runtime effective SpellInfo remains authoritative; raw evidence
+does not approve a definition. The regenerated catalog remains 106 profiles/888 ranks across all 21 classes;
+the 847 unapproved drafts/179 common-outcome candidates are unchanged. Provenance now includes native class
+mechanics and player learning, for 30 source entries.
+
+The queued integrated build ran after the independent build finished. Its source stage passed five checks,
+but native compilation failed because Unit.cpp could not find AbilityPracticeMasteryPolicy.h. The header moved
+from the CoA directory into the existing game/Spells include area without changing its callback or gameplay
+behavior. Both discovery provenance lists use the new path. No additional include dependency or CMake change
+is needed; no new compilation unit was introduced. The failed build report is
+`.cache/verify-all/20261005-172309/report.json` in the main development worktree. Repair integration and the
+affected rebuild are pending. No behavioral tests or production changes occurred.

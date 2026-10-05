@@ -3,11 +3,18 @@ from collections import Counter, defaultdict
 import hashlib
 import json
 from pathlib import Path
+import re
 import sys
 
 
 DIRECT_ROUTES = {'damage': {2, 17, 31, 58, 121}, 'healing': {10, 67, 136}}
 OUTCOME_ROUTES = {**DIRECT_ROUTES, 'interrupt': {68}, 'dispel': {38}, 'steal': {126}}
+DEPRECATED_WORD = re.compile(r'(?<![a-z0-9_])(?:deprecated|depreacated)(?![a-z0-9_])', re.IGNORECASE | re.ASCII)
+
+
+def raw_player_deprecated(raw):
+    return any(isinstance(raw.get(field), str) and DEPRECATED_WORD.search(raw[field])
+               for field in ('name', 'rankLabel'))
 
 
 def action_review(members):
@@ -26,6 +33,8 @@ def action_review(members):
             continue
         if raw.get('passive'):
             traits.add('passive-flag-review')
+        if raw_player_deprecated(raw):
+            traits.add('deprecated-player-spell')
         details = raw.get('effectDetails')
         if not details:
             traits.add('missing-or-invalid-raw-effect-evidence')
@@ -64,6 +73,8 @@ def native_route_review(members, route_ids, scope, missing_reason):
         reasons = []
         if not raw or raw.get('fieldErrors') or type(raw.get('passive')) is not bool:
             reasons.append('missing-or-invalid-raw-evidence')
+        elif raw_player_deprecated(raw):
+            reasons.append('deprecated-player-spell')
         elif raw['passive']:
             reasons.append('passive-spell')
         else:
@@ -396,13 +407,15 @@ def main():
                          'modules/mod-ability-practice/src/AbilityPracticeMastery.h',
                          'modules/mod-ability-practice/src/AbilityPracticeDevelopmentHelpers.h',
                          'modules/mod-ability-practice/src/AbilityPracticeProfiles.h',
-                         'src/server/coa/AbilityPracticeMasteryPolicy.h',
+                         'src/server/game/Spells/AbilityPracticeMasteryPolicy.h',
                          'src/server/coa/AscensionSpellEligibility.h',
                          'src/server/coa/AscensionRacialAbilities.h',
                          'src/server/coa/AscensionFelsworn.cpp',
                          'src/server/coa/AscensionFelswornAuras.cpp',
                          'src/server/coa/AscensionFelswornContracts.cpp',
                          'src/server/coa/AscensionCompat.cpp',
+                         'src/server/coa/AscensionClassMechanics.cpp',
+                         'src/server/game/Entities/Player/Player.cpp',
                          'src/server/game/Spells/AbilityPracticeCastReceipt.h',
                          'src/server/game/Spells/Spell.h', 'src/server/game/Spells/Spell.cpp',
                          'src/server/game/Spells/SpellEffects.cpp',
