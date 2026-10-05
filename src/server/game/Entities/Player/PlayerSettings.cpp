@@ -44,6 +44,16 @@ namespace PlayerSettingsStore
         return result;
     }
 
+    static std::optional<PlayerSettingVector> ParseSettingsDataChecked(std::string const& data,
+        std::string const& source)
+    {
+        if (source.starts_with("core.hxc.ability_practice."))
+            for (std::string_view token : Acore::Tokenize(data, ' ', false))
+                if (!token.empty() && !Acore::StringTo<uint32>(token))
+                    return std::nullopt;
+        return ParseSettingsData(data);
+    }
+
     // Common helper: serialize PlayerSettingVector to space-separated string
     std::string SerializeSettingsData(PlayerSettingVector const& settings)
     {
@@ -79,7 +89,7 @@ namespace PlayerSettingsStore
                 continue;
 
             std::string data = fields[1].Get<std::string>();
-            return ParseSettingsData(data);
+            return ParseSettingsDataChecked(data, source);
         } while (dbRes->NextRow());
 
         return result;
@@ -133,8 +143,14 @@ void Player::_LoadCharacterSettings(PreparedQueryResult result)
             continue;
         std::string data = fields[1].Get<std::string>();
 
-        PlayerSettingVector settings = PlayerSettingsStore::ParseSettingsData(data);
-        m_charSettingsMap.emplace(std::move(source), std::move(settings));
+        auto settings = PlayerSettingsStore::ParseSettingsDataChecked(data, source);
+        if (!settings)
+        {
+            LOG_ERROR("entities.player", "Refused malformed ability practice setting at source {} for {}",
+                source, GetGUID().ToString());
+            settings = PlayerSettingVector{};
+        }
+        m_charSettingsMap.emplace(std::move(source), std::move(*settings));
 
     } while (result->NextRow());
 }

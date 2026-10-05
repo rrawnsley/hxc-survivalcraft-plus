@@ -493,3 +493,19 @@ viewport/scale methods required by these changes, with no new behavioral cases.
 Source checks passed at `.cache/verify-all/20261005-082424/report.json`; whitespace and Lua 5.1 syntax passed.
 No behavioral tests ran. Actual font wrapping, resize/dragging, age updates and in-game layout remain acceptance
 work. Nothing was installed or published, and native protocol 3 is unchanged.
+
+## Refuse malformed stored numeric tokens
+
+Practice settings now use strict unsigned integer token parsing at both character login and offline settings
+loads. Invalid syntax or overflow refuses the record instead of silently skipping tokens. Login retains a
+present empty cache entry so the module refuses migration, training and new rank grants; normal saving skips
+that entry and preserves the original database row. The diagnostic identifies the setting and character.
+Offline updates stop on a failed numeric parse. Other settings retain their existing tolerant parser.
+
+This checks numeric tokens only. The module still validates field count, schema, definition and migration
+versions and progress bounds. It does not add generic offline schema validation, persistence acknowledgements
+or recovery. No SQL or public parser interface changed.
+
+Source/native build passed at `.cache/verify-all/20261005-083435/report.json`; C++ lint and whitespace passed.
+No behavioral tests ran. Corrupt-row login, preservation and offline update behavior require isolated runtime
+qualification. No live data was inspected or changed.
