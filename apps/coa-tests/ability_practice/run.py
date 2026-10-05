@@ -3,11 +3,26 @@ import importlib.util
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import tempfile
 
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[2]
+
+
+def check_client():
+    local_runtime = ROOT / '.cache/ability-practice/lua-runtime'
+    if local_runtime.is_dir():
+        sys.path.insert(0, str(local_runtime))
+    try:
+        from lupa.lua51 import LuaRuntime
+    except ImportError as error:
+        raise RuntimeError('Install lupa with Lua 5.1 support in the isolated verification environment.') from error
+    runtime = LuaRuntime()
+    client = ROOT / 'modules/mod-ability-practice/client/HXCAbilityPractice'
+    for path in (HERE / 'client_mock.lua', client / 'Model.lua', client / 'Menu.lua', HERE / 'client_cases.lua'):
+        runtime.execute(path.read_text(encoding='utf-8'))
 
 
 def check_inventory():
@@ -44,6 +59,7 @@ def check_inventory():
 
 def main():
     check_inventory()
+    check_client()
     compiler = shutil.which(os.environ.get('CXX', 'cl.exe' if os.name == 'nt' else 'c++'))
     if not compiler:
         raise RuntimeError('Enable a C++20 compiler for the isolated ability practice harness.')

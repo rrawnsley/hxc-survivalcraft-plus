@@ -2,12 +2,62 @@
 #include "AbilityPracticeCatalog.h"
 #include "AbilityPracticeActions.h"
 #include "AbilityPracticeState.h"
+#include "AbilityPracticeMenu.h"
 
 #include <array>
 #include <cassert>
 #include <iostream>
 
 using namespace AbilityPractice;
+
+void CheckMenu(TrainingPolicy policy)
+{
+    std::array const ranks = { AbilityRank{ 101, 1, { 4, 1 } }, AbilityRank{ 102, 2, { 16, 20 } },
+        AbilityRank{ 103, 3, { 24, 40 } } };
+    std::array const caps = { ProficiencyCap{ 1, 10 }, ProficiencyCap{ 16, 30 }, ProficiencyCap{ 24, 60 } };
+    AbilityDefinition const ability{ 24, 1001, AbilityKind::Ranked, ranks, caps };
+    std::array const known = { 101U, 102U };
+    AbilityView const training = BuildAbilityView(ability, policy, { 23, 18 }, 24, known, true);
+    assert(training.SchemaVersion == 1 && training.ClassId == 24 && training.AbilityId == 1001);
+    assert(training.DisplaySpellId == 102 && training.LearnedRank == 2);
+    assert(training.Availability == PracticeAvailability::Training);
+    assert(training.State.Proficiency == 23 && training.State.Points == 18 && training.PointsPerLevel == 30);
+    assert(training.Cap == 60 && training.NextPoint.Uses == 12);
+    assert(training.NextRank && training.NextRank->SpellId == 103 && training.NextRank->Practice.Uses == 492);
+    AbilityView const waiting = BuildAbilityView(ability, policy, { 23, 18 }, 16, known, true);
+    assert(waiting.Availability == PracticeAvailability::Training && waiting.NextPoint.Uses == 12);
+    assert(waiting.NextRank->State == RankState::NeedsBoth);
+    assert(waiting.NextRank->Practice.Status == ForecastStatus::BeyondCap);
+    AbilityView const capped = BuildAbilityView(ability, policy, { 40, 0 }, 16, known, true);
+    assert(capped.Availability == PracticeAvailability::Capped && capped.State.Proficiency == 40);
+    assert(capped.NextPoint.Status == ForecastStatus::BeyondCap);
+    assert(capped.NextRank->State == RankState::NeedsCharacterLevel);
+    std::array const allKnown = { 101U, 102U, 103U };
+    assert(!BuildAbilityView(ability, policy, { 40, 0 }, 24, allKnown, true).NextRank);
+    std::array<std::uint32_t, 0> const unknown{};
+    AbilityView const acquire = BuildAbilityView(ability, policy, { 1, 0 }, 4, unknown, true);
+    assert(acquire.Availability == PracticeAvailability::AcquireAbility);
+    assert(acquire.LearnedRank == 0 && acquire.DisplaySpellId == 101);
+    assert(acquire.NextPoint.Status == ForecastStatus::Invalid);
+    assert(acquire.NextRank->State == RankState::AcquireIntroductoryAbility);
+    assert(BuildAbilityView(ability, policy, { 1, 0 }, 3, unknown, true).Availability ==
+        PracticeAvailability::NeedsCharacterLevel);
+    assert(BuildAbilityView(ability, policy, { 23, 18 }, 24, known, false).Availability ==
+        PracticeAvailability::MissingPrerequisite);
+    assert(BuildAbilityView(ability, policy, { 1, 30 }, 24, known, true).Availability ==
+        PracticeAvailability::Invalid);
+    assert(BuildAbilityView(ability, policy, { 1, 0 }, 0, known, true).Availability ==
+        PracticeAvailability::Invalid);
+    AbilityDefinition const fixed{ 24, 1002, AbilityKind::Fixed, std::span(ranks).first(1), {} };
+    AbilityView const fixedKnown = BuildAbilityView(fixed, { {} }, {}, 4, known, true);
+    assert(fixedKnown.Availability == PracticeAvailability::Fixed && !fixedKnown.NextRank);
+    assert(fixedKnown.PointsPerLevel == 0 && fixedKnown.NextPoint.Status == ForecastStatus::Invalid);
+    AbilityView const fixedNew = BuildAbilityView(fixed, { {} }, {}, 4, unknown, true);
+    assert(fixedNew.Availability == PracticeAvailability::AcquireAbility);
+    assert(fixedNew.NextRank->State == RankState::AcquireIntroductoryAbility);
+    assert(BuildAbilityView(fixed, { {} }, {}, 3, unknown, true).NextRank->State ==
+        RankState::NeedsCharacterLevel);
+}
 
 void CheckState(TrainingPolicy policy)
 {
@@ -228,6 +278,7 @@ int main()
     CheckCatalog(policy);
     CheckActions();
     CheckState(policy);
+    CheckMenu(policy);
     assert(ValidPolicy(policy));
     assert(UsesUntil(policy, { 23, 18 }, 24, 80).Uses == 12);
     assert(UsesUntil(policy, { 27, 24 }, 28, 80).Uses == 6);

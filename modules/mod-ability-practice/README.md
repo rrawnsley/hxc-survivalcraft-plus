@@ -47,6 +47,24 @@ including hashes and the meaning of each rank reference. It records all 21 class
 without conflating acquisition predecessors with ability roots. These are source candidates, including talent,
 passive and support spells; no entry is yet approved as trainable or verified against effective DBC/SQL/runtime data.
 
+`src/AbilityPracticeMenu.h` builds authoritative per-ability view data from the same calculation/catalog APIs,
+including learned rank, proficiency, current cap, next-point forecast and upcoming rank state. It preserves earned
+above-cap progress and leaves fixed abilities without practice requirements. `MenuSchemaVersion` is 1.
+
+`client/HXCAbilityPractice` contains a staged WoW 3.3.5 addon window with My Skills/Upcoming views, scrollable ability
+selection, a next-point progress bar, exact qualifying-use text and character-level/rank requirement states. `/practice`
+opens it. Without server data it displays a waiting state; there are no demo values or client-calculated awards.
+The model validates and copies complete snapshots, rejects stale/class-mismatched updates and preserves large
+use counts as decimal strings rather than imprecise Lua floating-point numbers. The server transport is not wired,
+so this addon is not functional against production and is not installed or listed in any launcher payload/catalog.
+Session summaries, tracking preferences, filters/search, final visual polish and in-game acceptance remain future work.
+
+The snapshot adapter must send the C++ view fields as the camel-case Lua model fields, with numeric enum states,
+`uses` as an unsigned decimal string, and an enclosing `schemaVersion`, increasing `revision`, `classId`,
+`characterLevel`, and dense `abilities` array. Accept updates only from the authenticated server transport and apply
+them atomically after complete assembly; Lua validation does not authenticate a sender. No client request may change
+proficiency or learn a rank. Revision rollover/reconnect behavior must be defined when transport is integrated.
+
 The future menu will distinguish character level, learned rank and trained proficiency, with exact qualifying uses
 to the next point/milestone. No random fizzles, magic-school categories or automatic upgrades on unrelated abilities
 are part of the accepted design. Existing learned abilities must survive migration. Unranked rewards and numerical
@@ -55,6 +73,10 @@ training profiles still need balance review.
 Verification runs through `python -B tools/verify_all.py --stages source,harness --base 36117f3e9
 --harness ability_practice --jobs 1`. This focused harness compiles the actual header and exercises forecast/award
 agreement, changing bands, over-cap retention, malformed inputs, large counts, catalog/acquisition states, migration
-seeding, action deduplication/session isolation, save retries/stale callbacks and deterministic source inventory. It neither
+seeding, action deduplication/session isolation, save retries/stale callbacks, deterministic source inventory,
+authoritative menu views and the addon model in Lua 5.1. The Lua UI smoke uses mocked WoW frame APIs; it is not
+in-game visual acceptance. The harness requires MSVC/C++20 and `lupa` with Lua 5.1 support. The development runtime
+is isolated in `.cache/ability-practice/lua-runtime` (installed with `py -m pip install --target
+.cache/ability-practice/lua-runtime lupa`, version 2.8 at this checkpoint). It neither
 builds a worldserver nor accesses any server/database. Full build and gameplay qualification remain required before
 integration or deployment. Keep all development in this checkout while the user plays.
