@@ -685,14 +685,16 @@ void AwardOutcome(Player* player, Spell* spell, Practice::AbilityProfile const& 
     if (!Affects(player) || player->isBeingLoaded() || spell->GetScriptValue(PracticeCastSourceKey) != source ||
         !AcquisitionAllowed(player, profile.Definition, spell->GetSpellInfo()->Id))
         return;
-    auto& session = Sessions[player->GetGUID().GetRawValue()];
+    auto const found = Sessions.find(player->GetGUID().GetRawValue());
     auto const receipt = spell->GetPracticeCast();
-    if (receipt && (!ReceiptMatches(player, session, *receipt) || receipt->SpellId != spell->GetSpellInfo()->Id))
+    if (found == Sessions.end() || !receipt || !ReceiptMatches(player, found->second, *receipt) ||
+        receipt->SpellId != spell->GetSpellInfo()->Id)
         return;
+    auto& session = found->second;
     Practice::OutcomeContext const context{ true, true, true, true, player->GetLevel() };
     auto const award = Practice::HandleOutcome(*player, *spell, profile.Definition,
         profile.Policy, profile.DefinitionVersion, context);
-    if (receipt && (award.Status == Practice::OutcomeStatus::Awarded || award.Status == Practice::OutcomeStatus::Capped))
+    if (award.Status == Practice::OutcomeStatus::Awarded || award.Status == Practice::OutcomeStatus::Capped)
         receipt->MarkConsumed();
     RecordAward(player, session, profile, award);
 }
@@ -1129,10 +1131,7 @@ public:
             AcquisitionAllowed(player, profile->Definition, spell->GetSpellInfo()->Id);
         std::uint64_t const source = direct ? request : std::numeric_limits<std::uint64_t>::max();
         spell->SetScriptValue(PracticeCastSourceKey, source);
-        if (direct && (PeriodicRequested ||
-                (HelpersRequested && Practice::DevelopmentHelpers::IsManafeed(*profile))) &&
-            Affects(player) && !player->isBeingLoaded() &&
-            (profile->Outcome == Practice::OutcomeKind::Damage || profile->Outcome == Practice::OutcomeKind::Healing))
+        if (direct && Affects(player) && !player->isBeingLoaded() && profile->Outcome != Practice::OutcomeKind::None)
         {
             auto& session = Sessions[player->GetGUID().GetRawValue()];
             RefreshOwnerState(player, session, CachedCustomSpecialization(player));

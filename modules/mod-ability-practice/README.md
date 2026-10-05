@@ -1564,3 +1564,23 @@ Native/source passed `.cache/verify-all/20261005-191615/report.json` (two source
 After a Lua line wrap, source passed `.cache/verify-all/20261005-192047/report.json`; five Lua5.1 syntax
 compilations passed without executing chunks. C++ style/whitespace passed; authoring provenance refreshed.
 No unit/harness/gameplay tests, runtime startup or production installation/restart/configuration/DB/client changes.
+
+## Consistent direct-cast owner/session receipts — 5 October 2026
+
+Every eligible direct profiled nonfixed cast now captures the existing numeric original-cast receipt,
+including damage/healing and utility routes with periodic observation disabled. Direct awards require
+an existing initialized GUID session, a nonconsumed receipt with matching owner/class/race/native spec/
+cached custom specialization/session/spell, and existing native acquisition/source/qualification checks.
+The award path no longer creates a new session for an old pending result. Session reload/removal/login
+and owner changes reject stale direct receipts consistently with periodic receipts.
+
+Awarded/capped original casts consume the shared receipt; the existing per-Spell spent marker also remains.
+This is owner/session provenance consistency, not a newly established duplicate-award bug: earlier direct
+per-Spell deduplication and consumed-receipt checks already existed. No runtime defect reproduction was made.
+Fixed abilities, unselected players, bots and disabled observation do not allocate these receipts.
+One shared allocation per eligible cast now also applies in direct-only development mode; runtime cost
+needs measurement. There are no new per-tick allocations or configuration/DB lookups.
+Native damage/healing/utility mechanics, persistence, rank eligibility and wire formats are unchanged.
+Source/native passed `.cache/verify-all/20261005-192840/report.json` (two source checks;36.4-second build);
+C++ style/whitespace and authoring regeneration passed. Ownership/lifecycle/gameplay acceptance remains
+pending; no tests or production server/client/configuration/database/launcher changes or restart.
