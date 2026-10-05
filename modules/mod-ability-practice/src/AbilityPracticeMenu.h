@@ -63,6 +63,7 @@ struct AbilityView
     Forecast NextPoint;
     std::optional<RankView> NextRank;
     std::vector<RankView> Ranks;
+    SessionPractice Session{ false, 0, 0 };
 };
 
 inline AbilityView BuildAbilityView(AbilityDefinition const& ability, TrainingPolicy policy,

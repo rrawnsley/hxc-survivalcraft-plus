@@ -92,8 +92,9 @@ local function Ability(value, schema)
         end
         if not matched then return nil end
     end
+    local session = schema == 4 and Session(value.session) or nil
     if schema == 4 then
-        if not Integer(value.kind, 1, 3) then return nil end
+        if not session or not Integer(value.kind, 1, 3) then return nil end
         if value.kind == 3 then
             if #ranks ~= 1 or value.learnedRank > 1 or value.proficiency ~= 1 or value.cap ~= 1
                 or value.points ~= 0 or value.pointsPerLevel ~= 0 or point.status ~= 0
@@ -101,8 +102,8 @@ local function Ability(value, schema)
                 or (ranks[1].state ~= 1 and ranks[1].state ~= 2 and ranks[1].state ~= 3
                     and ranks[1].state ~= 5) then return nil end
         elseif value.availability == 6 then return nil end
-    elseif value.kind ~= nil then return nil end
-    return { kind = value.kind, ranks = ranks, abilityId = value.abilityId, displaySpellId = value.displaySpellId,
+    elseif value.kind ~= nil or value.session ~= nil then return nil end
+    return { kind = value.kind, session = session, ranks = ranks, abilityId = value.abilityId, displaySpellId = value.displaySpellId,
         learnedRank = value.learnedRank,
         proficiency = value.proficiency, points = value.points, cap = value.cap, pointsPerLevel = value.pointsPerLevel,
         availability = value.availability, nextPoint = point, nextRank = rank }

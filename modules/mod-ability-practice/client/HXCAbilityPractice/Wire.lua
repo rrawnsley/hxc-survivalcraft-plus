@@ -58,7 +58,8 @@ function Wire.Accept(message, now, currentRevision)
             local ability = part.A
             if pending.schemaVersion == 4 then
                 if not part.T then return Reject("Missing ability type") end
-                ability.kind = part.T
+                ability.kind = part.T.kind
+                ability.session = part.T.session
             end
             ability.nextPoint = part.P
             ability.nextRank = part.R ~= true and part.R or nil
@@ -88,9 +89,12 @@ function Wire.Accept(message, now, currentRevision)
     pending.parts[index] = part
     if kind == "T" then
         local abilityKind = tonumber(fields[4])
-        if pending.schemaVersion ~= 4 or part.T or #fields ~= 4 or not abilityKind
-            or abilityKind < 1 or abilityKind > 3 then return Reject("Invalid ability type") end
-        part.T = abilityKind
+        if pending.schemaVersion ~= 4 or part.T or #fields ~= 7 or not abilityKind
+            or abilityKind < 1 or abilityKind > 3 or (fields[5] ~= "0" and fields[5] ~= "1") then
+            return Reject("Invalid ability type or session progress")
+        end
+        part.T = { kind = abilityKind, session = { available = fields[5] == "1", uses = fields[6],
+            proficiencyGained = fields[7] } }
         return nil
     end
     if kind == "K" then

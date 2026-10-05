@@ -585,3 +585,24 @@ No new profiles were added; the three development definitions match the inspecte
 Source/native build passed at `.cache/verify-all/20261005-085619/report.json`; C++ lint and whitespace passed.
 No tests ran. Startup rejection and effective acquisition behavior remain isolated runtime qualification.
 No production changes occurred.
+
+## Per-ability session progress
+
+Unreleased menu protocol 4's T record now includes the ability type plus availability, use count and proficiency
+gained for that individual ability: T|revision|index|kind|available|uses|proficiencyGained. Addon version is
+0.4.1-development. The earlier four-field development T shape is superseded; nothing using it was published.
+Version 1/2/3 responses stay unchanged, and their parsed ability session totals are explicitly unavailable.
+
+Native GUID sessions retain separate class totals and per-ability totals across class changes during a login.
+Only OutcomeStatus::Awarded records one use and the actual proficiency gained; migration/seeding, capped,
+rejected and duplicate outcomes do not inflate counters. Logout clears them. Individual counters retain their
+own overflow availability independently of the class total. Fixed entries never award practice.
+Typed views require validated per-ability session counters; uint64 values stay exact strings in the client.
+The selected trainable ability displays This session practice uses and proficiency gained beside tracking.
+The pure view builder defaults totals to unavailable; native Send supplies actual session data or known zero.
+No per-ability history is persisted and no query was added.
+
+Source/native build passed at `.cache/verify-all/20261005-085938/report.json`; final addon source checks passed
+at `.cache/verify-all/20261005-090100/report.json`. C++ lint, whitespace and all four Lua 5.1 syntax compilations
+passed. No cases added or behavioral tests ran. Award/class-switch/overflow/transport and in-game text layout
+remain runtime qualification; production is untouched.

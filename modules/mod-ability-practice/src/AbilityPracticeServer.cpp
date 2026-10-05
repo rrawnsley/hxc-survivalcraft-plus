@@ -50,6 +50,12 @@ std::uint32_t Revision = 0;
 using Clock = std::chrono::steady_clock;
 constexpr auto RefreshInterval = std::chrono::seconds(2);
 constexpr auto InterestDuration = std::chrono::seconds(30);
+struct ClassSession
+{
+    Practice::SessionPractice Totals;
+    std::unordered_map<std::uint32_t, Practice::SessionPractice> Abilities;
+};
+
 struct MenuSession
 {
     Clock::time_point LastRequest{};
@@ -60,7 +66,7 @@ struct MenuSession
     bool Initialized = false;
     std::uint32_t Protocol = Practice::MenuSchemaVersion;
     std::uint32_t LastClass = 0;
-    std::unordered_map<std::uint32_t, Practice::SessionPractice> Progress;
+    std::unordered_map<std::uint32_t, ClassSession> Progress;
 };
 std::unordered_map<std::uint64_t, MenuSession> Sessions;
 
@@ -256,6 +262,7 @@ bool Send(Player* player, MenuSession const& session)
     if (!Requested || !DevelopmentAllowed || !Ready || !IsHumanPlayer(player) ||
         Revision == std::numeric_limits<std::uint32_t>::max())
         return false;
+    auto const currentProgress = session.Progress.find(player->getClass());
     std::vector<Practice::AbilityView> views;
     bool const supported = Affects(player);
     if (supported)
@@ -276,12 +283,18 @@ bool Send(Player* player, MenuSession const& session)
                     return false;
                 state = migrated->State;
             }
-            views.push_back(Practice::BuildAbilityView(ability, profile.Policy, state,
-                player->GetLevel(), learned, true));
+            auto view = Practice::BuildAbilityView(ability, profile.Policy, state, player->GetLevel(), learned, true);
+            view.Session = {};
+            if (currentProgress != session.Progress.end())
+            {
+                auto const progress = currentProgress->second.Abilities.find(ability.AbilityId);
+                if (progress != currentProgress->second.Abilities.end())
+                    view.Session = progress->second;
+            }
+            views.push_back(std::move(view));
         }
-    auto const currentProgress = session.Progress.find(player->getClass());
     auto const progress = !supported ? Practice::SessionPractice{ false, 0, 0 } :
-        currentProgress == session.Progress.end() ? Practice::SessionPractice{} : currentProgress->second;
+        currentProgress == session.Progress.end() ? Practice::SessionPractice{} : currentProgress->second.Totals;
     auto const messages = Practice::EncodeMenuSnapshot(player->getClass(), player->GetLevel(), ++Revision, views,
         session.Protocol >= Practice::SessionMenuSchemaVersion
             ? std::optional<Practice::SessionPractice>(progress) : std::nullopt,
@@ -535,7 +548,9 @@ public:
             profile->Policy, profile->DefinitionVersion, context);
         if (award.Status == Practice::OutcomeStatus::Awarded)
         {
-            session.Progress[player->getClass()].RecordAward(award.ProficiencyGained);
+            ClassSession& progress = session.Progress[player->getClass()];
+            progress.Totals.RecordAward(award.ProficiencyGained);
+            progress.Abilities[profile->Definition.AbilityId].RecordAward(award.ProficiencyGained);
             session.Dirty = true;
             session.CheckRanks = true;
             Refresh(player, session, Clock::now());

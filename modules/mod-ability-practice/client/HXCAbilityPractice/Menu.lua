@@ -64,6 +64,7 @@ progressBackground:SetTexture(0.12, 0.12, 0.12, 1)
 local progressLabel = progress:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
 progressLabel:SetPoint("CENTER")
 local pointText = Text(detail, "GameFontHighlight", 0, -130, 430)
+local abilitySessionText = Text(detail, "GameFontHighlightSmall", 154, -160, 276)
 local nextTitle = Text(detail, "GameFontNormal", 0, -195, 280)
 local nextText = Text(detail, "GameFontHighlight", 0, -221, 430)
 
@@ -122,6 +123,10 @@ local function RenderDetail(ability)
     track:SetText(TrackedAbilities()[tostring(ability.abilityId)] == true and "Stop tracking" or "Track ability")
     name:SetText(SpellName(ability.displaySpellId))
     local fixed = Model.IsFixed(ability)
+    local session = ability.session
+    abilitySessionText:SetText(fixed and "" or (session and session.available and
+        ("This session: " .. session.uses .. " practice uses\n+" .. session.proficiencyGained .. " proficiency")
+        or "Ability session totals unavailable"))
     rankLabel:SetText(ability.learnedRank > 0 and (fixed and "Learned ability" or
         ("Learned rank " .. ability.learnedRank)) or "Not yet learned")
     local trains = ability.learnedRank > 0 and ability.pointsPerLevel > 0 and not Model.IsFixed(ability)
