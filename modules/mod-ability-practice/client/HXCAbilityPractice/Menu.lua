@@ -7,6 +7,9 @@ local tab = "skills"
 local offset = 0
 local visible = {}
 local rows = {}
+local search = ""
+local Refresh
+local searchBox
 
 local panel = CreateFrame("Frame", "HXCAbilityPracticePanel", UIParent)
 panel:SetSize(760, 490)
@@ -63,9 +66,29 @@ local function SpellName(spellId)
     return GetSpellInfo(spellId) or ("Ability " .. spellId)
 end
 
+local function TrackedAbilities()
+    if type(HXCAbilityPracticePreferences) ~= "table" then HXCAbilityPracticePreferences = {} end
+    local key = snapshot and tostring(snapshot.classId)
+    if not key then return {} end
+    if type(HXCAbilityPracticePreferences[key]) ~= "table" then HXCAbilityPracticePreferences[key] = {} end
+    return HXCAbilityPracticePreferences[key]
+end
+
+local track = CreateFrame("Button", nil, detail, "UIPanelButtonTemplate")
+track:SetSize(140, 24)
+track:SetPoint("TOPLEFT", 0, -160)
+track:SetScript("OnClick", function()
+    if not selectedId or not snapshot then return end
+    local tracked = TrackedAbilities()
+    local key = tostring(selectedId)
+    tracked[key] = tracked[key] ~= true and true or nil
+    Refresh()
+end)
+
 local function RenderDetail(ability)
     if not ability then detail:Hide(); return end
     detail:Show()
+    track:SetText(TrackedAbilities()[tostring(ability.abilityId)] == true and "Stop tracking" or "Track ability")
     name:SetText(SpellName(ability.displaySpellId))
     rankLabel:SetText(ability.learnedRank > 0 and ("Learned rank " .. ability.learnedRank) or "Not yet learned")
     local trains = ability.availability == 4 or ability.availability == 5
@@ -85,7 +108,7 @@ local function RenderDetail(ability)
         or Model.RankText(nextRank))
 end
 
-local function Refresh()
+Refresh = function()
     visible = {}
     local session = snapshot and snapshot.session
     sessionText:SetText(session and session.available and ("This session: " .. session.uses
@@ -100,9 +123,14 @@ local function Refresh()
         local status = syncState == "current" and "Server progress received"
             or (syncState == "waiting" and "Refreshing saved view..." or "Saved view - Server progress unavailable")
         subtitle:SetText("Character level " .. snapshot.characterLevel .. " - " .. status)
+        local tracked = TrackedAbilities()
         for _, ability in ipairs(snapshot.abilities) do
-            if (tab == "skills" and ability.learnedRank > 0)
-                or (tab == "upcoming" and ability.nextRank) then visible[#visible + 1] = ability end
+            local matchesTab = (tab == "skills" and ability.learnedRank > 0)
+                or (tab == "upcoming" and ability.nextRank)
+                or (tab == "tracked" and tracked[tostring(ability.abilityId)] == true)
+            local matchesSearch = search == "" or string.find(string.lower(SpellName(ability.displaySpellId)),
+                search, 1, true)
+            if matchesTab and matchesSearch then visible[#visible + 1] = ability end
         end
         table.sort(visible, function(a, b)
             if tab == "upcoming" and a.nextRank.characterLevel ~= b.nextRank.characterLevel then
@@ -153,13 +181,30 @@ panel:SetScript("OnMouseWheel", function(_, delta) offset = offset - delta; Refr
 
 local function Tab(label, value, x)
     local button = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-    button:SetSize(120, 24)
+    button:SetSize(90, 24)
     button:SetPoint("TOPLEFT", x, -76)
     button:SetText(label)
     button:SetScript("OnClick", function() tab = value; offset = 0; Refresh() end)
 end
 Tab("My Skills", "skills", 28)
-Tab("Upcoming", "upcoming", 158)
+Tab("Upcoming", "upcoming", 128)
+Tab("Tracked", "tracked", 228)
+local searchLabel = Text(panel, "GameFontHighlightSmall", 336, -82, 54)
+searchLabel:SetText("Search")
+searchBox = CreateFrame("EditBox", "HXCAbilityPracticeSearch", panel, "InputBoxTemplate")
+searchBox:SetSize(330, 24)
+searchBox:SetPoint("TOPLEFT", 395, -76)
+searchBox:SetAutoFocus(false)
+searchBox:SetMaxLetters(80)
+searchBox:SetScript("OnTextChanged", function(self)
+    search = string.lower(string.match(self:GetText() or "", "^%s*(.-)%s*$"))
+    offset = 0
+    Refresh()
+end)
+searchBox:SetScript("OnEscapePressed", searchBox.ClearFocus)
+searchBox:SetScript("OnEnterPressed", searchBox.ClearFocus)
+searchBox:SetText("")
+panel:SetScript("OnHide", function() searchBox:ClearFocus() end)
 
 function API.ApplySnapshot(value)
     local validated, reason = Model.Validate(value)
@@ -196,6 +241,9 @@ function API.Reset()
     syncState = "waiting"
     selectedId = nil
     offset = 0
+    tab = "skills"
+    search = ""
+    searchBox:SetText("")
     Refresh()
 end
 

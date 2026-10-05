@@ -6,6 +6,7 @@ function methods:CreateFontString() return Widget() end
 function methods:CreateTexture() return Widget() end
 function methods:SetScript(event, callback) self.scripts[event] = callback end
 function methods:SetText(value) self.text = value end
+function methods:GetText() return self.text end
 function methods:SetValue(value) self.value = value end
 function methods:Show() self.shown = true end
 function methods:Hide() self.shown = false end
@@ -13,7 +14,7 @@ function methods:IsShown() return self.shown end
 local setters = { "SetSize", "SetWidth", "SetPoint", "SetFrameStrata", "SetMovable", "EnableMouse",
     "RegisterForDrag", "SetBackdrop", "SetJustifyH", "SetStatusBarTexture", "SetStatusBarColor",
     "SetMinMaxValues", "SetAllPoints", "SetTexture", "SetHighlightTexture", "EnableMouseWheel",
-    "StartMoving", "StopMovingOrSizing", "RegisterEvent" }
+    "StartMoving", "StopMovingOrSizing", "RegisterEvent", "SetAutoFocus", "SetMaxLetters", "ClearFocus" }
 for _, method in ipairs(setters) do methods[method] = function() end end
 function CreateFrame(_, name)
     local frame = Widget()

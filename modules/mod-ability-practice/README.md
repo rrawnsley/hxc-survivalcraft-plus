@@ -208,3 +208,15 @@ an exact saturated value. These totals currently cover only the three reviewed d
 
 Source/native build passed at `.cache/verify-all/20261005-043328/report.json`; C++ lint, whitespace and Lua 5.1
 syntax compilation passed. Protocol round-trip, counter behavior and gameplay acceptance remain unqualified.
+
+## Search and tracked abilities
+
+The menu includes My Skills, Upcoming and Tracked views. Its bounded search field filters displayed ability names
+with a plain substring match. The detail pane toggles tracking for the selected ability; preferences are saved per
+character and keyed by class and stable ability ID. They do not store or modify authoritative practice progress.
+Login resets search/view selection while retaining tracking preferences. Hidden panels release keyboard focus.
+
+The addon version is now `0.2.0-development`. The existing widget fixture gained only the edit-box methods needed
+by the controls, without new cases. Source checks passed at `.cache/verify-all/20261005-043620/report.json` and
+Lua 5.1 syntax compiled. Search/tracking behavior, persistence and client layout still need runtime acceptance.
+No addon was installed, cataloged or published.
