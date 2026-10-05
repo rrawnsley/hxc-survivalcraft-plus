@@ -35,8 +35,12 @@
 #include <array>
 #include <atomic>
 #include <chrono>
+#include <charconv>
+#include <memory>
 #include <mutex>
+#include <string_view>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 namespace
@@ -140,6 +144,9 @@ std::recursive_mutex Mutex;
 bool Requested = false;
 bool DevelopmentAllowed = false;
 bool Ready = false;
+bool CharacterSelectionReady = false;
+using CharacterSelection = std::unordered_set<std::uint64_t>;
+std::atomic<std::shared_ptr<CharacterSelection const>> SelectedCharacters;
 bool RankRequested = false;
 bool PeriodicRequested = false;
 bool MasteryRequested = false;
@@ -299,9 +306,42 @@ bool MatchesEffectiveRankChain(Practice::AbilityDefinition const& ability)
     return !present || present == ability.Ranks.size();
 }
 
-bool IsHumanPlayer(Player const* player)
+std::shared_ptr<CharacterSelection const> ParseSelectedCharacters(std::string_view setting)
 {
-    return player && player->GetSession() && !player->GetSession()->IsBot();
+    if (setting.size() > 4096)
+        return {};
+    auto selection = std::make_shared<CharacterSelection>();
+    if (setting.empty())
+        return selection;
+    while (!setting.empty())
+    {
+        std::size_t const delimiter = setting.find(',');
+        std::string_view token = setting.substr(0, delimiter);
+        std::size_t const first = token.find_first_not_of(" \t");
+        if (first == std::string_view::npos)
+            return {};
+        token = token.substr(first, token.find_last_not_of(" \t") - first + 1);
+        std::uint32_t characterId = 0;
+        auto const parsed = std::from_chars(token.data(), token.data() + token.size(), characterId);
+        if (parsed.ec != std::errc{} || parsed.ptr != token.data() + token.size() || !characterId ||
+            !selection->insert(ObjectGuid::Create<HighGuid::Player>(characterId).GetRawValue()).second ||
+            selection->size() > 128)
+            return {};
+        if (delimiter == std::string_view::npos)
+            break;
+        setting.remove_prefix(delimiter + 1);
+        if (setting.empty())
+            return {};
+    }
+    return selection;
+}
+
+bool IsDevelopmentPlayer(Player const* player)
+{
+    if (!player || !player->GetSession() || player->GetSession()->IsBot())
+        return false;
+    auto const selection = SelectedCharacters.load();
+    return selection && selection->contains(player->GetGUID().GetRawValue());
 }
 
 Practice::AbilityProfile const* FindProfile(Player const* player, std::uint32_t spellId)
@@ -316,7 +356,7 @@ std::span<Practice::AbilityProfile const* const> ProfilesForClass(std::uint32_t 
 
 bool IsProfiledPlayer(Player const* player)
 {
-    return IsHumanPlayer(player) && ProfileLookup && ProfileLookup->HasClass(player->getClass());
+    return IsDevelopmentPlayer(player) && ProfileLookup && ProfileLookup->HasClass(player->getClass());
 }
 
 bool Affects(Player const* player)
@@ -513,7 +553,7 @@ void Deliver(Player* player, MenuSession& session, Clock::time_point now)
 
 bool Send(Player* player, MenuSession& session, Clock::time_point now)
 {
-    if (!Requested || !DevelopmentAllowed || !Ready || !IsHumanPlayer(player) ||
+    if (!Requested || !DevelopmentAllowed || !Ready || !IsDevelopmentPlayer(player) ||
         Revision == std::numeric_limits<std::uint32_t>::max())
         return false;
     auto const currentProgress = session.Progress.find(player->getClass());
@@ -785,14 +825,28 @@ public:
         Requested = sConfigMgr->GetOption<bool>("AbilityPractice.Enable", false);
         DevelopmentAllowed = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentObservation", false);
         RankRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentRankLearning", false);
-        Active.store(Requested && DevelopmentAllowed && Ready);
-        RankActive.store(Requested && DevelopmentAllowed && Ready && RankRequested);
-        for (auto& entry : Sessions)
+        auto const selected = ParseSelectedCharacters(
+            sConfigMgr->GetOption<std::string>("AbilityPractice.DevelopmentCharacterGuids", ""));
+        SelectedCharacters.store(selected);
+        CharacterSelectionReady = selected && !selected->empty();
+        if (!selected)
+            LOG_ERROR("module.ability_practice", "Rejected invalid development character selection; effects disabled");
+        LOG_INFO("module.ability_practice", "Development character selection: valid={}, selected count={}",
+            static_cast<bool>(selected), selected ? selected->size() : 0);
+        Active.store(Requested && DevelopmentAllowed && Ready && CharacterSelectionReady);
+        RankActive.store(Requested && DevelopmentAllowed && Ready && CharacterSelectionReady && RankRequested);
+        for (auto entry = Sessions.begin(); entry != Sessions.end();)
         {
-            ClearDelivery(entry.second);
-            entry.second.ActionSession = NewActionSession();
-            entry.second.Dirty = true;
-            entry.second.CheckRanks = true;
+            if (!selected || !selected->contains(entry->first))
+            {
+                entry = Sessions.erase(entry);
+                continue;
+            }
+            ClearDelivery(entry->second);
+            entry->second.ActionSession = NewActionSession();
+            entry->second.Dirty = true;
+            entry->second.CheckRanks = true;
+            ++entry;
         }
     }
 
@@ -871,8 +925,8 @@ public:
                 }
             }
         }
-        Active.store(Requested && DevelopmentAllowed && Ready);
-        RankActive.store(Requested && DevelopmentAllowed && Ready && RankRequested);
+        Active.store(Requested && DevelopmentAllowed && Ready && CharacterSelectionReady);
+        RankActive.store(Requested && DevelopmentAllowed && Ready && CharacterSelectionReady && RankRequested);
         LOG_INFO("module.ability_practice", "Development observation: requested={}, allowed={}, data ready={}",
             Requested, DevelopmentAllowed, Ready);
         LOG_INFO("module.ability_practice", "Development class samples: enabled={}, profile count={}",
@@ -895,10 +949,10 @@ public:
 
     void OnPlayerLogin(Player* player) override
     {
-        if (!Active.load() || !IsHumanPlayer(player))
+        if (!Active.load() || !IsDevelopmentPlayer(player))
             return;
         std::lock_guard lock(Mutex);
-        if (!Requested || !DevelopmentAllowed || !Ready)
+        if (!Requested || !DevelopmentAllowed || !Ready || !IsDevelopmentPlayer(player))
             return;
         auto& session = Sessions[player->GetGUID().GetRawValue()];
         session = {};
@@ -907,13 +961,13 @@ public:
 
     void OnPlayerUpdate(Player* player, uint32) override
     {
-        if (!Active.load() || !IsHumanPlayer(player) || player->isBeingLoaded())
+        if (!Active.load() || !IsDevelopmentPlayer(player) || player->isBeingLoaded())
             return;
         std::uint32_t const customSpecialization = CachedCustomSpecialization(player);
         bool checkRanks = false;
         {
             std::lock_guard lock(Mutex);
-            if (!Requested || !DevelopmentAllowed || !Ready)
+            if (!Requested || !DevelopmentAllowed || !Ready || !IsDevelopmentPlayer(player))
                 return;
             MenuSession& session = Sessions[player->GetGUID().GetRawValue()];
             RefreshOwnerState(player, session, customSpecialization);
@@ -954,11 +1008,11 @@ public:
 
     bool OnPlayerCanUseChat(Player* player, uint32, uint32 language, std::string& message, Player* receiver) override
     {
-        if (!Active.load() || !IsHumanPlayer(player) || language != LANG_ADDON ||
+        if (!Active.load() || !IsDevelopmentPlayer(player) || language != LANG_ADDON ||
             message.rfind("HXAP\t", 0) != 0)
             return true;
         std::lock_guard lock(Mutex);
-        if (!Requested || !DevelopmentAllowed || !Ready)
+        if (!Requested || !DevelopmentAllowed || !Ready || !IsDevelopmentPlayer(player))
             return true;
         if (receiver != player || (message != "HXAP\tHELLO|1" && message != "HXAP\tHELLO|2" &&
             message != "HXAP\tHELLO|3" && message != "HXAP\tHELLO|4"))

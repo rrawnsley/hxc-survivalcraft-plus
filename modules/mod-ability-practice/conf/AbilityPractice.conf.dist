@@ -1,8 +1,13 @@
 # Development feature. Disabled by default; enable only on an isolated test server.
-# Both flags must be enabled in an isolated test server to observe the three Pyromancer fixtures.
+# Both flags and an explicit character selection are required on an isolated test server.
 # The numerical training profile is illustrative, not approved production balance.
 AbilityPractice.Enable = 0
 AbilityPractice.AllowDevelopmentObservation = 0
+
+# Comma-separated character database GUIDs, at most 128 positive uint32 IDs (example: "12, 34").
+# Empty or malformed selection disables all development effects, rank gates, recording and menu delivery.
+# Reloadable. Removed characters keep their saved progress/learned ranks and return to native progression.
+AbilityPractice.DevelopmentCharacterGuids = ""
 
 # Additional experimental rank gating and automatic upgrades. Leave off for observation-only sessions.
 AbilityPractice.AllowDevelopmentRankLearning = 0

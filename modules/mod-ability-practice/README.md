@@ -15,7 +15,8 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   definition in the broad ranked mode). Optional Hand of Elune mastery adds one more
   profile. Optional scripted observation adds Manafeed and an independent fixed-utility option adds two
   nontraining profiles; the largest staged catalog has 113 unique profiles.
-  All development settings default off.
+  All development settings default off. A nonempty explicit `AbilityPractice.DevelopmentCharacterGuids`
+  selection is also required; unselected characters keep native progression and receive no practice effects.
 - Outcomes: resolved direct damage/healing, successful interruption, dispel and beneficial-aura steal.
   Each profile requires its own outcome route. The existing client-cast callback records numeric class/spell
   identity; preparation requires that identity and rejects item/aura-triggered sources. Script-created casts
@@ -45,7 +46,7 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   with the player's continued live use. No production deployment/restart/configuration/DB/client change.
 
 Later sections are chronological implementation notes. Their older protocol/addon shapes are historical;
-the current unpublished shape above takes precedence. Source checking/building is not release acceptance.
+the current unpublished shape and activation requirements above take precedence. Source checking/building is not release acceptance.
 
 ## Client-request attribution checkpoint — 5 October 2026
 
@@ -1440,3 +1441,23 @@ Addon version is 0.4.14-development. Source checks and the isolated native build
 `.cache/verify-all/20261005-183804/report.json` (two source checks; 35.5-second build).
 Five Lua 5.1 files compiled for syntax without execution. Behavioral/gameplay/UI acceptance remains pending.
 No production changes were made.
+
+## Explicit development character selection — 5 October 2026
+
+`AbilityPractice.DevelopmentCharacterGuids` is a reloadable, comma-separated list of positive
+character database GUIDs, limited to 128 entries and 4,096 configuration bytes. It defaults empty.
+Empty selection disables observation, storage initialization, rank learning/gating, mastery and menu delivery.
+Malformed values, overflow, zero, duplicate IDs or empty entries reject the entire selection and disable effects.
+The immutable selection is cached and published atomically; cast callbacks do not parse configuration or query
+the database. Human-player ownership still applies; listed playerbots are not enrolled.
+
+Configuration reload removes excluded GUID sessions, cancels their unsent menu delivery and invalidates
+old original-cast receipts. Retained sessions also receive new action epochs. Login/update/chat callbacks
+recheck selection under the configuration mutex before creating a session. Removed characters retain
+learned ranks and cached/saved proficiency; native rank learning resumes without erasing earned progress.
+This selection is an isolated-development enrollment mechanism, not the final all-class rollout policy.
+
+Affected source and isolated native build passed in `.cache/verify-all/20261005-184316/report.json`
+(two source checks; 35.0-second build). Changed C++ style and whitespace passed.
+Runtime enrollment, reload/receipt behavior and persistence acceptance have not been exercised.
+All live server/client/configuration/database files remain unchanged.
