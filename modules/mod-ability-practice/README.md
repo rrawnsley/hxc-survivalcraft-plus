@@ -41,6 +41,8 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   caps, practice rates and rewards are not automatically approved or installed.
 - Startup refuses deprecated player spells, matching CoA's native learning restriction. Raw discovery also
   flags the native deprecated/depreacated whole-word markers in English spell names and rank labels.
+- Latest isolated source/native build passed .cache/verify-all/20261005-232101/report.json
+  (two source checks;35.6-second build), including Ranger/Chronomancer profiles. No build remains pending.
 - Verification on this resumed run: source checks, isolated native builds, C++ lint, whitespace and Lua 5.1
   syntax compilation only. No behavioral tests or live play checks ran. Earlier harness results below do not
   qualify the new changes. A validation-scope question is pending; explicit testing authorization is needed.
@@ -1849,3 +1851,19 @@ sum them as unique abilities or automatically approve training.
 Source passed .cache/verify-all/20261005-231841/report.json (two checks;9.5s), whitespace and all three updated
 read-only exports passed. No tests, native rebuild, addon execution/startup or production changes. The earlier
 Ranger/Chronomancer native compilation is still pending the other C:/Build-CoA build.
+
+
+## Pending periodic catalog native build completed — 5 October 2026
+
+The unrelated C:/Build-CoA build completed; only idle reusable MSBuild nodes remained. Then the isolated
+candidate b87626940d was compiled through verify_all, with source frozen and BelowNormal priority/four
+logical processors/one build job. Source/native passed .cache/verify-all/20261005-232101/report.json
+(two source checks;35.6-second build). This completes native compilation for the staged Serrated Shot,
+Toxic Dart and Unmake profiles after the earlier wait. No pending build remains. Earlier pending-build
+notes above describe their saved checkpoints, not the current qualification state.
+
+54-source authoring exports remain current; no native/provenance source changed during compilation. Addon
+remains0.4.24-development, with five Lua5.1 syntax compilations and no chunk execution. Unit/harness/gameplay
+stages skipped; compile success does not qualify runtime outcomes, callbacks, persistence, balance or release.
+Live CoA process42440 remains unchanged, started4October2026 21:36:56 local. No production installation,
+server/client/configuration/database/launcher update, native startup or restart was performed.
