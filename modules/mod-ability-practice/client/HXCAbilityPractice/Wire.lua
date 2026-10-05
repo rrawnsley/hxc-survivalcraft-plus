@@ -69,7 +69,8 @@ local function Accept(message, now, currentRevision, currentGeneration)
             return nil, "Stale snapshot header"
         end
         pending = { schemaVersion = schema, revision = revision, classId = classId, characterLevel = level,
-            count = count, generation = generation, started = now, lastPart = now, parts = {}, rankCount = 0, receivedRanks = 0 }
+            count = count, generation = generation, started = now, lastPart = now, parts = {},
+            rankCount = 0, receivedRanks = 0, rewardCount = 0, receivedRewards = 0 }
         return nil
     end
     if not pending then return nil, "No snapshot in progress" end
@@ -92,6 +93,11 @@ local function Accept(message, now, currentRevision, currentGeneration)
                 ability.route = part.T.route
                 ability.ruleSet = part.T.ruleSet
                 ability.nextTrainingCap = part.C ~= true and part.C or nil
+                ability.rewards = {}
+                for ordinal = 1, part.T.rewardCount do
+                    if not part.M or not part.M[ordinal] then return Reject("Incomplete mastery roadmap") end
+                    ability.rewards[ordinal] = part.M[ordinal]
+                end
             end
             ability.nextPoint = part.P
             ability.nextRank = part.R ~= true and part.R or nil
@@ -129,12 +135,34 @@ local function Accept(message, now, currentRevision, currentGeneration)
     end
     if kind == "T" then
         local abilityKind = tonumber(fields[4])
-        if pending.schemaVersion ~= 4 or part.T or #fields ~= 9 or not abilityKind
+        local rewardCount = tonumber(fields[10])
+        if pending.schemaVersion ~= 4 or part.T or #fields ~= 10 or not abilityKind
+            or not rewardCount or rewardCount > 8
             or abilityKind < 1 or abilityKind > 3 or (fields[5] ~= "0" and fields[5] ~= "1") then
             return Reject("Invalid ability type or session progress")
         end
-        part.T = { kind = abilityKind, route = tonumber(fields[8]), ruleSet = tonumber(fields[9]), session = { available = fields[5] == "1", uses = fields[6],
+        pending.rewardCount = pending.rewardCount + rewardCount
+        if pending.rewardCount > 512 then return Reject("Mastery roadmap is too large") end
+        if part.M then
+            for ordinal in pairs(part.M) do
+                if ordinal > rewardCount then return Reject("Invalid mastery roadmap ordinal") end
+            end
+        end
+        part.T = { kind = abilityKind, rewardCount = rewardCount, route = tonumber(fields[8]), ruleSet = tonumber(fields[9]), session = { available = fields[5] == "1", uses = fields[6],
             proficiencyGained = fields[7] } }
+        return nil
+    end
+    if kind == "M" then
+        local ordinal = tonumber(fields[4])
+        if pending.schemaVersion ~= 4 or #fields ~= 10 or not ordinal or ordinal < 1 or ordinal > 8
+            or (part.T and ordinal > part.T.rewardCount) then return Reject("Invalid mastery roadmap entry") end
+        part.M = part.M or {}
+        if part.M[ordinal] then return Reject("Duplicate mastery roadmap entry") end
+        pending.receivedRewards = pending.receivedRewards + 1
+        if pending.receivedRewards > 512 then return Reject("Mastery roadmap is too large") end
+        part.M[ordinal] = { characterLevel = tonumber(fields[5]), proficiency = tonumber(fields[6]),
+            healingBonusBasisPoints = tonumber(fields[7]), state = tonumber(fields[8]),
+            practice = { status = tonumber(fields[9]), uses = fields[10] } }
         return nil
     end
     if kind == "K" then
@@ -193,7 +221,7 @@ local function AcceptPacked(message, now, currentRevision, currentGeneration)
     if tonumber(revisionText) ~= pending.revision then return nil, "Unrelated packed progress message" end
     local parts = {}
     for part in string.gmatch(body .. ";", "([^;]*);") do
-        local kind, fields = string.match(part, "^([ACPRTKL])|(.+)$")
+        local kind, fields = string.match(part, "^([ACPRTKLM])|(.+)$")
         if not kind or #parts >= 32 then return Reject("Invalid packed progress part") end
         parts[#parts + 1] = kind .. "|" .. revisionText .. "|" .. fields
     end

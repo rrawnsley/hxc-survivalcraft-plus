@@ -162,6 +162,7 @@ local function RenderDetail(ability)
     track:SetText(TrackedAbilities()[tostring(ability.abilityId)] == true and "Stop tracking" or "Track ability")
     name:SetText(SpellName(ability.displaySpellId))
     local fixed = Model.IsFixed(ability)
+    local mastery = Model.IsMastery(ability)
     local session = ability.session
     abilitySessionText:SetText(fixed and "" or (session and session.available and
         ((syncState == "current" and "This session: " or "Saved session: ") .. session.uses
@@ -174,7 +175,7 @@ local function RenderDetail(ability)
     if not requiredLevel and ability.learnedRank == 0 and ability.nextRank then
         requiredLevel = ability.nextRank.characterLevel
     end
-    local rankText = ability.learnedRank > 0 and (fixed and "Learned ability" or
+    local rankText = ability.learnedRank > 0 and ((fixed or mastery) and "Learned ability" or
         ("Learned rank " .. ability.learnedRank)) or "Not yet learned"
     rankLabel:SetText(rankText .. (requiredLevel and (" - Required level " .. requiredLevel) or ""))
     local trains = ability.learnedRank > 0 and ability.pointsPerLevel > 0 and not Model.IsFixed(ability)
@@ -185,31 +186,35 @@ local function RenderDetail(ability)
     if trains then
         local capped = ability.proficiency >= ability.cap
         progress:SetValue(capped and 1 or ability.points / ability.pointsPerLevel)
-        progressLabel:SetText(capped and (not ability.nextRank and "Training complete" or "Current cap reached") or
+        progressLabel:SetText(capped and (not Model.NextMilestone(ability) and "Training complete" or "Current cap reached") or
             (math.floor(100 * ability.points / ability.pointsPerLevel) .. "% to the next proficiency point"))
     end
     pointText:SetText(Model.PointText(ability))
     local nextRank = ability.nextRank
+    local nextReward = Model.NextMastery(ability)
     nextTitle:SetText(nextRank and ((ability.learnedRank == 0 and "Upcoming ability: " or "Next rank: ")
-        .. SpellName(nextRank.spellId) .. (fixed and "" or (" (Rank " .. nextRank.rankNumber .. ")")))
-        or (fixed and "Ability details" or "Rank progression"))
-    nextText:SetText(Model.RankText(nextRank, Model.IsFixed(ability)))
-    local ranks = ability.ranks
-    roadmapButton:SetText(showRoadmap and "Next rank" or "All ranks")
+        .. SpellName(nextRank.spellId) .. ((fixed or mastery) and "" or (" (Rank " .. nextRank.rankNumber .. ")")))
+        or (fixed and "Ability details" or mastery and "Mastery benefits" or "Rank progression"))
+    nextText:SetText(mastery and not nextRank and Model.MasteryText(nextReward)
+        or Model.RankText(nextRank, fixed))
+    local ranks = mastery and ability.rewards or ability.ranks
+    roadmapButton:SetText(mastery and (showRoadmap and "Next benefit" or "All mastery")
+        or (showRoadmap and "Next rank" or "All ranks"))
     if ranks and not fixed then roadmapButton:Show() else roadmapButton:Hide() end
     local displayRoadmap = not fixed and showRoadmap and ranks
     if displayRoadmap then
         nextText:Hide()
         rankOffset = math.max(0, math.min(rankOffset, math.max(0, #ranks - #roadmapRows)))
-        nextTitle:SetText("Rank roadmap - " .. (rankOffset + 1) .. " to "
+        nextTitle:SetText((mastery and "Mastery roadmap - " or "Rank roadmap - ") .. (rankOffset + 1) .. " to "
             .. math.min(rankOffset + #roadmapRows, #ranks) .. " of " .. #ranks)
     else nextText:Show() end
     for index, row in ipairs(roadmapRows) do
         local rank = displayRoadmap and ranks[index + rankOffset]
         if rank then
             row:Show()
-            row.title:SetText("Rank " .. rank.rankNumber .. " - " .. SpellName(rank.spellId))
-            row.info:SetText(Model.RankText(rank, Model.IsFixed(ability)))
+            row.title:SetText(mastery and ("Mastery " .. (index + rankOffset))
+                or ("Rank " .. rank.rankNumber .. " - " .. SpellName(rank.spellId)))
+            row.info:SetText(mastery and Model.MasteryText(rank) or Model.RankText(rank, fixed))
         else row:Hide() end
     end
 end
@@ -245,15 +250,15 @@ Refresh = function()
         local tracked = TrackedAbilities()
         for _, ability in ipairs(snapshot.abilities) do
             local matchesTab = (tab == "skills" and ability.learnedRank > 0)
-                or (tab == "upcoming" and ability.nextRank)
+                or (tab == "upcoming" and Model.NextMilestone(ability))
                 or (tab == "tracked" and tracked[tostring(ability.abilityId)] == true)
             local matchesSearch = search == "" or string.find(string.lower(SpellName(ability.displaySpellId)),
                 search, 1, true)
             if matchesTab and matchesSearch then visible[#visible + 1] = ability end
         end
         table.sort(visible, function(a, b)
-            if tab == "upcoming" and a.nextRank.characterLevel ~= b.nextRank.characterLevel then
-                return a.nextRank.characterLevel < b.nextRank.characterLevel
+            if tab == "upcoming" and Model.NextMilestone(a).characterLevel ~= Model.NextMilestone(b).characterLevel then
+                return Model.NextMilestone(a).characterLevel < Model.NextMilestone(b).characterLevel
             end
             local left, right = SpellName(a.displaySpellId), SpellName(b.displaySpellId)
             if left == right then return a.abilityId < b.abilityId end
@@ -271,7 +276,7 @@ Refresh = function()
         footer:SetText(#snapshot.abilities == 0 and emptyText or
             (#visible == 0 and "No abilities in this view." or
             (#visible .. " abilities · " .. (showRoadmap and chosen and chosen.ranks
-                and "Use the mouse wheel over ranks to browse" or "Use the mouse wheel to browse")
+                and "Use the mouse wheel over milestones to browse" or "Use the mouse wheel to browse")
                 .. " · Forecasts count qualifying uses")))
     end
     if serverFailure then
@@ -287,12 +292,14 @@ Refresh = function()
             row.icon:SetTexture(icon or "Interface\\Icons\\INV_Misc_QuestionMark")
             row.label:SetText((ability.abilityId == selectedId and "|cffffd36b" or "|cffffffff")
                 .. SpellName(ability.displaySpellId) .. "|r")
-            local rank = ability.nextRank
+            local rank = Model.NextMilestone(ability)
             row.info:SetText(tab == "upcoming" and rank and
-                ((ability.learnedRank == 0 and "New ability" or ("Next rank " .. rank.rankNumber))
+                ((ability.learnedRank == 0 and "New ability" or Model.IsMastery(ability) and "Next mastery benefit"
+                    or ("Next rank " .. rank.rankNumber))
                     .. " · Req. level " .. rank.characterLevel) or
                 (ability.learnedRank == 0 and "Not yet learned" or
-                    (Model.IsFixed(ability) and "Fixed ability" or
+                    (Model.IsFixed(ability) and "Fixed ability" or Model.IsMastery(ability) and
+                        ("Mastery · Proficiency " .. ability.proficiency) or
                         ("Rank " .. ability.learnedRank .. " · Proficiency " .. ability.proficiency))))
         end
     end

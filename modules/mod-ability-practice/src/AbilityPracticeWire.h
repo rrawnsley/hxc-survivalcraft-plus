@@ -73,6 +73,39 @@ inline bool ConsistentTypedRoadmap(AbilityView const& view, std::uint32_t charac
     return false;
 }
 
+inline bool ConsistentTypedMastery(AbilityView const& view, std::uint32_t characterLevel)
+{
+    if (view.Kind != AbilityKind::Mastery)
+        return view.Rewards.empty();
+    if (view.Route != PracticeRoute::Healing || view.Rewards.empty() || view.Rewards.size() > MaximumMasteryRewards)
+        return false;
+    std::uint32_t previousLevel = view.Ranks.front().Requirement.CharacterLevel;
+    std::uint32_t previousProficiency = 1;
+    std::uint32_t previousBonus = 0;
+    for (MasteryRewardView const& entry : view.Rewards)
+    {
+        MasteryReward const& reward = entry.Reward;
+        if (reward.Requirement.CharacterLevel < previousLevel || reward.Requirement.CharacterLevel > 255 ||
+            reward.Requirement.Proficiency <= previousProficiency || reward.HealingBonusBasisPoints <= previousBonus ||
+            reward.HealingBonusBasisPoints > MaximumHealingMasteryBasisPoints || !ValidForecast(entry.Practice))
+            return false;
+        bool const levelMet = characterLevel >= reward.Requirement.CharacterLevel;
+        bool const practiceMet = view.State.Proficiency >= reward.Requirement.Proficiency;
+        RankState const expectedState = view.Availability == PracticeAvailability::MissingPrerequisite ?
+            RankState::MissingPrerequisite : !view.LearnedRank ? RankState::AcquireIntroductoryAbility :
+            levelMet && practiceMet ? RankState::Learned : levelMet ? RankState::NeedsPractice :
+            practiceMet ? RankState::NeedsCharacterLevel : RankState::NeedsBoth;
+        ForecastStatus const expectedForecast = practiceMet ? ForecastStatus::Complete :
+            reward.Requirement.Proficiency > view.Cap ? ForecastStatus::BeyondCap : ForecastStatus::Training;
+        if (entry.State != expectedState || entry.Practice.Status != expectedForecast)
+            return false;
+        previousLevel = reward.Requirement.CharacterLevel;
+        previousProficiency = reward.Requirement.Proficiency;
+        previousBonus = reward.HealingBonusBasisPoints;
+    }
+    return view.Cap <= view.Rewards.back().Reward.Requirement.Proficiency;
+}
+
 template<typename... Values>
 std::string WireLine(char kind, Values... values)
 {
@@ -101,7 +134,7 @@ inline std::vector<std::string> PackTypedMessages(std::span<std::string const> l
     };
     for (std::string const& line : lines)
     {
-        if (line.empty() || std::string_view("ACPRTKL").find(line.front()) == std::string_view::npos)
+        if (line.empty() || std::string_view("ACPRTKLM").find(line.front()) == std::string_view::npos)
         {
             flush();
             packed.push_back(line);
@@ -152,6 +185,15 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
     if ((includeRoadmap && !session) || (includeKinds && (!includeRoadmap || !generation)))
         return std::nullopt;
     std::size_t rankCount = 0;
+    std::size_t rewardCount = 0;
+    for (AbilityView const& view : abilities)
+    {
+        if (!includeKinds && (view.Kind == AbilityKind::Mastery || !view.Rewards.empty()))
+            return std::nullopt;
+        rewardCount += view.Rewards.size();
+        if (rewardCount > MaximumClassMasteryRewards)
+            return std::nullopt;
+    }
     if (includeRoadmap)
         for (AbilityView const& view : abilities)
         {
@@ -162,7 +204,7 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
                 return std::nullopt;
         }
     std::vector<std::string> lines;
-    lines.reserve(abilities.size() * (includeKinds ? 6 : includeRoadmap ? 4 : 3) + rankCount + 3);
+    lines.reserve(abilities.size() * (includeKinds ? 6 : includeRoadmap ? 4 : 3) + rankCount + rewardCount + 3);
     lines.push_back(Detail::WireLine('B', includeKinds ? TypedMenuSchemaVersion :
         includeRoadmap ? RoadmapMenuSchemaVersion :
         session ? SessionMenuSchemaVersion : MenuSchemaVersion,
@@ -185,7 +227,8 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
                 return std::nullopt;
         if (includeKinds)
         {
-            if (!Detail::ConsistentTypedRoadmap(view, characterLevel))
+            if (!Detail::ConsistentTypedRoadmap(view, characterLevel) ||
+                !Detail::ConsistentTypedMastery(view, characterLevel))
                 return std::nullopt;
             if ((view.RuleSet != HumanPvERuleSet && view.RuleSet != HumanPvEPeriodicRuleSet) ||
                 view.Route < PracticeRoute::Damage ||
@@ -209,7 +252,15 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
                 return std::nullopt;
             lines.push_back(Detail::WireLine('T', revision, index + 1, static_cast<std::uint32_t>(view.Kind) + 1,
                 view.Session.Available ? 1 : 0, view.Session.Uses, view.Session.ProficiencyGained,
-                static_cast<std::uint32_t>(view.Route), view.RuleSet));
+                static_cast<std::uint32_t>(view.Route), view.RuleSet, view.Rewards.size()));
+            for (std::size_t ordinal = 0; ordinal < view.Rewards.size(); ++ordinal)
+            {
+                MasteryRewardView const& reward = view.Rewards[ordinal];
+                lines.push_back(Detail::WireLine('M', revision, index + 1, ordinal + 1,
+                    reward.Reward.Requirement.CharacterLevel, reward.Reward.Requirement.Proficiency,
+                    reward.Reward.HealingBonusBasisPoints, static_cast<std::uint32_t>(reward.State),
+                    static_cast<std::uint32_t>(reward.Practice.Status), reward.Practice.Uses));
+            }
             if (view.NextTrainingCap)
             {
                 ProficiencyCap const& cap = *view.NextTrainingCap;

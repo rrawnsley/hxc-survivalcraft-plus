@@ -4,8 +4,10 @@
 #include "AbilityPracticeDevelopmentSamples.h"
 #include "AbilityPracticeDevelopmentPeriodic.h"
 #include "AbilityPracticeDevelopmentRanked.h"
+#include "AbilityPracticeDevelopmentMastery.h"
 #include "AbilityPracticeProfiles.h"
 #include "AbilityPracticeRankPolicy.h"
+#include "AbilityPracticeMasteryPolicy.h"
 #include "AbilityPracticeCastReceipt.h"
 #include "AbilityPracticeOutcome.h"
 #include "AbilityPracticeWire.h"
@@ -65,6 +67,46 @@ constexpr auto WithPeriodicProfiles(std::array<Practice::AbilityProfile, Count> 
 constexpr auto PeriodicProfiles = WithPeriodicProfiles(Profiles);
 constexpr auto AllClassPeriodicProfiles = WithPeriodicProfiles(AllClassSampleProfiles);
 constexpr auto RankedPeriodicProfiles = WithPeriodicProfiles(Practice::DevelopmentRanked::Profiles);
+template<std::size_t Count>
+constexpr auto WithMasteryProfiles(std::array<Practice::AbilityProfile, Count> const& profiles)
+{
+    std::array<Practice::AbilityProfile, Count + Practice::DevelopmentMastery::Profiles.size()> result{};
+    std::copy(profiles.begin(), profiles.end(), result.begin());
+    std::copy(Practice::DevelopmentMastery::Profiles.begin(), Practice::DevelopmentMastery::Profiles.end(),
+        result.begin() + Count);
+    return result;
+}
+constexpr auto MasteryProfiles = WithMasteryProfiles(Profiles);
+constexpr auto AllClassMasteryProfiles = WithMasteryProfiles(AllClassSampleProfiles);
+constexpr auto RankedMasteryProfiles = WithMasteryProfiles(Practice::DevelopmentRanked::Profiles);
+constexpr auto PeriodicMasteryProfiles = WithMasteryProfiles(PeriodicProfiles);
+constexpr auto AllClassPeriodicMasteryProfiles = WithMasteryProfiles(AllClassPeriodicProfiles);
+constexpr auto RankedPeriodicMasteryProfiles = WithMasteryProfiles(RankedPeriodicProfiles);
+
+std::span<Practice::AbilityProfile const> SelectProfiles(bool classSamples, bool ranked, bool periodic, bool mastery)
+{
+    if (ranked)
+    {
+        if (periodic)
+            return mastery ? std::span<Practice::AbilityProfile const>(RankedPeriodicMasteryProfiles) :
+                std::span<Practice::AbilityProfile const>(RankedPeriodicProfiles);
+        return mastery ? std::span<Practice::AbilityProfile const>(RankedMasteryProfiles) :
+            std::span<Practice::AbilityProfile const>(Practice::DevelopmentRanked::Profiles);
+    }
+    if (classSamples)
+    {
+        if (periodic)
+            return mastery ? std::span<Practice::AbilityProfile const>(AllClassPeriodicMasteryProfiles) :
+                std::span<Practice::AbilityProfile const>(AllClassPeriodicProfiles);
+        return mastery ? std::span<Practice::AbilityProfile const>(AllClassMasteryProfiles) :
+            std::span<Practice::AbilityProfile const>(AllClassSampleProfiles);
+    }
+    if (periodic)
+        return mastery ? std::span<Practice::AbilityProfile const>(PeriodicMasteryProfiles) :
+            std::span<Practice::AbilityProfile const>(PeriodicProfiles);
+    return mastery ? std::span<Practice::AbilityProfile const>(MasteryProfiles) :
+        std::span<Practice::AbilityProfile const>(Profiles);
+}
 std::optional<Practice::ProfileIndex> ProfileLookup;
 std::recursive_mutex Mutex;
 bool Requested = false;
@@ -72,6 +114,7 @@ bool DevelopmentAllowed = false;
 bool Ready = false;
 bool RankRequested = false;
 bool PeriodicRequested = false;
+bool MasteryRequested = false;
 std::uint64_t NextActionSession = 0;
 std::atomic<bool> RankActive = false;
 std::atomic<bool> Active = false;
@@ -83,7 +126,7 @@ constexpr auto InterestDuration = std::chrono::seconds(30);
 constexpr auto DeliveryInterval = std::chrono::milliseconds(100);
 constexpr auto DeliveryDuration = std::chrono::seconds(90);
 constexpr std::size_t DeliveryBatchSize = 8;
-constexpr std::size_t MaxQueuedMessages = 512 * 6 + 2048 + 3;
+constexpr std::size_t MaxQueuedMessages = 512 * 7 + 2048 + 3;
 constexpr std::uint32_t PracticeCastSourceKey = 0x41504353;
 constexpr std::uint32_t PracticeClientRequestKey = 0x41504352;
 std::string const ActiveSpecializationSource = "core.ascension_active_spec";
@@ -446,6 +489,8 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
             Practice::AbilityDefinition const& ability = profile.Definition;
             if (ability.ClassId != player->getClass())
                 continue;
+            if (ability.Kind == Practice::AbilityKind::Mastery && session.Protocol != Practice::TypedMenuSchemaVersion)
+                continue;
             auto const learned = Learned(player, ability);
             Practice::Progress state;
             if (ability.Kind != Practice::AbilityKind::Fixed)
@@ -468,6 +513,9 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
             }
             bool const acquisition = AcquisitionAllowed(player, ability, ability.Ranks.front().SpellId);
             auto view = Practice::BuildAbilityView(ability, profile.Policy, state, player->GetLevel(), learned, acquisition);
+            if (ability.Kind == Practice::AbilityKind::Mastery)
+                view.Rewards = Practice::DescribeMasteryRewards(ability, profile.Rewards, profile.Policy,
+                    state, player->GetLevel(), !learned.empty(), acquisition);
             for (Practice::RankView& rank : view.Ranks)
                 if (rank.State != Practice::RankState::Learned && !AcquisitionAllowed(player, ability, rank.SpellId))
                     rank.State = Practice::RankState::MissingPrerequisite;
@@ -703,6 +751,7 @@ public:
     {
         std::lock_guard lock(Mutex);
         PeriodicRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentPeriodicObservation", false);
+        MasteryRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentMastery", false);
         if (!Requested || !DevelopmentAllowed)
         {
             Active.store(false);
@@ -720,13 +769,8 @@ public:
         }
         bool const classSamples = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentClassSamples", false);
         bool const rankedCatalog = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentRankedCatalog", false);
-        std::span<Practice::AbilityProfile const> const profiles = PeriodicRequested ?
-            (rankedCatalog ? std::span<Practice::AbilityProfile const>(RankedPeriodicProfiles) :
-                classSamples ? std::span<Practice::AbilityProfile const>(AllClassPeriodicProfiles) :
-                std::span<Practice::AbilityProfile const>(PeriodicProfiles)) :
-            (rankedCatalog ? std::span<Practice::AbilityProfile const>(Practice::DevelopmentRanked::Profiles) :
-                classSamples ? std::span<Practice::AbilityProfile const>(AllClassSampleProfiles) :
-                std::span<Practice::AbilityProfile const>(Profiles));
+        std::span<Practice::AbilityProfile const> const profiles =
+            SelectProfiles(classSamples, rankedCatalog, PeriodicRequested, MasteryRequested);
         ProfileLookup.emplace(profiles);
         Ready = ProfileLookup->IsValid();
         for (Practice::AbilityProfile const& profile : profiles)
@@ -747,7 +791,9 @@ public:
             {
                 SpellInfo const* info = sSpellMgr->GetSpellInfo(rank.SpellId);
                 bool const fixed = profile.Definition.Kind == Practice::AbilityKind::Fixed;
-                bool const expectedOutcome = info && (fixed || HasSupportedOutcome(info, profile.Outcome));
+                bool const expectedOutcome = info && (fixed || HasSupportedOutcome(info, profile.Outcome)) &&
+                    (profile.Definition.Kind != Practice::AbilityKind::Mastery ||
+                        !info->HasAura(SPELL_AURA_PERIODIC_HEAL));
                 if (!info || (!fixed && info->IsPassive()) || !expectedOutcome)
                 {
                     Ready = false;
@@ -764,6 +810,7 @@ public:
             classSamples, profiles.size());
         LOG_INFO("module.ability_practice", "Development periodic observation: enabled={}", PeriodicRequested);
         LOG_INFO("module.ability_practice", "Development ranked catalog: enabled={}", rankedCatalog);
+        LOG_INFO("module.ability_practice", "Development mastery: enabled={}", MasteryRequested);
     }
 };
 
@@ -881,6 +928,32 @@ public:
     }
 };
 
+std::uint32_t ModifyMasteryHealing(Unit* healer, Unit* target, std::uint32_t spellId, std::uint32_t healing)
+{
+    if (!Active.load() || !MasteryRequested || !target || !healer || !spellId || !healing)
+        return healing;
+    Player* player = healer->ToPlayer();
+    if (!IsProfiledPlayer(player) || player->isBeingLoaded())
+        return healing;
+    auto const* profile = FindProfile(player, spellId);
+    if (!profile || profile->Definition.Kind != Practice::AbilityKind::Mastery ||
+        profile->Outcome != Practice::OutcomeKind::Healing ||
+        !QualifiesDevelopmentOutcome(Practice::OutcomeKind::Healing, player, target, 0, healing))
+        return healing;
+    std::lock_guard lock(Mutex);
+    if (!Affects(player) || !player->HasSpell(spellId) ||
+        !AcquisitionAllowed(player, profile->Definition, spellId))
+        return healing;
+    auto const loaded = Practice::ReadPlayerProgress(*player, profile->Definition.ClassId,
+        profile->Definition.AbilityId, profile->Policy, profile->DefinitionVersion);
+    if (loaded.Status != Practice::LoadStatus::Loaded ||
+        loaded.Record.MigrationVersion != Practice::LearnedRankMigrationVersion)
+        return healing;
+    std::uint32_t const bonus = Practice::HealingMasteryBonus(profile->Definition, profile->Rewards,
+        loaded.Record.State, player->GetLevel(), true, true);
+    return Practice::ApplyHealingMastery(healing, bonus);
+}
+
 class PracticeSpell : public AllSpellScript
 {
 public:
@@ -961,6 +1034,7 @@ void AddSC_ability_practice()
     CoAAbilityPractice::SetRankProvider(EvaluateRank);
     CoAAbilityPractice::SetPurchaseProvider(CanPurchaseSpell);
     CoAAbilityPractice::SetPeriodicOutcomeProvider(AwardPeriodicOutcome);
+    CoAAbilityPractice::SetHealingMasteryProvider(ModifyMasteryHealing);
     new PracticeWorld();
     new PracticePlayer();
     new PracticeClientCast();

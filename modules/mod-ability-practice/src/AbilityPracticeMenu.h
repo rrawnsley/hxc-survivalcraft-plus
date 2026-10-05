@@ -2,6 +2,7 @@
 #define ABILITY_PRACTICE_MENU_H
 
 #include "AbilityPracticeCatalog.h"
+#include "AbilityPracticeMastery.h"
 
 #include <cstdint>
 #include <limits>
@@ -77,6 +78,7 @@ struct AbilityView
     Forecast NextPoint;
     std::optional<RankView> NextRank;
     std::vector<RankView> Ranks;
+    std::vector<MasteryRewardView> Rewards;
     SessionPractice Session{ false, 0, 0 };
     PracticeRoute Route = PracticeRoute::Unknown;
     std::uint32_t RuleSet = 0;

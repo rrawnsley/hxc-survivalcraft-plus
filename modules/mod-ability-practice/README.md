@@ -11,7 +11,8 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   all 21 CoA classes. An optional startup-only sample catalog adds 20 ranked class-grant profiles for the other
   classes, for 23 profiles across all 21 classes. An optional broader ranked catalog selects 106 profiles and
   888 authored ranks across all 21 classes, taking priority over class samples. Periodic observation adds two
-  profiles to the selected catalog (five/25/108 respectively). All development settings default off.
+  profiles to the selected catalog (five/25/108 respectively). Optional Hand of Elune mastery adds one more
+  profile. All development settings default off.
 - Outcomes: resolved direct damage/healing, successful interruption, dispel and beneficial-aura steal.
   Each profile requires its own outcome route. The existing client-cast callback records numeric class/spell
   identity; preparation requires that identity and rejects item/aura-triggered sources. Script-created casts
@@ -23,7 +24,8 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   Shared native race/racial and faction-rift eligibility is checked at preparation, award and new upgrades;
   class/race/talent-set/custom-specialization changes refresh the owner state. Normal database save/reload/failure
   behavior and broader acquisition entitlements remain unqualified.
-- Menu: addon 0.4.10-development; unpublished protocol 4 includes B7 instance identity, T9 kind/session/rules,
+- Menu: addon 0.4.11-development; unpublished protocol 4 includes B7 instance identity, T10 kind/session/rules/reward
+  count and M mastery entries,
   mandatory C future-cap metadata, packed D parts and F8 unreadable-progress responses. Typed delivery is
   bounded/paced; saved views/ages/session totals are labeled. Existing schema 1/2/3 formats are preserved.
 - All-class preparation: 847 unapproved source-consistent class-grant definition drafts, including 244 ranked
@@ -1180,3 +1182,49 @@ style and whitespace passed. Discovery regeneration retains 847 unapproved draft
 with 22 native source provenance entries. The original native rebuild remains running in the frozen main
 worktree. Integration and incremental native build of these catalog additions remain pending. No behavioral
 tests ran and no production server, config, database, launcher or client was changed.
+
+
+## Hand of Elune unranked mastery prototype — 5 October 2026
+
+Startup-only `AbilityPractice.AllowDevelopmentMastery` selects one additional Starcaller class-grant profile
+(class 26, Hand of Elune 801990, authored character level 16). It defaults off. The setting enables draft
+healing benefits when the existing observation flags are enabled; it is not an observation-only setting.
+The ability remains a single spell rather than receiving invented ranks. Existing learned ownership seeds
+proficiency one without fabricated historical practice. Existing cached earned progress remains preserved.
+
+Mastery milestones are illustrative: proficiency 40/level 16 gives +0.5% healing; proficiency 70/level 24 gives
++1%; proficiency 100/level 32 gives +2%. Only the highest currently eligible benefit applies, never their sum.
+The 2% component ceiling, uint64 calculation and uint32 saturation prevent stacked/overflowing authored bonuses.
+They do not prove full rotation/proc balance or replace ordinary-play tuning. Rewards are available only for
+the learned profiled human ability in a qualifying friendly PvE encounter with native acquisition eligibility
+and a valid migrated cached record. Corruption, disabled module, wrong owner or missing prerequisites grant
+no bonus. Benefits do not require a new spell or DB schema. Progress/caps/forecasts use the existing policy.
+
+A narrow optional callback in AbilityPracticeMasteryPolicy.h receives explicit HealInfo healer/recipient
+identities. Unit::HealBySpell calls it after existing class scripts and before heal absorption/logging; no
+provider or inactive module leaves healing unchanged. Source inspection found the old ModifyHealReceived
+parameter names did not match its HealBySpell call order. That existing hook/caller behavior was preserved
+and is not used for new mastery attribution; no unrelated healing fix or observed gameplay defect is claimed.
+The new bridge changes Unit.cpp only, without changing Unit/Spell/Aura layouts again. It retains no pointers
+beyond the callback and reads cached progress only. Native periodic-heal mastery profiles are refused because
+this prototype modifies the direct HealBySpell route; periodic mastery rewards remain future work.
+
+Profile validation requires mastery reward definitions: at most eight ordered increasing healing milestones
+per ability, at most 512 per class, a final proficiency matching its full cap, valid level requirements and
+bonuses no greater than 200 basis points. Non-mastery profiles must have no rewards. Other unranked reward
+types are not implemented. Ranked definitions, normal introductory acquisition and stronger-rank gating remain.
+
+Addon 0.4.11-development supersedes the unpublished protocol-4 T9 shape with T10, adding reward count. M entries
+carry ordinal/level/proficiency/healing basis points/state/exact forecast; packed D accepts them. Both sides
+validate ordered rewards, counts, ownership/wait/forecast states and capped values; incomplete snapshots keep
+the saved view. Legacy 1/2/3 wire shapes are unchanged and omit unsupported mastery profiles. Nothing from
+protocol 4 has been released. Menu My Skills/Upcoming/Tracked and detail roadmaps distinguish mastery benefits
+from ranks, show waiting for character level after practice is earned, and label qualifying PvE healing.
+Session use/proficiency totals remain actual counters; no historical mastery-use totals are invented.
+
+Catalog-worktree source checks passed `.cache/verify-all/20261005-162213/report.json`; changed C++ lint, whitespace
+and five Lua 5.1 syntax compilations passed. Provenance includes the mastery API/definition/bridge and refreshed
+discovery still contains 847 unapproved drafts/179 outcome candidates. Original frozen native rebuild remains
+in progress; these changes require later integration and affected native build. No behavioral tests ran.
+All mastery rates/rewards and real healing/menu/migration/lifecycle behavior remain runtime qualification.
+Production server, client, configuration, DB and launcher remain untouched.

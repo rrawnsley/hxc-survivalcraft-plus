@@ -16,6 +16,7 @@
  */
 
 #include "Unit.h"
+#include "AbilityPracticeMasteryPolicy.h"
 #include "AbstractFollower.h"
 #include "AreaDefines.h"
 #include "ArenaSpectator.h"
@@ -8977,6 +8978,8 @@ int32 Unit::HealBySpell(HealInfo& healInfo, bool critical)
 {
     uint32 heal = healInfo.GetHeal();
     sScriptMgr->ModifyHealReceived(this, healInfo.GetTarget(), heal, healInfo.GetSpellInfo());
+    heal = CoAAbilityPractice::ModifyMasteryHealing(healInfo.GetHealer(), healInfo.GetTarget(),
+        healInfo.GetSpellInfo()->Id, heal);
     healInfo.SetHeal(heal);
 
     // calculate heal absorb and reduce healing

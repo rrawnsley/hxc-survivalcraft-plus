@@ -2,6 +2,7 @@
 #define ABILITY_PRACTICE_PROFILES_H
 
 #include "AbilityPracticeCatalog.h"
+#include "AbilityPracticeMastery.h"
 
 #include <unordered_map>
 #include <vector>
@@ -34,6 +35,7 @@ struct AbilityProfile
     AbilityDefinition Definition;
     TrainingPolicy Policy;
     OutcomeKind Outcome;
+    std::span<MasteryReward const> Rewards{};
 };
 
 inline bool ValidateProfiles(std::span<AbilityProfile const> profiles)
@@ -46,7 +48,8 @@ inline bool ValidateProfiles(std::span<AbilityProfile const> profiles)
         AbilityDefinition const& ability = profile.Definition;
         if (!profile.DefinitionVersion || profile.Acquisition != AcquisitionSource::ClassGrant ||
             ability.ClassId > 255 ||
-            ValidateDefinition(ability) != CatalogError::None || ability.Kind == AbilityKind::Mastery ||
+            ValidateDefinition(ability) != CatalogError::None || !ValidateMasteryRewards(ability, profile.Rewards) ||
+            (ability.Kind == AbilityKind::Mastery && profile.Outcome != OutcomeKind::Healing) ||
             !ValidPolicy(profile.Policy) ||
             (ability.Kind == AbilityKind::Fixed ? profile.Outcome != OutcomeKind::None :
                 profile.Outcome != OutcomeKind::Damage && profile.Outcome != OutcomeKind::Healing &&
@@ -65,6 +68,7 @@ inline bool ValidateProfiles(std::span<AbilityProfile const> profiles)
             return false;
         std::size_t classAbilities = 0;
         std::size_t classRanks = 0;
+        std::size_t classRewards = 0;
         for (std::size_t other = 0; other < profiles.size(); ++other)
         {
             AbilityDefinition const& existing = profiles[other].Definition;
@@ -72,6 +76,7 @@ inline bool ValidateProfiles(std::span<AbilityProfile const> profiles)
                 continue;
             ++classAbilities;
             classRanks += existing.Ranks.size();
+            classRewards += profiles[other].Rewards.size();
             if (other >= index)
                 continue;
             if (existing.AbilityId == ability.AbilityId)
@@ -81,7 +86,7 @@ inline bool ValidateProfiles(std::span<AbilityProfile const> profiles)
                     if (rank.SpellId == known.SpellId)
                         return false;
         }
-        if (classAbilities > 512 || classRanks > 2048)
+        if (classAbilities > 512 || classRanks > 2048 || classRewards > MaximumClassMasteryRewards)
             return false;
     }
     return true;

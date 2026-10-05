@@ -108,6 +108,37 @@ local function ConsistentTypedRoadmap(value, ranks, nextRank, point, characterLe
     return value.availability == 6 and value.kind == 3 and learned > 0 and introLevelMet
 end
 
+local function Rewards(value, ability, ranks, characterLevel)
+    if type(value) ~= "table" or #value > 8 then return nil end
+    local count = 0
+    for key in pairs(value) do
+        if not Integer(key, 1, #value) then return nil end
+        count = count + 1
+    end
+    if count ~= #value or (ability.kind ~= 2 and count ~= 0)
+        or (ability.kind == 2 and (count == 0 or ability.route ~= 2)) then return nil end
+    local result, previousLevel, previousProficiency, previousBonus = {}, ranks[1].characterLevel, 1, 0
+    for _, entry in ipairs(value) do
+        if type(entry) ~= "table" or not Integer(entry.characterLevel, previousLevel, 255)
+            or not Integer(entry.proficiency, previousProficiency + 1, 4294967295)
+            or not Integer(entry.healingBonusBasisPoints, previousBonus + 1, 200) then return nil end
+        local practice = Forecast(entry.practice)
+        if not practice then return nil end
+        local levelMet, practiceMet = characterLevel >= entry.characterLevel,
+            ability.proficiency >= entry.proficiency
+        local state = ability.availability == 2 and 3 or ability.learnedRank == 0 and 2
+            or levelMet and practiceMet and 1 or levelMet and 4 or practiceMet and 5 or 6
+        local forecast = practiceMet and 2 or entry.proficiency > ability.cap and 3 or 1
+        if entry.state ~= state or practice.status ~= forecast then return nil end
+        result[#result + 1] = { characterLevel = entry.characterLevel, proficiency = entry.proficiency,
+            healingBonusBasisPoints = entry.healingBonusBasisPoints, state = entry.state, practice = practice }
+        previousLevel, previousProficiency, previousBonus = entry.characterLevel, entry.proficiency,
+            entry.healingBonusBasisPoints
+    end
+    if ability.kind == 2 and ability.cap > previousProficiency then return nil end
+    return result
+end
+
 local function Ability(value, schema, characterLevel)
     if type(value) ~= "table" then return nil end
     local positive = { "abilityId", "displaySpellId", "proficiency", "cap" }
@@ -139,11 +170,14 @@ local function Ability(value, schema, characterLevel)
         if not matched then return nil end
     end
     local session = schema == 4 and Session(value.session) or nil
+    local rewards
     if schema == 4 then
         if not session or not Integer(value.kind, 1, 3) or not Integer(value.route, 1, 6)
             or (value.ruleSet ~= 1 and value.ruleSet ~= 2)
             or ((value.kind == 3) ~= (value.route == 6)) then return nil end
         if not ConsistentTypedRoadmap(value, ranks, rank, point, characterLevel) then return nil end
+        rewards = Rewards(value.rewards, value, ranks, characterLevel)
+        if not rewards then return nil end
         if value.nextTrainingCap ~= nil then
             local cap = value.nextTrainingCap
             if type(cap) ~= "table" or not Integer(cap.characterLevel, characterLevel + 1, 255)
@@ -159,11 +193,11 @@ local function Ability(value, schema, characterLevel)
                     and ranks[1].state ~= 5) then return nil end
         elseif value.availability == 6 then return nil end
     elseif value.kind ~= nil or value.session ~= nil or value.route ~= nil or value.ruleSet ~= nil
-        or value.nextTrainingCap ~= nil then return nil end
+        or value.nextTrainingCap ~= nil or value.rewards ~= nil then return nil end
     local cap = value.nextTrainingCap
     return { nextTrainingCap = cap and { characterLevel = cap.characterLevel, proficiency = cap.proficiency } or nil,
         hasCapInfo = schema == 4, kind = value.kind, session = session,
-        route = value.route, ruleSet = value.ruleSet, ranks = ranks,
+        route = value.route, ruleSet = value.ruleSet, ranks = ranks, rewards = rewards,
         abilityId = value.abilityId, displaySpellId = value.displaySpellId,
         learnedRank = value.learnedRank,
         proficiency = value.proficiency, points = value.points, cap = value.cap, pointsPerLevel = value.pointsPerLevel,
@@ -188,6 +222,7 @@ function Model.Validate(snapshot)
         characterLevel = snapshot.characterLevel, abilities = {} }
     local seen = {}
     local rankCount = 0
+    local rewardCount = 0
     local count = 0
     for key in pairs(snapshot.abilities) do
         if not Integer(key, 1, #snapshot.abilities) then return nil, "Invalid ability list" end
@@ -199,6 +234,8 @@ function Model.Validate(snapshot)
         if not ability or seen[ability.abilityId] then return nil, "Invalid or duplicate ability" end
         rankCount = rankCount + (ability.ranks and #ability.ranks or 0)
         if rankCount > 2048 then return nil, "Rank roadmap is too large" end
+        rewardCount = rewardCount + (ability.rewards and #ability.rewards or 0)
+        if rewardCount > 512 then return nil, "Mastery roadmap is too large" end
         seen[ability.abilityId] = true
         result.abilities[#result.abilities + 1] = ability
     end
@@ -207,6 +244,32 @@ end
 
 function Model.IsFixed(ability)
     return ability.kind == 3 or ability.availability == 6
+end
+
+function Model.IsMastery(ability) return ability.kind == 2 end
+
+function Model.NextMastery(ability)
+    for _, reward in ipairs(ability.rewards or {}) do
+        if reward.state ~= 1 then return reward end
+    end
+end
+
+function Model.NextMilestone(ability) return ability.nextRank or Model.NextMastery(ability) end
+
+function Model.MasteryText(reward)
+    if not reward then return "Mastery complete. All defined benefits are active." end
+    local bonus = string.format("%.2f", reward.healingBonusBasisPoints / 100)
+        :gsub("0+$", ""):gsub("%.$", "")
+    local benefit = "+" .. bonus .. "% healing in qualifying PvE combat."
+    local requirement = "Character level " .. reward.characterLevel .. " · Proficiency " .. reward.proficiency
+    if reward.state == 1 then return "Active: " .. benefit .. "\n" .. requirement end
+    local state = reward.state == 2 and "Learn the ability through its normal source."
+        or reward.state == 3 and "Current acquisition requirements are not met."
+        or reward.state == 5 and "Practice earned; waiting for character level."
+        or reward.practice.status == 3 and "Practice requirement exceeds the current cap."
+        or reward.practice.status == 1 and (reward.practice.uses .. " qualifying uses to the practice requirement.")
+        or "Waiting for the remaining requirements."
+    return benefit .. "\n" .. state .. "\n" .. requirement
 end
 
 function Model.PointText(ability)
@@ -222,12 +285,15 @@ function Model.PointText(ability)
     if state == 3 then return ability.learnedRank > 0 and "Practice requires a higher character level."
         or "This ability unlocks at a higher character level." end
     if state == 5 then
-        if not ability.nextRank then return "Training complete. All defined ranks learned." end
+        if not Model.NextMilestone(ability) then
+            return Model.IsMastery(ability) and "Mastery complete. All defined benefits are active."
+                or "Training complete. All defined ranks learned."
+        end
         if ability.nextTrainingCap then
             return "Current cap reached. More practice opens at character level "
                 .. ability.nextTrainingCap.characterLevel .. " (cap " .. ability.nextTrainingCap.proficiency .. ")."
         end
-        return "Current proficiency cap reached. Check the next rank for remaining requirements."
+        return "Current proficiency cap reached. Check the next milestone for remaining requirements."
     end
     if state == 6 then return "Fixed ability — no practice required." end
     if ability.nextPoint.status == 1 then
@@ -289,6 +355,10 @@ function Model.PracticeRules(ability)
         rule = rule .. (ability.ruleSet == 2 and
             " Supported damage/healing-over-time ticks can count once for the original cast."
             or " Only direct damage or healing counts in the current rules.")
+    end
+    if Model.IsMastery(ability) then
+        rule = rule .. " Mastery improves this ability's healing in the same qualifying PvE encounters."
+            .. " Only the highest earned benefit applies; mastery benefits do not add together."
     end
     return rule .. "\n\nOpponents that are too low level, players, player-controlled units, pets, totems"
         .. " and critters do not qualify."
