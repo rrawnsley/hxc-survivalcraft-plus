@@ -13,6 +13,7 @@ namespace AbilityPractice
 inline constexpr std::uint32_t MenuSchemaVersion = 1;
 inline constexpr std::uint32_t SessionMenuSchemaVersion = 2;
 inline constexpr std::uint32_t RoadmapMenuSchemaVersion = 3;
+inline constexpr std::uint32_t TypedMenuSchemaVersion = 4;
 
 struct SessionPractice
 {
@@ -54,6 +55,7 @@ struct AbilityView
     std::uint32_t AbilityId = 0;
     std::uint32_t DisplaySpellId = 0;
     std::uint32_t LearnedRank = 0;
+    AbilityKind Kind = AbilityKind::Ranked;
     Progress State;
     std::uint32_t Cap = 0;
     std::uint32_t PointsPerLevel = 0;
@@ -72,6 +74,7 @@ inline AbilityView BuildAbilityView(AbilityDefinition const& ability, TrainingPo
         return {};
 
     AbilityView view;
+    view.Kind = ability.Kind;
     view.ClassId = ability.ClassId;
     view.AbilityId = ability.AbilityId;
     view.DisplaySpellId = ability.Ranks.front().SpellId;

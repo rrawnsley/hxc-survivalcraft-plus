@@ -34,7 +34,8 @@ function Wire.Accept(message, now, currentRevision)
         if #fields ~= 6 then return Reject("Invalid snapshot header") end
         local schema, revision, classId, level, count = tonumber(fields[2]), tonumber(fields[3]),
             tonumber(fields[4]), tonumber(fields[5]), tonumber(fields[6])
-        if (schema ~= 1 and schema ~= 2 and schema ~= 3) or revision < 1 or revision > 4294967295 or classId < 1 or classId > 255
+        if (schema ~= 1 and schema ~= 2 and schema ~= 3 and schema ~= 4)
+            or revision < 1 or revision > 4294967295 or classId < 1 or classId > 255
             or level < 1 or level > 255 or count > 512 then return Reject("Unsupported snapshot header") end
         if revision <= (currentRevision or 0) or (pending and revision <= pending.revision) then
             return nil, "Stale snapshot header"
@@ -55,9 +56,13 @@ function Wire.Accept(message, now, currentRevision)
             local part = pending.parts[index]
             if not part or not part.A or not part.P or not part.R then return Reject("Incomplete snapshot") end
             local ability = part.A
+            if pending.schemaVersion == 4 then
+                if not part.T then return Reject("Missing ability type") end
+                ability.kind = part.T
+            end
             ability.nextPoint = part.P
             ability.nextRank = part.R ~= true and part.R or nil
-            if pending.schemaVersion == 3 then
+            if pending.schemaVersion >= 3 then
                 if not part.K then return Reject("Missing rank roadmap") end
                 ability.ranks = {}
                 for ordinal = 1, part.K do
@@ -81,9 +86,16 @@ function Wire.Accept(message, now, currentRevision)
     if not index or index < 1 or index > pending.count then return Reject("Invalid ability index") end
     local part = pending.parts[index] or {}
     pending.parts[index] = part
+    if kind == "T" then
+        local abilityKind = tonumber(fields[4])
+        if pending.schemaVersion ~= 4 or part.T or #fields ~= 4 or not abilityKind
+            or abilityKind < 1 or abilityKind > 3 then return Reject("Invalid ability type") end
+        part.T = abilityKind
+        return nil
+    end
     if kind == "K" then
         local count = tonumber(fields[4])
-        if pending.schemaVersion ~= 3 or part.K or #fields ~= 4 or not count or count < 1 or count > 64
+        if pending.schemaVersion < 3 or part.K or #fields ~= 4 or not count or count < 1 or count > 64
             then return Reject("Invalid rank roadmap count") end
         pending.rankCount = pending.rankCount + count
         if pending.rankCount > 2048 then return Reject("Rank roadmap is too large") end
@@ -97,7 +109,7 @@ function Wire.Accept(message, now, currentRevision)
     end
     if kind == "L" then
         local ordinal = tonumber(fields[4])
-        if pending.schemaVersion ~= 3 or #fields ~= 11 or not ordinal or ordinal < 1 or ordinal > 64
+        if pending.schemaVersion < 3 or #fields ~= 11 or not ordinal or ordinal < 1 or ordinal > 64
             or (part.K and ordinal > part.K) then return Reject("Invalid rank roadmap entry") end
         part.L = part.L or {}
         if part.L[ordinal] then return Reject("Duplicate rank roadmap entry") end

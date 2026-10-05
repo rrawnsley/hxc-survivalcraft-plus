@@ -543,3 +543,27 @@ full kind-specific upcoming labels remain future menu work.
 
 Source/native build passed at `.cache/verify-all/20261005-084624/report.json`; C++ lint and whitespace passed.
 No tests ran. Runtime fixed acquisition/display and passive behavior remain unqualified. No deployment occurred.
+
+## Authoritative ability types in menu version 4
+
+Development addon 0.4.0-development requests HELLO|4. Each ability requires a T record carrying its type
+(1 Ranked, 2 Mastery, 3 Fixed); all version-3 roadmap/session records remain mandatory. The server still
+answers HELLO|1/2/3 in their original formats, and the new parser accepts those snapshot formats. An older
+server that does not recognize HELLO|4 requires its matching older addon; request fallback is not implemented.
+
+Missing, duplicate, unknown and out-of-range type records refuse the whole snapshot. Typed fixed records
+must have a single rank, proficiency/cap 1, zero training points/rate, unavailable practice forecasts and normal
+learned/acquisition/level states. Nonfixed records cannot claim fixed availability. Existing numeric bounds,
+rank/message/ability limits, exact string counters and atomic snapshot assembly remain unchanged. Native
+AbilityView defaults to Ranked for existing callers; BuildAbilityView assigns the actual definition kind.
+
+Unlearned fixed entries now say normal acquisition/no practice required, including their character-level wait.
+Learned fixed entries say Learned ability/Fixed ability, omit the practice bar and hide the rank-roadmap toggle.
+Normal ranked views keep their rank roadmap. No Mastery profile or reward is enabled by this metadata.
+The existing request fixture expectation was updated to HELLO|4; no cases were added or executed.
+
+Source/native build passed at `.cache/verify-all/20261005-085250/report.json`; C++ lint/whitespace passed.
+All four addon files passed Lua 5.1 syntax compilation after a corrected missing closing parenthesis in menu
+editing. Final addon source checks passed at `.cache/verify-all/20261005-085212/report.json`. No behavioral or
+in-game tests ran; type transport, compatibility, fixed rendering and throughput remain runtime acceptance.
+No active client/server/launcher files were changed.

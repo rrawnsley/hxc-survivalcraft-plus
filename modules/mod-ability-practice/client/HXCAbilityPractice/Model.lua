@@ -79,9 +79,9 @@ local function Ability(value, schema)
     if not point then return nil end
     local rank = value.nextRank and Rank(value.nextRank) or nil
     if value.nextRank and not rank then return nil end
-    local ranks = schema == 3 and Ranks(value.ranks) or nil
-    if schema == 3 and not ranks then return nil end
-    if schema ~= 3 and value.ranks ~= nil then return nil end
+    local ranks = schema >= 3 and Ranks(value.ranks) or nil
+    if schema >= 3 and not ranks then return nil end
+    if schema < 3 and value.ranks ~= nil then return nil end
     if rank and ranks then
         local matched = false
         for _, entry in ipairs(ranks) do
@@ -92,7 +92,17 @@ local function Ability(value, schema)
         end
         if not matched then return nil end
     end
-    return { ranks = ranks, abilityId = value.abilityId, displaySpellId = value.displaySpellId,
+    if schema == 4 then
+        if not Integer(value.kind, 1, 3) then return nil end
+        if value.kind == 3 then
+            if #ranks ~= 1 or value.learnedRank > 1 or value.proficiency ~= 1 or value.cap ~= 1
+                or value.points ~= 0 or value.pointsPerLevel ~= 0 or point.status ~= 0
+                or ranks[1].proficiency ~= 1 or ranks[1].practice.status ~= 0
+                or (ranks[1].state ~= 1 and ranks[1].state ~= 2 and ranks[1].state ~= 3
+                    and ranks[1].state ~= 5) then return nil end
+        elseif value.availability == 6 then return nil end
+    elseif value.kind ~= nil then return nil end
+    return { kind = value.kind, ranks = ranks, abilityId = value.abilityId, displaySpellId = value.displaySpellId,
         learnedRank = value.learnedRank,
         proficiency = value.proficiency, points = value.points, cap = value.cap, pointsPerLevel = value.pointsPerLevel,
         availability = value.availability, nextPoint = point, nextRank = rank }
@@ -100,7 +110,8 @@ end
 
 function Model.Validate(snapshot)
     if type(snapshot) ~= "table"
-        or (snapshot.schemaVersion ~= 1 and snapshot.schemaVersion ~= 2 and snapshot.schemaVersion ~= 3)
+        or (snapshot.schemaVersion ~= 1 and snapshot.schemaVersion ~= 2 and snapshot.schemaVersion ~= 3
+            and snapshot.schemaVersion ~= 4)
         or not Integer(snapshot.revision, 1, 4294967295) or not Integer(snapshot.classId, 1, 255)
         or not Integer(snapshot.characterLevel, 1, 255) or type(snapshot.abilities) ~= "table"
         or #snapshot.abilities > 512 then return nil, "Unsupported or incomplete progress update" end
@@ -129,10 +140,18 @@ function Model.Validate(snapshot)
     return result
 end
 
+function Model.IsFixed(ability)
+    return ability.kind == 3 or ability.availability == 6
+end
+
 function Model.PointText(ability)
     local state = ability.availability
-    if state == 1 then return "Learn this ability to begin practicing." end
+    if state == 1 then return Model.IsFixed(ability) and "Learn through your normal ability source. No practice required."
+        or "Learn this ability to begin practicing." end
     if state == 2 then return "Requires the appropriate talent or specialization." end
+    if state == 3 and Model.IsFixed(ability) then
+        return "This ability requires a higher character level. No practice required."
+    end
     if state == 3 then return ability.learnedRank > 0 and "Practice requires a higher character level."
         or "This ability unlocks at a higher character level." end
     if state == 5 then
@@ -147,7 +166,14 @@ function Model.PointText(ability)
     return "Progress forecast unavailable."
 end
 
-function Model.RankText(rank)
+function Model.RankText(rank, fixed)
+    if fixed then
+        if not rank then return "This ability works at full effectiveness without practice." end
+        local requirement = "Character level " .. rank.characterLevel .. " - No practice required."
+        local state = rank.state == 1 and "Learned." or rank.state == 3 and "Normal acquisition prerequisites required."
+            or rank.state == 5 and "Waiting for character level." or "Learn through your normal ability source."
+        return state .. "\n" .. requirement
+    end
     if not rank then return "All currently defined ranks learned." end
     local requirement = "Character level " .. rank.characterLevel .. " · Proficiency " .. rank.proficiency
     if rank.state == 1 then return "Learned.\n" .. requirement end

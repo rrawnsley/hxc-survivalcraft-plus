@@ -121,8 +121,10 @@ local function RenderDetail(ability)
     detail:Show()
     track:SetText(TrackedAbilities()[tostring(ability.abilityId)] == true and "Stop tracking" or "Track ability")
     name:SetText(SpellName(ability.displaySpellId))
-    rankLabel:SetText(ability.learnedRank > 0 and ("Learned rank " .. ability.learnedRank) or "Not yet learned")
-    local trains = ability.learnedRank > 0 and ability.pointsPerLevel > 0 and ability.availability ~= 6
+    local fixed = Model.IsFixed(ability)
+    rankLabel:SetText(ability.learnedRank > 0 and (fixed and "Learned ability" or
+        ("Learned rank " .. ability.learnedRank)) or "Not yet learned")
+    local trains = ability.learnedRank > 0 and ability.pointsPerLevel > 0 and not Model.IsFixed(ability)
     local skillText = ability.proficiency > ability.cap and ("Saved proficiency " .. ability.proficiency
         .. " - current cap " .. ability.cap) or ("Proficiency " .. ability.proficiency .. " / " .. ability.cap)
     proficiency:SetText(trains and skillText or "")
@@ -136,13 +138,13 @@ local function RenderDetail(ability)
     pointText:SetText(Model.PointText(ability))
     local nextRank = ability.nextRank
     nextTitle:SetText(nextRank and ((ability.learnedRank == 0 and "Upcoming ability: " or "Next rank: ")
-        .. SpellName(nextRank.spellId) .. " (Rank " .. nextRank.rankNumber .. ")") or "Rank progression")
-    nextText:SetText(ability.availability == 6 and "This ability works at full effectiveness without practice."
-        or Model.RankText(nextRank))
+        .. SpellName(nextRank.spellId) .. (fixed and "" or (" (Rank " .. nextRank.rankNumber .. ")")))
+        or (fixed and "Ability details" or "Rank progression"))
+    nextText:SetText(Model.RankText(nextRank, Model.IsFixed(ability)))
     local ranks = ability.ranks
     roadmapButton:SetText(showRoadmap and "Next rank" or "All ranks")
-    if ranks then roadmapButton:Show() else roadmapButton:Hide() end
-    local displayRoadmap = showRoadmap and ranks
+    if ranks and not fixed then roadmapButton:Show() else roadmapButton:Hide() end
+    local displayRoadmap = not fixed and showRoadmap and ranks
     if displayRoadmap then
         nextText:Hide()
         rankOffset = math.max(0, math.min(rankOffset, math.max(0, #ranks - #roadmapRows)))
@@ -154,9 +156,7 @@ local function RenderDetail(ability)
         if rank then
             row:Show()
             row.title:SetText("Rank " .. rank.rankNumber .. " - " .. SpellName(rank.spellId))
-            row.info:SetText(ability.availability == 6 and ("Character level " .. rank.characterLevel
-                .. " - No practice required.\n" .. (rank.state == 1 and "Learned." or "Normal acquisition required."))
-                or Model.RankText(rank))
+            row.info:SetText(Model.RankText(rank, Model.IsFixed(ability)))
         else row:Hide() end
     end
 end
@@ -234,8 +234,8 @@ Refresh = function()
                 ((ability.learnedRank == 0 and "New ability" or ("Next rank " .. rank.rankNumber))
                     .. " · Req. level " .. rank.characterLevel) or
                 (ability.learnedRank == 0 and "Not yet learned" or
-                    ("Rank " .. ability.learnedRank .. (ability.availability == 6 and " · Fixed" or
-                        " · Proficiency " .. ability.proficiency))))
+                    (Model.IsFixed(ability) and "Fixed ability" or
+                        ("Rank " .. ability.learnedRank .. " · Proficiency " .. ability.proficiency))))
         end
     end
 end
