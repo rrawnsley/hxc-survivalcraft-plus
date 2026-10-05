@@ -599,6 +599,7 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
             if (view.NextRank)
                 view.NextRank = view.Ranks[view.NextRank->RankNumber - 1];
             view.Route = RouteFor(profile.Outcome);
+            view.AcquisitionSourceId = static_cast<std::uint32_t>(profile.Acquisition);
             view.RuleSet = HelpersRequested && Practice::DevelopmentHelpers::IsManafeed(profile) ?
                 Practice::HumanPvEScriptedHealRuleSet :
                 PeriodicRequested ? Practice::HumanPvEPeriodicRuleSet : Practice::HumanPvERuleSet;

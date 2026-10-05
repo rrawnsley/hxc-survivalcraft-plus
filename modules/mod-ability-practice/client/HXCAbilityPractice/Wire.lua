@@ -97,6 +97,7 @@ local function Accept(message, now, currentRevision, currentGeneration)
                 ability.session = part.T.session
                 ability.route = part.T.route
                 ability.ruleSet = part.T.ruleSet
+                ability.acquisitionSource = part.T.acquisitionSource
                 ability.nextTrainingCap = part.C ~= true and part.C or nil
                 ability.rewards = {}
                 for ordinal = 1, part.T.rewardCount do
@@ -141,8 +142,10 @@ local function Accept(message, now, currentRevision, currentGeneration)
     if kind == "T" then
         local abilityKind = tonumber(fields[4])
         local rewardCount = tonumber(fields[10])
-        if pending.schemaVersion ~= 4 or part.T or #fields ~= 10 or not abilityKind
+        local acquisitionSource = fields[11] and tonumber(fields[11]) or nil
+        if pending.schemaVersion ~= 4 or part.T or (#fields ~= 10 and #fields ~= 11) or not abilityKind
             or not rewardCount or rewardCount > 8
+            or (acquisitionSource and (acquisitionSource < 1 or acquisitionSource > 4))
             or abilityKind < 1 or abilityKind > 3 or (fields[5] ~= "0" and fields[5] ~= "1") then
             return Reject("Invalid ability type or session progress")
         end
@@ -153,7 +156,9 @@ local function Accept(message, now, currentRevision, currentGeneration)
                 if ordinal > rewardCount then return Reject("Invalid mastery roadmap ordinal") end
             end
         end
-        part.T = { kind = abilityKind, rewardCount = rewardCount, route = tonumber(fields[8]), ruleSet = tonumber(fields[9]), session = { available = fields[5] == "1", uses = fields[6],
+        part.T = { kind = abilityKind, rewardCount = rewardCount, route = tonumber(fields[8]),
+            ruleSet = tonumber(fields[9]), acquisitionSource = acquisitionSource,
+            session = { available = fields[5] == "1", uses = fields[6],
             proficiencyGained = fields[7] } }
         return nil
     end

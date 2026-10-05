@@ -84,6 +84,7 @@ struct AbilityView
     PracticeRoute Route = PracticeRoute::Unknown;
     std::uint32_t RuleSet = 0;
     std::optional<ProficiencyCap> NextTrainingCap;
+    std::uint32_t AcquisitionSourceId = 0;
 };
 
 inline std::optional<ProficiencyCap> FindNextTrainingCap(AbilityDefinition const& ability,

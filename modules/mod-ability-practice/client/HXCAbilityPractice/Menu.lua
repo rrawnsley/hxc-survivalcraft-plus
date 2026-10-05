@@ -143,6 +143,8 @@ practiceHelp:SetScript("OnEnter", function(self)
         if ability.abilityId == selectedId then
             GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
             GameTooltip:SetText("What earns practice?")
+            local acquisition = Model.AcquisitionText(ability)
+            if acquisition then GameTooltip:AddLine("Acquisition: " .. acquisition, 1, 0.82, 0, true) end
             GameTooltip:AddLine(Model.PracticeRules(ability), 1, 1, 1, true)
             if ability.learnedRank > 0 and ability.hasCapInfo and not Model.IsFixed(ability) then
                 local cap = ability.nextTrainingCap
@@ -197,7 +199,8 @@ local function RenderDetail(ability)
     if trains then
         local capped = ability.proficiency >= ability.cap
         progress:SetValue(capped and 1 or ability.points / ability.pointsPerLevel)
-        progressLabel:SetText(capped and (not Model.NextMilestone(ability) and "Training complete" or "Current cap reached") or
+        progressLabel:SetText(capped and
+            (not Model.NextMilestone(ability) and "Training complete" or "Current cap reached") or
             (math.floor(100 * ability.points / ability.pointsPerLevel) .. "% to the next proficiency point"))
     end
     pointText:SetText(Model.PointText(ability, snapshot.realmMaximumLevel, snapshot.characterLevel))
@@ -206,8 +209,10 @@ local function RenderDetail(ability)
     nextTitle:SetText(nextRank and ((ability.learnedRank == 0 and "Upcoming ability: " or "Next rank: ")
         .. SpellName(nextRank.spellId) .. ((fixed or mastery) and "" or (" (Rank " .. nextRank.rankNumber .. ")")))
         or (fixed and "Ability details" or mastery and "Mastery benefits" or "Rank progression"))
-    nextText:SetText(mastery and not nextRank and Model.MasteryText(nextReward, snapshot.realmMaximumLevel, snapshot.characterLevel)
-        or Model.RankText(nextRank, fixed, snapshot.realmMaximumLevel, snapshot.characterLevel))
+    nextText:SetText(mastery and not nextRank and Model.MasteryText(nextReward, snapshot.realmMaximumLevel,
+        snapshot.characterLevel, ability.acquisitionSource)
+        or Model.RankText(nextRank, fixed, snapshot.realmMaximumLevel,
+            snapshot.characterLevel, ability.acquisitionSource))
     local ranks = mastery and ability.rewards or ability.ranks
     roadmapButton:SetText(mastery and (showRoadmap and "Next benefit" or "All mastery")
         or (showRoadmap and "Next rank" or "All ranks"))
@@ -225,8 +230,10 @@ local function RenderDetail(ability)
             row:Show()
             row.title:SetText(mastery and ("Mastery " .. (index + rankOffset))
                 or ("Rank " .. rank.rankNumber .. " - " .. SpellName(rank.spellId)))
-            row.info:SetText(mastery and Model.MasteryText(rank, snapshot.realmMaximumLevel, snapshot.characterLevel)
-                or Model.RankText(rank, fixed, snapshot.realmMaximumLevel, snapshot.characterLevel))
+            row.info:SetText(mastery and Model.MasteryText(rank, snapshot.realmMaximumLevel,
+                snapshot.characterLevel, ability.acquisitionSource)
+                or Model.RankText(rank, fixed, snapshot.realmMaximumLevel,
+                    snapshot.characterLevel, ability.acquisitionSource))
         else row:Hide() end
     end
 end
@@ -346,7 +353,8 @@ Refresh = function()
                 (ability.learnedRank == 0 and "Not yet learned" or
                     (Model.IsFixed(ability) and "Fixed ability" or Model.IsMastery(ability) and
                         ("Mastery · Proficiency " .. ability.proficiency .. "/" .. ability.cap) or
-                        ("Rank " .. ability.learnedRank .. " · Proficiency " .. ability.proficiency .. "/" .. ability.cap))))
+                        ("Rank " .. ability.learnedRank .. " · Proficiency "
+                            .. ability.proficiency .. "/" .. ability.cap))))
         end
     end
     if GameTooltip and GameTooltip:IsShown() then
@@ -384,6 +392,8 @@ for index = 1, 9 do
         local ability = self.ability
         GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
         GameTooltip:SetText(SpellName(ability.displaySpellId))
+        local acquisition = Model.AcquisitionText(ability)
+        if acquisition then GameTooltip:AddLine("Acquisition: " .. acquisition, 1, 0.82, 0, true) end
         if not Model.IsFixed(ability) then
             GameTooltip:AddLine("Proficiency " .. ability.proficiency .. " / Current cap " .. ability.cap,
                 1, 0.82, 0, true)
@@ -395,14 +405,17 @@ for index = 1, 9 do
             1, 1, 1, true)
         if ability.session and ability.session.available and not Model.IsFixed(ability) then
             GameTooltip:AddLine((syncState == "current" and "This session: " or "Saved session: ")
-                .. ability.session.uses .. " qualifying uses · +" .. ability.session.proficiencyGained .. " proficiency",
+                .. ability.session.uses .. " qualifying uses · +"
+                .. ability.session.proficiencyGained .. " proficiency",
                 1, 0.82, 0, true)
         end
         local milestone = Model.NextMilestone(ability)
         if milestone then
             local text = Model.IsMastery(ability) and not ability.nextRank
-                and Model.MasteryText(milestone, snapshot.realmMaximumLevel, snapshot.characterLevel)
-                or Model.RankText(milestone, Model.IsFixed(ability), snapshot.realmMaximumLevel, snapshot.characterLevel)
+                and Model.MasteryText(milestone, snapshot.realmMaximumLevel,
+                    snapshot.characterLevel, ability.acquisitionSource)
+                or Model.RankText(milestone, Model.IsFixed(ability), snapshot.realmMaximumLevel,
+                    snapshot.characterLevel, ability.acquisitionSource)
             GameTooltip:AddLine(text, 1, 1, 1, true)
         end
         if syncState ~= "current" then GameTooltip:AddLine("This is your saved view.", 1, 0.82, 0, true) end

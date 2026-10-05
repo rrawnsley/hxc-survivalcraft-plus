@@ -29,8 +29,8 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   Shared native race/racial and faction-rift eligibility is checked at preparation, award and new upgrades;
   class/race/talent-set/custom-specialization changes refresh the owner state. Normal database save/reload/failure
   behavior and broader acquisition entitlements remain unqualified.
-- Menu: addon 0.4.16-development; unpublished protocol 4 includes B8 instance identity/realm cap, T10 kind/session/rules/reward
-  count and M mastery entries,
+- Menu: addon 0.4.17-development; unpublished protocol 4 includes B8 instance identity/realm cap, T11 kind/session/rules/reward
+  count/acquisition source and M mastery entries,
   mandatory C future-cap metadata, packed D parts and F8 unreadable-progress responses. Typed delivery is
   bounded/paced; saved views/ages/session totals are labeled. Existing schema 1/2/3 formats are preserved.
 - All-class preparation: 847 unapproved source-consistent class-grant definition drafts, including 244 ranked
@@ -1516,3 +1516,20 @@ Newly learned rank/mastery-event history is not yet recorded; this view only rep
 No native/protocol/storage change or rebuild. Source passed `.cache/verify-all/20261005-185501/report.json`
 (two source checks); five Lua5.1 files compiled for syntax without execution. In-game acceptance remains pending.
 No active addon installation or production changes.
+
+## Authoritative acquisition menu metadata — 5 October 2026
+
+Each server view now carries the selected profile acquisition source. Current validated definitions are
+class grants, so their menu source is Class progression; no talent/spec/item gameplay support is enabled.
+AcquisitionSource uses explicit stable numeric IDs0–4. An optional final source ID extends the unpublished
+protocol4 typed record from T10 to T11. New clients accept T10 as unknown source, and encoder fixtures
+without a source retain T10. Legacy schemas1/2/3 keep their formats. Unknown/invalid source IDs are
+rejected; the view range is1–4 or absent. No extra message/queue-count changes.
+
+Addon0.4.17-development shows Acquisition in row/practice-help tooltips and identifies the learning source
+in introductory/rank/mastery/fixed-acquisition text. Older source-less snapshots retain generic wording.
+Sources do not promise level-only unlocks; prerequisite/wait states remain authoritative.
+No native acquisition, rank entitlement, saved progress or reward behavior changed.
+Source/native build passed `.cache/verify-all/20261005-190423/report.json` (two source checks;34.5-second build),
+C++ style/whitespace and five Lua5.1 syntax compilations without execution. Authoring provenance refreshed.
+Actual wire delivery/menu/acquisition acceptance remains pending. No production installation or changes.

@@ -257,11 +257,15 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
                     view.Ranks.front().State != RankState::MissingPrerequisite &&
                     view.Ranks.front().State != RankState::NeedsCharacterLevel)))
                 return std::nullopt;
+            if (view.AcquisitionSourceId > 4)
+                return std::nullopt;
             if (!view.Session.Available && (view.Session.Uses || view.Session.ProficiencyGained))
                 return std::nullopt;
             lines.push_back(Detail::WireLine('T', revision, index + 1, static_cast<std::uint32_t>(view.Kind) + 1,
                 view.Session.Available ? 1 : 0, view.Session.Uses, view.Session.ProficiencyGained,
                 static_cast<std::uint32_t>(view.Route), view.RuleSet, view.Rewards.size()));
+            if (view.AcquisitionSourceId)
+                lines.back() += '|' + std::to_string(view.AcquisitionSourceId);
             for (std::size_t ordinal = 0; ordinal < view.Rewards.size(); ++ordinal)
             {
                 MasteryRewardView const& reward = view.Rewards[ordinal];

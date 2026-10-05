@@ -19,7 +19,9 @@ function Model.ValidateFailure(value)
     if type(value) ~= "table" or value.schemaVersion ~= 4
         or not Integer(value.revision, 1, 4294967295) or not Integer(value.classId, 1, 255)
         or not Integer(value.abilityId, 1, 4294967295) or not Integer(value.spellId, 1, 4294967295)
-        or not Model.ValidGeneration(value.generation) or value.issueCode ~= 1 then return nil, "Invalid saved-progress issue" end
+        or not Model.ValidGeneration(value.generation) or value.issueCode ~= 1 then
+        return nil, "Invalid saved-progress issue"
+    end
     return { schemaVersion = 4, revision = value.revision, classId = value.classId,
         abilityId = value.abilityId, spellId = value.spellId, issueCode = 1, generation = value.generation }
 end
@@ -172,6 +174,7 @@ local function Ability(value, schema, characterLevel)
     local session = schema == 4 and Session(value.session) or nil
     local rewards
     if schema == 4 then
+        if value.acquisitionSource ~= nil and not Integer(value.acquisitionSource, 1, 4) then return nil end
         if not session or not Integer(value.kind, 1, 3) or not Integer(value.route, 1, 6)
             or (value.ruleSet ~= 1 and value.ruleSet ~= 2 and value.ruleSet ~= 3)
             or (value.ruleSet == 3 and (value.kind ~= 1 or value.route ~= 2))
@@ -194,11 +197,12 @@ local function Ability(value, schema, characterLevel)
                     and ranks[1].state ~= 5) then return nil end
         elseif value.availability == 6 then return nil end
     elseif value.kind ~= nil or value.session ~= nil or value.route ~= nil or value.ruleSet ~= nil
-        or value.nextTrainingCap ~= nil or value.rewards ~= nil then return nil end
+        or value.nextTrainingCap ~= nil or value.rewards ~= nil or value.acquisitionSource ~= nil then return nil end
     local cap = value.nextTrainingCap
     return { nextTrainingCap = cap and { characterLevel = cap.characterLevel, proficiency = cap.proficiency } or nil,
         hasCapInfo = schema == 4, kind = value.kind, session = session,
-        route = value.route, ruleSet = value.ruleSet, ranks = ranks, rewards = rewards,
+        route = value.route, ruleSet = value.ruleSet, acquisitionSource = value.acquisitionSource,
+        ranks = ranks, rewards = rewards,
         abilityId = value.abilityId, displaySpellId = value.displaySpellId,
         learnedRank = value.learnedRank,
         proficiency = value.proficiency, points = value.points, cap = value.cap, pointsPerLevel = value.pointsPerLevel,
@@ -243,6 +247,16 @@ function Model.Validate(snapshot)
         result.abilities[#result.abilities + 1] = ability
     end
     return result
+end
+
+local acquisitionLabels = { "Class progression", "Talent", "Specialization", "Ability item" }
+local acquisitionSources = { "class progression", "the appropriate talent",
+    "your specialization", "the appropriate ability item" }
+
+function Model.AcquisitionText(ability) return acquisitionLabels[ability.acquisitionSource] end
+
+local function LearnText(source)
+    return "Learn through " .. (acquisitionSources[source] or "your normal ability source") .. "."
 end
 
 function Model.IsFixed(ability)
@@ -295,13 +309,13 @@ function Model.TrainingCapText(cap, realmMaximumLevel, characterLevel)
     return "More practice opens at " .. level .. " (cap " .. cap.proficiency .. ")."
 end
 
-function Model.MasteryText(reward, realmMaximumLevel, characterLevel)
+function Model.MasteryText(reward, realmMaximumLevel, characterLevel, acquisitionSource)
     if not reward then return "Mastery complete. Only the highest earned benefit applies." end
     local benefit = HealingBonusText(reward.healingBonusBasisPoints) .. " healing in qualifying PvE combat."
     local requirement = Model.LevelText(reward.characterLevel, realmMaximumLevel, characterLevel)
         .. " · Proficiency " .. reward.proficiency
     if reward.state == 1 then return "Earned: " .. benefit .. "\n" .. requirement end
-    local state = reward.state == 2 and "Learn the ability through its normal source."
+    local state = reward.state == 2 and LearnText(acquisitionSource)
         or reward.state == 3 and "Current acquisition requirements are not met."
         or reward.state == 5 and "Practice earned; waiting for character level."
         or reward.practice.status == 3 and "Practice requirement exceeds the current cap."
@@ -313,8 +327,8 @@ end
 function Model.PointText(ability, realmMaximumLevel, characterLevel)
     local state = ability.availability
     if state == 1 then
-        return Model.IsFixed(ability) and "Learn through your normal ability source. No practice required."
-            or "Learn this ability to begin practicing."
+        return LearnText(ability.acquisitionSource)
+            .. (Model.IsFixed(ability) and " No practice required." or " Then begin practicing.")
     end
     if state == 2 then return "Current acquisition requirements are not met." end
     if state == 3 and Model.IsFixed(ability) then
@@ -341,20 +355,20 @@ function Model.PointText(ability, realmMaximumLevel, characterLevel)
     return "Progress forecast unavailable."
 end
 
-function Model.RankText(rank, fixed, realmMaximumLevel, characterLevel)
+function Model.RankText(rank, fixed, realmMaximumLevel, characterLevel, acquisitionSource)
     if fixed then
         if not rank then return "This ability works at full effectiveness without practice." end
         local requirement = Model.LevelText(rank.characterLevel, realmMaximumLevel, characterLevel)
             .. " - No practice required."
         local state = rank.state == 1 and "Learned." or rank.state == 3 and "Normal acquisition prerequisites required."
-            or rank.state == 5 and "Waiting for character level." or "Learn through your normal ability source."
+            or rank.state == 5 and "Waiting for character level." or LearnText(acquisitionSource)
         return state .. "\n" .. requirement
     end
     if not rank then return "All currently defined ranks learned." end
     local requirement = Model.LevelText(rank.characterLevel, realmMaximumLevel, characterLevel)
         .. " · Proficiency " .. rank.proficiency
     if rank.state == 1 then return "Learned.\n" .. requirement end
-    if rank.state == 2 then return "Learn through your normal ability source.\n" .. requirement end
+    if rank.state == 2 then return LearnText(acquisitionSource) .. "\n" .. requirement end
     if rank.state == 3 then
         local forecast = rank.practice.status == 1 and (rank.practice.uses
             .. " qualifying uses to the proficiency requirement.\n")
@@ -375,7 +389,7 @@ end
 
 function Model.PracticeRules(ability)
     if Model.IsFixed(ability) then
-        return "This ability has no practice levels. Learn it through your normal ability source."
+        return "This ability has no practice levels. " .. LearnText(ability.acquisitionSource)
     end
     if ability.ruleSet ~= 1 and ability.ruleSet ~= 2 and ability.ruleSet ~= 3 then
         return "Practice rules are unavailable in this update. Refresh to request the current rules."

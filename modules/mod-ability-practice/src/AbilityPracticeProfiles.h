@@ -11,11 +11,11 @@ namespace AbilityPractice
 {
 enum class AcquisitionSource
 {
-    Unreviewed,
-    ClassGrant,
-    Talent,
-    Specialization,
-    Item
+    Unreviewed = 0,
+    ClassGrant = 1,
+    Talent = 2,
+    Specialization = 3,
+    Item = 4
 };
 
 enum class OutcomeKind
