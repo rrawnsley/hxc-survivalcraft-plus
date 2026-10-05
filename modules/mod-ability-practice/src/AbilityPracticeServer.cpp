@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "AbilityPracticeDevelopment.h"
+#include "AbilityPracticeProfiles.h"
 #include "AbilityPracticeRankPolicy.h"
 #include "AbilityPracticeOutcome.h"
 #include "AbilityPracticeWire.h"
@@ -27,6 +28,14 @@ namespace
 {
 namespace Practice = AbilityPractice;
 namespace Dev = AbilityPractice::Development;
+constexpr std::array Profiles = {
+    Practice::AbilityProfile{ Dev::DefinitionVersion, Practice::AcquisitionSource::ClassGrant,
+        Dev::Abilities[0], Dev::Policy, Practice::DirectOutcome::Damage },
+    Practice::AbilityProfile{ Dev::DefinitionVersion, Practice::AcquisitionSource::ClassGrant,
+        Dev::Abilities[1], Dev::Policy, Practice::DirectOutcome::Healing },
+    Practice::AbilityProfile{ Dev::DefinitionVersion, Practice::AcquisitionSource::ClassGrant,
+        Dev::Abilities[2], Dev::Policy, Practice::DirectOutcome::Healing }
+};
 std::recursive_mutex Mutex;
 bool Requested = false;
 bool DevelopmentAllowed = false;
@@ -47,7 +56,7 @@ struct MenuSession
     bool CheckRanks = true;
     std::uint32_t Protocol = Practice::MenuSchemaVersion;
     std::uint32_t LastClass = 0;
-    Practice::SessionPractice Progress;
+    std::unordered_map<std::uint32_t, Practice::SessionPractice> Progress;
 };
 std::unordered_map<std::uint64_t, MenuSession> Sessions;
 
@@ -56,14 +65,14 @@ bool IsHumanPlayer(Player const* player)
     return player && player->GetSession() && !player->GetSession()->IsBot();
 }
 
-bool IsDevelopmentPlayer(Player const* player)
+bool IsProfiledPlayer(Player const* player)
 {
-    return IsHumanPlayer(player) && player->getClass() == Dev::ClassId;
+    return IsHumanPlayer(player) && Practice::HasProfiles(Profiles, player->getClass());
 }
 
 bool Affects(Player const* player)
 {
-    return Requested && DevelopmentAllowed && Ready && IsDevelopmentPlayer(player);
+    return Requested && DevelopmentAllowed && Ready && IsProfiledPlayer(player);
 }
 
 bool IsDevelopmentOpponent(Player const* player, Unit const* opponent)
@@ -110,11 +119,12 @@ std::vector<std::uint32_t> Learned(Player const* player, Practice::AbilityDefini
 CoAAbilityPractice::RankDecision EvaluateRank(Player const* player, std::uint32_t spellId)
 {
     using Decision = CoAAbilityPractice::RankDecision;
-    if (!RankActive.load() || !IsDevelopmentPlayer(player))
+    if (!RankActive.load() || !IsProfiledPlayer(player))
         return Decision::Unmanaged;
-    auto const* ability = Dev::Find(spellId);
-    if (!ability || spellId == ability->Ranks.front().SpellId)
+    auto const* profile = Practice::FindProfile(Profiles, player->getClass(), spellId);
+    if (!profile || spellId == profile->Definition.Ranks.front().SpellId)
         return Decision::Unmanaged;
+    auto const* ability = &profile->Definition;
     std::lock_guard lock(Mutex);
     if (!RankRequested || !Affects(player))
         return Decision::Unmanaged;
@@ -127,18 +137,18 @@ CoAAbilityPractice::RankDecision EvaluateRank(Player const* player, std::uint32_
         if (rank.RankNumber >= desired->RankNumber && Practice::KnowsSpell(learned, rank.SpellId))
             return Decision::Allowed;
     auto const loaded = Practice::ReadPlayerProgress(*player, ability->ClassId, ability->AbilityId,
-        Dev::Policy, Dev::DefinitionVersion);
-    auto const record = Practice::MigrateLearnedRanks(*ability, Dev::Policy, loaded, learned);
+        profile->Policy, profile->DefinitionVersion);
+    auto const record = Practice::MigrateLearnedRanks(*ability, profile->Policy, loaded, learned);
     if (!record)
         return Decision::Blocked;
     auto const view = Practice::DescribeRank(*ability, static_cast<std::size_t>(desired - ability->Ranks.begin()),
-        Dev::Policy, record->State, player->GetLevel(), learned, true);
+        profile->Policy, record->State, player->GetLevel(), learned, true);
     return view.State == Practice::RankState::Ready ? Decision::Allowed : Decision::Blocked;
 }
 
 bool CanPurchaseSpell(Player const* player, std::uint32_t spellId)
 {
-    if (!RankActive.load() || !IsDevelopmentPlayer(player))
+    if (!RankActive.load() || !IsProfiledPlayer(player))
         return true;
     std::lock_guard lock(Mutex);
     if (!RankRequested || !Affects(player))
@@ -171,14 +181,18 @@ bool CanPurchaseSpell(Player const* player, std::uint32_t spellId)
 
 void PromoteRanks(Player* player)
 {
-    if (!RankActive.load() || !IsDevelopmentPlayer(player))
+    if (!RankActive.load() || !IsProfiledPlayer(player))
         return;
-    for (Practice::AbilityDefinition const& ability : Dev::Abilities)
-        for (Practice::AbilityRank const& rank : ability.Ranks)
-            if (RankActive.load() && IsDevelopmentPlayer(player) && rank.RankNumber > 1 &&
+    for (Practice::AbilityProfile const& profile : Profiles)
+    {
+        if (profile.Definition.ClassId != player->getClass())
+            continue;
+        for (Practice::AbilityRank const& rank : profile.Definition.Ranks)
+            if (RankActive.load() && profile.Definition.ClassId == player->getClass() && rank.RankNumber > 1 &&
                 !player->HasSpell(rank.SpellId) &&
                 EvaluateRank(player, rank.SpellId) == CoAAbilityPractice::RankDecision::Allowed)
                 player->learnSpell(rank.SpellId, false);
+    }
 }
 
 bool Send(Player* player, MenuSession const& session)
@@ -189,18 +203,28 @@ bool Send(Player* player, MenuSession const& session)
     std::vector<Practice::AbilityView> views;
     bool const supported = Affects(player);
     if (supported)
-        for (Practice::AbilityDefinition const& ability : Dev::Abilities)
+        for (Practice::AbilityProfile const& profile : Profiles)
         {
+            Practice::AbilityDefinition const& ability = profile.Definition;
+            if (ability.ClassId != player->getClass())
+                continue;
             auto const learned = Learned(player, ability);
-            auto const loaded = Practice::ReadPlayerProgress(*player, ability.ClassId, ability.AbilityId,
-                Dev::Policy, Dev::DefinitionVersion);
-            auto const migrated = Practice::MigrateLearnedRanks(ability, Dev::Policy, loaded, learned);
-            if (!migrated)
-                return false;
-            views.push_back(Practice::BuildAbilityView(ability, Dev::Policy, migrated->State,
+            Practice::Progress state;
+            if (ability.Kind != Practice::AbilityKind::Fixed)
+            {
+                auto const loaded = Practice::ReadPlayerProgress(*player, ability.ClassId, ability.AbilityId,
+                    profile.Policy, profile.DefinitionVersion);
+                auto const migrated = Practice::MigrateLearnedRanks(ability, profile.Policy, loaded, learned);
+                if (!migrated)
+                    return false;
+                state = migrated->State;
+            }
+            views.push_back(Practice::BuildAbilityView(ability, profile.Policy, state,
                 player->GetLevel(), learned, true));
         }
-    auto const progress = supported ? session.Progress : Practice::SessionPractice{ false, 0, 0 };
+    auto const currentProgress = session.Progress.find(player->getClass());
+    auto const progress = !supported ? Practice::SessionPractice{ false, 0, 0 } :
+        currentProgress == session.Progress.end() ? Practice::SessionPractice{} : currentProgress->second;
     auto const messages = Practice::EncodeMenuSnapshot(player->getClass(), player->GetLevel(), ++Revision, views,
         session.Protocol >= Practice::SessionMenuSchemaVersion
             ? std::optional<Practice::SessionPractice>(progress) : std::nullopt,
@@ -230,7 +254,7 @@ void Refresh(Player* player, MenuSession& session, Clock::time_point now)
 
 void MarkDirty(Player* player)
 {
-    if (!Active.load() || !IsDevelopmentPlayer(player))
+    if (!Active.load() || !IsProfiledPlayer(player))
         return;
     std::lock_guard lock(Mutex);
     auto const found = Sessions.find(player->GetGUID().GetRawValue());
@@ -272,14 +296,19 @@ public:
             LOG_INFO("module.ability_practice", "Development observation disabled");
             return;
         }
-        Ready = Practice::ValidateCatalog(Dev::Abilities) == Practice::CatalogError::None &&
-            Practice::ValidPolicy(Dev::Policy);
-        for (Practice::AbilityDefinition const& ability : Dev::Abilities)
-            for (Practice::AbilityRank const& rank : ability.Ranks)
+        Ready = Practice::ValidateProfiles(Profiles);
+        for (Practice::AbilityProfile const& profile : Profiles)
+            for (Practice::AbilityRank const& rank : profile.Definition.Ranks)
             {
                 SpellInfo const* info = sSpellMgr->GetSpellInfo(rank.SpellId);
-                if (!info || info->IsPassive())
+                bool const expectedOutcome = info && (profile.Outcome == Practice::DirectOutcome::Damage ?
+                    info->HasEffect(SPELL_EFFECT_SCHOOL_DAMAGE) : info->HasEffect(SPELL_EFFECT_HEAL));
+                if (!info || info->IsPassive() || !expectedOutcome)
+                {
                     Ready = false;
+                    LOG_ERROR("module.ability_practice", "Rejected development profile: class={}, ability={}, spell={}",
+                        profile.Definition.ClassId, profile.Definition.AbilityId, rank.SpellId);
+                }
             }
         Active.store(Requested && DevelopmentAllowed && Ready);
         RankActive.store(Requested && DevelopmentAllowed && Ready && RankRequested);
@@ -298,21 +327,24 @@ public:
 
     void OnPlayerLogin(Player* player) override
     {
-        if (!Active.load() || !IsDevelopmentPlayer(player))
+        if (!Active.load() || !IsHumanPlayer(player))
             return;
         std::lock_guard lock(Mutex);
-        if (!Affects(player))
+        if (!Requested || !DevelopmentAllowed || !Ready)
             return;
-        for (Practice::AbilityDefinition const& ability : Dev::Abilities)
+        for (Practice::AbilityProfile const& profile : Profiles)
         {
+            Practice::AbilityDefinition const& ability = profile.Definition;
+            if (ability.ClassId != player->getClass() || ability.Kind == Practice::AbilityKind::Fixed)
+                continue;
             auto const learned = Learned(player, ability);
             if (learned.empty())
                 continue;
             auto const loaded = Practice::ReadPlayerProgress(*player, ability.ClassId, ability.AbilityId,
-                Dev::Policy, Dev::DefinitionVersion);
-            auto const record = Practice::MigrateLearnedRanks(ability, Dev::Policy, loaded, learned);
+                profile.Policy, profile.DefinitionVersion);
+            auto const record = Practice::MigrateLearnedRanks(ability, profile.Policy, loaded, learned);
             if (record)
-                Practice::CachePlayerProgress(*player, ability.ClassId, ability.AbilityId, Dev::Policy, *record);
+                Practice::CachePlayerProgress(*player, ability.ClassId, ability.AbilityId, profile.Policy, *record);
         }
         auto& session = Sessions[player->GetGUID().GetRawValue()];
         session = {};
@@ -354,13 +386,13 @@ public:
 
     void OnPlayerLearnSpell(Player* player, uint32 spellId) override
     {
-        if (Dev::Find(spellId))
+        if (player && Practice::FindProfile(Profiles, player->getClass(), spellId))
             MarkDirty(player);
     }
 
     void OnPlayerForgotSpell(Player* player, uint32 spellId) override
     {
-        if (Dev::Find(spellId))
+        if (player && Practice::FindProfile(Profiles, player->getClass(), spellId))
             MarkDirty(player);
     }
 
@@ -408,10 +440,11 @@ public:
         if (!spell || !spell->GetCaster() || !target || miss != SPELL_MISS_NONE || (!damage && !healing))
             return;
         Player* player = spell->GetCaster()->ToPlayer();
-        if (!IsDevelopmentPlayer(player))
+        if (!IsProfiledPlayer(player))
             return;
-        auto const* ability = Dev::Find(spell->GetSpellInfo()->Id);
-        if (!ability || !QualifiesDevelopmentOutcome(player, target, damage, healing))
+        auto const* profile = Practice::FindProfile(Profiles, player->getClass(), spell->GetSpellInfo()->Id);
+        if (!profile || (profile->Outcome == Practice::DirectOutcome::Damage ? !damage : !healing) ||
+            !QualifiesDevelopmentOutcome(player, target, damage, healing))
             return;
         std::lock_guard lock(Mutex);
         if (!Affects(player))
@@ -420,10 +453,11 @@ public:
         if (found == Sessions.end())
             return;
         Practice::OutcomeContext const context{ true, true, true, true, player->GetLevel() };
-        auto const award = Practice::HandleOutcome(*player, *spell, *ability, Dev::Policy, Dev::DefinitionVersion, context);
+        auto const award = Practice::HandleOutcome(*player, *spell, profile->Definition,
+            profile->Policy, profile->DefinitionVersion, context);
         if (award.Status == Practice::OutcomeStatus::Awarded)
         {
-            found->second.Progress.RecordAward(award.ProficiencyGained);
+            found->second.Progress[player->getClass()].RecordAward(award.ProficiencyGained);
             found->second.Dirty = true;
             found->second.CheckRanks = true;
             Refresh(player, found->second, Clock::now());

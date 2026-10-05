@@ -405,3 +405,27 @@ current training rules, since its exact calculation can cross rate bands rather 
 
 Source checks passed at `.cache/verify-all/20261005-074726/report.json`; Lua 5.1 syntax passed. Raw exports completed;
 no new behavioral cases or tests ran and no production data changed.
+
+## Class-scoped profiles and sessions
+
+Native integration now looks up class/spell profiles rather than a hard-coded class ID. Each immutable profile
+owns its definition version, training policy and expected direct damage/healing outcome. Validation checks class
+identity, catalog uniqueness within the class, policy/requirements, eventual rank reachability and wire bounds.
+The same spell IDs can belong to different classes without merging their proficiency. Unreviewed/talent/spec/item
+acquisition sources are rejected; only reviewed class grants are currently supported. The three existing
+Pyromancer definitions remain the sole entries; no new abilities, rates or classes were approved by this refactor.
+
+Startup also checks every effective SpellInfo for the declared direct outcome and logs mismatched class/ability/
+spell IDs. Awards require that profile's expected outcome. Login seeding, menu views, rank checks and effective
+awards use the profile's own policy/version. Fixed views skip migration/storage, although the native observation
+slice still supports only the reviewed direct-outcome profiles and does not implement utility/passive mastery.
+
+Enabled observation creates transient GUID sessions for all human logins, including unsupported classes, so a
+later class change can begin progression without an addon request. Unsupported classes get no settings or awards.
+Session counters are stored per class and displayed only for the current class; switching back retains that
+class's login totals. Logout clears them. No Player pointers are retained.
+
+Source/native build passed at `.cache/verify-all/20261005-075453/report.json`; C++ lint and whitespace passed.
+Initial profile-only build also passed at `.cache/verify-all/20261005-075251/report.json`. No behavioral tests ran.
+Multi-class duplicate IDs, independent policies, wrong effective outcomes, class switching without the addon and
+session totals remain runtime qualification work. Production remains untouched and all three flags default off.
