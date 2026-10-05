@@ -209,6 +209,40 @@ local function Ability(value, schema, characterLevel)
         availability = value.availability, nextPoint = point, nextRank = rank }
 end
 
+local function Learning(value, abilities)
+    if type(value) ~= "table" or type(value.available) ~= "boolean" or not Counter(value.total)
+        or type(value.events) ~= "table" or #value.events > 32 then return nil end
+    local expected = #value.total <= 2 and math.min(tonumber(value.total), 32) or 32
+    if not value.available and (value.total ~= "0" or #value.events ~= 0) then return nil end
+    if value.available and #value.events ~= expected then return nil end
+    local count = 0
+    for key in pairs(value.events) do
+        if not Integer(key, 1, #value.events) then return nil end
+        count = count + 1
+    end
+    if count ~= #value.events then return nil end
+    local byId = {}
+    for _, ability in ipairs(abilities) do byId[ability.abilityId] = ability end
+    local events = {}
+    for _, event in ipairs(value.events) do
+        if type(event) ~= "table" or not Integer(event.abilityId, 1, 4294967295)
+            or not Integer(event.spellId, 1, 4294967295) or not Integer(event.rankNumber, 1, 64)
+            or not Integer(event.characterLevel, 1, 255) or not Integer(event.proficiency, 1, 4294967295)
+            or not byId[event.abilityId] then return nil end
+        local matched = false
+        for _, rank in ipairs(byId[event.abilityId].ranks or {}) do
+            if rank.spellId == event.spellId and rank.rankNumber == event.rankNumber
+                and rank.characterLevel == event.characterLevel and rank.proficiency == event.proficiency then
+                matched = true
+            end
+        end
+        if not matched then return nil end
+        events[#events + 1] = { abilityId = event.abilityId, spellId = event.spellId,
+            rankNumber = event.rankNumber, characterLevel = event.characterLevel, proficiency = event.proficiency }
+    end
+    return { available = value.available, total = value.total, events = events }
+end
+
 function Model.Validate(snapshot)
     if type(snapshot) ~= "table"
         or (snapshot.schemaVersion ~= 1 and snapshot.schemaVersion ~= 2 and snapshot.schemaVersion ~= 3
@@ -245,6 +279,20 @@ function Model.Validate(snapshot)
         if rewardCount > 512 then return nil, "Mastery roadmap is too large" end
         seen[ability.abilityId] = true
         result.abilities[#result.abilities + 1] = ability
+    end
+    if snapshot.learning ~= nil then
+        if snapshot.schemaVersion ~= 4 then return nil, "Unexpected session learning history" end
+        result.learning = Learning(snapshot.learning, result.abilities)
+        if not result.learning then return nil, "Invalid session learning history" end
+    end
+    return result
+end
+
+function Model.SessionLearns(snapshot, abilityId)
+    local result = {}
+    if not snapshot.learning or not snapshot.learning.available then return result end
+    for _, event in ipairs(snapshot.learning.events) do
+        if event.abilityId == abilityId then result[#result + 1] = event end
     end
     return result
 end

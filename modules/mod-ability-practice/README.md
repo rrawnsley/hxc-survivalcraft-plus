@@ -29,7 +29,7 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   Shared native race/racial and faction-rift eligibility is checked at preparation, award and new upgrades;
   class/race/talent-set/custom-specialization changes refresh the owner state. Normal database save/reload/failure
   behavior and broader acquisition entitlements remain unqualified.
-- Menu: addon 0.4.17-development; unpublished protocol 4 includes B8 instance identity/realm cap, T11 kind/session/rules/reward
+- Menu: addon 0.4.18-development; unpublished protocol 4 includes B11 instance identity/realm cap/session learning, T11 kind/session/rules/reward
   count/acquisition source and M mastery entries,
   mandatory C future-cap metadata, packed D parts and F8 unreadable-progress responses. Typed delivery is
   bounded/paced; saved views/ages/session totals are labeled. Existing schema 1/2/3 formats are preserved.
@@ -1533,3 +1533,34 @@ No native acquisition, rank entitlement, saved progress or reward behavior chang
 Source/native build passed `.cache/verify-all/20261005-190423/report.json` (two source checks;34.5-second build),
 C++ style/whitespace and five Lua5.1 syntax compilations without execution. Authoring provenance refreshed.
 Actual wire delivery/menu/acquisition acceptance remains pending. No production installation or changes.
+
+## Authoritative learned-ability/rank session history — 5 October 2026
+
+Successful native OnPlayerLearnSpell notifications now record profiled ability/rank learning events
+for enrolled human characters outside saved-character loading. Events are class-scoped numeric values
+(ability ID, spell ID, rank ordinal and authored requirement), with an exact uint64 total and only the
+latest32 retained. Duplicate spell IDs can represent actual relearning events; the total counts notifications,
+not unique abilities or practice-earned ranks. Recording does not teach spells or award proficiency.
+Counter overflow marks history unavailable and clears its counters rather than wrapping.
+
+LoginObserved preserves legitimate events recorded by earlier login callbacks before the practice login
+hook, while a repeated observed login resets session data. The login hook rotates action provenance;
+logout/enrollment removal clears transient history with the existing GUID session. Stored progress/ranks remain.
+Actual callback ordering, save lifecycle and relearning still require runtime acceptance.
+
+Optional typed history extends the unpublished header to B11 (availability, retained count, exact total).
+N8 records transmit each retained learn and may be packed in D. New client also accepts B7/B8 with
+unknown history; older encoder callers retain their existing header. Legacy schemas1/2/3 are unchanged.
+Native/client require complete ordered records, count=min(total,32) when available, empty zero data when
+unavailable, and an exact matching ability/rank/requirement in the same snapshot. Missing/duplicate ordinals,
+foreign/mismatched records and invalid counters reject the complete update. Delivery bounds allow32 more records.
+
+Addon0.4.18-development includes newly learned abilities/ranks in the Session view even without practice
+uses, including fixed abilities. Rows/hover describe actual learns, show up to three retained events per
+ability, and label saved data; footer reports the exact total and retained count. Mastery reward-event history
+is still unfinished and is not invented from forecasts. No historical pre-enrollment learns are inferred.
+
+Native/source passed `.cache/verify-all/20261005-191615/report.json` (two source checks;34.5-second build).
+After a Lua line wrap, source passed `.cache/verify-all/20261005-192047/report.json`; five Lua5.1 syntax
+compilations passed without executing chunks. C++ style/whitespace passed; authoring provenance refreshed.
+No unit/harness/gameplay tests, runtime startup or production installation/restart/configuration/DB/client changes.

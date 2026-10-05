@@ -55,7 +55,9 @@ local function Accept(message, now, currentRevision, currentGeneration)
         return nil, nil, failure
     end
     if kind == "B" then
-        if #fields ~= 6 and #fields ~= 7 and #fields ~= 8 then return Reject("Invalid snapshot header") end
+        if #fields ~= 6 and #fields ~= 7 and #fields ~= 8 and #fields ~= 11 then
+            return Reject("Invalid snapshot header")
+        end
         local schema, revision, classId, level, count = tonumber(fields[2]), tonumber(fields[3]),
             tonumber(fields[4]), tonumber(fields[5]), tonumber(fields[6])
         if (schema ~= 1 and schema ~= 2 and schema ~= 3 and schema ~= 4)
@@ -66,15 +68,24 @@ local function Accept(message, now, currentRevision, currentGeneration)
         if realmMaximumLevel and (realmMaximumLevel < 1 or realmMaximumLevel > 255) then
             return Reject("Invalid realm level cap")
         end
-        if (schema == 4 and ((#fields ~= 7 and #fields ~= 8) or not Model.ValidGeneration(generation)))
+        if (schema == 4 and ((#fields ~= 7 and #fields ~= 8 and #fields ~= 11)
+            or not Model.ValidGeneration(generation)))
             or (schema ~= 4 and #fields ~= 6) then return Reject("Invalid server instance identity") end
+        local learning, learnCount
+        if #fields == 11 then
+            learnCount = tonumber(fields[10])
+            if (fields[9] ~= "0" and fields[9] ~= "1") or not learnCount or learnCount > 32 then
+                return Reject("Invalid session learning header")
+            end
+            learning = { available = fields[9] == "1", total = fields[11], events = {} }
+        end
         local floor = generation and generation ~= currentGeneration and 0 or (currentRevision or 0)
         if revision <= floor or (pending and pending.generation == generation and revision <= pending.revision) then
             return nil, "Stale snapshot header"
         end
         pending = { schemaVersion = schema, revision = revision, classId = classId, characterLevel = level,
             count = count, generation = generation, realmMaximumLevel = realmMaximumLevel, started = now,
-            lastPart = now, parts = {},
+            lastPart = now, parts = {}, learning = learning, learnCount = learnCount,
             rankCount = 0, receivedRanks = 0, rewardCount = 0, receivedRewards = 0 }
         return nil
     end
@@ -86,7 +97,13 @@ local function Accept(message, now, currentRevision, currentGeneration)
         if pending.schemaVersion >= 2 and not pending.session then return Reject("Missing session progress") end
         local snapshot = { schemaVersion = pending.schemaVersion, revision = pending.revision,
             classId = pending.classId, characterLevel = pending.characterLevel, generation = pending.generation,
-            realmMaximumLevel = pending.realmMaximumLevel, session = pending.session, abilities = {} }
+            realmMaximumLevel = pending.realmMaximumLevel, session = pending.session,
+            learning = pending.learning, abilities = {} }
+        if pending.learning then
+            for index = 1, pending.learnCount do
+                if not pending.learning.events[index] then return Reject("Incomplete session learning history") end
+            end
+        end
         for index = 1, pending.count do
             local part = pending.parts[index]
             if not part or not part.A or not part.P or not part.R then return Reject("Incomplete snapshot") end
@@ -119,6 +136,16 @@ local function Accept(message, now, currentRevision, currentGeneration)
         end
         pending = nil
         return Model.Validate(snapshot)
+    end
+    if kind == "N" then
+        local index = tonumber(fields[3])
+        if pending.schemaVersion ~= 4 or not pending.learning or #fields ~= 8 or not index
+            or index < 1 or index > pending.learnCount or pending.learning.events[index] then
+            return Reject("Invalid session learning event")
+        end
+        pending.learning.events[index] = { abilityId = tonumber(fields[4]), spellId = tonumber(fields[5]),
+            rankNumber = tonumber(fields[6]), characterLevel = tonumber(fields[7]), proficiency = tonumber(fields[8]) }
+        return nil
     end
     if kind == "S" then
         if pending.schemaVersion < 2 or pending.session or #fields ~= 5
@@ -231,7 +258,7 @@ local function AcceptPacked(message, now, currentRevision, currentGeneration)
     if tonumber(revisionText) ~= pending.revision then return nil, "Unrelated packed progress message" end
     local parts = {}
     for part in string.gmatch(body .. ";", "([^;]*);") do
-        local kind, fields = string.match(part, "^([ACPRTKLM])|(.+)$")
+        local kind, fields = string.match(part, "^([ACPRTKLMN])|(.+)$")
         if not kind or #parts >= 32 then return Reject("Invalid packed progress part") end
         parts[#parts + 1] = kind .. "|" .. revisionText .. "|" .. fields
     end

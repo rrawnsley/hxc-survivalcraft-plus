@@ -114,6 +114,16 @@ local function SpellName(spellId)
     return GetSpellInfo(spellId) or ("Ability " .. spellId)
 end
 
+local function SessionLearnText(ability)
+    local highest = 0
+    for _, event in ipairs(Model.SessionLearns(snapshot, ability.abilityId)) do
+        highest = math.max(highest, event.rankNumber)
+    end
+    if highest == 0 then return nil end
+    return (Model.IsFixed(ability) or Model.IsMastery(ability) or highest == 1)
+        and "Learned ability this session" or ("Learned rank " .. highest .. " this session")
+end
+
 local function TrackedAbilities()
     if type(HXCAbilityPracticePreferences) ~= "table" then HXCAbilityPracticePreferences = {} end
     local key = snapshot and tostring(snapshot.classId)
@@ -272,9 +282,9 @@ Refresh = function()
             local matchesTab = (tab == "skills" and ability.learnedRank > 0)
                 or (tab == "upcoming" and Model.NextMilestone(ability))
                 or (tab == "tracked" and tracked[tostring(ability.abilityId)] == true)
-                or (tab == "session" and ability.session and ability.session.available
-                    and not Model.IsFixed(ability)
-                    and (ability.session.uses ~= "0" or ability.session.proficiencyGained ~= "0"))
+                or (tab == "session" and (SessionLearnText(ability) or
+                    (ability.session and ability.session.available and not Model.IsFixed(ability)
+                        and (ability.session.uses ~= "0" or ability.session.proficiencyGained ~= "0"))))
             local matchesSearch = search == "" or string.find(string.lower(SpellName(ability.displaySpellId)),
                 search, 1, true)
             if matchesTab and matchesSearch then visible[#visible + 1] = ability end
@@ -307,14 +317,21 @@ Refresh = function()
         elseif tab == "session" then
             emptyView = (snapshot.schemaVersion ~= 4 or not session or not session.available)
                 and "Per-ability session progress is unavailable in this snapshot."
-                or (syncState == "current" and "No qualifying practice has been recorded this session."
-                    or "No qualifying practice was recorded in this saved view.")
+                or (snapshot.learning and snapshot.learning.available
+                    and (syncState == "current" and "No practice or ability learning recorded this session."
+                        or "No practice or ability learning recorded in this saved view.")
+                    or (syncState == "current" and "No qualifying practice has been recorded this session."
+                        or "No qualifying practice was recorded in this saved view."))
         end
         footer:SetText(#snapshot.abilities == 0 and emptyText or
             (#visible == 0 and emptyView or
             (#visible .. " abilities · " .. (showRoadmap and chosen and chosen.ranks
                 and "Use the mouse wheel over milestones to browse" or "Use the mouse wheel to browse")
                 .. " · Forecasts count qualifying uses")))
+        if tab == "session" and #visible > 0 and snapshot.learning and snapshot.learning.available then
+            footer:SetText(#visible .. " abilities · Learned ability/rank events: " .. snapshot.learning.total
+                .. " · Latest " .. #snapshot.learning.events .. " retained")
+        end
     end
     if serverFailure then
         footer:SetText("Saved progress for " .. SpellName(serverFailure.spellId)
@@ -342,8 +359,11 @@ Refresh = function()
                     else row.progress:SetStatusBarColor(0.35, 0.72, 0.43) end
                 else row.progress:SetStatusBarColor(0.81, 0.62, 0.24) end
             else row.progress:Hide() end
-            row.info:SetText(tab == "session" and ability.session and
-                (ability.session.uses .. " uses · +" .. ability.session.proficiencyGained .. " proficiency") or
+            row.info:SetText(tab == "session" and
+                ((ability.session and ability.session.available and not Model.IsFixed(ability)
+                    and (ability.session.uses ~= "0" or ability.session.proficiencyGained ~= "0"))
+                    and (ability.session.uses .. " uses · +" .. ability.session.proficiencyGained .. " proficiency")
+                    or SessionLearnText(ability)) or
                 tab == "upcoming" and rank and
                 ((ability.learnedRank == 0 and "New ability" or Model.IsMastery(ability) and "Next mastery benefit"
                     or ("Next rank " .. rank.rankNumber))
@@ -408,6 +428,16 @@ for index = 1, 9 do
                 .. ability.session.uses .. " qualifying uses · +"
                 .. ability.session.proficiencyGained .. " proficiency",
                 1, 0.82, 0, true)
+        end
+        local learns = Model.SessionLearns(snapshot, ability.abilityId)
+        for index = math.max(1, #learns - 2), #learns do
+            local event = learns[index]
+            GameTooltip:AddLine((syncState == "current" and "Learned this session: " or "Saved session learn: ")
+                .. SpellName(event.spellId) .. ((Model.IsFixed(ability) or Model.IsMastery(ability)) and ""
+                    or (" (Rank " .. event.rankNumber .. ")")), 0.55, 0.9, 0.6, true)
+        end
+        if #learns > 3 then
+            GameTooltip:AddLine((#learns - 3) .. " earlier retained learns for this ability.", 1, 1, 1, true)
         end
         local milestone = Model.NextMilestone(ability)
         if milestone then

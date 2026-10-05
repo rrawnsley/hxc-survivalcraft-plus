@@ -40,6 +40,47 @@ struct SessionPractice
     }
 };
 
+inline constexpr std::size_t MaximumSessionLearns = 32;
+
+struct SessionLearn
+{
+    std::uint32_t AbilityId;
+    AbilityRank Rank;
+};
+
+struct SessionLearningView
+{
+    bool Available;
+    std::uint64_t Total;
+    std::span<SessionLearn const> Events;
+};
+
+struct SessionLearning
+{
+    bool Available = true;
+    std::uint64_t Total = 0;
+    std::vector<SessionLearn> Events;
+
+    void Record(std::uint32_t abilityId, AbilityRank const& rank)
+    {
+        if (!Available)
+            return;
+        if (Total == std::numeric_limits<std::uint64_t>::max())
+        {
+            Available = false;
+            Total = 0;
+            Events.clear();
+            return;
+        }
+        ++Total;
+        if (Events.size() == MaximumSessionLearns)
+            Events.erase(Events.begin());
+        Events.push_back({ abilityId, rank });
+    }
+
+    SessionLearningView View() const { return { Available, Total, Events }; }
+};
+
 enum class PracticeAvailability
 {
     Invalid = 0,

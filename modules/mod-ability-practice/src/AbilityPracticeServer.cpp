@@ -162,13 +162,14 @@ constexpr auto InterestDuration = std::chrono::seconds(30);
 constexpr auto DeliveryInterval = std::chrono::milliseconds(100);
 constexpr auto DeliveryDuration = std::chrono::seconds(90);
 constexpr std::size_t DeliveryBatchSize = 8;
-constexpr std::size_t MaxQueuedMessages = 512 * 7 + 2048 + 3;
+constexpr std::size_t MaxQueuedMessages = 512 * 7 + 2048 + Practice::MaximumSessionLearns + 3;
 constexpr std::uint32_t PracticeCastSourceKey = 0x41504353;
 constexpr std::uint32_t PracticeClientRequestKey = 0x41504352;
 std::string const ActiveSpecializationSource = "core.ascension_active_spec";
 struct ClassSession
 {
     Practice::SessionPractice Totals;
+    Practice::SessionLearning Learning;
     std::unordered_map<std::uint32_t, Practice::SessionPractice> Abilities;
 };
 
@@ -180,6 +181,7 @@ struct MenuSession
     bool Dirty = true;
     bool CheckRanks = true;
     bool Initialized = false;
+    bool LoginObserved = false;
     std::uint32_t Protocol = Practice::MenuSchemaVersion;
     std::uint32_t LastClass = 0;
     std::uint32_t LastRace = 0;
@@ -618,7 +620,12 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
         session.Protocol >= Practice::SessionMenuSchemaVersion
             ? std::optional<Practice::SessionPractice>(progress) : std::nullopt,
         session.Protocol >= Practice::RoadmapMenuSchemaVersion, session.Protocol == Practice::TypedMenuSchemaVersion,
-        ServerGeneration, sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL));
+        ServerGeneration, sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL),
+        session.Protocol == Practice::TypedMenuSchemaVersion
+            ? std::optional<Practice::SessionLearningView>(!supported
+                ? Practice::SessionLearningView{ false, 0, {} } : currentProgress == session.Progress.end()
+                    ? Practice::SessionLearningView{ true, 0, {} } : currentProgress->second.Learning.View())
+            : std::nullopt);
     if (!messages || messages->size() > MaxQueuedMessages)
         return false;
     if (session.Protocol == Practice::TypedMenuSchemaVersion)
@@ -956,8 +963,11 @@ public:
         if (!Requested || !DevelopmentAllowed || !Ready || !IsDevelopmentPlayer(player))
             return;
         auto& session = Sessions[player->GetGUID().GetRawValue()];
-        session = {};
+        if (session.LoginObserved)
+            session = {};
         RefreshOwnerState(player, session, CachedCustomSpecialization(player));
+        session.LoginObserved = true;
+        session.ActionSession = NewActionSession();
     }
 
     void OnPlayerUpdate(Player* player, uint32) override
@@ -990,8 +1000,20 @@ public:
 
     void OnPlayerLearnSpell(Player* player, uint32 spellId) override
     {
-        if (Active.load() && FindProfile(player, spellId))
-            MarkDirty(player);
+        if (!Active.load() || !IsProfiledPlayer(player) || player->isBeingLoaded())
+            return;
+        auto const* profile = FindProfile(player, spellId);
+        if (!profile)
+            return;
+        auto const rank = std::find_if(profile->Definition.Ranks.begin(), profile->Definition.Ranks.end(),
+            [spellId](Practice::AbilityRank const& entry) { return entry.SpellId == spellId; });
+        std::lock_guard lock(Mutex);
+        if (!Affects(player) || rank == profile->Definition.Ranks.end() || !player->HasSpell(spellId))
+            return;
+        auto& session = Sessions[player->GetGUID().GetRawValue()];
+        RefreshOwnerState(player, session, CachedCustomSpecialization(player));
+        session.Progress[player->getClass()].Learning.Record(profile->Definition.AbilityId, *rank);
+        MarkDirty(player);
     }
 
     void OnPlayerForgotSpell(Player* player, uint32 spellId) override

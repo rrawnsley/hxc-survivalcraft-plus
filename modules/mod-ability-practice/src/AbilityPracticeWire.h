@@ -134,7 +134,7 @@ inline std::vector<std::string> PackTypedMessages(std::span<std::string const> l
     };
     for (std::string const& line : lines)
     {
-        if (line.empty() || std::string_view("ACPRTKLM").find(line.front()) == std::string_view::npos)
+        if (line.empty() || std::string_view("ACPRTKLMN").find(line.front()) == std::string_view::npos)
         {
             flush();
             packed.push_back(line);
@@ -178,13 +178,20 @@ inline std::optional<std::string> EncodeMenuProgressFailure(std::uint32_t revisi
 inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t classId,
     std::uint32_t characterLevel, std::uint32_t revision, std::span<AbilityView const> abilities,
     std::optional<SessionPractice> session = std::nullopt, bool includeRoadmap = false, bool includeKinds = false,
-    std::uint64_t generation = 0, std::optional<std::uint32_t> realmMaximumLevel = std::nullopt)
+    std::uint64_t generation = 0, std::optional<std::uint32_t> realmMaximumLevel = std::nullopt,
+    std::optional<SessionLearningView> learning = std::nullopt)
 {
     if (!classId || classId > 255 || !characterLevel || characterLevel > 255 || !revision || abilities.size() > 512)
         return std::nullopt;
     if ((includeRoadmap && !session) || (includeKinds && (!includeRoadmap || !generation)))
         return std::nullopt;
     if (includeKinds && realmMaximumLevel && (!*realmMaximumLevel || *realmMaximumLevel > 255))
+        return std::nullopt;
+    if (learning && (!includeKinds || !realmMaximumLevel || learning->Events.size() > MaximumSessionLearns ||
+            learning->Total < learning->Events.size() ||
+            (learning->Available && learning->Events.size() !=
+                std::min(learning->Total, static_cast<std::uint64_t>(MaximumSessionLearns))) ||
+            (!learning->Available && (learning->Total || !learning->Events.empty()))))
         return std::nullopt;
     std::size_t rankCount = 0;
     std::size_t rewardCount = 0;
@@ -216,6 +223,9 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
         lines.front() += '|' + std::to_string(generation);
         if (realmMaximumLevel)
             lines.front() += '|' + std::to_string(*realmMaximumLevel);
+        if (learning)
+            lines.front() += '|' + std::to_string(learning->Available ? 1 : 0) + '|' +
+                std::to_string(learning->Events.size()) + '|' + std::to_string(learning->Total);
     }
     for (std::size_t index = 0; index < abilities.size(); ++index)
     {
@@ -329,6 +339,23 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
             }
         }
     }
+    if (learning)
+        for (std::size_t index = 0; index < learning->Events.size(); ++index)
+        {
+            SessionLearn const& event = learning->Events[index];
+            auto const ability = std::find_if(abilities.begin(), abilities.end(),
+                [&event](AbilityView const& view) { return view.AbilityId == event.AbilityId; });
+            if (ability == abilities.end() || !std::any_of(ability->Ranks.begin(), ability->Ranks.end(),
+                    [&event](RankView const& rank)
+                    {
+                        return rank.SpellId == event.Rank.SpellId && rank.RankNumber == event.Rank.RankNumber &&
+                            rank.Requirement.CharacterLevel == event.Rank.Requirement.CharacterLevel &&
+                            rank.Requirement.Proficiency == event.Rank.Requirement.Proficiency;
+                    }))
+                return std::nullopt;
+            lines.push_back(Detail::WireLine('N', revision, index + 1, event.AbilityId, event.Rank.SpellId,
+                event.Rank.RankNumber, event.Rank.Requirement.CharacterLevel, event.Rank.Requirement.Proficiency));
+        }
     if (session)
     {
         if (!session->Available && (session->Uses || session->ProficiencyGained))
