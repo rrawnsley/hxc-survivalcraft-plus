@@ -5059,6 +5059,12 @@ bool Player::LoadFromDB(ObjectGuid playerGuid, CharacterDatabaseQueryHolder cons
         return false;
     }
 
+    if (!holder.GetPreparedResult(PLAYER_LOGIN_QUERY_LOAD_CHARACTER_SETTINGS))
+    {
+        LOG_ERROR("entities.player", "Player ({}) character settings query failed, can't load.", playerGuid.ToString());
+        return false;
+    }
+
     uint64 guid = playerGuid.GetRawValue();
 
     Object::_Create(playerGuid);

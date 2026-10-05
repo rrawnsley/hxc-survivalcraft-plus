@@ -20,6 +20,8 @@
 #include "Tokenize.h"
 #include "CharacterDatabase.h"
 
+#include <optional>
+
 /*********************************************************/
 /***              PLAYER SETTINGS SYSTEM               ***/
 /*********************************************************/
@@ -56,7 +58,8 @@ namespace PlayerSettingsStore
     }
 
     // helper: load a single source row for a player and parse to vector
-    static PlayerSettingVector LoadPlayerSettings(ObjectGuid::LowType playerLowGuid, std::string const& source)
+    static std::optional<PlayerSettingVector> LoadPlayerSettings(ObjectGuid::LowType playerLowGuid,
+        std::string const& source)
     {
         PlayerSettingVector result;
 
@@ -64,11 +67,13 @@ namespace PlayerSettingsStore
         stmt->SetData(0, playerLowGuid);
         PreparedQueryResult dbRes = CharacterDatabase.Query(stmt);
         if (!dbRes)
-            return result;
+            return std::nullopt;
 
         do
         {
             Field* fields = dbRes->Fetch();
+            if (fields[0].IsNull())
+                continue;
             std::string rowSource = fields[0].Get<std::string>();
             if (rowSource != source)
                 continue;
@@ -85,14 +90,17 @@ namespace PlayerSettingsStore
         if (!sWorld->getBoolConfig(CONFIG_PLAYER_SETTINGS_ENABLED))
             return;
 
-        PlayerSettingVector settings = LoadPlayerSettings(playerLowGuid, source);
+        auto settings = LoadPlayerSettings(playerLowGuid, source);
+        if (!settings)
+            return;
         size_t const requiredSize = static_cast<size_t>(index) + 1;
-        if (settings.size() < requiredSize)
-            settings.resize(requiredSize); // zero-initialized PlayerSetting::value
+        if (settings->size() < requiredSize)
+            settings->resize(requiredSize); // zero-initialized PlayerSetting::value
 
-        settings[index].value = value;
+        (*settings)[index].value = value;
 
-        CharacterDatabasePreparedStatement* stmt = PlayerSettingsStore::PrepareReplaceStatement(playerLowGuid, source, settings);
+        CharacterDatabasePreparedStatement* stmt = PlayerSettingsStore::PrepareReplaceStatement(
+            playerLowGuid, source, *settings);
         CharacterDatabase.Execute(stmt);
     }
 }
@@ -117,6 +125,8 @@ void Player::_LoadCharacterSettings(PreparedQueryResult result)
     do
     {
         Field* fields = result->Fetch();
+        if (fields[0].IsNull())
+            continue;
         std::string source = fields[0].Get<std::string>();
         // Gameplay state is mandatory, even if optional player preferences are disabled.
         if (!sWorld->getBoolConfig(CONFIG_PLAYER_SETTINGS_ENABLED) && source.rfind("core.", 0) != 0)

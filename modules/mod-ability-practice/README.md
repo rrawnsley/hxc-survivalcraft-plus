@@ -164,3 +164,16 @@ at `.cache/verify-all/20261005-034752/report.json`. Both native module files wer
 worldserver linked. The Windows test dependency needs `-Dgtest_force_shared_crt=ON` to match the server runtime;
 that option is recorded only in this checkout's ignored build settings. Unit executables were built, but the unit
 stage was not run. No gameplay test server, database, installed client or launcher was accessed by this run.
+
+## Character settings load safeguard
+
+The existing cache could not distinguish a legitimate empty settings result from a failed query. Its prepared
+read now includes a synthetic NULL-source row, which both readers skip without storing it. An empty table therefore
+still has a successful result; a failed read remains null. `Player::LoadFromDB` refuses that failure before creating
+the player object state or running load/login hooks. The offline settings helper also refuses an update after a
+failed read rather than constructing a replacement from empty defaults. This required three narrow shared-loader
+changes because the module receives only the cache/login callback, not the original query outcome. No new table,
+SQL migration, extra query or player-header/ABI change was added.
+
+Source/native build passed at `.cache/verify-all/20261005-035958/report.json`. MySQL empty-result and failure-path
+runtime qualification remains outstanding; this build does not establish those runtime outcomes.
