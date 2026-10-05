@@ -76,6 +76,38 @@ local function Ranks(value)
     return result
 end
 
+local function SameRank(left, right)
+    return left and right and left.spellId == right.spellId and left.rankNumber == right.rankNumber
+        and left.characterLevel == right.characterLevel and left.proficiency == right.proficiency
+        and left.state == right.state and left.practice.status == right.practice.status
+        and left.practice.uses == right.practice.uses
+end
+
+local function ConsistentTypedRoadmap(value, ranks, nextRank, point, characterLevel)
+    if ranks[1].proficiency ~= 1 or (value.kind == 1 and #ranks < 2)
+        or (value.kind ~= 1 and #ranks ~= 1) then return false end
+    local learned, display = 0, ranks[1].spellId
+    for index, rank in ipairs(ranks) do
+        if rank.rankNumber ~= index then return false end
+        if rank.state == 1 then learned, display = index, rank.spellId end
+    end
+    if value.learnedRank ~= learned or value.displaySpellId ~= display then return false end
+    if learned < #ranks then
+        if not SameRank(nextRank, ranks[learned + 1]) then return false end
+    elseif nextRank then return false end
+    local introLevelMet = characterLevel >= ranks[1].characterLevel
+    if value.availability == 1 then return learned == 0 and introLevelMet and point.status == 0 end
+    if value.availability == 2 then return point.status == 0 end
+    if value.availability == 3 then return not introLevelMet and point.status == 0 end
+    if value.availability == 4 then
+        return learned > 0 and introLevelMet and value.proficiency < value.cap and point.status == 1
+    end
+    if value.availability == 5 then
+        return learned > 0 and introLevelMet and value.proficiency >= value.cap and point.status == 3
+    end
+    return value.availability == 6 and value.kind == 3 and learned > 0 and introLevelMet
+end
+
 local function Ability(value, schema, characterLevel)
     if type(value) ~= "table" then return nil end
     local positive = { "abilityId", "displaySpellId", "proficiency", "cap" }
@@ -110,6 +142,7 @@ local function Ability(value, schema, characterLevel)
     if schema == 4 then
         if not session or not Integer(value.kind, 1, 3) or not Integer(value.route, 1, 6)
             or value.ruleSet ~= 1 or ((value.kind == 3) ~= (value.route == 6)) then return nil end
+        if not ConsistentTypedRoadmap(value, ranks, rank, point, characterLevel) then return nil end
         if value.nextTrainingCap ~= nil then
             local cap = value.nextTrainingCap
             if type(cap) ~= "table" or not Integer(cap.characterLevel, characterLevel + 1, 255)

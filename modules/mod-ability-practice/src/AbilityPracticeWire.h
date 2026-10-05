@@ -20,6 +20,59 @@ inline bool ValidForecast(Forecast forecast)
 
 namespace Detail
 {
+inline bool SameRankView(RankView const& left, RankView const& right)
+{
+    return left.SpellId == right.SpellId && left.RankNumber == right.RankNumber &&
+        left.Requirement.CharacterLevel == right.Requirement.CharacterLevel &&
+        left.Requirement.Proficiency == right.Requirement.Proficiency && left.State == right.State &&
+        left.Practice.Status == right.Practice.Status && left.Practice.Uses == right.Practice.Uses;
+}
+
+inline bool ConsistentTypedRoadmap(AbilityView const& view, std::uint32_t characterLevel)
+{
+    if (view.Ranks.empty() || view.Ranks.front().Requirement.Proficiency != 1 ||
+        (view.Kind == AbilityKind::Ranked ? view.Ranks.size() < 2 : view.Ranks.size() != 1))
+        return false;
+    std::uint32_t learned = 0;
+    std::uint32_t display = view.Ranks.front().SpellId;
+    for (std::size_t index = 0; index < view.Ranks.size(); ++index)
+    {
+        RankView const& rank = view.Ranks[index];
+        if (rank.RankNumber != index + 1)
+            return false;
+        if (rank.State == RankState::Learned)
+        {
+            learned = rank.RankNumber;
+            display = rank.SpellId;
+        }
+    }
+    if (view.LearnedRank != learned || view.DisplaySpellId != display ||
+        (view.NextRank.has_value() != (learned < view.Ranks.size())) ||
+        (view.NextRank && !SameRankView(*view.NextRank, view.Ranks[learned])))
+        return false;
+    bool const introLevelMet = characterLevel >= view.Ranks.front().Requirement.CharacterLevel;
+    switch (view.Availability)
+    {
+        case PracticeAvailability::AcquireAbility:
+            return !learned && introLevelMet && view.NextPoint.Status == ForecastStatus::Invalid;
+        case PracticeAvailability::MissingPrerequisite:
+            return view.NextPoint.Status == ForecastStatus::Invalid;
+        case PracticeAvailability::NeedsCharacterLevel:
+            return !introLevelMet && view.NextPoint.Status == ForecastStatus::Invalid;
+        case PracticeAvailability::Training:
+            return learned && introLevelMet && view.State.Proficiency < view.Cap &&
+                view.NextPoint.Status == ForecastStatus::Training;
+        case PracticeAvailability::Capped:
+            return learned && introLevelMet && view.State.Proficiency >= view.Cap &&
+                view.NextPoint.Status == ForecastStatus::BeyondCap;
+        case PracticeAvailability::Fixed:
+            return view.Kind == AbilityKind::Fixed && learned && introLevelMet;
+        case PracticeAvailability::Invalid:
+            return false;
+    }
+    return false;
+}
+
 template<typename... Values>
 std::string WireLine(char kind, Values... values)
 {
@@ -132,6 +185,8 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
                 return std::nullopt;
         if (includeKinds)
         {
+            if (!Detail::ConsistentTypedRoadmap(view, characterLevel))
+                return std::nullopt;
             if (view.RuleSet != HumanPvERuleSet || view.Route < PracticeRoute::Damage ||
                 view.Route > PracticeRoute::Fixed ||
                 ((view.Kind == AbilityKind::Fixed) != (view.Route == PracticeRoute::Fixed)))

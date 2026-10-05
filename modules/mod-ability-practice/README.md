@@ -79,6 +79,23 @@ were regenerated; the 847 draft groups and 179 common-outcome candidates are unc
 isolated native build passed in `.cache/verify-all/20261005-134959/report.json`; changed C++ lint and whitespace
 passed. No behavioral tests or live client/server checks ran.
 
+## Typed roadmap consistency — 5 October 2026
+
+The unpublished protocol-4 encoder and addon model now check roadmap records together. Rank numbers must be
+contiguous from one, introductory proficiency must be one, and the selected ability kind must match its rank
+count. The displayed spell and learned-rank number must match the highest rank marked learned. The next-rank
+record must equal the rank immediately following it, or be absent when the final rank is learned.
+
+Availability must agree with the introductory level, learned ownership, current cap and next-point forecast.
+Previously learned higher ranks with missing lower rows remain representable: the highest learned rank still
+controls the display and next rank. Requirements of retained learned ranks are not retrospectively enforced.
+Invalid typed snapshots are refused rather than replacing the previous validated client view. Legacy schemas
+1/2/3 are unchanged. This is cross-record validation, not a new practice or acquisition policy.
+
+Source checks and the isolated native build passed in `.cache/verify-all/20261005-135617/report.json`;
+C++ lint, whitespace and five Lua 5.1 syntax compilations passed. Malformed/valid snapshot behavioral
+acceptance remains pending explicit testing authorization. Production remains untouched.
+
 `src/AbilityPracticeProgression.h` provides configurable training bands, progression after a qualifying action,
 exact action forecasts across catch-up/rate changes, cap handling and separate character-level/practice eligibility.
 Definitions contain no final balance constants: proficiency caps and policy bands are supplied by the caller.
