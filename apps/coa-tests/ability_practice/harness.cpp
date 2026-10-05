@@ -305,6 +305,25 @@ int main(int argc, char** argv)
         assert(exact && (*exact)[2].find("9007199254740993") != std::string::npos);
         views[0].NextPoint = { ForecastStatus::Complete, 1 };
         assert(!EncodeMenuSnapshot(24, 24, 11, views));
+        views[0].NextPoint = { ForecastStatus::Training, 12 };
+        std::vector<AbilityView> maximum;
+        maximum.reserve(513);
+        for (std::uint32_t index = 0; index < 512; ++index)
+        {
+            AbilityView view = views[0];
+            view.AbilityId += index;
+            view.DisplaySpellId += index;
+            maximum.push_back(view);
+        }
+        auto const full = EncodeMenuSnapshot(24, 24, 12, maximum);
+        assert(full && full->size() == 1538);
+        for (std::string const& line : *full)
+            assert(line.size() <= 240);
+        maximum.push_back(views[0]);
+        assert(!EncodeMenuSnapshot(24, 24, 12, maximum));
+        maximum.resize(2);
+        maximum[1].AbilityId = maximum[0].AbilityId;
+        assert(!EncodeMenuSnapshot(24, 24, 12, maximum));
     }
     assert(ValidPolicy(policy));
     assert(UsesUntil(policy, { 23, 18 }, 24, 80).Uses == 12);
