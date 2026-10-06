@@ -590,15 +590,18 @@ bool MatchesPassiveFixedMechanic(Practice::AbilityProfile const& profile)
             return entry.ClassId == profile.Definition.ClassId && entry.SpellId == profile.Definition.AbilityId;
         });
     SpellInfo const* info = sSpellMgr->GetSpellInfo(profile.Definition.AbilityId);
-    if (mechanic == mechanics.end() || !info || !info->IsPassive())
+    if (mechanic == mechanics.end() || !info || !info->IsPassive() ||
+        (mechanic->RequiredSpellFamily && info->SpellFamilyName != mechanic->RequiredSpellFamily))
         return false;
     for (std::size_t index = 0; index < mechanic->AuraIds.size(); ++index)
     {
         auto const& effect = info->Effects[index];
-        std::uint32_t const expectedEffect = mechanic->AuraIds[index] ? std::uint32_t(SPELL_EFFECT_APPLY_AURA) : 0;
-        if (effect.Effect != expectedEffect || effect.ApplyAuraName != mechanic->AuraIds[index] ||
-            effect.TriggerSpell || effect.TargetA.GetTarget() != (mechanic->AuraIds[index] ? TARGET_UNIT_CASTER : 0) ||
+        if (effect.Effect != mechanic->EffectIds[index] || effect.ApplyAuraName != mechanic->AuraIds[index] ||
+            effect.TriggerSpell != mechanic->TriggerSpellIds[index] ||
+            effect.TargetA.GetTarget() != mechanic->TargetAIds[index] ||
             effect.TargetB.GetTarget())
+            return false;
+        if (effect.TriggerSpell && !sSpellMgr->GetSpellInfo(effect.TriggerSpell))
             return false;
     }
     return true;

@@ -2862,3 +2862,28 @@ player/menu behavior still need isolated qualification; actual script integratio
 Six-entry passive roadmap source2/native75.3s passed at .cache/verify-all/20261006-154908/report.json, with
 no compiler warning/error in that build log. C++ style/whitespace and source exports passed; unit/harness/gameplay
 skipped. No tests, startup, client chunks, deployment or production operations. All switches remain0.
+
+## Individually reviewed automatic passive features
+
+The same disabled passive-roadmap switch adds seven further singleton native Fixed definitions: Demons Blood
+17/804345 at6, Triumphant18/707372 at12, Scourge Apprentice Training23/680283 at10, Necromancy23/804360 at1,
+Mushas Blessing26/800292 at12, Shadras Boon29/681443 at50 and Soul Collector30/706731 at1. Apostrophes
+remain native spell names; spell IDs determine ownership. All thirteen passive entries remain fully functional
+native features without practice, saved rows, automatic teaching or authored mastery bonuses.
+
+Each additional mechanic has exact effect/aura/trigger/target metadata. Referenced native helpers must exist;
+helper magnitude, proc frequency and execution remain unchanged and unqualified. Native Necromancer family29
+contracts replace Necromancys first aura23/trigger804528 with dummy aura4/trigger0; its loaded-data guard uses
+that contracted shape and explicitly requires family29. Raw DBC is not treated as the effective native shape.
+Scourge Training retains its native183 slot and500524 reference; native contracts disable the legacy helpers
+effects. These Fixed definitions do not activate or alter those helpers. Their execution still needs isolated
+qualification, as do all passive menu entries and native script interactions.
+
+Source exports now show171 profiles/173 declarations (120 ranked/7 mastery/44 fixed),126 baselines,553 missing
+definitions (106 ranked/447 standalone),850 runtime-unqualified groups and97 native source hashes. All previous
+six passive definitions and practice pacing remain unchanged. No blanket classification of other untracked
+passives, no client/protocol/version change and no production operation.
+
+Thirteen-entry passive roadmap source2/native29.3s passed at .cache/verify-all/20261006-155553/report.json.
+C++ style/whitespace and current source exports passed; unit/harness/gameplay skipped. No tests, client chunks,
+startup, runtime helper execution, deployment or production operations.
