@@ -2661,3 +2661,33 @@ During this continuation the external Spell.dbc fingerprint differed from the ea
 stale provenance; the inventory was regenerated against actual current data. All7544 captured spell raw practice
 fields matched the prior inventory; fields outside that extraction were not compared. Current Spell.dbc SHA256 is
 d99a7ef1340dce0ddca43755a5fee1756a837c82c26f466170e5911aa18a16fa. This task did not modify the DBC or production.
+
+## Pommel Smash and Lunge mastery drafts
+
+Crusader15 Pommel Smash680515 introduces at12; Bloodmage20 Lunge500126 at8. Both have a single source rank,
+no generated progression ranks, and an original direct-damage path. Optional development mastery adds one
+nonstacking damage bonus at proficiency40/70/100:0.5%/1%/2%. Pommel's character gates are12/20/28; Lunge's are
+8/16/24. Shared authored caps rise with character level and stop at100. The native spell remains rank1.
+
+Only qualifying original direct PvE damage earns one receipt use; failed/absorbed/no-damage hits, movement,
+threat, helper aura applications and triggered energize/healing cannot earn extra credit. Existing target,
+character/class ownership, replacement, session, receipt and persistence guards apply. The mastery bonus uses
+only the original damage provider; this increment does not modify jump/facing, energy, threat or helper effects.
+
+Pommel's native effects121/64/63 and helper582588 (percent-damage-taken/from-caster auras87/271) are checked at
+startup. Lunge must retain native42/2/178 with50259 in its third effect plus energize helper804864; native effect178
+currently dispatches to EffectNULL. Native Bloodmage jump-facing script, hit-result energize and talent proc
+sources were inspected and already appear in provenance. A mismatch prevents the development catalog activating.
+Helper debuff/slow/energy traits are not inferred into practice or extra mastery rewards.
+
+Individually authored definition1 curves use16200/3240 points per proficiency and1170 before40/900 afterward.
+Zero-partial baseline milestones take540 Pommel uses at assumed5seconds and108 Lunge uses at raw25second recovery,
+each45minutes. Frequency is not measured ordinary play; mastery pacing export confirms all six new milestones
+fit the assumed target. Existing saved definition versions and three adjusted mastery pacing entries are unchanged.
+
+Coverage:152 unique profiles/154 declarations/2 shared (119 ranked/7 mastery/26 fixed),123 baselines,575 missing
+definitions among850 still-runtime-unqualified groups.92-source exports and both unchanged generated pacing headers
+reproduced. Existing typed menu shows exact remaining uses, native spell level and mastery milestones without an
+invented next rank; no client code/installation/version change in this increment. All development switches remain0.
+Source2/style/whitespace and28.4-second native build passed at
+.cache/verify-all/20261006-142446/report.json. Unit/harness/gameplay skipped; no runtime/tests/deployment.

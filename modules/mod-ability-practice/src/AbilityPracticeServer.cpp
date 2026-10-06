@@ -384,6 +384,35 @@ bool HasSupportedHelperOutcome(SpellInfo const* info, Practice::AbilityProfile c
         info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_PERIODIC_DUMMY;
 }
 
+bool MatchesAdditionalMasteryMechanic(SpellInfo const* info, Practice::AbilityProfile const& profile)
+{
+    auto const& ability = profile.Definition;
+    if (ability.Kind != Practice::AbilityKind::Mastery ||
+        (ability.AbilityId != 680515 && ability.AbilityId != 500126))
+        return true;
+    if (!info || info->Id != ability.AbilityId || profile.Outcome != Practice::OutcomeKind::Damage)
+        return false;
+    auto const& effects = info->Effects;
+    if (ability.AbilityId == 680515)
+    {
+        SpellInfo const* helper = sSpellMgr->GetSpellInfo(582588);
+        return ability.ClassId == 15 && effects[EFFECT_0].Effect == SPELL_EFFECT_NORMALIZED_WEAPON_DMG &&
+            effects[EFFECT_1].Effect == SPELL_EFFECT_TRIGGER_SPELL && effects[EFFECT_1].TriggerSpell == 582588 &&
+            effects[EFFECT_2].Effect == SPELL_EFFECT_THREAT && helper &&
+            helper->Effects[EFFECT_0].Effect == SPELL_EFFECT_APPLY_AURA &&
+            helper->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN &&
+            helper->Effects[EFFECT_1].Effect == SPELL_EFFECT_APPLY_AURA &&
+            helper->Effects[EFFECT_1].ApplyAuraName == SPELL_AURA_MOD_DAMAGE_FROM_CASTER &&
+            !helper->Effects[EFFECT_2].Effect;
+    }
+    SpellInfo const* helper = sSpellMgr->GetSpellInfo(804864);
+    return ability.ClassId == 20 && effects[EFFECT_0].Effect == SPELL_EFFECT_JUMP_DEST &&
+        effects[EFFECT_1].Effect == SPELL_EFFECT_SCHOOL_DAMAGE && effects[EFFECT_2].Effect == 178 &&
+        effects[EFFECT_2].TriggerSpell == 50259 && helper &&
+        helper->Effects[EFFECT_0].Effect == SPELL_EFFECT_ENERGIZE &&
+        !helper->Effects[EFFECT_1].Effect && !helper->Effects[EFFECT_2].Effect;
+}
+
 bool MatchesNativeClassGrant(Practice::AbilityProfile const& profile)
 {
     Practice::AbilityDefinition const& ability = profile.Definition;
@@ -1322,7 +1351,8 @@ public:
                         (!Practice::DevelopmentControl::SupportsRoot(profile) ||
                             (info && info->HasAura(SPELL_AURA_MOD_ROOT))));
                 if (!info || info->IsDeprecatedForPlayers || (!fixed && info->IsPassive()) ||
-                    !expectedOutcome || !expectedAbsorption || !expectedControl)
+                    !expectedOutcome || !expectedAbsorption || !expectedControl ||
+                    !MatchesAdditionalMasteryMechanic(info, profile))
                 {
                     Ready = false;
                     LOG_ERROR("module.ability_practice", "Rejected development profile: class={}, ability={}, spell={}",

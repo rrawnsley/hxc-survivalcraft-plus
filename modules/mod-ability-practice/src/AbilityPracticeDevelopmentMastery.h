@@ -8,6 +8,16 @@
 
 namespace AbilityPractice::DevelopmentMastery
 {
+inline constexpr std::array PommelSmash = { AbilityRank{ 680515, 1, { 12, 1 } } };
+inline constexpr std::array Lunge = { AbilityRank{ 500126, 1, { 8, 1 } } };
+inline constexpr std::array PommelSmashBands = {
+    TrainingBand{ 1, 16200, 1170 }, TrainingBand{ 40, 16200, 900 }
+};
+inline constexpr TrainingPolicy PommelSmashPolicy{ PommelSmashBands };
+inline constexpr std::array LungeBands = {
+    TrainingBand{ 1, 3240, 1170 }, TrainingBand{ 40, 3240, 900 }
+};
+inline constexpr TrainingPolicy LungePolicy{ LungeBands };
 inline constexpr std::array HandOfElune = { AbilityRank{ 801990, 1, { 16, 1 } } };
 inline constexpr std::array VileSting = { AbilityRank{ 805097, 1, { 12, 1 } } };
 inline constexpr std::array Soulslam = { AbilityRank{ 504014, 1, { 20, 1 } } };
@@ -53,7 +63,22 @@ inline constexpr std::array HellfireTrampleRewards = {
     MasteryReward{ { 28, 70 }, 0, 100 },
     MasteryReward{ { 36, 100 }, 0, 200 }
 };
+inline constexpr std::array PommelSmashRewards = {
+    MasteryReward{ { 12, 40 }, 0, 50 },
+    MasteryReward{ { 20, 70 }, 0, 100 },
+    MasteryReward{ { 28, 100 }, 0, 200 }
+};
+inline constexpr std::array LungeRewards = {
+    MasteryReward{ { 8, 40 }, 0, 50 },
+    MasteryReward{ { 16, 70 }, 0, 100 },
+    MasteryReward{ { 24, 100 }, 0, 200 }
+};
 inline constexpr std::array Profiles = {
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 15, 680515, AbilityKind::Mastery, PommelSmash, Caps }, PommelSmashPolicy, OutcomeKind::Damage,
+        PommelSmashRewards },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 20, 500126, AbilityKind::Mastery, Lunge, Caps }, LungePolicy, OutcomeKind::Damage, LungeRewards },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 17, 804702, AbilityKind::Mastery, DreadridersStomp, Caps }, DreadridersStompPolicy, OutcomeKind::Damage,
         DreadridersStompRewards },

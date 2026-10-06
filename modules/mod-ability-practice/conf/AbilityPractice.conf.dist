@@ -25,7 +25,8 @@ AbilityPractice.AllowDevelopmentRankedCatalog = 0
 # Leave off until isolated qualification; scripted spread/copies cannot earn extra practice.
 AbilityPractice.AllowDevelopmentPeriodicObservation = 0
 
-# Experimental Hand of Elune healing and Vile Sting/Soulslam damage mastery, up to 2% in PvE. Startup-only.
+# Experimental individually authored healing/direct damage mastery, up to 2% in PvE. Startup-only.
+# Includes Hand of Elune, Vile Sting, Soulslam, Dreadrider Stomp, Hellfire Trample, Pommel Smash and Lunge.
 # This applies draft healing/damage benefits when observation is enabled; it is not observation-only.
 AbilityPractice.AllowDevelopmentMastery = 0
 
