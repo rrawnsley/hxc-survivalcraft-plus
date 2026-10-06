@@ -141,7 +141,7 @@ def build_coverage(drafts, declarations):
         seen.add(identity)
         declaration = declarations.get(identity)
         baseline = draft.get('nativeBaselineExclusion')
-        if baseline and (declaration or identity[1] not in {75, 81, 107, 674, 2764, 3018, 3124, 5019} or
+        if baseline and (declaration or identity[1] not in {75, 81, 107, 674, 2764, 3018, 3124, 5019, 552011} or
                          len(draft['ranks']) != 1):
             raise ValueError('Native baseline cannot be a development practice profile')
         if declaration and ((declaration['kind'] == 'ranked' and len(draft['ranks']) < 2) or
@@ -162,7 +162,8 @@ def build_coverage(drafts, declarations):
                      'reviewFlags': draft['reviewFlags'],
                      'pendingReviewQueues': [] if declaration or baseline else review_queues(draft),
                      'qualificationReviewQueues': review_queues(draft),
-                     'practiceDecision': 'excluded-native-combat-baseline' if baseline else 'unreviewed',
+                     'practiceDecision': ('excluded-native-passive-baseline' if identity[1] == 552011 else
+                                          'excluded-native-combat-baseline') if baseline else 'unreviewed',
                      'productionApproved': False, 'runtimeQualified': False})
     if set(declarations) - seen:
         raise ValueError('Declared profile absent from source-consistent drafts')

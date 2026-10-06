@@ -458,6 +458,7 @@ def main():
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentTrainerFixed.h',
                 'modules/mod-ability-practice/tools/trainer_acquisition_review.py',
                 'data/sql/updates/pending_db_world/rev_20260923_05_coa_class_trainer_core.sql',
+                'src/server/coa/AscensionLiveBaselineData.h',
                 'src/server/game/Entities/Creature/Trainer.h',
                 'src/server/game/Entities/Creature/Trainer.cpp',
                 'src/server/game/Globals/ObjectMgr.h',

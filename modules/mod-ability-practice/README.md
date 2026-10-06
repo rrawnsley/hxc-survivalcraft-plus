@@ -2638,3 +2638,26 @@ Queries used read-only transactions, no character rows and no stored credentials
 database observations, not proof of loaded SpellInfo, successful casts, travel, menu rendering or learning. The
 startup callback runs after world data loads, so its trainer check reads initialized memory rather than startup
 SQL. Running CoA PID49508 and the other realm PID40616 were observed unchanged during this continuation.
+
+## Explicit native passive baseline
+
+Resilient Constitution552011 stays native for classes12..32. Native InitializeLiveBaseline grants its exact
+all-race entries from AscensionLiveBaselineData.h during initial character setup; the captured class grants are
+level1 singleton entries. Its passive raw6/6/0 effects are self-applied percent modifiers (aura108/108/0), with
+no triggered spell. It receives no ability practice gate, counter, menu profile, cap or mastery reward.
+
+The existing native baseline guard now includes only this additional reviewed spell. Authoring requires the
+exact21 class/race0 baseline entries, all21 matching class grants and raw passive/effect/target/trigger evidence.
+It does not infer modifier semantics from the name or classify other passives automatically. Coverage separates
+this passive decision from the existing native combat baselines. Remaining16 passive groups stay under review.
+
+Exports now carry92 native source hashes, including AscensionLiveBaselineData.h.850 groups retain150 development
+profiles;123 baseline exclusions leave577 missing definitions (112 ranked/465 standalone). Both generated pacing
+headers reproduced without changes;119 ranked and3 adjusted mastery curves remain. All runtime qualifications
+remain false. Source2 and the31.1-second incremental native build passed at
+.cache/verify-all/20261006-141953/report.json. Unit/harness/gameplay skipped; no tests or runtime startup.
+
+During this continuation the external Spell.dbc fingerprint differed from the earlier inventory. Authoring refused
+stale provenance; the inventory was regenerated against actual current data. All7544 captured spell raw practice
+fields matched the prior inventory; fields outside that extraction were not compared. Current Spell.dbc SHA256 is
+d99a7ef1340dce0ddca43755a5fee1756a837c82c26f466170e5911aa18a16fa. This task did not modify the DBC or production.
