@@ -3125,3 +3125,27 @@ files syntax parsed using Lua5.1 loadstring, no addon chunks executed.210 profil
 (123 ranked/7 mastery/80 fixed),126 baselines,514 missing definitions (103 ranked/411 standalone),
 850 runtime-unqualified groups. No tests, startup, contribution/rank/cache/menu execution,
 migration execution, launcher/payload publication or deployment. All switches remain0.
+
+## Complete Brutal Shout trainer ladder — 6 October 2026
+
+Source trainer review found rank7 spell300887 at level65, trainer900012, requiring300886.
+The six-rank buff prefix alone fails the existing loaded trainer-boundary guard. A separate frozen
+DevelopmentBuffTrainerRanks definition3 now supplies the complete seven-rank ladder, proficiency100
+for rank7, without changing the earlier eight definition3 trainer profiles or their header hash.
+Definition versions are per ability; this newly authored ability has no prior version3 definition.
+The five prior version2 bands remain exact. The added80-to100 transition is540 qualifying combat
+actions before catch-up at assumed5s, estimating45min; actual frequency remains unmeasured.
+
+Buff contribution now requires both rank pacing and trainer extensions. Native startup checks the
+class-grant prefix, loaded trainer owner/level/skill gates/prerequisites and every buff aura rank.
+Shared saved-row conversion reads frozen versions1/2, preserves whole/fractional progress and seeds
+already learned rank7 to proficiency100. Unknown/unreadable versions remain unavailable and preserved.
+Trainer acquisition still requires the actual preceding ability. No native spell power was changed.
+
+The source projection tool writes the buff extension separately and rejects differing existing
+definition3 contents. It reproduces the original eight-entry header without rewriting it. Current
+projections cover9 profiles/20 additional trainer ranks; all prior pacing is preserved.104 native
+source hashes cover the new header.210 profile identities and514 pending definitions are unchanged;
+all850 source groups still require runtime qualification. Source2/native30.0s passed
+.cache/verify-all/20261006-200727/report.json; C++ style/whitespace and actual source exports passed.
+No tests, native startup, migration execution, gameplay, active addon changes or production operations.

@@ -123,12 +123,14 @@ def declared_outcome(root, row):
     return next(iter(outcomes))
 
 
-def render_native_header(root, rows):
+def render_native_header(root, rows, buff=False):
     expected = {(13, 807037), (16, 707044), (19, 801165), (26, 575039),
                 (28, 802684), (29, 803198), (30, 800174), (31, 803981)}
+    if buff:
+        expected = {(12, 300857)}
     if (len(rows) != len(expected) or {(row['classId'], row['abilityId']) for row in rows} != expected or
             any(row['blockingFlags'] or not row.get('priorPacingPreserved') for row in rows)):
-        raise ValueError('Native extension scope requires eight explicitly reviewed complete projections')
+        raise ValueError('Native extension scope differs from explicitly reviewed complete projections')
     lines = ['// SPDX-License-Identifier: GPL-2.0-or-later', '',
              '#ifndef ABILITY_PRACTICE_DEVELOPMENT_TRAINER_RANKS_H',
              '#define ABILITY_PRACTICE_DEVELOPMENT_TRAINER_RANKS_H', '',
@@ -140,6 +142,15 @@ def render_native_header(root, rows):
              'struct Entry', '{', '    AbilityProfile Profile;', '    std::span<AbilityRank const> PreviousRanks;',
              '    std::span<ProficiencyCap const> PreviousCaps;', '    TrainingPolicy PreviousPolicy;',
              '    std::span<TrainerRank const> AdditionalTrainerRanks;', '};', '']
+    if buff:
+        lines = ['// SPDX-License-Identifier: GPL-2.0-or-later', '',
+                 '#ifndef ABILITY_PRACTICE_DEVELOPMENT_BUFF_TRAINER_RANKS_H',
+                 '#define ABILITY_PRACTICE_DEVELOPMENT_BUFF_TRAINER_RANKS_H', '',
+                 '#include "AbilityPracticeDevelopmentTrainerRanks.h"', '',
+                 'namespace AbilityPractice::DevelopmentBuffTrainerRanks', '{',
+                 'inline constexpr std::uint32_t DefinitionVersion = 3;', '',
+                 'using TrainerRank = DevelopmentTrainerRanks::TrainerRank;',
+                 'using Entry = DevelopmentTrainerRanks::Entry;', '']
     rendered = []
     for row in rows:
         name = 'Class' + str(row['classId']) + 'Ability' + str(row['abilityId'])
@@ -195,6 +206,7 @@ def main():
     parser.add_argument('--dbc', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--native-header', type=Path)
+    parser.add_argument('--buff-native-header', type=Path)
     args = parser.parse_args()
     root, dbc = args.root.resolve(), args.dbc.resolve()
     candidates = json.loads(args.candidates.read_text(encoding='utf-8'))
@@ -250,19 +262,22 @@ def main():
               'summary': {'profileCount': len(rows), 'addedRankCount': sum(row['addedRankCount'] for row in rows),
                           'statuses': dict(Counter(row['status'] for row in rows)),
                           'priorPacingPreservedCount': sum(row.get('priorPacingPreserved') is True for row in rows)}}
-    if args.native_header:
-        header = render_native_header(root, rows)
-        args.native_header.parent.mkdir(parents=True, exist_ok=True)
+    for path, buff in [(args.native_header, False), (args.buff_native_header, True)]:
+        if not path:
+            continue
+        selected = [row for row in rows if ((row['classId'], row['abilityId']) == (12, 300857)) == buff]
+        header = render_native_header(root, selected, buff)
+        path.parent.mkdir(parents=True, exist_ok=True)
         encoded = header.encode('utf-8')
-        exists = args.native_header.exists()
-        if exists and args.native_header.read_bytes() != encoded:
+        exists = path.exists()
+        if exists and path.read_bytes() != encoded:
             raise ValueError('Existing native definition3 differs; author a new definition version explicitly')
         if not exists:
-            args.native_header.write_bytes(encoded)
+            path.write_bytes(encoded)
+        prefix = 'buffNativeHeader' if buff else 'nativeHeader'
         result['nativeHeaderGenerated'] = True
-        result['nativeHeaderUpdated'] = not exists
-        result['nativeHeader'] = {'path': str(args.native_header.resolve()),
-                                  'sha256': hashlib.sha256(encoded).hexdigest()}
+        result[prefix + 'Updated'] = not exists
+        result[prefix] = {'path': str(path.resolve()), 'sha256': hashlib.sha256(encoded).hexdigest()}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + '\n', encoding='utf-8')
     print(json.dumps(result['summary'], sort_keys=True))

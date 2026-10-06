@@ -16,6 +16,7 @@
 #include "AbilityPracticeDevelopmentUtilityFixed.h"
 #include "AbilityPracticeDevelopmentTrainerFixed.h"
 #include "AbilityPracticeDevelopmentTrainerRanks.h"
+#include "AbilityPracticeDevelopmentBuffTrainerRanks.h"
 #include "AbilityPracticeDevelopmentAbsorption.h"
 #include "AbilityPracticeDevelopmentControl.h"
 #include "AbilityPracticeDevelopmentControlFixed.h"
@@ -238,18 +239,27 @@ bool ApplyDevelopmentMasteryPacing(std::vector<Practice::AbilityProfile>& profil
     return true;
 }
 
+Practice::DevelopmentTrainerRanks::Entry const* TrainerRankExtensionForIdentity(
+    std::uint32_t classId, std::uint32_t abilityId)
+{
+    std::array<std::span<Practice::DevelopmentTrainerRanks::Entry const>, 2> const catalogs = {
+        Practice::DevelopmentTrainerRanks::Entries, Practice::DevelopmentBuffTrainerRanks::Entries };
+    Practice::DevelopmentTrainerRanks::Entry const* result = nullptr;
+    for (auto const entries : catalogs)
+        for (auto const& entry : entries)
+            if (entry.Profile.Definition.ClassId == classId && entry.Profile.Definition.AbilityId == abilityId)
+            {
+                if (result)
+                    return nullptr;
+                result = &entry;
+            }
+    return result;
+}
+
 Practice::DevelopmentTrainerRanks::Entry const* TrainerRankExtensionEntry(Practice::AbilityProfile const& profile)
 {
-    if (profile.DefinitionVersion != Practice::DevelopmentTrainerRanks::DefinitionVersion)
-        return nullptr;
-    auto const& entries = Practice::DevelopmentTrainerRanks::Entries;
-    auto const found = std::find_if(entries.begin(), entries.end(),
-        [&profile](Practice::DevelopmentTrainerRanks::Entry const& entry)
-        {
-            return entry.Profile.Definition.ClassId == profile.Definition.ClassId &&
-                entry.Profile.Definition.AbilityId == profile.Definition.AbilityId;
-        });
-    return found == entries.end() ? nullptr : &*found;
+    auto const* entry = TrainerRankExtensionForIdentity(profile.Definition.ClassId, profile.Definition.AbilityId);
+    return entry && profile.DefinitionVersion == entry->Profile.DefinitionVersion ? entry : nullptr;
 }
 
 bool ApplyDevelopmentTrainerRankExtensions(std::vector<Practice::AbilityProfile>& profiles)
@@ -257,14 +267,8 @@ bool ApplyDevelopmentTrainerRankExtensions(std::vector<Practice::AbilityProfile>
     std::size_t count = 0;
     for (auto& profile : profiles)
     {
-        auto const& entries = Practice::DevelopmentTrainerRanks::Entries;
-        auto const found = std::find_if(entries.begin(), entries.end(),
-            [&profile](Practice::DevelopmentTrainerRanks::Entry const& entry)
-            {
-                return entry.Profile.Definition.ClassId == profile.Definition.ClassId &&
-                    entry.Profile.Definition.AbilityId == profile.Definition.AbilityId;
-            });
-        if (found == entries.end())
+        auto const* found = TrainerRankExtensionForIdentity(profile.Definition.ClassId, profile.Definition.AbilityId);
+        if (!found)
             continue;
         Practice::AbilityProfile const expected{
             Practice::DevelopmentPacing::DefinitionVersion, Practice::AcquisitionSource::ClassGrant,
@@ -1810,7 +1814,8 @@ public:
         bool const directLeechValid = !DirectLeechRequested ||
             AppendProfiles(RuntimeProfiles, Practice::DevelopmentLeech::Profiles);
         bool const buffValid = !BuffContributionRequested ||
-            (PacingRequested && AppendProfiles(RuntimeProfiles, Practice::DevelopmentBuffs::Profiles));
+            (PacingRequested && TrainerRanksRequested &&
+                AppendProfiles(RuntimeProfiles, Practice::DevelopmentBuffs::Profiles));
         bool const absorptionValid = !AbsorptionRequested ||
             AppendProfiles(RuntimeProfiles, Practice::DevelopmentAbsorption::Profiles);
         bool const fixedValid = !fixedCatalog || AppendProfiles(RuntimeProfiles, Practice::DevelopmentFixed::Profiles);

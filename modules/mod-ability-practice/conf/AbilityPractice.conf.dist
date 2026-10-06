@@ -75,6 +75,7 @@ AbilityPractice.AllowDevelopmentMasteryPacing = 0
 AbilityPractice.AllowDevelopmentDirectLeech = 0
 
 # Experimental Brutal Shout ranks earned through original combat casts while your own buff is active.
+# Requires development rank pacing and trainer rank extensions for the complete seven-rank ladder.
 # Requires rank pacing. Applying/refreshing does not earn practice; qualifying casts count at most every5s.
 AbilityPractice.AllowDevelopmentBuffContribution = 0
 

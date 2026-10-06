@@ -32,6 +32,7 @@ def verify_provenance(candidates, root, dbc):
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentBuffs.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentTrainerFixed.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentTrainerRanks.h',
+                'modules/mod-ability-practice/src/AbilityPracticeDevelopmentBuffTrainerRanks.h',
                 'modules/mod-ability-practice/tools/trainer_rank_extensions.py',
                 'modules/mod-ability-practice/tools/trainer_acquisition_review.py',
                 'data/sql/updates/pending_db_world/rev_20260923_05_coa_class_trainer_core.sql',
