@@ -55,6 +55,8 @@ def verify_provenance(candidates, root, dbc):
                          'src/server/coa/AscensionVenomancerAuras.cpp',
                          'src/server/coa/AscensionReaperTalentProcs.h',
                          'src/server/coa/AscensionReaperTalentProcs.cpp',
+                'src/server/coa/AscensionReaperTalents.cpp',
+                'data/sql/updates/pending_db_world/rev_20260915_01_soul_capture.sql',
                 'src/server/coa/AscensionBloodmageTalents.cpp',
                 'src/server/coa/AscensionBloodmageSecondary.cpp',
                 'src/server/coa/AscensionTalentReplacementData.h',
@@ -309,6 +311,9 @@ def build_drafts(candidates, root):
             required.append('cyclic-raw-trigger-reference-execution-review')
         if trigger_summary['incompleteRootSpellIds']:
             required.append('incomplete-raw-trigger-reference-review')
+        if class_id == 30 and ability_id == 561289:
+            required.extend(['soul-capture-loaded-script-registration-and-trigger-suppression',
+                             'soul-capture-corpse-resource-and-post-combat-use-design'])
         if candidate.get('nativeOutcomeReview', {}).get('directLeechReview', {}).get('commonRoutes'):
             required.append('original-health-leech-damage-attribution')
         if periodic:

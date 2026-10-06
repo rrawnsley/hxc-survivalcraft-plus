@@ -99,6 +99,8 @@ def review_queues(draft):
         queues.add('cyclic-raw-trigger-reference-execution-review')
     if trigger_summary.get('incompleteRootSpellIds'):
         queues.add('incomplete-raw-trigger-reference-review')
+    if draft['classId'] == 30 and draft['abilityId'] == 561289:
+        queues.add('corpse-resource-and-post-combat-use-design')
     if len(draft['ranks']) == 1:
         queues.add('unranked-mastery-or-fixed-design')
     if set(routes) & {'interrupt', 'dispel', 'steal'}:

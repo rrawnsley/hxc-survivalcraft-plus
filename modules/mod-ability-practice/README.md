@@ -3007,3 +3007,21 @@ opponent list, matching the existing native eligibility filter. Fixed abilities 
 All five addon files parsed with Lua5.1 loadstring; no addon chunks executed. Source165542 passed
 2 checks, all other stages skipped. Native remains163946; no render or gameplay acceptance claimed.
 No active addon installation, launcher/payload publication, tests, server startup or production changes.
+
+## Soul Capture execution-path evidence — 6 October 2026
+
+AscensionReaperTalents.cpp::spell_ascension_soul_capture overrides the raw corpse-selector path.
+CheckCorpse searches dead units and stores one eligible hostile corpse GUID. Eligible requires
+no existing Soul Captured marker, same map/phase, native radius and line of sight. Capture rechecks
+that corpse and requires AddAura572887 success; otherwise it prevents the HEAL_PCT effect.
+On success it triggers Reaped Soul500363 and permits the original self-heal. Both trigger launch
+hooks suppress the default raw TRIGGER_SPELL effects. Raw helper graphs therefore cannot predict
+actual cast execution. Native corpse search is not restricted to our practice-eligible NPC filter.
+
+Script registration source is rev_20260915_01_soul_capture.sql. Both real source files now join
+strict provenance101 sources; loaded database registration and behavior remain unqualified.
+Soul Capture draft/coverage explicitly require corpse-resource/post-combat design plus loaded
+registration and trigger suppression review. The ordinary in-combat healing route is insufficient
+for reliable practice across its normal post-fight use. No Soul Capture profile, power benefit or
+counter was added. Source165820 passed2 checks;205 definitions/519 missing unchanged.
+Native unchanged from163946. No tests, startup, SQL mutation, active-client changes or deployment.
