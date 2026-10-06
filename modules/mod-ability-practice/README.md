@@ -3459,6 +3459,34 @@ Unpublished addon0.4.41-development updates route13 help to describe the support
 including spell power, instead of calling every effect a stat. Wire schema4 and practice math remain.
 Five Lua5.1 chunks syntax-parsed without execution; source214613 passed2/no selected suites.
 Native unchanged from214418. No active client install, publishing or production changes.
+
+## Owned mana-regeneration buff practice — 6 October 2026
+
+Call of the Wind16/804018 six ranks14/24/34/44/54/60 and Seal of Al'ar24/803649 five ranks
+16/26/36/46/56 join the disabled owned-buff catalog. Complete source and same-name trainer ladders
+agree; native active APPLY_AURA6/MOD_POWER_REGEN85/friendly21/mana0/positive shapes have no other
+effects/triggers. Exact full loaded class trainer/levels/prerequisites and native shape are required.
+
+Readiness requires primary mana, nonzero maximum mana, no PREVENT_REGENERATE_POWER(mana+1), a
+positive native mana world rate and positive interrupted mana regeneration. Existing positive own
+application, stronger exclusive same-effect comparison for the same resource, original receipt,
+cast-start/result eligibility and independent floors remain. Native UpdateManaRegen includes flat
+mana regeneration in both interrupted and normal rates; its source now has hashed provenance.
+This is practice from meaningful combat while a supported buff is available, not a record of actual
+mana ticks or restored mana. Full mana alone does not prevent practice. Regeneration-veto scripts
+and effective runtime behavior still require qualification. Ranger's Grove Instinct remains pending
+its Focus/native resource behavior; Cultist buffs remain pending their family lifecycle.
+
+New two pacing entries preserve preceding140 and target540 qualifying uses/45min per rank before
+catch-up under assumed5s combat cadence. All four frozen trainer headers reproduce unchanged.
+232 profiles/234 declarations,142 ranked/7 mastery/83 Fixed,471 pending(84 ranked/387 standalone),
+147 baselines/109 hashes/850 runtime-unqualified.20 owned buff tracks/13 classes. Addon0.4.42/schema4
+help describes conditional mana availability and uses a generic unavailable/suppressed pause label.
+
+VERIFY ALL: PASSED214905 source2/no selected suites/native31.4s; style/whitespace/final source,
+coverage/trainer exports and five Lua5.1 syntax parses passed without chunks executed. All flags0.
+No tests, native startup, client/menu/gameplay/migration execution, active install, publish, deploy,
+restart or production configuration/database/process operations.
 All switches0; owned-buff rules remain an isolated reversible design draft.
 
 ## Chromie's complete trainer ladder — 6 October 2026

@@ -568,7 +568,7 @@ function Model.BuffStateText(ability, saved)
         [2] = "Reapply your buff to earn practice.",
         [3] = "Your buff is ready for combat practice.",
         [4] = "Buff practice requirements are unavailable.",
-        [5] = "Stronger or inactive effect; practice paused."
+        [5] = "Buff effect unavailable or suppressed; practice paused."
     }
     local text = states[ability.buffState]
     if ability.buffState == 3 and ability.availability == 5 then
@@ -595,6 +595,7 @@ function Model.PracticeRules(ability, saved)
             .. " Your owned buff must be valid when the combat cast begins and when its result qualifies."
             .. " Its supported buff effect must be active and positive; a stronger exclusive effect prevents practice."
             .. " Equal-strength exclusive effects remain eligible."
+            .. " Mana regeneration buffs also require an active mana resource and available native regeneration."
             .. " One combat cast can earn one use for this buff, with at least five seconds between counted uses."
             .. " Supported buffs progress independently; a combat cast can practice more than one active buff."
             .. " Applying or refreshing the buff, auto-attacks and triggered helper spells earn no buff practice."

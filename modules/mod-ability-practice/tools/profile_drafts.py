@@ -106,7 +106,8 @@ def verify_provenance(candidates, root, dbc):
                 'src/server/game/Spells/Auras/SpellAuras.h', 'src/server/game/Spells/Auras/SpellAuras.cpp',
                 'src/server/game/Spells/Auras/SpellAuraEffects.cpp',
                 'src/server/game/Spells/Auras/SpellAuraEffects.h',
-                'src/server/game/Entities/Unit/Unit.h', 'src/server/game/Entities/Unit/Unit.cpp'}
+                'src/server/game/Entities/Unit/Unit.h', 'src/server/game/Entities/Unit/Unit.cpp',
+                'src/server/game/Entities/Unit/StatSystem.cpp'}
     if not isinstance(native_sources, list) or len(native_sources) != len(expected) or {
             source.get('path') for source in native_sources} != expected:
         raise ValueError('Missing native outcome provenance')
@@ -201,7 +202,8 @@ def reviewed_stat_buffs(root):
         class_id, ability_id, target, stat = map(int, match.groups()[:4])
         aura = int(match[5]) if match[5] is not None else 29
         if (not 12 <= class_id <= 32 or not ability_id or target not in {21, 56} or
-                not (aura == 29 and stat in range(5) or aura == 345 and stat == 127 and target == 21)):
+                not (aura == 29 and stat in range(5) or aura == 345 and stat == 127 and target == 21 or
+                     aura == 85 and stat == 0 and target == 21)):
             raise ValueError('Unsupported owned stat-buff mechanic')
         identity = (class_id, ability_id)
         if identity in result:
@@ -396,6 +398,9 @@ def build_drafts(candidates, root):
                              'buff-contribution-five-second-cadence-and-per-cast-deduplication',
                              'independent-owned-buff-origin-eligibility-and-cadence',
                              'buff-contribution-menu-rule-and-session-qualification'])
+            if mechanic['auraId'] == 85:
+                required.extend(['primary-mana-resource-and-native-regeneration-availability',
+                                 'meaningful-combat-practice-not-mana-tick-awards'])
             if ability_id == 680302:
                 expected_spells = [680302, 681439, 681440, 681441]
                 expected_levels = [24, 36, 48, 58]

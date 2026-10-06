@@ -1137,12 +1137,19 @@ bool EffectiveBuffApplication(Player* player, AuraApplication const& application
         return false;
     AuraEffect const* effect = application.GetBase()->GetEffect(EFFECT_0);
     std::uint32_t const aura = Practice::DevelopmentBuffs::Aura(profile);
-    if ((aura != SPELL_AURA_MOD_STAT && aura != SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT) ||
+    if ((aura != SPELL_AURA_MOD_STAT && aura != SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT &&
+            aura != SPELL_AURA_MOD_POWER_REGEN) ||
         !effect || effect->GetAuraType() != aura || effect->GetAmount() <= 0 ||
         effect->GetMiscValue() != Practice::DevelopmentBuffs::StatSelector(profile))
         return false;
+    if (aura == SPELL_AURA_MOD_POWER_REGEN && (player->getPowerType() != POWER_MANA ||
+        !player->GetMaxPower(POWER_MANA) ||
+        player->HasAuraTypeWithMiscvalue(SPELL_AURA_PREVENT_REGENERATE_POWER, POWER_MANA + 1) ||
+        sWorld->getRate(RATE_POWER_MANA) <= 0.0f ||
+        player->GetFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER + POWER_MANA) <= 0.0f))
+        return false;
     std::int64_t const competing = player->GetHighestExclusiveSameEffectSpellGroupValue(
-        effect, effect->GetAuraType(), aura == SPELL_AURA_MOD_STAT, effect->GetMiscValue());
+        effect, effect->GetAuraType(), aura != SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT, effect->GetMiscValue());
     std::int64_t const magnitude = competing < 0 ? -competing : competing;
     return magnitude <= effect->GetAmount();
 }

@@ -705,6 +705,7 @@ def main():
                          'src/server/game/Spells/Auras/SpellAuraEffects.cpp',
                          'src/server/game/Spells/Auras/SpellAuraEffects.h',
                          'src/server/game/Entities/Unit/Unit.h', 'src/server/game/Entities/Unit/Unit.cpp',
+                         'src/server/game/Entities/Unit/StatSystem.cpp',
                          'src/server/shared/SharedDefines.h')]
     if args.dbc:
         from inventory import load_dbc_lookup
