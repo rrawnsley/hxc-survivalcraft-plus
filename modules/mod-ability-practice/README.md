@@ -2046,3 +2046,30 @@ Source checks passed in .cache/verify-all/20261006-000954/report.json (two check
 draft/coverage exports refreshed. Native/addon unchanged from the passing000409 build; no runtime/test or
 production operations performed. The optional rank pacing preference remains pending and existing draft
 rates remain unapproved.
+
+
+## Rank pacing proposals — 5 October 2026 local
+
+The user selected 30–60 minutes of meaningful combat per stronger rank once its character-level gate is met.
+The new read-only authoring tool tools/pacing_drafts.py prepares a 45-minute midpoint proposal for each of244
+source-consistent ranked groups/1412 transitions. It uses the currently practiced rank's raw recovery evidence
+with an explicitly assumed common-use interval floor of5seconds. This is not measured cast frequency or
+effective cooldown; cast-time index is unresolved, modifiers/resources/target availability are unmeasured.
+Catch-up and character-level waiting are excluded from baseline estimates. All proposals remain unapproved/
+unqualified, including source groups that have not been classified as trainable. Singleton rewards are not tuned.
+
+Each transition's proposed pointsPerLevel=baselineUses*30 and pointsPerUse=proficiencyDelta*30 make its full
+baseline requirement exact from the preceding threshold with zero partial progress. The30-unit scaling permits
+an exact fraction-preserving conversion from the existing prototype's30-point bands; the actual versioned
+saved-progress migration and native policy integration are explicitly not implemented. Proposals do not reset
+or alter any saved state, native header, flag, rate or reward. Applying these policies remains future work after
+migration review and measured meaningful-use qualification. Source/default5-second proposals alone are not a
+promise that observed play will take45minutes. None of the1412 default proposals fall outside30–60minutes under
+their stated assumptions.
+
+Generate the proposal using the same provenance-checked draft/DBC inputs as coverage:
+
+    py -B modules/mod-ability-practice/tools/pacing_drafts.py --drafts .cache/ability-practice/profile-drafts.json --dbc C:/Azerothcore-CoA/server-data/dbc --output .cache/ability-practice/pacing-drafts.json
+
+Source checks passed in .cache/verify-all/20261006-001550/report.json (two checks), and62-source exports refreshed.
+Native/addon remain unchanged from the000409 passing build; no tests/runtime/production operations performed.
