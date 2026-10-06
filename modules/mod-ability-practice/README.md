@@ -2290,3 +2290,17 @@ header(71 sources); native pacing generation reproduced its118-entry header iden
 VERIFY ALL PASSED .cache/verify-all/20261006-041926/report.json: source(two checks) and native build(36.2s).
 C++ style/whitespace and authoring exports passed. Unit/harness/gameplay/client execution and native startup were
 not performed. The live server, configuration, databases and active client files remain untouched.
+
+## Review the realm-specific Parry baseline
+
+Source grants/live-baseline data use Parry3124 for classes15/17/18/26/29/30, not3127. Its raw singleton passive
+spell has effect22, and native Spell::EffectParry enables the existing parry capability. The catalog now protects
+3124 as well. Baseline export validation checks the exact raw effects for all four reviewed IDs: Dodge20,
+Block23, Dual Wield40 and Parry22, with empty remaining effects. No name-based or broad passive exclusion is used.
+
+Coverage now reports59 native-baseline class entries,124 declarations and664 groups needing definitions
+(125 ranked,539 standalone), among847 runtime-unqualified source groups. The71-source exports refreshed and
+native pacing header reproduced identically. An initial regeneration used the source-only inventory and was
+refused for missing Spell.dbc provenance; regeneration with dbc-source-inventory.json succeeded.
+VERIFY ALL PASSED .cache/verify-all/20261006-042125/report.json: source(two checks), native build34.0s.
+C++ style/whitespace passed. No tests/client/gameplay/startup/production operations occurred.

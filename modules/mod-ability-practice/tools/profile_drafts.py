@@ -121,7 +121,7 @@ def build_drafts(candidates, root):
     if not baseline_match:
         raise ValueError('Missing reviewed native baseline list')
     baseline_ids = [int(value.strip()) for value in baseline_match[1].split(',')]
-    if baseline_ids != [81, 107, 674]:
+    if baseline_ids != [81, 107, 674, 3124]:
         raise ValueError('Native baseline scope needs explicit authoring review')
     if candidates.get('schemaVersion') != 1 or candidates.get('scope') != (
             'source-review-candidates-not-runtime-definitions'):
@@ -168,8 +168,12 @@ def build_drafts(candidates, root):
                           'nameFromRawDbc': raw.get('name'), 'proficiencyRequired': None,
                           'rawCastProfile': raw_cast_profile(raw)})
         baseline = ability_id in baseline_ids
-        if baseline and (len(ranks) != 1 or members[ability_id].get('rawDbc', {}).get('passive') is not True):
-            raise ValueError('Native baseline raw/source evidence changed')
+        baseline_effects = {81: 20, 107: 23, 674: 40, 3124: 22}
+        if baseline:
+            baseline_raw = members[ability_id].get('rawDbc', {})
+            if (len(ranks) != 1 or baseline_raw.get('passive') is not True or
+                    baseline_raw.get('effects') != [baseline_effects[ability_id], 0, 0]):
+                raise ValueError('Native baseline raw/source evidence changed')
         routes = candidate.get('nativeOutcomeReview', {}).get('commonRoutes', [])
         if not isinstance(routes, list) or len(set(routes)) != len(routes) or any(route not in {
                 'damage', 'healing', 'interrupt', 'dispel', 'steal'} for route in routes):
