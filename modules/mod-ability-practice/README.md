@@ -2540,3 +2540,34 @@ assumptions, not measured play. Existing curves remain intact pending an authore
 Output: .cache/ability-practice/mastery-pacing-drafts.json. Provenance now83 sources, catalog counts unchanged.
 Source .cache/verify-all/20261006-052320/report.json passed2 checks; whitespace and exports passed. Native unchanged
 from051657; no redundant build. No tests/client chunks/gameplay/startup/production operations.
+
+
+## Explicit versioned mastery pacing migration
+
+AbilityPractice.AllowDevelopmentMasteryPacing defaults0/startup-only and requires mastery profiles to be enabled.
+Generated DevelopmentMasteryPacing.h freezes version1 ranks/rewards/outcomes/policies for Hand of Elune, Vile Sting
+and Soulslam and supplies version2 milestone curves. Startup verifies the exact expected baseline before replacing
+its policy/version; invalid composition leaves readiness off. Reward strengths/requirements, native ranks and caps
+remain. New Stomp/Trample policies already fit and stay version1 unchanged. No changes to119 ranked pacing entries.
+
+Shared PreviousPacingFor identifies the exact previous policy for a configured ranked or mastery transition.
+Owner initialization/learned-state refresh rebases only readable reviewed-version records through the existing
+fraction-preserving cache operation. Whole proficiency/learned migration markers remain; current-version rows are
+not reconverted. Retained unlearned rows can rebase without teaching or seeding. Unknown/unreadable/mismatched rows
+stay preserved/unavailable. Turning pacing off cannot reinterpret version2 as1. Whole module off returns native
+behavior and retains rows. No cast-time SQL/config/file reads; flags/profiles remain immutable between startups.
+Version2-to3 migration is not implemented; it requires separately reviewed prior policy/row handling.
+
+Mastery authoring now offers --native-header and reports current versus proposed bands. Changed existing header
+content requires a strictly newer definition version; ordinary regeneration reproduces the current3-entry header.
+Source assumptions yield540/338/60 qualifying uses per reward milestone before catch-up for Elune/Vile/Soulslam,
+45/45.067/45min at5s/8s/45s intervals. All15 proposed/current-fitted milestones fall within30-60 under assumptions;
+ordinary frequency/effective cooldown exceptions remain unmeasured. Native forecasts, cache migration, awards,
+bonus/menu/session execution still require qualification.84-source exports;147 profiles/598 pending unchanged.
+
+VERIFY ALL PASSED .cache/verify-all/20261006-052949/report.json: source2/native45.4s; later source053404 passed2
+for authoring shape guards. C++ style/whitespace, final exports and both generated headers passed/reproduced.
+No addon changes/redundant Lua checks, tests/client chunks/gameplay/startup/production operations. Unrelated
+mod-coa-needs edits appeared in this checkout during/after compilation: build log includes CoANeeds.cpp, whose
+last write053050 followed completion. They were preserved/excluded from this commit. The build proves compilation
+of ability-practice code; it is not a frozen full-checkout release artifact and must not be deployed as one.

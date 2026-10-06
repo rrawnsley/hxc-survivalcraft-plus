@@ -58,3 +58,9 @@ AbilityPractice.AllowDevelopmentControlObservation = 0
 # Effective use frequency, cooldown exceptions and gameplay migration still need isolated qualification.
 # Turning this off after version2 progress exists preserves the row but does not downgrade it to version1.
 AbilityPractice.AllowDevelopmentRankPacing = 0
+
+# Optional milestone pacing for Hand of Elune, Vile Sting and Soulslam. Startup-only; mastery must be enabled.
+# Definition version2 preserves earned proficiency/rewards and rebases the reviewed version1 partial fraction.
+# Draft raw/cadence assumptions target45 minutes per benefit before catch-up; runtime qualification is pending.
+# Disabling this does not downgrade version2 rows; unknown definitions remain preserved and unavailable.
+AbilityPractice.AllowDevelopmentMasteryPacing = 0
