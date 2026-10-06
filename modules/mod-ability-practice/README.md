@@ -2073,3 +2073,28 @@ Generate the proposal using the same provenance-checked draft/DBC inputs as cove
 
 Source checks passed in .cache/verify-all/20261006-001550/report.json (two checks), and62-source exports refreshed.
 Native/addon remain unchanged from the000409 passing build; no tests/runtime/production operations performed.
+
+## Base cast duration and individual cadence assumptions
+
+The pacing authoring tool now resolves each prior rank's castingTimeIndex through the reviewed SpellCastTimes
+reader. Its signed base CastTime value and complete table origin/hash remain in the proposal export. A zero
+index has no referenced base cast duration; a missing nonzero record fails export. Negative base values are
+retained as evidence and clamped to zero only for the assumed interval, matching the native base-time floor.
+The maximum of base cast time, raw recovery timers and assumed cadence determines the draft interval.
+Effective cast modifiers, native corrections, channel duration, resources and meaningful target availability
+remain unmeasured. This supersedes the earlier unresolved-cast-index limitation, without changing native rates.
+
+Optional --cadences accepts a strictly shaped JSON document with schemaVersion1,
+scope authored-cadence-assumptions-not-measured-frequency and an abilities array. Each entry requires classId,
+abilityId, assumedUseIntervalMilliseconds and a nonempty reason (at most240 UTF-8 bytes, no control characters).
+Only known ranked draft identities are accepted; duplicate identities, extra keys and invalid intervals fail.
+A cadence replaces the common assumption for that ability, while raw base/recovery minima still apply.
+The proposal records the reason, assumption source and input file hash. No measured-frequency claim or
+approval is inferred. Leaving the option absent preserves the common five-second assumption.
+
+For example, an authoring input can express a situational Lava Shard assumption:
+
+    {"schemaVersion":1,"scope":"authored-cadence-assumptions-not-measured-frequency","abilities":[{"classId":24,"abilityId":803950,"assumedUseIntervalMilliseconds":10000,"reason":"Illustrative authoring assumption; ordinary rotation frequency has not been measured."}]}
+
+This example is not approved class tuning and is not installed. A slow cadence can produce a transition outside
+the target window when integer uses cannot meet it; the export counts and retains those cases for review.
