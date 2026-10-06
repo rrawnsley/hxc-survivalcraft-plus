@@ -94,6 +94,11 @@ def review_queues(draft):
                'control-effect-attribution-review': 'control-effect-attribution-and-meaningful-use',
                'unknown-raw-aura-review': 'unknown-aura', 'unknown-raw-effect-review': 'unknown-effect'}
     queues = {mapping[trait] for trait in traits if trait in mapping}
+    trigger_summary = draft.get('rawTriggerReferenceSummary', {})
+    if trigger_summary.get('rootsWithDetectedCycles'):
+        queues.add('cyclic-raw-trigger-reference-execution-review')
+    if trigger_summary.get('incompleteRootSpellIds'):
+        queues.add('incomplete-raw-trigger-reference-review')
     if len(draft['ranks']) == 1:
         queues.add('unranked-mastery-or-fixed-design')
     if set(routes) & {'interrupt', 'dispel', 'steal'}:
@@ -162,6 +167,7 @@ def build_coverage(drafts, declarations):
                          for rank in draft['ranks']],
                      'candidateOutcomeRoutes': draft['candidateOutcomeRoutes'],
                      'candidatePeriodicOutcomeRoutes': draft.get('candidatePeriodicOutcomeRoutes', []),
+                     'rawTriggerReferenceSummary': draft.get('rawTriggerReferenceSummary'),
                      'actionTraits': draft['actionTraits'], 'requiredReviews': draft['requiredReviews'],
                      'reviewFlags': draft['reviewFlags'],
                      'pendingReviewQueues': [] if declaration or baseline else review_queues(draft),

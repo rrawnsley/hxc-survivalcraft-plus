@@ -2976,3 +2976,22 @@ compilation of the refinement is tracked separately. No tests, startup, player m
 Frozen-policy refinement source2/native30.2s passed at .cache/verify-all/20261006-163946/report.json.
 C++ style/whitespace and99-source exports passed; existing trainer header reproduced with no rewrite.
 Unit/harness/gameplay skipped. No tests, startup, actual saved-row conversion, deployment or production change.
+
+## Bounded raw helper-reference review — 6 October 2026
+
+Catalog discovery follows raw trigger fields with limits64 nodes/192 edges/depth8 per root.
+Raw references include inactive effect slots and are not a prediction of executed casts, outcomes,
+proc frequency, runtime recursion or practice eligibility. Exact raw nodes share current Spell.dbc
+provenance; missing/invalid metadata and limit exhaustion remain explicitly incomplete.
+Depth-first back-edge detection reports encountered cycle paths, not an exhaustive cycle enumeration.
+
+Actual export:3044 roots,9841 raw nodes,73 roots with detected cycles,9 incomplete roots.
+Five source-consistent ability groups require cyclic-reference review: Brand of the Damned, Titanstrike,
+Reliquary of the Lost, Soul Capture and Soul Collector. One is already a native Fixed development
+profile; four still lack definitions. Soul Capture includes500363→805077→805078→500363.
+This is raw resource-helper evidence, not a confirmed live recursion defect. Soul Shock includes
+801260/Babify with native raw HEAL_PCT against target6; its attribution still requires loaded/script review.
+
+Source review165334 passed2 checks. Native sources unchanged from163946; no redundant build.
+205 definitions,126 baselines,519 missing definitions and850 runtime-unqualified groups unchanged.
+No tests, native startup, migration execution, active-client changes or deployment.

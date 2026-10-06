@@ -187,6 +187,21 @@ def build_drafts(candidates, root):
         raise ValueError('Unsupported candidate artifact')
     passive_classes = reviewed_passive_baseline_classes(root)
     passive_drafts = {spell: set() for spell in passive_classes}
+    trigger_review = candidates.get('rawTriggerReferenceReview')
+    if (not isinstance(trigger_review, dict) or trigger_review.get('dbcOrigin') != candidates.get('dbcOrigin')
+            or trigger_review.get('scope') != 'raw-dbc-references-not-executed-casts-or-practice-eligibility'
+            or trigger_review.get('requiresLoadedDataScriptAndOriginalCastQualification') is not True
+            or not isinstance(trigger_review.get('graphs'), list)):
+        raise ValueError('Missing raw trigger-reference review')
+    trigger_graphs = {}
+    for graph in trigger_review['graphs']:
+        spell = graph.get('rootSpellId')
+        if (type(spell) is not int or not 1 <= spell <= 4294967295 or spell in trigger_graphs
+                or graph.get('runtimeQualified') is not False
+                or not isinstance(graph.get('detectedCyclePaths'), list)
+                or not isinstance(graph.get('incompleteReasons'), list)):
+            raise ValueError('Invalid or duplicate raw trigger-reference graph')
+        trigger_graphs[spell] = graph
     drafts = []
     identities = set()
     for candidate in candidates['candidates']:
@@ -279,6 +294,21 @@ def build_drafts(candidates, root):
             raise ValueError('Invalid candidate periodic outcome routes')
         required = ['effective-data', 'classification', 'acquisition-ownership', 'meaningful-outcome',
                     'practice-rates-and-caps', 'persistence-and-migration', 'menu-and-gameplay-qualification']
+        raw_graphs = [trigger_graphs[rank['spellId']] for rank in ranks if rank['spellId'] in trigger_graphs]
+        trigger_summary = {
+            'rootSpellIds': [graph['rootSpellId'] for graph in raw_graphs],
+            'rootsWithDetectedCycles': [graph['rootSpellId'] for graph in raw_graphs
+                                       if graph['detectedCyclePaths']],
+            'incompleteRootSpellIds': [graph['rootSpellId'] for graph in raw_graphs
+                                       if graph['incompleteReasons']],
+            'runtimeQualified': False,
+        }
+        if raw_graphs:
+            required.append('trigger-reference-loaded-data-script-and-original-cast-attribution')
+        if trigger_summary['rootsWithDetectedCycles']:
+            required.append('cyclic-raw-trigger-reference-execution-review')
+        if trigger_summary['incompleteRootSpellIds']:
+            required.append('incomplete-raw-trigger-reference-review')
         if candidate.get('nativeOutcomeReview', {}).get('directLeechReview', {}).get('commonRoutes'):
             required.append('original-health-leech-damage-attribution')
         if periodic:
@@ -299,6 +329,7 @@ def build_drafts(candidates, root):
                                       'native-combat-baseline-remains-native')} if baseline else None,
                        'candidateOutcomeRoutes': list(routes),
                        'candidatePeriodicOutcomeRoutes': list(periodic), 'ranks': ranks,
+                       'rawTriggerReferenceSummary': trigger_summary,
                        'proficiencyCaps': [], 'trainingBands': [], 'masteryRewards': [],
                        'reviewFlags': list(candidate['reviewFlags']),
                        'actionTraits': list(candidate['rawActionReview']['traits']),

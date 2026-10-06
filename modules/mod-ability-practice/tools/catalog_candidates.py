@@ -11,6 +11,9 @@ DIRECT_ROUTES = {'damage': {2, 17, 31, 58, 121}, 'healing': {10, 67, 136}}
 OUTCOME_ROUTES = {**DIRECT_ROUTES, 'interrupt': {68}, 'dispel': {38}, 'steal': {126}}
 PERIODIC_ROUTES = {'damage': {3, 53, 89}, 'healing': {8}}
 CONTROL_ROUTES = {'fear': {7}, 'stun': {12}, 'root': {26}}
+TRIGGER_NODE_LIMIT = 64
+TRIGGER_EDGE_LIMIT = 192
+TRIGGER_DEPTH_LIMIT = 8
 DEPRECATED_WORD = re.compile(r'(?<![a-z0-9_])(?:deprecated|depreacated)(?![a-z0-9_])', re.IGNORECASE | re.ASCII)
 
 
@@ -68,6 +71,102 @@ def action_review(members):
             timing.append({'spellId': member['spellId'], **raw['castProfile']})
     return {'traits': sorted(traits), 'triggerSpellIds': sorted(triggers), 'castProfiles': timing,
             'scope': 'raw-action-routing-review-not-runtime-qualification'}
+
+
+def annotate_trigger_references(result, lookup, origin):
+    if origin != result.get('dbcOrigin'):
+        raise ValueError('Trigger-reference DBC provenance differs from candidate inventory')
+    nodes, graphs = {}, {}
+
+    def node(spell):
+        if spell not in nodes:
+            nodes[spell] = lookup(spell)
+        return nodes[spell]
+
+    def edges(spell):
+        raw = node(spell)
+        if not raw or raw.get('fieldErrors'):
+            return None
+        details = raw.get('effectDetails')
+        if not isinstance(details, list) or len(details) != 3 or any(
+                not isinstance(slot, dict) or slot.get('index') != index
+                or any(type(slot.get(field)) is not int or slot[field] < 0 for field in
+                       ('effectId', 'auraId', 'implicitTargetA', 'implicitTargetB', 'triggerSpellId'))
+                for index, slot in enumerate(details)):
+            return None
+        return [{'fromSpellId': spell, 'effectIndex': slot['index'], 'toSpellId': slot['triggerSpellId'],
+                 'hasRawEffect': slot['effectId'] != 0} for slot in details if slot['triggerSpellId']]
+
+    def graph(root):
+        queue, visited, links, issues = [(root, 0)], {root}, [], set()
+        for spell, depth in queue:
+            outgoing = edges(spell)
+            if outgoing is None:
+                issues.add('missing-or-invalid-raw-reference-node')
+                continue
+            for link in outgoing:
+                if len(links) == TRIGGER_EDGE_LIMIT:
+                    issues.add('edge-limit-reached')
+                    break
+                links.append(link)
+                target = link['toSpellId']
+                if target in visited:
+                    continue
+                if depth == TRIGGER_DEPTH_LIMIT:
+                    issues.add('depth-limit-reached')
+                elif len(visited) == TRIGGER_NODE_LIMIT:
+                    issues.add('node-limit-reached')
+                else:
+                    visited.add(target)
+                    queue.append((target, depth + 1))
+        adjacency = defaultdict(set)
+        for link in links:
+            if link['toSpellId'] in visited:
+                adjacency[link['fromSpellId']].add(link['toSpellId'])
+        state, path, cycles = {}, [], []
+
+        def visit(spell):
+            state[spell] = 1
+            path.append(spell)
+            for target in sorted(adjacency[spell]):
+                if state.get(target) == 1:
+                    cycles.append(path[path.index(target):] + [target])
+                elif not state.get(target):
+                    visit(target)
+            path.pop()
+            state[spell] = 2
+
+        visit(root)
+        return {'rootSpellId': root, 'nodeSpellIds': sorted(visited), 'references': links,
+                'detectedCyclePaths': cycles, 'incompleteReasons': sorted(issues),
+                'status': 'incomplete-raw-reference-graph' if issues else 'complete-raw-reference-graph',
+                'runtimeQualified': False}
+
+    for candidate in result['candidates']:
+        roots = []
+        for member in candidate['members']:
+            spell = member['spellId']
+            outgoing = edges(spell)
+            if not outgoing:
+                continue
+            roots.append(spell)
+            if spell not in graphs:
+                graphs[spell] = graph(spell)
+        candidate['rawTriggerReferenceGraphIds'] = sorted(roots)
+    result['rawTriggerReferenceReview'] = {
+        'scope': 'raw-dbc-references-not-executed-casts-or-practice-eligibility', 'dbcOrigin': origin,
+        'limits': {'nodesPerRoot': TRIGGER_NODE_LIMIT, 'edgesPerRoot': TRIGGER_EDGE_LIMIT,
+                   'depthPerRoot': TRIGGER_DEPTH_LIMIT},
+        'nodes': [{'spellId': spell, 'rawDbc': raw} for spell, raw in sorted(nodes.items())],
+        'graphs': [graphs[spell] for spell in sorted(graphs)],
+        'requiresLoadedDataScriptAndOriginalCastQualification': True,
+    }
+    result['summary']['rawTriggerReferenceReview'] = {
+        'rootCount': len(graphs), 'nodeCount': len(nodes),
+        'rootsWithDetectedCycles': sum(bool(row['detectedCyclePaths']) for row in graphs.values()),
+        'incompleteRoots': sum(bool(row['incompleteReasons']) for row in graphs.values()),
+        'runtimeQualifiedCount': 0,
+    }
 
 
 def raw_periodic_auras(raw, effects):
@@ -578,6 +677,9 @@ def main():
                          'src/server/game/Entities/Unit/Unit.h', 'src/server/game/Entities/Unit/Unit.cpp',
                          'src/server/shared/SharedDefines.h')]
     if args.dbc:
+        from inventory import load_dbc_lookup
+        spell_lookup, spell_origin = load_dbc_lookup(args.root, args.dbc)
+        annotate_trigger_references(result, spell_lookup, spell_origin)
         lookup, sources = load_acquisition_lookup(args.root, args.dbc)
         annotate_acquisition(result, lookup, sources)
         from trainer_acquisition_review import build_review, rift_mappings, source_trainers
