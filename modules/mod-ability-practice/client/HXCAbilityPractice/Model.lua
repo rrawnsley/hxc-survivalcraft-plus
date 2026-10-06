@@ -186,7 +186,7 @@ local function Ability(value, schema, characterLevel)
             or (value.route == 13 and (value.kind ~= 1 or (value.ruleSet ~= 1 and value.ruleSet ~= 4)))
             or ((value.kind == 3) ~= (value.route == 6)) then return nil end
         if value.route == 13 then
-            if not Integer(value.buffState, 1, 4) then return nil end
+            if not Integer(value.buffState, 1, 5) then return nil end
         elseif value.buffState ~= nil then return nil end
         if value.replacementSpellId ~= nil then
             if not Integer(value.replacementSpellId, 1, 4294967295) or value.availability ~= 2 then return nil end
@@ -553,7 +553,8 @@ function Model.BuffStateText(ability, saved)
         [1] = "Cast your own buff to earn practice.",
         [2] = "Reapply your buff to earn practice.",
         [3] = "Your buff is ready for qualifying combat casts.",
-        [4] = "Buff practice requirements are unavailable."
+        [4] = "Buff practice requirements are unavailable.",
+        [5] = "A stronger buff or inactive effect is blocking practice."
     }
     local text = states[ability.buffState]
     if ability.buffState == 3 and ability.availability == 5 then
@@ -578,6 +579,8 @@ function Model.PracticeRules(ability, saved)
         [13] = "Keep your own Brutal Shout active on yourself and use learned abilities that deal direct damage"
             .. " to a level-appropriate PvE opponent or restore missing health in a qualifying PvE fight."
             .. " Your owned buff must be valid when the combat cast begins and when its result qualifies."
+            .. " Its stat effect must be active and positive; a stronger exclusive effect prevents practice."
+            .. " Equal-strength exclusive effects remain eligible."
             .. " One combat cast can earn one use for this buff, with at least five seconds between counted uses."
             .. " Applying or refreshing the buff, auto-attacks and triggered helper spells earn no buff practice."
             .. " Other players' actions do not count. Reapply your buff after login or a class or specialization change.",

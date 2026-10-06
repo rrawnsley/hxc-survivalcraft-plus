@@ -3200,3 +3200,24 @@ and the result hook runs after aura application. This is source evidence, not ru
 Source2/native36.9s passed .cache/verify-all/20261006-202502/report.json, C++ style/whitespace,
 105-source exports and five Lua5.1 syntax parses passed. No tests/chunk execution/startup/gameplay,
 active-client installation or production changes. All flags0; addon0.4.37/protocol4 unchanged.
+
+## Effective owned buff eligibility — 6 October 2026
+
+The shared menu/award resolver requires a live self-owned aura application with effect0 applied,
+no pending removal, and a positive MOD_STAT amount. Native exclusive same-effect group queries
+check the current competing magnitude using the same stat selector as the native stat handler.
+A strictly stronger competing exclusive effect pauses practice. Equal-strength effects remain
+eligible for practice, preventing duplicate group buffs from blocking ordinary cooperation; this
+is an authored practice rule, not a claim that each equal aura adds another native stat bonus.
+Native buff power and stacking remain unchanged. Original ownership and cast-start/result checks
+still apply. No actor/world pointers are retained, and the comparison uses signed64 magnitude.
+
+Typed Q readiness now accepts state5 Suppressed. Menu/help explicitly identify stronger competition
+or an inactive/nonpositive effect. Matching unpublished addon0.4.38-development/protocol4 is required;
+earlier typed clients can reject the new state when it appears. The optional buff design choice
+remains a reversible development assumption. No additional buffs were enrolled.
+
+Source2/native31.6s passed .cache/verify-all/20261006-203259/report.json. C++ style/whitespace,
+105-source exports and five Lua5.1 syntax parses passed. An initial export duplicate provenance
+entry was rejected and removed; final exports passed. No tests, addon execution, native startup,
+actual stacking/gameplay/menu qualification, active-client install or production changes. All flags0.

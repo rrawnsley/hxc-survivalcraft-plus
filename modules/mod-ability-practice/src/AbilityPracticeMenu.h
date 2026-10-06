@@ -159,7 +159,8 @@ enum class BuffPracticeState : std::uint32_t
     Inactive = 1,
     Reapply = 2,
     Ready = 3,
-    Unavailable = 4
+    Unavailable = 4,
+    Suppressed = 5
 };
 
 struct CatchupView

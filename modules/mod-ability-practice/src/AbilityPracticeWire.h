@@ -296,7 +296,7 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
                 return std::nullopt;
             if (view.BuffState)
             {
-                if (*view.BuffState < BuffPracticeState::Inactive || *view.BuffState > BuffPracticeState::Unavailable)
+                if (*view.BuffState < BuffPracticeState::Inactive || *view.BuffState > BuffPracticeState::Suppressed)
                     return std::nullopt;
                 lines.push_back(Detail::WireLine('Q', revision, index + 1,
                     static_cast<std::uint32_t>(*view.BuffState)));

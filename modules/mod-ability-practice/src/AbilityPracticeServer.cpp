@@ -43,6 +43,7 @@
 #include "ScriptMgr.h"
 #include "Spell.h"
 #include "SpellAuras.h"
+#include "SpellAuraEffects.h"
 #include "SpellMgr.h"
 #include "Trainer.h"
 #include "World.h"
@@ -1026,6 +1027,20 @@ bool IsBuffObserver(Player const* player)
     return profile && Practice::DevelopmentBuffs::IsBrutalShout(*profile);
 }
 
+bool EffectiveBuffApplication(Player* player, AuraApplication const& application)
+{
+    if (application.GetRemoveMode() != AURA_REMOVE_NONE || !application.HasEffect(EFFECT_0) ||
+        application.GetBase()->IsRemoved())
+        return false;
+    AuraEffect const* effect = application.GetBase()->GetEffect(EFFECT_0);
+    if (!effect || effect->GetAuraType() != SPELL_AURA_MOD_STAT || effect->GetAmount() <= 0)
+        return false;
+    std::int64_t const competing = player->GetHighestExclusiveSameEffectSpellGroupValue(
+        effect, SPELL_AURA_MOD_STAT, true, effect->GetMiscValue());
+    std::int64_t const magnitude = competing < 0 ? -competing : competing;
+    return magnitude <= effect->GetAmount();
+}
+
 SpellInfo const* AcceptedBuffSpell(Player* player, MenuSession const& session,
     Practice::AbilityProfile const& profile)
 {
@@ -1035,8 +1050,9 @@ SpellInfo const* AcceptedBuffSpell(Player* player, MenuSession const& session,
         std::none_of(profile.Definition.Ranks.begin(), profile.Definition.Ranks.end(),
             [&origin](Practice::AbilityRank const& rank) { return rank.SpellId == origin->SpellId; }))
         return nullptr;
-    Aura* aura = player->GetAura(origin->SpellId, player->GetGUID());
-    return aura && !aura->IsRemoved() && aura->GetPracticeCast() == origin ?
+    AuraApplication* application = player->GetAuraApplication(origin->SpellId, player->GetGUID());
+    return application && EffectiveBuffApplication(player, *application) &&
+        application->GetBase()->GetPracticeCast() == origin ?
         sSpellMgr->GetSpellInfo(origin->SpellId) : nullptr;
 }
 
@@ -1050,8 +1066,10 @@ Practice::BuffPracticeState BuffStateFor(Player* player, MenuSession const& sess
     if (AcceptedBuffSpell(player, session, profile))
         return Practice::BuffPracticeState::Ready;
     for (auto const& rank : profile.Definition.Ranks)
-        if (Aura* aura = player->GetAura(rank.SpellId, player->GetGUID()); aura && !aura->IsRemoved())
-            return Practice::BuffPracticeState::Reapply;
+        if (AuraApplication* application = player->GetAuraApplication(rank.SpellId, player->GetGUID());
+            application && !application->GetBase()->IsRemoved() && application->GetRemoveMode() == AURA_REMOVE_NONE)
+            return EffectiveBuffApplication(player, *application) ?
+                Practice::BuffPracticeState::Reapply : Practice::BuffPracticeState::Suppressed;
     return Practice::BuffPracticeState::Inactive;
 }
 

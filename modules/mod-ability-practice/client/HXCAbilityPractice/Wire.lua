@@ -190,7 +190,7 @@ local function Accept(message, now, currentRevision, currentGeneration)
     if kind == "Q" then
         local state = tonumber(fields[4])
         if pending.schemaVersion ~= 4 or part.Q or #fields ~= 4 or not state
-            or state < 1 or state > 4 or state % 1 ~= 0 then return Reject("Invalid buff practice state") end
+            or state < 1 or state > 5 or state % 1 ~= 0 then return Reject("Invalid buff practice state") end
         part.Q = state
         return nil
     end
