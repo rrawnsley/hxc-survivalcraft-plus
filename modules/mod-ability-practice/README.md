@@ -2315,3 +2315,24 @@ ability labels. Fixed abilities still show no practice bars, uses or proficiency
 Source report .cache/verify-all/20261006-042326/report.json passed(two checks). Five Lua5.1 files compiled for
 syntax only; no addon chunks executed. A transient edit encoding error was repaired before this final check.
 Native code unchanged from passing042125 build. Client rendering remains unqualified; no active client changes.
+
+## Broader resurrection utility rank definitions
+
+The optional fixed catalog adds twelve explicit native resurrection ladders/77 ranks: Reclaim Soul(class13),
+Do Over/Resynchronize(22), Call of The Scourge(23), Phoenix Rebirth(24), Ritual of Awakening(25), Tidal Rebirth(26),
+Revivify(27), Defibrillate(28), Prayer Beads/Spawn(29) and Return to Life(31). Each selected source ladder was
+consistent and every raw rank nonpassive with exactly effect113/0/0. Native EffectResurrectNew handles dead
+player resurrection requests. Mixed resurrection/aura/self-resurrection candidates remain pending; this is
+explicit selection, not automatic classification by a name or a single effect anywhere in a chain.
+
+All requirements are proficiency1 with no practice cap/rate/award/reward, and rank acquisition remains native.
+Existing restored health/mana, targeting, cooldowns, script behavior and class grants are unchanged. New entries
+remain behind the existing startup-only/defaultoff fixed-catalog flag and explicit selected humans; no production
+configuration changed. Effective-data/startup/gameplay classification remains unqualified.
+
+Coverage now136 unique profiles/138 declarations(118 practiced ranked,3 mastery,15 fixed),59 baseline exclusions
+and652 groups needing definitions(113 ranked/539 standalone) across847 source groups. All remain unqualified.
+Fixed ladders are excluded from pacing:231 proposals/1343 transitions;118 native pacing entries unchanged.
+71-source exports refreshed and pacing header reproduced identically.
+VERIFY ALL PASSED .cache/verify-all/20261006-042456/report.json: source(two checks), native build37.9s.
+C++ style/whitespace passed. No tests/addon execution/native startup or production operations occurred.
