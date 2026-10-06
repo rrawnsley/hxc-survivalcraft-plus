@@ -3278,3 +3278,30 @@ their preceding pacing reproduced unchanged. Initial exports rejected stale tool
 an overly narrow source-level bound; final exports account for native levels above80 without
 claiming they can currently be learned. Source2 passed205236 with no selected suites; native
 unchanged from204851. No tests, native/client execution or production operations.
+
+## Native lock utility roadmap — 6 October 2026
+
+Class12 Smash Lock570122 and class24 Melt Lock804662 appear as Fixed utilities at their native
+level16 introductions when the disabled utility roadmap is selected. Both are active unranked
+OPEN_LOCK33 on gameobject/item target26, lock type1, no aura/helper/secondary effects. Loaded
+metadata validation additionally checks signed MiscValue and BasePoints across all three slots:
+Smash4 and Melt14 in slot0, zero elsewhere. Existing utilities leave these new optional value
+checks unset. Source drafts reject changed class/rank/introduction/raw lock shapes.
+
+Native CanOpenLock matches lock type, key and required skill, resolves SkillByLockType to the
+native skill and uses existing spell skill bonuses. EffectOpenLock performs native loot/unlock
+and only grows an already-known skill under its existing conditions; item casts do not grow it,
+and gameobject skill-up tracking prevents repeated growth before respawn. None of these native
+rules, bonuses, acquisition or player skills changed. The roadmap adds no separate use counter,
+practice gate, automatic learning or mastery benefit. Tinker's Pick Lock804154 has a triggered
+helper71495 and remains outside this enrollment pending its own source/effective review.
+
+212 unique development profiles/214 declarations include82 Fixed,123 ranked and7 mastery;
+491 pending groups remain(103 ranked/388 standalone).147 baseline exclusions,106 source hashes
+and850 runtime-unqualified groups. All passively flagged source grants were already classified
+as baseline or Fixed; no passive profiles were added during this continuation.
+
+VERIFY ALL: PASSED .cache/verify-all/20261006-210035/report.json: source2 with no selected suites,
+native31.9s. C++ style/whitespace and actual source/coverage exports passed. No tests, native
+startup, lock/skill/menu gameplay execution, client install, deployment or production changes.
+Addon0.4.39-development/protocol4 unchanged; all development switches remain0.

@@ -6,6 +6,8 @@
 #include "AbilityPracticeDevelopment.h"
 #include "AbilityPracticeProfiles.h"
 
+#include <optional>
+
 namespace AbilityPractice::DevelopmentUtilityFixed
 {
 inline constexpr std::array Class13Ability806240 = { AbilityRank{ 806240, 1, { 16, 1 } } };
@@ -31,6 +33,8 @@ inline constexpr std::array Class32Ability803679 = { AbilityRank{ 803679, 1, { 2
 
 inline constexpr std::array Myotoxin = { AbilityRank{ 572304, 1, { 40, 1 } } };
 inline constexpr std::array Antivenom = { AbilityRank{ 800905, 1, { 16, 1 } } };
+inline constexpr std::array SmashLock = { AbilityRank{ 570122, 1, { 16, 1 } } };
+inline constexpr std::array MeltLock = { AbilityRank{ 804662, 1, { 16, 1 } } };
 
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -76,7 +80,11 @@ inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 29, 572304, AbilityKind::Fixed, Myotoxin, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
-        { 29, 800905, AbilityKind::Fixed, Antivenom, {} }, Development::Policy, OutcomeKind::None }
+        { 29, 800905, AbilityKind::Fixed, Antivenom, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 12, 570122, AbilityKind::Fixed, SmashLock, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 24, 804662, AbilityKind::Fixed, MeltLock, {} }, Development::Policy, OutcomeKind::None }
 };
 
 struct Mechanic
@@ -88,6 +96,8 @@ struct Mechanic
     std::array<std::uint32_t, 3> TargetBIds;
     std::array<std::uint32_t, 3> AuraIds = {};
     std::array<std::uint32_t, 3> TriggerSpellIds = {};
+    std::optional<std::array<std::int32_t, 3>> MiscValues;
+    std::optional<std::array<std::int32_t, 3>> BasePoints;
 };
 
 inline constexpr std::array Mechanics = {
@@ -112,7 +122,11 @@ inline constexpr std::array Mechanics = {
     Mechanic{ 32, 800995, { 68, 0, 0 }, { 6, 0, 0 }, { 0, 0, 0 } },
     Mechanic{ 32, 803679, { 38, 38, 0 }, { 16, 31, 0 }, { 0, 0, 0 } },
     Mechanic{ 29, 572304, { 38, 6, 0 }, { 6, 6, 0 }, {}, { 0, 23, 0 }, { 0, 572407, 0 } },
-    Mechanic{ 29, 800905, { 6, 38, 0 }, { 21, 21, 0 }, {}, { 23, 0, 0 }, { 803680, 0, 0 } }
+    Mechanic{ 29, 800905, { 6, 38, 0 }, { 21, 21, 0 }, {}, { 23, 0, 0 }, { 803680, 0, 0 } },
+    Mechanic{ 12, 570122, { 33, 0, 0 }, { 26, 0, 0 }, {}, {}, {},
+        std::array<std::int32_t, 3>{ 1, 0, 0 }, std::array<std::int32_t, 3>{ 4, 0, 0 } },
+    Mechanic{ 24, 804662, { 33, 0, 0 }, { 26, 0, 0 }, {}, {}, {},
+        std::array<std::int32_t, 3>{ 1, 0, 0 }, std::array<std::int32_t, 3>{ 14, 0, 0 } }
 };
 
 struct HelperMechanic

@@ -335,6 +335,18 @@ def build_drafts(candidates, root):
                              'soul-capture-corpse-resource-and-post-combat-use-design'])
         if class_id == 19 and ability_id == 806521:
             required.append('titanstrike-loaded-aura-duration-helper-and-original-leech-damage')
+        if (class_id, ability_id) in {(12, 570122), (24, 804662)}:
+            raw = members[ability_id].get('rawDbc', {})
+            details = raw.get('effectDetails', [])
+            base_points = 4 if ability_id == 570122 else 14
+            expected = [(33, 0, 26, 0, 0, 1, base_points), (0, 0, 0, 0, 0, 0, 0),
+                        (0, 0, 0, 0, 0, 0, 0)]
+            if (len(ranks) != 1 or ranks[0]['characterLevel'] != 16 or raw.get('passive') is not False or
+                    raw.get('rankLabel') or len(details) != 3 or [(v.get('effectId'), v.get('auraId'),
+                        v.get('implicitTargetA'), v.get('implicitTargetB'), v.get('triggerSpellId'),
+                        v.get('miscValue'), v.get('basePoints')) for v in details] != expected):
+                raise ValueError('Reviewed lock utility source/raw evidence changed')
+            required.append('native-lock-requirements-and-existing-skill-progression-preserved')
         if class_id == 12 and ability_id == 300857:
             required.extend(['owned-buff-original-application-and-combat-cast-contribution',
                              'buff-contribution-five-second-cadence-and-per-cast-deduplication',

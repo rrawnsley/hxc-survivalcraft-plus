@@ -792,6 +792,9 @@ bool MatchesUtilityFixedMechanic(Practice::AbilityProfile const& profile)
             effect.TargetA.GetTarget() != mechanic->TargetAIds[index] ||
             effect.TargetB.GetTarget() != mechanic->TargetBIds[index])
             return false;
+        if ((mechanic->MiscValues && effect.MiscValue != (*mechanic->MiscValues)[index]) ||
+            (mechanic->BasePoints && effect.BasePoints != (*mechanic->BasePoints)[index]))
+            return false;
         if (!effect.TriggerSpell)
             continue;
         auto const& helpers = Practice::DevelopmentUtilityFixed::Helpers;
