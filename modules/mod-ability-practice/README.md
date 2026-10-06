@@ -2839,3 +2839,26 @@ unqualified groups and96 native source hashes. All native pacing headers reprodu
 
 Source2 and29.3-second native build passed at .cache/verify-all/20261006-154426/report.json; C++ style and
 whitespace passed. Unit/harness/gameplay skipped. No tests, startup, client, database or production operation.
+
+## Reviewed native class passive roadmap
+
+Default-off AbilityPractice.AllowDevelopmentPassiveFixedCatalog adds six singleton Fixed menu definitions:
+Barbaric Rage12/804337 at2, Fel Finesse14/520591 at20, Bloodrider17/704964 at50, Disciple of Shadra29/503907
+at10, Spirit Walker30/561082 at14 and Improved Ghost Form30/807084 at40. They keep native class grants,
+full effects and unlock levels, without practice counters, proficiency gates, saved rows or mastery bonuses.
+Fixed learning remains Unmanaged; the module does not automatically teach these passives.
+
+Startup requires exact authored definitions, native class acquisition and existing rank checks. Each loaded
+spell must remain passive and match its reviewed self-targeted APPLY_AURA slots, exact aura IDs and no trigger
+or additional target/effect. Bloodrider has two aura108 slots; the others have one aura107,144 or4 as authored.
+This checks individually reviewed shapes and does not approve every passive or change any class script.
+
+The existing fixed menu shows native learned status and upcoming character introduction without use forecasts.
+No client/protocol/version change is required.97-source exports report164 unique profiles/166 declarations
+(120 ranked/7 mastery/37 fixed),126 baselines and560 missing definitions (106 ranked/454 standalone) among850
+runtime-unqualified groups. Seven other passive groups remain under individual review. Native loaded-data and
+player/menu behavior still need isolated qualification; actual script integration is not proven by compilation.
+
+Six-entry passive roadmap source2/native75.3s passed at .cache/verify-all/20261006-154908/report.json, with
+no compiler warning/error in that build log. C++ style/whitespace and source exports passed; unit/harness/gameplay
+skipped. No tests, startup, client chunks, deployment or production operations. All switches remain0.

@@ -81,3 +81,7 @@ AbilityPractice.AllowDevelopmentConjureFixedCatalog = 0
 # Development-only complete trainer-linked rank extensions. Requires rank pacing; startup-only.
 # Selected authored profiles move to definition3 with guarded readable version1/2 migration.
 AbilityPractice.AllowDevelopmentTrainerRankExtensions = 0
+
+# Development-only reviewed class passive roadmap. Startup-only; native grants and full effects remain.
+# No practice counter, proficiency gate, automatic teaching or authored mastery benefit.
+AbilityPractice.AllowDevelopmentPassiveFixedCatalog = 0

@@ -481,6 +481,7 @@ def main():
                 'modules/mod-ability-practice/tools/pacing_drafts.py',
                 'modules/mod-ability-practice/tools/mastery_pacing_drafts.py',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentConjureFixed.h',
+                'modules/mod-ability-practice/src/AbilityPracticeDevelopmentPassiveFixed.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentLeech.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentTrainerFixed.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentTrainerRanks.h',
