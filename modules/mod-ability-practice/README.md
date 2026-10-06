@@ -2720,3 +2720,24 @@ Exports contain93 native source hashes,153 unique profiles/155 declarations/2 sh
 mastery pacing header reproduced unchanged. Source2/style/whitespace and28.7-second native build passed at
 .cache/verify-all/20261006-143217/report.json. Unit/harness/gameplay skipped. No addon/version/protocol change,
 test execution, startup or production change.
+
+## Native item-conjuring utility roadmap
+
+Default-off AbilityPractice.AllowDevelopmentConjureFixedCatalog adds only five explicitly reviewed item-creation
+utilities: Witch Doctor13 Rejuvenating Mojo572747 (5 ranks), Brew Stew807050 (7), Brew Cocktail807070 (7),
+Stormbringer16 Thunder Ale804763 (7), and Necromancer23 Bone Reliquary803766 (5). Their31 total ranks retain exact
+native character unlock levels, acquisition and item creation. Every proficiency requirement stays1; no caps,
+training counter, saved practice row or mastery reward exists. Fixed learning decisions remain Unmanaged so normal
+native class/trainer learning continues; native utility ranks do not require repeat item production.
+
+Startup requires exact authored profiles, native class/rank ladders and all31 loaded spells to be nonpassive pure
+CREATE_ITEM24/0/0 with a nonzero Effect0.ItemType backed by a loaded item template. Native Spell::EffectCreateItem
+uses ItemType, not MiscValue; original spell quantities, reagents, inventory restrictions and produced items are
+untouched. Other conjuration/summon/item mechanics remain under individual review. The existing fixed menu shows
+learned rank, introductory level and upcoming native ranks without an invented use forecast or progress bar.
+
+Source exports:94 native source hashes,158 unique profiles/160 declarations/2 shared (120 ranked/7 mastery/31 fixed),
+123 baselines and569 missing definitions (106 ranked/463 standalone) among850 runtime-unqualified groups. Both
+native pacing headers reproduced unchanged. Source2/C++ style/whitespace and28.6-second native build passed at
+.cache/verify-all/20261006-143657/report.json. Unit/harness/gameplay skipped. No client/version/protocol change,
+tests, startup, database or production operation.

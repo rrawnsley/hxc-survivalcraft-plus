@@ -11,7 +11,7 @@ PROFILE_HEADERS = ('AbilityPracticeDevelopmentRanked.h', 'AbilityPracticeDevelop
                    'AbilityPracticeDevelopmentMastery.h', 'AbilityPracticeDevelopmentHelpers.h',
                    'AbilityPracticeDevelopmentFixed.h', 'AbilityPracticeDevelopmentAbsorption.h',
                    'AbilityPracticeDevelopmentControl.h', 'AbilityPracticeDevelopmentTrainerFixed.h',
-                   'AbilityPracticeDevelopmentLeech.h')
+                   'AbilityPracticeDevelopmentLeech.h', 'AbilityPracticeDevelopmentConjureFixed.h')
 PROFILE_PATTERN = re.compile(
     r'AbilityProfile\s*\{\s*Development::DefinitionVersion,\s*AcquisitionSource::(?:ClassGrant|ClassTrainer),\s*'
     r'\{\s*(\d+),\s*(\d+),\s*AbilityKind::(Ranked|Mastery|Fixed)\s*,\s*([\w:]+)\s*,')

@@ -10,6 +10,7 @@
 #include "AbilityPracticeDevelopmentHelpers.h"
 #include "AbilityPracticeDevelopmentLeech.h"
 #include "AbilityPracticeDevelopmentFixed.h"
+#include "AbilityPracticeDevelopmentConjureFixed.h"
 #include "AbilityPracticeDevelopmentTrainerFixed.h"
 #include "AbilityPracticeDevelopmentAbsorption.h"
 #include "AbilityPracticeDevelopmentControl.h"
@@ -467,6 +468,30 @@ bool MatchesNativeClassGrant(Practice::AbilityProfile const& profile)
                         entry.SpellId == rank.SpellId;
                 }) != 1)
             return false;
+    return true;
+}
+
+bool MatchesConjureFixedMechanic(Practice::AbilityProfile const& profile)
+{
+    auto const& authored = Practice::DevelopmentConjureFixed::Profiles;
+    auto const found = std::find_if(authored.begin(), authored.end(),
+        [&profile](Practice::AbilityProfile const& entry)
+        {
+            return entry.Definition.ClassId == profile.Definition.ClassId &&
+                entry.Definition.AbilityId == profile.Definition.AbilityId;
+        });
+    if (found == authored.end())
+        return true;
+    if (!SameProfile(profile, *found))
+        return false;
+    for (auto const& rank : profile.Definition.Ranks)
+    {
+        SpellInfo const* info = sSpellMgr->GetSpellInfo(rank.SpellId);
+        if (!info || info->IsPassive() || info->Effects[EFFECT_0].Effect != SPELL_EFFECT_CREATE_ITEM ||
+            info->Effects[EFFECT_1].Effect || info->Effects[EFFECT_2].Effect ||
+            !info->Effects[EFFECT_0].ItemType || !sObjectMgr->GetItemTemplate(info->Effects[EFFECT_0].ItemType))
+            return false;
+    }
     return true;
 }
 
@@ -1290,6 +1315,8 @@ public:
         bool const classSamples = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentClassSamples", false);
         bool const rankedCatalog = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentRankedCatalog", false);
         bool const fixedCatalog = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentFixedCatalog", false);
+        bool const conjureFixedCatalog =
+            sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentConjureFixedCatalog", false);
         bool const trainerFixedCatalog =
             sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentTrainerFixedCatalog", false);
         std::span<Practice::AbilityProfile const> const selected =
@@ -1307,6 +1334,8 @@ public:
         bool const absorptionValid = !AbsorptionRequested ||
             AppendProfiles(RuntimeProfiles, Practice::DevelopmentAbsorption::Profiles);
         bool const fixedValid = !fixedCatalog || AppendProfiles(RuntimeProfiles, Practice::DevelopmentFixed::Profiles);
+        bool const conjureFixedValid = !conjureFixedCatalog ||
+            AppendProfiles(RuntimeProfiles, Practice::DevelopmentConjureFixed::Profiles);
         bool const trainerFixedValid = !trainerFixedCatalog ||
             AppendProfiles(RuntimeProfiles, Practice::DevelopmentTrainerFixed::Profiles);
         bool const controlValid = !ControlRequested ||
@@ -1317,7 +1346,7 @@ public:
         ProfileLookup.emplace(profiles);
         Ready = ProfileLookup->IsValid() && periodicValid && masteryValid && helpersValid && fixedValid &&
             absorptionValid && controlValid && pacingValid && masteryPacingValid && trainerFixedValid &&
-            directLeechValid &&
+            directLeechValid && conjureFixedValid &&
             Practice::ValidCatchupSettings(Catchup);
         for (Practice::AbilityProfile const& profile : profiles)
         {
@@ -1331,7 +1360,7 @@ public:
             }
             bool const acquisitionValid = profile.Acquisition == Practice::AcquisitionSource::ClassTrainer ?
                 MatchesNativeClassTrainer(profile) : MatchesNativeClassGrant(profile);
-            if (!acquisitionValid)
+            if (!acquisitionValid || !MatchesConjureFixedMechanic(profile))
             {
                 Ready = false;
                 LOG_ERROR("module.ability_practice", "Rejected native acquisition: class={}, ability={}",

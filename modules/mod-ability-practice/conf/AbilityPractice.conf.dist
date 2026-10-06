@@ -73,3 +73,7 @@ AbilityPractice.AllowDevelopmentMasteryPacing = 0
 # Experimental original direct health-leech damage practice for Bloodbolt. Startup-only.
 # Actual PvE damage earns one shared original-cast use; self healing earns no additional use.
 AbilityPractice.AllowDevelopmentDirectLeech = 0
+
+# Development-only reviewed item-conjuring utilities retain native ranks and learning. Startup-only.
+# Rejuvenating Mojo, Brew Stew/Cocktail, Thunder Ale and Bone Reliquary have no practice counter or gate.
+AbilityPractice.AllowDevelopmentConjureFixedCatalog = 0
