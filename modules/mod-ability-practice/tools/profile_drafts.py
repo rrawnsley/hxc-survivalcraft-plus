@@ -152,7 +152,7 @@ def raw_channel_profile(raw):
     return dict(value)
 
 
-def reviewed_constitution_classes(root):
+def reviewed_passive_baseline_classes(root):
     source = 'src/server/coa/AscensionLiveBaselineData.h'
     text = (root / source).read_text(encoding='utf-8')
     block = re.search(r'array<Spell,\s*315>\s+Spells\s*=\s*\{\{(.*?)\}\};', text, re.S)
@@ -161,11 +161,13 @@ def reviewed_constitution_classes(root):
     rows = re.findall(r'\{\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\}', block[1])
     if len(rows) != 315:
         raise ValueError('Live baseline spell table shape changed')
-    constitution = [(int(class_id), int(race_id)) for class_id, race_id, spell_id in rows
-                    if int(spell_id) == 552011]
-    if sorted(constitution) != [(class_id, 0) for class_id in range(12, 33)]:
-        raise ValueError('Reviewed Constitution class/race baseline evidence changed')
-    return {class_id for class_id, _ in constitution}
+    expected = {552011: set(range(12, 33)), 536213: {13}, 632621: {16}, 28875: {17}}
+    for spell, classes in expected.items():
+        actual = [(int(class_id), int(race_id)) for class_id, race_id, spell_id in rows
+                  if int(spell_id) == spell]
+        if sorted(actual) != [(class_id, 0) for class_id in sorted(classes)]:
+            raise ValueError('Reviewed passive class/race baseline evidence changed: ' + str(spell))
+    return expected
 
 
 def build_drafts(candidates, root):
@@ -175,13 +177,13 @@ def build_drafts(candidates, root):
     if not baseline_match:
         raise ValueError('Missing reviewed native baseline list')
     baseline_ids = [int(value.strip()) for value in baseline_match[1].split(',')]
-    if baseline_ids != [75, 81, 107, 674, 2764, 3018, 3124, 5019, 552011]:
+    if baseline_ids != [75, 81, 107, 674, 2764, 3018, 3124, 5019, 28875, 536213, 552011, 632621]:
         raise ValueError('Native baseline scope needs explicit authoring review')
     if candidates.get('schemaVersion') != 1 or candidates.get('scope') != (
             'source-review-candidates-not-runtime-definitions'):
         raise ValueError('Unsupported candidate artifact')
-    constitution_classes = reviewed_constitution_classes(root)
-    constitution_drafts = set()
+    passive_classes = reviewed_passive_baseline_classes(root)
+    passive_drafts = {spell: set() for spell in passive_classes}
     drafts = []
     identities = set()
     for candidate in candidates['candidates']:
@@ -243,23 +245,27 @@ def build_drafts(candidates, root):
                           'rawChannelProfile': raw_channel_profile(raw)})
         baseline = ability_id in baseline_ids
         baseline_effects = {75: 58, 81: 20, 107: 23, 674: 40, 2764: 58, 3018: 58, 3124: 22, 5019: 17}
+        passive_effects = {552011: [6, 6, 0], 536213: [6, 0, 0], 632621: [6, 0, 0], 28875: [6, 0, 0]}
         if baseline:
             baseline_raw = members[ability_id].get('rawDbc', {})
             expected_passive = ability_id not in {75, 2764, 3018, 5019}
             if (len(ranks) != 1 or ranks[0]['characterLevel'] != 1 or
                     baseline_raw.get('passive') is not expected_passive or
-                    baseline_raw.get('effects') != ([6, 6, 0] if ability_id == 552011 else
-                                                    [baseline_effects[ability_id], 0, 0])):
+                    baseline_raw.get('effects') != (passive_effects[ability_id] if ability_id in passive_effects
+                                                    else [baseline_effects[ability_id], 0, 0])):
                 raise ValueError('Native baseline raw/source evidence changed')
-            if ability_id == 552011:
+            if ability_id in passive_classes:
                 details = baseline_raw.get('effectDetails', [])
-                expected = [(6, 108, 1, 0, 0), (6, 108, 1, 0, 0), (0, 0, 0, 0, 0)]
-                if (class_id not in constitution_classes or len(details) != 3 or
+                expected = ([(6, 108, 1, 0, 0), (6, 108, 1, 0, 0), (0, 0, 0, 0, 0)] if ability_id == 552011
+                            else [(6, 98, 1, 0, 0), (0, 0, 0, 0, 0), (0, 0, 0, 0, 0)])
+                native_level = 1 if ability_id == 552011 else 0
+                if (class_id not in passive_classes[ability_id] or len(details) != 3 or
                         [(v.get('effectId'), v.get('auraId'), v.get('implicitTargetA'),
                           v.get('implicitTargetB'), v.get('triggerSpellId')) for v in details] != expected or
-                        baseline_raw.get('baseLevel') != 1 or baseline_raw.get('spellLevel') != 1):
-                    raise ValueError('Reviewed Constitution raw passive baseline evidence changed')
-                constitution_drafts.add(class_id)
+                        baseline_raw.get('baseLevel') != native_level or
+                        baseline_raw.get('spellLevel') != native_level):
+                    raise ValueError('Reviewed raw passive baseline evidence changed: ' + str(ability_id))
+                passive_drafts[ability_id].add(class_id)
         routes = candidate.get('nativeOutcomeReview', {}).get('commonRoutes', [])
         if not isinstance(routes, list) or len(set(routes)) != len(routes) or any(route not in {
                 'damage', 'healing', 'interrupt', 'dispel', 'steal', 'fear', 'stun', 'root'} for route in routes):
@@ -286,7 +292,7 @@ def build_drafts(candidates, root):
                                             'class-grant-source-evidence', 'productionApproved': False,
                        'kind': None, 'outcome': None,
                        'nativeBaselineExclusion': {'source': baseline_source,
-                           'reason': ('native-passive-baseline-remains-native' if ability_id == 552011 else
+                           'reason': ('native-passive-baseline-remains-native' if ability_id in passive_classes else
                                       'native-combat-baseline-remains-native')} if baseline else None,
                        'candidateOutcomeRoutes': list(routes),
                        'candidatePeriodicOutcomeRoutes': list(periodic), 'ranks': ranks,
@@ -294,8 +300,8 @@ def build_drafts(candidates, root):
                        'reviewFlags': list(candidate['reviewFlags']),
                        'actionTraits': list(candidate['rawActionReview']['traits']),
                        'requiredReviews': required})
-    if constitution_drafts != constitution_classes:
-        raise ValueError('Reviewed Constitution class grants are incomplete')
+    if passive_drafts != passive_classes:
+        raise ValueError('Reviewed passive baseline class grants are incomplete')
     drafts.sort(key=lambda draft: (draft['classId'], draft['abilityId']))
     classes = Counter(draft['classId'] for draft in drafts)
     return {'schemaVersion': 1, 'scope': 'unapproved-definition-drafts-not-runtime-profiles',

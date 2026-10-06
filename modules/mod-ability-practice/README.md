@@ -2823,3 +2823,19 @@ frequency remains unmeasured; all previous pacing bands are retained. No client/
 
 Version3 source2 and32.5-second native build passed at .cache/verify-all/20261006-154106/report.json.
 Unit/harness/gameplay skipped; no tests, client chunks, startup, migration execution or production operations.
+
+## Native crafting passive baselines
+
+Natural Alchemist536213 for Witch Doctor13, Electric Ingenuity632621 for Stormbringer16, and Gemcutting28875
+for Dreadrider17 remain native starting passives. They join the explicit baseline list rather than receive
+practice profiles, counters, gates or authored bonuses. Native profession bonuses and racial mechanics are
+unchanged. This is individual source review, not exclusion of every passive or profession-related spell.
+
+Authoring validates the315-row live baseline table, exact class/race0 starting grants, singleton level1 class
+grants, and passive6/0/0 self aura98 without triggered effects. Raw DBC base/spell levels are0 for these three;
+character introduction is1. Constitution21-class validation remains separate and exact. Coverage reports
+126 native baselines,158 declared profiles,566 missing definitions (106 ranked/460 standalone),850 runtime
+unqualified groups and96 native source hashes. All native pacing headers reproduce unchanged.
+
+Source2 and29.3-second native build passed at .cache/verify-all/20261006-154426/report.json; C++ style and
+whitespace passed. Unit/harness/gameplay skipped. No tests, startup, client, database or production operation.
