@@ -138,7 +138,7 @@ inline std::vector<std::string> PackTypedMessages(std::span<std::string const> l
     };
     for (std::string const& line : lines)
     {
-        if (line.empty() || std::string_view("ACPRTKLMNGOJ").find(line.front()) == std::string_view::npos)
+        if (line.empty() || std::string_view("ACPRTKLMNGOJQ").find(line.front()) == std::string_view::npos)
         {
             flush();
             packed.push_back(line);
@@ -292,6 +292,15 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
                 (view.AcquisitionSourceId == 5 && view.Kind != AbilityKind::Fixed) ||
                 (view.RuleSet > 3) != view.Catchup.has_value())
                 return std::nullopt;
+            if ((view.Route == PracticeRoute::BuffCombat) != view.BuffState.has_value())
+                return std::nullopt;
+            if (view.BuffState)
+            {
+                if (*view.BuffState < BuffPracticeState::Inactive || *view.BuffState > BuffPracticeState::Unavailable)
+                    return std::nullopt;
+                lines.push_back(Detail::WireLine('Q', revision, index + 1,
+                    static_cast<std::uint32_t>(*view.BuffState)));
+            }
             if (view.ReplacementSpellId)
             {
                 if (view.Availability != PracticeAvailability::MissingPrerequisite ||

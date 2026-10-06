@@ -154,6 +154,14 @@ enum class PracticeRoute
 
 inline constexpr std::uint32_t HumanPvERuleSet = 1;
 
+enum class BuffPracticeState : std::uint32_t
+{
+    Inactive = 1,
+    Reapply = 2,
+    Ready = 3,
+    Unavailable = 4
+};
+
 struct CatchupView
 {
     std::uint32_t Gap;
@@ -186,6 +194,7 @@ struct AbilityView
     std::uint32_t AcquisitionSourceId = 0;
     std::uint32_t ReplacementSpellId = 0;
     std::optional<CatchupView> Catchup;
+    std::optional<BuffPracticeState> BuffState;
 };
 
 inline std::optional<ProficiencyCap> FindNextTrainingCap(AbilityDefinition const& ability,

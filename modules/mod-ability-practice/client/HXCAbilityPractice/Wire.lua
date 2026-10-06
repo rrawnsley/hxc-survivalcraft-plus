@@ -122,6 +122,7 @@ local function Accept(message, now, currentRevision, currentGeneration)
                 ability.acquisitionSource = part.T.acquisitionSource
                 ability.catchup = part.G
                 ability.replacementSpellId = part.J
+                ability.buffState = part.Q
                 ability.nextTrainingCap = part.C ~= true and part.C or nil
                 ability.rewards = {}
                 for ordinal = 1, part.T.rewardCount do
@@ -186,6 +187,13 @@ local function Accept(message, now, currentRevision, currentGeneration)
     if not index or index < 1 or index > pending.count then return Reject("Invalid ability index") end
     local part = pending.parts[index] or {}
     pending.parts[index] = part
+    if kind == "Q" then
+        local state = tonumber(fields[4])
+        if pending.schemaVersion ~= 4 or part.Q or #fields ~= 4 or not state
+            or state < 1 or state > 4 or state % 1 ~= 0 then return Reject("Invalid buff practice state") end
+        part.Q = state
+        return nil
+    end
     if kind == "J" then
         local replacement = tonumber(fields[4])
         if pending.schemaVersion ~= 4 or part.J or #fields ~= 4 or not replacement
@@ -306,7 +314,7 @@ local function AcceptPacked(message, now, currentRevision, currentGeneration)
     if tonumber(revisionText) ~= pending.revision then return nil, "Unrelated packed progress message" end
     local parts = {}
     for part in string.gmatch(body .. ";", "([^;]*);") do
-        local kind, fields = string.match(part, "^([ACPRTKLMNGOJ])|(.+)$")
+        local kind, fields = string.match(part, "^([ACPRTKLMNGOJQ])|(.+)$")
         if not kind or #parts >= 32 then return Reject("Invalid packed progress part") end
         parts[#parts + 1] = kind .. "|" .. revisionText .. "|" .. fields
     end

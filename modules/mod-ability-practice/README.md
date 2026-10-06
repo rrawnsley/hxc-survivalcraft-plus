@@ -3149,3 +3149,22 @@ source hashes cover the new header.210 profile identities and514 pending definit
 all850 source groups still require runtime qualification. Source2/native30.0s passed
 .cache/verify-all/20261006-200727/report.json; C++ style/whitespace and actual source exports passed.
 No tests, native startup, migration execution, gameplay, active addon changes or production operations.
+
+## Buff practice readiness in the menu — 6 October 2026
+
+Unpublished addon0.4.37-development retains protocol4 and adds bounded typed Q state records only for
+BuffCombat route13. Missing, duplicate, out-of-range or unrelated state records reject the snapshot.
+The detail panel and help distinguish inactive own buff, reapplication required, accepted original
+owned buff, and unmet acquisition/learning requirements. Capped and stale snapshots have explicit
+wording. This is the state at the last update, not a client-side claim of instantaneous readiness.
+Forecasters still count qualifying actions; five-second spacing and meaningful-use rules still apply.
+
+The award path and menu share the same accepted aura/receipt/learning/acquisition resolver. Interested
+menus compare buff state at most every2s and refresh changes; no per-cast SQL or stored World pointers.
+Legacy menu schemas1-3 omit this route, like mastery, rather than label buff casts as direct damage.
+Older unpublished typed addon builds reject new buff records when enabled; matching development
+server/addon still need joint qualification. All other route wire formats remain unchanged.
+
+Source2/native30.5s passed .cache/verify-all/20261006-201157/report.json. C++ style/whitespace,
+104-source exports and five Lua5.1 syntax parses passed; addon chunks were not executed. No tests,
+native startup, gameplay/menu execution, active-client installation or production operations.

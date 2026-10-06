@@ -340,7 +340,7 @@ constexpr auto InterestDuration = std::chrono::seconds(30);
 constexpr auto DeliveryInterval = std::chrono::milliseconds(100);
 constexpr auto DeliveryDuration = std::chrono::seconds(90);
 constexpr std::size_t DeliveryBatchSize = 8;
-constexpr std::size_t MaxQueuedMessages = 512 * 9 + 2048 + Practice::MaximumSessionLearns +
+constexpr std::size_t MaxQueuedMessages = 512 * 10 + 2048 + Practice::MaximumSessionLearns +
     Practice::MaximumSessionMasteries + 4;
 constexpr std::uint32_t PracticeCastSourceKey = 0x41504353;
 constexpr std::uint32_t PracticeClientRequestKey = 0x41504352;
@@ -372,6 +372,8 @@ struct MenuSession
     std::uint64_t ActionSession = 0;
     std::shared_ptr<CoAAbilityPractice::CastReceipt> BuffOrigin;
     Clock::time_point NextBuffContribution{};
+    Clock::time_point NextBuffStateRefresh{};
+    std::optional<Practice::BuffPracticeState> LastBuffState;
     std::uint32_t OutgoingClass = 0;
     std::vector<std::string> Outgoing;
     std::size_t NextMessage = 0;
@@ -1023,6 +1025,35 @@ bool IsBuffObserver(Player const* player)
     return profile && Practice::DevelopmentBuffs::IsBrutalShout(*profile);
 }
 
+SpellInfo const* AcceptedBuffSpell(Player* player, MenuSession const& session,
+    Practice::AbilityProfile const& profile)
+{
+    auto const& origin = session.BuffOrigin;
+    if (!origin || !player->HasSpell(origin->SpellId) ||
+        !AcquisitionAllowed(player, profile.Definition, origin->SpellId) ||
+        std::none_of(profile.Definition.Ranks.begin(), profile.Definition.Ranks.end(),
+            [&origin](Practice::AbilityRank const& rank) { return rank.SpellId == origin->SpellId; }))
+        return nullptr;
+    Aura* aura = player->GetAura(origin->SpellId, player->GetGUID());
+    return aura && !aura->IsRemoved() && aura->GetPracticeCast() == origin ?
+        sSpellMgr->GetSpellInfo(origin->SpellId) : nullptr;
+}
+
+Practice::BuffPracticeState BuffStateFor(Player* player, MenuSession const& session,
+    Practice::AbilityProfile const& profile)
+{
+    if (!AcquisitionAllowed(player, profile.Definition, profile.Definition.Ranks.front().SpellId) ||
+        std::none_of(profile.Definition.Ranks.begin(), profile.Definition.Ranks.end(),
+            [player](Practice::AbilityRank const& rank) { return player->HasSpell(rank.SpellId); }))
+        return Practice::BuffPracticeState::Unavailable;
+    if (AcceptedBuffSpell(player, session, profile))
+        return Practice::BuffPracticeState::Ready;
+    for (auto const& rank : profile.Definition.Ranks)
+        if (Aura* aura = player->GetAura(rank.SpellId, player->GetGUID()); aura && !aura->IsRemoved())
+            return Practice::BuffPracticeState::Reapply;
+    return Practice::BuffPracticeState::Inactive;
+}
+
 std::uint32_t CachedCustomSpecialization(Player const* player)
 {
     auto const* values = player->FindPlayerSettings(ActiveSpecializationSource);
@@ -1226,7 +1257,9 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
             Practice::AbilityDefinition const& ability = profile.Definition;
             if (ability.ClassId != player->getClass())
                 continue;
-            if (ability.Kind == Practice::AbilityKind::Mastery && session.Protocol != Practice::TypedMenuSchemaVersion)
+            if (session.Protocol != Practice::TypedMenuSchemaVersion &&
+                (ability.Kind == Practice::AbilityKind::Mastery ||
+                    Practice::DevelopmentBuffs::IsBrutalShout(profile)))
                 continue;
             auto const learned = Learned(player, ability);
             Practice::Progress state;
@@ -1274,6 +1307,8 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
                 AbsorptionRequested && Practice::DevelopmentAbsorption::IsEmeraldVeil(profile)
                 ? Practice::PracticeRoute::HealingAbsorption : RouteFor(profile.Outcome);
             view.AcquisitionSourceId = static_cast<std::uint32_t>(profile.Acquisition);
+            if (view.Route == Practice::PracticeRoute::BuffCombat)
+                view.BuffState = BuffStateFor(player, session, profile);
             view.ReplacementSpellId = NativeReplacement(player, ability);
             view.RuleSet = HelpersRequested && Practice::DevelopmentHelpers::IsManafeed(profile) ?
                 Practice::HumanPvEScriptedHealRuleSet :
@@ -1329,6 +1364,19 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
 
 void Refresh(Player* player, MenuSession& session, Clock::time_point now)
 {
+    if (now < session.InterestedUntil && now >= session.NextBuffStateRefresh && IsBuffObserver(player))
+    {
+        session.NextBuffStateRefresh = now + RefreshInterval;
+        if (auto const* profile = FindProfile(player, Practice::DevelopmentBuffs::AbilityId))
+        {
+            auto const state = BuffStateFor(player, session, *profile);
+            if (session.LastBuffState != state)
+            {
+                session.LastBuffState = state;
+                session.Dirty = true;
+            }
+        }
+    }
     if (!session.Outgoing.empty())
     {
         if (session.OutgoingClass != player->getClass() || now >= session.DeliveryDeadline)
@@ -1458,11 +1506,8 @@ void AwardBuffContribution(Player* player, Spell* spell, Unit* target, std::uint
     if (!origin || now < session.NextBuffContribution || !player->HasSpell(origin->SpellId) ||
         !AcquisitionAllowed(player, profile->Definition, origin->SpellId))
         return;
-    Aura* aura = player->GetAura(origin->SpellId, player->GetGUID());
-    SpellInfo const* info = sSpellMgr->GetSpellInfo(origin->SpellId);
-    if (!aura || aura->GetPracticeCast() != origin || !info || aura->IsRemoved() ||
-        std::none_of(profile->Definition.Ranks.begin(), profile->Definition.Ranks.end(),
-            [&origin](Practice::AbilityRank const& rank) { return rank.SpellId == origin->SpellId; }))
+    SpellInfo const* info = AcceptedBuffSpell(player, session, *profile);
+    if (!info)
         return;
     auto const effective = Practice::BuildCatchupPolicy(profile->Policy,
         Practice::CapAtLevel(profile->Definition, player->GetLevel()), Catchup);

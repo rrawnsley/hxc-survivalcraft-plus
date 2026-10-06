@@ -185,6 +185,9 @@ local function Ability(value, schema, characterLevel)
             or ((value.ruleSet == 3 or value.ruleSet == 6) and (value.kind ~= 1 or value.route ~= 2))
             or (value.route == 13 and (value.kind ~= 1 or (value.ruleSet ~= 1 and value.ruleSet ~= 4)))
             or ((value.kind == 3) ~= (value.route == 6)) then return nil end
+        if value.route == 13 then
+            if not Integer(value.buffState, 1, 4) then return nil end
+        elseif value.buffState ~= nil then return nil end
         if value.replacementSpellId ~= nil then
             if not Integer(value.replacementSpellId, 1, 4294967295) or value.availability ~= 2 then return nil end
             for _, entry in ipairs(ranks) do
@@ -226,12 +229,13 @@ local function Ability(value, schema, characterLevel)
         elseif value.availability == 6 then return nil end
     elseif value.kind ~= nil or value.session ~= nil or value.route ~= nil or value.ruleSet ~= nil
         or value.nextTrainingCap ~= nil or value.rewards ~= nil or value.acquisitionSource ~= nil
-        or value.catchup ~= nil or value.replacementSpellId ~= nil then return nil end
+        or value.catchup ~= nil or value.replacementSpellId ~= nil or value.buffState ~= nil then return nil end
     local cap = value.nextTrainingCap
     return { nextTrainingCap = cap and { characterLevel = cap.characterLevel, proficiency = cap.proficiency } or nil,
         hasCapInfo = schema == 4, kind = value.kind, session = session,
         route = value.route, ruleSet = value.ruleSet, acquisitionSource = value.acquisitionSource,
         replacementSpellId = value.replacementSpellId,
+        buffState = value.buffState,
         ranks = ranks, rewards = rewards, catchup = catchup,
         abilityId = value.abilityId, displaySpellId = value.displaySpellId,
         learnedRank = value.learnedRank,
@@ -543,7 +547,22 @@ function Model.CatchupText(ability, saved)
         .. ability.catchup.gap .. " proficiency behind the current cap."
 end
 
-function Model.PracticeRules(ability)
+function Model.BuffStateText(ability, saved)
+    if ability.route ~= 13 then return nil end
+    local states = {
+        [1] = "Cast your own buff to earn practice.",
+        [2] = "Reapply your buff to earn practice.",
+        [3] = "Your buff is ready for qualifying combat casts.",
+        [4] = "Buff practice requirements are unavailable."
+    }
+    local text = states[ability.buffState]
+    if ability.buffState == 3 and ability.availability == 5 then
+        text = "Your buff is active; the current training cap is reached."
+    end
+    return text and ((saved and "Saved update: " or "Last update: ") .. text) or nil
+end
+
+function Model.PracticeRules(ability, saved)
     if ability.replacementSpellId then
         return Model.ReplacementText(ability) .. "\n\nUse the replacement from your spellbook."
             .. " The original ability can resume practice when it is available again."
@@ -589,6 +608,8 @@ function Model.PracticeRules(ability)
     }
     local rule = rules[ability.route]
     if not rule then return "Practice rules are unavailable in this update." end
+    local buffState = Model.BuffStateText(ability, saved)
+    if buffState then rule = buffState .. "\n\n" .. rule end
     if ruleSet == 3 then
         rule = "Drain mana from a live, level-appropriate PvE opponent while this ability restores your missing health."
             .. " You must be in a qualifying PvE fight. No mana drained or full overhealing does not count."

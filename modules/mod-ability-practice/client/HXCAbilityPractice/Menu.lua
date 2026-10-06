@@ -214,7 +214,7 @@ practiceHelp:SetScript("OnEnter", function(self)
             GameTooltip:SetText("What earns practice?")
             local acquisition = Model.AcquisitionText(ability)
             if acquisition then GameTooltip:AddLine("Acquisition: " .. acquisition, 1, 0.82, 0, true) end
-            GameTooltip:AddLine(Model.PracticeRules(ability), 1, 1, 1, true)
+            GameTooltip:AddLine(Model.PracticeRules(ability, syncState ~= "current"), 1, 1, 1, true)
             if not Model.IsFixed(ability) then
                 GameTooltip:AddLine("Uses remaining counts qualifying uses under the displayed training rules,"
                     .. " including catch-up. Only uses that meet this ability's rules count."
@@ -268,7 +268,8 @@ local function RenderDetail(ability)
     local rankText = ability.learnedRank > 0 and (not ShowsRankNumbers(ability) and "Learned ability" or
         ("Learned rank " .. ability.learnedRank)) or "Not yet learned"
     rankLabel:SetText(rankText .. (requiredLevel and (" - Required level " .. requiredLevel) or "")
-        .. (mastery and ("\n" .. Model.CurrentMasteryText(ability, syncState ~= "current")) or ""))
+        .. (mastery and ("\n" .. Model.CurrentMasteryText(ability, syncState ~= "current")) or "")
+        .. (ability.route == 13 and ("\n" .. Model.BuffStateText(ability, syncState ~= "current")) or ""))
     local trains = ability.learnedRank > 0 and ability.pointsPerLevel > 0 and not Model.IsFixed(ability)
     local skillText = ability.proficiency > ability.cap and ("Saved proficiency " .. ability.proficiency
         .. " - current cap " .. ability.cap) or ("Proficiency " .. ability.proficiency .. " / " .. ability.cap)
