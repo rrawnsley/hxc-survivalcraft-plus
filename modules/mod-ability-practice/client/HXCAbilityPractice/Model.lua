@@ -180,9 +180,10 @@ local function Ability(value, schema, characterLevel)
     if schema == 4 then
         if value.acquisitionSource ~= nil and not Integer(value.acquisitionSource, 1, 5) then return nil end
         if value.acquisitionSource == 5 and value.kind ~= 3 then return nil end
-        if not session or not Integer(value.kind, 1, 3) or not Integer(value.route, 1, 12)
+        if not session or not Integer(value.kind, 1, 3) or not Integer(value.route, 1, 13)
             or not Integer(value.ruleSet, 1, 6)
             or ((value.ruleSet == 3 or value.ruleSet == 6) and (value.kind ~= 1 or value.route ~= 2))
+            or (value.route == 13 and (value.kind ~= 1 or (value.ruleSet ~= 1 and value.ruleSet ~= 4)))
             or ((value.kind == 3) ~= (value.route == 6)) then return nil end
         if value.replacementSpellId ~= nil then
             if not Integer(value.replacementSpellId, 1, 4294967295) or value.availability ~= 2 then return nil end
@@ -555,6 +556,11 @@ function Model.PracticeRules(ability)
         return "Practice rules are unavailable in this update. Refresh to request the current rules."
     end
     local rules = {
+        [13] = "Keep your own Brutal Shout active on yourself and use learned abilities that deal direct damage"
+            .. " to a level-appropriate PvE opponent or restore missing health in a qualifying PvE fight."
+            .. " One combat cast can earn one use for this buff, with at least five seconds between counted uses."
+            .. " Applying or refreshing the buff, auto-attacks and triggered helper spells earn no buff practice."
+            .. " Other players' actions do not count. Reapply your buff after login or a class or specialization change.",
         [11] = "Deal direct damage or newly stun a live, level-appropriate PvE opponent with the learned ability."
             .. " Refreshes and already stunned enemies do not earn control credit."
             .. " Damage and control share one award for the original cast.",

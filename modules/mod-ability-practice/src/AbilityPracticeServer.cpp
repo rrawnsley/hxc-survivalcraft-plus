@@ -9,6 +9,7 @@
 #include "AbilityPracticeDevelopmentMastery.h"
 #include "AbilityPracticeDevelopmentHelpers.h"
 #include "AbilityPracticeDevelopmentLeech.h"
+#include "AbilityPracticeDevelopmentBuffs.h"
 #include "AbilityPracticeDevelopmentFixed.h"
 #include "AbilityPracticeDevelopmentConjureFixed.h"
 #include "AbilityPracticeDevelopmentPassiveFixed.h"
@@ -40,6 +41,7 @@
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "Spell.h"
+#include "SpellAuras.h"
 #include "SpellMgr.h"
 #include "Trainer.h"
 #include "World.h"
@@ -291,6 +293,7 @@ bool PeriodicRequested = false;
 bool MasteryRequested = false;
 bool HelpersRequested = false;
 bool DirectLeechRequested = false;
+bool BuffContributionRequested = false;
 bool TrainerRanksRequested = false;
 bool AbsorptionRequested = false;
 bool PacingRequested = false;
@@ -337,6 +340,7 @@ constexpr std::size_t MaxQueuedMessages = 512 * 9 + 2048 + Practice::MaximumSess
     Practice::MaximumSessionMasteries + 4;
 constexpr std::uint32_t PracticeCastSourceKey = 0x41504353;
 constexpr std::uint32_t PracticeClientRequestKey = 0x41504352;
+constexpr std::uint32_t PracticeBuffContributionKey = 0x41504342;
 std::string const ActiveSpecializationSource = "core.ascension_active_spec";
 struct ClassSession
 {
@@ -362,6 +366,8 @@ struct MenuSession
     std::uint32_t LastSpec = 0;
     std::uint32_t LastCustomSpecialization = 0;
     std::uint64_t ActionSession = 0;
+    std::shared_ptr<CoAAbilityPractice::CastReceipt> BuffOrigin;
+    Clock::time_point NextBuffContribution{};
     std::uint32_t OutgoingClass = 0;
     std::vector<std::string> Outgoing;
     std::size_t NextMessage = 0;
@@ -434,6 +440,19 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
 {
     if (!info)
         return false;
+    if (BuffContributionRequested && Practice::DevelopmentBuffs::IsBrutalShout(profile))
+    {
+        for (std::size_t index = 0; index < 3; ++index)
+        {
+            auto const& slot = info->Effects[index];
+            if (slot.Effect != (index == 0 ? SPELL_EFFECT_APPLY_AURA : 0u) ||
+                slot.ApplyAuraName != (index == 0 ? SPELL_AURA_MOD_STAT : 0u) ||
+                slot.TargetA.GetTarget() != (index == 0 ? TARGET_UNIT_CASTER_AREA_RAID : 0u) ||
+                slot.TargetB.GetTarget() || slot.TriggerSpell)
+                return false;
+        }
+        return true;
+    }
     if (DirectLeechRequested && Practice::DevelopmentLeech::IsBloodbolt(profile))
         return info->Effects[EFFECT_0].Effect == SPELL_EFFECT_HEALTH_LEECH &&
             !info->Effects[EFFECT_0].TriggerSpell &&
@@ -992,6 +1011,14 @@ bool AcquisitionAllowed(Player const* player, Practice::AbilityDefinition const&
         AscensionAcquisition::CanLearnRacialSpell(player, spellId);
 }
 
+bool IsBuffObserver(Player const* player)
+{
+    if (!BuffContributionRequested || !player || player->getClass() != Practice::DevelopmentBuffs::ClassId)
+        return false;
+    auto const* profile = FindProfile(player, Practice::DevelopmentBuffs::AbilityId);
+    return profile && Practice::DevelopmentBuffs::IsBrutalShout(*profile);
+}
+
 std::uint32_t CachedCustomSpecialization(Player const* player)
 {
     auto const* values = player->FindPlayerSettings(ActiveSpecializationSource);
@@ -1234,7 +1261,9 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
                     rank.State = Practice::RankState::MissingPrerequisite;
             if (view.NextRank)
                 view.NextRank = view.Ranks[view.NextRank->RankNumber - 1];
-            view.Route = ControlRequested && Practice::DevelopmentControl::SupportsStun(profile)
+            view.Route = BuffContributionRequested && Practice::DevelopmentBuffs::IsBrutalShout(profile)
+                ? Practice::PracticeRoute::BuffCombat :
+                ControlRequested && Practice::DevelopmentControl::SupportsStun(profile)
                 ? Practice::PracticeRoute::DamageOrStun :
                 ControlRequested && Practice::DevelopmentControl::SupportsRoot(profile)
                 ? Practice::PracticeRoute::DamageOrRoot :
@@ -1385,6 +1414,70 @@ struct ReceiptCast
             Receipt.MarkConsumed();
     }
 };
+
+void BindBuffOrigin(Player* player, Spell* spell, Unit* target)
+{
+    if (!IsBuffObserver(player) || target != player || !spell)
+        return;
+    auto const* profile = FindProfile(player, spell->GetSpellInfo()->Id);
+    if (!profile || !Practice::DevelopmentBuffs::IsBrutalShout(*profile))
+        return;
+    std::lock_guard lock(Mutex);
+    auto const session = Sessions.find(player->GetGUID().GetRawValue());
+    auto const receipt = spell->GetPracticeCast();
+    Aura* aura = player->GetAura(spell->GetSpellInfo()->Id, player->GetGUID());
+    if (Affects(player) && session != Sessions.end() && receipt && aura &&
+        ReceiptOwnerMatches(player, session->second, *receipt) && aura->GetPracticeCast() == receipt &&
+        receipt->SpellId == spell->GetSpellInfo()->Id)
+        session->second.BuffOrigin = receipt;
+}
+
+void AwardBuffContribution(Player* player, Spell* spell, Unit* target, std::uint32_t damage, std::uint32_t healing)
+{
+    if (!IsBuffObserver(player) || !spell || spell->GetScriptValue(PracticeBuffContributionKey) ||
+        (!QualifiesDevelopmentOutcome(Practice::OutcomeKind::Damage, player, target, damage, 0) &&
+            !QualifiesDevelopmentOutcome(Practice::OutcomeKind::Healing, player, target, 0, healing)))
+        return;
+    std::lock_guard lock(Mutex);
+    auto const found = Sessions.find(player->GetGUID().GetRawValue());
+    auto const action = spell->GetPracticeCast();
+    auto const* profile = FindProfile(player, Practice::DevelopmentBuffs::AbilityId);
+    if (!Affects(player) || player->isBeingLoaded() || found == Sessions.end() || !action || !profile ||
+        !ReceiptOwnerMatches(player, found->second, *action) || action->SpellId != spell->GetSpellInfo()->Id ||
+        spell->IsTriggered() || spell->m_CastItem || !spell->m_castItemGUID.IsEmpty() ||
+        spell->GetSpellInfo()->IsAutoRepeatRangedSpell() ||
+        !player->HasSpell(action->SpellId) || !player->IsSpellFitByClassAndRace(action->SpellId))
+        return;
+    auto& session = found->second;
+    auto const origin = session.BuffOrigin;
+    auto const now = Clock::now();
+    if (!origin || now < session.NextBuffContribution || !player->HasSpell(origin->SpellId) ||
+        !AcquisitionAllowed(player, profile->Definition, origin->SpellId))
+        return;
+    Aura* aura = player->GetAura(origin->SpellId, player->GetGUID());
+    SpellInfo const* info = sSpellMgr->GetSpellInfo(origin->SpellId);
+    if (!aura || aura->GetPracticeCast() != origin || !info || aura->IsRemoved() ||
+        std::none_of(profile->Definition.Ranks.begin(), profile->Definition.Ranks.end(),
+            [&origin](Practice::AbilityRank const& rank) { return rank.SpellId == origin->SpellId; }))
+        return;
+    auto const effective = Practice::BuildCatchupPolicy(profile->Policy,
+        Practice::CapAtLevel(profile->Definition, player->GetLevel()), Catchup);
+    if (!effective)
+        return;
+    CoAAbilityPractice::CastReceipt contribution(player->GetGUID().GetRawValue(), session.ActionSession,
+        player->getClass(), origin->SpellId, player->getRace(), player->GetActiveSpec(),
+        session.LastCustomSpecialization);
+    ReceiptCast cast{ player, info, contribution };
+    Practice::OutcomeContext const context{ true, true, true, true, player->GetLevel() };
+    auto const award = Practice::HandleOutcome(*player, cast, profile->Definition,
+        effective->View(), profile->DefinitionVersion, context);
+    if (award.Status == Practice::OutcomeStatus::Awarded || award.Status == Practice::OutcomeStatus::Capped)
+    {
+        spell->SetScriptValue(PracticeBuffContributionKey, 1);
+        session.NextBuffContribution = now + std::chrono::seconds(5);
+    }
+    RecordAward(player, session, *profile, award);
+}
 
 void AwardPeriodicOutcome(Unit* caster, Unit* target, std::uint32_t auraSpellId, std::uint32_t auraType,
     std::uint32_t damage, std::uint32_t healing, std::shared_ptr<CoAAbilityPractice::CastReceipt> const& receipt)
@@ -1579,6 +1672,8 @@ void RefreshOwnerState(Player* player, MenuSession& session, std::uint32_t custo
     session.LastSpec = player->GetActiveSpec();
     session.LastCustomSpecialization = customSpecialization;
     session.ActionSession = NewActionSession();
+    session.BuffOrigin.reset();
+    session.NextBuffContribution = {};
     session.Dirty = true;
     session.CheckRanks = true;
 }
@@ -1639,6 +1734,8 @@ public:
             }
             ClearDelivery(entry->second);
             entry->second.ActionSession = NewActionSession();
+            entry->second.BuffOrigin.reset();
+            entry->second.NextBuffContribution = {};
             entry->second.Dirty = true;
             entry->second.CheckRanks = true;
             ++entry;
@@ -1666,6 +1763,8 @@ public:
             sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentTrainerRankExtensions", false);
         DirectLeechRequested =
             sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentDirectLeech", false);
+        BuffContributionRequested =
+            sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentBuffContribution", false);
         AbsorptionRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentAbsorption", false);
         PacingRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentRankPacing", false);
         MasteryPacingRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentMasteryPacing", false);
@@ -1710,6 +1809,8 @@ public:
             AppendProfiles(RuntimeProfiles, Practice::DevelopmentHelpers::Profiles);
         bool const directLeechValid = !DirectLeechRequested ||
             AppendProfiles(RuntimeProfiles, Practice::DevelopmentLeech::Profiles);
+        bool const buffValid = !BuffContributionRequested ||
+            (PacingRequested && AppendProfiles(RuntimeProfiles, Practice::DevelopmentBuffs::Profiles));
         bool const absorptionValid = !AbsorptionRequested ||
             AppendProfiles(RuntimeProfiles, Practice::DevelopmentAbsorption::Profiles);
         bool const fixedValid = !fixedCatalog || AppendProfiles(RuntimeProfiles, Practice::DevelopmentFixed::Profiles);
@@ -1734,7 +1835,7 @@ public:
         Ready = ProfileLookup->IsValid() && periodicValid && masteryValid && helpersValid && fixedValid &&
             absorptionValid && controlValid && pacingValid && masteryPacingValid && trainerFixedValid &&
             directLeechValid && conjureFixedValid && trainerRanksValid && passiveFixedValid && utilityFixedValid &&
-            controlFixedValid &&
+            controlFixedValid && buffValid &&
             Practice::ValidCatchupSettings(Catchup);
         for (Practice::AbilityProfile const& profile : profiles)
         {
@@ -1837,6 +1938,8 @@ public:
         RefreshOwnerState(player, session, CachedCustomSpecialization(player));
         session.LoginObserved = true;
         session.ActionSession = NewActionSession();
+        session.BuffOrigin.reset();
+        session.NextBuffContribution = {};
     }
 
     void OnPlayerUpdate(Player* player, uint32) override
@@ -1953,7 +2056,7 @@ public:
     {
         if (!Active.load() || !IsProfiledPlayer(player) || mover != player || !spell ||
             spell->GetCaster() != player || !spell->GetSpellInfo() ||
-            !FindProfile(player, spell->GetSpellInfo()->Id))
+            (!FindProfile(player, spell->GetSpellInfo()->Id) && !IsBuffObserver(player)))
             return;
         std::uint64_t const request = (static_cast<std::uint64_t>(player->getClass()) << 32) |
             spell->GetSpellInfo()->Id;
@@ -2034,7 +2137,7 @@ public:
         if (!IsProfiledPlayer(player))
             return true;
         auto const* profile = FindProfile(player, spell->GetSpellInfo()->Id);
-        if (!profile)
+        if (!profile && !IsBuffObserver(player))
             return true;
         std::lock_guard lock(Mutex);
         spell->SetPracticeCast({});
@@ -2043,10 +2146,14 @@ public:
         bool const direct = spell->GetScriptValue(PracticeClientRequestKey) == request && !triggeredByAura &&
             !spell->IsTriggered() && !spell->m_CastItem && spell->m_castItemGUID.IsEmpty() &&
             spell->GetOriginalCasterGUID() == player->GetGUID() &&
-            AcquisitionAllowed(player, profile->Definition, spell->GetSpellInfo()->Id);
+            (profile ? AcquisitionAllowed(player, profile->Definition, spell->GetSpellInfo()->Id) :
+                player->HasSpell(spell->GetSpellInfo()->Id) &&
+                player->IsSpellFitByClassAndRace(spell->GetSpellInfo()->Id) &&
+                AscensionAcquisition::CanLearnRacialSpell(player, spell->GetSpellInfo()->Id));
         std::uint64_t const source = direct ? request : std::numeric_limits<std::uint64_t>::max();
         spell->SetScriptValue(PracticeCastSourceKey, source);
-        if (direct && Affects(player) && !player->isBeingLoaded() && profile->Outcome != Practice::OutcomeKind::None)
+        if (direct && Affects(player) && !player->isBeingLoaded() &&
+            (IsBuffObserver(player) || (profile && profile->Outcome != Practice::OutcomeKind::None)))
         {
             auto& session = Sessions[player->GetGUID().GetRawValue()];
             RefreshOwnerState(player, session, CachedCustomSpecialization(player));
@@ -2062,13 +2169,18 @@ public:
     {
         if (!Active.load())
             return;
-        if (!spell || !spell->GetCaster() || !target || miss != SPELL_MISS_NONE || (!damage && !healing))
+        if (!spell || !spell->GetCaster() || !target || miss != SPELL_MISS_NONE)
             return;
         Player* player = spell->GetCaster()->ToPlayer();
         if (!IsProfiledPlayer(player))
             return;
+        BindBuffOrigin(player, spell, target);
+        if (!damage && !healing)
+            return;
+        AwardBuffContribution(player, spell, target, damage, healing);
         auto const* profile = FindProfile(player, spell->GetSpellInfo()->Id);
-        if (!profile || !QualifiesDevelopmentOutcome(profile->Outcome, player, target, damage, healing))
+        if (!profile || Practice::DevelopmentBuffs::IsBrutalShout(*profile) ||
+            !QualifiesDevelopmentOutcome(profile->Outcome, player, target, damage, healing))
             return;
         AwardOutcome(player, spell, *profile);
     }

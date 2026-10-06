@@ -355,7 +355,7 @@ Refresh = function()
     local session = snapshot and snapshot.session
     sessionText:SetText(session and session.available and
         ((syncState == "current" and "Class skills this session: " or "Saved class session: ") .. session.uses
-        .. " uses that earned practice - +" .. session.proficiencyGained
+        .. " skill practice awards - +" .. session.proficiencyGained
         .. " proficiency") or "Session totals unavailable")
     UpdateSubtitle(GetTime())
     if not snapshot then

@@ -3,6 +3,12 @@
   "scope": "authored-cadence-assumptions-not-measured-frequency",
   "abilities": [
     {
+      "classId": 12,
+      "abilityId": 300857,
+      "assumedUseIntervalMilliseconds": 5000,
+      "reason": "Draft five-second combat-action floor while your own buff is active; actual frequency is unmeasured."
+    },
+    {
       "classId": 16,
       "abilityId": 707044,
       "assumedUseIntervalMilliseconds": 15000,

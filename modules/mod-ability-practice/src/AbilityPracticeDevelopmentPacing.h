@@ -20,6 +20,22 @@ struct Entry
     TrainingPolicy Policy;
 };
 
+inline constexpr std::array RanksClass12Ability300857 = {
+    AbilityRank{ 300857, 1, { 4, 1 } },
+    AbilityRank{ 300882, 2, { 10, 10 } },
+    AbilityRank{ 300883, 3, { 24, 20 } },
+    AbilityRank{ 300884, 4, { 38, 40 } },
+    AbilityRank{ 300885, 5, { 52, 60 } },
+    AbilityRank{ 300886, 6, { 60, 80 } }
+};
+inline constexpr std::array BandsClass12Ability300857 = {
+    TrainingBand{ 1, 16200, 270 },
+    TrainingBand{ 10, 16200, 300 },
+    TrainingBand{ 20, 16200, 600 },
+    TrainingBand{ 40, 16200, 600 },
+    TrainingBand{ 60, 16200, 600 }
+};
+
 inline constexpr std::array RanksClass12Ability500002 = {
     AbilityRank{ 500002, 1, { 14, 1 } },
     AbilityRank{ 500450, 2, { 22, 10 } },
@@ -2511,6 +2527,7 @@ inline constexpr std::array BandsClass32Ability802202 = {
 };
 
 inline constexpr std::array Entries = {
+    Entry{ 12, 300857, RanksClass12Ability300857, { BandsClass12Ability300857 } },
     Entry{ 12, 500002, RanksClass12Ability500002, { BandsClass12Ability500002 } },
     Entry{ 12, 500919, RanksClass12Ability500919, { BandsClass12Ability500919 } },
     Entry{ 12, 520523, RanksClass12Ability520523, { BandsClass12Ability520523 } },

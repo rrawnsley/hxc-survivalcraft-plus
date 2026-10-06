@@ -13,7 +13,7 @@ PROFILE_HEADERS = ('AbilityPracticeDevelopmentRanked.h', 'AbilityPracticeDevelop
                    'AbilityPracticeDevelopmentControl.h', 'AbilityPracticeDevelopmentTrainerFixed.h',
                    'AbilityPracticeDevelopmentLeech.h', 'AbilityPracticeDevelopmentConjureFixed.h',
                    'AbilityPracticeDevelopmentPassiveFixed.h', 'AbilityPracticeDevelopmentUtilityFixed.h',
-                   'AbilityPracticeDevelopmentControlFixed.h')
+                   'AbilityPracticeDevelopmentControlFixed.h', 'AbilityPracticeDevelopmentBuffs.h')
 PROFILE_PATTERN = re.compile(
     r'AbilityProfile\s*\{\s*Development::DefinitionVersion,\s*AcquisitionSource::(?:ClassGrant|ClassTrainer),\s*'
     r'\{\s*(\d+),\s*(\d+),\s*AbilityKind::(Ranked|Mastery|Fixed)\s*,\s*([\w:]+)\s*,')
@@ -101,6 +101,8 @@ def review_queues(draft):
         queues.add('incomplete-raw-trigger-reference-review')
     if draft['classId'] == 30 and draft['abilityId'] == 561289:
         queues.add('corpse-resource-and-post-combat-use-design')
+    if draft['classId'] == 12 and draft['abilityId'] == 300857:
+        queues.add('owned-buff-original-combat-cast-contribution')
     if len(draft['ranks']) == 1:
         queues.add('unranked-mastery-or-fixed-design')
     if set(routes) & {'interrupt', 'dispel', 'steal'}:

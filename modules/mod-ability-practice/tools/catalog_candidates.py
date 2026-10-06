@@ -621,6 +621,7 @@ def main():
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentUtilityFixed.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentControlFixed.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentLeech.h',
+                'modules/mod-ability-practice/src/AbilityPracticeDevelopmentBuffs.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentTrainerFixed.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentTrainerRanks.h',
                 'modules/mod-ability-practice/tools/trainer_rank_extensions.py',

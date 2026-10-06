@@ -29,6 +29,7 @@ def verify_provenance(candidates, root, dbc):
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentUtilityFixed.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentControlFixed.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentLeech.h',
+                'modules/mod-ability-practice/src/AbilityPracticeDevelopmentBuffs.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentTrainerFixed.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentTrainerRanks.h',
                 'modules/mod-ability-practice/tools/trainer_rank_extensions.py',
@@ -317,6 +318,10 @@ def build_drafts(candidates, root):
                              'soul-capture-corpse-resource-and-post-combat-use-design'])
         if class_id == 19 and ability_id == 806521:
             required.append('titanstrike-loaded-aura-duration-helper-and-original-leech-damage')
+        if class_id == 12 and ability_id == 300857:
+            required.extend(['owned-buff-original-application-and-combat-cast-contribution',
+                             'buff-contribution-five-second-cadence-and-per-cast-deduplication',
+                             'buff-contribution-menu-rule-and-session-qualification'])
         if candidate.get('nativeOutcomeReview', {}).get('directLeechReview', {}).get('commonRoutes'):
             required.append('original-health-leech-damage-attribution')
         if periodic:
