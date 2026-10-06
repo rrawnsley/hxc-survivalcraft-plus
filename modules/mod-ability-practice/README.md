@@ -2214,3 +2214,21 @@ and migration execution were not run. No production server/config/database/addon
 Final integration source/native report .cache/verify-all/20261006-003947/report.json passed(two source checks,
 30.8s native build). C++ style/whitespace and66-source exports passed; generator reproduced the header without
 changes. Export metadata now distinguishes available native conversion from execution by the authoring tool.
+
+## Distinguish preserved progress version mismatches
+
+Addon0.4.29 and the native unpublished protocol4 failure response retain F8 but extend its validated issue code:
+1=unreadable saved progress,2=definition version mismatch. The default encoder remains issue1 for existing callers.
+Native snapshot failures select2 only when loading explicitly reports DefinitionMismatch. Other unreadable,
+unsupported-schema/migration or policy failures remain1. Invalid issue codes are refused by both ends.
+
+The menu preserves the saved view and its stale indicator, names a mismatched skill and explains that its
+progress is preserved and needs a matching progression version. It directs the player to an administrator,
+without offering a reset or claiming the row is corrupt. Unreadable issue1 retains its existing message.
+No saved values, versions or implementation settings are exposed in the response. Older unpublished protocol4
+addons reject issue2; the staged addon/native pair requires joint qualification before any release. Protocols1–3
+are unchanged. Outcome/wire sources are now included in native authoring provenance.
+
+Source/native compilation passed in .cache/verify-all/20261006-004245/report.json (two checks,32.1s native
+build), plus C++ style/whitespace and five Lua5.1 syntax compilations. Addon chunks and tests were not executed;
+actual rendering/wire behavior remains unqualified. No deployment or live client changes.

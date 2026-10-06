@@ -170,12 +170,21 @@ inline std::vector<std::string> PackTypedMessages(std::span<std::string const> l
 }
 }
 
-inline std::optional<std::string> EncodeMenuProgressFailure(std::uint32_t revision, std::uint32_t classId,
-    std::uint32_t abilityId, std::uint32_t spellId, std::uint64_t generation)
+enum class ProgressIssue : std::uint32_t
 {
-    if (!revision || !classId || classId > 255 || !abilityId || !spellId || !generation)
+    Unreadable = 1,
+    DefinitionMismatch = 2
+};
+
+inline std::optional<std::string> EncodeMenuProgressFailure(std::uint32_t revision, std::uint32_t classId,
+    std::uint32_t abilityId, std::uint32_t spellId, std::uint64_t generation,
+    ProgressIssue issue = ProgressIssue::Unreadable)
+{
+    if (!revision || !classId || classId > 255 || !abilityId || !spellId || !generation ||
+        (issue != ProgressIssue::Unreadable && issue != ProgressIssue::DefinitionMismatch))
         return std::nullopt;
-    return Detail::WireLine('F', TypedMenuSchemaVersion, revision, classId, abilityId, spellId, 1, generation);
+    return Detail::WireLine('F', TypedMenuSchemaVersion, revision, classId, abilityId, spellId,
+        static_cast<std::uint32_t>(issue), generation);
 }
 
 inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t classId,

@@ -19,11 +19,11 @@ function Model.ValidateFailure(value)
     if type(value) ~= "table" or value.schemaVersion ~= 4
         or not Integer(value.revision, 1, 4294967295) or not Integer(value.classId, 1, 255)
         or not Integer(value.abilityId, 1, 4294967295) or not Integer(value.spellId, 1, 4294967295)
-        or not Model.ValidGeneration(value.generation) or value.issueCode ~= 1 then
+        or not Model.ValidGeneration(value.generation) or not Integer(value.issueCode, 1, 2) then
         return nil, "Invalid saved-progress issue"
     end
     return { schemaVersion = 4, revision = value.revision, classId = value.classId,
-        abilityId = value.abilityId, spellId = value.spellId, issueCode = 1, generation = value.generation }
+        abilityId = value.abilityId, spellId = value.spellId, issueCode = value.issueCode, generation = value.generation }
 end
 
 

@@ -91,7 +91,8 @@ panel:SetScript("OnEvent", function() if panel:IsShown() then FitPanel() end end
 local function UpdateSubtitle(now)
     if not snapshot and serverFailure then
         subtitle:SetText(syncState == "waiting" and "Checking saved progress again..."
-            or "The server responded, but a skill's saved progress needs attention.")
+            or (serverFailure.issueCode == 2 and "Saved progress is preserved; a skill needs a matching progression version."
+                or "The server responded, but a skill's saved progress needs attention."))
         return
     end
     if not snapshot then
@@ -101,7 +102,10 @@ local function UpdateSubtitle(now)
     end
     local status = syncState == "current" and "Server progress received"
         or (syncState == "waiting" and "Refreshing saved view..." or "Saved view - Server progress unavailable")
-    if serverFailure and syncState ~= "waiting" then status = "Saved view - Skill progress needs attention" end
+    if serverFailure and syncState ~= "waiting" then
+        status = serverFailure.issueCode == 2 and "Saved view - Progress version mismatch"
+            or "Saved view - Skill progress needs attention"
+    end
     if #snapshot.abilities == 0 and syncState == "current" then status = "No practice catalog for this class" end
     local age = type(now) == "number" and type(receivedAt) == "number" and now >= receivedAt
         and now < math.huge and math.floor(now - receivedAt) or nil
@@ -416,8 +420,11 @@ Refresh = function()
         end
     end
     if serverFailure then
-        footer:SetText("Saved progress for " .. SpellName(serverFailure.spellId)
-            .. " could not be read safely. It was left unchanged; please report this.")
+        footer:SetText(serverFailure.issueCode == 2
+            and ("Progress preserved - " .. SpellName(serverFailure.spellId)
+                .. " needs a matching progression version. Contact an admin.")
+            or ("Saved progress for " .. SpellName(serverFailure.spellId)
+                .. " could not be read safely. It was left unchanged; please report this."))
     end
     for index, row in ipairs(rows) do
         local ability = visible[index + offset]

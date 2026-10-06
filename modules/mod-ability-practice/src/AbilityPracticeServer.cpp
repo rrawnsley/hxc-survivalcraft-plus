@@ -677,7 +677,9 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
                     if (session.Protocol != Practice::TypedMenuSchemaVersion)
                         return false;
                     auto const failure = Practice::EncodeMenuProgressFailure(++Revision, ability.ClassId,
-                        ability.AbilityId, ability.Ranks.front().SpellId, ServerGeneration);
+                        ability.AbilityId, ability.Ranks.front().SpellId, ServerGeneration,
+                        loaded.Status == Practice::LoadStatus::DefinitionMismatch ?
+                            Practice::ProgressIssue::DefinitionMismatch : Practice::ProgressIssue::Unreadable);
                     if (!failure)
                         return false;
                     QueueDelivery(session, player->getClass(), { *failure }, now);
