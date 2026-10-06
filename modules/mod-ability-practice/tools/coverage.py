@@ -154,7 +154,7 @@ def build_coverage(drafts, declarations):
         declaration = declarations.get(identity)
         baseline = draft.get('nativeBaselineExclusion')
         if baseline and (declaration or identity[1] not in {
-                75, 81, 107, 674, 2764, 3018, 3124, 5019, 28875, 536213, 552011, 632621} or
+                75, 81, 107, 674, 2764, 3018, 3124, 5019, 6603, 28875, 536213, 552011, 632621} or
                          len(draft['ranks']) != 1):
             raise ValueError('Native baseline cannot be a development practice profile')
         if declaration and ((declaration['kind'] == 'ranked' and len(draft['ranks']) < 2) or

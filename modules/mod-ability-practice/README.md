@@ -3168,3 +3168,17 @@ server/addon still need joint qualification. All other route wire formats remain
 Source2/native30.5s passed .cache/verify-all/20261006-201157/report.json. C++ style/whitespace,
 104-source exports and five Lua5.1 syntax parses passed; addon chunks were not executed. No tests,
 native startup, gameplay/menu execution, active-client installation or production operations.
+
+## Preserve native melee auto attack — 6 October 2026
+
+Auto Attack6603 is explicitly excluded from ability practice for all21 custom classes. The actual
+native baseline grants it at level1 for classes12-32 without racial restrictions; source guards require
+the complete class set and exact raw active effect78/0/0, no aura/target/trigger/rank, raw base/spell levels0.
+The spell dispatch maps effect78 to EffectUnused; actual melee swings use CMSG_ATTACKSWING and
+Player::Attack through CombatHandler.cpp. Existing weapon skills stay native. Profile validation
+rejects this baseline ID, preventing a duplicate spell proficiency track. No core opcode behavior changed.
+
+Source2/native32.2s passed .cache/verify-all/20261006-202046/report.json. C++ style/whitespace and
+105-source exports passed. Native baseline exclusions now147; pending definitions493 (103 ranked/390
+standalone),210 profile identities/850 runtime-unqualified groups unchanged. No tests, startup,
+gameplay, active-client changes or production operations. The addon remains0.4.37-development.

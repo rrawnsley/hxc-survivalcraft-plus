@@ -37,6 +37,7 @@ def verify_provenance(candidates, root, dbc):
                 'modules/mod-ability-practice/tools/trainer_acquisition_review.py',
                 'data/sql/updates/pending_db_world/rev_20260923_05_coa_class_trainer_core.sql',
                 'src/server/coa/AscensionLiveBaselineData.h',
+                'src/server/game/Handlers/CombatHandler.cpp',
                 'src/server/game/Entities/Creature/Trainer.h',
                 'src/server/game/Entities/Creature/Trainer.cpp',
                 'src/server/game/Globals/ObjectMgr.h',
@@ -175,6 +176,9 @@ def reviewed_passive_baseline_classes(root):
                   if int(spell_id) == spell]
         if sorted(actual) != [(class_id, 0) for class_id in sorted(classes)]:
             raise ValueError('Reviewed passive class/race baseline evidence changed: ' + str(spell))
+    attacks = [(int(class_id), int(race_id)) for class_id, race_id, spell_id in rows if int(spell_id) == 6603]
+    if sorted(attacks) != [(class_id, 0) for class_id in range(12, 33)]:
+        raise ValueError('Reviewed native melee auto-attack baseline class/race evidence changed')
     return expected
 
 
@@ -185,13 +189,14 @@ def build_drafts(candidates, root):
     if not baseline_match:
         raise ValueError('Missing reviewed native baseline list')
     baseline_ids = [int(value.strip()) for value in baseline_match[1].split(',')]
-    if baseline_ids != [75, 81, 107, 674, 2764, 3018, 3124, 5019, 28875, 536213, 552011, 632621]:
+    if baseline_ids != [75, 81, 107, 674, 2764, 3018, 3124, 5019, 6603, 28875, 536213, 552011, 632621]:
         raise ValueError('Native baseline scope needs explicit authoring review')
     if candidates.get('schemaVersion') != 1 or candidates.get('scope') != (
             'source-review-candidates-not-runtime-definitions'):
         raise ValueError('Unsupported candidate artifact')
     passive_classes = reviewed_passive_baseline_classes(root)
     passive_drafts = {spell: set() for spell in passive_classes}
+    melee_drafts = set()
     trigger_review = candidates.get('rawTriggerReferenceReview')
     if (not isinstance(trigger_review, dict) or trigger_review.get('dbcOrigin') != candidates.get('dbcOrigin')
             or trigger_review.get('scope') != 'raw-dbc-references-not-executed-casts-or-practice-eligibility'
@@ -267,16 +272,26 @@ def build_drafts(candidates, root):
                           'rawCastProfile': raw_cast_profile(raw),
                           'rawChannelProfile': raw_channel_profile(raw)})
         baseline = ability_id in baseline_ids
-        baseline_effects = {75: 58, 81: 20, 107: 23, 674: 40, 2764: 58, 3018: 58, 3124: 22, 5019: 17}
+        baseline_effects = {75: 58, 81: 20, 107: 23, 674: 40, 2764: 58, 3018: 58, 3124: 22, 5019: 17, 6603: 78}
         passive_effects = {552011: [6, 6, 0], 536213: [6, 0, 0], 632621: [6, 0, 0], 28875: [6, 0, 0]}
         if baseline:
             baseline_raw = members[ability_id].get('rawDbc', {})
-            expected_passive = ability_id not in {75, 2764, 3018, 5019}
+            expected_passive = ability_id not in {75, 2764, 3018, 5019, 6603}
             if (len(ranks) != 1 or ranks[0]['characterLevel'] != 1 or
                     baseline_raw.get('passive') is not expected_passive or
                     baseline_raw.get('effects') != (passive_effects[ability_id] if ability_id in passive_effects
                                                     else [baseline_effects[ability_id], 0, 0])):
                 raise ValueError('Native baseline raw/source evidence changed')
+            if ability_id == 6603:
+                details = baseline_raw.get('effectDetails', [])
+                expected = [(78, 0, 0, 0, 0), (0, 0, 0, 0, 0), (0, 0, 0, 0, 0)]
+                if (class_id not in range(12, 33) or baseline_raw.get('name') != 'Auto Attack' or
+                        baseline_raw.get('rankLabel') or baseline_raw.get('baseLevel') != 0 or
+                        baseline_raw.get('spellLevel') != 0 or len(details) != 3 or
+                        [(v.get('effectId'), v.get('auraId'), v.get('implicitTargetA'),
+                          v.get('implicitTargetB'), v.get('triggerSpellId')) for v in details] != expected):
+                    raise ValueError('Reviewed melee auto-attack raw/source evidence changed')
+                melee_drafts.add(class_id)
             if ability_id in passive_classes:
                 details = baseline_raw.get('effectDetails', [])
                 expected = ([(6, 108, 1, 0, 0), (6, 108, 1, 0, 0), (0, 0, 0, 0, 0)] if ability_id == 552011
@@ -350,6 +365,8 @@ def build_drafts(candidates, root):
                        'requiredReviews': required})
     if passive_drafts != passive_classes:
         raise ValueError('Reviewed passive baseline class grants are incomplete')
+    if melee_drafts != set(range(12, 33)):
+        raise ValueError('Reviewed melee auto-attack baseline class grants are incomplete')
     drafts.sort(key=lambda draft: (draft['classId'], draft['abilityId']))
     classes = Counter(draft['classId'] for draft in drafts)
     return {'schemaVersion': 1, 'scope': 'unapproved-definition-drafts-not-runtime-profiles',
