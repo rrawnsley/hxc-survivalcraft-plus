@@ -3025,3 +3025,22 @@ registration and trigger suppression review. The ordinary in-combat healing rout
 for reliable practice across its normal post-fight use. No Soul Capture profile, power benefit or
 counter was added. Source165820 passed2 checks;205 definitions/519 missing unchanged.
 Native unchanged from163946. No tests, startup, SQL mutation, active-client changes or deployment.
+
+## Mixed and helper-backed control roadmap draft — 6 October 2026
+
+Blackjack21/520568 at character12 and Soul Shock30/803989 at8 join the disabled
+AllowDevelopmentControlFixedCatalog draft, now14 entries. Optional crowd-control preference
+remains unanswered; native full function is the reversible draft assumption. No practice,
+stored proficiency, benefit, automatic teaching or change to native control effectiveness.
+
+Exact loaded Blackjack DUMMY/stun slots and targets are required. Soul Shock retains its
+stun/271/dummy slots and801260 helper reference. Loaded nonpassive/nondeprecated helper must
+match HEAL_PCT against enemy target6 with empty remaining slots and no auras/triggers.
+Native class/rank ownership and introduction checks remain. This preserves native mechanics
+without claiming that the helper itself earns practice or that runtime behavior is qualified.
+
+Initial170035 native build failed on two nonexistent zero-slot enum names. Corrected to native
+zero values; source2/native29.9s passed170121. C++ style/whitespace and101-source exports passed.
+207 unique profiles/209 declarations:120 ranked,7 mastery,80 fixed;126 baselines,517 missing
+definitions (106 ranked/411 standalone),850 runtime-unqualified groups. Earlier curves unchanged.
+Addon0.4.35-development/protocol4 unchanged. No tests, startup, SQL mutation or production changes.

@@ -689,9 +689,23 @@ bool MatchesControlFixedMechanic(Practice::AbilityProfile const& profile)
     {
         auto const& effect = info->Effects[index];
         if (effect.Effect != mechanic->EffectIds[index] || effect.ApplyAuraName != mechanic->AuraIds[index] ||
-            effect.TriggerSpell || effect.TargetA.GetTarget() != mechanic->TargetAIds[index] ||
+            effect.TriggerSpell != mechanic->TriggerSpellIds[index] ||
+            effect.TargetA.GetTarget() != mechanic->TargetAIds[index] ||
             effect.TargetB.GetTarget() != mechanic->TargetBIds[index])
             return false;
+        if (!effect.TriggerSpell)
+            continue;
+        SpellInfo const* helper = sSpellMgr->GetSpellInfo(effect.TriggerSpell);
+        if (effect.TriggerSpell != 801260 || !helper || helper->IsPassive() || helper->IsDeprecatedForPlayers)
+            return false;
+        for (std::size_t helperIndex = 0; helperIndex < mechanic->EffectIds.size(); ++helperIndex)
+        {
+            auto const& slot = helper->Effects[helperIndex];
+            if (slot.Effect != (helperIndex == 0 ? SPELL_EFFECT_HEAL_PCT : 0u) ||
+                slot.ApplyAuraName || slot.TriggerSpell || slot.TargetB.GetTarget() ||
+                slot.TargetA.GetTarget() != (helperIndex == 0 ? TARGET_UNIT_TARGET_ENEMY : 0u))
+                return false;
+        }
     }
     return true;
 }
