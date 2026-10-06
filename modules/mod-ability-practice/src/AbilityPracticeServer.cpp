@@ -345,6 +345,7 @@ constexpr std::size_t MaxQueuedMessages = 512 * 10 + 2048 + Practice::MaximumSes
 constexpr std::uint32_t PracticeCastSourceKey = 0x41504353;
 constexpr std::uint32_t PracticeClientRequestKey = 0x41504352;
 constexpr std::uint32_t PracticeBuffContributionKey = 0x41504342;
+constexpr std::uint32_t PracticeBuffEligibilityKey = 0x41504253;
 std::string const ActiveSpecializationSource = "core.ascension_active_spec";
 struct ClassSession
 {
@@ -1486,7 +1487,8 @@ void BindBuffOrigin(Player* player, Spell* spell, Unit* target)
 
 void AwardBuffContribution(Player* player, Spell* spell, Unit* target, std::uint32_t damage, std::uint32_t healing)
 {
-    if (!IsBuffObserver(player) || !spell || spell->GetScriptValue(PracticeBuffContributionKey) ||
+    if (!IsBuffObserver(player) || !spell || !spell->GetScriptValue(PracticeBuffEligibilityKey) ||
+        spell->GetScriptValue(PracticeBuffContributionKey) ||
         (!QualifiesDevelopmentOutcome(Practice::OutcomeKind::Damage, player, target, damage, 0) &&
             !QualifiesDevelopmentOutcome(Practice::OutcomeKind::Healing, player, target, 0, healing)))
         return;
@@ -2191,6 +2193,7 @@ public:
             return true;
         std::lock_guard lock(Mutex);
         spell->SetPracticeCast({});
+        spell->SetScriptValue(PracticeBuffEligibilityKey, 0);
         std::uint64_t const request = (static_cast<std::uint64_t>(player->getClass()) << 32) |
             spell->GetSpellInfo()->Id;
         bool const direct = spell->GetScriptValue(PracticeClientRequestKey) == request && !triggeredByAura &&
@@ -2208,9 +2211,15 @@ public:
             auto& session = Sessions[player->GetGUID().GetRawValue()];
             RefreshOwnerState(player, session, CachedCustomSpecialization(player));
             if (session.ActionSession)
+            {
                 spell->SetPracticeCast(std::make_shared<CoAAbilityPractice::CastReceipt>(
                     player->GetGUID().GetRawValue(), session.ActionSession, player->getClass(), spell->GetSpellInfo()->Id,
                     player->getRace(), player->GetActiveSpec(), session.LastCustomSpecialization));
+                if (IsBuffObserver(player))
+                    if (auto const* buff = FindProfile(player, Practice::DevelopmentBuffs::AbilityId))
+                        spell->SetScriptValue(PracticeBuffEligibilityKey,
+                            AcceptedBuffSpell(player, session, *buff) ? 1 : 0);
+            }
         }
         return true;
     }

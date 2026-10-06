@@ -3182,3 +3182,21 @@ Source2/native32.2s passed .cache/verify-all/20261006-202046/report.json. C++ st
 105-source exports passed. Native baseline exclusions now147; pending definitions493 (103 ranked/390
 standalone),210 profile identities/850 runtime-unqualified groups unchanged. No tests, startup,
 gameplay, active-client changes or production operations. The addon remains0.4.37-development.
+
+## Buff activity at combat cast start — 6 October 2026
+
+Buff contribution now latches accepted original owned buff eligibility during CanPrepare, before
+the native cast begins. A combat spell started without that buff cannot earn retroactive buff credit
+if it lands after the buff is applied. The result must still find an accepted owned aura and satisfy
+the existing actual PvE outcome, owner epoch, acquisition, per-cast dedup and five-second checks.
+Refreshing an already owned buff while a combat spell is in flight retains eligibility when the
+current aura has accepted provenance; original action practice remains independent. Buff application
+alone earns nothing. The per-Spell eligibility flag is transient numeric metadata, with no SQL,
+persisted schema or retained World pointers. Addon help states both the start and result requirements.
+
+Native source order supports this design: SpellHandler marks the client request before prepare;
+Spell::prepare invokes CanPrepare before cast processing. Aura creation and refresh carry receipts,
+and the result hook runs after aura application. This is source evidence, not runtime qualification.
+Source2/native36.9s passed .cache/verify-all/20261006-202502/report.json, C++ style/whitespace,
+105-source exports and five Lua5.1 syntax parses passed. No tests/chunk execution/startup/gameplay,
+active-client installation or production changes. All flags0; addon0.4.37/protocol4 unchanged.
