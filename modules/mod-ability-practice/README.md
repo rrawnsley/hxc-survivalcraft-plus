@@ -2387,3 +2387,29 @@ VERIFY ALL PASSED .cache/verify-all/20261006-043835/report.json: source(two chec
 C++ style/whitespace and71-source exports passed; native pacing header reproduced identically. No tests/addon
 chunks/client rendering/gameplay/startup/production operations. Protocol field shapes and addon0.4.31 unchanged;
 joint native/addon execution qualification remains pending.
+
+## Raw channel duration and occupancy review
+
+Inventory now preserves AttributesEx, reviewed channel flags and DurationIndex separately from existing cast
+profiles. Drafts validate their exact shape, integer bounds and flag agreement for all847 source groups. Coverage
+retains that evidence. Pacing reads reviewed SpellDuration records with full provenance and reports raw base,
+per-level and maximum duration, finite/unbounded/unsupported/missing status and unresolved cadence reviews.
+Missing nonzero channel duration references fail authoring. Inventory reader and SpellInfo.cpp now participate
+in the73-source native provenance set.
+
+For finite constant raw durations(per-level0 and equal base/max), proposals include casting time plus channel
+occupancy as another interval floor. Cast-time-plus-ordinary-recovery remains a separate floor; recovery is not
+added twice to the channel. Source Spell::cast starts ordinary cooldown before handle_immediate starts the
+channel, and SpellInfo::GetDuration supplies its raw base before spell-mod/haste adjustments. Effective duration,
+event-start cooldowns, interruptions, movement/resources and actual eligible-use frequency remain unmeasured.
+Other channel shapes remain explicit unresolved reviews; no negative/unbounded duration is silently treated as0.
+
+Current231 proposals/1343 transitions include15 raw channel transitions: three declared Manafeed at5s, nine
+pending Crypt Swarm at3s and three pending Runic Harvest at10s. Existing assumed intervals5s/5s/20s already
+cover these raw occupancy floors. No current native curve changed:118-entry version2 header reproduced
+identically. All15 raw channel references resolved; this is source evidence, not effective/gameplay qualification.
+Coverage remains136 profiles/102 baseline exclusions/609 requiring definitions, all847 runtime-unqualified.
+
+Source report .cache/verify-all/20261006-044934/report.json passed(two checks), whitespace passed,73-source exports
+regenerated. Native code unchanged from043835; no redundant build. No tests/client chunks/rendering/gameplay/
+startup or production operations. SpellDuration hash eeae44ef0185924f3d6ec57ab2701c66566db86e51ab0bae017a9449126eb3a0.

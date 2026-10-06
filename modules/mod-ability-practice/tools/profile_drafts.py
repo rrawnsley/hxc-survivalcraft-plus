@@ -19,6 +19,7 @@ def verify_provenance(candidates, root, dbc):
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentRanked.h',
                 'modules/mod-ability-practice/tools/ranked_development.py',
                 'modules/mod-ability-practice/tools/catalog_candidates.py',
+                'modules/mod-ability-practice/tools/inventory.py',
                 'modules/mod-ability-practice/tools/profile_drafts.py',
                 'modules/mod-ability-practice/tools/coverage.py',
                 'modules/mod-ability-practice/tools/pacing_drafts.py',
@@ -68,7 +69,8 @@ def verify_provenance(candidates, root, dbc):
                 'src/server/coa/AscensionTemplarAbilities.cpp',
                 'src/server/coa/AscensionTemplarEvents.cpp',
                 'src/server/game/Spells/AbilityPracticeCastReceipt.h', 'src/server/game/Spells/Spell.h',
-                'src/server/game/Spells/Spell.cpp', 'src/server/game/Spells/SpellEffects.cpp',
+                'src/server/game/Spells/Spell.cpp',
+                'src/server/game/Spells/SpellInfo.cpp', 'src/server/game/Spells/SpellEffects.cpp',
                 'src/server/game/Spells/Auras/SpellAuras.h', 'src/server/game/Spells/Auras/SpellAuras.cpp',
                 'src/server/game/Spells/Auras/SpellAuraEffects.cpp',
                 'src/server/game/Spells/Auras/SpellAuraEffects.h',
@@ -112,6 +114,22 @@ def raw_cast_profile(raw):
     if any(type(value[field]) is not int or not 0 <= value[field] <= 4294967295 for field in fields):
         raise ValueError('Invalid raw cast timing value')
     return {field: value[field] for field in (*fields, 'scope')}
+
+
+
+def raw_channel_profile(raw):
+    value = raw.get('channelProfile')
+    fields = {'attributesEx', 'durationIndex', 'channelFlagMask', 'channeled', 'scope'}
+    if not isinstance(value, dict) or set(value) != fields or value['scope'] != (
+            'raw-channel-timing-not-measured-effective-duration'):
+        raise ValueError('Missing or invalid raw channel timing shape or scope')
+    if any(type(value[field]) is not int or not 0 <= value[field] <= 4294967295
+           for field in ('attributesEx', 'durationIndex', 'channelFlagMask')):
+        raise ValueError('Invalid raw channel timing value')
+    if value['channelFlagMask'] != 68 or type(value['channeled']) is not bool or (
+            value['channeled'] != bool(value['attributesEx'] & value['channelFlagMask'])):
+        raise ValueError('Raw channel flags disagree with channel classification')
+    return dict(value)
 
 
 def build_drafts(candidates, root):
@@ -166,7 +184,8 @@ def build_drafts(candidates, root):
             raw = members[spell].get('rawDbc') or {}
             ranks.append({'rankNumber': ordinal, 'spellId': spell, 'characterLevel': level,
                           'nameFromRawDbc': raw.get('name'), 'proficiencyRequired': None,
-                          'rawCastProfile': raw_cast_profile(raw)})
+                          'rawCastProfile': raw_cast_profile(raw),
+                          'rawChannelProfile': raw_channel_profile(raw)})
         baseline = ability_id in baseline_ids
         baseline_effects = {75: 58, 81: 20, 107: 23, 674: 40, 2764: 58, 3018: 58, 3124: 22, 5019: 17}
         if baseline:
@@ -210,6 +229,8 @@ def build_drafts(candidates, root):
                         'rankedSourceGroupCount': sum(len(draft['ranks']) > 1 for draft in drafts),
                         'standaloneSourceGroupCount': sum(len(draft['ranks']) == 1 for draft in drafts),
                         'nativeBaselineExclusionCount': sum(bool(draft['nativeBaselineExclusion']) for draft in drafts),
+                        'withRawChannelInfoCount': sum(all(rank.get('rawChannelProfile') for rank in draft['ranks'])
+                                                       for draft in drafts),
                         'withCandidateOutcomeCount': sum(bool(draft['candidateOutcomeRoutes']) for draft in drafts),
                         'withCandidatePeriodicOutcomeCount': sum(bool(draft['candidatePeriodicOutcomeRoutes'])
                                                                 for draft in drafts)},

@@ -187,7 +187,8 @@ def load_dbc_lookup(root, directory):
     dataset = DataSet(directory, root=root)
     table, schema, index, origin = dataset.load('Spell')
     names = ('SpellName[enUS]', 'Rank[enUS]', 'Attributes', 'BaseLevel', 'SpellLevel',
-             'CastingTimeIndex', 'RecoveryTime', 'CategoryRecoveryTime', 'StartRecoveryTime') + tuple(
+             'CastingTimeIndex', 'RecoveryTime', 'CategoryRecoveryTime', 'StartRecoveryTime',
+             'AttributesEx', 'DurationIndex') + tuple(
         name + '[' + str(effect) + ']' for name in (
             'Effect', 'EffectApplyAuraName', 'EffectTriggerSpell', 'EffectImplicitTargetA', 'EffectImplicitTargetB')
         for effect in range(3))
@@ -195,6 +196,10 @@ def load_dbc_lookup(root, directory):
     if any(name not in columns for name in names):
         raise ValueError('Reviewed Spell schema is missing a required inventory field')
     passive = next(value for value, label in dataset.enums['SpellAttr0'].items() if label == 'SPELL_ATTR0_PASSIVE')
+    channel_mask = sum(value for value, label in dataset.enums['SpellAttr1'].items()
+                       if label in {'SPELL_ATTR1_IS_CHANNELED', 'SPELL_ATTR1_IS_SELF_CHANNELED'})
+    if channel_mask != 68:
+        raise ValueError('Native channel flags require authoring review')
 
     def lookup(spell_id):
         if spell_id not in index:
@@ -220,6 +225,11 @@ def load_dbc_lookup(root, directory):
                 'implicitTargetA': values['EffectImplicitTargetA[' + str(effect) + ']'],
                 'implicitTargetB': values['EffectImplicitTargetB[' + str(effect) + ']'],
             } for effect in range(3)],
+            'channelProfile': {
+                'attributesEx': values['AttributesEx'], 'durationIndex': values['DurationIndex'],
+                'channelFlagMask': channel_mask, 'channeled': bool(values['AttributesEx'] & channel_mask),
+                'scope': 'raw-channel-timing-not-measured-effective-duration',
+            },
             'castProfile': {
                 'castingTimeIndex': values['CastingTimeIndex'],
                 'recoveryMilliseconds': values['RecoveryTime'],

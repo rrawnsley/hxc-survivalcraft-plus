@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 
 from coverage import declared_profiles, validate_rank_agreement
-from profile_drafts import verify_provenance
+from profile_drafts import raw_channel_profile, verify_provenance
 
 
 def load_cast_times(root, directory):
@@ -21,6 +21,55 @@ def load_cast_times(root, directory):
             raise ValueError('Invalid raw cast duration: ' + str(identity))
         values[identity] = value
     return values, origin
+
+
+
+def load_durations(root, directory):
+    sys.path.insert(0, str(root / 'apps/coa-dbc'))
+    from inspect_dbc import DataSet
+    dataset = DataSet(directory, root=root)
+    table, schema, index, origin = dataset.load('SpellDuration')
+    names = ('Duration', 'DurationPerLevel', 'MaxDuration')
+    columns = {field.name: field for field in schema.columns}
+    if any(name not in columns for name in names):
+        raise ValueError('Reviewed duration schema is incomplete')
+    values = {}
+    for identity, row in index.items():
+        record = {}
+        for name in names:
+            value, error = dataset.value(table, row, columns[name])
+            if error or type(value) is not int or not -2147483648 <= value <= 2147483647:
+                raise ValueError('Invalid raw duration: ' + str(identity))
+            record[name] = value
+        values[identity] = record
+    return values, origin
+
+
+def describe_channel_timing(profile, durations):
+    channel = raw_channel_profile({'channelProfile': profile})
+    duration_index = channel['durationIndex']
+    duration = durations.get(duration_index) if channel['channeled'] and duration_index else None
+    if channel['channeled'] and duration_index and duration is None:
+        raise ValueError('Missing raw channel duration record: ' + str(duration_index))
+    if not channel['channeled']:
+        status = 'not-channeled'
+    elif duration is None:
+        status = 'no-duration-reference'
+    elif duration['Duration'] == -1:
+        status = 'unbounded-raw-duration'
+    elif duration['Duration'] < 0:
+        status = 'unsupported-negative-raw-duration'
+    else:
+        status = 'finite-raw-duration'
+    constant_duration = duration['Duration'] if duration and duration['Duration'] >= 0 and (
+        duration['DurationPerLevel'] == 0 and duration['MaxDuration'] == duration['Duration']) else None
+    return {**channel, 'status': status,
+            'rawBaseDurationMilliseconds': duration['Duration'] if duration else None,
+            'rawDurationPerLevelMilliseconds': duration['DurationPerLevel'] if duration else None,
+            'rawMaximumDurationMilliseconds': duration['MaxDuration'] if duration else None,
+            'rawConstantChannelDurationMilliseconds': constant_duration,
+            'durationIncludedInCurrentInterval': constant_duration is not None,
+            'effectiveChannelDurationMeasured': False}
 
 
 def load_cadences(path, drafts):
@@ -54,7 +103,7 @@ def load_cadences(path, drafts):
 
 
 def build_pacing(drafts, minimum_minutes, target_minutes, maximum_minutes, common_interval,
-                 cast_times, cast_time_origin, cadences, cadence_origin, declarations):
+                 cast_times, cast_time_origin, cadences, cadence_origin, declarations, durations, duration_origin):
     if drafts.get('scope') != 'unapproved-definition-drafts-not-runtime-profiles' or (
             drafts.get('productionApproved') is not False):
         raise ValueError('Expected unapproved source-consistent drafts')
@@ -84,6 +133,7 @@ def build_pacing(drafts, minimum_minutes, target_minutes, maximum_minutes, commo
         bands, transitions = [], []
         for index in range(1, len(ranks)):
             previous, upcoming = ranks[index - 1], ranks[index]
+            channel = describe_channel_timing(previous.get('rawChannelProfile'), durations)
             timing = previous.get('rawCastProfile')
             if not timing or timing.get('scope') != 'raw-dbc-timing-not-measured-use-frequency':
                 raise ValueError('Missing raw timing for ranked ability: ' + str(identity))
@@ -99,7 +149,10 @@ def build_pacing(drafts, minimum_minutes, target_minutes, maximum_minutes, commo
             raw_cast_time = cast_times[cast_index] if cast_index else 0
             recovery = max(timing['recoveryMilliseconds'], timing['categoryRecoveryMilliseconds'])
             sequential_floor = max(0, raw_cast_time) + recovery
-            interval = max(cadence_interval, timing['startRecoveryMilliseconds'], sequential_floor)
+            channel_duration = channel['rawConstantChannelDurationMilliseconds']
+            channel_floor = max(0, raw_cast_time) + channel_duration if channel_duration is not None else None
+            interval = max(cadence_interval, timing['startRecoveryMilliseconds'], sequential_floor,
+                           channel_floor if channel_floor is not None else 0)
             previous_proficiency = 1 if index == 1 else 10 if index == 2 else (index - 2) * 20
             proficiency = 10 if index == 1 else (index - 1) * 20
             delta = proficiency - previous_proficiency
@@ -112,11 +165,15 @@ def build_pacing(drafts, minimum_minutes, target_minutes, maximum_minutes, commo
                                 'requiredCharacterLevel': upcoming['characterLevel'],
                                 'requiredProficiency': proficiency, 'proficiencyDelta': delta,
                                 'assumedUseIntervalMilliseconds': interval,
-                                'assumptionSource': 'maximum-cast-then-raw-recovery-global-recovery-or-authored-cadence-floor',
+                                'assumptionSource': ('maximum-cast-then-raw-recovery-constant-channel-occupancy-'
+                                                     'global-or-authored-cadence-floor'),
+                                'rawChannelTiming': channel,
+                                'requiresChannelCadenceReview': channel['channeled'],
                                 'castingTimeIndex': cast_index,
                                 'rawBaseCastMilliseconds': raw_cast_time,
                                 'rawRecoveryAfterCastMilliseconds': recovery,
                                 'rawCastAndRecoveryFloorMilliseconds': sequential_floor,
+                                'rawCastAndChannelFloorMilliseconds': channel_floor,
                                 'cooldownLifecycleExceptionsResolved': False,
                                 'baselineUsesFromPriorThresholdAndZeroPartial': uses,
                                 'estimatedBaselineCombatMilliseconds': milliseconds,
@@ -132,7 +189,10 @@ def build_pacing(drafts, minimum_minutes, target_minutes, maximum_minutes, commo
                           'proposedTrainingBands': bands,
                           'transitions': transitions,
                           'requiredReviews': sorted(set(draft['requiredReviews']) |
-                                                    {'native-cooldown-and-channel-lifecycle'}),
+                                                    {'native-cooldown-and-channel-lifecycle'} |
+                                                    ({'raw-channel-duration-and-cadence'} if any(
+                                                        value['requiresChannelCadenceReview']
+                                                        for value in transitions) else set())),
                           'reviewFlags': draft['reviewFlags'],
                           'assumedCadenceMilliseconds': cadence_interval,
                           'cadenceSource': 'authored-ability-assumption' if cadence else 'common-default-assumption',
@@ -144,15 +204,29 @@ def build_pacing(drafts, minimum_minutes, target_minutes, maximum_minutes, commo
             'maximumRankMinutes': maximum_minutes, 'assumedCommonUseIntervalMilliseconds': common_interval,
             'catchupIncluded': False, 'characterLevelWaitIncluded': False,
             'effectiveCooldownModifiersIncluded': False, 'effectiveCastingModifiersIncluded': False,
-            'channelDurationIncluded': False, 'cooldownLifecycleExceptionsResolved': False,
+            'rawChannelInfoIncluded': True, 'rawConstantChannelDurationIncluded': True,
+            'channelDurationIncluded': all(not transition['requiresChannelCadenceReview'] or
+                transition['rawChannelTiming']['durationIncludedInCurrentInterval']
+                for value in proposals for transition in value['transitions']),
+            'effectiveChannelModifiersIncluded': False,
+            'cooldownLifecycleExceptionsResolved': False,
             'measuredUseFrequency': False,
             'unrankedRewardsTuned': False, 'partialCreditScale': 30,
             'savedProgressMigrationExecutedByThisTool': False,
             'nativeVersionedConversionAvailable': True, 'sources': drafts['sources'],
             'nativeOutcomeSources': drafts['nativeOutcomeSources'], 'dbcOrigin': drafts['dbcOrigin'],
-            'castTimeDbcOrigin': cast_time_origin, 'authoredCadenceOrigin': cadence_origin,
+            'castTimeDbcOrigin': cast_time_origin, 'durationDbcOrigin': duration_origin,
+            'authoredCadenceOrigin': cadence_origin,
             'summary': {'rankedProposalCount': len(proposals),
                         'transitionCount': sum(len(value['transitions']) for value in proposals),
+                        'channeledTransitionCount': sum(transition['requiresChannelCadenceReview']
+                            for value in proposals for transition in value['transitions']),
+                        'unresolvedChannelTransitionCount': sum(transition['requiresChannelCadenceReview'] and
+                            not transition['rawChannelTiming']['durationIncludedInCurrentInterval']
+                            for value in proposals for transition in value['transitions']),
+                        'declaredChanneledTransitionCount': sum(transition['requiresChannelCadenceReview']
+                            for value in proposals if value['existingDevelopmentDeclaration']
+                            for transition in value['transitions']),
                         'authoredCadenceCount': len(cadences),
                         'declaredRankedProposalCount': sum(value['existingDevelopmentDeclaration'] is not None
                                                           for value in proposals),
@@ -178,10 +252,11 @@ def main():
     drafts = json.loads(args.drafts.read_text(encoding='utf-8'))
     verify_provenance(drafts, args.root.resolve(), args.dbc.resolve())
     cast_times, origin = load_cast_times(args.root.resolve(), args.dbc.resolve())
+    durations, duration_origin = load_durations(args.root.resolve(), args.dbc.resolve())
     cadences, cadence_origin = load_cadences(args.cadences, drafts)
     result = build_pacing(drafts, args.minimum_rank_minutes, args.target_rank_minutes,
                           args.maximum_rank_minutes, args.common_use_interval_ms, cast_times, origin,
-                          cadences, cadence_origin, declared_profiles(args.root.resolve()))
+                          cadences, cadence_origin, declared_profiles(args.root.resolve()), durations, duration_origin)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + '\n', encoding='utf-8')
     print(json.dumps(result['summary'], sort_keys=True))

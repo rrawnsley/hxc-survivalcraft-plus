@@ -131,7 +131,8 @@ def build_coverage(drafts, declarations):
         seen.add(identity)
         declaration = declarations.get(identity)
         baseline = draft.get('nativeBaselineExclusion')
-        if baseline and (declaration or identity[1] not in {75, 81, 107, 674, 2764, 3018, 3124, 5019} or len(draft['ranks']) != 1):
+        if baseline and (declaration or identity[1] not in {75, 81, 107, 674, 2764, 3018, 3124, 5019} or
+                         len(draft['ranks']) != 1):
             raise ValueError('Native baseline cannot be a development practice profile')
         if declaration and ((declaration['kind'] == 'ranked' and len(draft['ranks']) < 2) or
                             (declaration['kind'] == 'mastery' and len(draft['ranks']) != 1)):
@@ -143,6 +144,8 @@ def build_coverage(drafts, declarations):
                      'nativeBaselineExclusion': baseline,
                      'rawCastProfiles': [{'spellId': rank['spellId'], **rank['rawCastProfile']}
                          for rank in draft['ranks'] if rank.get('rawCastProfile') is not None],
+                     'rawChannelProfiles': [{'spellId': rank['spellId'], **rank['rawChannelProfile']}
+                         for rank in draft['ranks']],
                      'candidateOutcomeRoutes': draft['candidateOutcomeRoutes'],
                      'candidatePeriodicOutcomeRoutes': draft.get('candidatePeriodicOutcomeRoutes', []),
                      'actionTraits': draft['actionTraits'], 'requiredReviews': draft['requiredReviews'],
@@ -169,6 +172,8 @@ def build_coverage(drafts, declarations):
                     row['declaredDevelopmentProfile']['requiresRuntimeEquivalenceCheck']) for row in selected),
                 'declaredDevelopmentKinds': dict(sorted(kinds.items())), 'needsDefinitionCount': len(pending),
                 'nativeBaselineExclusionCount': sum(bool(row['nativeBaselineExclusion']) for row in selected),
+                'withCompleteRawChannelInfoCount': sum(len(row['rawChannelProfiles']) == row['sourceRankCount']
+                                                        for row in selected),
                 'needsDefinitionWithRawOutcomeCount': sum(bool(row['candidateOutcomeRoutes']) for row in pending),
                 'needsDefinitionWithRawPeriodicOutcomeCount': sum(bool(row['candidatePeriodicOutcomeRoutes'])
                                                                 for row in pending),

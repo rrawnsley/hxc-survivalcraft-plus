@@ -4,7 +4,7 @@ from pathlib import Path
 import re
 
 from coverage import declared_profiles
-from pacing_drafts import build_pacing, load_cadences, load_cast_times
+from pacing_drafts import build_pacing, load_cadences, load_cast_times, load_durations
 from profile_drafts import verify_provenance
 
 
@@ -99,9 +99,10 @@ def main():
     drafts = json.loads(args.drafts.read_text(encoding='utf-8'))
     verify_provenance(drafts, root, dbc)
     cast_times, origin = load_cast_times(root, dbc)
+    durations, duration_origin = load_durations(root, dbc)
     cadences, cadence_origin = load_cadences(args.cadences, drafts)
     proposals = build_pacing(drafts, 30, 45, 60, 5000, cast_times, origin,
-                             cadences, cadence_origin, declared_profiles(root))
+                             cadences, cadence_origin, declared_profiles(root), durations, duration_origin)
     declared = {(value['classId'], value['abilityId']) for value in proposals['proposals']
                 if value['existingDevelopmentDeclaration']}
     if set(cadences) - declared:
