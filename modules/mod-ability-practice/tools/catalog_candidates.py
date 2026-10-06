@@ -455,6 +455,13 @@ def main():
                 'modules/mod-ability-practice/tools/coverage.py',
                 'modules/mod-ability-practice/tools/pacing_drafts.py',
                 'modules/mod-ability-practice/tools/mastery_pacing_drafts.py',
+                'modules/mod-ability-practice/src/AbilityPracticeDevelopmentTrainerFixed.h',
+                'modules/mod-ability-practice/tools/trainer_acquisition_review.py',
+                'data/sql/updates/pending_db_world/rev_20260923_05_coa_class_trainer_core.sql',
+                'src/server/game/Entities/Creature/Trainer.h',
+                'src/server/game/Entities/Creature/Trainer.cpp',
+                'src/server/game/Globals/ObjectMgr.h',
+                'src/server/game/Globals/ObjectMgr.cpp',
                 'modules/mod-ability-practice/tools/rank_pacing_development.py',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentPacing.h',
                          'modules/mod-ability-practice/src/AbilityPracticeDevelopmentMastery.h',
@@ -524,6 +531,15 @@ def main():
     if args.dbc:
         lookup, sources = load_acquisition_lookup(args.root, args.dbc)
         annotate_acquisition(result, lookup, sources)
+        from trainer_acquisition_review import build_review, rift_mappings, source_trainers
+        owners, offers = source_trainers(args.root)
+        review = build_review(result, owners, offers, rift_mappings(args.root))
+        supplemental = {(row['classId'], row['sourceReferenceSpellId']): row for row in review['candidates']}
+        for candidate in result['candidates']:
+            identity = (candidate['classId'], candidate['sourceReferenceSpellId'])
+            if identity in supplemental:
+                candidate['nativeTrainerSourceReview'] = supplemental[identity]
+        result['summary']['supplementalTrainerSourceReview'] = review['summary']
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + '\n', encoding='utf-8')
     print(json.dumps(result['summary'], sort_keys=True))

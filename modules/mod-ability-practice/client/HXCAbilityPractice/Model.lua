@@ -178,7 +178,8 @@ local function Ability(value, schema, characterLevel)
     local session = schema == 4 and Session(value.session) or nil
     local rewards, catchup
     if schema == 4 then
-        if value.acquisitionSource ~= nil and not Integer(value.acquisitionSource, 1, 4) then return nil end
+        if value.acquisitionSource ~= nil and not Integer(value.acquisitionSource, 1, 5) then return nil end
+        if value.acquisitionSource == 5 and value.kind ~= 3 then return nil end
         if not session or not Integer(value.kind, 1, 3) or not Integer(value.route, 1, 12)
             or not Integer(value.ruleSet, 1, 6)
             or ((value.ruleSet == 3 or value.ruleSet == 6) and (value.kind ~= 1 or value.route ~= 2))
@@ -372,9 +373,9 @@ function Model.SessionLearns(snapshot, abilityId)
     return result
 end
 
-local acquisitionLabels = { "Class progression", "Talent", "Specialization", "Ability item" }
+local acquisitionLabels = { "Class progression", "Talent", "Specialization", "Ability item", "Class trainer" }
 local acquisitionSources = { "class progression", "the appropriate talent",
-    "your specialization", "the appropriate ability item" }
+    "your specialization", "the appropriate ability item", "your class trainer" }
 
 function Model.AcquisitionText(ability) return acquisitionLabels[ability.acquisitionSource] end
 

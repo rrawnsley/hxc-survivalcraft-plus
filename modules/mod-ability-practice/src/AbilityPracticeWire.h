@@ -286,7 +286,9 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
                             rank.State != RankState::MissingPrerequisite && rank.State != RankState::NeedsCharacterLevel);
                 })))
                 return std::nullopt;
-            if (view.AcquisitionSourceId > 4 || (view.RuleSet > 3) != view.Catchup.has_value())
+            if (view.AcquisitionSourceId > 5 ||
+                (view.AcquisitionSourceId == 5 && view.Kind != AbilityKind::Fixed) ||
+                (view.RuleSet > 3) != view.Catchup.has_value())
                 return std::nullopt;
             if (view.ReplacementSpellId)
             {

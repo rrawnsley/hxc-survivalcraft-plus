@@ -16,7 +16,8 @@ enum class AcquisitionSource
     ClassGrant = 1,
     Talent = 2,
     Specialization = 3,
-    Item = 4
+    Item = 4,
+    ClassTrainer = 5
 };
 
 enum class OutcomeKind
@@ -50,7 +51,11 @@ inline bool ValidateProfiles(std::span<AbilityProfile const> profiles)
     {
         AbilityProfile const& profile = profiles[index];
         AbilityDefinition const& ability = profile.Definition;
-        if (!profile.DefinitionVersion || profile.Acquisition != AcquisitionSource::ClassGrant ||
+        bool const trainerFixed = profile.Acquisition == AcquisitionSource::ClassTrainer &&
+            ability.Kind == AbilityKind::Fixed && ability.ClassId == 14 &&
+            (ability.AbilityId == 535598 || ability.AbilityId == 535599 || ability.AbilityId == 535600) &&
+            ability.Ranks.size() == 1;
+        if (!profile.DefinitionVersion || (!trainerFixed && profile.Acquisition != AcquisitionSource::ClassGrant) ||
             ability.ClassId > 255 ||
             ValidateDefinition(ability) != CatalogError::None || !ValidateMasteryRewards(ability, profile.Rewards) ||
             (ability.Kind == AbilityKind::Mastery &&

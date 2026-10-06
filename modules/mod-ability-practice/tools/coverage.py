@@ -10,9 +10,9 @@ from profile_drafts import verify_provenance
 PROFILE_HEADERS = ('AbilityPracticeDevelopmentRanked.h', 'AbilityPracticeDevelopmentPeriodic.h',
                    'AbilityPracticeDevelopmentMastery.h', 'AbilityPracticeDevelopmentHelpers.h',
                    'AbilityPracticeDevelopmentFixed.h', 'AbilityPracticeDevelopmentAbsorption.h',
-                   'AbilityPracticeDevelopmentControl.h')
+                   'AbilityPracticeDevelopmentControl.h', 'AbilityPracticeDevelopmentTrainerFixed.h')
 PROFILE_PATTERN = re.compile(
-    r'AbilityProfile\s*\{\s*Development::DefinitionVersion,\s*AcquisitionSource::ClassGrant,\s*'
+    r'AbilityProfile\s*\{\s*Development::DefinitionVersion,\s*AcquisitionSource::(?:ClassGrant|ClassTrainer),\s*'
     r'\{\s*(\d+),\s*(\d+),\s*AbilityKind::(Ranked|Mastery|Fixed)\s*,\s*([\w:]+)\s*,')
 
 
@@ -54,18 +54,22 @@ def declared_profiles(root):
         for match in matches:
             identity = (int(match[1]), int(match[2]))
             kind = match[3].lower()
+            acquisition = ('class-trainer-source-evidence' if 'AcquisitionSource::ClassTrainer' in match[0] else
+                           'class-grant-source-evidence')
             reference = match[4] if '::' in match[4] else namespace[1] + '::' + match[4]
             if reference not in arrays:
                 raise ValueError('Missing declared rank array: ' + reference)
             ranks = arrays[reference]
             if identity in result:
                 existing = result[identity]
-                if existing['kind'] != kind or existing['authoredRanks'] != ranks or relative in existing['sources']:
+                if (existing['kind'] != kind or existing['authoredRanks'] != ranks
+                        or existing['acquisitionSource'] != acquisition or relative in existing['sources']):
                     raise ValueError('Conflicting or repeated header declaration: ' + str(identity))
                 existing['sources'].append(relative)
                 existing['requiresRuntimeEquivalenceCheck'] = True
             else:
                 result[identity] = {'kind': kind, 'sources': [relative], 'authoredRanks': ranks,
+                                    'acquisitionSource': acquisition,
                                     'requiresRuntimeEquivalenceCheck': False}
     return result
 
@@ -108,6 +112,8 @@ def validate_rank_agreement(draft, declaration):
     if declaration is None:
         return
     identity = (draft['classId'], draft['abilityId'])
+    if declaration['acquisitionSource'] != draft['acquisitionSource']:
+        raise ValueError('Declared acquisition and source evidence differ: ' + str(identity))
     authored = declaration['authoredRanks']
     source = [{key: rank[key] for key in ('spellId', 'rankNumber', 'characterLevel')}
               for rank in draft['ranks']]

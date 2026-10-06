@@ -217,7 +217,8 @@ local function Accept(message, now, currentRevision, currentGeneration)
         local acquisitionSource = fields[11] and tonumber(fields[11]) or nil
         if pending.schemaVersion ~= 4 or part.T or (#fields ~= 10 and #fields ~= 11) or not abilityKind
             or not rewardCount or rewardCount > 8
-            or (acquisitionSource and (acquisitionSource < 1 or acquisitionSource > 4))
+            or (acquisitionSource and (acquisitionSource < 1 or acquisitionSource > 5))
+            or (acquisitionSource == 5 and abilityKind ~= 3)
             or abilityKind < 1 or abilityKind > 3 or (fields[5] ~= "0" and fields[5] ~= "1") then
             return Reject("Invalid ability type or session progress")
         end

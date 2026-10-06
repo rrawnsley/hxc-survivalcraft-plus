@@ -24,6 +24,13 @@ def verify_provenance(candidates, root, dbc):
                 'modules/mod-ability-practice/tools/coverage.py',
                 'modules/mod-ability-practice/tools/pacing_drafts.py',
                 'modules/mod-ability-practice/tools/mastery_pacing_drafts.py',
+                'modules/mod-ability-practice/src/AbilityPracticeDevelopmentTrainerFixed.h',
+                'modules/mod-ability-practice/tools/trainer_acquisition_review.py',
+                'data/sql/updates/pending_db_world/rev_20260923_05_coa_class_trainer_core.sql',
+                'src/server/game/Entities/Creature/Trainer.h',
+                'src/server/game/Entities/Creature/Trainer.cpp',
+                'src/server/game/Globals/ObjectMgr.h',
+                'src/server/game/Globals/ObjectMgr.cpp',
                 'modules/mod-ability-practice/tools/rank_pacing_development.py',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentPacing.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentMastery.h',
@@ -158,6 +165,23 @@ def build_drafts(candidates, root):
         if candidate.get('productionApproved') is not False or candidate.get('classification') != 'pending':
             raise ValueError('Expected unapproved review candidates')
         review = candidate.get('nativeClassGrantReview', {})
+        trainer = candidate['classId'] == 14 and candidate['sourceReferenceSpellId'] in {535598, 535599, 535600}
+        if trainer:
+            supplemental = candidate.get('nativeTrainerSourceReview', {})
+            entries = supplemental.get('members', [])
+            if (supplemental.get('status') != 'needs-effective-trainer-and-design-review'
+                    or supplemental.get('blockingFlags') or len(entries) != 1
+                    or entries[0].get('rawEffects') != [50, 0, 0] or entries[0].get('rawPassive') is not False
+                    or not entries[0].get('nativeRiftMapping')):
+                raise ValueError('Reviewed trainer rift source evidence changed')
+            offers = entries[0].get('sourceTrainerOffers', [])
+            if (len(offers) != 1 or offers[0]['trainerId'] != 900014 or offers[0]['requiredSkillLine']
+                    or offers[0]['requiredSkillRank'] or offers[0]['requiredAbilities']):
+                raise ValueError('Reviewed trainer rift prerequisites changed')
+            review = {'sourceChainConsistent': True, 'blockingFlags': [],
+                      'status': 'needs-unranked-kind-and-effective-review',
+                      'sourceRanks': [{'spellId': entries[0]['spellId'],
+                                       'characterLevel': offers[0]['characterLevel'], 'rawRankNumber': None}]}
         if review.get('sourceChainConsistent') is not True:
             continue
         if review.get('blockingFlags') or review.get('status') not in {
@@ -219,8 +243,12 @@ def build_drafts(candidates, root):
             required.append('control-original-cast-and-new-application-attribution')
         if len(ranks) == 1:
             required.append('unranked-mastery-or-fixed-design')
+        if trainer:
+            required.extend(['loaded-class-trainer-owner-and-offer', 'native-race-and-faction-eligibility',
+                             'effective-native-rift-mapping'])
         drafts.append({'classId': class_id, 'abilityId': ability_id, 'definitionVersion': None,
-                       'acquisitionSource': 'class-grant-source-evidence', 'productionApproved': False,
+                       'acquisitionSource': 'class-trainer-source-evidence' if trainer else
+                                            'class-grant-source-evidence', 'productionApproved': False,
                        'kind': None, 'outcome': None,
                        'nativeBaselineExclusion': {'source': baseline_source,
                            'reason': 'native-combat-baseline-remains-native'} if baseline else None,

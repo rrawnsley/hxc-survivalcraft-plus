@@ -159,7 +159,8 @@ def supplemental_ladders(candidates, offers, supplemental):
         root = identities[0]
         selected_links = [link for link in links if (link['classId'], link['spellId']) in identities]
         result.append({'classId': root[0], 'firstObservedSpellId': root[1],
-                       'name': records[root]['rawDbc']['name'], 'hasSourceConsistentClassGrantRoot': root in native_roots,
+                       'name': records[root]['rawDbc']['name'],
+                       'hasSourceConsistentClassGrantRoot': root in native_roots,
                        'status': 'blocked-by-source-evidence' if flags else
                                  'needs-effective-chain-and-acquisition-review',
                        'blockingFlags': sorted(flags), 'ranks': ranks, 'acquisitionLinks': selected_links,
@@ -246,9 +247,15 @@ def main():
     verify_provenance(candidates, root, dbc)
     owners, offers = source_trainers(root)
     result = build_review(candidates, owners, offers, rift_mappings(root))
-    result['sources'] = candidates['sources'] + candidates['nativeOutcomeSources'] + [
+    sources = candidates['sources'] + candidates['nativeOutcomeSources'] + [
         {'path': relative, 'sha256': hashlib.sha256((root / relative).read_bytes()).hexdigest()}
         for relative in REVIEW_SOURCES]
+    unique = {}
+    for source in sources:
+        if source['path'] in unique and unique[source['path']] != source:
+            raise ValueError('Conflicting trainer review source provenance')
+        unique[source['path']] = source
+    result['sources'] = [unique[path] for path in sorted(unique)]
     result['dbcOrigin'] = candidates['dbcOrigin']
     result['inputSha256'] = hashlib.sha256(args.candidates.read_bytes()).hexdigest()
     args.output.parent.mkdir(parents=True, exist_ok=True)

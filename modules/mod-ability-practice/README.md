@@ -2598,3 +2598,43 @@ profiles,119 ranked curves,3 mastery pacing entries and84-source catalog provena
 Another task changed SpellbookOfferData.h in the primary checkout during review; strict provenance rejected its
 stale export. Authoring moved to the clean ability-practice-catalog worktree at7043d4dee, preserving those edits.
 No native/addon change, redundant build, tests, client execution, startup or production operation is involved.
+
+## Development-only trainer fixed profiles
+
+AllowDevelopmentTrainerFixedCatalog defaults0/startup-only and adds exactly class14 Fel Rift: Orgrimmar535598,
+Thunder Bluff535599 and Undercity535600, native levels26/30/36. They use new ClassTrainer acquisition5, Fixed
+kind and one native rank with proficiency1. No saved practice, mastery bonus, automatic teaching, rank withholding
+or portal mechanic change. Normal trainer costs/learning remain native; Stonard535602 remains unsupported.
+
+Profile validation restricts ClassTrainer to those three class14 fixed roots. Startup requires exact authored
+profile equivalence, loaded trainer900014 with Class type/owner14, one exact spell offer and matching level, no
+skill/prerequisite requirements, effective nonpassive50/0/0 effects and matching explicit native portal object
+mapping. Mismatch leaves module readiness off. Trainer access reads loaded memory only; no SQL/config/file reads
+are added during casts. Character eligibility also uses the trainer's native IsSpellFitByClassAndRace and existing
+CanLearnRacialSpell/faction checks. These singleton abilities continue through the native Unmanaged learning path.
+
+Unpublished addon0.4.34/protocol4 supports acquisition5 only with Fixed kind and labels it Class trainer / Learn
+through your class trainer. Native encoder, wire decoder and model reject acquisition5 on practiceable kinds.
+Older unpublished protocol4 readers reject the new source, so native/addon qualification requires the matching
+pair. There is no launcher publication or active-client installation. Existing fixed display rules hide use bars
+and show native levels; actual trainer/menu/race/session behavior remains unqualified.
+
+Catalog candidates now include separate advisory trainer source evidence. Draft generation permits only these
+three exact reviewed singleton roots with captured/source level agreement, raw50/0/0, explicit mappings and zero
+extra trainer prerequisites. Class grants are not synthesized. Coverage checks acquisition as well as full rank
+agreement.91 native source hashes/97 distinct audit source paths;850 groups/244 ranked/606 standalone,150 unique
+profiles/152 declarations/2 shared:119 ranked/5 mastery/26 fixed.102 baselines and598 pending definitions remain.
+This does not absorb the40 supplemental rank-ladder review groups into existing practice definitions.
+
+Source2 and the fresh catalog-worktree native build passed at .cache/verify-all/20261006-055422/report.json
+(2 source checks;2998.625-second configure/build). C++ style/whitespace, five Lua5.1 syntax-only files and current
+exports passed; no addon chunks/tests/gameplay were executed. Both pacing headers reproduced before compilation
+and remain unchanged. Unit/harness/gameplay stages were skipped. No runtime startup or production operation occurred.
+
+Read-only configured-world database inspection during compilation found trainer900014 Type0/owner14 and these
+three offers at26/30/36 with zero skill/ability prerequisites. Portal objects9000143/4/5 are type10 with script
+go_ascension_felsworn_rift. Stonard has a level40 offer but remains blocked by its absent explicit source mapping.
+Queries used read-only transactions, no character rows and no stored credentials; no data was changed. These are
+database observations, not proof of loaded SpellInfo, successful casts, travel, menu rendering or learning. The
+startup callback runs after world data loads, so its trainer check reads initialized memory rather than startup
+SQL. Running CoA PID49508 and the other realm PID40616 were observed unchanged during this continuation.

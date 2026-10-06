@@ -9,6 +9,7 @@
 #include "AbilityPracticeDevelopmentMastery.h"
 #include "AbilityPracticeDevelopmentHelpers.h"
 #include "AbilityPracticeDevelopmentFixed.h"
+#include "AbilityPracticeDevelopmentTrainerFixed.h"
 #include "AbilityPracticeDevelopmentAbsorption.h"
 #include "AbilityPracticeDevelopmentControl.h"
 #include "AbilityPracticeDevelopmentMasteryPacing.h"
@@ -21,6 +22,7 @@
 #include "AscensionCustomClassData.h"
 #include "AscensionSpellProgressionData.h"
 #include "AscensionSpellEligibility.h"
+#include "AscensionFelswornData.h"
 #include "Chat.h"
 #include "Config.h"
 #include "CryptoRandom.h"
@@ -33,6 +35,7 @@
 #include "ScriptMgr.h"
 #include "Spell.h"
 #include "SpellMgr.h"
+#include "Trainer.h"
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -428,6 +431,39 @@ bool MatchesNativeClassGrant(Practice::AbilityProfile const& profile)
     return true;
 }
 
+bool MatchesNativeClassTrainer(Practice::AbilityProfile const& profile)
+{
+    auto const& authored = Practice::DevelopmentTrainerFixed::Profiles;
+    if (profile.Acquisition != Practice::AcquisitionSource::ClassTrainer ||
+        std::none_of(authored.begin(), authored.end(),
+            [&profile](Practice::AbilityProfile const& entry) { return SameProfile(profile, entry); }))
+        return false;
+    auto const& trainers = sObjectMgr->GetTrainers();
+    auto const found = trainers.find(900014);
+    if (found == trainers.end() || found->second.GetTrainerType() != Trainer::Type::Class ||
+        found->second.GetTrainerRequirement() != profile.Definition.ClassId)
+        return false;
+    auto const& rank = profile.Definition.Ranks.front();
+    auto const& spells = found->second.GetSpells();
+    if (std::count_if(spells.begin(), spells.end(),
+            [&rank](Trainer::Spell const& entry) { return entry.SpellId == rank.SpellId; }) != 1)
+        return false;
+    Trainer::Spell const* offer = found->second.GetSpell(rank.SpellId);
+    if (!offer || offer->ReqLevel != rank.Requirement.CharacterLevel || offer->ReqSkillLine || offer->ReqSkillRank ||
+        std::any_of(offer->ReqAbility.begin(), offer->ReqAbility.end(), [](uint32 spell) { return spell != 0; }))
+        return false;
+    SpellInfo const* info = sSpellMgr->GetSpellInfo(rank.SpellId);
+    if (!info || info->IsPassive() || info->Effects[EFFECT_0].Effect != SPELL_EFFECT_TRANS_DOOR ||
+        info->Effects[EFFECT_1].Effect || info->Effects[EFFECT_2].Effect)
+        return false;
+    return std::count_if(std::begin(FelswornRifts), std::end(FelswornRifts),
+        [&rank, info](FelswornRift const& entry)
+        {
+            return entry.spell == rank.SpellId && entry.entry &&
+                info->Effects[EFFECT_0].MiscValue == static_cast<int32>(entry.entry);
+        }) == 1;
+}
+
 bool MatchesEffectiveRankChain(Practice::AbilityDefinition const& ability)
 {
     std::size_t present = 0;
@@ -522,8 +558,12 @@ std::uint32_t NativeReplacement(Player const* player, Practice::AbilityDefinitio
 
 bool AcquisitionAllowed(Player const* player, Practice::AbilityDefinition const& ability, std::uint32_t spellId)
 {
+    auto const* profile = FindProfile(player, ability.AbilityId);
+    bool const trainer = profile && profile->Acquisition == Practice::AcquisitionSource::ClassTrainer;
     return player && player->getClass() == ability.ClassId && !ability.Ranks.empty() &&
         !NativeReplacement(player, ability) &&
+        (!trainer || (player->IsSpellFitByClassAndRace(ability.Ranks.front().SpellId) &&
+            player->IsSpellFitByClassAndRace(spellId))) &&
         AscensionAcquisition::CanLearnRacialSpell(player, ability.Ranks.front().SpellId) &&
         AscensionAcquisition::CanLearnRacialSpell(player, spellId);
 }
@@ -1209,6 +1249,8 @@ public:
         bool const classSamples = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentClassSamples", false);
         bool const rankedCatalog = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentRankedCatalog", false);
         bool const fixedCatalog = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentFixedCatalog", false);
+        bool const trainerFixedCatalog =
+            sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentTrainerFixedCatalog", false);
         std::span<Practice::AbilityProfile const> const selected =
             SelectProfiles(classSamples, rankedCatalog);
         RuntimeProfiles.assign(selected.begin(), selected.end());
@@ -1222,6 +1264,8 @@ public:
         bool const absorptionValid = !AbsorptionRequested ||
             AppendProfiles(RuntimeProfiles, Practice::DevelopmentAbsorption::Profiles);
         bool const fixedValid = !fixedCatalog || AppendProfiles(RuntimeProfiles, Practice::DevelopmentFixed::Profiles);
+        bool const trainerFixedValid = !trainerFixedCatalog ||
+            AppendProfiles(RuntimeProfiles, Practice::DevelopmentTrainerFixed::Profiles);
         bool const controlValid = !ControlRequested ||
             AppendProfiles(RuntimeProfiles, Practice::DevelopmentControl::Profiles);
         bool const pacingValid = !PacingRequested || ApplyDevelopmentPacing(RuntimeProfiles);
@@ -1229,7 +1273,7 @@ public:
         std::span<Practice::AbilityProfile const> const profiles(RuntimeProfiles);
         ProfileLookup.emplace(profiles);
         Ready = ProfileLookup->IsValid() && periodicValid && masteryValid && helpersValid && fixedValid &&
-            absorptionValid && controlValid && pacingValid && masteryPacingValid &&
+            absorptionValid && controlValid && pacingValid && masteryPacingValid && trainerFixedValid &&
             Practice::ValidCatchupSettings(Catchup);
         for (Practice::AbilityProfile const& profile : profiles)
         {
@@ -1241,10 +1285,12 @@ public:
                 LOG_ERROR("module.ability_practice", "Rejected catch-up policy: class={}, ability={}",
                     profile.Definition.ClassId, profile.Definition.AbilityId);
             }
-            if (!MatchesNativeClassGrant(profile))
+            bool const acquisitionValid = profile.Acquisition == Practice::AcquisitionSource::ClassTrainer ?
+                MatchesNativeClassTrainer(profile) : MatchesNativeClassGrant(profile);
+            if (!acquisitionValid)
             {
                 Ready = false;
-                LOG_ERROR("module.ability_practice", "Rejected class-grant acquisition: class={}, ability={}",
+                LOG_ERROR("module.ability_practice", "Rejected native acquisition: class={}, ability={}",
                     profile.Definition.ClassId, profile.Definition.AbilityId);
             }
             if (!MatchesEffectiveRankChain(profile.Definition))

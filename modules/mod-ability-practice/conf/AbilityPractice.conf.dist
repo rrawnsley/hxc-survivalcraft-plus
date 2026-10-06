@@ -37,6 +37,10 @@ AbilityPractice.AllowDevelopmentScriptedObservation = 0
 # They keep normal acquisition/full function and earn no practice. No training bar or invented ranks.
 AbilityPractice.AllowDevelopmentFixedCatalog = 0
 
+# Optional three reviewed Horde Fel Rift trainer abilities. Startup-only, disabled by default.
+# Loaded trainer ownership/levels and native rift mappings must match. No practice or automatic teaching.
+AbilityPractice.AllowDevelopmentTrainerFixedCatalog = 0
+
 # Optional catch-up for neglected abilities. Startup-only, unapproved development balance.
 # Boost practice when proficiency is at least Gap behind the current cap; stop below that gap.
 # Gap must be 1-500 and multiplier 2-4 when enabled. No saved progress is retroactively multiplied.
