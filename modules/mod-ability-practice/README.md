@@ -3221,3 +3221,17 @@ Source2/native31.6s passed .cache/verify-all/20261006-203259/report.json. C++ st
 105-source exports and five Lua5.1 syntax parses passed. An initial export duplicate provenance
 entry was rejected and removed; final exports passed. No tests, addon execution, native startup,
 actual stacking/gameplay/menu qualification, active-client install or production changes. All flags0.
+
+## Paused buff menu categories — 6 October 2026
+
+Unpublished addon0.4.39-development/protocol4 uses shared model predicates for current training
+and paused practice. A learned trainable buff without ready owned-effect state belongs in Paused;
+it is omitted from Training and currently trainable uses sorting. Detail/list progress bars grey
+while paused. Earned points and server forecasts remain visible. Capped/unlearned and other routes
+retain their existing categories. Catch-up text identifies an available future rate while buff
+practice is paused, and stale snapshot labels remain explicit. Shorter readiness wording reduces
+layout pressure; actual client geometry and execution still need qualification.
+
+Five Lua5.1 files syntax parsed; no addon chunks executed. Whitespace passed. Native code remained
+unchanged from1759bc7 and its source2/native31.6s passing203259 report, so no native rebuild was run.
+No tests, gameplay, startup, active-client install or production operations. All flags0.

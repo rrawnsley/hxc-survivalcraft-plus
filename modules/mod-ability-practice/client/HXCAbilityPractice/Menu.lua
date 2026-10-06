@@ -176,16 +176,16 @@ local function FilterPreference()
 end
 
 local function MatchesFilter(ability, mode)
-    if mode == "training" then return ability.availability == 4 end
+    if mode == "training" then return Model.Practicing(ability) end
     if mode == "capped" then return ability.availability == 5 end
-    if mode == "paused" then return ability.availability == 2 or ability.availability == 3 end
+    if mode == "paused" then return Model.PracticePaused(ability) end
     if mode == "unlearned" then return ability.learnedRank == 0 end
     return true
 end
 
 local function TrainableMilestoneUses(ability)
     local milestone = Model.NextMilestone(ability)
-    if ability.availability ~= 4 or ability.learnedRank == 0 or not milestone
+    if not Model.Practicing(ability) or ability.learnedRank == 0 or not milestone
         or milestone.state ~= 4 or milestone.characterLevel > snapshot.characterLevel
         or milestone.practice.status ~= 1 then return nil end
     return milestone.practice.uses
@@ -283,10 +283,11 @@ local function RenderDetail(ability)
             (math.floor(100 * ability.points / ability.pointsPerLevel) .. "% to the next proficiency point")
         if ability.catchup and ability.catchup.boosted and ability.availability == 4 then
             label = label .. " · " .. ability.catchup.multiplier .. "x "
-                .. (syncState == "current" and "catch-up" or "saved boost")
+                .. (syncState ~= "current" and "saved boost"
+                    or Model.Practicing(ability) and "catch-up" or "boost eligible")
         end
         progressLabel:SetText(label)
-        if ability.availability == 2 or ability.availability == 3 then
+        if Model.PracticePaused(ability) then
             progress:SetStatusBarColor(0.45, 0.45, 0.45)
         elseif capped and not Model.NextMilestone(ability) then
             progress:SetStatusBarColor(0.35, 0.72, 0.43)
@@ -457,7 +458,7 @@ Refresh = function()
                 row.progress:Show()
                 row.progress:SetValue(ability.proficiency >= ability.cap and 1
                     or ability.points / ability.pointsPerLevel)
-                if ability.availability == 2 or ability.availability == 3 then
+                if Model.PracticePaused(ability) then
                     row.progress:SetStatusBarColor(0.45, 0.45, 0.45)
                 elseif ability.availability == 5 then
                     if rank then row.progress:SetStatusBarColor(0.81, 0.62, 0.24)

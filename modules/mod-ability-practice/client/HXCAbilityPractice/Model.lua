@@ -394,6 +394,15 @@ end
 
 function Model.IsMastery(ability) return ability.kind == 2 end
 
+function Model.PracticePaused(ability)
+    return ability.availability == 2 or ability.availability == 3
+        or (ability.availability == 4 and ability.route == 13 and ability.buffState ~= 3)
+end
+
+function Model.Practicing(ability)
+    return ability.availability == 4 and not Model.PracticePaused(ability)
+end
+
 function Model.NextMastery(ability)
     for _, reward in ipairs(ability.rewards or {}) do
         if reward.state ~= 1 then return reward end
@@ -537,12 +546,17 @@ end
 function Model.CatchupText(ability, saved)
     if not ability.catchup then return nil end
     local prefix = saved and "Saved catch-up: " or "Catch-up: "
-    if ability.availability == 4 then
+    if Model.Practicing(ability) then
         return prefix .. (ability.catchup.boosted and (ability.catchup.multiplier .. "x training is active.")
             or "normal training rate.")
     end
     if ability.availability == 5 then return prefix .. "inactive at the current cap." end
-    if ability.availability == 2 or ability.availability == 3 then return prefix .. "paused with training." end
+    if Model.PracticePaused(ability) then
+        if ability.availability == 4 and ability.catchup.boosted then
+            return prefix .. ability.catchup.multiplier .. "x rate available when buff practice resumes."
+        end
+        return prefix .. "paused with training."
+    end
     return prefix .. "learn this ability first; the boost requires a gap of "
         .. ability.catchup.gap .. " proficiency behind the current cap."
 end
@@ -552,13 +566,13 @@ function Model.BuffStateText(ability, saved)
     local states = {
         [1] = "Cast your own buff to earn practice.",
         [2] = "Reapply your buff to earn practice.",
-        [3] = "Your buff is ready for qualifying combat casts.",
+        [3] = "Your buff is ready for combat practice.",
         [4] = "Buff practice requirements are unavailable.",
-        [5] = "A stronger buff or inactive effect is blocking practice."
+        [5] = "Stronger or inactive effect; practice paused."
     }
     local text = states[ability.buffState]
     if ability.buffState == 3 and ability.availability == 5 then
-        text = "Your buff is active; the current training cap is reached."
+        text = "Owned buff active; current cap reached."
     end
     return text and ((saved and "Saved update: " or "Last update: ") .. text) or nil
 end
@@ -635,8 +649,10 @@ function Model.PracticeRules(ability, saved)
             .. ability.catchup.gap .. " or more proficiency behind its current cap."
             .. " The boost ends when the gap falls below " .. ability.catchup.gap .. "."
             .. " Uses-remaining forecasts include the change in rate."
-        if ability.availability == 4 then
+        if Model.Practicing(ability) then
             rule = rule .. (ability.catchup.boosted and " Catch-up is active." or " Normal training rate is active.")
+        elseif Model.PracticePaused(ability) then
+            rule = rule .. " Training is paused; the forecast counts qualifying uses after practice resumes."
         end
     end
     return rule .. "\n\nOpponents that are too low level, players, player-controlled units, pets, totems,"
