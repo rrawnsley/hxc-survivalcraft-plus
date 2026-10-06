@@ -181,6 +181,9 @@ def build_pacing(drafts, minimum_minutes, target_minutes, maximum_minutes, commo
             channel_floor = max(0, raw_cast_time) + channel_duration if channel_duration is not None else None
             interval = max(cadence_interval, timing['startRecoveryMilliseconds'], sequential_floor,
                            channel_floor if channel_floor is not None else 0)
+            buff_combat = draft.get('ownedStatBuffReview') is not None
+            if buff_combat:
+                interval = max(5000, cadence_interval)
             previous_proficiency = rank_proficiency(index - 1)
             proficiency = rank_proficiency(index)
             earliest_completion = next((cap['characterLevel'] for cap in rank_caps['caps']
@@ -199,8 +202,9 @@ def build_pacing(drafts, minimum_minutes, target_minutes, maximum_minutes, commo
                                 'practiceCanCompleteBeforeRankLevel': earliest_completion is not None and
                                     earliest_completion < upcoming['characterLevel'],
                                 'assumedUseIntervalMilliseconds': interval,
-                                'assumptionSource': ('maximum-cast-then-raw-recovery-constant-channel-occupancy-'
-                                                     'global-or-authored-cadence-floor'),
+                                'assumptionSource': ('original-combat-action-cadence-not-buff-application-timing'
+                                    if buff_combat else 'maximum-cast-then-raw-recovery-constant-channel-occupancy-'
+                                    'global-or-authored-cadence-floor'),
                                 'rawChannelTiming': channel,
                                 'requiresChannelCadenceReview': channel['channeled'],
                                 'castingTimeIndex': cast_index,

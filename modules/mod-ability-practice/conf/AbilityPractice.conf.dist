@@ -79,7 +79,7 @@ AbilityPractice.AllowDevelopmentMasteryPacing = 0
 # Actual PvE damage earns one shared original-cast use; self healing earns no additional use.
 AbilityPractice.AllowDevelopmentDirectLeech = 0
 
-# Experimental Brutal Shout and Enduring Shout ranks earned through combat casts while your own buff is active.
+# Experimental thirteen reviewed stat-buff tracks; combat casts practice buffs you applied to yourself.
 # Requires development rank pacing and trainer rank extensions for the complete seven-rank ladder.
 # Each buff has separate application provenance and a5s practice floor; applications alone earn nothing.
 AbilityPractice.AllowDevelopmentBuffContribution = 0

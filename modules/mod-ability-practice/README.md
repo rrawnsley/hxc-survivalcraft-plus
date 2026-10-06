@@ -3360,3 +3360,43 @@ counter/gate/benefit or automatic teaching. Existing racial/faction acquisition 
 850 runtime-unqualified groups. VERIFY ALL: PASSED211816 source2/no selected suites/native31.0s;
 style/whitespace/actual exports passed. Addon0.4.40/protocol4 unchanged; no new Lua syntax run needed.
 No tests, native startup, visual/lock/menu/gameplay execution, active install or production changes.
+
+## Complete source stat-buff ladders across classes — 6 October 2026
+
+The disabled owned stat-buff catalog adds eleven complete native source/trainer ladders:
+Inquisitor's Edict15/706741, Call of the Storm16/578311, Gift of Zeal19/706634,
+Bloodsoaked Offering20/572400, Nozdormu's Wisdom22/572391, Foul Mandate23/800199,
+Seal of Alysrazor24/800196, Celestial Mind26/300255, Spider Pheromones29/803177,
+Rite of Resolve30/800198 and Etching of the Dextrous32/561237.57 source ranks retain their
+actual levels and native power. Each is active APPLY_AURA6/MOD_STAT29/friendly target21,
+one reviewed stat selector0-4 and no secondary effects or triggers. Source authoring checked
+the entire same-name SQL trainer set, unique offer, exact native level/zero skill/prerequisite
+against the complete source ladder before creating the arrays. No matching source C++ root
+handlers were found; effective loaded script/data behavior remains unqualified.
+
+Loaded validation now uses per-profile target/stat mechanics and unique class trainer900000+class
+offers for all source-complete stat buffs. Previous Brutal Shout extension validation remains.
+Mechanic/profile counts are compile-time equal; duplicate mechanic identities resolve unavailable.
+Reviewed source shape metadata must match every raw rank and every native declared profile.
+Friendly buffs practice only from an accepted own application on yourself, while qualifying combat
+actions occur; applications on others do not become your owned self buff. Existing independent
+receipts, cast-start masks, floors, dedup, suppression and menus apply unchanged. No native stat
+power/stacking or class/race eligibility changes. One-rank-ahead definition4 composes normally.
+
+Pacing source reports explicitly use original combat cadence rather than the buff application's
+cast/cooldown occupancy. A floor5s and common assumed5s yield540 qualifying uses/45min per transition
+before catch-up. Additive version2 generation preserved every preceding124 native entry and adds
+eleven, now135. Nine existing version3 trainer extension definitions/pacing reproduced unchanged.
+Unimplemented Illidari Intuition has higher offers with gaps/nonmonotonic rank-level evidence;
+Sanguinary Offering and Chromie's Wisdom have additional higher trainer ranks. Those three remain
+pending explicit complete-ladder/version/migration work, not silently treated as complete prefixes.
+
+225 unique profiles/227 declarations,135 ranked/7 mastery/83 Fixed,478 pending(91 ranked/387
+standalone),147 baselines/106 hashes;850 source groups runtime-unqualified. Thirteen buff tracks
+cover twelve classes. An initial authoring parser counted the C++ type declaration as a row;
+the corrected parser strictly reads the initializer body and final exports passed.
+
+VERIFY ALL: PASSED212214 source2/no selected suites/native30.9s, style/whitespace and actual
+source/coverage/pacing/trainer exports passed. Addon0.4.40/protocol4 unchanged; no repeat Lua parsing.
+No tests, native startup, migration/menu/gameplay execution, active install or production changes.
+All switches0; owned-buff rules remain an isolated reversible design draft.

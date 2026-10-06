@@ -183,7 +183,34 @@ def reviewed_passive_baseline_classes(root):
     return expected
 
 
+def reviewed_stat_buffs(root):
+    text = (root / 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentBuffs.h').read_text(encoding='utf-8')
+    body = re.search(r'inline\s+constexpr\s+std::array\s+Mechanics\s*=\s*\{(.*?)\};', text, re.DOTALL)
+    if body is None:
+        raise ValueError('Missing owned stat-buff mechanic catalog')
+    pattern = r'Mechanic\s*\{\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+)\s*\}'
+    matches = list(re.finditer(pattern, body[1]))
+    if not matches or re.sub(pattern, '', body[1]).replace(',', '').strip():
+        raise ValueError('Unsupported owned stat-buff mechanic declaration')
+    profiles = {(int(value[1]), int(value[2])) for value in re.finditer(
+        r'\{\s*(\d+),\s*(\d+),\s*AbilityKind::Ranked,', text)}
+    result = {}
+    for match in matches:
+        class_id, ability_id, target, stat = map(int, match.groups())
+        if not 12 <= class_id <= 32 or not ability_id or target not in {21, 56} or stat not in range(5):
+            raise ValueError('Unsupported owned stat-buff mechanic')
+        identity = (class_id, ability_id)
+        if identity in result:
+            raise ValueError('Duplicate owned stat-buff mechanic')
+        result[identity] = {'scope': 'reviewed-source-shape-not-effective-runtime-buff',
+                            'targetA': target, 'statSelector': stat}
+    if set(result) != profiles:
+        raise ValueError('Owned stat-buff profiles and mechanics differ')
+    return result
+
+
 def build_drafts(candidates, root):
+    stat_buffs = reviewed_stat_buffs(root)
     baseline_source = 'modules/mod-ability-practice/src/AbilityPracticeBaseline.h'
     baseline_text = (root / baseline_source).read_text(encoding='utf-8')
     baseline_match = re.search(r'NativeBaselineSpells\s*=\s*\{([\d,\s]+)\}\s*;', baseline_text)
@@ -349,7 +376,18 @@ def build_drafts(candidates, root):
                         v.get('miscValue'), v.get('basePoints')) for v in details] != expected):
                 raise ValueError('Reviewed lock utility source/raw evidence changed')
             required.append('native-lock-requirements-and-existing-skill-progression-preserved')
-        if class_id == 12 and ability_id in {300857, 680302}:
+        if (class_id, ability_id) in stat_buffs:
+            mechanic = stat_buffs[(class_id, ability_id)]
+            expected = [(6, 29, mechanic['targetA'], 0, 0, mechanic['statSelector']),
+                        (0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0)]
+            for rank in ranks:
+                raw = members[rank['spellId']].get('rawDbc', {})
+                details = raw.get('effectDetails', [])
+                if raw.get('passive') is not False or len(details) != 3 or [(v.get('effectId'),
+                        v.get('auraId'), v.get('implicitTargetA'), v.get('implicitTargetB'),
+                        v.get('triggerSpellId'), v.get('miscValue')) for v in details] != expected or (
+                        type(details[0].get('basePoints')) is not int or details[0]['basePoints'] < 0):
+                    raise ValueError('Reviewed owned stat-buff source shape changed')
             required.extend(['owned-buff-original-application-and-combat-cast-contribution',
                              'buff-contribution-five-second-cadence-and-per-cast-deduplication',
                              'independent-owned-buff-origin-eligibility-and-cadence',
@@ -395,6 +433,7 @@ def build_drafts(candidates, root):
                        'proficiencyCaps': [], 'trainingBands': [], 'masteryRewards': [],
                        'reviewFlags': list(candidate['reviewFlags']),
                        'actionTraits': list(candidate['rawActionReview']['traits']),
+                       'ownedStatBuffReview': stat_buffs.get((class_id, ability_id)),
                        'requiredReviews': required})
     if passive_drafts != passive_classes:
         raise ValueError('Reviewed passive baseline class grants are incomplete')

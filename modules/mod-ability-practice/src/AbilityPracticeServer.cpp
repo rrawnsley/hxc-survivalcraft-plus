@@ -514,7 +514,7 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
             auto const& slot = info->Effects[index];
             if (slot.Effect != (index == 0 ? SPELL_EFFECT_APPLY_AURA : 0u) ||
                 slot.ApplyAuraName != (index == 0 ? SPELL_AURA_MOD_STAT : 0u) ||
-                slot.TargetA.GetTarget() != (index == 0 ? TARGET_UNIT_CASTER_AREA_RAID : 0u) ||
+                slot.TargetA.GetTarget() != (index == 0 ? Practice::DevelopmentBuffs::Target(profile) : 0u) ||
                 slot.TargetB.GetTarget() || slot.TriggerSpell ||
                 slot.MiscValue != (index == 0 ? Practice::DevelopmentBuffs::StatSelector(profile) : 0))
                 return false;
@@ -709,12 +709,13 @@ bool MatchesNativeClassGrant(Practice::AbilityProfile const& profile)
 
 bool MatchesStatBuffTrainer(Practice::AbilityProfile const& profile)
 {
-    if (!Practice::DevelopmentBuffs::IsSupportedStatBuff(profile) || profile.Definition.AbilityId != 680302)
+    if (!Practice::DevelopmentBuffs::IsSupportedStatBuff(profile) || profile.Definition.AbilityId == 300857)
         return true;
-    if (profile.Definition.Ranks.size() != Practice::DevelopmentBuffs::EnduringShout.size())
+    auto const* mechanic = Practice::DevelopmentBuffs::MechanicFor(profile);
+    if (!mechanic || profile.Definition.Ranks.size() < 2)
         return false;
     auto const& trainers = sObjectMgr->GetTrainers();
-    auto const found = trainers.find(900012);
+    auto const found = trainers.find(900000 + profile.Definition.ClassId);
     if (found == trainers.end() || found->second.GetTrainerType() != Trainer::Type::Class ||
         found->second.GetTrainerRequirement() != profile.Definition.ClassId)
         return false;
