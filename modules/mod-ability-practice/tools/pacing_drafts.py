@@ -87,7 +87,9 @@ def build_pacing(drafts, minimum_minutes, target_minutes, maximum_minutes, commo
             if cast_index and cast_index not in cast_times:
                 raise ValueError('Missing raw casting-time record: ' + str(cast_index))
             raw_cast_time = cast_times[cast_index] if cast_index else 0
-            interval = max(cadence_interval, max(0, raw_cast_time), *intervals)
+            recovery = max(timing['recoveryMilliseconds'], timing['categoryRecoveryMilliseconds'])
+            sequential_floor = max(0, raw_cast_time) + recovery
+            interval = max(cadence_interval, timing['startRecoveryMilliseconds'], sequential_floor)
             previous_proficiency = 1 if index == 1 else 10 if index == 2 else (index - 2) * 20
             proficiency = 10 if index == 1 else (index - 1) * 20
             delta = proficiency - previous_proficiency
@@ -100,9 +102,12 @@ def build_pacing(drafts, minimum_minutes, target_minutes, maximum_minutes, commo
                                 'requiredCharacterLevel': upcoming['characterLevel'],
                                 'requiredProficiency': proficiency, 'proficiencyDelta': delta,
                                 'assumedUseIntervalMilliseconds': interval,
-                                'assumptionSource': 'maximum-raw-recovery-cast-duration-or-authored-cadence-floor',
+                                'assumptionSource': 'maximum-cast-then-raw-recovery-global-recovery-or-authored-cadence-floor',
                                 'castingTimeIndex': cast_index,
                                 'rawBaseCastMilliseconds': raw_cast_time,
+                                'rawRecoveryAfterCastMilliseconds': recovery,
+                                'rawCastAndRecoveryFloorMilliseconds': sequential_floor,
+                                'cooldownLifecycleExceptionsResolved': False,
                                 'baselineUsesFromPriorThresholdAndZeroPartial': uses,
                                 'estimatedBaselineCombatMilliseconds': milliseconds,
                                 'withinAssumedTargetWindow': minimum_minutes * 60000 <= milliseconds <= (
@@ -112,7 +117,9 @@ def build_pacing(drafts, minimum_minutes, target_minutes, maximum_minutes, commo
                           'nameFromRawDbc': ranks[0]['nameFromRawDbc'], 'definitionVersion': None,
                           'productionApproved': False, 'runtimeQualified': False,
                           'requiresSavedProgressMigrationReview': True, 'proposedTrainingBands': bands,
-                          'transitions': transitions, 'requiredReviews': draft['requiredReviews'],
+                          'transitions': transitions,
+                          'requiredReviews': sorted(set(draft['requiredReviews']) |
+                                                    {'native-cooldown-and-channel-lifecycle'}),
                           'reviewFlags': draft['reviewFlags'],
                           'assumedCadenceMilliseconds': cadence_interval,
                           'cadenceSource': 'authored-ability-assumption' if cadence else 'common-default-assumption',
@@ -124,7 +131,8 @@ def build_pacing(drafts, minimum_minutes, target_minutes, maximum_minutes, commo
             'maximumRankMinutes': maximum_minutes, 'assumedCommonUseIntervalMilliseconds': common_interval,
             'catchupIncluded': False, 'characterLevelWaitIncluded': False,
             'effectiveCooldownModifiersIncluded': False, 'effectiveCastingModifiersIncluded': False,
-            'channelDurationIncluded': False, 'measuredUseFrequency': False,
+            'channelDurationIncluded': False, 'cooldownLifecycleExceptionsResolved': False,
+            'measuredUseFrequency': False,
             'unrankedRewardsTuned': False, 'partialCreditScale': 30,
             'savedProgressMigrationImplemented': False, 'sources': drafts['sources'],
             'nativeOutcomeSources': drafts['nativeOutcomeSources'], 'dbcOrigin': drafts['dbcOrigin'],

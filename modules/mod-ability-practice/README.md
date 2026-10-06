@@ -2132,3 +2132,18 @@ when catch-up needs a derived buffer; disabled catch-up retains the original pol
 
 Source/native compilation passed in .cache/verify-all/20261006-002731/report.json (two source checks,31.5s
 native build), plus C++ style/whitespace. Unit/harness/gameplay stages skipped; no rate activation or deployment.
+
+## Cast and recovery sequencing in pacing proposals
+
+Pacing proposals now assume base cast time followed by the larger raw spell/category recovery timer, rather
+than treating those phases as fully overlapping. The interval is the maximum of that sum, raw start recovery
+and the authored cadence. This follows the ordinary source path: prepare schedules cast time and global
+recovery, while cast calls SendSpellCooldown and AddSpellAndCategoryCooldowns after cast completion. The export
+retains both base and recovery components and adds a native-cooldown-and-channel-lifecycle review for each
+proposal. Cooldowns started on events, passive/triggered exceptions, native class corrections, channel duration
+and other effective modifiers remain unresolved. This supersedes the previous maximum-of-cast-and-recovery
+assumption, without claiming observed frequency or changing native rates.
+
+Source checks passed in .cache/verify-all/20261006-002853/report.json (two checks);64-source exports refreshed.
+The244 ranked proposals/1412 transitions remain within30–60minutes under the default assumptions. Native C++
+remains the002731 passing build; no tests, actual-frequency measurements or production operations performed.
