@@ -2522,3 +2522,21 @@ VERIFY ALL PASSED .cache/verify-all/20261006-051657/report.json: source2(no suit
 C++ style/whitespace and final authoring exports passed. Addon0.4.33 unchanged; no redundant Lua checks, tests,
 client chunks/gameplay/startup/production operations. Damage integer safety already clamps to native signed
 maximum; inspected existing implementation and made no redundant change.
+
+
+## Unranked mastery pace authoring
+
+The provenance-checked tools/mastery_pacing_drafts.py reads actual authored mastery profiles/policies/rewards,
+validates source rank agreement, raw common outcome, caps/milestones and integer bounds, then reports baseline
+source arithmetic per reward from the prior milestone with zero partial credit. Raw cast/recovery/global/
+constant-channel floors share the ranked authoring readers; ordinary qualifying frequency remains unmeasured.
+It does not execute native forecasts, catch-up, existing progress or client/gameplay. Future curve changes must
+receive explicit saved-progress migration review; this report changes no native policy.
+
+All5 profiles/15 milestones are covered. The new Stomp/Trample curves estimate45min each. Old Hand of Elune
+estimates73.75/75/75min at5s; Vile Sting118/120/120min at8s; Soulslam663.75/675/675min at45s. Nine old milestones
+lie outside the assumed30-60min target, exposing the remaining original unranked pacing gap. These are source
+assumptions, not measured play. Existing curves remain intact pending an authored version/migration path.
+Output: .cache/ability-practice/mastery-pacing-drafts.json. Provenance now83 sources, catalog counts unchanged.
+Source .cache/verify-all/20261006-052320/report.json passed2 checks; whitespace and exports passed. Native unchanged
+from051657; no redundant build. No tests/client chunks/gameplay/startup/production operations.

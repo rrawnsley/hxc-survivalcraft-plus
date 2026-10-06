@@ -454,6 +454,7 @@ def main():
                 'modules/mod-ability-practice/tools/profile_drafts.py',
                 'modules/mod-ability-practice/tools/coverage.py',
                 'modules/mod-ability-practice/tools/pacing_drafts.py',
+                'modules/mod-ability-practice/tools/mastery_pacing_drafts.py',
                 'modules/mod-ability-practice/tools/rank_pacing_development.py',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentPacing.h',
                          'modules/mod-ability-practice/src/AbilityPracticeDevelopmentMastery.h',
