@@ -2014,3 +2014,19 @@ Source/native passed in .cache/verify-all/20261006-000409/report.json (two sourc
 build), with C++ style/whitespace and 61-source export refresh passing. Runtime/menu rendering qualification
 remains deferred; no unit/harness/gameplay tests or production changes were performed. Catalog123unique/
 125declared and addon0.4.28 are unchanged. Report dates are UTC; this local checkpoint remains 5 October.
+
+
+## Qualification queues for declared profiles — 5 October 2026 local
+
+Coverage preserves qualificationReviewQueues for every source group, including abilities that already have a
+development header declaration. Existing pendingReviewQueues still describe only missing definitions. Separate
+class/global declaredReviewQueueCounts and qualificationReviewQueueCounts keep runtime/balance reviews visible;
+all queue categories overlap and cannot be added as unique abilities. Explicit unqualified counters currently
+report all 847 source groups and all 123 declared development profiles as unqualified. This is declaration
+coverage, not effective-data/gameplay/balance approval; no evidence or decisions are fabricated.
+
+The declared groups still carry 38 triggered-attribution, 16 scripted-outcome, 16 periodic-attribution and
+three unknown-effect reviews, among overlapping queues. Fixed/helper profiles remain visible even where a raw
+common direct outcome is absent. Source checks passed in .cache/verify-all/20261006-000736/report.json (two
+checks), and the 61-source authoring exports refreshed. Native/gameplay/addon code and the previous passing
+native build are unchanged; unit/harness/gameplay were skipped. No production operations were performed.

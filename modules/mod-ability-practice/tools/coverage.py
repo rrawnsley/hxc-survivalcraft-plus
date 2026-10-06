@@ -89,6 +89,7 @@ def build_coverage(drafts, declarations):
                      'actionTraits': draft['actionTraits'], 'requiredReviews': draft['requiredReviews'],
                      'reviewFlags': draft['reviewFlags'],
                      'pendingReviewQueues': [] if declaration else review_queues(draft),
+                     'qualificationReviewQueues': review_queues(draft),
                      'practiceDecision': 'unreviewed',
                      'productionApproved': False, 'runtimeQualified': False})
     if set(declarations) - seen:
@@ -98,6 +99,7 @@ def build_coverage(drafts, declarations):
 
     def summarize(selected):
         pending = [row for row in selected if not row['declaredDevelopmentProfile']]
+        declared = [row for row in selected if row['declaredDevelopmentProfile']]
         kinds = Counter(row['declaredDevelopmentProfile']['kind'] for row in selected
                         if row['declaredDevelopmentProfile'])
         return {'sourceGroupCount': len(selected), 'declaredDevelopmentProfileCount': sum(kinds.values()),
@@ -111,6 +113,12 @@ def build_coverage(drafts, declarations):
                                                                 for row in pending),
                 'pendingRankedGroupCount': sum(row['sourceRankCount'] > 1 for row in pending),
                 'pendingStandaloneGroupCount': sum(row['sourceRankCount'] == 1 for row in pending),
+                'unqualifiedSourceGroupCount': sum(row['runtimeQualified'] is False for row in selected),
+                'declaredUnqualifiedProfileCount': sum(row['runtimeQualified'] is False for row in declared),
+                'declaredReviewQueueCounts': dict(sorted(Counter(queue for row in declared
+                    for queue in row['qualificationReviewQueues']).items())),
+                'qualificationReviewQueueCounts': dict(sorted(Counter(queue for row in selected
+                    for queue in row['qualificationReviewQueues']).items())),
                 'pendingReviewQueueCounts': dict(sorted(Counter(queue for row in pending
                     for queue in row['pendingReviewQueues']).items()))}
 
