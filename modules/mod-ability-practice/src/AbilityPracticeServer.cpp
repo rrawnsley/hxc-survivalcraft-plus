@@ -142,6 +142,7 @@ bool AppendProfiles(std::vector<Practice::AbilityProfile>& destination,
     return valid;
 }
 std::vector<Practice::AbilityProfile> RuntimeProfiles;
+std::unordered_set<std::uint64_t> PeriodicPracticeAbilities;
 std::optional<Practice::ProfileIndex> ProfileLookup;
 std::recursive_mutex Mutex;
 bool Requested = false;
@@ -221,6 +222,21 @@ Practice::PracticeRoute RouteFor(Practice::OutcomeKind outcome)
     return Practice::PracticeRoute::Unknown;
 }
 
+std::uint64_t ProfileKey(Practice::AbilityDefinition const& ability)
+{
+    return (static_cast<std::uint64_t>(ability.ClassId) << 32) | ability.AbilityId;
+}
+
+bool HasSupportedPeriodicOutcome(SpellInfo const* info, Practice::OutcomeKind outcome)
+{
+    if (!info)
+        return false;
+    if (outcome == Practice::OutcomeKind::Damage)
+        return info->HasAura(SPELL_AURA_PERIODIC_DAMAGE) || info->HasAura(SPELL_AURA_PERIODIC_DAMAGE_PERCENT) ||
+            info->HasAura(SPELL_AURA_PERIODIC_LEECH);
+    return outcome == Practice::OutcomeKind::Healing && info->HasAura(SPELL_AURA_PERIODIC_HEAL);
+}
+
 bool HasSupportedOutcome(SpellInfo const* info, Practice::OutcomeKind outcome)
 {
     if (!info)
@@ -232,13 +248,11 @@ bool HasSupportedOutcome(SpellInfo const* info, Practice::OutcomeKind outcome)
         return directDamage && HasSupportedOutcome(info, outcome == Practice::OutcomeKind::DamageOrInterrupt
             ? Practice::OutcomeKind::Interrupt : Practice::OutcomeKind::Dispel);
     if (outcome == Practice::OutcomeKind::Damage)
-        return directDamage || (PeriodicRequested &&
-                (info->HasAura(SPELL_AURA_PERIODIC_DAMAGE) || info->HasAura(SPELL_AURA_PERIODIC_DAMAGE_PERCENT) ||
-                    info->HasAura(SPELL_AURA_PERIODIC_LEECH)));
+        return directDamage || (PeriodicRequested && HasSupportedPeriodicOutcome(info, outcome));
     if (outcome == Practice::OutcomeKind::Healing)
         return info->HasEffect(SPELL_EFFECT_HEAL) || info->HasEffect(SPELL_EFFECT_HEAL_PCT) ||
             info->HasEffect(SPELL_EFFECT_HEAL_MAX_HEALTH) ||
-            (PeriodicRequested && info->HasAura(SPELL_AURA_PERIODIC_HEAL));
+            (PeriodicRequested && HasSupportedPeriodicOutcome(info, outcome));
     if (outcome == Practice::OutcomeKind::Interrupt)
         return info->HasEffect(SPELL_EFFECT_INTERRUPT_CAST);
     if (outcome == Practice::OutcomeKind::Dispel)
@@ -647,7 +661,8 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
             view.ReplacementSpellId = NativeReplacement(player, ability);
             view.RuleSet = HelpersRequested && Practice::DevelopmentHelpers::IsManafeed(profile) ?
                 Practice::HumanPvEScriptedHealRuleSet :
-                PeriodicRequested ? Practice::HumanPvEPeriodicRuleSet : Practice::HumanPvERuleSet;
+                PeriodicPracticeAbilities.contains(ProfileKey(ability)) ?
+                    Practice::HumanPvEPeriodicRuleSet : Practice::HumanPvERuleSet;
             if (Catchup.Enabled && ability.Kind != Practice::AbilityKind::Fixed)
             {
                 view.RuleSet += 3;
@@ -1028,6 +1043,7 @@ public:
         std::span<Practice::AbilityProfile const> const selected =
             SelectProfiles(classSamples, rankedCatalog);
         RuntimeProfiles.assign(selected.begin(), selected.end());
+        PeriodicPracticeAbilities.clear();
         bool const periodicValid = !PeriodicRequested ||
             AppendProfiles(RuntimeProfiles, Practice::DevelopmentPeriodic::Profiles);
         bool const masteryValid = !MasteryRequested ||
@@ -1066,6 +1082,9 @@ public:
             for (Practice::AbilityRank const& rank : profile.Definition.Ranks)
             {
                 SpellInfo const* info = sSpellMgr->GetSpellInfo(rank.SpellId);
+                if (PeriodicRequested && profile.Definition.Kind == Practice::AbilityKind::Ranked &&
+                    HasSupportedPeriodicOutcome(info, profile.Outcome))
+                    PeriodicPracticeAbilities.insert(ProfileKey(profile.Definition));
                 bool const fixed = profile.Definition.Kind == Practice::AbilityKind::Fixed;
                 bool const expectedOutcome = info && (fixed || HasSupportedOutcome(info, profile.Outcome) ||
                     HasSupportedHelperOutcome(info, profile)) &&

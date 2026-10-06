@@ -1998,3 +1998,19 @@ This is a development lifecycle safeguard, not a reproduced production defect. S
 .cache/verify-all/20261005-235946/report.json (two source checks, 31.8-second native build), plus C++ style/
 whitespace and 61-source export refresh. Unit/harness/gameplay skipped, lifecycle behavior unqualified.
 Addon 0.4.28 and catalog counts remain unchanged. No production changes or startup were performed.
+
+
+## Ability-specific periodic rule descriptions — 5 October 2026
+
+Menu rules now advertise periodic practice only for ranked class/ability identities whose effective startup
+SpellInfo contains the supported periodic aura for that selected outcome and whose periodic mode is enabled.
+The bounded numeric identity set is built once during catalog qualification. Mastery, fixed, direct-only and
+hybrid utility abilities retain direct/utility rules; Manafeed retains its explicit scripted rule. Catch-up
+variants continue to derive from the selected per-ability rule. No per-cast scan, stored gameplay pointers,
+configuration/database reads, new wire format, progression-rate or award-policy changes are introduced.
+The startup outcome validator and menu qualification share the same supported periodic effect helper.
+
+Source/native passed in .cache/verify-all/20261006-000409/report.json (two source checks, 32.0-second native
+build), with C++ style/whitespace and 61-source export refresh passing. Runtime/menu rendering qualification
+remains deferred; no unit/harness/gameplay tests or production changes were performed. Catalog123unique/
+125declared and addon0.4.28 are unchanged. Report dates are UTC; this local checkpoint remains 5 October.
