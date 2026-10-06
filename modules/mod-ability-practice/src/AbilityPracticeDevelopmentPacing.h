@@ -864,6 +864,16 @@ inline constexpr std::array BandsClass19Ability804906 = {
     TrainingBand{ 140, 16200, 600 }
 };
 
+inline constexpr std::array RanksClass19Ability806521 = {
+    AbilityRank{ 806521, 1, { 34, 1 } },
+    AbilityRank{ 806834, 2, { 42, 10 } },
+    AbilityRank{ 806835, 3, { 52, 20 } }
+};
+inline constexpr std::array BandsClass19Ability806521 = {
+    TrainingBand{ 1, 10140, 270 },
+    TrainingBand{ 10, 10140, 300 }
+};
+
 inline constexpr std::array RanksClass20Ability500123 = {
     AbilityRank{ 500123, 1, { 6, 1 } },
     AbilityRank{ 501671, 2, { 12, 10 } },
@@ -2545,6 +2555,7 @@ inline constexpr std::array Entries = {
     Entry{ 19, 801478, RanksClass19Ability801478, { BandsClass19Ability801478 } },
     Entry{ 19, 803157, RanksClass19Ability803157, { BandsClass19Ability803157 } },
     Entry{ 19, 804906, RanksClass19Ability804906, { BandsClass19Ability804906 } },
+    Entry{ 19, 806521, RanksClass19Ability806521, { BandsClass19Ability806521 } },
     Entry{ 20, 500123, RanksClass20Ability500123, { BandsClass20Ability500123 } },
     Entry{ 20, 500125, RanksClass20Ability500125, { BandsClass20Ability500125 } },
     Entry{ 20, 500169, RanksClass20Ability500169, { BandsClass20Ability500169 } },

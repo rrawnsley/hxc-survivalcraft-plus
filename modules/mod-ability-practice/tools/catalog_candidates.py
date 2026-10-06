@@ -92,10 +92,21 @@ def annotate_trigger_references(result, lookup, origin):
                 not isinstance(slot, dict) or slot.get('index') != index
                 or any(type(slot.get(field)) is not int or slot[field] < 0 for field in
                        ('effectId', 'auraId', 'implicitTargetA', 'implicitTargetB', 'triggerSpellId'))
+                or any(type(slot.get(field)) is not int for field in ('miscValue', 'basePoints'))
                 for index, slot in enumerate(details)):
             return None
-        return [{'fromSpellId': spell, 'effectIndex': slot['index'], 'toSpellId': slot['triggerSpellId'],
-                 'hasRawEffect': slot['effectId'] != 0} for slot in details if slot['triggerSpellId']]
+        result = []
+        for slot in details:
+            trigger, duration_aura = slot['triggerSpellId'], slot['miscValue'] if slot['effectId'] == 177 else 0
+            if trigger:
+                result.append({'fromSpellId': spell, 'effectIndex': slot['index'], 'toSpellId': trigger,
+                               'hasRawEffect': slot['effectId'] != 0,
+                               'referenceKind': 'aura-duration-target' if trigger == duration_aura else
+                                                'raw-trigger-field'})
+            if duration_aura > 0 and duration_aura != trigger:
+                result.append({'fromSpellId': spell, 'effectIndex': slot['index'], 'toSpellId': duration_aura,
+                               'hasRawEffect': True, 'referenceKind': 'aura-duration-target'})
+        return result
 
     def graph(root):
         queue, visited, links, issues = [(root, 0)], {root}, [], set()
@@ -245,16 +256,22 @@ def native_direct_leech_review(members):
     ravenous = {500123, 501671, 501672, 501673, 501674, 501675, 501676, 501677, 501678, 501679}
     selected_ravenous = (len(members) == len(ravenous) and {m['spellId'] for m in members} == ravenous and
                         all(m['classId'] == 20 for m in members))
+    titanstrike = {806521, 806834, 806835}
+    selected_titanstrike = (len(members) == len(titanstrike) and
+                           {m['spellId'] for m in members} == titanstrike and
+                           all(m['classId'] == 19 for m in members))
     selected = (len(members) == len(bloodbolt) and {m['spellId'] for m in members} == bloodbolt and
                 all(m['classId'] == 20 for m in members))
-    result = native_route_review(members, {'damage': {9}} if selected or selected_ravenous else {},
+    result = native_route_review(members, {'damage': {9}} if selected or selected_ravenous or selected_titanstrike
+                                else {},
                                 'raw-reviewed-direct-leech-damage-not-effective-or-attribution-approval',
                                 'no-reviewed-direct-leech-profile')
-    if selected or selected_ravenous:
+    if selected or selected_ravenous or selected_titanstrike:
         for member in members:
             raw = member.get('rawDbc') or {}
             details = raw.get('effectDetails', [])
-            expected = ([(9, 0, 6, 0, 0), (142, 0, 6, 0, 805352), (0, 0, 0, 0, 0)] if selected_ravenous
+            expected = ([(9, 0, 6, 0, 0), (64, 0, 6, 0, 707896), (0, 0, 0, 0, 0)] if selected_titanstrike else
+                        [(9, 0, 6, 0, 0), (142, 0, 6, 0, 805352), (0, 0, 0, 0, 0)] if selected_ravenous
                         else [(9, 0, 6, 0, 0), (6, 118, 6, 0, 0), (0, 0, 0, 0, 0)])
             if (raw.get('effects') != [slot[0] for slot in expected] or len(details) != 3 or
                     [(v.get('effectId'), v.get('auraId'), v.get('implicitTargetA'),
@@ -668,6 +685,7 @@ def main():
                          'src/server/coa/AscensionReaperDeathwind.cpp',
                          'src/server/coa/AscensionTemplar.cpp',
                          'src/server/coa/AscensionTemplarAbilities.cpp',
+                         'src/server/coa/AscensionTemplarData.h',
                          'src/server/coa/AscensionTemplarEvents.cpp',
                          'src/server/game/Entities/Player/Player.cpp',
                          'src/server/game/Entities/Player/AbilityPracticeRankPolicy.h',

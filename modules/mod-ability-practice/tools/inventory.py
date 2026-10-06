@@ -190,7 +190,8 @@ def load_dbc_lookup(root, directory):
              'CastingTimeIndex', 'RecoveryTime', 'CategoryRecoveryTime', 'StartRecoveryTime',
              'AttributesEx', 'DurationIndex') + tuple(
         name + '[' + str(effect) + ']' for name in (
-            'Effect', 'EffectApplyAuraName', 'EffectTriggerSpell', 'EffectImplicitTargetA', 'EffectImplicitTargetB')
+            'Effect', 'EffectApplyAuraName', 'EffectTriggerSpell', 'EffectImplicitTargetA', 'EffectImplicitTargetB',
+            'EffectMiscValue', 'EffectBasePoints')
         for effect in range(3))
     columns = {field.name: field for field in schema.columns}
     if any(name not in columns for name in names):
@@ -224,6 +225,8 @@ def load_dbc_lookup(root, directory):
                 'triggerSpellId': values['EffectTriggerSpell[' + str(effect) + ']'],
                 'implicitTargetA': values['EffectImplicitTargetA[' + str(effect) + ']'],
                 'implicitTargetB': values['EffectImplicitTargetB[' + str(effect) + ']'],
+                'miscValue': values['EffectMiscValue[' + str(effect) + ']'],
+                'basePoints': values['EffectBasePoints[' + str(effect) + ']'],
             } for effect in range(3)],
             'channelProfile': {
                 'attributesEx': values['AttributesEx'], 'durationIndex': values['DurationIndex'],

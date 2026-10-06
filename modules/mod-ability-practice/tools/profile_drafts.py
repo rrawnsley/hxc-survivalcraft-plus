@@ -92,6 +92,7 @@ def verify_provenance(candidates, root, dbc):
                 'src/server/coa/AscensionNecromancerContracts.cpp', 'src/server/coa/AscensionReaperDeathwind.cpp',
                 'src/server/coa/AscensionTemplar.cpp',
                 'src/server/coa/AscensionTemplarAbilities.cpp',
+                'src/server/coa/AscensionTemplarData.h',
                 'src/server/coa/AscensionTemplarEvents.cpp',
                 'src/server/game/Spells/AbilityPracticeCastReceipt.h', 'src/server/game/Spells/Spell.h',
                 'src/server/game/Spells/Spell.cpp',
@@ -314,6 +315,8 @@ def build_drafts(candidates, root):
         if class_id == 30 and ability_id == 561289:
             required.extend(['soul-capture-loaded-script-registration-and-trigger-suppression',
                              'soul-capture-corpse-resource-and-post-combat-use-design'])
+        if class_id == 19 and ability_id == 806521:
+            required.append('titanstrike-loaded-aura-duration-helper-and-original-leech-damage')
         if candidate.get('nativeOutcomeReview', {}).get('directLeechReview', {}).get('commonRoutes'):
             required.append('original-health-leech-damage-attribution')
         if periodic:

@@ -469,6 +469,45 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
         }
         return true;
     }
+    if (DirectLeechRequested && Practice::DevelopmentLeech::IsTitanstrike(profile))
+    {
+        constexpr std::array<std::uint32_t, 3> effects = {
+            SPELL_EFFECT_HEALTH_LEECH, SPELL_EFFECT_TRIGGER_SPELL, 0u
+        };
+        constexpr std::array<std::uint32_t, 3> targets = {
+            TARGET_UNIT_TARGET_ENEMY, TARGET_UNIT_TARGET_ENEMY, 0u
+        };
+        constexpr std::array triggers = { 0u, 707896u, 0u };
+        for (std::size_t index = 0; index < effects.size(); ++index)
+        {
+            auto const& slot = info->Effects[index];
+            if (slot.Effect != effects[index] || slot.ApplyAuraName || slot.TargetA.GetTarget() != targets[index] ||
+                slot.TargetB.GetTarget() || slot.TriggerSpell != triggers[index])
+                return false;
+        }
+        SpellInfo const* helper = sSpellMgr->GetSpellInfo(707896);
+        if (!helper || helper->IsPassive() || helper->IsDeprecatedForPlayers)
+            return false;
+        constexpr std::array auraIds = { 704576u, 706426u, 0u };
+        for (std::size_t index = 0; index < auraIds.size(); ++index)
+        {
+            auto const& slot = helper->Effects[index];
+            if (slot.Effect != (index < 2 ? SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION : 0u) ||
+                slot.ApplyAuraName || slot.TargetA.GetTarget() != (index < 2 ? TARGET_UNIT_CASTER : 0u) ||
+                slot.TargetB.GetTarget() || slot.TriggerSpell != auraIds[index] ||
+                slot.MiscValue != static_cast<std::int32_t>(auraIds[index]) ||
+                (index < 2 && slot.BasePoints != 2999))
+                return false;
+            if (index < 2)
+            {
+                SpellInfo const* aura = sSpellMgr->GetSpellInfo(auraIds[index]);
+                if (!aura || aura->IsPassive() || aura->IsDeprecatedForPlayers ||
+                    !aura->HasEffect(SPELL_EFFECT_APPLY_AURA))
+                    return false;
+            }
+        }
+        return true;
+    }
     return HelpersRequested && Practice::DevelopmentHelpers::IsManafeed(profile) &&
         info->Effects[EFFECT_0].Effect == SPELL_EFFECT_APPLY_AURA &&
         info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_PERIODIC_DUMMY;

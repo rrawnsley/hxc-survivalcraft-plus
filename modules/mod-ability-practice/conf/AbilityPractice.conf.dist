@@ -70,7 +70,7 @@ AbilityPractice.AllowDevelopmentRankPacing = 0
 # Disabling this does not downgrade version2 rows; unknown definitions remain preserved and unavailable.
 AbilityPractice.AllowDevelopmentMasteryPacing = 0
 
-# Experimental original direct health-leech damage practice for Bloodbolt and Ravenous Strike. Startup-only.
+# Experimental original direct health-leech damage practice for Bloodbolt, Ravenous Strike and Titanstrike.
 # Actual PvE damage earns one shared original-cast use; self healing earns no additional use.
 AbilityPractice.AllowDevelopmentDirectLeech = 0
 

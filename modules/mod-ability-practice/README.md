@@ -3064,3 +3064,27 @@ Source2/native29.8s passed171528; C++ style/whitespace and101-source exports pas
 profiles/210 declarations:121 ranked,7 mastery,80 fixed;126 baselines,516 missing definitions
 (105 ranked/411 standalone),850 runtime-unqualified groups. Addon0.4.35-development/protocol4
 unchanged. No tests, startup, migration execution, active-client or production changes.
+
+## Titanstrike rank practice and duration-reference evidence — 6 October 2026
+
+Disabled direct-leech catalog includes Templar19/806521 Titanstrike, ranks at34/42/52
+requiring proficiency1/10/20. Original qualifying PvE damage earns at most one shared-receipt
+award; native leech healing and Oath Chain duration handling remain unchanged. Exact loaded
+HEALTH_LEECH/TRIGGER_SPELL slots/targets and707896 helper required. Helper must preserve
+MODIFY_AURA_DURATION slots, self targets, aura references704576/706426 in MiscValue, raw
+TriggerSpell metadata and active-slot BasePoints2999; referenced native auras must exist.
+Unused base points are ignored because raw empty slot uses-1. No helper creates extra practice.
+
+Inventory now captures signed MiscValue/BasePoints. Raw reference graphs distinguish duration
+aura targets, which the native effect reads from MiscValue, from unresolved trigger-field references.
+Duration references can appear in raw graph cycles without causing triggered casts. Additional
+TemplarData.h provenance gives102 sources.3058 raw roots/9850 nodes,75 roots with detected
+cycles,9 incomplete roots remain unqualified. No live recursion or effective-data claim.
+
+Additive pacing entry preserves previous121 curves and frozen legacy versions.338 qualifying
+uses per transition before catch-up at raw8s category-recovery floor estimates45.067min; actual
+combat frequency remains unmeasured. Source2/native31.4s passed194039, C++ style/whitespace
+and source exports passed.209 profiles/211 declarations (122 ranked/7 mastery/80 fixed),126
+baselines,515 missing definitions (104 ranked/411 standalone),850 runtime-unqualified groups.
+Addon0.4.35-development/protocol4 unchanged. All switches0. No tests, startup, migration
+execution, native spell changes, active-client installation or production changes.
