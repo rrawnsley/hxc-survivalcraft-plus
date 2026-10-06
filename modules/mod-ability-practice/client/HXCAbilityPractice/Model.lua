@@ -590,12 +590,13 @@ function Model.PracticeRules(ability, saved)
         return "Practice rules are unavailable in this update. Refresh to request the current rules."
     end
     local rules = {
-        [13] = "Keep your own Brutal Shout active on yourself and use learned abilities that deal direct damage"
+        [13] = "Keep this buff active on yourself from your own cast and use learned abilities that deal direct damage"
             .. " to a level-appropriate PvE opponent or restore missing health in a qualifying PvE fight."
             .. " Your owned buff must be valid when the combat cast begins and when its result qualifies."
             .. " Its stat effect must be active and positive; a stronger exclusive effect prevents practice."
             .. " Equal-strength exclusive effects remain eligible."
             .. " One combat cast can earn one use for this buff, with at least five seconds between counted uses."
+            .. " Supported buffs progress independently; a combat cast can practice more than one active buff."
             .. " Applying or refreshing the buff, auto-attacks and triggered helper spells earn no buff practice."
             .. " Other players' actions do not count. Reapply your buff after login or a class or specialization change.",
         [11] = "Deal direct damage or newly stun a live, level-appropriate PvE opponent with the learned ability."

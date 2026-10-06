@@ -347,10 +347,28 @@ def build_drafts(candidates, root):
                         v.get('miscValue'), v.get('basePoints')) for v in details] != expected):
                 raise ValueError('Reviewed lock utility source/raw evidence changed')
             required.append('native-lock-requirements-and-existing-skill-progression-preserved')
-        if class_id == 12 and ability_id == 300857:
+        if class_id == 12 and ability_id in {300857, 680302}:
             required.extend(['owned-buff-original-application-and-combat-cast-contribution',
                              'buff-contribution-five-second-cadence-and-per-cast-deduplication',
+                             'independent-owned-buff-origin-eligibility-and-cadence',
                              'buff-contribution-menu-rule-and-session-qualification'])
+            if ability_id == 680302:
+                expected_spells = [680302, 681439, 681440, 681441]
+                expected_levels = [24, 36, 48, 58]
+                expected_points = [19, 31, 42, 53]
+                if ([rank['spellId'] for rank in ranks] != expected_spells or
+                        [rank['characterLevel'] for rank in ranks] != expected_levels):
+                    raise ValueError('Enduring Shout native source ladder changed')
+                for spell, points in zip(expected_spells, expected_points):
+                    raw = members[spell].get('rawDbc', {})
+                    details = raw.get('effectDetails', [])
+                    expected = [(6, 29, 56, 0, 0, 2, points), (0, 0, 0, 0, 0, 0, 0),
+                                (0, 0, 0, 0, 0, 0, 0)]
+                    if raw.get('passive') is not False or len(details) != 3 or [(v.get('effectId'),
+                            v.get('auraId'), v.get('implicitTargetA'), v.get('implicitTargetB'),
+                            v.get('triggerSpellId'), v.get('miscValue'), v.get('basePoints'))
+                            for v in details] != expected:
+                        raise ValueError('Enduring Shout reviewed stat-buff raw evidence changed')
         if candidate.get('nativeOutcomeReview', {}).get('directLeechReview', {}).get('commonRoutes'):
             required.append('original-health-leech-damage-attribution')
         if periodic:

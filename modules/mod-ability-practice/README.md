@@ -3305,3 +3305,43 @@ VERIFY ALL: PASSED .cache/verify-all/20261006-210035/report.json: source2 with n
 native31.9s. C++ style/whitespace and actual source/coverage exports passed. No tests, native
 startup, lock/skill/menu gameplay execution, client install, deployment or production changes.
 Addon0.4.39-development/protocol4 unchanged; all development switches remain0.
+
+## Independent owned stat buffs — 6 October 2026
+
+The disabled owned-buff prototype now supports Enduring Shout12/680302 at native levels24/36/48/58,
+spells680302/681439/681440/681441 and proficiency1/10/20/40. Source/raw shape is frozen: active
+MOD_STAT29 on raid/caster target56, stat selector2, base points19/31/42/53, no secondary effects,
+auras or triggers. Loaded validation checks the selector and complete unique class12 trainer900012
+offers, exact levels, zero skill requirements and preceding-spell prerequisites. Native class grants,
+rank boundaries and ownership/acquisition checks still apply. Stronger loaded stat effects pause
+practice; no native buff magnitude/stacking change. Existing Brutal Shout selector1 is now explicit.
+
+Per-ability numeric session state stores each owned application receipt, five-second contribution
+floor and last menu readiness. Transient uint64 per-Spell masks independently capture supported
+buff eligibility at original combat-cast start and deduplicate later awards; supported catalog is
+bounded64. A meaningful original combat cast may train each eligible owned buff once and its own
+direct ability once. Buff applications alone still earn nothing. Reapplying one buff cannot replace
+another's receipt or reset either contribution floor. Class/race/spec/login/enrollment changes
+clear all buff provenance. Routine learned-rank epoch rotation retains accepted owned applications.
+Menu refreshes compare each buff independently; no World pointers, client prediction or per-cast SQL.
+
+Buff awards defer snapshot delivery until all original-hit credits are processed. Direct awards
+retain existing refresh behavior; unprofiled qualifying combat casts flush buff updates afterward.
+An initially suspected rank-learning receipt race was not confirmed: source tracing shows automatic
+promotion already happens on player update, not the per-award menu refresh. This change coalesces
+menu snapshots; it does not change native rank-learning timing or ownership rules.
+
+Additive version2 pacing adds only Enduring Shout, preserving the preceding123 entries. Three bands
+16200/(270,300,600) imply540 qualifying uses/45min per rank at assumed5s opportunities before catch-up.
+One-rank-ahead definition4 composes normally; saved earlier definitions remain guarded/readable.
+Existing nine trainer-extension version3 entries/20 added ranks reproduced unchanged.213 unique
+profiles/215 declarations,124 ranked/7 mastery/82 Fixed,490 pending(102 ranked/388 standalone),147
+baselines and106 hashes; all850 source groups remain runtime-unqualified. Buff behavior remains
+a reversible default-off draft, not a claim of exact classic EverQuest mechanics.
+
+Unpublished addon0.4.40-development/protocol4 describes the selected buff and independent progress;
+earlier0.4.39 help incorrectly names Brutal Shout for the new track, so matching client qualification
+is required. Five Lua5.1 syntax parses passed without executing chunks. VERIFY ALL: PASSED211225,
+source2 with no selected suites/native30.4s after snapshot coalescing; earlier210900 native31.1s
+also passed. Style/whitespace/source exports passed. No tests, server startup, gameplay/migration/menu
+execution, active-client install, deployment or production changes. All switches remain0.

@@ -101,7 +101,7 @@ def review_queues(draft):
         queues.add('incomplete-raw-trigger-reference-review')
     if draft['classId'] == 30 and draft['abilityId'] == 561289:
         queues.add('corpse-resource-and-post-combat-use-design')
-    if draft['classId'] == 12 and draft['abilityId'] == 300857:
+    if draft['classId'] == 12 and draft['abilityId'] in {300857, 680302}:
         queues.add('owned-buff-original-combat-cast-contribution')
     if len(draft['ranks']) == 1:
         queues.add('unranked-mastery-or-fixed-design')
