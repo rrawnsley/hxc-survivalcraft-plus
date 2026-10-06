@@ -69,3 +69,7 @@ AbilityPractice.AllowDevelopmentRankPacing = 0
 # Draft raw/cadence assumptions target45 minutes per benefit before catch-up; runtime qualification is pending.
 # Disabling this does not downgrade version2 rows; unknown definitions remain preserved and unavailable.
 AbilityPractice.AllowDevelopmentMasteryPacing = 0
+
+# Experimental original direct health-leech damage practice for Bloodbolt. Startup-only.
+# Actual PvE damage earns one shared original-cast use; self healing earns no additional use.
+AbilityPractice.AllowDevelopmentDirectLeech = 0

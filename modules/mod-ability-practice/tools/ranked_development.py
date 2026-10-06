@@ -8,7 +8,9 @@ from profile_drafts import build_drafts, verify_provenance
 
 def render_header(drafts):
     supported = {'damage', 'healing', 'interrupt', 'dispel', 'steal'}
-    selected = [draft for draft in drafts if len(draft['ranks']) > 1 and
+    separately_authored = {(20, 804685)}
+    selected = [draft for draft in drafts if (draft['classId'], draft['abilityId']) not in separately_authored and
+                len(draft['ranks']) > 1 and
                 supported.intersection(draft['candidateOutcomeRoutes'])]
     selected.sort(key=lambda draft: (draft['classId'], draft['abilityId']))
     classes = Counter(draft['classId'] for draft in selected)

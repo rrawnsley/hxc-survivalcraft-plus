@@ -126,6 +126,25 @@ def native_direct_review(members):
                                'no-current-direct-route')
 
 
+def native_direct_leech_review(members):
+    bloodbolt = {804685, 806928, 806929, 806930, 806931, 806932, 578304, 578305}
+    selected = (len(members) == len(bloodbolt) and {m['spellId'] for m in members} == bloodbolt and
+                all(m['classId'] == 20 for m in members))
+    result = native_route_review(members, {'damage': {9}} if selected else {},
+                                'raw-reviewed-bloodbolt-leech-damage-not-effective-or-attribution-approval',
+                                'no-reviewed-direct-leech-profile')
+    if selected:
+        for member in members:
+            raw = member.get('rawDbc') or {}
+            details = raw.get('effectDetails', [])
+            expected = [(9, 0, 6, 0, 0), (6, 118, 6, 0, 0), (0, 0, 0, 0, 0)]
+            if (raw.get('effects') != [9, 6, 0] or len(details) != 3 or
+                    [(v.get('effectId'), v.get('auraId'), v.get('implicitTargetA'),
+                      v.get('implicitTargetB'), v.get('triggerSpellId')) for v in details] != expected):
+                raise ValueError('Reviewed Bloodbolt raw leech mechanics changed')
+    return result
+
+
 def native_outcome_review(members):
     result = native_route_review(members, OUTCOME_ROUTES,
                                 'raw-native-outcome-route-comparison-not-effective-data-approval',
@@ -138,6 +157,12 @@ def native_outcome_review(members):
         result['blockedMembers'] = []
         result['status'] = 'needs-effective-data-and-acquisition-review'
     result['controlReview'] = control
+    leech = native_direct_leech_review(members)
+    if leech['commonRoutes']:
+        result['commonRoutes'] = sorted(set(result['commonRoutes']) | set(leech['commonRoutes']))
+        result['blockedMembers'] = []
+        result['status'] = 'needs-effective-data-and-acquisition-review'
+    result['directLeechReview'] = leech
     return result
 
 
@@ -455,6 +480,7 @@ def main():
                 'modules/mod-ability-practice/tools/coverage.py',
                 'modules/mod-ability-practice/tools/pacing_drafts.py',
                 'modules/mod-ability-practice/tools/mastery_pacing_drafts.py',
+                'modules/mod-ability-practice/src/AbilityPracticeDevelopmentLeech.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentTrainerFixed.h',
                 'modules/mod-ability-practice/tools/trainer_acquisition_review.py',
                 'data/sql/updates/pending_db_world/rev_20260923_05_coa_class_trainer_core.sql',

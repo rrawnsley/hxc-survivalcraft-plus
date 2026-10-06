@@ -2691,3 +2691,32 @@ reproduced. Existing typed menu shows exact remaining uses, native spell level a
 invented next rank; no client code/installation/version change in this increment. All development switches remain0.
 Source2/style/whitespace and28.4-second native build passed at
 .cache/verify-all/20261006-142446/report.json. Unit/harness/gameplay skipped; no runtime/tests/deployment.
+
+## Bloodbolt original health-leech rank practice
+
+Default-off AbilityPractice.AllowDevelopmentDirectLeech adds only Bloodmage20 Bloodbolt804685 and its exact
+native eight-rank ladder at8/14/20/28/36/44/52/60. Each rank must retain original effects9/6/0, health-leech damage,
+healing-percent aura118 and no triggers. Source authoring also requires exact enemy targets and member identities;
+loaded startup checks match the original mechanism and native acquisition/rank-chain checks still apply.
+
+EffectHealthLeech accumulates native m_damage. Spell.cpp deals real damage, captures scriptDamageResult and passes
+it to the existing OnSpellHitResult observer. Thus the same owner/session/client-cast receipt can earn one use for
+actual eligible PvE damage, including a lethal hit. The native self-heal, healing modifier and other triggered
+results earn no second use. No native leech damage/healing/coefficients/procs or core callback changes are made.
+Health-leech remains excluded from direct mastery; other leech/script hybrids require individual review.
+
+The specialized profile has proficiency gates1/10/20/40/60/80/100/120 and native level gates. Normal development
+learning/persistence/migration/menu behavior applies. With optional rank pacing enabled, each zero-partial rank
+transition costs540 qualifying hits under assumed5-second use intervals (45min, not measured play frequency).
+The generated version2 pacing header adds exactly one profile and reproduces all119 earlier entries byte-for-byte;
+definition versions, previous policies and earlier ranks/rates stay unchanged. Fractional1-to2 migration uses the
+existing guarded path. No2-to3 migration or production activation is introduced.
+
+Broad ranked generator preserves its106 profiles/888 ranks by keeping this separately authored adapter separate.
+The native outcome export recognizes only Bloodbolt's exact reviewed eight-member chain; it does not classify all
+health-leech spells as approved. Original-health-leech-damage-attribution remains a required qualification review.
+Exports contain93 native source hashes,153 unique profiles/155 declarations/2 shared (120 ranked/7 mastery/26 fixed),
+123 baselines and574 missing definitions (111 ranked/463 standalone) among850 runtime-unqualified groups. Existing
+mastery pacing header reproduced unchanged. Source2/style/whitespace and28.7-second native build passed at
+.cache/verify-all/20261006-143217/report.json. Unit/harness/gameplay skipped. No addon/version/protocol change,
+test execution, startup or production change.

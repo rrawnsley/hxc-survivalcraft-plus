@@ -8,6 +8,7 @@
 #include "AbilityPracticeDevelopmentPacing.h"
 #include "AbilityPracticeDevelopmentMastery.h"
 #include "AbilityPracticeDevelopmentHelpers.h"
+#include "AbilityPracticeDevelopmentLeech.h"
 #include "AbilityPracticeDevelopmentFixed.h"
 #include "AbilityPracticeDevelopmentTrainerFixed.h"
 #include "AbilityPracticeDevelopmentAbsorption.h"
@@ -244,6 +245,7 @@ bool RankRequested = false;
 bool PeriodicRequested = false;
 bool MasteryRequested = false;
 bool HelpersRequested = false;
+bool DirectLeechRequested = false;
 bool AbsorptionRequested = false;
 bool PacingRequested = false;
 bool MasteryPacingRequested = false;
@@ -377,9 +379,17 @@ bool HasSupportedOutcome(SpellInfo const* info, Practice::OutcomeKind outcome)
     return false;
 }
 
-bool HasSupportedHelperOutcome(SpellInfo const* info, Practice::AbilityProfile const& profile)
+bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProfile const& profile)
 {
-    return HelpersRequested && info && Practice::DevelopmentHelpers::IsManafeed(profile) &&
+    if (!info)
+        return false;
+    if (DirectLeechRequested && Practice::DevelopmentLeech::IsBloodbolt(profile))
+        return info->Effects[EFFECT_0].Effect == SPELL_EFFECT_HEALTH_LEECH &&
+            !info->Effects[EFFECT_0].TriggerSpell &&
+            info->Effects[EFFECT_1].Effect == SPELL_EFFECT_APPLY_AURA &&
+            info->Effects[EFFECT_1].ApplyAuraName == SPELL_AURA_MOD_HEALING_PCT &&
+            !info->Effects[EFFECT_1].TriggerSpell && !info->Effects[EFFECT_2].Effect;
+    return HelpersRequested && Practice::DevelopmentHelpers::IsManafeed(profile) &&
         info->Effects[EFFECT_0].Effect == SPELL_EFFECT_APPLY_AURA &&
         info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_PERIODIC_DUMMY;
 }
@@ -1256,6 +1266,8 @@ public:
         PeriodicRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentPeriodicObservation", false);
         MasteryRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentMastery", false);
         HelpersRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentScriptedObservation", false);
+        DirectLeechRequested =
+            sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentDirectLeech", false);
         AbsorptionRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentAbsorption", false);
         PacingRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentRankPacing", false);
         MasteryPacingRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentMasteryPacing", false);
@@ -1290,6 +1302,8 @@ public:
             AppendProfiles(RuntimeProfiles, Practice::DevelopmentMastery::Profiles);
         bool const helpersValid = !HelpersRequested ||
             AppendProfiles(RuntimeProfiles, Practice::DevelopmentHelpers::Profiles);
+        bool const directLeechValid = !DirectLeechRequested ||
+            AppendProfiles(RuntimeProfiles, Practice::DevelopmentLeech::Profiles);
         bool const absorptionValid = !AbsorptionRequested ||
             AppendProfiles(RuntimeProfiles, Practice::DevelopmentAbsorption::Profiles);
         bool const fixedValid = !fixedCatalog || AppendProfiles(RuntimeProfiles, Practice::DevelopmentFixed::Profiles);
@@ -1303,6 +1317,7 @@ public:
         ProfileLookup.emplace(profiles);
         Ready = ProfileLookup->IsValid() && periodicValid && masteryValid && helpersValid && fixedValid &&
             absorptionValid && controlValid && pacingValid && masteryPacingValid && trainerFixedValid &&
+            directLeechValid &&
             Practice::ValidCatchupSettings(Catchup);
         for (Practice::AbilityProfile const& profile : profiles)
         {
@@ -1336,7 +1351,7 @@ public:
                     PeriodicPracticeAbilities.insert(ProfileKey(profile.Definition));
                 bool const fixed = profile.Definition.Kind == Practice::AbilityKind::Fixed;
                 bool const expectedOutcome = info && (fixed || HasSupportedOutcome(info, profile.Outcome) ||
-                    HasSupportedHelperOutcome(info, profile)) &&
+                    HasSupportedSpecializedOutcome(info, profile)) &&
                     (profile.Definition.Kind != Practice::AbilityKind::Mastery ||
                         (!info->HasAura(SPELL_AURA_PERIODIC_HEAL) && !info->HasAura(SPELL_AURA_PERIODIC_LEECH) &&
                             !info->HasAura(SPELL_AURA_PERIODIC_DAMAGE) &&
@@ -1371,6 +1386,7 @@ public:
         LOG_INFO("module.ability_practice", "Development mastery: enabled={}", MasteryRequested);
         LOG_INFO("module.ability_practice", "Development scripted observation: enabled={}", HelpersRequested);
         LOG_INFO("module.ability_practice", "Development fixed catalog: enabled={}", fixedCatalog);
+        LOG_INFO("module.ability_practice", "Development direct leech observation: enabled={}", DirectLeechRequested);
         LOG_INFO("module.ability_practice", "Development absorption observation: enabled={}", AbsorptionRequested);
         LOG_INFO("module.ability_practice", "Development rank pacing: enabled={}", PacingRequested);
         LOG_INFO("module.ability_practice", "Development mastery pacing: enabled={}", MasteryPacingRequested);

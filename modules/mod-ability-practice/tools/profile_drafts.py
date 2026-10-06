@@ -24,6 +24,7 @@ def verify_provenance(candidates, root, dbc):
                 'modules/mod-ability-practice/tools/coverage.py',
                 'modules/mod-ability-practice/tools/pacing_drafts.py',
                 'modules/mod-ability-practice/tools/mastery_pacing_drafts.py',
+                'modules/mod-ability-practice/src/AbilityPracticeDevelopmentLeech.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentTrainerFixed.h',
                 'modules/mod-ability-practice/tools/trainer_acquisition_review.py',
                 'data/sql/updates/pending_db_world/rev_20260923_05_coa_class_trainer_core.sql',
@@ -266,6 +267,8 @@ def build_drafts(candidates, root):
             raise ValueError('Invalid candidate periodic outcome routes')
         required = ['effective-data', 'classification', 'acquisition-ownership', 'meaningful-outcome',
                     'practice-rates-and-caps', 'persistence-and-migration', 'menu-and-gameplay-qualification']
+        if candidate.get('nativeOutcomeReview', {}).get('directLeechReview', {}).get('commonRoutes'):
+            required.append('original-health-leech-damage-attribution')
         if periodic:
             required.append('periodic-original-cast-attribution')
         if set(routes) & {'fear', 'stun', 'root'}:
