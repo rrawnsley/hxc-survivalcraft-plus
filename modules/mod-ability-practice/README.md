@@ -2147,3 +2147,19 @@ assumption, without claiming observed frequency or changing native rates.
 Source checks passed in .cache/verify-all/20261006-002853/report.json (two checks);64-source exports refreshed.
 The244 ranked proposals/1412 transitions remain within30–60minutes under the default assumptions. Native C++
 remains the002731 passing build; no tests, actual-frequency measurements or production operations performed.
+
+## Authored rank-ladder agreement in coverage
+
+Coverage now resolves each profile's rank-array reference within its development namespace, including qualified
+references to shared ranked arrays. It exports the authored spell IDs, rank numbers, required character levels
+and proficiency thresholds. Unsupported array/declaration shapes and missing/duplicate references fail export.
+Every declared ladder must match the source-consistent class-grant draft in spell identity, ordinal and level;
+its proficiency thresholds must match the current reviewed1/10/20/40... template. Shared declarations must also
+agree on authored ranks. Runtime composition still checks caps/rates/rewards/outcomes and remains required.
+
+All123 declared profiles currently agree with their source ladders. This establishes source agreement only;
+effective spell data, ownership, meaningful outcomes, balance and client/gameplay qualification remain pending.
+A future intentionally different proficiency template requires an explicit authoring-tool update and review.
+
+Source checks passed in .cache/verify-all/20261006-003200/report.json (two checks),64-source exports refreshed.
+Native C++ remains the002731 passing build; no unit/harness/gameplay tests or production operations.

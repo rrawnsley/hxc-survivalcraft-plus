@@ -12,28 +12,60 @@ PROFILE_HEADERS = ('AbilityPracticeDevelopmentRanked.h', 'AbilityPracticeDevelop
                    'AbilityPracticeDevelopmentFixed.h', 'AbilityPracticeDevelopmentAbsorption.h')
 PROFILE_PATTERN = re.compile(
     r'AbilityProfile\s*\{\s*Development::DefinitionVersion,\s*AcquisitionSource::ClassGrant,\s*'
-    r'\{\s*(\d+),\s*(\d+),\s*AbilityKind::(Ranked|Mastery|Fixed)\b')
+    r'\{\s*(\d+),\s*(\d+),\s*AbilityKind::(Ranked|Mastery|Fixed)\s*,\s*([\w:]+)\s*,')
+
+
+def declared_rank_arrays(root):
+    result = {}
+    rank_pattern = re.compile(r'AbilityRank\s*\{\s*(\d+),\s*(\d+),\s*'
+                              r'\{\s*(\d+),\s*(\d+)\s*\}\s*\}')
+    for filename in PROFILE_HEADERS:
+        text = (root / 'modules/mod-ability-practice/src' / filename).read_text(encoding='utf-8')
+        namespace = re.search(r'namespace\s+AbilityPractice::(\w+)\s*\{', text)
+        if not namespace:
+            raise ValueError('Missing development namespace: ' + filename)
+        for match in re.finditer(r'inline\s+constexpr\s+std::array\s+(\w+)\s*=\s*\{(.*?)\};', text,
+                                 re.DOTALL):
+            body = match[2]
+            ranks = list(rank_pattern.finditer(body))
+            if not ranks:
+                continue
+            if rank_pattern.sub('', body).replace(',', '').strip():
+                raise ValueError('Unsupported authored rank array: ' + filename + ':' + match[1])
+            key = namespace[1] + '::' + match[1]
+            if key in result:
+                raise ValueError('Duplicate authored rank array: ' + key)
+            result[key] = [{'spellId': int(rank[1]), 'rankNumber': int(rank[2]),
+                            'characterLevel': int(rank[3]), 'proficiencyRequired': int(rank[4])} for rank in ranks]
+    return result
 
 
 def declared_profiles(root):
+    arrays = declared_rank_arrays(root)
     result = {}
     for filename in PROFILE_HEADERS:
         relative = 'modules/mod-ability-practice/src/' + filename
         text = (root / relative).read_text(encoding='utf-8')
+        namespace = re.search(r'namespace\s+AbilityPractice::(\w+)\s*\{', text)
         matches = list(PROFILE_PATTERN.finditer(text))
         if not matches or len(matches) != len(re.findall(r'\bAbilityProfile\s*\{', text)):
             raise ValueError('Unsupported profile declaration shape: ' + relative)
         for match in matches:
             identity = (int(match[1]), int(match[2]))
             kind = match[3].lower()
+            reference = match[4] if '::' in match[4] else namespace[1] + '::' + match[4]
+            if reference not in arrays:
+                raise ValueError('Missing declared rank array: ' + reference)
+            ranks = arrays[reference]
             if identity in result:
                 existing = result[identity]
-                if existing['kind'] != kind or relative in existing['sources']:
+                if existing['kind'] != kind or existing['authoredRanks'] != ranks or relative in existing['sources']:
                     raise ValueError('Conflicting or repeated header declaration: ' + str(identity))
                 existing['sources'].append(relative)
                 existing['requiresRuntimeEquivalenceCheck'] = True
             else:
-                result[identity] = {'kind': kind, 'sources': [relative], 'requiresRuntimeEquivalenceCheck': False}
+                result[identity] = {'kind': kind, 'sources': [relative], 'authoredRanks': ranks,
+                                    'requiresRuntimeEquivalenceCheck': False}
     return result
 
 
@@ -83,6 +115,18 @@ def build_coverage(drafts, declarations):
         declaration = declarations.get(identity)
         if declaration and ((declaration['kind'] == 'ranked') != (len(draft['ranks']) > 1)):
             raise ValueError('Declared kind and source rank count differ: ' + str(identity))
+        if declaration:
+            authored = declaration['authoredRanks']
+            source = [{key: rank[key] for key in ('spellId', 'rankNumber', 'characterLevel')}
+                      for rank in draft['ranks']]
+            actual = [{key: rank[key] for key in ('spellId', 'rankNumber', 'characterLevel')}
+                      for rank in authored]
+            if actual != source:
+                raise ValueError('Declared ranks and source ladder differ: ' + str(identity))
+            expected = [1 if index == 0 else 10 if index == 1 else (index - 1) * 20
+                        for index in range(len(authored))]
+            if [rank['proficiencyRequired'] for rank in authored] != expected:
+                raise ValueError('Unsupported authored proficiency ladder: ' + str(identity))
         rows.append({'classId': identity[0], 'abilityId': identity[1],
                      'nameFromRawDbc': draft['ranks'][0].get('nameFromRawDbc'),
                      'sourceRankCount': len(draft['ranks']), 'declaredDevelopmentProfile': declaration,
@@ -121,6 +165,7 @@ def build_coverage(drafts, declarations):
                                                   for row in selected),
                 'unqualifiedSourceGroupCount': sum(row['runtimeQualified'] is False for row in selected),
                 'declaredUnqualifiedProfileCount': sum(row['runtimeQualified'] is False for row in declared),
+                'declaredSourceRankAgreementCount': len(declared),
                 'declaredReviewQueueCounts': dict(sorted(Counter(queue for row in declared
                     for queue in row['qualificationReviewQueues']).items())),
                 'qualificationReviewQueueCounts': dict(sorted(Counter(queue for row in selected
