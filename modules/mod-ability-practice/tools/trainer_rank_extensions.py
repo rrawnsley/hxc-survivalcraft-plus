@@ -107,6 +107,85 @@ def projected_extensions(drafts, review, declarations, candidates):
     return projected, projected_declarations, rows
 
 
+def declared_outcome(root, row):
+    pattern = (r'AbilityProfile\s*\{\s*Development::DefinitionVersion,\s*AcquisitionSource::ClassGrant,\s*'
+               r'\{\s*' + str(row['classId']) + r',\s*' + str(row['abilityId']) +
+               r',\s*AbilityKind::Ranked,\s*[\w:]+,\s*[\w:]+\s*\},\s*'
+               r'Development::Policy,\s*OutcomeKind::(\w+)\s*\}')
+    outcomes = set()
+    for source in row['priorNativeDeclaration']['sources']:
+        matches = re.findall(pattern, (root / source).read_text(encoding='utf-8'))
+        if len(matches) != 1:
+            raise ValueError('Unsupported prior native outcome shape')
+        outcomes.update(matches)
+    if len(outcomes) != 1 or not outcomes.issubset({'Damage', 'Healing', 'Fear'}):
+        raise ValueError('Conflicting or unsupported prior outcome')
+    return next(iter(outcomes))
+
+
+def render_native_header(root, rows):
+    expected = {(13, 807037), (16, 707044), (19, 801165), (26, 575039),
+                (28, 802684), (29, 803198), (30, 800174), (31, 803981)}
+    if (len(rows) != len(expected) or {(row['classId'], row['abilityId']) for row in rows} != expected or
+            any(row['blockingFlags'] or not row.get('priorPacingPreserved') for row in rows)):
+        raise ValueError('Native extension scope requires eight explicitly reviewed complete projections')
+    lines = ['// SPDX-License-Identifier: GPL-2.0-or-later', '',
+             '#ifndef ABILITY_PRACTICE_DEVELOPMENT_TRAINER_RANKS_H',
+             '#define ABILITY_PRACTICE_DEVELOPMENT_TRAINER_RANKS_H', '',
+             '#include "AbilityPracticeDevelopment.h"', '#include "AbilityPracticeProfiles.h"', '',
+             'namespace AbilityPractice::DevelopmentTrainerRanks', '{',
+             'inline constexpr std::uint32_t DefinitionVersion = 3;', '',
+             'struct TrainerRank', '{', '    std::uint32_t SpellId;', '    std::uint32_t CharacterLevel;',
+             '    std::uint32_t TrainerId;', '    std::array<std::uint32_t, 3> RequiredAbilities;', '};', '',
+             'struct Entry', '{', '    AbilityProfile Profile;', '    std::span<AbilityRank const> PreviousRanks;',
+             '    std::span<ProficiencyCap const> PreviousCaps;', '    TrainingPolicy PreviousPolicy;',
+             '    std::span<TrainerRank const> AdditionalTrainerRanks;', '};', '']
+    rendered = []
+    for row in rows:
+        name = 'Class' + str(row['classId']) + 'Ability' + str(row['abilityId'])
+        prior = row['priorNativeDeclaration']['authoredRanks']
+        for prefix, ranks in [('PreviousRanks', prior), ('Ranks', row['projectedRanks'])]:
+            lines.append('inline constexpr std::array ' + prefix + name + ' = {')
+            for index, rank in enumerate(ranks):
+                fields = [rank[key] for key in ('spellId', 'rankNumber', 'characterLevel', 'proficiencyRequired')]
+                lines.append('    AbilityRank{ ' + str(fields[0]) + ', ' + str(fields[1]) + ', { ' +
+                             str(fields[2]) + ', ' + str(fields[3]) + ' } }' +
+                             (',' if index + 1 < len(ranks) else ''))
+            lines.extend(['};', ''])
+        for prefix, bands in [('PreviousBands', row['priorVersion2TrainingBands']),
+                              ('Bands', row['projectedTrainingBands'])]:
+            lines.append('inline constexpr std::array ' + prefix + name + ' = {')
+            for index, band in enumerate(bands):
+                fields = [band[key] for key in ('firstProficiency', 'pointsPerLevel', 'pointsPerUse')]
+                lines.append('    TrainingBand{ ' + ', '.join(map(str, fields)) + ' }' +
+                             (',' if index + 1 < len(bands) else ''))
+            lines.extend(['};', ''])
+        lines.extend(['inline constexpr auto PreviousCaps' + name + ' = Development::RankCaps(PreviousRanks' +
+                      name + ');', 'inline constexpr auto Caps' + name + ' = Development::RankCaps(Ranks' + name + ');',
+                      'inline constexpr std::array TrainerRanks' + name + ' = {'])
+        added = row['projectedRanks'][len(prior):]
+        for index, rank in enumerate(added):
+            offer = rank['sourceTrainerOffers'][0]
+            prerequisites = offer['requiredAbilities'] + [0] * (3 - len(offer['requiredAbilities']))
+            lines.append('    TrainerRank{ ' + str(rank['spellId']) + ', ' + str(rank['characterLevel']) + ', ' +
+                         str(offer['trainerId']) + ', { ' + ', '.join(map(str, prerequisites)) + ' } }' +
+                         (',' if index + 1 < len(added) else ''))
+        lines.extend(['};', ''])
+        rendered.append(['    Entry{', '        { DefinitionVersion, AcquisitionSource::ClassGrant,',
+                         '            { ' + str(row['classId']) + ', ' + str(row['abilityId']) +
+                         ', AbilityKind::Ranked, Ranks' + name + ', Caps' + name + ' },',
+                         '            { Bands' + name + ' }, OutcomeKind::' + declared_outcome(root, row) + ' },',
+                         '        PreviousRanks' + name + ', PreviousCaps' + name + ',',
+                         '        { PreviousBands' + name + ' }, TrainerRanks' + name, '    }'])
+    lines.append('inline constexpr std::array Entries = {')
+    for index, entry in enumerate(rendered):
+        lines.extend(entry[:-1] + [entry[-1] + (',' if index + 1 < len(rendered) else '')])
+    lines.extend(['};', '}', '', '#endif', ''])
+    if any(len(line) > 120 for line in lines):
+        raise ValueError('Generated native extension line exceeds120 columns')
+    return '\n'.join(lines)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--root', type=Path, default=Path(__file__).resolve().parents[3])
@@ -115,6 +194,7 @@ def main():
     parser.add_argument('--trainer-review', type=Path, required=True)
     parser.add_argument('--dbc', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--native-header', type=Path)
     args = parser.parse_args()
     root, dbc = args.root.resolve(), args.dbc.resolve()
     candidates = json.loads(args.candidates.read_text(encoding='utf-8'))
@@ -170,6 +250,13 @@ def main():
               'summary': {'profileCount': len(rows), 'addedRankCount': sum(row['addedRankCount'] for row in rows),
                           'statuses': dict(Counter(row['status'] for row in rows)),
                           'priorPacingPreservedCount': sum(row.get('priorPacingPreserved') is True for row in rows)}}
+    if args.native_header:
+        header = render_native_header(root, rows)
+        args.native_header.parent.mkdir(parents=True, exist_ok=True)
+        args.native_header.write_bytes(header.encode('utf-8'))
+        result['nativeHeaderGenerated'] = True
+        result['nativeHeader'] = {'path': str(args.native_header.resolve()),
+                                  'sha256': hashlib.sha256(header.encode('utf-8')).hexdigest()}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + '\n', encoding='utf-8')
     print(json.dumps(result['summary'], sort_keys=True))

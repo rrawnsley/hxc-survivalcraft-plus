@@ -75,20 +75,23 @@ inline std::optional<std::array<std::uint32_t, StoredFieldCount>> EncodeStoredPr
 }
 
 inline std::optional<StoredProgress> RebaseStoredProgress(TrainingPolicy previousPolicy,
-    TrainingPolicy nextPolicy, std::uint32_t nextDefinitionVersion, StoredProgress previous)
+    TrainingPolicy nextPolicy, std::uint32_t nextDefinitionVersion, StoredProgress previous,
+    std::uint32_t minimumProficiency = 0)
 {
     if (!EncodeStoredProgress(previousPolicy, previous) || !ValidPolicy(nextPolicy) ||
         nextDefinitionVersion <= previous.DefinitionVersion)
         return std::nullopt;
     std::uint32_t const previousCost = previousPolicy.Bands[
         Detail::BandIndex(previousPolicy, previous.State.Proficiency)].PointsPerLevel;
+    std::uint32_t const nextProficiency = std::max(previous.State.Proficiency, minimumProficiency);
     std::uint32_t const nextCost = nextPolicy.Bands[
-        Detail::BandIndex(nextPolicy, previous.State.Proficiency)].PointsPerLevel;
+        Detail::BandIndex(nextPolicy, nextProficiency)].PointsPerLevel;
     std::uint64_t const scaledPoints = previous.State.Points * nextCost;
     if (scaledPoints % previousCost)
         return std::nullopt;
     StoredProgress next = previous;
     next.DefinitionVersion = nextDefinitionVersion;
+    next.State.Proficiency = nextProficiency;
     next.State.Points = scaledPoints / previousCost;
     return EncodeStoredProgress(nextPolicy, next) ? std::optional<StoredProgress>{ next } : std::nullopt;
 }
@@ -130,10 +133,11 @@ LoadedProgress ReadPlayerProgress(PlayerType const& player, std::uint32_t classI
 template<typename PlayerType>
 bool CacheRebasedPlayerProgress(PlayerType& player, std::uint32_t classId, std::uint32_t abilityId,
     TrainingPolicy previousPolicy, TrainingPolicy nextPolicy, std::uint32_t nextDefinitionVersion,
-    StoredProgress expectedPrevious)
+    StoredProgress expectedPrevious, std::uint32_t minimumProficiency = 0)
 {
     std::string const source = StorageSource(classId, abilityId);
-    auto const next = RebaseStoredProgress(previousPolicy, nextPolicy, nextDefinitionVersion, expectedPrevious);
+    auto const next = RebaseStoredProgress(previousPolicy, nextPolicy, nextDefinitionVersion,
+        expectedPrevious, minimumProficiency);
     if (source.empty() || !next)
         return false;
     LoadedProgress const existing = ReadPlayerProgress(player, classId, abilityId,

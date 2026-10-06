@@ -77,3 +77,7 @@ AbilityPractice.AllowDevelopmentDirectLeech = 0
 # Development-only reviewed item-conjuring utilities retain native ranks and learning. Startup-only.
 # Rejuvenating Mojo, Brew Stew/Cocktail, Thunder Ale and Bone Reliquary have no practice counter or gate.
 AbilityPractice.AllowDevelopmentConjureFixedCatalog = 0
+
+# Development-only complete trainer-linked rank extensions. Requires rank pacing; startup-only.
+# Selected authored profiles move to definition3 with guarded readable version1/2 migration.
+AbilityPractice.AllowDevelopmentTrainerRankExtensions = 0

@@ -2795,3 +2795,28 @@ add an invented predecessor requirement. New transition assumptions are540 uses 
 Exports now contain95 native source hashes;158 profiles/569 missing definitions/850 unqualified groups unchanged.
 Final source-only report .cache/verify-all/20261006-145841/report.json passed2 checks after provenance refinement. No native rebuild is needed for this authoring-only increment. No tests,
 startup, client execution, migration, deployment or production operations occurred.
+
+## Staged complete trainer rank ladders and version3 migration
+
+Default-off AbilityPractice.AllowDevelopmentTrainerRankExtensions replaces eight selected version2 ranked profiles
+with complete version3 definitions, covering their19 additional source trainer ranks. It requires development rank
+pacing and exact prior-profile agreement. The introductory acquisition remains the real native class grant; each
+additional trainer rank separately validates its loaded trainer class, exact offer/level and prerequisite array.
+The full effective native chain and outcome checks remain required; incomplete loaded chains refuse activation.
+
+Additional ranks retain native character levels and1/10/20-based proficiency requirements. Automatic acquisition
+checks native class/race eligibility and actual trainer ability prerequisites before teaching an unknown extra rank.
+Already learned ranks retain their proficiency baseline. No trainer SQL, native purchase cost, class grant or spell
+mechanic is changed. The menu consumes the complete selected definition through its existing rank roadmap.
+
+Initialization can read explicitly supported version1 or2 saved records, retain whole proficiency, preserve the
+exact fractional level progress and seed any already learned higher rank in the same guarded cache conversion.
+Retained forgotten rows convert without teaching. Current version3 records are not converted again; unknown or
+unreadable versions remain preserved and unavailable. Turning off the extension cannot downgrade version3 rows.
+The whole module remains disabled by default, with no production migration or activation performed.
+
+trainer_rank_extensions.py --native-header modules/mod-ability-practice/src/AbilityPracticeDevelopmentTrainerRanks.h
+now renders the eight native definitions and their frozen prior ranks, caps, pacing and exact trainer metadata.
+Earlier projection-only findings above describe the preceding authoring increment. These staged definitions and
+migration code still require native compilation and isolated loaded-data/player/menu qualification. Actual use
+frequency remains unmeasured; all previous pacing bands are retained. No client/protocol/version change.
