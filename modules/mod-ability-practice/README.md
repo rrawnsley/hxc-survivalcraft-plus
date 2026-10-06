@@ -2766,3 +2766,32 @@ Current158 profiles/850 groups/569 missing definitions and94 native source hashe
 headers reproduced. Source2/style/whitespace and30.0-second native build passed at
 .cache/verify-all/20261006-144333/report.json. Unit/harness/gameplay skipped. No tests/client execution/startup/
 deployment or production operations occurred.
+
+## Source trainer rank extension projections
+
+trainer_rank_extensions.py exports complete source ladders and draft pacing for the eight guarded practice profiles.
+It verifies current candidate/draft provenance and the trainer review fingerprint, then recomputes trainer source
+ladders/boundaries against actual SQL, captured evidence and declarations. It parses current immutable version2
+rank/pacing arrays and requires exact agreement with every existing declared ranked profile and prior version1 bands.
+
+Run with --candidates .cache/ability-practice/catalog-candidates.json --drafts .cache/ability-practice/profile-drafts.json
+--trainer-review .cache/ability-practice/trainer-acquisition-review.json --dbc C:/Azerothcore-CoA/server-data/dbc
+--output .cache/ability-practice/trainer-rank-extensions.json. The output is unapproved source projection data, not a
+new native header, class-grant invention or executed saved-progress migration. Mixed class-grant/trainer evidence
+stays explicit per rank and in projected acquisition. Existing native declarations remain separately captured.
+
+All eight source projections add19 ranks and preserve every previous version2 training band. The projected next
+version is3 and needs explicit readable version1/2 migration, whole/fractional progress and learned-rank retention,
+unknown-version preservation, exact source trainer prerequisite eligibility and loaded full-chain/outcome/menu
+qualification. These requirements are not implemented merely by exporting the projection. Native rank/pacing
+headers and actual158-profile catalog remain unchanged; the startup boundary still refuses incomplete loaded ladders.
+
+Claw Strike, Deathwind and Seismic Crash trainer rows require an earlier known rank rather than each immediate
+predecessor. The projection preserves those exact rows; it accepts prerequisites only inside earlier ranks of the
+same source-linked ladder, with no skill requirement or foreign/tree prerequisite. It does not rewrite live SQL or
+add an invented predecessor requirement. New transition assumptions are540 uses at5s,180 Storm Alert at15s, and
+338 Seismic Crash at8s (45/45/45.067min). Actual frequency/effective modifiers remain unmeasured.
+
+Exports now contain95 native source hashes;158 profiles/569 missing definitions/850 unqualified groups unchanged.
+Final source-only report .cache/verify-all/20261006-145841/report.json passed2 checks after provenance refinement. No native rebuild is needed for this authoring-only increment. No tests,
+startup, client execution, migration, deployment or production operations occurred.

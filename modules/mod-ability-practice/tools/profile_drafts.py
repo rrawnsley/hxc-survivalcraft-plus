@@ -27,6 +27,7 @@ def verify_provenance(candidates, root, dbc):
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentConjureFixed.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentLeech.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentTrainerFixed.h',
+                'modules/mod-ability-practice/tools/trainer_rank_extensions.py',
                 'modules/mod-ability-practice/tools/trainer_acquisition_review.py',
                 'data/sql/updates/pending_db_world/rev_20260923_05_coa_class_trainer_core.sql',
                 'src/server/coa/AscensionLiveBaselineData.h',
