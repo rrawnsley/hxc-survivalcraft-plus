@@ -242,20 +242,24 @@ def native_direct_review(members):
 
 def native_direct_leech_review(members):
     bloodbolt = {804685, 806928, 806929, 806930, 806931, 806932, 578304, 578305}
+    ravenous = {500123, 501671, 501672, 501673, 501674, 501675, 501676, 501677, 501678, 501679}
+    selected_ravenous = (len(members) == len(ravenous) and {m['spellId'] for m in members} == ravenous and
+                        all(m['classId'] == 20 for m in members))
     selected = (len(members) == len(bloodbolt) and {m['spellId'] for m in members} == bloodbolt and
                 all(m['classId'] == 20 for m in members))
-    result = native_route_review(members, {'damage': {9}} if selected else {},
-                                'raw-reviewed-bloodbolt-leech-damage-not-effective-or-attribution-approval',
+    result = native_route_review(members, {'damage': {9}} if selected or selected_ravenous else {},
+                                'raw-reviewed-direct-leech-damage-not-effective-or-attribution-approval',
                                 'no-reviewed-direct-leech-profile')
-    if selected:
+    if selected or selected_ravenous:
         for member in members:
             raw = member.get('rawDbc') or {}
             details = raw.get('effectDetails', [])
-            expected = [(9, 0, 6, 0, 0), (6, 118, 6, 0, 0), (0, 0, 0, 0, 0)]
-            if (raw.get('effects') != [9, 6, 0] or len(details) != 3 or
+            expected = ([(9, 0, 6, 0, 0), (142, 0, 6, 0, 805352), (0, 0, 0, 0, 0)] if selected_ravenous
+                        else [(9, 0, 6, 0, 0), (6, 118, 6, 0, 0), (0, 0, 0, 0, 0)])
+            if (raw.get('effects') != [slot[0] for slot in expected] or len(details) != 3 or
                     [(v.get('effectId'), v.get('auraId'), v.get('implicitTargetA'),
                       v.get('implicitTargetB'), v.get('triggerSpellId')) for v in details] != expected):
-                raise ValueError('Reviewed Bloodbolt raw leech mechanics changed')
+                raise ValueError('Reviewed direct leech raw mechanics changed')
     return result
 
 

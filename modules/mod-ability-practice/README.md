@@ -3044,3 +3044,23 @@ zero values; source2/native29.9s passed170121. C++ style/whitespace and101-sourc
 207 unique profiles/209 declarations:120 ranked,7 mastery,80 fixed;126 baselines,517 missing
 definitions (106 ranked/411 standalone),850 runtime-unqualified groups. Earlier curves unchanged.
 Addon0.4.35-development/protocol4 unchanged. No tests, startup, SQL mutation or production changes.
+
+## Ravenous Strike rank practice — 6 October 2026
+
+Disabled direct-leech catalog includes Bloodmage20/500123 Ravenous Strike, ten native ranks
+at6/12/18/24/30/36/42/48/54/60. Stronger ranks require proficiency10/20/40/60/80/100/120/140/160
+plus native character levels. Existing learned ranks seed the required proficiency. Rank pacing
+adds one new version2 entry, preserving all previous120 entries and frozen legacy policies.
+Each transition takes540 qualifying uses from its prior threshold/zero partial before catch-up;
+assumed5s opportunities estimate45min. Raw recovery0 is evidence, not measured combat frequency.
+
+Exact loaded HEALTH_LEECH/trigger-with-value parent slots/targets required;805352 must remain
+a nonpassive/nondeprecated pure self ENERGIZE helper with empty other slots/no auras/triggers.
+Original client-requested PvE damage uses the existing shared receipt and at most one award.
+Native leech healing/resource generation remain unchanged; helper casts cannot award extra practice.
+No new mastery power or core observation hook. All switches0.
+
+Source2/native29.8s passed171528; C++ style/whitespace and101-source exports passed.208 unique
+profiles/210 declarations:121 ranked,7 mastery,80 fixed;126 baselines,516 missing definitions
+(105 ranked/411 standalone),850 runtime-unqualified groups. Addon0.4.35-development/protocol4
+unchanged. No tests, startup, migration execution, active-client or production changes.

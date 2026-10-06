@@ -440,6 +440,35 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
             info->Effects[EFFECT_1].Effect == SPELL_EFFECT_APPLY_AURA &&
             info->Effects[EFFECT_1].ApplyAuraName == SPELL_AURA_MOD_HEALING_PCT &&
             !info->Effects[EFFECT_1].TriggerSpell && !info->Effects[EFFECT_2].Effect;
+    if (DirectLeechRequested && Practice::DevelopmentLeech::IsRavenousStrike(profile))
+    {
+        constexpr std::array<std::uint32_t, 3> effects = {
+            SPELL_EFFECT_HEALTH_LEECH, SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE, 0u
+        };
+        constexpr std::array<std::uint32_t, 3> targets = {
+            TARGET_UNIT_TARGET_ENEMY, TARGET_UNIT_TARGET_ENEMY, 0u
+        };
+        constexpr std::array triggers = { 0u, 805352u, 0u };
+        for (std::size_t index = 0; index < effects.size(); ++index)
+        {
+            auto const& slot = info->Effects[index];
+            if (slot.Effect != effects[index] || slot.ApplyAuraName || slot.TargetA.GetTarget() != targets[index] ||
+                slot.TargetB.GetTarget() || slot.TriggerSpell != triggers[index])
+                return false;
+        }
+        SpellInfo const* helper = sSpellMgr->GetSpellInfo(805352);
+        if (!helper || helper->IsPassive() || helper->IsDeprecatedForPlayers)
+            return false;
+        for (std::size_t index = 0; index < effects.size(); ++index)
+        {
+            auto const& slot = helper->Effects[index];
+            if (slot.Effect != (index == 0 ? SPELL_EFFECT_ENERGIZE : 0u) || slot.ApplyAuraName ||
+                slot.TargetA.GetTarget() != (index == 0 ? TARGET_UNIT_CASTER : 0u) ||
+                slot.TargetB.GetTarget() || slot.TriggerSpell)
+                return false;
+        }
+        return true;
+    }
     return HelpersRequested && Practice::DevelopmentHelpers::IsManafeed(profile) &&
         info->Effects[EFFECT_0].Effect == SPELL_EFFECT_APPLY_AURA &&
         info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_PERIODIC_DUMMY;

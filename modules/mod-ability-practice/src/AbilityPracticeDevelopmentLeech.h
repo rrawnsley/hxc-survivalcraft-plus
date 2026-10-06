@@ -19,14 +19,36 @@ inline constexpr std::array Bloodbolt = {
     AbilityRank{ 578305, 8, { 60, 120 } }
 };
 inline constexpr auto BloodboltCaps = Development::RankCaps(Bloodbolt);
+inline constexpr std::array RavenousStrike = {
+    AbilityRank{ 500123, 1, { 6, 1 } },
+    AbilityRank{ 501671, 2, { 12, 10 } },
+    AbilityRank{ 501672, 3, { 18, 20 } },
+    AbilityRank{ 501673, 4, { 24, 40 } },
+    AbilityRank{ 501674, 5, { 30, 60 } },
+    AbilityRank{ 501675, 6, { 36, 80 } },
+    AbilityRank{ 501676, 7, { 42, 100 } },
+    AbilityRank{ 501677, 8, { 48, 120 } },
+    AbilityRank{ 501678, 9, { 54, 140 } },
+    AbilityRank{ 501679, 10, { 60, 160 } }
+};
+inline constexpr auto RavenousStrikeCaps = Development::RankCaps(RavenousStrike);
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
-        { 20, 804685, AbilityKind::Ranked, Bloodbolt, BloodboltCaps }, Development::Policy, OutcomeKind::Damage }
+        { 20, 804685, AbilityKind::Ranked, Bloodbolt, BloodboltCaps }, Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 20, 500123, AbilityKind::Ranked, RavenousStrike, RavenousStrikeCaps },
+        Development::Policy, OutcomeKind::Damage }
 };
 
 inline bool IsBloodbolt(AbilityProfile const& profile)
 {
     return profile.Definition.ClassId == 20 && profile.Definition.AbilityId == 804685 &&
+        profile.Definition.Kind == AbilityKind::Ranked && profile.Outcome == OutcomeKind::Damage;
+}
+
+inline bool IsRavenousStrike(AbilityProfile const& profile)
+{
+    return profile.Definition.ClassId == 20 && profile.Definition.AbilityId == 500123 &&
         profile.Definition.Kind == AbilityKind::Ranked && profile.Outcome == OutcomeKind::Damage;
 }
 }
