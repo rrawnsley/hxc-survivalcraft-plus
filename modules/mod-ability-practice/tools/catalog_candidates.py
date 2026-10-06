@@ -636,6 +636,7 @@ def main():
                 'src/server/game/Globals/ObjectMgr.cpp',
                 'modules/mod-ability-practice/tools/rank_pacing_development.py',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentPacing.h',
+                'modules/mod-ability-practice/src/AbilityPracticeDevelopmentRankCaps.h',
                          'modules/mod-ability-practice/src/AbilityPracticeDevelopmentMastery.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentMasteryPacing.h',
                          'modules/mod-ability-practice/src/AbilityPracticeMastery.h',

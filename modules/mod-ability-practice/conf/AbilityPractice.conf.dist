@@ -64,6 +64,11 @@ AbilityPractice.AllowDevelopmentControlObservation = 0
 # Turning this off after version2 progress exists preserves the row but does not downgrade it to version1.
 AbilityPractice.AllowDevelopmentRankPacing = 0
 
+# One upcoming rank may be prepared; its character-level unlock opens practice toward the following rank.
+# Startup-only definition4 requires rank pacing. Earned proficiency and learned ranks remain preserved.
+# Disabling the option preserves version4 rows without downgrading them to older definitions.
+AbilityPractice.AllowDevelopmentOneRankAhead = 0
+
 # Optional milestone pacing for Hand of Elune, Vile Sting and Soulslam. Startup-only; mastery must be enabled.
 # Definition version2 preserves earned proficiency/rewards and rebases the reviewed version1 partial fraction.
 # Draft raw/cadence assumptions target45 minutes per benefit before catch-up; runtime qualification is pending.

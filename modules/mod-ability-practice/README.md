@@ -3235,3 +3235,32 @@ layout pressure; actual client geometry and execution still need qualification.
 Five Lua5.1 files syntax parsed; no addon chunks executed. Whitespace passed. Native code remained
 unchanged from1759bc7 and its source2/native31.6s passing203259 report, so no native rebuild was run.
 No tests, gameplay, startup, active-client install or production operations. All flags0.
+
+## One upcoming rank of practice — 6 October 2026
+
+The user selected preparing one rank ahead. Startup-only AllowDevelopmentOneRankAhead defaults0
+and requires ranked pacing. Ranked version2/3 profiles compose into definition4 after any selected
+trainer extensions. Their previous profile, native ranks, training policy and old cap shape remain
+available for validation and readable saved-progress conversion; the earlier definitions are unchanged.
+Each new cap is the smaller of the existing character-level cap and the next rank's proficiency
+threshold after the highest rank whose character-level requirement is met. Learning a rank early
+does not open later practice early. Characters catching up at higher levels can practice successive
+already-level-eligible ranks. Fixed utilities and unranked mastery retain their existing definitions.
+
+For the complete Brutal Shout ladder, level4 caps practice at10, level10 at20, level24 at40,
+level38 at60, level52 at80 and level60 at100; rank7 still requires level65. Existing learned ranks,
+whole proficiency and readable partial progress remain. Saved proficiency above the new cap is
+retained and pauses further awards until a higher cap opens. Version1/2, and actual preceding3
+for extended ladders, use the existing guarded fractional migration. Unknown/unreadable versions
+remain preserved and unavailable. Disabling this option cannot downgrade version4 rows.
+
+Startup-owned numeric profile/cap storage remains stable for the catalog lifetime. Native grant
+and actual loaded trainer checks use the matching frozen predecessor. Current cap, next greater
+training cap and forecast records already feed the menu; forecasts beyond the current cap remain
+explicitly blocked. No addon protocol or persisted schema change is needed. Actual migration,
+automatic ranks, menu and gameplay execution remain unqualified.
+
+VERIFY ALL: PASSED .cache/verify-all/20261006-204851/report.json: source2 with no selected
+test suites and native32.7s. C++ style/whitespace and actual106-source exports passed. No tests,
+native startup, client execution, active install, deployment or production configuration/database
+changes. Unpublished addon0.4.39-development/protocol4 unchanged. All development flags remain0.

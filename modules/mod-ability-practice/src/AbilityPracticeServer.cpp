@@ -6,6 +6,7 @@
 #include "AbilityPracticeDevelopmentPeriodic.h"
 #include "AbilityPracticeDevelopmentRanked.h"
 #include "AbilityPracticeDevelopmentPacing.h"
+#include "AbilityPracticeDevelopmentRankCaps.h"
 #include "AbilityPracticeDevelopmentMastery.h"
 #include "AbilityPracticeDevelopmentHelpers.h"
 #include "AbilityPracticeDevelopmentLeech.h"
@@ -257,8 +258,49 @@ Practice::DevelopmentTrainerRanks::Entry const* TrainerRankExtensionForIdentity(
     return result;
 }
 
+std::unordered_map<std::uint64_t, Practice::DevelopmentRankCaps::Entry> RankCapEntries;
+
+Practice::AbilityProfile const* PreviousRankCapProfile(Practice::AbilityProfile const& profile)
+{
+    if (profile.DefinitionVersion != Practice::DevelopmentRankCaps::DefinitionVersion ||
+        profile.Definition.Kind != Practice::AbilityKind::Ranked)
+        return nullptr;
+    std::uint64_t const key = (std::uint64_t(profile.Definition.ClassId) << 32) | profile.Definition.AbilityId;
+    auto const found = RankCapEntries.find(key);
+    if (found == RankCapEntries.end())
+        return nullptr;
+    Practice::AbilityProfile expected = found->second.Previous;
+    expected.DefinitionVersion = Practice::DevelopmentRankCaps::DefinitionVersion;
+    expected.Definition.Caps = found->second.Caps;
+    return SameProfile(profile, expected) ? &found->second.Previous : nullptr;
+}
+
+bool ApplyDevelopmentRankCaps(std::vector<Practice::AbilityProfile>& profiles)
+{
+    RankCapEntries.clear();
+    std::size_t count = 0;
+    for (auto& profile : profiles)
+    {
+        if (profile.Definition.Kind != Practice::AbilityKind::Ranked)
+            continue;
+        auto entry = Practice::DevelopmentRankCaps::Build(profile);
+        if (!entry)
+            return false;
+        std::uint64_t const key = (std::uint64_t(profile.Definition.ClassId) << 32) | profile.Definition.AbilityId;
+        auto const [position, inserted] = RankCapEntries.emplace(key, std::move(*entry));
+        if (!inserted)
+            return false;
+        profile.Definition.Caps = position->second.Caps;
+        profile.DefinitionVersion = Practice::DevelopmentRankCaps::DefinitionVersion;
+        ++count;
+    }
+    return count != 0;
+}
+
 Practice::DevelopmentTrainerRanks::Entry const* TrainerRankExtensionEntry(Practice::AbilityProfile const& profile)
 {
+    if (auto const* previous = PreviousRankCapProfile(profile))
+        return TrainerRankExtensionEntry(*previous);
     auto const* entry = TrainerRankExtensionForIdentity(profile.Definition.ClassId, profile.Definition.AbilityId);
     return entry && profile.DefinitionVersion == entry->Profile.DefinitionVersion ? entry : nullptr;
 }
@@ -302,6 +344,7 @@ bool BuffContributionRequested = false;
 bool TrainerRanksRequested = false;
 bool AbsorptionRequested = false;
 bool PacingRequested = false;
+bool RankCapsRequested = false;
 bool MasteryPacingRequested = false;
 bool ControlRequested = false;
 Practice::CatchupSettings Catchup;
@@ -312,8 +355,19 @@ struct PreviousPacing
     std::uint32_t DefinitionVersion;
 };
 
-std::array<std::optional<PreviousPacing>, 2> PreviousPacingFor(Practice::AbilityProfile const& profile)
+std::array<std::optional<PreviousPacing>, 3> PreviousPacingFor(Practice::AbilityProfile const& profile)
 {
+    if (RankCapsRequested)
+        if (auto const* previous = PreviousRankCapProfile(profile))
+        {
+            auto result = PreviousPacingFor(*previous);
+            auto const empty = std::find_if(result.begin(), result.end(),
+                [](std::optional<PreviousPacing> const& value) { return !value; });
+            if (empty == result.end())
+                return {};
+            *empty = PreviousPacing{ previous->Policy, previous->DefinitionVersion };
+            return result;
+        }
     if (TrainerRanksRequested)
         if (auto const* entry = TrainerRankExtensionEntry(profile))
             return { PreviousPacing{ Practice::DevelopmentPacing::PreviousPolicy,
@@ -571,6 +625,8 @@ bool MatchesAdditionalMasteryMechanic(SpellInfo const* info, Practice::AbilityPr
 
 bool MatchesNativeClassGrant(Practice::AbilityProfile const& profile)
 {
+    if (auto const* previous = PreviousRankCapProfile(profile))
+        return MatchesNativeClassGrant(*previous);
     Practice::AbilityDefinition const& ability = profile.Definition;
     if (profile.Acquisition != Practice::AcquisitionSource::ClassGrant || ability.Ranks.empty())
         return false;
@@ -1836,6 +1892,7 @@ public:
             sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentBuffContribution", false);
         AbsorptionRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentAbsorption", false);
         PacingRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentRankPacing", false);
+        RankCapsRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentOneRankAhead", false);
         MasteryPacingRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentMasteryPacing", false);
         ControlRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentControlObservation", false);
         if (!Requested || !DevelopmentAllowed)
@@ -1900,12 +1957,14 @@ public:
         bool const masteryPacingValid = !MasteryPacingRequested || ApplyDevelopmentMasteryPacing(RuntimeProfiles);
         bool const trainerRanksValid = !TrainerRanksRequested ||
             (PacingRequested && pacingValid && ApplyDevelopmentTrainerRankExtensions(RuntimeProfiles));
+        bool const rankCapsValid = !RankCapsRequested ||
+            (PacingRequested && pacingValid && trainerRanksValid && ApplyDevelopmentRankCaps(RuntimeProfiles));
         std::span<Practice::AbilityProfile const> const profiles(RuntimeProfiles);
         ProfileLookup.emplace(profiles);
         Ready = ProfileLookup->IsValid() && periodicValid && masteryValid && helpersValid && fixedValid &&
             absorptionValid && controlValid && pacingValid && masteryPacingValid && trainerFixedValid &&
             directLeechValid && conjureFixedValid && trainerRanksValid && passiveFixedValid && utilityFixedValid &&
-            controlFixedValid && buffValid &&
+            controlFixedValid && buffValid && rankCapsValid &&
             Practice::ValidCatchupSettings(Catchup);
         for (Practice::AbilityProfile const& profile : profiles)
         {
