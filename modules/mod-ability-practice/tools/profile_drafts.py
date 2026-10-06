@@ -121,7 +121,7 @@ def build_drafts(candidates, root):
     if not baseline_match:
         raise ValueError('Missing reviewed native baseline list')
     baseline_ids = [int(value.strip()) for value in baseline_match[1].split(',')]
-    if baseline_ids != [81, 107, 674, 3124]:
+    if baseline_ids != [75, 81, 107, 674, 2764, 3018, 3124, 5019]:
         raise ValueError('Native baseline scope needs explicit authoring review')
     if candidates.get('schemaVersion') != 1 or candidates.get('scope') != (
             'source-review-candidates-not-runtime-definitions'):
@@ -168,10 +168,12 @@ def build_drafts(candidates, root):
                           'nameFromRawDbc': raw.get('name'), 'proficiencyRequired': None,
                           'rawCastProfile': raw_cast_profile(raw)})
         baseline = ability_id in baseline_ids
-        baseline_effects = {81: 20, 107: 23, 674: 40, 3124: 22}
+        baseline_effects = {75: 58, 81: 20, 107: 23, 674: 40, 2764: 58, 3018: 58, 3124: 22, 5019: 17}
         if baseline:
             baseline_raw = members[ability_id].get('rawDbc', {})
-            if (len(ranks) != 1 or baseline_raw.get('passive') is not True or
+            expected_passive = ability_id not in {75, 2764, 3018, 5019}
+            if (len(ranks) != 1 or ranks[0]['characterLevel'] != 1 or
+                    baseline_raw.get('passive') is not expected_passive or
                     baseline_raw.get('effects') != [baseline_effects[ability_id], 0, 0]):
                 raise ValueError('Native baseline raw/source evidence changed')
         routes = candidate.get('nativeOutcomeReview', {}).get('commonRoutes', [])

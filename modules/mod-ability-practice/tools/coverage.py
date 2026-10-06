@@ -131,7 +131,7 @@ def build_coverage(drafts, declarations):
         seen.add(identity)
         declaration = declarations.get(identity)
         baseline = draft.get('nativeBaselineExclusion')
-        if baseline and (declaration or identity[1] not in {81, 107, 674, 3124} or len(draft['ranks']) != 1):
+        if baseline and (declaration or identity[1] not in {75, 81, 107, 674, 2764, 3018, 3124, 5019} or len(draft['ranks']) != 1):
             raise ValueError('Native baseline cannot be a development practice profile')
         if declaration and ((declaration['kind'] == 'ranked' and len(draft['ranks']) < 2) or
                             (declaration['kind'] == 'mastery' and len(draft['ranks']) != 1)):

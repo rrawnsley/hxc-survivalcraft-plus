@@ -2336,3 +2336,19 @@ Fixed ladders are excluded from pacing:231 proposals/1343 transitions;118 native
 71-source exports refreshed and pacing header reproduced identically.
 VERIFY ALL PASSED .cache/verify-all/20261006-042456/report.json: source(two checks), native build37.9s.
 C++ style/whitespace passed. No tests/addon execution/native startup or production operations occurred.
+
+## Preserve basic ranged weapon attacks
+
+Native-baseline protection now also covers Auto Shot75, Throw2764, Shoot3018 and Wand5019. Their raw singleton
+class-grant entries are nonpassive level1 with exact weapon effects58/58/58/17 respectively; normal native
+weapon damage and existing combat-skill behavior remain authoritative. No per-ability practice or mastery is
+layered onto these basic attacks. Other weapon-based class abilities remain individually reviewed and are not
+excluded by damage effect alone. The eight explicit baseline IDs are the only protected IDs. Passive baseline
+entries now also require source level1, alongside their exact effect and passive evidence.
+
+Coverage:136 declared profiles,102 native-baseline class entries and609 needing definitions(113 ranked/496
+standalone), among847 still-runtime-unqualified groups.27 pending groups have raw common outcomes;231 pacing
+proposals/1343 transitions and118 native curves unchanged.71-source exports refreshed and pacing header reproduced
+identically. VERIFY ALL PASSED .cache/verify-all/20261006-042916/report.json: source(two checks), native build46.7s.
+The intermediate Wand-only source/native build042709 also passed(two checks/47.9s), before adding the other basic
+ranged attacks. C++ style/whitespace passed. No tests/client/startup/gameplay/production operations occurred.

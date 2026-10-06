@@ -9,7 +9,7 @@
 
 namespace AbilityPractice
 {
-inline constexpr std::array<std::uint32_t, 4> NativeBaselineSpells = { 81, 107, 674, 3124 };
+inline constexpr std::array<std::uint32_t, 8> NativeBaselineSpells = { 75, 81, 107, 674, 2764, 3018, 3124, 5019 };
 
 inline bool IsNativeBaselineSpell(std::uint32_t spellId)
 {
