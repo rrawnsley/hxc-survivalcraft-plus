@@ -244,6 +244,7 @@ def main():
         row['projectedTrainingBands'] = bands
         row['priorPacingPreserved'] = True
         row['addedTransitions'] = proposal['transitions'][len(prior[identity]):]
+        row['oneRankAheadCapProjection'] = proposal['oneRankAheadCapProjection']
         row['requiredNativeWork'] = ['mixed-class-grant-and-trainer-acquisition', 'loaded-full-rank-boundary',
                                     'explicit-version1-and2-readable-migration', 'preserve-whole-and-partial-progress',
                                     'retain-existing-learned-higher-ranks', 'unknown-version-preservation',

@@ -102,6 +102,33 @@ def load_cadences(path, drafts):
                     'scope': document['scope']}
 
 
+def rank_proficiency(index):
+    return 1 if index == 0 else 10 if index == 1 else (index - 1) * 20
+
+
+def describe_rank_caps(ranks):
+    if len(ranks) < 2 or any(type(rank['characterLevel']) is not int or
+                           not 1 <= rank['characterLevel'] <= 255 for rank in ranks) or any(
+            current['characterLevel'] > upcoming['characterLevel']
+            for current, upcoming in zip(ranks, ranks[1:])):
+        raise ValueError('Rank caps require an ordered native character-level ladder')
+    caps = []
+    for level in range(1, 81):
+        qualified = 0
+        while qualified + 1 < len(ranks) and ranks[qualified + 1]['characterLevel'] <= level:
+            qualified += 1
+        upcoming = min(qualified + 1, len(ranks) - 1)
+        legacy = min(level * 5, rank_proficiency(len(ranks) - 1))
+        caps.append({'characterLevel': level, 'legacyProficiency': legacy,
+                     'proficiency': min(legacy, rank_proficiency(upcoming))})
+    return {'scope': 'source-projection-not-effective-runtime-cap', 'definitionVersion': 4,
+            'policy': 'one-character-level-qualified-rank-ahead-with-existing-level-ceiling',
+            'learnedRankOpensPracticeEarly': False, 'earnedProgressClamped': False,
+            'terminalThresholdReachableInLevel80CapCatalog':
+                caps[-1]['proficiency'] >= rank_proficiency(len(ranks) - 1),
+            'caps': caps}
+
+
 def build_pacing(drafts, minimum_minutes, target_minutes, maximum_minutes, common_interval,
                  cast_times, cast_time_origin, cadences, cadence_origin, declarations, durations, duration_origin):
     if drafts.get('scope') != 'unapproved-definition-drafts-not-runtime-profiles' or (
@@ -128,6 +155,7 @@ def build_pacing(drafts, minimum_minutes, target_minutes, maximum_minutes, commo
         if declaration and declaration['kind'] != 'ranked':
             raise ValueError('Pacing requires a ranked declared profile: ' + str(identity))
         validate_rank_agreement(draft, declaration)
+        rank_caps = describe_rank_caps(ranks)
         cadence = cadences.get(identity)
         cadence_interval = cadence['assumedUseIntervalMilliseconds'] if cadence else common_interval
         bands, transitions = [], []
@@ -153,8 +181,11 @@ def build_pacing(drafts, minimum_minutes, target_minutes, maximum_minutes, commo
             channel_floor = max(0, raw_cast_time) + channel_duration if channel_duration is not None else None
             interval = max(cadence_interval, timing['startRecoveryMilliseconds'], sequential_floor,
                            channel_floor if channel_floor is not None else 0)
-            previous_proficiency = 1 if index == 1 else 10 if index == 2 else (index - 2) * 20
-            proficiency = 10 if index == 1 else (index - 1) * 20
+            previous_proficiency = rank_proficiency(index - 1)
+            proficiency = rank_proficiency(index)
+            earliest_completion = next((cap['characterLevel'] for cap in rank_caps['caps']
+                                       if cap['characterLevel'] >= ranks[0]['characterLevel'] and
+                                       cap['proficiency'] >= proficiency), None)
             delta = proficiency - previous_proficiency
             uses = max(1, (target_minutes * 60000 + interval // 2) // interval)
             milliseconds = uses * interval
@@ -164,6 +195,9 @@ def build_pacing(drafts, minimum_minutes, target_minutes, maximum_minutes, commo
                                 'nextRankNumber': upcoming['rankNumber'],
                                 'requiredCharacterLevel': upcoming['characterLevel'],
                                 'requiredProficiency': proficiency, 'proficiencyDelta': delta,
+                                'earliestCharacterLevelCapAllowsCompletion': earliest_completion,
+                                'practiceCanCompleteBeforeRankLevel': earliest_completion is not None and
+                                    earliest_completion < upcoming['characterLevel'],
                                 'assumedUseIntervalMilliseconds': interval,
                                 'assumptionSource': ('maximum-cast-then-raw-recovery-constant-channel-occupancy-'
                                                      'global-or-authored-cadence-floor'),
@@ -187,9 +221,13 @@ def build_pacing(drafts, minimum_minutes, target_minutes, maximum_minutes, commo
                           'existingDevelopmentDeclaration': declaration,
                           'sourceRankAgreementWithDeclaredProfile': True if declaration else None,
                           'proposedTrainingBands': bands,
+                          'oneRankAheadCapProjection': rank_caps,
                           'transitions': transitions,
                           'requiredReviews': sorted(set(draft['requiredReviews']) |
                                                     {'native-cooldown-and-channel-lifecycle'} |
+                                                    ({'terminal-proficiency-unreachable-in-level80-cap-catalog'}
+                                                     if not rank_caps[
+                                                         'terminalThresholdReachableInLevel80CapCatalog'] else set()) |
                                                     ({'raw-channel-duration-and-cadence'} if any(
                                                         value['requiresChannelCadenceReview']
                                                         for value in transitions) else set())),
@@ -228,6 +266,13 @@ def build_pacing(drafts, minimum_minutes, target_minutes, maximum_minutes, commo
                             for value in proposals if value['existingDevelopmentDeclaration']
                             for transition in value['transitions']),
                         'authoredCadenceCount': len(cadences),
+                        'oneRankAheadCapProjectionCount': len(proposals),
+                        'terminalThresholdUnreachableProjectionCount': sum(not value[
+                            'oneRankAheadCapProjection']['terminalThresholdReachableInLevel80CapCatalog']
+                            for value in proposals),
+                        'declaredTerminalThresholdUnreachableProjectionCount': sum(not value[
+                            'oneRankAheadCapProjection']['terminalThresholdReachableInLevel80CapCatalog']
+                            for value in proposals if value['existingDevelopmentDeclaration']),
                         'declaredRankedProposalCount': sum(value['existingDevelopmentDeclaration'] is not None
                                                           for value in proposals),
                         'needsDefinitionProposalCount': sum(value['existingDevelopmentDeclaration'] is None

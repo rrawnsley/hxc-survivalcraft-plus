@@ -3264,3 +3264,17 @@ VERIFY ALL: PASSED .cache/verify-all/20261006-204851/report.json: source2 with n
 test suites and native32.7s. C++ style/whitespace and actual106-source exports passed. No tests,
 native startup, client execution, active install, deployment or production configuration/database
 changes. Unpublished addon0.4.39-development/protocol4 unchanged. All development flags remain0.
+
+Authoring pacing exports now include per-level one-rank-ahead cap projections and the earliest
+character level at which each threshold can be completed. They remain source drafts, not effective
+runtime caps or measured progression.226 ranked source ladders include123 declared and103 pending;
+all123 declared terminal thresholds fit the existing level80 cap catalog. Pending Shadowflare's
+level84/90 tail cannot reach its terminal threshold under that catalog and carries an explicit
+review flag. Call Lightning's final native level84 rank remains character-gated; its proficiency
+threshold can be prepared at level79. Native realm maximum-level policy is unchanged.
+
+The same projections accompany all nine full trainer ladders; existing nine version3 entries and
+their preceding pacing reproduced unchanged. Initial exports rejected stale tool provenance and
+an overly narrow source-level bound; final exports account for native levels above80 without
+claiming they can currently be learned. Source2 passed205236 with no selected suites; native
+unchanged from204851. No tests, native/client execution or production operations.
