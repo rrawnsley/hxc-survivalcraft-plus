@@ -593,7 +593,7 @@ function Model.PracticeRules(ability, saved)
         [13] = "Keep this buff active on yourself from your own cast and use learned abilities that deal direct damage"
             .. " to a level-appropriate PvE opponent or restore missing health in a qualifying PvE fight."
             .. " Your owned buff must be valid when the combat cast begins and when its result qualifies."
-            .. " Its stat effect must be active and positive; a stronger exclusive effect prevents practice."
+            .. " Its supported buff effect must be active and positive; a stronger exclusive effect prevents practice."
             .. " Equal-strength exclusive effects remain eligible."
             .. " One combat cast can earn one use for this buff, with at least five seconds between counted uses."
             .. " Supported buffs progress independently; a combat cast can practice more than one active buff."

@@ -3454,6 +3454,11 @@ VERIFY ALL: PASSED214418 source2/no selected suites/native30.6s; style/whitespac
 coverage/trainer exports passed. Earlier214056/214244 compiled intermediate drafts, superseded.
 Addon0.4.40/protocol4 unchanged. All flags0. No tests, native startup, client/gameplay/migration
 execution, active install, publish, deploy, restart or production configuration/database mutation.
+
+Unpublished addon0.4.41-development updates route13 help to describe the supported buff effect,
+including spell power, instead of calling every effect a stat. Wire schema4 and practice math remain.
+Five Lua5.1 chunks syntax-parsed without execution; source214613 passed2/no selected suites.
+Native unchanged from214418. No active client install, publishing or production changes.
 All switches0; owned-buff rules remain an isolated reversible design draft.
 
 ## Chromie's complete trainer ladder — 6 October 2026
