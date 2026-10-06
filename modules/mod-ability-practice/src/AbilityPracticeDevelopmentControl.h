@@ -14,6 +14,19 @@ inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 16, 707044, AbilityKind::Ranked, StormAlert, StormAlertCaps }, Development::Policy, OutcomeKind::Fear }
 };
+
+inline bool SupportsStun(AbilityProfile const& profile)
+{
+    return profile.Definition.Kind == AbilityKind::Ranked && profile.Outcome == OutcomeKind::Damage &&
+        ((profile.Definition.ClassId == 12 && profile.Definition.AbilityId == 520523) ||
+            (profile.Definition.ClassId == 18 && profile.Definition.AbilityId == 802197));
+}
+
+inline bool SupportsRoot(AbilityProfile const& profile)
+{
+    return profile.Definition.Kind == AbilityKind::Ranked && profile.Outcome == OutcomeKind::Damage &&
+        profile.Definition.ClassId == 24 && profile.Definition.AbilityId == 805476;
+}
 }
 
 #endif

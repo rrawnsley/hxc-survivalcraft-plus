@@ -179,7 +179,7 @@ local function Ability(value, schema, characterLevel)
     local rewards, catchup
     if schema == 4 then
         if value.acquisitionSource ~= nil and not Integer(value.acquisitionSource, 1, 4) then return nil end
-        if not session or not Integer(value.kind, 1, 3) or not Integer(value.route, 1, 10)
+        if not session or not Integer(value.kind, 1, 3) or not Integer(value.route, 1, 12)
             or not Integer(value.ruleSet, 1, 6)
             or ((value.ruleSet == 3 or value.ruleSet == 6) and (value.kind ~= 1 or value.route ~= 2))
             or ((value.kind == 3) ~= (value.route == 6)) then return nil end
@@ -554,6 +554,12 @@ function Model.PracticeRules(ability)
         return "Practice rules are unavailable in this update. Refresh to request the current rules."
     end
     local rules = {
+        [11] = "Deal direct damage or newly stun a live, level-appropriate PvE opponent with the learned ability."
+            .. " Refreshes and already stunned enemies do not earn control credit."
+            .. " Damage and control share one award for the original cast.",
+        [12] = "Deal supported periodic damage or newly root a live, level-appropriate PvE opponent."
+            .. " Refreshes, already immobilized enemies and roots suppressed by a stun do not earn control credit."
+            .. " Damage ticks and control share one award for the original cast.",
         [10] = "Newly make a live, level-appropriate PvE opponent flee with the learned ability."
             .. " Refreshes, already fleeing enemies and casts prevented from taking control do not count."
             .. " Each original cast can earn one award.",

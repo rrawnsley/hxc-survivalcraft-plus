@@ -49,8 +49,8 @@ AbilityPractice.DevelopmentCatchupMultiplier = 2
 # No shield magnitude, native mechanics or mastery benefit changes. Other shields and mana shields unsupported.
 AbilityPractice.AllowDevelopmentAbsorption = 0
 
-# Enable only the isolated Storm Alert fear practice prototype at startup.
-# Original casts must newly make an eligible PvE enemy flee; refreshes do not count.
+# Enable isolated Storm Alert fear and Headbutt/Battle Rush/Cindergrip control credit at startup.
+# Original casts must newly control an eligible PvE enemy; damage and control share one award.
 AbilityPractice.AllowDevelopmentControlObservation = 0
 
 # Optional per-ability ranked pacing curves targeting 30-60 combat minutes under draft cadence assumptions.

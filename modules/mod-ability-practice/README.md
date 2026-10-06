@@ -2448,3 +2448,28 @@ suite, including12 existing Python tests. No test binaries, gameplay, client chu
 The subsequent compile-only report .cache/verify-all/20261006-050019/report.json passed81.3s build, all other
 stages skipped. C++ style/whitespace passed;5 Lua5.1 files compiled for syntax only. Final authoring exports
 were regenerated. Production binaries/configuration/databases/addons/launcher were not changed or restarted.
+
+
+## Shared damage and control credit
+
+The same disabled control option now adds explicitly reviewed hybrid adapters for Headbutt(class12/520523),
+Battle Rush(class18/802197) and Cindergrip(class24/805476). Their existing Damage profiles remain; no additional
+profile, rank, cap, pacing curve or persisted definition version changes. Startup checks every hybrid rank for
+its required stun/root aura. Stun reporting requires a newly installed stunned state and native stun flag;
+root reporting requires a new root state and native rooted movement, refusing prior root/stun/immobility.
+Real application only; original receipt, exact spell, human/session/acquisition/live PvE guards are shared with
+fear. Existing damage or periodic ticks and the new control effect consume the same original receipt, allowing
+at most one award. Disabling control returns the existing damage routes. Native control/threat behavior remains.
+
+Addon0.4.33 routes11/12 explain direct-damage-or-new-stun and periodic-damage-or-new-root respectively. These are
+individually scoped adapters, not general training for all spells containing control. Unranked control mastery,
+control duration rewards and confusion are still undesigned. Raw source review now recognizes fear/stun/root
+and explicitly queues attribution/new-application review.196 of847 source groups have raw common outcomes;
+608 still need definitions,42 with a raw common route; all remain runtime-unqualified. Profile count137 and
+77-source provenance are unchanged.106/888 broad ranked header and119-entry pacing header reproduced identically.
+
+Compile-only .cache/verify-all/20261006-050631/report.json passed37.0s. Prior050534 failed because the newly
+written observer used nonexistent Unit::HasMovementFlag; corrected to the existing Unit::IsRooted API. C++
+style/whitespace,5 Lua5.1 syntax-only compilations and final authoring exports passed. Source stage was skipped
+to avoid its automatic mechanic-map tests; no further tests/client chunks/gameplay/startup ran. Production remains
+untouched. Successful native/control/menu execution, timing and acquisition qualification are outstanding.

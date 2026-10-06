@@ -200,7 +200,7 @@ def build_drafts(candidates, root):
                 raise ValueError('Native baseline raw/source evidence changed')
         routes = candidate.get('nativeOutcomeReview', {}).get('commonRoutes', [])
         if not isinstance(routes, list) or len(set(routes)) != len(routes) or any(route not in {
-                'damage', 'healing', 'interrupt', 'dispel', 'steal', 'fear'} for route in routes):
+                'damage', 'healing', 'interrupt', 'dispel', 'steal', 'fear', 'stun', 'root'} for route in routes):
             raise ValueError('Invalid candidate outcome routes')
         periodic = candidate.get('nativePeriodicReview', {}).get('commonRoutes', [])
         if not isinstance(periodic, list) or len(set(periodic)) != len(periodic) or any(
@@ -210,7 +210,7 @@ def build_drafts(candidates, root):
                     'practice-rates-and-caps', 'persistence-and-migration', 'menu-and-gameplay-qualification']
         if periodic:
             required.append('periodic-original-cast-attribution')
-        if 'fear' in routes:
+        if set(routes) & {'fear', 'stun', 'root'}:
             required.append('control-original-cast-and-new-application-attribution')
         if len(ranks) == 1:
             required.append('unranked-mastery-or-fixed-design')

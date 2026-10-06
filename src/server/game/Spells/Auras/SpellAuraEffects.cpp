@@ -3755,10 +3755,14 @@ void AuraEffect::HandleAuraModStun(AuraApplication const* aurApp, uint8 mode, bo
         return;
 
     Unit* target = aurApp->GetTarget();
-
+    auto const receipt = GetBase()->GetPracticeCast();
+    bool const newStun = apply && receipt && !receipt->IsConsumed() &&
+        !target->HasUnitState(UNIT_STATE_STUNNED) && !target->HasUnitFlag(UNIT_FLAG_STUNNED);
     target->SetControlled(apply, UNIT_STATE_STUNNED);
     if (apply)
         target->GetThreatMgr().EvaluateSuppressed();
+    if (newStun && target->HasUnitState(UNIT_STATE_STUNNED) && target->HasUnitFlag(UNIT_FLAG_STUNNED))
+        CoAAbilityPractice::ReportControlOutcome(GetCaster(), target, GetId(), SPELL_AURA_MOD_STUN, receipt);
 }
 
 void AuraEffect::HandleAuraModRoot(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -3767,8 +3771,13 @@ void AuraEffect::HandleAuraModRoot(AuraApplication const* aurApp, uint8 mode, bo
         return;
 
     Unit* target = aurApp->GetTarget();
-
+    auto const receipt = GetBase()->GetPracticeCast();
+    bool const newRoot = apply && receipt && !receipt->IsConsumed() &&
+        !target->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED) &&
+        !target->IsRooted() && !target->HasUnitFlag(UNIT_FLAG_DISABLE_MOVE);
     target->SetControlled(apply, UNIT_STATE_ROOT);
+    if (newRoot && target->HasUnitState(UNIT_STATE_ROOT) && target->IsRooted())
+        CoAAbilityPractice::ReportControlOutcome(GetCaster(), target, GetId(), SPELL_AURA_MOD_ROOT, receipt);
 }
 
 void AuraEffect::HandlePreventFleeing(AuraApplication const* aurApp, uint8 mode, bool apply) const

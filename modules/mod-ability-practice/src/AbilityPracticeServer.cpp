@@ -708,7 +708,11 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
                     rank.State = Practice::RankState::MissingPrerequisite;
             if (view.NextRank)
                 view.NextRank = view.Ranks[view.NextRank->RankNumber - 1];
-            view.Route = AbsorptionRequested && Practice::DevelopmentAbsorption::IsEmeraldVeil(profile)
+            view.Route = ControlRequested && Practice::DevelopmentControl::SupportsStun(profile)
+                ? Practice::PracticeRoute::DamageOrStun :
+                ControlRequested && Practice::DevelopmentControl::SupportsRoot(profile)
+                ? Practice::PracticeRoute::DamageOrRoot :
+                AbsorptionRequested && Practice::DevelopmentAbsorption::IsEmeraldVeil(profile)
                 ? Practice::PracticeRoute::HealingAbsorption : RouteFor(profile.Outcome);
             view.AcquisitionSourceId = static_cast<std::uint32_t>(profile.Acquisition);
             view.ReplacementSpellId = NativeReplacement(player, ability);
@@ -903,13 +907,17 @@ void AwardControlOutcome(Unit* caster, Unit* target, std::uint32_t auraSpellId, 
     std::shared_ptr<CoAAbilityPractice::CastReceipt> const& receipt)
 {
     if (!Active.load() || !ControlRequested || !caster || !target || !target->IsAlive() ||
-        !receipt || receipt->IsConsumed() || auraType != SPELL_AURA_MOD_FEAR || auraSpellId != receipt->SpellId)
+        !receipt || receipt->IsConsumed() || auraSpellId != receipt->SpellId)
         return;
     Player* player = caster->ToPlayer();
     if (!IsProfiledPlayer(player))
         return;
     auto const* profile = FindProfile(player, receipt->SpellId);
-    if (!profile || profile->Outcome != Practice::OutcomeKind::Fear || !IsDevelopmentOpponent(player, target))
+    bool const supported = profile &&
+        ((auraType == SPELL_AURA_MOD_FEAR && profile->Outcome == Practice::OutcomeKind::Fear) ||
+            (auraType == SPELL_AURA_MOD_STUN && Practice::DevelopmentControl::SupportsStun(*profile)) ||
+            (auraType == SPELL_AURA_MOD_ROOT && Practice::DevelopmentControl::SupportsRoot(*profile)));
+    if (!supported || !IsDevelopmentOpponent(player, target))
         return;
     std::lock_guard lock(Mutex);
     auto const found = Sessions.find(player->GetGUID().GetRawValue());
@@ -1198,8 +1206,13 @@ public:
                 bool const expectedAbsorption = !AbsorptionRequested ||
                     !Practice::DevelopmentAbsorption::IsEmeraldVeil(profile) ||
                     (info && info->HasAura(SPELL_AURA_SCHOOL_ABSORB));
+                bool const expectedControl = !ControlRequested ||
+                    ((!Practice::DevelopmentControl::SupportsStun(profile) ||
+                        (info && info->HasAura(SPELL_AURA_MOD_STUN))) &&
+                        (!Practice::DevelopmentControl::SupportsRoot(profile) ||
+                            (info && info->HasAura(SPELL_AURA_MOD_ROOT))));
                 if (!info || info->IsDeprecatedForPlayers || (!fixed && info->IsPassive()) ||
-                    !expectedOutcome || !expectedAbsorption)
+                    !expectedOutcome || !expectedAbsorption || !expectedControl)
                 {
                     Ready = false;
                     LOG_ERROR("module.ability_practice", "Rejected development profile: class={}, ability={}, spell={}",
@@ -1220,7 +1233,7 @@ public:
         LOG_INFO("module.ability_practice", "Development fixed catalog: enabled={}", fixedCatalog);
         LOG_INFO("module.ability_practice", "Development absorption observation: enabled={}", AbsorptionRequested);
         LOG_INFO("module.ability_practice", "Development rank pacing: enabled={}", PacingRequested);
-        LOG_INFO("module.ability_practice", "Development fear observation: enabled={}", ControlRequested);
+        LOG_INFO("module.ability_practice", "Development control observation: enabled={}", ControlRequested);
     }
 };
 

@@ -91,7 +91,7 @@ def review_queues(draft):
         queues.add('unranked-mastery-or-fixed-design')
     if set(routes) & {'interrupt', 'dispel', 'steal'}:
         queues.add('utility-classification-and-meaningful-use')
-    if 'fear' in routes:
+    if set(routes) & {'fear', 'stun', 'root'}:
         queues.add('control-effect-attribution-and-meaningful-use')
     if len(draft['ranks']) > 1 and set(routes) & {'damage', 'healing'}:
         queues.add('ranked-common-outcome')

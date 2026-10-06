@@ -146,7 +146,9 @@ enum class PracticeRoute
     HealingAbsorption = 7,
     DamageOrInterrupt = 8,
     DamageOrDispel = 9,
-    Fear = 10
+    Fear = 10,
+    DamageOrStun = 11,
+    DamageOrRoot = 12
 };
 
 inline constexpr std::uint32_t HumanPvERuleSet = 1;

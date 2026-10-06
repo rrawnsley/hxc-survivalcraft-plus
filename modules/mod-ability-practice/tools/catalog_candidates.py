@@ -10,6 +10,7 @@ import sys
 DIRECT_ROUTES = {'damage': {2, 17, 31, 58, 121}, 'healing': {10, 67, 136}}
 OUTCOME_ROUTES = {**DIRECT_ROUTES, 'interrupt': {68}, 'dispel': {38}, 'steal': {126}}
 PERIODIC_ROUTES = {'damage': {3, 53, 89}, 'healing': {8}}
+CONTROL_ROUTES = {'fear': {7}, 'stun': {12}, 'root': {26}}
 DEPRECATED_WORD = re.compile(r'(?<![a-z0-9_])(?:deprecated|depreacated)(?![a-z0-9_])', re.IGNORECASE | re.ASCII)
 
 
@@ -47,7 +48,8 @@ def action_review(members):
                 traits.add('utility-outcome-review')
             if aura.startswith('SPELL_AURA_PERIODIC_'):
                 traits.add('periodic-attribution-review')
-            if name == 'SPELL_EFFECT_APPLY_AURA' and aura == 'SPELL_AURA_MOD_FEAR':
+            if name == 'SPELL_EFFECT_APPLY_AURA' and aura in {
+                    'SPELL_AURA_MOD_FEAR', 'SPELL_AURA_MOD_STUN', 'SPELL_AURA_MOD_ROOT'}:
                 traits.add('control-effect-attribution-review')
             if name.startswith('SPELL_EFFECT_SUMMON') or name == 'SPELL_EFFECT_CREATE_TAMED_PET':
                 traits.add('pet-or-summon-ownership-review')
@@ -128,14 +130,14 @@ def native_outcome_review(members):
     result = native_route_review(members, OUTCOME_ROUTES,
                                 'raw-native-outcome-route-comparison-not-effective-data-approval',
                                 'no-current-native-outcome-route')
-    fear = native_route_review(members, {'fear': {7}},
-                               'raw-native-fear-route-comparison-not-attribution-or-effective-data-approval',
-                               'no-current-native-fear-route', periodic=True)
-    if fear['commonRoutes']:
-        result['commonRoutes'] = sorted(set(result['commonRoutes']) | {'fear'})
+    control = native_route_review(members, CONTROL_ROUTES,
+                                  'raw-native-control-route-comparison-not-attribution-or-effective-data-approval',
+                                  'no-current-native-control-route', periodic=True)
+    if control['commonRoutes']:
+        result['commonRoutes'] = sorted(set(result['commonRoutes']) | set(control['commonRoutes']))
         result['blockedMembers'] = []
         result['status'] = 'needs-effective-data-and-acquisition-review'
-    result['fearReview'] = fear
+    result['controlReview'] = control
     return result
 
 
