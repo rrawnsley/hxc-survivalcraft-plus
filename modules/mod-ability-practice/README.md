@@ -2120,3 +2120,15 @@ numeric proficiency and its next-point fraction. Source exports now include pers
 Source/native compilation passed in .cache/verify-all/20261006-002445/report.json (two source checks,33.2s
 native build), C++ style/whitespace passed, and64-source authoring exports refreshed. No unit/harness/gameplay
 tests, server startup, policy activation, saved-row conversion or production operations were performed.
+
+## Catch-up capacity for individual rank pacing
+
+The bounded effective-policy buffer now accepts up to64 base bands plus one catch-up cutoff band, aligned with
+the profile rank-count limit. The earlier eight-base-band buffer would refuse some future proposed pacing
+curves (the current proposal export has up to12 bands). Present development policies still use two bands;
+award rates, cutoff semantics, overflow refusal and saved partial progress remain unchanged. No dynamic
+allocation, added gameplay pointer or active native pacing policy is introduced. Larger policies remain refused
+when catch-up needs a derived buffer; disabled catch-up retains the original policy view as before.
+
+Source/native compilation passed in .cache/verify-all/20261006-002731/report.json (two source checks,31.5s
+native build), plus C++ style/whitespace. Unit/harness/gameplay stages skipped; no rate activation or deployment.

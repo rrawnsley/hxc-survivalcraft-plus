@@ -15,10 +15,12 @@ struct CatchupSettings
     std::uint32_t Multiplier = 2;
 };
 
+inline constexpr std::size_t MaximumCatchupBaseBands = 64;
+
 struct EffectiveTrainingPolicy
 {
     TrainingPolicy Original;
-    std::array<TrainingBand, 9> Bands{};
+    std::array<TrainingBand, MaximumCatchupBaseBands + 1> Bands{};
     std::size_t Count = 0;
 
     TrainingPolicy View() const & { return Count ? TrainingPolicy{ { Bands.data(), Count } } : Original; }
