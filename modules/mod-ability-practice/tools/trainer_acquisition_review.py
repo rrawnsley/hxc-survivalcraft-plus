@@ -169,6 +169,76 @@ def supplemental_ladders(candidates, offers, supplemental):
     return sorted(result, key=lambda row: (row['classId'], row['firstObservedSpellId']))
 
 
+def source_trainer_rank_audit(candidates, offers):
+    records, roots = {}, {}
+    for candidate in candidates['candidates']:
+        class_id = candidate['classId']
+        for member in candidate['members']:
+            identity = (class_id, member['spellId'])
+            if identity in records and records[identity] != member:
+                raise ValueError('Conflicting captured member in trainer rank audit')
+            records[identity] = member
+        review = candidate['nativeClassGrantReview']
+        if review.get('sourceChainConsistent') is True and len(review['sourceRanks']) > 1:
+            identity = (class_id, candidate['sourceReferenceSpellId'])
+            if identity in roots and roots[identity] != review['sourceRanks']:
+                raise ValueError('Conflicting native prefix in trainer rank audit')
+            roots[identity] = review['sourceRanks']
+    rows = []
+    for identity, prefix in sorted(roots.items()):
+        name = records[identity].get('rawDbc', {}).get('name')
+        if not name:
+            raise ValueError('Missing captured native root name in trainer rank audit')
+        ranks, flags = [], set()
+        for offered, evidence in sorted(offers.items()):
+            member = records.get(offered, {})
+            raw = member.get('rawDbc', {})
+            if offered[0] != identity[0] or raw.get('name') != name:
+                continue
+            number = member.get('rawRankNumber')
+            if type(number) is not int or number < 1 or raw.get('fieldErrors'):
+                flags.add('missing-or-invalid-ranked-raw-evidence')
+            if len(evidence) != 1:
+                flags.add('missing-or-ambiguous-source-trainer-offer')
+            level = evidence[0]['characterLevel'] if len(evidence) == 1 else None
+            if level not in member.get('reportedLevels', []):
+                flags.add('source-trainer-and-inventory-level-conflict')
+            prerequisites = sorted({value for offer in evidence for value in offer['requiredAbilities']})
+            if any(offer['requiredSkillLine'] or offer['requiredSkillRank'] for offer in evidence):
+                flags.add('additional-native-skill-gate')
+            links = [{'spellId': value,
+                      'capturedName': records.get((identity[0], value), {}).get('rawDbc', {}).get('name')}
+                     for value in prerequisites]
+            if any(link['capturedName'] != name for link in links):
+                flags.add('different-ability-or-uncaptured-prerequisite')
+            ranks.append({'spellId': offered[1], 'rankNumber': number, 'characterLevel': level,
+                          'sourceTrainerOffers': evidence, 'prerequisiteIdentities': links})
+        ranks.sort(key=lambda rank: (rank['rankNumber'] if type(rank['rankNumber']) is int else 0,
+                                     rank['spellId']))
+        if [rank['rankNumber'] for rank in ranks] != list(range(1, len(ranks) + 1)):
+            flags.add('raw-rank-sequence-incomplete-or-conflicting')
+        projected_prefix = [{key: rank[key] for key in ('spellId', 'characterLevel')} for rank in
+                            ranks[:len(prefix)]]
+        expected_prefix = [{key: rank[key] for key in ('spellId', 'characterLevel')} for rank in prefix]
+        if projected_prefix != expected_prefix:
+            flags.add('source-trainer-and-native-prefix-disagree')
+        levels = [rank['characterLevel'] for rank in ranks]
+        if any(level is None for level in levels) or any(later < earlier for earlier, later in
+                                                       zip(levels, levels[1:]) if None not in (earlier, later)):
+            flags.add('source-trainer-level-order-unresolved')
+        for index, rank in enumerate(ranks):
+            expected = [ranks[index - 1]['spellId']] if index else []
+            if [link['spellId'] for link in rank['prerequisiteIdentities']] != expected:
+                flags.add('trainer-prerequisite-differs-from-immediate-rank')
+        rows.append({'classId': identity[0], 'abilityId': identity[1], 'name': name,
+                     'nativePrefix': prefix, 'sameNameSourceTrainerRanks': ranks,
+                     'blockingFlags': sorted(flags),
+                     'status': 'requires-source-gate-review' if flags else 'needs-effective-trainer-review',
+                     'scope': 'same-name-source-trainer-audit-not-acquisition-link',
+                     'runtimeQualified': False, 'productionApproved': False})
+    return rows
+
+
 def build_review(candidates, owners, offers, mappings):
     if candidates.get('schemaVersion') != 1 or candidates.get('scope') != (
             'source-review-candidates-not-runtime-definitions'):
@@ -218,6 +288,11 @@ def build_review(candidates, owners, offers, mappings):
                      'blockingFlags': sorted(flags), 'members': members,
                      'runtimeQualified': False, 'productionApproved': False})
     ladders = supplemental_ladders(candidates, offers, rows)
+    audit = source_trainer_rank_audit(candidates, offers)
+    captured = {(candidate['classId'], member['spellId']) for candidate in candidates['candidates']
+                for member in candidate['members']}
+    uncaptured = [{'classId': identity[0], 'spellId': identity[1], 'sourceTrainerOffers': evidence}
+                  for identity, evidence in sorted(offers.items()) if identity not in captured]
     return {'schemaVersion': 1, 'scope': 'supplemental-trainer-source-review-not-native-entitlement',
             'runtimeQualified': False, 'productionApproved': False,
             'requiredEffectiveReview': ['loaded-class-trainer-owner-and-offer', 'native-rank-chain',
@@ -228,11 +303,16 @@ def build_review(candidates, owners, offers, mappings):
                         'supplementalCandidates': len(rows),
                         'statuses': dict(sorted(Counter(row['status'] for row in rows).items())),
                         'supplementalRankLadders': len(ladders),
+                        'sourceTrainerRankAudits': len(audit),
+                        'sourceTrainerRankAuditFlags': dict(sorted(Counter(flag for row in audit
+                                                                          for flag in row['blockingFlags']).items())),
+                        'uncapturedSourceTrainerOffers': len(uncaptured),
                         'supplementalRankLadderStatuses': dict(sorted(Counter(row['status']
                                                                             for row in ladders).items())),
                         'blockingFlags': dict(sorted(Counter(flag for row in rows
                                                            for flag in row['blockingFlags']).items()))},
-            'candidates': rows, 'rankLadders': ladders}
+            'candidates': rows, 'rankLadders': ladders, 'sourceTrainerRankAudits': audit,
+            'uncapturedSourceTrainerOffers': uncaptured}
 
 
 def declared_rank_boundaries(review, declarations):

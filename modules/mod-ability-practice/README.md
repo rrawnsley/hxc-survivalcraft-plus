@@ -3399,6 +3399,27 @@ the corrected parser strictly reads the initializer body and final exports passe
 VERIFY ALL: PASSED212214 source2/no selected suites/native30.9s, style/whitespace and actual
 source/coverage/pacing/trainer exports passed. Addon0.4.40/protocol4 unchanged; no repeat Lua parsing.
 No tests, native startup, migration/menu/gameplay execution, active install or production changes.
+
+## Trainer gate audit — 6 October 2026
+
+The source report separately audits all244 consistent ranked class-grant roots against3732 SQL
+trainer offers. Same-name raw ranks are reported with their actual prerequisites, without turning
+name similarity into an acquisition link. Missing captured offers are listed independently; current
+capture has zero omissions. Six roots require gate review: Illidari Intuition, Sanguinary Offering,
+Raise: Lesser Skeletal Warrior, Claw Strike, Deathwind and Seismic Crash. Three existing extensions
+use earlier ranks as native prerequisites; this diagnostic does not override their frozen definitions.
+
+Correction to the preceding Chromie investigation: Sanguinary707340 is captured as a standalone
+rank6 at72. Its prerequisite is Bloodsoaked Offering572403, rather than Sanguinary707339. That
+different-name reference correctly prevents joining the linked Sanguinary ladder. The rejected
+draft remains excluded; the SQL prerequisite is retained for explicit acquisition/design review.
+Illidari has missing rank11 and nonmonotonic levels. Raise's native prefix differs from the
+same-name trainer set and needs individual summon/acquisition review.
+
+Reports retain separate source scopes, runtimeQualified=false and productionApproved=false.
+The linked-ladder extension generator still reproduces all three frozen headers unchanged.
+Source213856 passed2 checks with no selected suites; native unchanged from212847. No tests,
+native startup, active installation, production mutation, publishing or server process operations.
 All switches0; owned-buff rules remain an isolated reversible design draft.
 
 ## Chromie's complete trainer ladder — 6 October 2026
