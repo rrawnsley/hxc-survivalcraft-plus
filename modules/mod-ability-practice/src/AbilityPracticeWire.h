@@ -31,7 +31,8 @@ inline bool SameRankView(RankView const& left, RankView const& right)
 inline bool ConsistentTypedRoadmap(AbilityView const& view, std::uint32_t characterLevel)
 {
     if (view.Ranks.empty() || view.Ranks.front().Requirement.Proficiency != 1 ||
-        (view.Kind == AbilityKind::Ranked ? view.Ranks.size() < 2 : view.Ranks.size() != 1))
+        (view.Kind == AbilityKind::Ranked && view.Ranks.size() < 2) ||
+        (view.Kind == AbilityKind::Mastery && view.Ranks.size() != 1))
         return false;
     std::uint32_t learned = 0;
     std::uint32_t display = view.Ranks.front().SpellId;

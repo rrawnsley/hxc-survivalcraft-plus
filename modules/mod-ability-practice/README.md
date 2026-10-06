@@ -2372,3 +2372,18 @@ its execution qualification remains pending. No new abilities/rates/saved rows/n
 Source report .cache/verify-all/20261006-043731/report.json passed(two checks); whitespace passed. Native remains
 042916. No tests/runtime/client execution or production operations occurred. Distributed mastery instructions
 now name both the healing and damage examples accurately; their flags remain defaultoff.
+
+## Correct the fixed-utility typed roadmap precondition
+
+Source review found that ConsistentTypedRoadmap retained its older non-ranked-singleton precondition, despite
+the later fixed-kind validation and addon having gained multirank support. That precondition would reject every
+multirank fixed utility before encoding. It now requires singleton only for Mastery and at least two ranks for
+Ranked; Fixed uses the existing bounded nonempty rank roadmap and strict zero-practice validation. Display,
+learned/next rank, levels, acquisition and zero-forecast checks remain in place. Catalog/view/Lua paths were
+reviewed for the same old restriction and already support the intended shape. This is a confirmed source-level
+oversight in the newly added development path; no runtime reproduction is claimed.
+
+VERIFY ALL PASSED .cache/verify-all/20261006-043835/report.json: source(two checks), native build50.4s.
+C++ style/whitespace and71-source exports passed; native pacing header reproduced identically. No tests/addon
+chunks/client rendering/gameplay/startup/production operations. Protocol field shapes and addon0.4.31 unchanged;
+joint native/addon execution qualification remains pending.
