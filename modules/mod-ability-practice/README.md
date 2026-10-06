@@ -1983,3 +1983,18 @@ native build), with five Lua 5.1 syntax-only compilations and C++ style/whitespa
 exports preserve 61 provenance sources including Sun Cleric's triggered-cast consumer. Counts remain
 123 unique/125 declarations, with 724 pending definitions; all production/runtime approvals remain false.
 Unit/harness/gameplay skipped. No native/addon startup or production modifications were performed.
+
+
+## Forgotten ability receipt checkpoint — 5 October 2026
+
+The native forgotten-spell callback now rotates the existing action session for managed abilities, in addition
+to refreshing menu/ranks. An original cast started before a managed ability is forgotten cannot regain credit
+or mastery merely because it was relearned before its delayed outcome. Known-state/acquisition checks remain;
+retained proficiency and session totals are unchanged. Learning an unrelated spell or forgetting an unmanaged
+spell still refreshes the view without invalidating original actions. Replacement changes reuse the same
+refresh/invalidation path; no new receipt fields, registries, pointers or core hook are added.
+
+This is a development lifecycle safeguard, not a reproduced production defect. Source/native passed in
+.cache/verify-all/20261005-235946/report.json (two source checks, 31.8-second native build), plus C++ style/
+whitespace and 61-source export refresh. Unit/harness/gameplay skipped, lifecycle behavior unqualified.
+Addon 0.4.28 and catalog counts remain unchanged. No production changes or startup were performed.

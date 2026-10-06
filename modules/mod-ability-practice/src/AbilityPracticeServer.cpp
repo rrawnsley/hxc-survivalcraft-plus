@@ -927,7 +927,7 @@ void RefreshOwnerState(Player* player, MenuSession& session, std::uint32_t custo
     session.CheckRanks = true;
 }
 
-void MarkDirty(Player* player)
+void MarkDirty(Player* player, bool invalidateActions = false)
 {
     if (!Active.load() || !IsProfiledPlayer(player))
         return;
@@ -937,6 +937,8 @@ void MarkDirty(Player* player)
     {
         ClearDelivery(found->second);
         found->second.NextRefresh = {};
+        if (invalidateActions)
+            found->second.ActionSession = NewActionSession();
         found->second.Dirty = true;
         found->second.CheckRanks = true;
     }
@@ -947,16 +949,7 @@ void ReplacementChanged(Player* player, std::uint32_t originalSpellId)
     if (!Active.load() || !IsProfiledPlayer(player) || player->isBeingLoaded() ||
         !FindProfile(player, originalSpellId))
         return;
-    std::lock_guard lock(Mutex);
-    auto const found = Sessions.find(player->GetGUID().GetRawValue());
-    if (!Affects(player) || found == Sessions.end())
-        return;
-    MenuSession& session = found->second;
-    ClearDelivery(session);
-    session.NextRefresh = {};
-    session.ActionSession = NewActionSession();
-    session.Dirty = true;
-    session.CheckRanks = true;
+    MarkDirty(player, true);
 }
 
 class PracticeWorld : public WorldScript
@@ -1191,10 +1184,10 @@ public:
         MarkDirty(player);
     }
 
-    void OnPlayerForgotSpell(Player* player, uint32) override
+    void OnPlayerForgotSpell(Player* player, uint32 spellId) override
     {
         if (Active.load() && IsProfiledPlayer(player) && !player->isBeingLoaded())
-            MarkDirty(player);
+            MarkDirty(player, FindProfile(player, spellId) != nullptr);
     }
 
     void OnPlayerLogout(Player* player) override
