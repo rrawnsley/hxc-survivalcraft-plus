@@ -18,6 +18,7 @@
 #include "AbilityPracticeDevelopmentTrainerFixed.h"
 #include "AbilityPracticeDevelopmentTrainerRanks.h"
 #include "AbilityPracticeDevelopmentBuffTrainerRanks.h"
+#include "AbilityPracticeDevelopmentStatBuffTrainerRanks.h"
 #include "AbilityPracticeDevelopmentAbsorption.h"
 #include "AbilityPracticeDevelopmentControl.h"
 #include "AbilityPracticeDevelopmentControlFixed.h"
@@ -244,8 +245,9 @@ bool ApplyDevelopmentMasteryPacing(std::vector<Practice::AbilityProfile>& profil
 Practice::DevelopmentTrainerRanks::Entry const* TrainerRankExtensionForIdentity(
     std::uint32_t classId, std::uint32_t abilityId)
 {
-    std::array<std::span<Practice::DevelopmentTrainerRanks::Entry const>, 2> const catalogs = {
-        Practice::DevelopmentTrainerRanks::Entries, Practice::DevelopmentBuffTrainerRanks::Entries };
+    std::array<std::span<Practice::DevelopmentTrainerRanks::Entry const>, 3> const catalogs = {
+        Practice::DevelopmentTrainerRanks::Entries, Practice::DevelopmentBuffTrainerRanks::Entries,
+        Practice::DevelopmentStatBuffTrainerRanks::Entries };
     Practice::DevelopmentTrainerRanks::Entry const* result = nullptr;
     for (auto const entries : catalogs)
         for (auto const& entry : entries)

@@ -3400,3 +3400,31 @@ VERIFY ALL: PASSED212214 source2/no selected suites/native30.9s, style/whitespac
 source/coverage/pacing/trainer exports passed. Addon0.4.40/protocol4 unchanged; no repeat Lua parsing.
 No tests, native startup, migration/menu/gameplay execution, active install or production changes.
 All switches0; owned-buff rules remain an isolated reversible design draft.
+
+## Chromie's complete trainer ladder — 6 October 2026
+
+Chromie's Wisdom22/801523 adds its four native source ranks12/28/42/56 to the disabled buff catalog,
+then composes through a separate frozen DevelopmentStatBuffTrainerRanks definition3 into rank5
+802830 at native level70/proficiency60. Class22 trainer900022 requires preceding802829 with zero
+skill requirements. The full rank is active MOD_STAT29/friendly21/stat4/base49; unused raw slots
+have base-1 but no effect/aura/target/trigger, preserving their native unused shape. Loaded full
+trainer/rank boundary/shape checks remain mandatory. No native buff power or learning level changed.
+
+New third trainer catalog shares exact acquisition and readable prior1/2 migration, learned-rank
+seeding, partial fraction preservation and unknown-version handling. One-rank-ahead4 composes above3
+and keeps readable1/2/3 predecessors; its cap prepares proficiency60 from native level56 while rank5
+still waits for70. Existing nine extension entries remain unchanged. Strict authoring output scopes
+separate the old8, Brutal1 and Chromie1 headers; new optional stat-buff output cannot replace a
+different existing definition3. Ten projections now add21 trainer ranks with prior pacing preserved.
+
+An attempted Sanguinary Offering projection was rejected because its higher SQL rank707340 at72
+is not represented in the captured class candidate ladder. Its uncommitted profile/spec and pacing
+addition were removed; preceding committed135 curves were restored and regenerated additively for
+Chromie alone. Sanguinary remains pending source/effective acquisition review, with no enrollment.
+No old profile progress or published definitions were changed by that rejected development draft.
+
+226 unique profiles/228 declarations,136 ranked/7 mastery/83 Fixed,477 pending(90 ranked/387 standalone),
+147 baselines/107 hashes/850 runtime-unqualified groups.14 supported buff tracks span12 classes.
+VERIFY ALL: PASSED212847 source2/no selected suites/native31.0s; style/whitespace/source/coverage/
+trainer exports passed. Addon0.4.40/protocol4 unchanged; no repeat Lua parsing. All switches0.
+No tests, native startup, migration/menu/gameplay execution, active install or production changes.
