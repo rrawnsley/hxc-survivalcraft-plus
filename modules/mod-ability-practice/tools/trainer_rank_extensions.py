@@ -253,10 +253,16 @@ def main():
     if args.native_header:
         header = render_native_header(root, rows)
         args.native_header.parent.mkdir(parents=True, exist_ok=True)
-        args.native_header.write_bytes(header.encode('utf-8'))
+        encoded = header.encode('utf-8')
+        exists = args.native_header.exists()
+        if exists and args.native_header.read_bytes() != encoded:
+            raise ValueError('Existing native definition3 differs; author a new definition version explicitly')
+        if not exists:
+            args.native_header.write_bytes(encoded)
         result['nativeHeaderGenerated'] = True
+        result['nativeHeaderUpdated'] = not exists
         result['nativeHeader'] = {'path': str(args.native_header.resolve()),
-                                  'sha256': hashlib.sha256(header.encode('utf-8')).hexdigest()}
+                                  'sha256': hashlib.sha256(encoded).hexdigest()}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + '\n', encoding='utf-8')
     print(json.dumps(result['summary'], sort_keys=True))

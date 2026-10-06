@@ -81,7 +81,7 @@ def raw_periodic_auras(raw, effects):
     return {detail['auraId'] for detail in details if detail['effectId'] == 6}
 
 
-def native_route_review(members, route_ids, scope, missing_reason, periodic=False):
+def native_route_review(members, route_ids, scope, missing_reason, periodic=False, enemy_control=False):
     routes = set(route_ids)
     blocked = []
     for member in members:
@@ -103,8 +103,23 @@ def native_route_review(members, route_ids, scope, missing_reason, periodic=Fals
                 if identities is None:
                     reasons.append('missing-or-invalid-raw-aura-details')
                 else:
-                    supported = {route for route, values in route_ids.items() if values.intersection(identities)}
-                    if not supported:
+                    if enemy_control:
+                        details = raw['effectDetails']
+                        if any(type(detail.get(field)) is not int or detail[field] < 0
+                               for detail in details for field in ('implicitTargetA', 'implicitTargetB')):
+                            reasons.append('missing-or-invalid-raw-control-targets')
+                            supported = set()
+                        else:
+                            identities = {detail['auraId'] for detail in details if detail['effectId'] == 6 and
+                                          (detail['implicitTargetA'], detail['implicitTargetB']) != (1, 0)}
+                            supported = {route for route, values in route_ids.items()
+                                         if values.intersection(identities)}
+                            if not supported and any(detail['auraId'] in {7, 12, 26} and detail['effectId'] == 6
+                                                     for detail in details):
+                                reasons.append('raw-control-applies-only-to-caster-not-enemy-outcome')
+                    else:
+                        supported = {route for route, values in route_ids.items() if values.intersection(identities)}
+                    if not supported and not reasons:
                         reasons.append(missing_reason)
                     routes.intersection_update(supported)
         if reasons:
@@ -151,7 +166,8 @@ def native_outcome_review(members):
                                 'no-current-native-outcome-route')
     control = native_route_review(members, CONTROL_ROUTES,
                                   'raw-native-control-route-comparison-not-attribution-or-effective-data-approval',
-                                  'no-current-native-control-route', periodic=True)
+                                  'no-current-native-control-route', periodic=True, enemy_control=True)
+    control['requiresLoadedEnemyTargetAndOriginalCastQualification'] = True
     if control['commonRoutes']:
         result['commonRoutes'] = sorted(set(result['commonRoutes']) | set(control['commonRoutes']))
         result['blockedMembers'] = []

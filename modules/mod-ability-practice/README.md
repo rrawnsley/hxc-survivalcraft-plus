@@ -2952,3 +2952,27 @@ trainer extensions unchanged. No client/protocol/version or production change; a
 Twelve-control draft source2/native30.1s passed at .cache/verify-all/20261006-161311/report.json. C++ style/
 whitespace and current source exports passed; unit/harness/gameplay skipped. No tests, startup, client chunks,
 database changes, deployment or production operations. Optional preference remains open.
+
+## Enemy control evidence and frozen migration inputs
+
+Raw control authoring now ignores APPLY_AURA control slots targeted only to the caster (target1 with no
+second target). Invalid target fields block review; remaining candidates still explicitly require loaded enemy
+target and original-cast qualification. Self-stuns are not evidence of enemy control. Seven real candidate
+groups are blocked on this basis, including Moon Gaze20/562723, which is self form/dummy/stun rather than
+raw enemy control. Other non-self target selectors are not automatically proof of hostility or meaningful use.
+
+Raw source-class-grant outcome candidates drop197 to196; raw stun routes30 to26 and root routes11 to8.
+Native205 definitions and existing gameplay hooks are unchanged by that authoring correction.519 missing
+definitions and850 runtime-unqualified groups remain. Native code uses the frozen version1 policy/version
+from DevelopmentPacing for version3 readable migration and prefix validation, rather than mutable current
+development defaults. Current values agree; this prevents future default retuning from changing legacy reads.
+
+Trainer extension generation reproduces an identical existing version3 header without rewriting it and records
+nativeHeaderUpdated=false. A differing existing header raises an explicit new-version authoring requirement
+instead of silently retuning version3. Native rank/proficiency/pacing arrays remain byte-identical.
+Earlier authoring-only source report163350 passed2 checks before the frozen-policy refinement; native
+compilation of the refinement is tracked separately. No tests, startup, player migration or production action.
+
+Frozen-policy refinement source2/native30.2s passed at .cache/verify-all/20261006-163946/report.json.
+C++ style/whitespace and99-source exports passed; existing trainer header reproduced with no rewrite.
+Unit/harness/gameplay skipped. No tests, startup, actual saved-row conversion, deployment or production change.

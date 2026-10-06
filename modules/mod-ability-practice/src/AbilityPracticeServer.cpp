@@ -308,7 +308,8 @@ std::array<std::optional<PreviousPacing>, 2> PreviousPacingFor(Practice::Ability
 {
     if (TrainerRanksRequested)
         if (auto const* entry = TrainerRankExtensionEntry(profile))
-            return { PreviousPacing{ Practice::Development::Policy, Practice::Development::DefinitionVersion },
+            return { PreviousPacing{ Practice::DevelopmentPacing::PreviousPolicy,
+                Practice::DevelopmentPacing::PreviousDefinitionVersion },
                 PreviousPacing{ entry->PreviousPolicy, Practice::DevelopmentPacing::DefinitionVersion } };
     if (PacingRequested && profile.Definition.Kind == Practice::AbilityKind::Ranked &&
         profile.DefinitionVersion == Practice::DevelopmentPacing::DefinitionVersion)
@@ -483,9 +484,10 @@ bool MatchesNativeClassGrant(Practice::AbilityProfile const& profile)
         if (!TrainerRanksRequested || !SameProfile(profile, extension->Profile))
             return false;
         Practice::AbilityProfile const prefix{
-            Practice::Development::DefinitionVersion, Practice::AcquisitionSource::ClassGrant,
+            Practice::DevelopmentPacing::PreviousDefinitionVersion, Practice::AcquisitionSource::ClassGrant,
             { ability.ClassId, ability.AbilityId, Practice::AbilityKind::Ranked,
-                extension->PreviousRanks, extension->PreviousCaps }, Practice::Development::Policy, profile.Outcome };
+                extension->PreviousRanks, extension->PreviousCaps },
+            Practice::DevelopmentPacing::PreviousPolicy, profile.Outcome };
         if (!MatchesNativeClassGrant(prefix))
             return false;
         auto const& trainers = sObjectMgr->GetTrainers();
