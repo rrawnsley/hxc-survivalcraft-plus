@@ -3088,3 +3088,40 @@ and source exports passed.209 profiles/211 declarations (122 ranked/7 mastery/80
 baselines,515 missing definitions (104 ranked/411 standalone),850 runtime-unqualified groups.
 Addon0.4.35-development/protocol4 unchanged. All switches0. No tests, startup, migration
 execution, native spell changes, active-client installation or production changes.
+
+## Owned buff combat contribution prototype — 6 October 2026
+
+AllowDevelopmentBuffContribution=0 adds only class12 Brutal Shout300857, six native ranks at
+4/10/24/38/52/60 with proficiency1/10/20/40/60/80. It requires development rank pacing.
+The optional buff preference was unanswered; recommended combat use is a reversible development
+draft assumption, not a submitted preference or production approval. No other buffs were enrolled.
+Exact pure MOD_STAT raid-target aura metadata and native acquisition are required at startup.
+Existing learned ranks seed proficiency; native buff magnitude remains unchanged.
+
+Original client cast receipts identify the player's own successful self-applied buff. Live aura
+receipt must match that accepted origin; no World/Unit/Aura pointers are retained. Native aura
+refresh receipt propagation is reused. Original learned direct damage or actual healing combat
+casts can each contribute at most once, with five-second monotonic spacing for this buff.
+Applying/refreshing, auto-repeat attacks, triggered/item/helper casts, ticks and other players'
+actions cannot contribute. Existing eligible PvE/actual-healing filters and ownership apply.
+An original action can train its own ability and this buff separately; class totals count skill
+practice awards. A separate local progression receipt and per-Spell dedup key preserve the
+action's existing direct/periodic shared receipt. No per-cast SQL or additional mastery power.
+
+Owner class/race/spec changes, enrollment reload and login clear accepted buff provenance.
+Normal learned-rank epoch rotation retains an already accepted active buff, preventing rebuff
+requirements on every unrelated promotion. Reapplication after login/owner changes binds new
+provenance. Buff reapplication does not reset the five-second floor. Forgotten/replaced buff
+ownership stops contributions; persisted progress remains. One prototype per character.
+
+New additive version2 entry preserves previous122 curves:540 qualifying combat actions per
+transition before catch-up; assumed5s opportunities estimate45min. Actual cadence needs measurement.
+Unpublished addon0.4.36-development/protocol4 adds ranked-only route13 BuffCombat under normal/
+catch-up rules, with explicit combat-action help. Earlier unpublished typed addons reject the
+unknown route when this flag is enabled; qualify current server/addon together. No active install.
+
+Source2/native29.8s passed195503; C++ style/whitespace and103-source exports passed. Five Lua
+files syntax parsed using Lua5.1 loadstring, no addon chunks executed.210 profiles/212 declarations
+(123 ranked/7 mastery/80 fixed),126 baselines,514 missing definitions (103 ranked/411 standalone),
+850 runtime-unqualified groups. No tests, startup, contribution/rank/cache/menu execution,
+migration execution, launcher/payload publication or deployment. All switches remain0.
