@@ -215,6 +215,14 @@ practiceHelp:SetScript("OnEnter", function(self)
             local acquisition = Model.AcquisitionText(ability)
             if acquisition then GameTooltip:AddLine("Acquisition: " .. acquisition, 1, 0.82, 0, true) end
             GameTooltip:AddLine(Model.PracticeRules(ability), 1, 1, 1, true)
+            if not Model.IsFixed(ability) then
+                GameTooltip:AddLine("Uses remaining counts qualifying uses under the displayed training rules,"
+                    .. " including catch-up. Only uses that meet this ability's rules count."
+                    .. " Character-level and acquisition requirements must also be met.", 1, 1, 1, true)
+                GameTooltip:AddLine("This session counts uses that earned practice since this character session began."
+                    .. " Earned proficiency and learned ranks are retained when practice is paused or capped.",
+                    1, 1, 1, true)
+            end
             if ability.learnedRank > 0 and ability.hasCapInfo and not Model.IsFixed(ability) then
                 local cap = ability.nextTrainingCap
                 GameTooltip:AddLine(cap and Model.TrainingCapText(cap, snapshot.realmMaximumLevel,
@@ -224,7 +232,8 @@ practiceHelp:SetScript("OnEnter", function(self)
                         "This is the highest defined training cap."), 1, 0.82, 0, true)
             end
             if syncState ~= "current" then
-                GameTooltip:AddLine("These rules are from your saved view.", 1, 0.82, 0, true)
+                GameTooltip:AddLine("Rules and uses remaining are from your last received view;"
+                    .. " they may have changed since then. Refresh for current progress.", 1, 0.82, 0, true)
             end
             GameTooltip:Show()
             return

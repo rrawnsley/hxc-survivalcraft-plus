@@ -2995,3 +2995,15 @@ This is raw resource-helper evidence, not a confirmed live recursion defect. Sou
 Source review165334 passed2 checks. Native sources unchanged from163946; no redundant build.
 205 definitions,126 baselines,519 missing definitions and850 runtime-unqualified groups unchanged.
 No tests, native startup, migration execution, active-client changes or deployment.
+
+## Forecast and session menu guidance — 6 October 2026
+
+Unpublished addon0.4.35-development retains protocol4. The existing per-ability help explains
+qualifying-use forecasts, catch-up, separate level/acquisition requirements and awarded session uses.
+Earned proficiency/learned ranks remain retained while paused or capped. Saved views warn that rules
+and counts may have changed and recommend refresh. Training dummies join the explicit excluded
+opponent list, matching the existing native eligibility filter. Fixed abilities retain native rules.
+
+All five addon files parsed with Lua5.1 loadstring; no addon chunks executed. Source165542 passed
+2 checks, all other stages skipped. Native remains163946; no render or gameplay acceptance claimed.
+No active addon installation, launcher/payload publication, tests, server startup or production changes.

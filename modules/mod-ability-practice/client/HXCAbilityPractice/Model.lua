@@ -608,8 +608,8 @@ function Model.PracticeRules(ability)
             rule = rule .. (ability.catchup.boosted and " Catch-up is active." or " Normal training rate is active.")
         end
     end
-    return rule .. "\n\nOpponents that are too low level, players, player-controlled units, pets, totems"
-        .. " and critters do not qualify."
+    return rule .. "\n\nOpponents that are too low level, players, player-controlled units, pets, totems,"
+        .. " critters and training dummies do not qualify."
         .. "\n\nOnly your learned ability casts requested through your client can count."
         .. " Triggered casts, item casts, script-created spells and aura-triggered helpers do not count."
         .. " One award per original cast, regardless of targets, ticks or removals. Practice stops at your current cap."
