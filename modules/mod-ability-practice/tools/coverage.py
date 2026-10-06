@@ -9,7 +9,8 @@ from profile_drafts import verify_provenance
 
 PROFILE_HEADERS = ('AbilityPracticeDevelopmentRanked.h', 'AbilityPracticeDevelopmentPeriodic.h',
                    'AbilityPracticeDevelopmentMastery.h', 'AbilityPracticeDevelopmentHelpers.h',
-                   'AbilityPracticeDevelopmentFixed.h', 'AbilityPracticeDevelopmentAbsorption.h')
+                   'AbilityPracticeDevelopmentFixed.h', 'AbilityPracticeDevelopmentAbsorption.h',
+                   'AbilityPracticeDevelopmentControl.h')
 PROFILE_PATTERN = re.compile(
     r'AbilityProfile\s*\{\s*Development::DefinitionVersion,\s*AcquisitionSource::ClassGrant,\s*'
     r'\{\s*(\d+),\s*(\d+),\s*AbilityKind::(Ranked|Mastery|Fixed)\s*,\s*([\w:]+)\s*,')
@@ -83,12 +84,15 @@ def review_queues(draft):
                'pet-or-summon-ownership-review': 'pet-or-summon-ownership',
                'scripted-behavior-review': 'scripted-outcome',
                'periodic-attribution-review': 'periodic-attribution',
+               'control-effect-attribution-review': 'control-effect-attribution-and-meaningful-use',
                'unknown-raw-aura-review': 'unknown-aura', 'unknown-raw-effect-review': 'unknown-effect'}
     queues = {mapping[trait] for trait in traits if trait in mapping}
     if len(draft['ranks']) == 1:
         queues.add('unranked-mastery-or-fixed-design')
     if set(routes) & {'interrupt', 'dispel', 'steal'}:
         queues.add('utility-classification-and-meaningful-use')
+    if 'fear' in routes:
+        queues.add('control-effect-attribution-and-meaningful-use')
     if len(draft['ranks']) > 1 and set(routes) & {'damage', 'healing'}:
         queues.add('ranked-common-outcome')
     if periodic:

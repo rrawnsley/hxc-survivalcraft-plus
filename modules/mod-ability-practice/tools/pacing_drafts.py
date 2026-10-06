@@ -253,7 +253,8 @@ def main():
     verify_provenance(drafts, args.root.resolve(), args.dbc.resolve())
     cast_times, origin = load_cast_times(args.root.resolve(), args.dbc.resolve())
     durations, duration_origin = load_durations(args.root.resolve(), args.dbc.resolve())
-    cadences, cadence_origin = load_cadences(args.cadences, drafts)
+    cadence_path = args.cadences or args.root.resolve() / 'modules/mod-ability-practice/tools/development-cadences.json'
+    cadences, cadence_origin = load_cadences(cadence_path, drafts)
     result = build_pacing(drafts, args.minimum_rank_minutes, args.target_rank_minutes,
                           args.maximum_rank_minutes, args.common_use_interval_ms, cast_times, origin,
                           cadences, cadence_origin, declared_profiles(args.root.resolve()), durations, duration_origin)

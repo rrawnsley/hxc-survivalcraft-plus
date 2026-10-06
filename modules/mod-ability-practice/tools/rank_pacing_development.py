@@ -100,7 +100,8 @@ def main():
     verify_provenance(drafts, root, dbc)
     cast_times, origin = load_cast_times(root, dbc)
     durations, duration_origin = load_durations(root, dbc)
-    cadences, cadence_origin = load_cadences(args.cadences, drafts)
+    cadence_path = args.cadences or root / 'modules/mod-ability-practice/tools/development-cadences.json'
+    cadences, cadence_origin = load_cadences(cadence_path, drafts)
     proposals = build_pacing(drafts, 30, 45, 60, 5000, cast_times, origin,
                              cadences, cadence_origin, declared_profiles(root), durations, duration_origin)
     declared = {(value['classId'], value['abilityId']) for value in proposals['proposals']

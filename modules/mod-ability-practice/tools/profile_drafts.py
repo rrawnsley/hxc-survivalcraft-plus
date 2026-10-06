@@ -30,6 +30,9 @@ def verify_provenance(candidates, root, dbc):
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentHelpers.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentFixed.h',
                          'modules/mod-ability-practice/src/AbilityPracticeDevelopmentAbsorption.h',
+                'modules/mod-ability-practice/src/AbilityPracticeDevelopmentControl.h',
+                'modules/mod-ability-practice/tools/development-cadences.json',
+                'src/server/game/Movement/MotionMaster.h', 'src/server/game/Movement/MotionMaster.cpp',
                          'src/server/coa/AscensionVenomancerAbilities.cpp',
                          'src/server/coa/AscensionSunClericAbilities.cpp',
                          'src/server/coa/AscensionVenomancerAuras.cpp',
@@ -197,7 +200,7 @@ def build_drafts(candidates, root):
                 raise ValueError('Native baseline raw/source evidence changed')
         routes = candidate.get('nativeOutcomeReview', {}).get('commonRoutes', [])
         if not isinstance(routes, list) or len(set(routes)) != len(routes) or any(route not in {
-                'damage', 'healing', 'interrupt', 'dispel', 'steal'} for route in routes):
+                'damage', 'healing', 'interrupt', 'dispel', 'steal', 'fear'} for route in routes):
             raise ValueError('Invalid candidate outcome routes')
         periodic = candidate.get('nativePeriodicReview', {}).get('commonRoutes', [])
         if not isinstance(periodic, list) or len(set(periodic)) != len(periodic) or any(
@@ -207,6 +210,8 @@ def build_drafts(candidates, root):
                     'practice-rates-and-caps', 'persistence-and-migration', 'menu-and-gameplay-qualification']
         if periodic:
             required.append('periodic-original-cast-attribution')
+        if 'fear' in routes:
+            required.append('control-original-cast-and-new-application-attribution')
         if len(ranks) == 1:
             required.append('unranked-mastery-or-fixed-design')
         drafts.append({'classId': class_id, 'abilityId': ability_id, 'definitionVersion': None,

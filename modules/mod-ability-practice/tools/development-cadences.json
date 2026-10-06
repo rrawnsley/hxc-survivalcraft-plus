@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "scope": "authored-cadence-assumptions-not-measured-frequency",
+  "abilities": [
+    {
+      "classId": 16,
+      "abilityId": 707044,
+      "assumedUseIntervalMilliseconds": 15000,
+      "reason": "Draft interval between new fear opportunities; qualifying frequency needs play measurement."
+    }
+  ]
+}

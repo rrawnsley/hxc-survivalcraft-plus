@@ -179,7 +179,7 @@ local function Ability(value, schema, characterLevel)
     local rewards, catchup
     if schema == 4 then
         if value.acquisitionSource ~= nil and not Integer(value.acquisitionSource, 1, 4) then return nil end
-        if not session or not Integer(value.kind, 1, 3) or not Integer(value.route, 1, 9)
+        if not session or not Integer(value.kind, 1, 3) or not Integer(value.route, 1, 10)
             or not Integer(value.ruleSet, 1, 6)
             or ((value.ruleSet == 3 or value.ruleSet == 6) and (value.kind ~= 1 or value.route ~= 2))
             or ((value.kind == 3) ~= (value.route == 6)) then return nil end
@@ -554,6 +554,9 @@ function Model.PracticeRules(ability)
         return "Practice rules are unavailable in this update. Refresh to request the current rules."
     end
     local rules = {
+        [10] = "Newly make a live, level-appropriate PvE opponent flee with the learned ability."
+            .. " Refreshes, already fleeing enemies and casts prevented from taking control do not count."
+            .. " Each original cast can earn one award.",
         [1] = "Deal damage to a level-appropriate PvE opponent with the learned ability.",
         [2] = "Restore missing health on a friendly unit fighting a live, level-appropriate PvE opponent."
             .. " Full overhealing does not count.",

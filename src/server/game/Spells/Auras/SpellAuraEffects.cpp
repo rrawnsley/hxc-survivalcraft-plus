@@ -17,6 +17,7 @@
 
 #include "SpellAuraEffects.h"
 #include "AbilityPracticeCastReceipt.h"
+#include "MotionMaster.h"
 #include "AreaDefines.h"
 #include "BattlefieldMgr.h"
 #include "Battleground.h"
@@ -3737,8 +3738,15 @@ void AuraEffect::HandleModFear(AuraApplication const* aurApp, uint8 mode, bool a
         return;
 
     Unit* target = aurApp->GetTarget();
-
+    auto const receipt = GetBase()->GetPracticeCast();
+    bool const newFear = apply && receipt && !receipt->IsConsumed() &&
+        !target->HasUnitState(UNIT_STATE_FLEEING | UNIT_STATE_STUNNED | UNIT_STATE_CONFUSED) &&
+        target->GetMotionMaster()->GetMotionSlotType(MOTION_SLOT_CONTROLLED) != FLEEING_MOTION_TYPE &&
+        target->GetMotionMaster()->GetMotionSlotType(MOTION_SLOT_CONTROLLED) != TIMED_FLEEING_MOTION_TYPE;
     target->SetControlled(apply, UNIT_STATE_FLEEING, GetCaster(), true);
+    if (newFear && target->HasUnitState(UNIT_STATE_FLEEING) &&
+        target->GetMotionMaster()->GetMotionSlotType(MOTION_SLOT_CONTROLLED) == FLEEING_MOTION_TYPE)
+        CoAAbilityPractice::ReportControlOutcome(GetCaster(), target, GetId(), SPELL_AURA_MOD_FEAR, receipt);
 }
 
 void AuraEffect::HandleAuraModStun(AuraApplication const* aurApp, uint8 mode, bool apply) const

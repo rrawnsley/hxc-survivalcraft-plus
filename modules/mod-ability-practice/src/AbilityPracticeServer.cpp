@@ -10,6 +10,7 @@
 #include "AbilityPracticeDevelopmentHelpers.h"
 #include "AbilityPracticeDevelopmentFixed.h"
 #include "AbilityPracticeDevelopmentAbsorption.h"
+#include "AbilityPracticeDevelopmentControl.h"
 #include "AbilityPracticeProfiles.h"
 #include "AbilityPracticeRankPolicy.h"
 #include "AbilityPracticeMasteryPolicy.h"
@@ -201,6 +202,7 @@ bool MasteryRequested = false;
 bool HelpersRequested = false;
 bool AbsorptionRequested = false;
 bool PacingRequested = false;
+bool ControlRequested = false;
 Practice::CatchupSettings Catchup;
 std::uint64_t NextActionSession = 0;
 std::atomic<bool> RankActive = false;
@@ -263,6 +265,7 @@ Practice::PracticeRoute RouteFor(Practice::OutcomeKind outcome)
         case Practice::OutcomeKind::None: return Practice::PracticeRoute::Fixed;
         case Practice::OutcomeKind::DamageOrInterrupt: return Practice::PracticeRoute::DamageOrInterrupt;
         case Practice::OutcomeKind::DamageOrDispel: return Practice::PracticeRoute::DamageOrDispel;
+        case Practice::OutcomeKind::Fear: return Practice::PracticeRoute::Fear;
     }
     return Practice::PracticeRoute::Unknown;
 }
@@ -304,6 +307,8 @@ bool HasSupportedOutcome(SpellInfo const* info, Practice::OutcomeKind outcome)
         return info->HasEffect(SPELL_EFFECT_DISPEL);
     if (outcome == Practice::OutcomeKind::Steal)
         return info->HasEffect(SPELL_EFFECT_STEAL_BENEFICIAL_BUFF);
+    if (outcome == Practice::OutcomeKind::Fear)
+        return ControlRequested && info->HasAura(SPELL_AURA_MOD_FEAR);
     return false;
 }
 
@@ -831,7 +836,7 @@ void AwardOutcome(Player* player, Spell* spell, Practice::AbilityProfile const& 
     RecordAward(player, session, profile, award);
 }
 
-struct PeriodicCast
+struct ReceiptCast
 {
     Player* Caster;
     SpellInfo const* Info;
@@ -883,7 +888,36 @@ void AwardPeriodicOutcome(Unit* caster, Unit* target, std::uint32_t auraSpellId,
         !ReceiptMatches(player, found->second, *receipt) ||
         !AcquisitionAllowed(player, profile->Definition, receipt->SpellId))
         return;
-    PeriodicCast cast{ player, sSpellMgr->GetSpellInfo(receipt->SpellId), *receipt };
+    ReceiptCast cast{ player, sSpellMgr->GetSpellInfo(receipt->SpellId), *receipt };
+    Practice::OutcomeContext const context{ true, true, true, true, player->GetLevel() };
+    auto const effective = Practice::BuildCatchupPolicy(profile->Policy,
+        Practice::CapAtLevel(profile->Definition, player->GetLevel()), Catchup);
+    if (!effective)
+        return;
+    auto const award = Practice::HandleOutcome(*player, cast, profile->Definition,
+        effective->View(), profile->DefinitionVersion, context);
+    RecordAward(player, found->second, *profile, award);
+}
+
+void AwardControlOutcome(Unit* caster, Unit* target, std::uint32_t auraSpellId, std::uint32_t auraType,
+    std::shared_ptr<CoAAbilityPractice::CastReceipt> const& receipt)
+{
+    if (!Active.load() || !ControlRequested || !caster || !target || !target->IsAlive() ||
+        !receipt || receipt->IsConsumed() || auraType != SPELL_AURA_MOD_FEAR || auraSpellId != receipt->SpellId)
+        return;
+    Player* player = caster->ToPlayer();
+    if (!IsProfiledPlayer(player))
+        return;
+    auto const* profile = FindProfile(player, receipt->SpellId);
+    if (!profile || profile->Outcome != Practice::OutcomeKind::Fear || !IsDevelopmentOpponent(player, target))
+        return;
+    std::lock_guard lock(Mutex);
+    auto const found = Sessions.find(player->GetGUID().GetRawValue());
+    if (!Affects(player) || player->isBeingLoaded() || found == Sessions.end() ||
+        !ReceiptMatches(player, found->second, *receipt) ||
+        !AcquisitionAllowed(player, profile->Definition, receipt->SpellId))
+        return;
+    ReceiptCast cast{ player, sSpellMgr->GetSpellInfo(receipt->SpellId), *receipt };
     Practice::OutcomeContext const context{ true, true, true, true, player->GetLevel() };
     auto const effective = Practice::BuildCatchupPolicy(profile->Policy,
         Practice::CapAtLevel(profile->Definition, player->GetLevel()), Catchup);
@@ -1086,6 +1120,7 @@ public:
         HelpersRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentScriptedObservation", false);
         AbsorptionRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentAbsorption", false);
         PacingRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentRankPacing", false);
+        ControlRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentControlObservation", false);
         if (!Requested || !DevelopmentAllowed)
         {
             Active.store(false);
@@ -1117,11 +1152,13 @@ public:
         bool const absorptionValid = !AbsorptionRequested ||
             AppendProfiles(RuntimeProfiles, Practice::DevelopmentAbsorption::Profiles);
         bool const fixedValid = !fixedCatalog || AppendProfiles(RuntimeProfiles, Practice::DevelopmentFixed::Profiles);
+        bool const controlValid = !ControlRequested ||
+            AppendProfiles(RuntimeProfiles, Practice::DevelopmentControl::Profiles);
         bool const pacingValid = !PacingRequested || ApplyDevelopmentPacing(RuntimeProfiles);
         std::span<Practice::AbilityProfile const> const profiles(RuntimeProfiles);
         ProfileLookup.emplace(profiles);
         Ready = ProfileLookup->IsValid() && periodicValid && masteryValid && helpersValid && fixedValid &&
-            absorptionValid && pacingValid && Practice::ValidCatchupSettings(Catchup);
+            absorptionValid && controlValid && pacingValid && Practice::ValidCatchupSettings(Catchup);
         for (Practice::AbilityProfile const& profile : profiles)
         {
             std::uint32_t const maximumCap = profile.Definition.Caps.empty() ? 1 :
@@ -1183,6 +1220,7 @@ public:
         LOG_INFO("module.ability_practice", "Development fixed catalog: enabled={}", fixedCatalog);
         LOG_INFO("module.ability_practice", "Development absorption observation: enabled={}", AbsorptionRequested);
         LOG_INFO("module.ability_practice", "Development rank pacing: enabled={}", PacingRequested);
+        LOG_INFO("module.ability_practice", "Development fear observation: enabled={}", ControlRequested);
     }
 };
 
@@ -1466,6 +1504,7 @@ void AddSC_ability_practice()
     CoAAbilityPractice::SetPurchaseProvider(CanPurchaseSpell);
     CoAAbilityPractice::SetReplacementChangedProvider(ReplacementChanged);
     CoAAbilityPractice::SetPeriodicOutcomeProvider(AwardPeriodicOutcome);
+    CoAAbilityPractice::SetControlOutcomeProvider(AwardControlOutcome);
     CoAAbilityPractice::SetHealingMasteryProvider(ModifyMasteryHealing);
     CoAAbilityPractice::SetDamageMasteryProvider(ModifyMasteryDamage);
     new PracticeWorld();

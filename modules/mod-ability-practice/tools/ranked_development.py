@@ -7,7 +7,9 @@ from profile_drafts import build_drafts, verify_provenance
 
 
 def render_header(drafts):
-    selected = [draft for draft in drafts if len(draft['ranks']) > 1 and draft['candidateOutcomeRoutes']]
+    supported = {'damage', 'healing', 'interrupt', 'dispel', 'steal'}
+    selected = [draft for draft in drafts if len(draft['ranks']) > 1 and
+                supported.intersection(draft['candidateOutcomeRoutes'])]
     selected.sort(key=lambda draft: (draft['classId'], draft['abilityId']))
     classes = Counter(draft['classId'] for draft in selected)
     if set(classes) != set(range(12, 33)):

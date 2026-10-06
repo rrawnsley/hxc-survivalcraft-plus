@@ -47,6 +47,8 @@ def action_review(members):
                 traits.add('utility-outcome-review')
             if aura.startswith('SPELL_AURA_PERIODIC_'):
                 traits.add('periodic-attribution-review')
+            if name == 'SPELL_EFFECT_APPLY_AURA' and aura == 'SPELL_AURA_MOD_FEAR':
+                traits.add('control-effect-attribution-review')
             if name.startswith('SPELL_EFFECT_SUMMON') or name == 'SPELL_EFFECT_CREATE_TAMED_PET':
                 traits.add('pet-or-summon-ownership-review')
             trigger = effect.get('triggerSpellId', 0)
@@ -123,9 +125,18 @@ def native_direct_review(members):
 
 
 def native_outcome_review(members):
-    return native_route_review(members, OUTCOME_ROUTES,
-                               'raw-native-outcome-route-comparison-not-effective-data-approval',
-                               'no-current-native-outcome-route')
+    result = native_route_review(members, OUTCOME_ROUTES,
+                                'raw-native-outcome-route-comparison-not-effective-data-approval',
+                                'no-current-native-outcome-route')
+    fear = native_route_review(members, {'fear': {7}},
+                               'raw-native-fear-route-comparison-not-attribution-or-effective-data-approval',
+                               'no-current-native-fear-route', periodic=True)
+    if fear['commonRoutes']:
+        result['commonRoutes'] = sorted(set(result['commonRoutes']) | {'fear'})
+        result['blockedMembers'] = []
+        result['status'] = 'needs-effective-data-and-acquisition-review'
+    result['fearReview'] = fear
+    return result
 
 
 def native_periodic_review(members):
@@ -448,6 +459,9 @@ def main():
                          'modules/mod-ability-practice/src/AbilityPracticeDevelopmentHelpers.h',
                          'modules/mod-ability-practice/src/AbilityPracticeDevelopmentFixed.h',
                          'modules/mod-ability-practice/src/AbilityPracticeDevelopmentAbsorption.h',
+                'modules/mod-ability-practice/src/AbilityPracticeDevelopmentControl.h',
+                'modules/mod-ability-practice/tools/development-cadences.json',
+                'src/server/game/Movement/MotionMaster.h', 'src/server/game/Movement/MotionMaster.cpp',
                          'src/server/coa/AscensionVenomancerAbilities.cpp',
                          'src/server/coa/AscensionSunClericAbilities.cpp',
                          'src/server/coa/AscensionVenomancerAuras.cpp',

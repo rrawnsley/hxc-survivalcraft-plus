@@ -43,6 +43,25 @@ inline void SetPeriodicOutcomeProvider(PeriodicOutcomeProvider provider)
     PeriodicOutcomeHandler.store(provider);
 }
 
+using ControlOutcomeProvider = void (*)(Unit*, Unit*, std::uint32_t, std::uint32_t,
+    std::shared_ptr<CastReceipt> const&);
+inline std::atomic<ControlOutcomeProvider> ControlOutcomeHandler = nullptr;
+
+inline void SetControlOutcomeProvider(ControlOutcomeProvider provider)
+{
+    ControlOutcomeHandler.store(provider);
+}
+
+inline void ReportControlOutcome(Unit* caster, Unit* target, std::uint32_t spellId, std::uint32_t auraType,
+    std::shared_ptr<CastReceipt> const& receipt)
+{
+    if (!caster || !target || !receipt || receipt->IsConsumed())
+        return;
+    auto const provider = ControlOutcomeHandler.load();
+    if (provider)
+        provider(caster, target, spellId, auraType, receipt);
+}
+
 inline void ReportAuraOutcome(Unit* caster, Unit* target, std::uint32_t spellId, std::uint32_t auraType,
     std::uint32_t damage, std::uint32_t healing, std::shared_ptr<CastReceipt> const& receipt)
 {

@@ -269,7 +269,7 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
                 ((view.RuleSet == HumanPvEScriptedHealRuleSet || view.RuleSet == 6) &&
                     (view.Route != PracticeRoute::Healing || view.Kind != AbilityKind::Ranked)) ||
                 view.Route < PracticeRoute::Damage ||
-                view.Route > PracticeRoute::DamageOrDispel ||
+                view.Route > PracticeRoute::Fear ||
                 ((view.Kind == AbilityKind::Fixed) != (view.Route == PracticeRoute::Fixed)))
                 return std::nullopt;
             if (view.Kind != AbilityKind::Ranked && view.Kind != AbilityKind::Mastery && view.Kind != AbilityKind::Fixed)

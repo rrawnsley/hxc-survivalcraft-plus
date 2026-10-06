@@ -2413,3 +2413,38 @@ Coverage remains136 profiles/102 baseline exclusions/609 requiring definitions, 
 Source report .cache/verify-all/20261006-044934/report.json passed(two checks), whitespace passed,73-source exports
 regenerated. Native code unchanged from043835; no redundant build. No tests/client chunks/rendering/gameplay/
 startup or production operations. SpellDuration hash eeae44ef0185924f3d6ec57ab2701c66566db86e51ab0bae017a9449126eb3a0.
+
+
+## Isolated successful fear practice prototype
+
+Storm Alert(class16) has source ranks707044(level8, proficiency1) and707905(level32, proficiency10).
+The startup-only AbilityPractice.AllowDevelopmentControlObservation option defaults0. Existing overall
+observation, readiness and explicit human character selection gates remain mandatory. A synchronous native
+fear callback requires an original unconsumed cast receipt, a new fleeing state and an installed untimed
+fleeing movement generator. Refresh/removal, already fleeing/timed-fleeing enemies, stun/confusion suppression,
+missing caster and failed movement-generator installation cannot award. The module additionally requires a
+live eligible nongray PvE opponent, exact original spell identity, current owner/session and acquisition.
+One receipt shares one award across targets. Native fear duration, immunities, movement and combat stay intact.
+This observes installed fear control; distance actually travelled/path success is not measured.
+
+Addon0.4.32 accepts typed route10 and explains these rules. Protocol4 field shapes remain; older unpublished
+clients cannot accept the new route and need joint native/addon qualification. Mastery remains damage/healing
+only. Root/stun/confusion and the three source-grant unranked fears still require individual design/attribution.
+
+The tracked tools/development-cadences.json supplies an explicitly unmeasured15-second control-opportunity
+assumption to both pacing authoring tools by default. Overrides remain explicit. The additive authoring path
+added one real profile to version2 while reproducing all118 previous profiles byte-for-byte. Storm Alert's band
+cost5400/rate270 yields20 qualifying uses per point/180 for proficiency1 to10 before catch-up. That represents
+45 minutes under the assumption, not measured ordinary play. No existing persisted curve/version was changed.
+Normal subsequent generation reproduced the119-entry header identically. Native provenance has77 sources,
+including control definition, cadence assumptions and native movement implementation. Broad ranked generation
+continues to select only its direct/utility routes; pure fear is individually authored. Fear review queues and
+required original-cast/new-application reviews remain unqualified.
+
+Current coverage:137 unique profiles/139 declarations(119 ranked,3 mastery,15 fixed);102 native baselines;
+608 needing definitions(112 ranked/496 standalone),30 with raw common outcomes. All847 source groups remain
+runtime-unqualified. The source-only check045918 passed4 checks but unexpectedly selected the mechanic-map
+suite, including12 existing Python tests. No test binaries, gameplay, client chunks or native startup ran.
+The subsequent compile-only report .cache/verify-all/20261006-050019/report.json passed81.3s build, all other
+stages skipped. C++ style/whitespace passed;5 Lua5.1 files compiled for syntax only. Final authoring exports
+were regenerated. Production binaries/configuration/databases/addons/launcher were not changed or restarted.
