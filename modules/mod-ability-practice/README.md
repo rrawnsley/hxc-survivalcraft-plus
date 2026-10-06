@@ -2571,3 +2571,30 @@ No addon changes/redundant Lua checks, tests/client chunks/gameplay/startup/prod
 mod-coa-needs edits appeared in this checkout during/after compilation: build log includes CoANeeds.cpp, whose
 last write053050 followed completion. They were preserved/excluded from this commit. The build proves compilation
 of ability-practice code; it is not a frozen full-checkout release artifact and must not be deployed as one.
+
+## Supplemental trainer acquisition review
+
+trainer_acquisition_review.py reads the real captured candidates, raw Spell.dbc evidence and pending class-trainer
+SQL without querying or changing a database. It verifies existing candidate provenance, strict INSERT column/row
+shapes, class trainer owners and unique spell offers. It compares captured levels/prerequisites with source SQL,
+keeps tree acquisition unresolved, and checks explicit native Felsworn rift mappings. Additional source hashes,
+the candidate input hash and raw DBC provenance accompany the advisory export. No entitlement or profile is added.
+
+Run with --candidates .cache/ability-practice/catalog-candidates.json --dbc C:/Azerothcore-CoA/server-data/dbc
+--output .cache/ability-practice/trainer-acquisition-review.json. The stable catalog worktree snapshot contains21
+source class trainers/3732 offers and389 supplemental candidate groups:176 need effective trainer/design review,
+213 have source blockers, including212 tree overlaps and the missing explicit Stonard rift mapping. Orgrimmar,
+Thunder Bluff and Undercity source levels26/30/36 match captured offers and explicit native mappings; they remain
+unmanaged, unapproved and absent from the practice menu pending actual trainer acquisition support.
+
+The export also reconstructs40 potential supplementary rank ladders through captured prerequisites and existing
+generated source groups, requiring matching raw names and increasing raw ranks for every joining edge. No name-only
+merge or inferred rank1 occurs.20 ladders have complete ordered source ranks/levels and20 remain blocked. These are
+review groups, not40 new abilities: some extend existing class chains, including Storm Alert rank3 at56. Missing
+first ranks, nonconsecutive ranks, missing offers and decreasing levels remain explicit blockers. Loaded trainer,
+effective chain, faction/race/tree, learn-wrapper and individual design reviews remain mandatory. Existing147
+profiles,119 ranked curves,3 mastery pacing entries and84-source catalog provenance remain unchanged.
+
+Another task changed SpellbookOfferData.h in the primary checkout during review; strict provenance rejected its
+stale export. Authoring moved to the clean ability-practice-catalog worktree at7043d4dee, preserving those edits.
+No native/addon change, redundant build, tests, client execution, startup or production operation is involved.
