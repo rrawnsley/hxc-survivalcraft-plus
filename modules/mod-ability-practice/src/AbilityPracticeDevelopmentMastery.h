@@ -11,6 +11,16 @@ namespace AbilityPractice::DevelopmentMastery
 inline constexpr std::array HandOfElune = { AbilityRank{ 801990, 1, { 16, 1 } } };
 inline constexpr std::array VileSting = { AbilityRank{ 805097, 1, { 12, 1 } } };
 inline constexpr std::array Soulslam = { AbilityRank{ 504014, 1, { 20, 1 } } };
+inline constexpr std::array DreadridersStomp = { AbilityRank{ 804702, 1, { 20, 1 } } };
+inline constexpr std::array HellfireTrample = { AbilityRank{ 804704, 1, { 20, 1 } } };
+inline constexpr std::array DreadridersStompBands = {
+    TrainingBand{ 1, 16200, 1170 }, TrainingBand{ 40, 16200, 900 }
+};
+inline constexpr TrainingPolicy DreadridersStompPolicy{ DreadridersStompBands };
+inline constexpr std::array HellfireTrampleBands = {
+    TrainingBand{ 1, 1350, 1170 }, TrainingBand{ 40, 1350, 900 }
+};
+inline constexpr TrainingPolicy HellfireTramplePolicy{ HellfireTrampleBands };
 inline constexpr auto Caps = []
 {
     auto result = Development::Caps;
@@ -33,7 +43,23 @@ inline constexpr std::array SoulslamRewards = {
     MasteryReward{ { 28, 70 }, 0, 100 },
     MasteryReward{ { 36, 100 }, 0, 200 }
 };
+inline constexpr std::array DreadridersStompRewards = {
+    MasteryReward{ { 20, 40 }, 0, 50 },
+    MasteryReward{ { 28, 70 }, 0, 100 },
+    MasteryReward{ { 36, 100 }, 0, 200 }
+};
+inline constexpr std::array HellfireTrampleRewards = {
+    MasteryReward{ { 20, 40 }, 0, 50 },
+    MasteryReward{ { 28, 70 }, 0, 100 },
+    MasteryReward{ { 36, 100 }, 0, 200 }
+};
 inline constexpr std::array Profiles = {
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 17, 804702, AbilityKind::Mastery, DreadridersStomp, Caps }, DreadridersStompPolicy, OutcomeKind::Damage,
+        DreadridersStompRewards },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 17, 804704, AbilityKind::Mastery, HellfireTrample, Caps }, HellfireTramplePolicy, OutcomeKind::Damage,
+        HellfireTrampleRewards },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 26, 801990, AbilityKind::Mastery, HandOfElune, Caps }, Development::Policy, OutcomeKind::Healing, Rewards },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,

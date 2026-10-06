@@ -2495,3 +2495,30 @@ raw common outcomes. All847 remain runtime-unqualified.119-entry pacing header r
 VERIFY ALL PASSED .cache/verify-all/20261006-051047/report.json: source2(no suites/tests selected) and native
 build51.2s. C++ style/whitespace and final authoring exports passed. No addon changes/redundant Lua checks,
 tests/client chunks/gameplay/startup/production configuration/database/client/launcher/deploy/restart operations.
+
+
+## Two individually paced unranked damage mastery drafts
+
+Dreadrider's Stomp(class17/804702) and Hellfire Trample(class17/804704), both introduced at20, are separate
+single-rank mastery drafts under the existing default-off mastery option. Each has damage-only rewards0.5%/
+1%/2% at proficiency40/70/100 and character levels20/28/36. Highest eligible reward only; the three existing
+mastery definitions/policies/rewards and all ranked pacing remain unchanged. Native Xoroth cast checks still
+require aura804703 and refuse807248; class damage modifiers and movement/charge/cooldown remain. Stomp's
+triggered54350 helper has no original mastery receipt and cannot receive the parent damage bonus or a second
+practice award. Only actual original direct damage to an eligible PvE opponent practices; charge movement,
+failed casts/zero damage/copies do not.
+
+New individual version1 policies use cost16200 and rates1170 below40/900 from40 for Stomp; cost1350 with the
+same rates for Trample. From the prior milestone/zero partial credit, band arithmetic gives540 and45 qualifying
+casts per milestone respectively before catch-up. Assumed intervals5seconds and60seconds yield45min; Stomp's
+raw ordinary recovery is3seconds, Trample's60seconds, instant raw cast/global1.5seconds. This is source arithmetic
+and unmeasured ordinary frequency, not executed forecasts or gameplay. New profiles have no prior managed curve;
+no existing curve/version/migration was replaced. Broader unranked pace/reward balance remains under review.
+
+Provenance adds XorothAbilities.cpp, XorothData.h and XorothContracts.cpp, now82 sources. Coverage147 unique/149
+declarations(119 ranked/5 mastery/23 fixed),102 baselines,598 requiring definitions(112 ranked/486 standalone),
+40 with raw common outcomes.119-entry ranked pacing header regenerated identically; all847 runtime-unqualified.
+VERIFY ALL PASSED .cache/verify-all/20261006-051657/report.json: source2(no suites/tests selected), native49.9s.
+C++ style/whitespace and final authoring exports passed. Addon0.4.33 unchanged; no redundant Lua checks, tests,
+client chunks/gameplay/startup/production operations. Damage integer safety already clamps to native signed
+maximum; inspected existing implementation and made no redundant change.

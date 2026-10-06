@@ -495,6 +495,8 @@ def main():
                          'src/server/coa/AscensionFelswornAuras.cpp',
                          'src/server/coa/AscensionFelswornContracts.cpp',
                 'src/server/coa/AscensionFelswornData.h', 'src/server/coa/AscensionFelswornSummons.cpp',
+                'src/server/coa/AscensionXorothAbilities.cpp', 'src/server/coa/AscensionXorothData.h',
+                'src/server/coa/AscensionXorothContracts.cpp',
                          'src/server/coa/AscensionCompat.cpp',
                          'src/server/coa/AscensionStarcallerAbilities.cpp',
                          'src/server/coa/AscensionStarcallerEvents.cpp',
