@@ -2818,5 +2818,8 @@ The whole module remains disabled by default, with no production migration or ac
 trainer_rank_extensions.py --native-header modules/mod-ability-practice/src/AbilityPracticeDevelopmentTrainerRanks.h
 now renders the eight native definitions and their frozen prior ranks, caps, pacing and exact trainer metadata.
 Earlier projection-only findings above describe the preceding authoring increment. These staged definitions and
-migration code still require native compilation and isolated loaded-data/player/menu qualification. Actual use
+migration code still require isolated loaded-data/player/menu qualification. Actual use
 frequency remains unmeasured; all previous pacing bands are retained. No client/protocol/version change.
+
+Version3 source2 and32.5-second native build passed at .cache/verify-all/20261006-154106/report.json.
+Unit/harness/gameplay skipped; no tests, client chunks, startup, migration execution or production operations.
