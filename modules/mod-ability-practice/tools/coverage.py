@@ -130,6 +130,9 @@ def build_coverage(drafts, declarations):
             raise ValueError('Expected unapproved, unclassified source draft')
         seen.add(identity)
         declaration = declarations.get(identity)
+        baseline = draft.get('nativeBaselineExclusion')
+        if baseline and (declaration or identity[1] not in {81, 107, 674} or len(draft['ranks']) != 1):
+            raise ValueError('Native baseline cannot be a development practice profile')
         if declaration and ((declaration['kind'] == 'ranked' and len(draft['ranks']) < 2) or
                             (declaration['kind'] == 'mastery' and len(draft['ranks']) != 1)):
             raise ValueError('Declared kind and source rank count differ: ' + str(identity))
@@ -137,15 +140,16 @@ def build_coverage(drafts, declarations):
         rows.append({'classId': identity[0], 'abilityId': identity[1],
                      'nameFromRawDbc': draft['ranks'][0].get('nameFromRawDbc'),
                      'sourceRankCount': len(draft['ranks']), 'declaredDevelopmentProfile': declaration,
+                     'nativeBaselineExclusion': baseline,
                      'rawCastProfiles': [{'spellId': rank['spellId'], **rank['rawCastProfile']}
                          for rank in draft['ranks'] if rank.get('rawCastProfile') is not None],
                      'candidateOutcomeRoutes': draft['candidateOutcomeRoutes'],
                      'candidatePeriodicOutcomeRoutes': draft.get('candidatePeriodicOutcomeRoutes', []),
                      'actionTraits': draft['actionTraits'], 'requiredReviews': draft['requiredReviews'],
                      'reviewFlags': draft['reviewFlags'],
-                     'pendingReviewQueues': [] if declaration else review_queues(draft),
+                     'pendingReviewQueues': [] if declaration or baseline else review_queues(draft),
                      'qualificationReviewQueues': review_queues(draft),
-                     'practiceDecision': 'unreviewed',
+                     'practiceDecision': 'excluded-native-combat-baseline' if baseline else 'unreviewed',
                      'productionApproved': False, 'runtimeQualified': False})
     if set(declarations) - seen:
         raise ValueError('Declared profile absent from source-consistent drafts')
@@ -153,7 +157,8 @@ def build_coverage(drafts, declarations):
     classes = sorted({row['classId'] for row in rows})
 
     def summarize(selected):
-        pending = [row for row in selected if not row['declaredDevelopmentProfile']]
+        pending = [row for row in selected if not row['declaredDevelopmentProfile'] and
+                   not row['nativeBaselineExclusion']]
         declared = [row for row in selected if row['declaredDevelopmentProfile']]
         kinds = Counter(row['declaredDevelopmentProfile']['kind'] for row in selected
                         if row['declaredDevelopmentProfile'])
@@ -163,6 +168,7 @@ def build_coverage(drafts, declarations):
                 'sharedDeclarationProfileCount': sum(bool(row['declaredDevelopmentProfile'] and
                     row['declaredDevelopmentProfile']['requiresRuntimeEquivalenceCheck']) for row in selected),
                 'declaredDevelopmentKinds': dict(sorted(kinds.items())), 'needsDefinitionCount': len(pending),
+                'nativeBaselineExclusionCount': sum(bool(row['nativeBaselineExclusion']) for row in selected),
                 'needsDefinitionWithRawOutcomeCount': sum(bool(row['candidateOutcomeRoutes']) for row in pending),
                 'needsDefinitionWithRawPeriodicOutcomeCount': sum(bool(row['candidatePeriodicOutcomeRoutes'])
                                                                 for row in pending),

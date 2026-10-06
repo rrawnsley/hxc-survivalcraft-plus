@@ -46,6 +46,7 @@ def verify_provenance(candidates, root, dbc):
                 'src/server/coa/AscensionPyromancerAuras.cpp',
                 'src/server/coa/AscensionPyromancerContracts.cpp',
                 'modules/mod-ability-practice/src/AbilityPracticeProfiles.h',
+                'modules/mod-ability-practice/src/AbilityPracticeBaseline.h',
                 'modules/mod-ability-practice/src/AbilityPracticePersistence.h',
                 'modules/mod-ability-practice/src/AbilityPracticeOutcome.h',
                 'modules/mod-ability-practice/src/AbilityPracticeCatalog.h',
@@ -113,7 +114,15 @@ def raw_cast_profile(raw):
     return {field: value[field] for field in (*fields, 'scope')}
 
 
-def build_drafts(candidates):
+def build_drafts(candidates, root):
+    baseline_source = 'modules/mod-ability-practice/src/AbilityPracticeBaseline.h'
+    baseline_text = (root / baseline_source).read_text(encoding='utf-8')
+    baseline_match = re.search(r'NativeBaselineSpells\s*=\s*\{([\d,\s]+)\}\s*;', baseline_text)
+    if not baseline_match:
+        raise ValueError('Missing reviewed native baseline list')
+    baseline_ids = [int(value.strip()) for value in baseline_match[1].split(',')]
+    if baseline_ids != [81, 107, 674]:
+        raise ValueError('Native baseline scope needs explicit authoring review')
     if candidates.get('schemaVersion') != 1 or candidates.get('scope') != (
             'source-review-candidates-not-runtime-definitions'):
         raise ValueError('Unsupported candidate artifact')
@@ -158,6 +167,9 @@ def build_drafts(candidates):
             ranks.append({'rankNumber': ordinal, 'spellId': spell, 'characterLevel': level,
                           'nameFromRawDbc': raw.get('name'), 'proficiencyRequired': None,
                           'rawCastProfile': raw_cast_profile(raw)})
+        baseline = ability_id in baseline_ids
+        if baseline and (len(ranks) != 1 or members[ability_id].get('rawDbc', {}).get('passive') is not True):
+            raise ValueError('Native baseline raw/source evidence changed')
         routes = candidate.get('nativeOutcomeReview', {}).get('commonRoutes', [])
         if not isinstance(routes, list) or len(set(routes)) != len(routes) or any(route not in {
                 'damage', 'healing', 'interrupt', 'dispel', 'steal'} for route in routes):
@@ -174,7 +186,10 @@ def build_drafts(candidates):
             required.append('unranked-mastery-or-fixed-design')
         drafts.append({'classId': class_id, 'abilityId': ability_id, 'definitionVersion': None,
                        'acquisitionSource': 'class-grant-source-evidence', 'productionApproved': False,
-                       'kind': None, 'outcome': None, 'candidateOutcomeRoutes': list(routes),
+                       'kind': None, 'outcome': None,
+                       'nativeBaselineExclusion': {'source': baseline_source,
+                           'reason': 'native-combat-baseline-remains-native'} if baseline else None,
+                       'candidateOutcomeRoutes': list(routes),
                        'candidatePeriodicOutcomeRoutes': list(periodic), 'ranks': ranks,
                        'proficiencyCaps': [], 'trainingBands': [], 'masteryRewards': [],
                        'reviewFlags': list(candidate['reviewFlags']),
@@ -188,6 +203,7 @@ def build_drafts(candidates):
             'summary': {'classCount': len(classes), 'draftCount': len(drafts),
                         'rankedSourceGroupCount': sum(len(draft['ranks']) > 1 for draft in drafts),
                         'standaloneSourceGroupCount': sum(len(draft['ranks']) == 1 for draft in drafts),
+                        'nativeBaselineExclusionCount': sum(bool(draft['nativeBaselineExclusion']) for draft in drafts),
                         'withCandidateOutcomeCount': sum(bool(draft['candidateOutcomeRoutes']) for draft in drafts),
                         'withCandidatePeriodicOutcomeCount': sum(bool(draft['candidatePeriodicOutcomeRoutes'])
                                                                 for draft in drafts)},
@@ -204,7 +220,7 @@ def main():
     args = parser.parse_args()
     candidates = json.loads(args.candidates.read_text(encoding='utf-8'))
     verify_provenance(candidates, args.root.resolve(), args.dbc.resolve())
-    result = build_drafts(candidates)
+    result = build_drafts(candidates, args.root.resolve())
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + '\n', encoding='utf-8')
     print(json.dumps(result['summary'], sort_keys=True))

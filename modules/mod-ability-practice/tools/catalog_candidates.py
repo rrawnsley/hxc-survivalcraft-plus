@@ -464,6 +464,7 @@ def main():
                 'src/server/coa/AscensionPyromancerAuras.cpp',
                 'src/server/coa/AscensionPyromancerContracts.cpp',
                          'modules/mod-ability-practice/src/AbilityPracticeProfiles.h',
+                'modules/mod-ability-practice/src/AbilityPracticeBaseline.h',
                 'modules/mod-ability-practice/src/AbilityPracticePersistence.h',
                 'modules/mod-ability-practice/src/AbilityPracticeOutcome.h',
                 'modules/mod-ability-practice/src/AbilityPracticeCatalog.h',

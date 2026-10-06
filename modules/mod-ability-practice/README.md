@@ -2273,3 +2273,20 @@ definitions). It cannot accept a practice cadence override. Native pacing genera
 Source/native report .cache/verify-all/20261006-005141/report.json passed(two source checks,31.8s native build).
 C++ style/whitespace, five Lua5.1 syntax compilations and70-source authoring exports passed. The pacing header
 reproduced identically. Unit/harness/gameplay/client rendering and native startup were not executed.
+
+## Preserve native combat baselines
+
+The source catalog refuses practice definitions containing Dodge81, Block107 or Dual Wield674. Their existing
+native acquisition and combat-skill behavior remain authoritative; no practice grants, awards, caps or mastery
+are introduced. Source-consistent singleton/passive evidence identifies53 class-grant entries. Authoring exports
+retain their provenance and qualification reviews but mark them excluded-native-combat-baseline and remove them
+from definition queues. This does not claim effective gameplay qualification. Parry3127 has no source-consistent
+class-grant candidate in this inventory and is not included by guessing its name.
+
+Coverage remains847 source groups:124 declared development profiles,53 native-baseline exclusions and670 groups
+needing definitions(125 ranked,545 standalone). All847 remain runtime-unqualified. Provenance includes the baseline
+header(71 sources); native pacing generation reproduced its118-entry header identically.
+
+VERIFY ALL PASSED .cache/verify-all/20261006-041926/report.json: source(two checks) and native build(36.2s).
+C++ style/whitespace and authoring exports passed. Unit/harness/gameplay/client execution and native startup were
+not performed. The live server, configuration, databases and active client files remain untouched.

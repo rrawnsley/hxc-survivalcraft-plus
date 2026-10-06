@@ -62,7 +62,7 @@ def main():
     args = parser.parse_args()
     candidates = json.loads(args.candidates.read_text(encoding='utf-8'))
     verify_provenance(candidates, args.root.resolve(), args.dbc.resolve())
-    drafts = build_drafts(candidates)
+    drafts = build_drafts(candidates, args.root.resolve())
     header, summary = render_header(drafts['drafts'])
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(header, encoding='utf-8', newline='\n')

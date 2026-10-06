@@ -2,6 +2,7 @@
 #define ABILITY_PRACTICE_PROFILES_H
 
 #include "AbilityPracticeCatalog.h"
+#include "AbilityPracticeBaseline.h"
 #include "AbilityPracticeMastery.h"
 
 #include <unordered_map>
@@ -60,7 +61,9 @@ inline bool ValidateProfiles(std::span<AbilityProfile const> profiles)
                     profile.Outcome != OutcomeKind::Interrupt && profile.Outcome != OutcomeKind::Dispel &&
                     profile.Outcome != OutcomeKind::Steal && profile.Outcome != OutcomeKind::DamageOrInterrupt &&
                     profile.Outcome != OutcomeKind::DamageOrDispel) ||
-            ability.Ranks.size() > 64)
+            ability.Ranks.size() > 64 ||
+            std::any_of(ability.Ranks.begin(), ability.Ranks.end(),
+                [](AbilityRank const& rank) { return IsNativeBaselineSpell(rank.SpellId); }))
             return false;
         for (AbilityRank const& rank : ability.Ranks)
             if (rank.Requirement.CharacterLevel > 255)
