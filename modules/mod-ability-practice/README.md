@@ -2030,3 +2030,19 @@ three unknown-effect reviews, among overlapping queues. Fixed/helper profiles re
 common direct outcome is absent. Source checks passed in .cache/verify-all/20261006-000736/report.json (two
 checks), and the 61-source authoring exports refreshed. Native/gameplay/addon code and the previous passing
 native build are unchanged; unit/harness/gameplay were skipped. No production operations were performed.
+
+
+## Preserve raw timing for per-ability tuning — 5 October 2026 local
+
+Each source-consistent draft rank now carries a strict rawCastProfile with casting-time index and ordinary,
+category and start recovery milliseconds. The shape, exact raw-data scope and unsigned integer values are
+validated; absent timing remains explicit rather than invented. Coverage preserves these spell-keyed timing
+records and routes missing evidence to a review queue. All847 current groups have complete raw timing.
+These are raw DBC values, not effective cooldowns, measured successful-use frequency or training-duration
+promises. Native talent/resource/proc/effective-data and actual encounter observations still matter for tuning.
+No cooldown, training policy, reward or gameplay changes are made by this authoring improvement.
+
+Source checks passed in .cache/verify-all/20261006-000954/report.json (two checks), and61-source candidate/
+draft/coverage exports refreshed. Native/addon unchanged from the passing000409 build; no runtime/test or
+production operations performed. The optional rank pacing preference remains pending and existing draft
+rates remain unapproved.

@@ -61,6 +61,8 @@ def review_queues(draft):
         queues.add('ranked-common-outcome')
     if periodic:
         queues.add('native-periodic-outcome-and-attribution')
+    if any(rank.get('rawCastProfile') is None for rank in draft['ranks']):
+        queues.add('missing-raw-action-timing')
     if not routes and not periodic:
         queues.add('missing-common-supported-outcome')
     return sorted(queues)
@@ -84,6 +86,8 @@ def build_coverage(drafts, declarations):
         rows.append({'classId': identity[0], 'abilityId': identity[1],
                      'nameFromRawDbc': draft['ranks'][0].get('nameFromRawDbc'),
                      'sourceRankCount': len(draft['ranks']), 'declaredDevelopmentProfile': declaration,
+                     'rawCastProfiles': [{'spellId': rank['spellId'], **rank['rawCastProfile']}
+                         for rank in draft['ranks'] if rank.get('rawCastProfile') is not None],
                      'candidateOutcomeRoutes': draft['candidateOutcomeRoutes'],
                      'candidatePeriodicOutcomeRoutes': draft.get('candidatePeriodicOutcomeRoutes', []),
                      'actionTraits': draft['actionTraits'], 'requiredReviews': draft['requiredReviews'],
@@ -113,6 +117,8 @@ def build_coverage(drafts, declarations):
                                                                 for row in pending),
                 'pendingRankedGroupCount': sum(row['sourceRankCount'] > 1 for row in pending),
                 'pendingStandaloneGroupCount': sum(row['sourceRankCount'] == 1 for row in pending),
+                'withCompleteRawTimingCount': sum(len(row['rawCastProfiles']) == row['sourceRankCount']
+                                                  for row in selected),
                 'unqualifiedSourceGroupCount': sum(row['runtimeQualified'] is False for row in selected),
                 'declaredUnqualifiedProfileCount': sum(row['runtimeQualified'] is False for row in declared),
                 'declaredReviewQueueCounts': dict(sorted(Counter(queue for row in declared

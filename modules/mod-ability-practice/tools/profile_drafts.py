@@ -90,6 +90,20 @@ def verify_provenance(candidates, root, dbc):
         raise ValueError('DBC schema source changed since candidate discovery')
 
 
+def raw_cast_profile(raw):
+    value = raw.get('castProfile')
+    if value is None:
+        return None
+    fields = ('castingTimeIndex', 'recoveryMilliseconds', 'categoryRecoveryMilliseconds',
+              'startRecoveryMilliseconds')
+    if not isinstance(value, dict) or set(value) != {*fields, 'scope'} or value['scope'] != (
+            'raw-dbc-timing-not-measured-use-frequency'):
+        raise ValueError('Invalid raw cast timing shape or scope')
+    if any(type(value[field]) is not int or not 0 <= value[field] <= 4294967295 for field in fields):
+        raise ValueError('Invalid raw cast timing value')
+    return {field: value[field] for field in (*fields, 'scope')}
+
+
 def build_drafts(candidates):
     if candidates.get('schemaVersion') != 1 or candidates.get('scope') != (
             'source-review-candidates-not-runtime-definitions'):
@@ -133,7 +147,8 @@ def build_drafts(candidates):
             seen.add(spell)
             raw = members[spell].get('rawDbc') or {}
             ranks.append({'rankNumber': ordinal, 'spellId': spell, 'characterLevel': level,
-                          'nameFromRawDbc': raw.get('name'), 'proficiencyRequired': None})
+                          'nameFromRawDbc': raw.get('name'), 'proficiencyRequired': None,
+                          'rawCastProfile': raw_cast_profile(raw)})
         routes = candidate.get('nativeOutcomeReview', {}).get('commonRoutes', [])
         if not isinstance(routes, list) or len(set(routes)) != len(routes) or any(route not in {
                 'damage', 'healing', 'interrupt', 'dispel', 'steal'} for route in routes):
