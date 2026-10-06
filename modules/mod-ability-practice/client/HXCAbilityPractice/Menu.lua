@@ -136,13 +136,18 @@ local function SessionMasteryText(ability)
         .. string.format("%.2f", highest / 100):gsub("0+$", ""):gsub("%.$", "") .. "%"
 end
 
+local function ShowsRankNumbers(ability)
+    return not Model.IsMastery(ability) and (not Model.IsFixed(ability)
+        or (ability.ranks and #ability.ranks > 1))
+end
+
 local function SessionLearnText(ability)
     local highest = 0
     for _, event in ipairs(Model.SessionLearns(snapshot, ability.abilityId)) do
         highest = math.max(highest, event.rankNumber)
     end
     if highest == 0 then return nil end
-    return (Model.IsFixed(ability) or Model.IsMastery(ability) or highest == 1)
+    return (not ShowsRankNumbers(ability) or highest == 1)
         and "Learned ability this session" or ("Learned rank " .. highest .. " this session")
 end
 
@@ -251,7 +256,7 @@ local function RenderDetail(ability)
     if not requiredLevel and ability.learnedRank == 0 and ability.nextRank then
         requiredLevel = ability.nextRank.characterLevel
     end
-    local rankText = ability.learnedRank > 0 and ((fixed or mastery) and "Learned ability" or
+    local rankText = ability.learnedRank > 0 and (not ShowsRankNumbers(ability) and "Learned ability" or
         ("Learned rank " .. ability.learnedRank)) or "Not yet learned"
     rankLabel:SetText(rankText .. (requiredLevel and (" - Required level " .. requiredLevel) or "")
         .. (mastery and ("\n" .. Model.CurrentMasteryText(ability, syncState ~= "current")) or ""))
@@ -282,7 +287,7 @@ local function RenderDetail(ability)
     local nextRank = ability.nextRank
     local nextReward = Model.NextMastery(ability)
     nextTitle:SetText(nextRank and ((ability.learnedRank == 0 and "Upcoming ability: " or "Next rank: ")
-        .. SpellName(nextRank.spellId) .. ((fixed or mastery) and "" or (" (Rank " .. nextRank.rankNumber .. ")")))
+        .. SpellName(nextRank.spellId) .. (ShowsRankNumbers(ability) and (" (Rank " .. nextRank.rankNumber .. ")") or ""))
         or (fixed and "Ability details" or mastery and "Mastery benefits" or "Rank progression"))
     nextText:SetText(mastery and not nextRank and Model.MasteryText(nextReward, snapshot.realmMaximumLevel,
         snapshot.characterLevel, ability.acquisitionSource)
@@ -291,8 +296,9 @@ local function RenderDetail(ability)
     local ranks = mastery and ability.rewards or ability.ranks
     roadmapButton:SetText(mastery and (showRoadmap and "Next benefit" or "All mastery")
         or (showRoadmap and "Next rank" or "All ranks"))
-    if ranks and not fixed then roadmapButton:Show() else roadmapButton:Hide() end
-    local displayRoadmap = not fixed and showRoadmap and ranks
+    local hasRoadmap = ranks and (not fixed or #ranks > 1)
+    if hasRoadmap then roadmapButton:Show() else roadmapButton:Hide() end
+    local displayRoadmap = hasRoadmap and showRoadmap
     if displayRoadmap then
         nextText:Hide()
         rankOffset = math.max(0, math.min(rankOffset, math.max(0, #ranks - #roadmapRows)))
@@ -460,7 +466,9 @@ Refresh = function()
                         snapshot.characterLevel) and ("Above realm cap " .. snapshot.realmMaximumLevel)
                         or ("Req. level " .. rank.characterLevel))) or
                 (ability.learnedRank == 0 and "Not yet learned" or
-                    (Model.IsFixed(ability) and "Fixed ability" or Model.IsMastery(ability) and
+                    (Model.IsFixed(ability) and (ShowsRankNumbers(ability)
+                        and ("Rank " .. ability.learnedRank .. " · No practice required") or "No practice required")
+                        or Model.IsMastery(ability) and
                         ("Mastery · Proficiency " .. ability.proficiency .. "/" .. ability.cap) or
                         ("Rank " .. ability.learnedRank .. " · Proficiency "
                             .. ability.proficiency .. "/" .. ability.cap))))
@@ -531,8 +539,8 @@ for index = 1, 9 do
         for index = math.max(1, #learns - 2), #learns do
             local event = learns[index]
             GameTooltip:AddLine((syncState == "current" and "Learned this session: " or "Saved session learn: ")
-                .. SpellName(event.spellId) .. ((Model.IsFixed(ability) or Model.IsMastery(ability)) and ""
-                    or (" (Rank " .. event.rankNumber .. ")")), 0.55, 0.9, 0.6, true)
+                .. SpellName(event.spellId) .. (ShowsRankNumbers(ability)
+                    and (" (Rank " .. event.rankNumber .. ")") or ""), 0.55, 0.9, 0.6, true)
         end
         if #learns > 3 then
             GameTooltip:AddLine((#learns - 3) .. " earlier retained learns for this ability.", 1, 1, 1, true)

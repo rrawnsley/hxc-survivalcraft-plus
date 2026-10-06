@@ -2304,3 +2304,14 @@ native pacing header reproduced identically. An initial regeneration used the so
 refused for missing Spell.dbc provenance; regeneration with dbc-source-inventory.json succeeded.
 VERIFY ALL PASSED .cache/verify-all/20261006-042125/report.json: source(two checks), native build34.0s.
 C++ style/whitespace passed. No tests/client/gameplay/startup/production operations occurred.
+
+## Fixed rank roadmaps in the menu
+
+Addon0.4.31 displays real rank numbers for fixed utilities with multiple native ranks, including the learned
+rank, next rank, session learns and tooltips. Their All ranks control now shows the full native level roadmap,
+using the existing no-practice/acquisition labels. Singleton fixed utilities and unranked mastery keep their
+ability labels. Fixed abilities still show no practice bars, uses or proficiency requirements.
+
+Source report .cache/verify-all/20261006-042326/report.json passed(two checks). Five Lua5.1 files compiled for
+syntax only; no addon chunks executed. A transient edit encoding error was repaired before this final check.
+Native code unchanged from passing042125 build. Client rendering remains unqualified; no active client changes.
