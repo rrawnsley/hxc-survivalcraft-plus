@@ -48,3 +48,9 @@ AbilityPractice.DevelopmentCatchupMultiplier = 2
 # Adds/reuses its six-rank Healing profile. Direct healing and actual PvE shielding share one original-cast award.
 # No shield magnitude, native mechanics or mastery benefit changes. Other shields and mana shields unsupported.
 AbilityPractice.AllowDevelopmentAbsorption = 0
+
+# Optional per-ability ranked pacing curves targeting 30-60 combat minutes under draft cadence assumptions.
+# Startup-only. Uses definition version2 and exact fraction-preserving conversion from the reviewed version1.
+# Effective use frequency, cooldown exceptions and gameplay migration still need isolated qualification.
+# Turning this off after version2 progress exists preserves the row but does not downgrade it to version1.
+AbilityPractice.AllowDevelopmentRankPacing = 0

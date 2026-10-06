@@ -2175,3 +2175,42 @@ undeclared source candidate is never silently promoted to a trainable native abi
 
 Source checks passed in .cache/verify-all/20261006-003304/report.json (two checks);64-source exports refreshed.
 Native C++ remains the002731 passing build. Unit/harness/gameplay stages and production operations were not run.
+
+## Integrated isolated rank pacing and version conversion
+
+AllowDevelopmentRankPacing is a startup-only flag, disabled by default and still requiring module observation,
+explicit selected human character GUIDs and successful native catalog validation. It substitutes generated
+per-ability policies for the118 declared ranked profiles only. Defaults target45minutes within30–60 under raw
+cast/recovery and five-second cadence assumptions. These are draft rates, not measured or approved balance.
+Mastery/fixed profiles, ranks, level gates, caps, acquisition checks and outcome routes remain unchanged.
+
+Startup compares each selected ranked profile's exact spell/rank/level/proficiency ladder and previous bands
+against the generated migration source before assigning definition version2 and its new policy. A missing entry
+or disagreement disables readiness. Composition checks precede substitution, and effective native chain,
+acquisition, policy and catch-up checks still follow it. Policy lookup/substitution happen only at startup.
+
+Owner initialization and dirty rank refresh convert a valid saved version1 row through the explicit fraction-
+preserving cache operation. Missing rows start at version2 and use existing once-only learned-rank seeding.
+Unknown versions, bad rows and failed exact conversions stay preserved and blocked. Saved proficiency and
+rank-seeding markers are retained; no historical usage or session gains are fabricated. The native settings
+save lifecycle persists the cache normally. No database query is added to casts and no gameplay pointer is stored.
+
+Turning pacing off after version2 rows exist preserves them, but the version1 practice policy cannot interpret
+them and reports a mismatch. Disabling the entire module restores native progression without deleting progress
+or learned ranks. Re-enable the matching pacing version to use retained rows. Automatic downgrade is unsupported.
+
+rank_pacing_development.py generates only current declared ranked entries, validates the reviewed version1
+baseline and provenance, and optionally consumes authored cadence assumptions for declared abilities only.
+Existing output may be regenerated identically; changed output requires --definition-version strictly greater
+than its prior version. Current conversion supports the reviewed version1 source only. Future2-to3 transitions
+need a separately authored migration source; unknown existing versions remain blocked rather than reinterpreted.
+
+    py -B modules/mod-ability-practice/tools/rank_pacing_development.py --drafts .cache/ability-practice/profile-drafts.json --dbc C:/Azerothcore-CoA/server-data/dbc --output modules/mod-ability-practice/src/AbilityPracticeDevelopmentPacing.h
+
+The generated definitions and generator are included in source provenance. Native integration compiled in
+.cache/verify-all/20261006-003744/report.json: two source checks and31.7s native build passed. Unit/harness/gameplay
+and migration execution were not run. No production server/config/database/addon files were modified or started.
+
+Final integration source/native report .cache/verify-all/20261006-003947/report.json passed(two source checks,
+30.8s native build). C++ style/whitespace and66-source exports passed; generator reproduced the header without
+changes. Export metadata now distinguishes available native conversion from execution by the authoring tool.

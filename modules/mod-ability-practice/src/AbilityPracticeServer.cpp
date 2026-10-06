@@ -5,6 +5,7 @@
 #include "AbilityPracticeDevelopmentSamples.h"
 #include "AbilityPracticeDevelopmentPeriodic.h"
 #include "AbilityPracticeDevelopmentRanked.h"
+#include "AbilityPracticeDevelopmentPacing.h"
 #include "AbilityPracticeDevelopmentMastery.h"
 #include "AbilityPracticeDevelopmentHelpers.h"
 #include "AbilityPracticeDevelopmentFixed.h"
@@ -141,6 +142,49 @@ bool AppendProfiles(std::vector<Practice::AbilityProfile>& destination,
     }
     return valid;
 }
+bool ApplyDevelopmentPacing(std::vector<Practice::AbilityProfile>& profiles)
+{
+    if (Practice::DevelopmentPacing::DefinitionVersion <= Practice::DevelopmentPacing::PreviousDefinitionVersion ||
+        !Practice::ValidPolicy(Practice::DevelopmentPacing::PreviousPolicy))
+        return false;
+    for (Practice::AbilityProfile& profile : profiles)
+    {
+        if (profile.Definition.Kind != Practice::AbilityKind::Ranked)
+            continue;
+        auto const& entries = Practice::DevelopmentPacing::Entries;
+        auto const entry = std::find_if(entries.begin(), entries.end(),
+            [&profile](Practice::DevelopmentPacing::Entry const& value)
+            {
+                return value.ClassId == profile.Definition.ClassId && value.AbilityId == profile.Definition.AbilityId;
+            });
+        auto const& previous = Practice::DevelopmentPacing::PreviousPolicy;
+        if (entry == entries.end() ||
+            profile.DefinitionVersion != Practice::DevelopmentPacing::PreviousDefinitionVersion ||
+            !std::equal(profile.Definition.Ranks.begin(), profile.Definition.Ranks.end(),
+                entry->ExpectedRanks.begin(), entry->ExpectedRanks.end(),
+                [](Practice::AbilityRank const& left, Practice::AbilityRank const& right)
+                {
+                    return left.SpellId == right.SpellId && left.RankNumber == right.RankNumber &&
+                        SameMilestone(left.Requirement, right.Requirement);
+                }) ||
+            !std::equal(profile.Policy.Bands.begin(), profile.Policy.Bands.end(),
+                previous.Bands.begin(), previous.Bands.end(),
+                [](Practice::TrainingBand const& left, Practice::TrainingBand const& right)
+                {
+                    return left.FirstProficiency == right.FirstProficiency &&
+                        left.PointsPerLevel == right.PointsPerLevel && left.PointsPerUse == right.PointsPerUse;
+                }))
+        {
+            LOG_ERROR("module.ability_practice", "Rejected development pacing source: class={}, ability={}",
+                profile.Definition.ClassId, profile.Definition.AbilityId);
+            return false;
+        }
+        profile.Policy = entry->Policy;
+        profile.DefinitionVersion = Practice::DevelopmentPacing::DefinitionVersion;
+    }
+    return true;
+}
+
 std::vector<Practice::AbilityProfile> RuntimeProfiles;
 std::unordered_set<std::uint64_t> PeriodicPracticeAbilities;
 std::optional<Practice::ProfileIndex> ProfileLookup;
@@ -156,6 +200,7 @@ bool PeriodicRequested = false;
 bool MasteryRequested = false;
 bool HelpersRequested = false;
 bool AbsorptionRequested = false;
+bool PacingRequested = false;
 Practice::CatchupSettings Catchup;
 std::uint64_t NextActionSession = 0;
 std::atomic<bool> RankActive = false;
@@ -876,8 +921,21 @@ void InitializeProgress(Player* player)
         auto const learned = Learned(player, ability);
         if (learned.empty())
             continue;
-        auto const loaded = Practice::ReadPlayerProgress(*player, ability.ClassId, ability.AbilityId,
+        auto loaded = Practice::ReadPlayerProgress(*player, ability.ClassId, ability.AbilityId,
             profile.Policy, profile.DefinitionVersion);
+        if (PacingRequested && ability.Kind == Practice::AbilityKind::Ranked &&
+            profile.DefinitionVersion == Practice::DevelopmentPacing::DefinitionVersion &&
+            loaded.Status == Practice::LoadStatus::DefinitionMismatch)
+        {
+            auto const previous = Practice::ReadPlayerProgress(*player, ability.ClassId, ability.AbilityId,
+                Practice::DevelopmentPacing::PreviousPolicy, Practice::DevelopmentPacing::PreviousDefinitionVersion);
+            if (previous.Status == Practice::LoadStatus::Loaded &&
+                Practice::CacheRebasedPlayerProgress(*player, ability.ClassId, ability.AbilityId,
+                    Practice::DevelopmentPacing::PreviousPolicy, profile.Policy, profile.DefinitionVersion,
+                    previous.Record))
+                loaded = Practice::ReadPlayerProgress(*player, ability.ClassId, ability.AbilityId,
+                    profile.Policy, profile.DefinitionVersion);
+        }
         auto const record = Practice::MigrateLearnedRanks(ability, profile.Policy, loaded, learned);
         if (record)
             Practice::CachePlayerProgress(*player, ability.ClassId, ability.AbilityId, profile.Policy, *record);
@@ -1022,6 +1080,7 @@ public:
         MasteryRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentMastery", false);
         HelpersRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentScriptedObservation", false);
         AbsorptionRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentAbsorption", false);
+        PacingRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentRankPacing", false);
         if (!Requested || !DevelopmentAllowed)
         {
             Active.store(false);
@@ -1053,10 +1112,11 @@ public:
         bool const absorptionValid = !AbsorptionRequested ||
             AppendProfiles(RuntimeProfiles, Practice::DevelopmentAbsorption::Profiles);
         bool const fixedValid = !fixedCatalog || AppendProfiles(RuntimeProfiles, Practice::DevelopmentFixed::Profiles);
+        bool const pacingValid = !PacingRequested || ApplyDevelopmentPacing(RuntimeProfiles);
         std::span<Practice::AbilityProfile const> const profiles(RuntimeProfiles);
         ProfileLookup.emplace(profiles);
         Ready = ProfileLookup->IsValid() && periodicValid && masteryValid && helpersValid && fixedValid &&
-            absorptionValid && Practice::ValidCatchupSettings(Catchup);
+            absorptionValid && pacingValid && Practice::ValidCatchupSettings(Catchup);
         for (Practice::AbilityProfile const& profile : profiles)
         {
             std::uint32_t const maximumCap = profile.Definition.Caps.empty() ? 1 :
@@ -1117,6 +1177,7 @@ public:
         LOG_INFO("module.ability_practice", "Development scripted observation: enabled={}", HelpersRequested);
         LOG_INFO("module.ability_practice", "Development fixed catalog: enabled={}", fixedCatalog);
         LOG_INFO("module.ability_practice", "Development absorption observation: enabled={}", AbsorptionRequested);
+        LOG_INFO("module.ability_practice", "Development rank pacing: enabled={}", PacingRequested);
     }
 };
 
@@ -1157,6 +1218,8 @@ public:
             RefreshOwnerState(player, session, customSpecialization);
             checkRanks = session.CheckRanks;
             session.CheckRanks = false;
+            if (checkRanks && PacingRequested)
+                InitializeProgress(player);
         }
         if (checkRanks)
             PromoteRanks(player);
