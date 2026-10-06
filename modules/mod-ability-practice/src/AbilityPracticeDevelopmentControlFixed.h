@@ -1,0 +1,77 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+
+#ifndef ABILITY_PRACTICE_DEVELOPMENT_CONTROL_FIXED_H
+#define ABILITY_PRACTICE_DEVELOPMENT_CONTROL_FIXED_H
+
+#include "AbilityPracticeDevelopment.h"
+#include "AbilityPracticeProfiles.h"
+
+namespace AbilityPractice::DevelopmentControlFixed
+{
+inline constexpr std::array Class13Ability803325 = { AbilityRank{ 803325, 1, { 22, 1 } } };
+inline constexpr std::array Class15Ability802826 = { AbilityRank{ 802826, 1, { 40, 1 } } };
+inline constexpr std::array Class16Ability654545 = { AbilityRank{ 654545, 1, { 24, 1 } } };
+inline constexpr std::array Class17Ability801067 = { AbilityRank{ 801067, 1, { 34, 1 } } };
+inline constexpr std::array Class19Ability560963 = { AbilityRank{ 560963, 1, { 24, 1 } } };
+inline constexpr std::array Class21Ability557333 = { AbilityRank{ 557333, 1, { 24, 1 } } };
+inline constexpr std::array Class23Ability500341 = { AbilityRank{ 500341, 1, { 34, 1 } } };
+inline constexpr std::array Class23Ability800706 = { AbilityRank{ 800706, 1, { 20, 1 } } };
+inline constexpr std::array Class29Ability504335 = { AbilityRank{ 504335, 1, { 16, 1 } } };
+inline constexpr std::array Class29Ability804970 = { AbilityRank{ 804970, 1, { 8, 1 } } };
+inline constexpr std::array Class32Ability524930 = { AbilityRank{ 524930, 1, { 12, 1 } } };
+inline constexpr std::array Class32Ability807822 = { AbilityRank{ 807822, 1, { 8, 1 } } };
+
+inline constexpr std::array Profiles = {
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 13, 803325, AbilityKind::Fixed, Class13Ability803325, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 15, 802826, AbilityKind::Fixed, Class15Ability802826, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 16, 654545, AbilityKind::Fixed, Class16Ability654545, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 17, 801067, AbilityKind::Fixed, Class17Ability801067, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 19, 560963, AbilityKind::Fixed, Class19Ability560963, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 21, 557333, AbilityKind::Fixed, Class21Ability557333, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 23, 500341, AbilityKind::Fixed, Class23Ability500341, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 23, 800706, AbilityKind::Fixed, Class23Ability800706, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 29, 504335, AbilityKind::Fixed, Class29Ability504335, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 29, 804970, AbilityKind::Fixed, Class29Ability804970, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 32, 524930, AbilityKind::Fixed, Class32Ability524930, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 32, 807822, AbilityKind::Fixed, Class32Ability807822, {} }, Development::Policy, OutcomeKind::None }
+};
+
+struct Mechanic
+{
+    std::uint32_t ClassId;
+    std::uint32_t SpellId;
+    std::array<std::uint32_t, 3> EffectIds;
+    std::array<std::uint32_t, 3> AuraIds;
+    std::array<std::uint32_t, 3> TargetAIds;
+    std::array<std::uint32_t, 3> TargetBIds;
+};
+
+inline constexpr std::array Mechanics = {
+    Mechanic{ 13, 803325, { 6, 6, 0 }, { 7, 31, 0 }, { 6, 6, 0 }, { 0, 0, 0 } },
+    Mechanic{ 15, 802826, { 6, 6, 0 }, { 12, 118, 0 }, { 22, 22, 0 }, { 15, 15, 0 } },
+    Mechanic{ 16, 654545, { 6, 6, 0 }, { 12, 40, 0 }, { 6, 6, 0 }, { 0, 0, 0 } },
+    Mechanic{ 17, 801067, { 6, 6, 6 }, { 12, 118, 39 }, { 6, 6, 6 }, { 0, 0, 0 } },
+    Mechanic{ 19, 560963, { 6, 6, 0 }, { 12, 40, 0 }, { 6, 6, 0 }, { 0, 0, 0 } },
+    Mechanic{ 21, 557333, { 5, 6, 0 }, { 0, 12, 0 }, { 1, 6, 0 }, { 65, 0, 0 } },
+    Mechanic{ 23, 500341, { 6, 6, 6 }, { 12, 118, 40 }, { 6, 6, 6 }, { 0, 0, 0 } },
+    Mechanic{ 23, 800706, { 6, 6, 0 }, { 7, 56, 0 }, { 6, 6, 0 }, { 0, 0, 0 } },
+    Mechanic{ 29, 504335, { 6, 6, 0 }, { 12, 56, 0 }, { 6, 6, 0 }, { 0, 0, 0 } },
+    Mechanic{ 29, 804970, { 6, 0, 0 }, { 7, 0, 0 }, { 22, 0, 0 }, { 15, 0, 0 } },
+    Mechanic{ 32, 524930, { 6, 6, 6 }, { 12, 271, 271 }, { 6, 6, 6 }, { 0, 0, 0 } },
+    Mechanic{ 32, 807822, { 6, 0, 0 }, { 26, 0, 0 }, { 6, 0, 0 }, { 0, 0, 0 } }
+};
+}
+
+#endif

@@ -2929,3 +2929,26 @@ unqualified. Earlier20 utility profiles remain unchanged.
 missing definitions (106 ranked/425 standalone),850 runtime-unqualified groups. Source2/native29.9s passed
 at .cache/verify-all/20261006-160736/report.json; C++ style/whitespace and current source exports passed.
 Unit/harness/gameplay skipped. No tests, startup, client chunks, database changes or production operation.
+
+## Draft native unranked control roadmap
+
+With the optional control-benefit preference still unanswered, the recommended draft preserves full native
+function with no practice requirement. Default-off AbilityPractice.AllowDevelopmentControlFixedCatalog adds12
+explicit singleton Fixed controls: Hireeks Jinx13 at22, Holy Water Tonic15 at40, Call of the Maelstrom16 at24,
+Imprison17 at34, Shackle The Unrepentant19 at24, Bushwhack21 at24, Entomb23 at34, Ghoulify23 at20, Web Wrap29
+at16, Arachnophobia29 at8, Ice Rune32 at12 and Cryobrand32 at8. Native names retain their apostrophes.
+
+Native class acquisition, cooldowns, duration, diminishing returns, target/area behavior, movement, transforms
+and secondary debuffs remain unchanged. No practice cache, progression gate, automatic teaching or authored
+benefit. Startup checks exact profiles, native acquisition/ranks, nonpassive flags and precise effect/aura/target
+slots without triggers. Existing fixed menu displays native learned/upcoming level. Scripted Moon Gaze,
+Blackjack and Soul Shock remain individually pending. This draft is reversible and not user approval of a
+cooldown benefit, runtime qualification or production activation.
+
+99-source exports:205 unique profiles/207 declarations (120 ranked/7 mastery/78 fixed),126 baselines,519
+missing definitions (106 ranked/413 standalone),850 runtime-unqualified groups. Earlier profiles/pacing and
+trainer extensions unchanged. No client/protocol/version or production change; all flags remain0.
+
+Twelve-control draft source2/native30.1s passed at .cache/verify-all/20261006-161311/report.json. C++ style/
+whitespace and current source exports passed; unit/harness/gameplay skipped. No tests, startup, client chunks,
+database changes, deployment or production operations. Optional preference remains open.

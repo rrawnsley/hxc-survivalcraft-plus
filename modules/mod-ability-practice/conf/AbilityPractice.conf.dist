@@ -89,3 +89,7 @@ AbilityPractice.AllowDevelopmentPassiveFixedCatalog = 0
 # Development-only reviewed unranked interrupts, cleanses and spell steals. Startup-only.
 # Native unlocks/full utility remain; no practice counter, gate, automatic teaching or authored benefit.
 AbilityPractice.AllowDevelopmentUtilityFixedCatalog = 0
+
+# Draft reviewed unranked fear, stun and root utility roadmap. Startup-only; full native function.
+# No practice counter, gate, automatic teaching or authored cooldown/duration benefit.
+AbilityPractice.AllowDevelopmentControlFixedCatalog = 0
