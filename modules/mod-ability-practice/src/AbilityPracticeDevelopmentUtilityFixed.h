@@ -29,6 +29,9 @@ inline constexpr std::array Class32Ability520269 = { AbilityRank{ 520269, 1, { 2
 inline constexpr std::array Class32Ability800995 = { AbilityRank{ 800995, 1, { 18, 1 } } };
 inline constexpr std::array Class32Ability803679 = { AbilityRank{ 803679, 1, { 28, 1 } } };
 
+inline constexpr std::array Myotoxin = { AbilityRank{ 572304, 1, { 40, 1 } } };
+inline constexpr std::array Antivenom = { AbilityRank{ 800905, 1, { 16, 1 } } };
+
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 13, 806240, AbilityKind::Fixed, Class13Ability806240, {} }, Development::Policy, OutcomeKind::None },
@@ -69,7 +72,11 @@ inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 32, 800995, AbilityKind::Fixed, Class32Ability800995, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
-        { 32, 803679, AbilityKind::Fixed, Class32Ability803679, {} }, Development::Policy, OutcomeKind::None }
+        { 32, 803679, AbilityKind::Fixed, Class32Ability803679, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 29, 572304, AbilityKind::Fixed, Myotoxin, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 29, 800905, AbilityKind::Fixed, Antivenom, {} }, Development::Policy, OutcomeKind::None }
 };
 
 struct Mechanic
@@ -79,6 +86,8 @@ struct Mechanic
     std::array<std::uint32_t, 3> EffectIds;
     std::array<std::uint32_t, 3> TargetAIds;
     std::array<std::uint32_t, 3> TargetBIds;
+    std::array<std::uint32_t, 3> AuraIds = {};
+    std::array<std::uint32_t, 3> TriggerSpellIds = {};
 };
 
 inline constexpr std::array Mechanics = {
@@ -101,7 +110,21 @@ inline constexpr std::array Mechanics = {
     Mechanic{ 31, 520841, { 38, 38, 0 }, { 21, 21, 0 }, { 0, 0, 0 } },
     Mechanic{ 32, 520269, { 126, 0, 0 }, { 6, 0, 0 }, { 0, 0, 0 } },
     Mechanic{ 32, 800995, { 68, 0, 0 }, { 6, 0, 0 }, { 0, 0, 0 } },
-    Mechanic{ 32, 803679, { 38, 38, 0 }, { 16, 31, 0 }, { 0, 0, 0 } }
+    Mechanic{ 32, 803679, { 38, 38, 0 }, { 16, 31, 0 }, { 0, 0, 0 } },
+    Mechanic{ 29, 572304, { 38, 6, 0 }, { 6, 6, 0 }, {}, { 0, 23, 0 }, { 0, 572407, 0 } },
+    Mechanic{ 29, 800905, { 6, 38, 0 }, { 21, 21, 0 }, {}, { 23, 0, 0 }, { 803680, 0, 0 } }
+};
+
+struct HelperMechanic
+{
+    std::uint32_t SpellId;
+    std::array<std::uint32_t, 3> EffectIds;
+    std::array<std::uint32_t, 3> TargetAIds;
+};
+
+inline constexpr std::array Helpers = {
+    HelperMechanic{ 572407, { 38, 0, 0 }, { 6, 0, 0 } },
+    HelperMechanic{ 803680, { 38, 38, 0 }, { 21, 21, 0 } }
 };
 }
 

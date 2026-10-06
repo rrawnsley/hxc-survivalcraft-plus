@@ -2914,3 +2914,18 @@ trainer extensions and pacing definitions remain unchanged. All development swit
 Twenty-utility source2/native30.8s passed at .cache/verify-all/20261006-160056/report.json. C++ style/whitespace
 and current source exports passed; unit/harness/gameplay skipped. No tests, startup, client chunks, database
 changes, deployment or production operations.
+
+## Periodic cleansing utilities remain native
+
+The same disabled utility-roadmap switch now includes Myotoxin29/572304 at40 and Antivenom29/800905 at16
+as singleton Fixed native utilities. Their direct dispels and periodic trigger aura23 remain; no repeated
+cleanses earn proficiency or benefits and neither helper becomes a standalone practice ability. Startup
+checks exact parent effect/aura/trigger/target metadata and loaded nonpassive/nondeprecated pure dispel
+helpers572407 (enemy-targeted single dispel) and803680 (ally-targeted two dispels), without nested triggers.
+Native timing, duration, cooldowns, dispel counts and mechanics are untouched; loaded/player behavior remains
+unqualified. Earlier20 utility profiles remain unchanged.
+
+98-source exports:193 unique profiles/195 declarations (120 ranked/7 mastery/66 fixed),126 baselines,531
+missing definitions (106 ranked/425 standalone),850 runtime-unqualified groups. Source2/native29.9s passed
+at .cache/verify-all/20261006-160736/report.json; C++ style/whitespace and current source exports passed.
+Unit/harness/gameplay skipped. No tests, startup, client chunks, database changes or production operation.

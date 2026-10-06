@@ -633,10 +633,29 @@ bool MatchesUtilityFixedMechanic(Practice::AbilityProfile const& profile)
     for (std::size_t index = 0; index < mechanic->EffectIds.size(); ++index)
     {
         auto const& effect = info->Effects[index];
-        if (effect.Effect != mechanic->EffectIds[index] || effect.ApplyAuraName || effect.TriggerSpell ||
+        if (effect.Effect != mechanic->EffectIds[index] || effect.ApplyAuraName != mechanic->AuraIds[index] ||
+            effect.TriggerSpell != mechanic->TriggerSpellIds[index] ||
             effect.TargetA.GetTarget() != mechanic->TargetAIds[index] ||
             effect.TargetB.GetTarget() != mechanic->TargetBIds[index])
             return false;
+        if (!effect.TriggerSpell)
+            continue;
+        auto const& helpers = Practice::DevelopmentUtilityFixed::Helpers;
+        auto const spec = std::find_if(helpers.begin(), helpers.end(),
+            [&effect](Practice::DevelopmentUtilityFixed::HelperMechanic const& entry)
+            {
+                return entry.SpellId == effect.TriggerSpell;
+            });
+        SpellInfo const* helper = sSpellMgr->GetSpellInfo(effect.TriggerSpell);
+        if (spec == helpers.end() || !helper || helper->IsPassive() || helper->IsDeprecatedForPlayers)
+            return false;
+        for (std::size_t helperIndex = 0; helperIndex < spec->EffectIds.size(); ++helperIndex)
+        {
+            auto const& slot = helper->Effects[helperIndex];
+            if (slot.Effect != spec->EffectIds[helperIndex] || slot.ApplyAuraName || slot.TriggerSpell ||
+                slot.TargetA.GetTarget() != spec->TargetAIds[helperIndex] || slot.TargetB.GetTarget())
+                return false;
+        }
     }
     return true;
 }
