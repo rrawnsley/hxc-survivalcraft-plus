@@ -2232,3 +2232,16 @@ are unchanged. Outcome/wire sources are now included in native authoring provena
 Source/native compilation passed in .cache/verify-all/20261006-004245/report.json (two checks,32.1s native
 build), plus C++ style/whitespace and five Lua5.1 syntax compilations. Addon chunks and tests were not executed;
 actual rendering/wire behavior remains unqualified. No deployment or live client changes.
+
+## Retained pacing progress when an ability is unlearned
+
+Development pacing initialization now reviews existing ranked rows even when the character knows no rank of
+that ability. A valid prior row receives the same exact version conversion, preserving its earned proficiency,
+partial fraction and rank-seeding marker. Missing rows remain missing for unlearned abilities; learned-rank
+seeding and ordinary cache writes still require at least one known rank. No ability is taught and no practice or
+session gain is invented. This closes a new source-level migration oversight where a forgotten ability's valid
+prior row would remain mismatched and stop the coherent menu snapshot. Runtime reproduction is not claimed.
+
+Source/native compilation passed in .cache/verify-all/20261006-004356/report.json (two checks,31.5s native build),
+plus C++ style/whitespace. All68-source authoring exports refreshed; the generator reproduced its header
+identically. Unit/harness/gameplay and migration execution were not run; no production operations occurred.

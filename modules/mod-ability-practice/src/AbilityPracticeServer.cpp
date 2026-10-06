@@ -921,7 +921,7 @@ void InitializeProgress(Player* player)
         if (ability.ClassId != player->getClass() || ability.Kind == Practice::AbilityKind::Fixed)
             continue;
         auto const learned = Learned(player, ability);
-        if (learned.empty())
+        if (learned.empty() && (!PacingRequested || ability.Kind != Practice::AbilityKind::Ranked))
             continue;
         auto loaded = Practice::ReadPlayerProgress(*player, ability.ClassId, ability.AbilityId,
             profile.Policy, profile.DefinitionVersion);
@@ -938,6 +938,8 @@ void InitializeProgress(Player* player)
                 loaded = Practice::ReadPlayerProgress(*player, ability.ClassId, ability.AbilityId,
                     profile.Policy, profile.DefinitionVersion);
         }
+        if (learned.empty())
+            continue;
         auto const record = Practice::MigrateLearnedRanks(ability, profile.Policy, loaded, learned);
         if (record)
             Practice::CachePlayerProgress(*player, ability.ClassId, ability.AbilityId, profile.Policy, *record);
