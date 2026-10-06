@@ -2245,3 +2245,31 @@ prior row would remain mismatched and stop the coherent menu snapshot. Runtime r
 Source/native compilation passed in .cache/verify-all/20261006-004356/report.json (two checks,31.5s native build),
 plus C++ style/whitespace. All68-source authoring exports refreshed; the generator reproduced its header
 identically. Unit/harness/gameplay and migration execution were not run; no production operations occurred.
+
+## Fixed utilities with normal ranked progression
+
+Fixed definitions can now contain multiple native ranks, each requiring proficiency1 with no training caps,
+points, forecasts or rewards. Mastery remains singleton; ranked practice remains separate. Every fixed rank is
+unmanaged by the practice rank gate, so ordinary native acquisition retains its level/ownership requirements.
+Practice promotion does not teach fixed ranks, and fixed casts receive no practice receipt, award or mastery.
+The native encoder and addon0.4.30 validate every fixed rank's level/acquisition/learned state and zero practice
+forecast. Existing learned ranks determine the displayed rank and the real upcoming native rank. No fake ranks
+or practice levels are added. Older unpublished protocol4 addons reject multirank fixed definitions; joint
+native/addon qualification remains required, and no payload has been installed or published.
+
+The optional defaultoff fixed catalog adds a development example for Absolution Spiritual Ascension:
+500688/500757/500758/500759/500760 at source-grant levels20/50/60/70/80. Raw Spell.dbc shows resurrection effect18
+for the root; the source-consistent class-grant ladder supplies actual authored rank levels. This is a draft
+utility classification pending effective/startup/gameplay review. Repeated deaths are not a practice
+requirement; normal native resurrection and rank acquisition remain authoritative. No resurrection mechanics,
+health restoration values, cooldowns, spell SQL or native class grants are changed.
+
+Coverage now reports124 declared profiles (118 practiced ranked,3 mastery,3 fixed) and126 declarations with
+124 source-ladder agreements.723 source groups still need definitions. The fixed five-rank utility is excluded
+from practice pacing proposals, leaving243 proposals/1408 transitions (118 declared practiced ranked,125 needing
+definitions). It cannot accept a practice cadence override. Native pacing generation still reproduces the same
+118 entries. Native authoring provenance now includes Catalog/Menu as well as Outcome/Wire:70 sources total.
+
+Source/native report .cache/verify-all/20261006-005141/report.json passed(two source checks,31.8s native build).
+C++ style/whitespace, five Lua5.1 syntax compilations and70-source authoring exports passed. The pacing header
+reproduced identically. Unit/harness/gameplay/client rendering and native startup were not executed.

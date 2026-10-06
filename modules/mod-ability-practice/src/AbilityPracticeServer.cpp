@@ -536,7 +536,8 @@ CoAAbilityPractice::RankDecision EvaluateRank(Player const* player, std::uint32_
     if (!RankActive.load() || !IsProfiledPlayer(player))
         return Decision::Unmanaged;
     auto const* profile = FindProfile(player, spellId);
-    if (!profile || spellId == profile->Definition.Ranks.front().SpellId)
+    if (!profile || profile->Definition.Kind == Practice::AbilityKind::Fixed ||
+        spellId == profile->Definition.Ranks.front().SpellId)
         return Decision::Unmanaged;
     auto const* ability = &profile->Definition;
     std::lock_guard lock(Mutex);

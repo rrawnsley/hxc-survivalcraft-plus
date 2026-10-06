@@ -110,8 +110,9 @@ def validate_rank_agreement(draft, declaration):
     actual = [{key: rank[key] for key in ('spellId', 'rankNumber', 'characterLevel')} for rank in authored]
     if actual != source:
         raise ValueError('Declared ranks and source ladder differ: ' + str(identity))
-    expected = [1 if index == 0 else 10 if index == 1 else (index - 1) * 20
-                for index in range(len(authored))]
+    expected = ([1] * len(authored) if declaration['kind'] == 'fixed' else
+                [1 if index == 0 else 10 if index == 1 else (index - 1) * 20
+                 for index in range(len(authored))])
     if [rank['proficiencyRequired'] for rank in authored] != expected:
         raise ValueError('Unsupported authored proficiency ladder: ' + str(identity))
 
@@ -129,7 +130,8 @@ def build_coverage(drafts, declarations):
             raise ValueError('Expected unapproved, unclassified source draft')
         seen.add(identity)
         declaration = declarations.get(identity)
-        if declaration and ((declaration['kind'] == 'ranked') != (len(draft['ranks']) > 1)):
+        if declaration and ((declaration['kind'] == 'ranked' and len(draft['ranks']) < 2) or
+                            (declaration['kind'] == 'mastery' and len(draft['ranks']) != 1)):
             raise ValueError('Declared kind and source rank count differ: ' + str(identity))
         validate_rank_agreement(draft, declaration)
         rows.append({'classId': identity[0], 'abilityId': identity[1],

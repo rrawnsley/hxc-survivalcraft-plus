@@ -71,6 +71,11 @@ def build_pacing(drafts, minimum_minutes, target_minutes, maximum_minutes, commo
         if len(ranks) < 2:
             continue
         declaration = declarations.get(identity)
+        if declaration and declaration['kind'] == 'fixed':
+            validate_rank_agreement(draft, declaration)
+            if identity in cadences:
+                raise ValueError('Fixed utilities cannot use practice cadence overrides')
+            continue
         if declaration and declaration['kind'] != 'ranked':
             raise ValueError('Pacing requires a ranked declared profile: ' + str(identity))
         validate_rank_agreement(draft, declaration)

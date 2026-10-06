@@ -275,14 +275,15 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
                 return std::nullopt;
             if (view.Kind != AbilityKind::Fixed && view.Availability == PracticeAvailability::Fixed)
                 return std::nullopt;
-            if (view.Kind == AbilityKind::Fixed && (view.Ranks.size() != 1 || view.LearnedRank > 1 ||
+            if (view.Kind == AbilityKind::Fixed && (view.LearnedRank > view.Ranks.size() ||
                 view.Cap != 1 || view.State.Proficiency != 1 || view.State.Points || view.PointsPerLevel ||
-                view.NextPoint.Status != ForecastStatus::Invalid || view.Ranks.front().Requirement.Proficiency != 1 ||
-                view.Ranks.front().Practice.Status != ForecastStatus::Invalid ||
-                (view.Ranks.front().State != RankState::Learned &&
-                    view.Ranks.front().State != RankState::AcquireIntroductoryAbility &&
-                    view.Ranks.front().State != RankState::MissingPrerequisite &&
-                    view.Ranks.front().State != RankState::NeedsCharacterLevel)))
+                view.NextPoint.Status != ForecastStatus::Invalid ||
+                std::any_of(view.Ranks.begin(), view.Ranks.end(), [](RankView const& rank)
+                {
+                    return rank.Requirement.Proficiency != 1 || rank.Practice.Status != ForecastStatus::Invalid ||
+                        (rank.State != RankState::Learned && rank.State != RankState::AcquireIntroductoryAbility &&
+                            rank.State != RankState::MissingPrerequisite && rank.State != RankState::NeedsCharacterLevel);
+                })))
                 return std::nullopt;
             if (view.AcquisitionSourceId > 4 || (view.RuleSet > 3) != view.Catchup.has_value())
                 return std::nullopt;

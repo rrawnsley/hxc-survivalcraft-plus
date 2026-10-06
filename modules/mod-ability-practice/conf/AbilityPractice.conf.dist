@@ -33,7 +33,7 @@ AbilityPractice.AllowDevelopmentMastery = 0
 # This adds its ranked development profile; other scripted/helper abilities remain unsupported.
 AbilityPractice.AllowDevelopmentScriptedObservation = 0
 
-# Optional fixed utility menu examples: Spiritual Recall and Teleport: Caverns of Time. Startup-only.
+# Optional fixed utility examples: Spiritual Recall, Caverns teleport and Spiritual Ascension. Startup-only.
 # They keep normal acquisition/full function and earn no practice. No training bar or invented ranks.
 AbilityPractice.AllowDevelopmentFixedCatalog = 0
 

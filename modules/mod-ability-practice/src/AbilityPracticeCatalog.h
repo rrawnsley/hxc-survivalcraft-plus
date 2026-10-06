@@ -52,7 +52,7 @@ inline CatalogError ValidateDefinition(AbilityDefinition const& ability)
     if (ability.Kind != AbilityKind::Ranked && ability.Kind != AbilityKind::Mastery &&
         ability.Kind != AbilityKind::Fixed)
         return CatalogError::InvalidKind;
-    if (ability.Kind != AbilityKind::Ranked && ability.Ranks.size() != 1)
+    if (ability.Kind == AbilityKind::Mastery && ability.Ranks.size() != 1)
         return CatalogError::InvalidRank;
 
     std::uint32_t previousLevel = 0;
@@ -64,7 +64,8 @@ inline CatalogError ValidateDefinition(AbilityDefinition const& ability)
         if (!rank.SpellId || rank.RankNumber != previousRank + 1 || !rank.Requirement.CharacterLevel ||
             !rank.Requirement.Proficiency || rank.Requirement.CharacterLevel < previousLevel ||
             rank.Requirement.Proficiency < previousProficiency ||
-            (!previousRank && rank.Requirement.Proficiency != 1))
+            (!previousRank && rank.Requirement.Proficiency != 1) ||
+            (ability.Kind == AbilityKind::Fixed && rank.Requirement.Proficiency != 1))
             return CatalogError::InvalidRank;
         for (std::size_t other = 0; other < index; ++other)
             if (ability.Ranks[other].SpellId == rank.SpellId)

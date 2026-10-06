@@ -48,6 +48,8 @@ def verify_provenance(candidates, root, dbc):
                 'modules/mod-ability-practice/src/AbilityPracticeProfiles.h',
                 'modules/mod-ability-practice/src/AbilityPracticePersistence.h',
                 'modules/mod-ability-practice/src/AbilityPracticeOutcome.h',
+                'modules/mod-ability-practice/src/AbilityPracticeCatalog.h',
+                'modules/mod-ability-practice/src/AbilityPracticeMenu.h',
                 'modules/mod-ability-practice/src/AbilityPracticeWire.h',
                 'modules/mod-ability-practice/src/AbilityPracticeProgression.h', 'src/server/shared/SharedDefines.h',
                 'src/server/game/Spells/AbilityPracticeMasteryPolicy.h',

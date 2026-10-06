@@ -87,7 +87,7 @@ end
 
 local function ConsistentTypedRoadmap(value, ranks, nextRank, point, characterLevel)
     if ranks[1].proficiency ~= 1 or (value.kind == 1 and #ranks < 2)
-        or (value.kind ~= 1 and #ranks ~= 1) then return false end
+        or (value.kind == 2 and #ranks ~= 1) then return false end
     local learned, display = 0, ranks[1].spellId
     for index, rank in ipairs(ranks) do
         if rank.rankNumber ~= index then return false end
@@ -214,11 +214,13 @@ local function Ability(value, schema, characterLevel)
                 or cap.characterLevel < ranks[1].characterLevel or value.kind == 3 then return nil end
         end
         if value.kind == 3 then
-            if #ranks ~= 1 or value.learnedRank > 1 or value.proficiency ~= 1 or value.cap ~= 1
-                or value.points ~= 0 or value.pointsPerLevel ~= 0 or point.status ~= 0
-                or ranks[1].proficiency ~= 1 or ranks[1].practice.status ~= 0
-                or (ranks[1].state ~= 1 and ranks[1].state ~= 2 and ranks[1].state ~= 3
-                    and ranks[1].state ~= 5) then return nil end
+            if value.learnedRank > #ranks or value.proficiency ~= 1 or value.cap ~= 1
+                or value.points ~= 0 or value.pointsPerLevel ~= 0 or point.status ~= 0 then return nil end
+            for _, rank in ipairs(ranks) do
+                if rank.proficiency ~= 1 or rank.practice.status ~= 0
+                    or (rank.state ~= 1 and rank.state ~= 2 and rank.state ~= 3
+                        and rank.state ~= 5) then return nil end
+            end
         elseif value.availability == 6 then return nil end
     elseif value.kind ~= nil or value.session ~= nil or value.route ~= nil or value.ruleSet ~= nil
         or value.nextTrainingCap ~= nil or value.rewards ~= nil or value.acquisitionSource ~= nil
