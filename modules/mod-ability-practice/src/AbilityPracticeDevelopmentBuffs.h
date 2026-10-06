@@ -133,6 +133,34 @@ inline constexpr std::array ChromiesWisdom = {
 };
 inline constexpr auto ChromiesWisdomCaps = Development::RankCaps(ChromiesWisdom);
 
+inline constexpr std::array Class15Ability707684 = {
+    AbilityRank{ 707684, 1, { 20, 1 } },
+    AbilityRank{ 707685, 2, { 38, 10 } },
+    AbilityRank{ 707686, 3, { 48, 20 } },
+    AbilityRank{ 707687, 4, { 58, 40 } }
+};
+inline constexpr auto Class15Ability707684Caps = Development::RankCaps(Class15Ability707684);
+inline constexpr std::array Class23Ability572787 = {
+    AbilityRank{ 572787, 1, { 38, 1 } },
+    AbilityRank{ 572788, 2, { 46, 10 } },
+    AbilityRank{ 572789, 3, { 52, 20 } }
+};
+inline constexpr auto Class23Ability572787Caps = Development::RankCaps(Class23Ability572787);
+inline constexpr std::array Class27Ability575040 = {
+    AbilityRank{ 575040, 1, { 28, 1 } },
+    AbilityRank{ 575041, 2, { 38, 10 } },
+    AbilityRank{ 575042, 3, { 48, 20 } },
+    AbilityRank{ 575043, 4, { 58, 40 } }
+};
+inline constexpr auto Class27Ability575040Caps = Development::RankCaps(Class27Ability575040);
+inline constexpr std::array Class29Ability707689 = {
+    AbilityRank{ 707689, 1, { 28, 1 } },
+    AbilityRank{ 707690, 2, { 38, 10 } },
+    AbilityRank{ 707691, 3, { 48, 20 } },
+    AbilityRank{ 707692, 4, { 58, 40 } }
+};
+inline constexpr auto Class29Ability707689Caps = Development::RankCaps(Class29Ability707689);
+
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 12, 300857, AbilityKind::Ranked, BrutalShout, BrutalShoutCaps },
@@ -175,6 +203,18 @@ inline constexpr std::array Profiles = {
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 22, 801523, AbilityKind::Ranked, ChromiesWisdom, ChromiesWisdomCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 15, 707684, AbilityKind::Ranked, Class15Ability707684, Class15Ability707684Caps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 23, 572787, AbilityKind::Ranked, Class23Ability572787, Class23Ability572787Caps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 27, 575040, AbilityKind::Ranked, Class27Ability575040, Class27Ability575040Caps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 29, 707689, AbilityKind::Ranked, Class29Ability707689, Class29Ability707689Caps },
         Development::Policy, OutcomeKind::Damage }
 };
 
@@ -202,6 +242,7 @@ struct Mechanic
     std::uint32_t AbilityId;
     std::uint32_t TargetA;
     std::int32_t Stat;
+    std::uint32_t Aura = 29;
 };
 
 inline constexpr std::array Mechanics = {
@@ -218,7 +259,11 @@ inline constexpr std::array Mechanics = {
     Mechanic{ 29, 803177, 21, 1 },
     Mechanic{ 30, 800198, 21, 2 },
     Mechanic{ 32, 561237, 21, 1 },
-    Mechanic{ 22, 801523, 21, 4 }
+    Mechanic{ 22, 801523, 21, 4 },
+    Mechanic{ 15, 707684, 21, 127, 345 },
+    Mechanic{ 23, 572787, 21, 127, 345 },
+    Mechanic{ 27, 575040, 21, 127, 345 },
+    Mechanic{ 29, 707689, 21, 127, 345 }
 };
 
 static_assert(Mechanics.size() == Profiles.size());
@@ -240,6 +285,12 @@ inline std::int32_t StatSelector(AbilityProfile const& profile)
 {
     auto const* mechanic = MechanicFor(profile);
     return mechanic ? mechanic->Stat : -2;
+}
+
+inline std::uint32_t Aura(AbilityProfile const& profile)
+{
+    auto const* mechanic = MechanicFor(profile);
+    return mechanic ? mechanic->Aura : 0;
 }
 
 inline std::uint32_t Target(AbilityProfile const& profile)

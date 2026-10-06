@@ -3420,6 +3420,40 @@ Reports retain separate source scopes, runtimeQualified=false and productionAppr
 The linked-ladder extension generator still reproduces all three frozen headers unchanged.
 Source213856 passed2 checks with no selected suites; native unchanged from212847. No tests,
 native startup, active installation, production mutation, publishing or server process operations.
+
+## Owned spell-power buff practice — 6 October 2026
+
+Four disabled ladders join owned-buff practice: Witching Edict15/707684, Grim Mandate23/572787,
+Devotion of Radiance27/575040 and Toxic Pheromones29/707689. Native source introductions/ranks and
+buff power remain. Reviewed single active APPLY_AURA6/custom spell-power aura345/friendly21/all
+schools127/positive amount shapes have no secondary effects or triggers. Source shape metadata
+now explicitly includes aura29 or345; other aura/selectors are rejected. Existing stat profiles
+retain their numeric definitions and eligibility rules.
+
+Native spell damage/healing bonus reads custom aura345 through GetTotalAuraModifier with school
+predicates and exclusive same-effect groups. All-school buff readiness checks the actual applied
+positive effect and pauses under a stronger competing group member without restricting its school
+mask. This is conservative for competing partial-school buffs; it does not prove additional power
+for every physical action. Equal-strength participation remains the existing authored practice rule.
+Original own application, cast-start/end eligibility, independent5s floors and dedup still apply.
+
+Radiance's fifth trainer rank575044 at68/proficiency60 requires575043 on trainer900027 with zero
+skill. Actual extra shape is aura345/127/base72. A separate frozen spell-power trainer definition3
+preserves its prior version2 prefix/pacing and uses the existing guarded1/2 migration. One-rank-ahead4
+composes above3. Eleven extensions/22 extra ranks; all preceding three headers reproduce unchanged.
+New four additive paced entries preserve the previous136 and target540 qualifying uses/45min
+per transition under assumed5s combat opportunities before catch-up. Frequency remains unmeasured.
+
+Whispers of C'thun25/572791 remains pending its native Cultist lifecycle/family replacement review.
+Its captured/source prefix and same-name SQL set each have three ranks; the higher trainer rank
+that rejected this batch's initial header generation belongs to Radiance. No Cultist enrollment.
+230 unique profiles/232 declarations,140 ranked/7 mastery/83 Fixed,473 pending(86 ranked/387
+standalone),147 baselines/108 native source hashes/850 runtime-unqualified;18 buff tracks/13 classes.
+
+VERIFY ALL: PASSED214418 source2/no selected suites/native30.6s; style/whitespace and final source/
+coverage/trainer exports passed. Earlier214056/214244 compiled intermediate drafts, superseded.
+Addon0.4.40/protocol4 unchanged. All flags0. No tests, native startup, client/gameplay/migration
+execution, active install, publish, deploy, restart or production configuration/database mutation.
 All switches0; owned-buff rules remain an isolated reversible design draft.
 
 ## Chromie's complete trainer ladder — 6 October 2026

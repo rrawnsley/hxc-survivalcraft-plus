@@ -124,10 +124,11 @@ def declared_outcome(root, row):
 
 
 STAT_BUFF_IDENTITIES = {(22, 801523)}
+SPELL_POWER_BUFF_IDENTITIES = {(27, 575040)}
 
 
-def render_native_header(root, rows, buff=False, stat=False):
-    if buff and stat:
+def render_native_header(root, rows, buff=False, stat=False, power=False):
+    if sum((buff, stat, power)) > 1:
         raise ValueError('Conflicting native extension scopes')
     expected = {(13, 807037), (16, 707044), (19, 801165), (26, 575039),
                 (28, 802684), (29, 803198), (30, 800174), (31, 803981)}
@@ -135,6 +136,8 @@ def render_native_header(root, rows, buff=False, stat=False):
         expected = {(12, 300857)}
     if stat:
         expected = STAT_BUFF_IDENTITIES
+    if power:
+        expected = SPELL_POWER_BUFF_IDENTITIES
     if (len(rows) != len(expected) or {(row['classId'], row['abilityId']) for row in rows} != expected or
             any(row['blockingFlags'] or not row.get('priorPacingPreserved') for row in rows)):
         raise ValueError('Native extension scope differs from explicitly reviewed complete projections')
@@ -149,9 +152,10 @@ def render_native_header(root, rows, buff=False, stat=False):
              'struct Entry', '{', '    AbilityProfile Profile;', '    std::span<AbilityRank const> PreviousRanks;',
              '    std::span<ProficiencyCap const> PreviousCaps;', '    TrainingPolicy PreviousPolicy;',
              '    std::span<TrainerRank const> AdditionalTrainerRanks;', '};', '']
-    if buff or stat:
-        guard = 'STAT_BUFF' if stat else 'BUFF'
-        namespace = 'DevelopmentStatBuffTrainerRanks' if stat else 'DevelopmentBuffTrainerRanks'
+    if buff or stat or power:
+        guard = 'SPELL_POWER_BUFF' if power else 'STAT_BUFF' if stat else 'BUFF'
+        namespace = ('DevelopmentSpellPowerBuffTrainerRanks' if power else
+                     'DevelopmentStatBuffTrainerRanks' if stat else 'DevelopmentBuffTrainerRanks')
         lines = ['// SPDX-License-Identifier: GPL-2.0-or-later', '',
                  '#ifndef ABILITY_PRACTICE_DEVELOPMENT_' + guard + '_TRAINER_RANKS_H',
                  '#define ABILITY_PRACTICE_DEVELOPMENT_' + guard + '_TRAINER_RANKS_H', '',
@@ -217,6 +221,7 @@ def main():
     parser.add_argument('--native-header', type=Path)
     parser.add_argument('--buff-native-header', type=Path)
     parser.add_argument('--stat-buff-native-header', type=Path)
+    parser.add_argument('--spell-power-buff-native-header', type=Path)
     args = parser.parse_args()
     root, dbc = args.root.resolve(), args.dbc.resolve()
     candidates = json.loads(args.candidates.read_text(encoding='utf-8'))
@@ -273,13 +278,16 @@ def main():
               'summary': {'profileCount': len(rows), 'addedRankCount': sum(row['addedRankCount'] for row in rows),
                           'statuses': dict(Counter(row['status'] for row in rows)),
                           'priorPacingPreservedCount': sum(row.get('priorPacingPreserved') is True for row in rows)}}
-    for path, buff, stat in [(args.native_header, False, False), (args.buff_native_header, True, False),
-                             (args.stat_buff_native_header, False, True)]:
+    for path, buff, stat, power in [(args.native_header, False, False, False),
+                                    (args.buff_native_header, True, False, False),
+                                    (args.stat_buff_native_header, False, True, False),
+                                    (args.spell_power_buff_native_header, False, False, True)]:
         if not path:
             continue
         selected = [row for row in rows if ((row['classId'], row['abilityId']) == (12, 300857)) == buff and
-                    ((row['classId'], row['abilityId']) in STAT_BUFF_IDENTITIES) == stat]
-        header = render_native_header(root, selected, buff, stat)
+                    ((row['classId'], row['abilityId']) in STAT_BUFF_IDENTITIES) == stat and
+                    ((row['classId'], row['abilityId']) in SPELL_POWER_BUFF_IDENTITIES) == power]
+        header = render_native_header(root, selected, buff, stat, power)
         path.parent.mkdir(parents=True, exist_ok=True)
         encoded = header.encode('utf-8')
         exists = path.exists()
@@ -287,7 +295,8 @@ def main():
             raise ValueError('Existing native definition3 differs; author a new definition version explicitly')
         if not exists:
             path.write_bytes(encoded)
-        prefix = 'statBuffNativeHeader' if stat else 'buffNativeHeader' if buff else 'nativeHeader'
+        prefix = ('spellPowerBuffNativeHeader' if power else 'statBuffNativeHeader' if stat else
+                  'buffNativeHeader' if buff else 'nativeHeader')
         result['nativeHeaderGenerated'] = True
         result[prefix + 'Updated'] = not exists
         result[prefix] = {'path': str(path.resolve()), 'sha256': hashlib.sha256(encoded).hexdigest()}

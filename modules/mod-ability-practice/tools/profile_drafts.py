@@ -34,6 +34,7 @@ def verify_provenance(candidates, root, dbc):
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentTrainerRanks.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentBuffTrainerRanks.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentStatBuffTrainerRanks.h',
+                'modules/mod-ability-practice/src/AbilityPracticeDevelopmentSpellPowerBuffTrainerRanks.h',
                 'modules/mod-ability-practice/tools/trainer_rank_extensions.py',
                 'modules/mod-ability-practice/tools/trainer_acquisition_review.py',
                 'data/sql/updates/pending_db_world/rev_20260923_05_coa_class_trainer_core.sql',
@@ -189,7 +190,7 @@ def reviewed_stat_buffs(root):
     body = re.search(r'inline\s+constexpr\s+std::array\s+Mechanics\s*=\s*\{(.*?)\};', text, re.DOTALL)
     if body is None:
         raise ValueError('Missing owned stat-buff mechanic catalog')
-    pattern = r'Mechanic\s*\{\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+)\s*\}'
+    pattern = r'Mechanic\s*\{\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+))?\s*\}'
     matches = list(re.finditer(pattern, body[1]))
     if not matches or re.sub(pattern, '', body[1]).replace(',', '').strip():
         raise ValueError('Unsupported owned stat-buff mechanic declaration')
@@ -197,14 +198,16 @@ def reviewed_stat_buffs(root):
         r'\{\s*(\d+),\s*(\d+),\s*AbilityKind::Ranked,', text)}
     result = {}
     for match in matches:
-        class_id, ability_id, target, stat = map(int, match.groups())
-        if not 12 <= class_id <= 32 or not ability_id or target not in {21, 56} or stat not in range(5):
+        class_id, ability_id, target, stat = map(int, match.groups()[:4])
+        aura = int(match[5]) if match[5] is not None else 29
+        if (not 12 <= class_id <= 32 or not ability_id or target not in {21, 56} or
+                not (aura == 29 and stat in range(5) or aura == 345 and stat == 127 and target == 21)):
             raise ValueError('Unsupported owned stat-buff mechanic')
         identity = (class_id, ability_id)
         if identity in result:
             raise ValueError('Duplicate owned stat-buff mechanic')
         result[identity] = {'scope': 'reviewed-source-shape-not-effective-runtime-buff',
-                            'targetA': target, 'statSelector': stat}
+                            'targetA': target, 'statSelector': stat, 'auraId': aura}
     if set(result) != profiles:
         raise ValueError('Owned stat-buff profiles and mechanics differ')
     return result
@@ -379,7 +382,7 @@ def build_drafts(candidates, root):
             required.append('native-lock-requirements-and-existing-skill-progression-preserved')
         if (class_id, ability_id) in stat_buffs:
             mechanic = stat_buffs[(class_id, ability_id)]
-            expected = [(6, 29, mechanic['targetA'], 0, 0, mechanic['statSelector']),
+            expected = [(6, mechanic['auraId'], mechanic['targetA'], 0, 0, mechanic['statSelector']),
                         (0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0)]
             for rank in ranks:
                 raw = members[rank['spellId']].get('rawDbc', {})

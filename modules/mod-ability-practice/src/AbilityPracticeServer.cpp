@@ -19,6 +19,7 @@
 #include "AbilityPracticeDevelopmentTrainerRanks.h"
 #include "AbilityPracticeDevelopmentBuffTrainerRanks.h"
 #include "AbilityPracticeDevelopmentStatBuffTrainerRanks.h"
+#include "AbilityPracticeDevelopmentSpellPowerBuffTrainerRanks.h"
 #include "AbilityPracticeDevelopmentAbsorption.h"
 #include "AbilityPracticeDevelopmentControl.h"
 #include "AbilityPracticeDevelopmentControlFixed.h"
@@ -245,9 +246,10 @@ bool ApplyDevelopmentMasteryPacing(std::vector<Practice::AbilityProfile>& profil
 Practice::DevelopmentTrainerRanks::Entry const* TrainerRankExtensionForIdentity(
     std::uint32_t classId, std::uint32_t abilityId)
 {
-    std::array<std::span<Practice::DevelopmentTrainerRanks::Entry const>, 3> const catalogs = {
+    std::array<std::span<Practice::DevelopmentTrainerRanks::Entry const>, 4> const catalogs = {
         Practice::DevelopmentTrainerRanks::Entries, Practice::DevelopmentBuffTrainerRanks::Entries,
-        Practice::DevelopmentStatBuffTrainerRanks::Entries };
+        Practice::DevelopmentStatBuffTrainerRanks::Entries,
+        Practice::DevelopmentSpellPowerBuffTrainerRanks::Entries };
     Practice::DevelopmentTrainerRanks::Entry const* result = nullptr;
     for (auto const entries : catalogs)
         for (auto const& entry : entries)
@@ -515,7 +517,7 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
         {
             auto const& slot = info->Effects[index];
             if (slot.Effect != (index == 0 ? SPELL_EFFECT_APPLY_AURA : 0u) ||
-                slot.ApplyAuraName != (index == 0 ? SPELL_AURA_MOD_STAT : 0u) ||
+                slot.ApplyAuraName != (index == 0 ? Practice::DevelopmentBuffs::Aura(profile) : 0u) ||
                 slot.TargetA.GetTarget() != (index == 0 ? Practice::DevelopmentBuffs::Target(profile) : 0u) ||
                 slot.TargetB.GetTarget() || slot.TriggerSpell ||
                 slot.MiscValue != (index == 0 ? Practice::DevelopmentBuffs::StatSelector(profile) : 0))
@@ -1127,16 +1129,20 @@ bool IsBuffObserver(Player const* player)
         });
 }
 
-bool EffectiveBuffApplication(Player* player, AuraApplication const& application)
+bool EffectiveBuffApplication(Player* player, AuraApplication const& application,
+    Practice::AbilityProfile const& profile)
 {
     if (application.GetRemoveMode() != AURA_REMOVE_NONE || !application.HasEffect(EFFECT_0) ||
         application.GetBase()->IsRemoved())
         return false;
     AuraEffect const* effect = application.GetBase()->GetEffect(EFFECT_0);
-    if (!effect || effect->GetAuraType() != SPELL_AURA_MOD_STAT || effect->GetAmount() <= 0)
+    std::uint32_t const aura = Practice::DevelopmentBuffs::Aura(profile);
+    if ((aura != SPELL_AURA_MOD_STAT && aura != SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT) ||
+        !effect || effect->GetAuraType() != aura || effect->GetAmount() <= 0 ||
+        effect->GetMiscValue() != Practice::DevelopmentBuffs::StatSelector(profile))
         return false;
     std::int64_t const competing = player->GetHighestExclusiveSameEffectSpellGroupValue(
-        effect, SPELL_AURA_MOD_STAT, true, effect->GetMiscValue());
+        effect, effect->GetAuraType(), aura == SPELL_AURA_MOD_STAT, effect->GetMiscValue());
     std::int64_t const magnitude = competing < 0 ? -competing : competing;
     return magnitude <= effect->GetAmount();
 }
@@ -1154,7 +1160,7 @@ SpellInfo const* AcceptedBuffSpell(Player* player, MenuSession const& session,
             [&origin](Practice::AbilityRank const& rank) { return rank.SpellId == origin->SpellId; }))
         return nullptr;
     AuraApplication* application = player->GetAuraApplication(origin->SpellId, player->GetGUID());
-    return application && EffectiveBuffApplication(player, *application) &&
+    return application && EffectiveBuffApplication(player, *application, profile) &&
         application->GetBase()->GetPracticeCast() == origin ?
         sSpellMgr->GetSpellInfo(origin->SpellId) : nullptr;
 }
@@ -1171,7 +1177,7 @@ Practice::BuffPracticeState BuffStateFor(Player* player, MenuSession const& sess
     for (auto const& rank : profile.Definition.Ranks)
         if (AuraApplication* application = player->GetAuraApplication(rank.SpellId, player->GetGUID());
             application && !application->GetBase()->IsRemoved() && application->GetRemoveMode() == AURA_REMOVE_NONE)
-            return EffectiveBuffApplication(player, *application) ?
+            return EffectiveBuffApplication(player, *application, profile) ?
                 Practice::BuffPracticeState::Reapply : Practice::BuffPracticeState::Suppressed;
     return Practice::BuffPracticeState::Inactive;
 }
