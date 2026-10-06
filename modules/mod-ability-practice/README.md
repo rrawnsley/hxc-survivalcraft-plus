@@ -2352,3 +2352,23 @@ proposals/1343 transitions and118 native curves unchanged.71-source exports refr
 identically. VERIFY ALL PASSED .cache/verify-all/20261006-042916/report.json: source(two checks), native build46.7s.
 The intermediate Wand-only source/native build042709 also passed(two checks/47.9s), before adding the other basic
 ranged attacks. C++ style/whitespace passed. No tests/client/startup/gameplay/production operations occurred.
+
+## Preserve existing pacing while adding future profiles
+
+The native pacing authoring tool now offers explicit --allow-profile-additions. It requires an existing output
+at the same definition version. Before accepting a changed header, it extracts every prior identity, requires
+strictly additional identities with none removed, regenerates the entire prior header from the current
+proposals and compares it byte-for-byte. Existing ranks, rates, versions, migration policy and header structure
+must reproduce exactly. This permits adding new separately authored profiles without reversioning unchanged
+progress. It does not perform or approve2-to3 migration. Ordinary changes to existing pacing still require a
+strictly newer version; unknown saved versions remain blocked and preserved.
+
+Normal regeneration derives its expected count from the existing header, so later accepted additions can
+regenerate without requesting further additions. New output starts with the118 reviewed baseline profiles.
+The current71-source exports regenerated successfully; the118-entry version2 header is identical and the
+reported addedProfileCount is0. The additive validation branch was not exercised with invented profiles;
+its execution qualification remains pending. No new abilities/rates/saved rows/native runtime changed here.
+
+Source report .cache/verify-all/20261006-043731/report.json passed(two checks); whitespace passed. Native remains
+042916. No tests/runtime/client execution or production operations occurred. Distributed mastery instructions
+now name both the healing and damage examples accurately; their flags remain defaultoff.

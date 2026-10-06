@@ -25,8 +25,8 @@ AbilityPractice.AllowDevelopmentRankedCatalog = 0
 # Leave off until isolated qualification; scripted spread/copies cannot earn extra practice.
 AbilityPractice.AllowDevelopmentPeriodicObservation = 0
 
-# Experimental Hand of Elune practice and up to 2% PvE healing mastery. Read once at startup.
-# This applies draft healing benefits when observation is enabled; it is not observation-only.
+# Experimental Hand of Elune healing and Vile Sting/Soulslam damage mastery, up to 2% in PvE. Startup-only.
+# This applies draft healing/damage benefits when observation is enabled; it is not observation-only.
 AbilityPractice.AllowDevelopmentMastery = 0
 
 # Experimental original-cast observation of Manafeed's scripted drain-and-heal result. Startup-only.

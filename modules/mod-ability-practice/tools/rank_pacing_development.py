@@ -8,7 +8,7 @@ from pacing_drafts import build_pacing, load_cadences, load_cast_times
 from profile_drafts import verify_provenance
 
 
-def render_header(proposals, root, next_version):
+def render_header(proposals, root, next_version, expected_profile_count=118):
     if type(next_version) is not int or not 2 <= next_version <= 4294967295:
         raise ValueError('Invalid next development definition version')
     text = (root / 'modules/mod-ability-practice/src/AbilityPracticeDevelopment.h').read_text(encoding='utf-8')
@@ -21,8 +21,10 @@ def render_header(proposals, root, next_version):
     if previous != [(1, 30, 2), (20, 30, 1)] or pattern.sub('', bands[1]).replace(',', '').strip():
         raise ValueError('Prototype rates differ from reviewed migration source')
     selected = [value for value in proposals['proposals'] if value['existingDevelopmentDeclaration']]
-    if len(selected) != 118 or {value['classId'] for value in selected} != set(range(12, 33)):
-        raise ValueError('Expected118 reviewed development rank declarations across21 classes')
+    if (type(expected_profile_count) is not int or expected_profile_count < 118 or
+            len(selected) != expected_profile_count or
+            {value['classId'] for value in selected} != set(range(12, 33))):
+        raise ValueError('Expected reviewed development rank declarations across21 classes')
     lines = ['// SPDX-License-Identifier: GPL-2.0-or-later', '',
              '#ifndef ABILITY_PRACTICE_DEVELOPMENT_PACING_H', '#define ABILITY_PRACTICE_DEVELOPMENT_PACING_H', '',
              '#include "AbilityPracticeProfiles.h"', '', 'namespace AbilityPractice::DevelopmentPacing', '{',
@@ -64,6 +66,25 @@ def render_header(proposals, root, next_version):
                               'previousDefinitionVersion': 1, 'measuredUseFrequency': False}
 
 
+def validate_profile_additions(proposals, root, definition_version, previous_header):
+    pattern = re.compile(r'    Entry\{ (\d+), (\d+), RanksClass\1Ability\2, '
+                         r'\{ BandsClass\1Ability\2 \} \}')
+    matches = list(pattern.finditer(previous_header))
+    previous_ids = {(int(match[1]), int(match[2])) for match in matches}
+    if (len(previous_ids) < 118 or len(previous_ids) != len(matches) or
+            len(matches) != len(re.findall(r'\bEntry\{', previous_header))):
+        raise ValueError('Unsupported existing pacing entries for additive expansion')
+    next_ids = {(value['classId'], value['abilityId']) for value in proposals['proposals']
+                if value['existingDevelopmentDeclaration']}
+    if not previous_ids < next_ids:
+        raise ValueError('Additive expansion requires new profiles and retains every existing profile')
+    previous_proposals = {**proposals, 'proposals': [value for value in proposals['proposals']
+        if (value['classId'], value['abilityId']) in previous_ids]}
+    reproduced, _ = render_header(previous_proposals, root, definition_version, len(previous_ids))
+    if reproduced != previous_header:
+        raise ValueError('Additive expansion cannot change existing ranks, rates, versions or header structure')
+    return len(next_ids - previous_ids)
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--drafts', type=Path, required=True)
@@ -71,6 +92,7 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--cadences', type=Path)
     parser.add_argument('--definition-version', type=int, default=2)
+    parser.add_argument('--allow-profile-additions', action='store_true')
     parser.add_argument('--root', type=Path, default=Path(__file__).resolve().parents[3])
     args = parser.parse_args()
     root, dbc = args.root.resolve(), args.dbc.resolve()
@@ -84,13 +106,24 @@ def main():
                 if value['existingDevelopmentDeclaration']}
     if set(cadences) - declared:
         raise ValueError('Native pacing cannot consume cadence assumptions for undeclared abilities')
-    header, summary = render_header(proposals, root, args.definition_version)
-    if args.output.exists():
-        previous_header = args.output.read_text(encoding='utf-8')
-        previous_version = re.search(r'(?<!Previous)DefinitionVersion\s*=\s*(\d+)\s*;', previous_header)
-        if not previous_version:
-            raise ValueError('Refusing to replace an unknown output file')
-        if header != previous_header and args.definition_version <= int(previous_version[1]):
+    previous_header = args.output.read_text(encoding='utf-8') if args.output.exists() else None
+    previous_version = re.search(r'(?<!Previous)DefinitionVersion\s*=\s*(\d+)\s*;', previous_header) \
+        if previous_header is not None else None
+    if previous_header is not None and not previous_version:
+        raise ValueError('Refusing to replace an unknown output file')
+    if args.allow_profile_additions and previous_header is None:
+        raise ValueError('Additive expansion requires an existing reviewed pacing header')
+    if args.allow_profile_additions and args.definition_version != int(previous_version[1]):
+        raise ValueError('Additive expansion preserves the existing definition version')
+    previous_count = len(re.findall(r'\bEntry\{', previous_header)) if previous_header is not None else 118
+    expected_count = len(declared) if args.allow_profile_additions else previous_count
+    header, summary = render_header(proposals, root, args.definition_version, expected_count)
+    summary['addedProfileCount'] = 0
+    if previous_header is not None and header != previous_header:
+        if args.allow_profile_additions:
+            summary['addedProfileCount'] = validate_profile_additions(
+                proposals, root, args.definition_version, previous_header)
+        elif args.definition_version <= int(previous_version[1]):
             raise ValueError('Changed native pacing requires a strictly newer definition version')
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(header, encoding='utf-8', newline='\n')
