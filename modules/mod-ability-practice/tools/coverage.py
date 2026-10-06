@@ -100,6 +100,22 @@ def review_queues(draft):
     return sorted(queues)
 
 
+def validate_rank_agreement(draft, declaration):
+    if declaration is None:
+        return
+    identity = (draft['classId'], draft['abilityId'])
+    authored = declaration['authoredRanks']
+    source = [{key: rank[key] for key in ('spellId', 'rankNumber', 'characterLevel')}
+              for rank in draft['ranks']]
+    actual = [{key: rank[key] for key in ('spellId', 'rankNumber', 'characterLevel')} for rank in authored]
+    if actual != source:
+        raise ValueError('Declared ranks and source ladder differ: ' + str(identity))
+    expected = [1 if index == 0 else 10 if index == 1 else (index - 1) * 20
+                for index in range(len(authored))]
+    if [rank['proficiencyRequired'] for rank in authored] != expected:
+        raise ValueError('Unsupported authored proficiency ladder: ' + str(identity))
+
+
 def build_coverage(drafts, declarations):
     if drafts.get('schemaVersion') != 1 or drafts.get('scope') != (
             'unapproved-definition-drafts-not-runtime-profiles') or drafts.get('productionApproved') is not False:
@@ -115,18 +131,7 @@ def build_coverage(drafts, declarations):
         declaration = declarations.get(identity)
         if declaration and ((declaration['kind'] == 'ranked') != (len(draft['ranks']) > 1)):
             raise ValueError('Declared kind and source rank count differ: ' + str(identity))
-        if declaration:
-            authored = declaration['authoredRanks']
-            source = [{key: rank[key] for key in ('spellId', 'rankNumber', 'characterLevel')}
-                      for rank in draft['ranks']]
-            actual = [{key: rank[key] for key in ('spellId', 'rankNumber', 'characterLevel')}
-                      for rank in authored]
-            if actual != source:
-                raise ValueError('Declared ranks and source ladder differ: ' + str(identity))
-            expected = [1 if index == 0 else 10 if index == 1 else (index - 1) * 20
-                        for index in range(len(authored))]
-            if [rank['proficiencyRequired'] for rank in authored] != expected:
-                raise ValueError('Unsupported authored proficiency ladder: ' + str(identity))
+        validate_rank_agreement(draft, declaration)
         rows.append({'classId': identity[0], 'abilityId': identity[1],
                      'nameFromRawDbc': draft['ranks'][0].get('nameFromRawDbc'),
                      'sourceRankCount': len(draft['ranks']), 'declaredDevelopmentProfile': declaration,

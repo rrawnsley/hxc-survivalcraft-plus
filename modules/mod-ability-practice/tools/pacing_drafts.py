@@ -4,6 +4,7 @@ import json
 import sys
 from pathlib import Path
 
+from coverage import declared_profiles, validate_rank_agreement
 from profile_drafts import verify_provenance
 
 
@@ -53,7 +54,7 @@ def load_cadences(path, drafts):
 
 
 def build_pacing(drafts, minimum_minutes, target_minutes, maximum_minutes, common_interval,
-                 cast_times, cast_time_origin, cadences, cadence_origin):
+                 cast_times, cast_time_origin, cadences, cadence_origin, declarations):
     if drafts.get('scope') != 'unapproved-definition-drafts-not-runtime-profiles' or (
             drafts.get('productionApproved') is not False):
         raise ValueError('Expected unapproved source-consistent drafts')
@@ -69,6 +70,10 @@ def build_pacing(drafts, minimum_minutes, target_minutes, maximum_minutes, commo
         ranks = draft['ranks']
         if len(ranks) < 2:
             continue
+        declaration = declarations.get(identity)
+        if declaration and declaration['kind'] != 'ranked':
+            raise ValueError('Pacing requires a ranked declared profile: ' + str(identity))
+        validate_rank_agreement(draft, declaration)
         cadence = cadences.get(identity)
         cadence_interval = cadence['assumedUseIntervalMilliseconds'] if cadence else common_interval
         bands, transitions = [], []
@@ -116,7 +121,10 @@ def build_pacing(drafts, minimum_minutes, target_minutes, maximum_minutes, commo
         proposals.append({'classId': identity[0], 'abilityId': identity[1],
                           'nameFromRawDbc': ranks[0]['nameFromRawDbc'], 'definitionVersion': None,
                           'productionApproved': False, 'runtimeQualified': False,
-                          'requiresSavedProgressMigrationReview': True, 'proposedTrainingBands': bands,
+                          'requiresSavedProgressMigrationReview': True,
+                          'existingDevelopmentDeclaration': declaration,
+                          'sourceRankAgreementWithDeclaredProfile': True if declaration else None,
+                          'proposedTrainingBands': bands,
                           'transitions': transitions,
                           'requiredReviews': sorted(set(draft['requiredReviews']) |
                                                     {'native-cooldown-and-channel-lifecycle'}),
@@ -140,6 +148,10 @@ def build_pacing(drafts, minimum_minutes, target_minutes, maximum_minutes, commo
             'summary': {'rankedProposalCount': len(proposals),
                         'transitionCount': sum(len(value['transitions']) for value in proposals),
                         'authoredCadenceCount': len(cadences),
+                        'declaredRankedProposalCount': sum(value['existingDevelopmentDeclaration'] is not None
+                                                          for value in proposals),
+                        'needsDefinitionProposalCount': sum(value['existingDevelopmentDeclaration'] is None
+                                                           for value in proposals),
                         'outsideAssumedTargetWindowCount': sum(not transition['withinAssumedTargetWindow']
                             for value in proposals for transition in value['transitions'])},
             'proposals': proposals}
@@ -163,7 +175,7 @@ def main():
     cadences, cadence_origin = load_cadences(args.cadences, drafts)
     result = build_pacing(drafts, args.minimum_rank_minutes, args.target_rank_minutes,
                           args.maximum_rank_minutes, args.common_use_interval_ms, cast_times, origin,
-                          cadences, cadence_origin)
+                          cadences, cadence_origin, declared_profiles(args.root.resolve()))
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + '\n', encoding='utf-8')
     print(json.dumps(result['summary'], sort_keys=True))

@@ -2163,3 +2163,15 @@ A future intentionally different proficiency template requires an explicit autho
 
 Source checks passed in .cache/verify-all/20261006-003200/report.json (two checks),64-source exports refreshed.
 Native C++ remains the002731 passing build; no unit/harness/gameplay tests or production operations.
+
+## Pacing proposal linkage to existing development profiles
+
+Pacing independently resolves current declarations and invokes the shared rank-ladder agreement validator.
+Each proposal records its existing declaration (source paths, authored ranks and runtime equivalence review)
+or null when no development definition exists. Source-rank agreement is true only for a matched declaration;
+undeclared candidates report null. Current proposals comprise118 declared ranked profiles and126 groups still
+needing definitions. Rates, migration version mappings and runtime qualification are still unapproved; an
+undeclared source candidate is never silently promoted to a trainable native ability by this linkage.
+
+Source checks passed in .cache/verify-all/20261006-003304/report.json (two checks);64-source exports refreshed.
+Native C++ remains the002731 passing build. Unit/harness/gameplay stages and production operations were not run.
