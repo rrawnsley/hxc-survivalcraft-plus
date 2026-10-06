@@ -235,6 +235,29 @@ def build_review(candidates, owners, offers, mappings):
             'candidates': rows, 'rankLadders': ladders}
 
 
+def declared_rank_boundaries(review, declarations):
+    rows = []
+    for ladder in review['rankLadders']:
+        identity = (ladder['classId'], ladder['firstObservedSpellId'])
+        declaration = declarations.get(identity)
+        if not declaration or declaration['kind'] == 'fixed':
+            continue
+        authored = declaration['authoredRanks']
+        known = {rank['spellId'] for rank in authored}
+        extra = [rank for rank in ladder['ranks'] if rank['spellId'] not in known and
+                 rank['rankNumber'] > authored[-1]['rankNumber']]
+        if not extra:
+            continue
+        rows.append({'classId': identity[0], 'abilityId': identity[1], 'name': ladder['name'],
+                     'declaredKind': declaration['kind'], 'authoredRanks': authored,
+                     'unprofiledLinkedHigherRanks': extra, 'sourceLadderStatus': ladder['status'],
+                     'sourceLadderBlockingFlags': ladder['blockingFlags'],
+                     'decision': 'reject-incomplete-practice-catalog-until-fully-authored',
+                     'scope': 'source-linked-higher-rank-boundary-not-loaded-trainer-proof',
+                     'runtimeQualified': False, 'productionApproved': False})
+    return rows
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--root', type=Path, default=Path(__file__).resolve().parents[3])
@@ -247,6 +270,11 @@ def main():
     verify_provenance(candidates, root, dbc)
     owners, offers = source_trainers(root)
     result = build_review(candidates, owners, offers, rift_mappings(root))
+    from coverage import declared_profiles
+    result['practiceProfileTrainerRankBoundaries'] = declared_rank_boundaries(result, declared_profiles(root))
+    result['summary']['practiceProfileTrainerExtensionCount'] = len(result['practiceProfileTrainerRankBoundaries'])
+    result['summary']['unprofiledLinkedHigherRankCount'] = sum(
+        len(row['unprofiledLinkedHigherRanks']) for row in result['practiceProfileTrainerRankBoundaries'])
     sources = candidates['sources'] + candidates['nativeOutcomeSources'] + [
         {'path': relative, 'sha256': hashlib.sha256((root / relative).read_bytes()).hexdigest()}
         for relative in REVIEW_SOURCES]

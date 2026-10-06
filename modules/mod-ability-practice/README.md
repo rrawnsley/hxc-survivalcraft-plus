@@ -2741,3 +2741,28 @@ Source exports:94 native source hashes,158 unique profiles/160 declarations/2 sh
 native pacing headers reproduced unchanged. Source2/C++ style/whitespace and28.6-second native build passed at
 .cache/verify-all/20261006-143657/report.json. Unit/harness/gameplay skipped. No client/version/protocol change,
 tests, startup, database or production operation.
+
+## Reject incomplete trainer-linked practice ladders
+
+Startup now checks each practiceable profile against initialized native class trainers for its class. If an offer
+requires a known profile rank and teaches an unprofiled spell with the same native English name and a strictly
+higher numeric Rank label, the selected development catalog remains inactive. Names alone do not establish this
+boundary. Normal fixed utilities stay Unmanaged and are skipped; existing native spell-chain validation remains.
+
+Direct offers and nested LEARN_SPELL targets are inspected through a bounded32-spell walk with duplicate/cycle
+suppression. Missing native spell information or overflow on a linked offer also prevents activation. No pointers
+are retained, no cast-path data access is added and no player ranks/progress/trainer money are changed. The check
+is startup-only. It does not prove every spellbook/talent/script acquisition route is covered, and its loaded-data
+execution/rejection behavior still requires isolated qualification.
+
+The trainer source report now compares its captured/source-linked ladders with actual development declarations.
+Eight practice profiles have19 unprofiled linked higher source ranks: Malefic Wrath13 (1), Storm Alert16 (1),
+Temple Guardian19 (4), Silverstream26 (1), Emergency Heal28 (1), Claw Strike29 (4), Deathwind30 (5), Seismic Crash31
+(2). All eight source sequences are ordered/source-consistent, not loaded-chain or runtime-qualified. Full rank,
+acquisition, pacing and saved-definition migration authoring is needed before such profiles can activate safely;
+higher trainer ranks are not silently turned into new standalone abilities or automatic grants.
+
+Current158 profiles/850 groups/569 missing definitions and94 native source hashes are unchanged. Both pacing
+headers reproduced. Source2/style/whitespace and30.0-second native build passed at
+.cache/verify-all/20261006-144333/report.json. Unit/harness/gameplay skipped. No tests/client execution/startup/
+deployment or production operations occurred.

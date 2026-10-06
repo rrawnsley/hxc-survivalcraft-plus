@@ -548,6 +548,75 @@ bool MatchesEffectiveRankChain(Practice::AbilityDefinition const& ability)
     return !present || present == ability.Ranks.size();
 }
 
+std::optional<std::uint32_t> NativeRankLabel(SpellInfo const* info)
+{
+    if (!info || !info->Rank[0])
+        return {};
+    std::string_view label(info->Rank[0]);
+    if (!label.starts_with("Rank "))
+        return {};
+    label.remove_prefix(5);
+    std::uint32_t rank = 0;
+    auto const parsed = std::from_chars(label.data(), label.data() + label.size(), rank);
+    if (parsed.ec != std::errc{} || parsed.ptr != label.data() + label.size() || !rank || rank > 64)
+        return {};
+    return rank;
+}
+
+bool MatchesTrainerRankBoundary(Practice::AbilityDefinition const& ability)
+{
+    if (ability.Kind == Practice::AbilityKind::Fixed)
+        return true;
+    SpellInfo const* first = sSpellMgr->GetSpellInfo(ability.Ranks.front().SpellId);
+    if (!first || !first->SpellName[0] || !*first->SpellName[0])
+        return false;
+    auto known = [&ability](std::uint32_t spell)
+    {
+        return std::any_of(ability.Ranks.begin(), ability.Ranks.end(),
+            [spell](Practice::AbilityRank const& rank) { return rank.SpellId == spell; });
+    };
+    for (auto const& [trainerId, trainer] : sObjectMgr->GetTrainers())
+    {
+        if (trainer.GetTrainerType() != Trainer::Type::Class || trainer.GetTrainerRequirement() != ability.ClassId)
+            continue;
+        for (auto const& offer : trainer.GetSpells())
+        {
+            if (std::none_of(offer.ReqAbility.begin(), offer.ReqAbility.end(), known))
+                continue;
+            std::array<std::uint32_t, 32> spells{};
+            spells[0] = offer.SpellId;
+            std::size_t count = 1;
+            for (std::size_t index = 0; index < count; ++index)
+            {
+                SpellInfo const* info = sSpellMgr->GetSpellInfo(spells[index]);
+                if (!info)
+                    return false;
+                auto const rank = NativeRankLabel(info);
+                if (!known(info->Id) && rank && *rank > ability.Ranks.back().RankNumber && info->SpellName[0] &&
+                    std::string_view(info->SpellName[0]) == first->SpellName[0])
+                {
+                    LOG_ERROR("module.ability_practice",
+                        "Unprofiled trainer-linked rank: trainer={}, class={}, ability={}, spell={}",
+                        trainerId, ability.ClassId, ability.AbilityId, info->Id);
+                    return false;
+                }
+                for (auto const& effect : info->GetEffects())
+                {
+                    if (!effect.IsEffect(SPELL_EFFECT_LEARN_SPELL) || !effect.TriggerSpell)
+                        continue;
+                    auto const end = spells.begin() + count;
+                    if (std::find(spells.begin(), end, effect.TriggerSpell) != end)
+                        continue;
+                    if (count == spells.size())
+                        return false;
+                    spells[count++] = effect.TriggerSpell;
+                }
+            }
+        }
+    }
+    return true;
+}
+
 std::shared_ptr<CharacterSelection const> ParseSelectedCharacters(std::string_view setting)
 {
     if (setting.size() > 4096)
@@ -1366,7 +1435,7 @@ public:
                 LOG_ERROR("module.ability_practice", "Rejected native acquisition: class={}, ability={}",
                     profile.Definition.ClassId, profile.Definition.AbilityId);
             }
-            if (!MatchesEffectiveRankChain(profile.Definition))
+            if (!MatchesEffectiveRankChain(profile.Definition) || !MatchesTrainerRankBoundary(profile.Definition))
             {
                 Ready = false;
                 LOG_ERROR("module.ability_practice", "Rejected effective rank chain: class={}, ability={}",
