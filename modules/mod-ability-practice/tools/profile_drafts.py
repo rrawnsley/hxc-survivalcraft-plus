@@ -335,13 +335,15 @@ def build_drafts(candidates, root):
                              'soul-capture-corpse-resource-and-post-combat-use-design'])
         if class_id == 19 and ability_id == 806521:
             required.append('titanstrike-loaded-aura-duration-helper-and-original-leech-damage')
-        if (class_id, ability_id) in {(12, 570122), (24, 804662)}:
+        if (class_id, ability_id) in {(12, 570122), (24, 804662), (28, 804154)}:
             raw = members[ability_id].get('rawDbc', {})
             details = raw.get('effectDetails', [])
-            base_points = 4 if ability_id == 570122 else 14
-            expected = [(33, 0, 26, 0, 0, 1, base_points), (0, 0, 0, 0, 0, 0, 0),
+            base_points = 14 if ability_id == 804662 else 4
+            intro_level = 14 if ability_id == 804154 else 16
+            helper_slot = (64, 0, 1, 0, 71495, 0, 0) if ability_id == 804154 else (0, 0, 0, 0, 0, 0, 0)
+            expected = [(33, 0, 26, 0, 0, 1, base_points), helper_slot,
                         (0, 0, 0, 0, 0, 0, 0)]
-            if (len(ranks) != 1 or ranks[0]['characterLevel'] != 16 or raw.get('passive') is not False or
+            if (len(ranks) != 1 or ranks[0]['characterLevel'] != intro_level or raw.get('passive') is not False or
                     raw.get('rankLabel') or len(details) != 3 or [(v.get('effectId'), v.get('auraId'),
                         v.get('implicitTargetA'), v.get('implicitTargetB'), v.get('triggerSpellId'),
                         v.get('miscValue'), v.get('basePoints')) for v in details] != expected):

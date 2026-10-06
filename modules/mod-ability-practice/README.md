@@ -3345,3 +3345,18 @@ is required. Five Lua5.1 syntax parses passed without executing chunks. VERIFY A
 source2 with no selected suites/native30.4s after snapshot coalescing; earlier210900 native31.1s
 also passed. Style/whitespace/source exports passed. No tests, server startup, gameplay/migration/menu
 execution, active-client install, deployment or production changes. All switches remain0.
+
+## Tinker native lock utility — 6 October 2026
+
+Tinker28 Pick Lock804154 joins the disabled Fixed utility roadmap at native level14. The root
+retains OPEN_LOCK33/type1/base4/gameobject-item26 plus its self-targeted TRIGGER_SPELL64/helper71495.
+Loaded helper must be active, nondeprecated DUMMY3 on target18, with zero aura/trigger/other slots;
+no specific native C++ case71495 or matching reviewed script-binding SQL entry was found. Its raw
+name is Explosion Visual. This is source/metadata evidence, not confirmation of live visual behavior.
+Native lock checks/conditional skill gains and the helper remain unchanged. No separate practice
+counter/gate/benefit or automatic teaching. Existing racial/faction acquisition rules remain.
+
+214 unique profiles,83 Fixed,489 pending(102 ranked/387 standalone);147 baselines/106 hashes and
+850 runtime-unqualified groups. VERIFY ALL: PASSED211816 source2/no selected suites/native31.0s;
+style/whitespace/actual exports passed. Addon0.4.40/protocol4 unchanged; no new Lua syntax run needed.
+No tests, native startup, visual/lock/menu/gameplay execution, active install or production changes.

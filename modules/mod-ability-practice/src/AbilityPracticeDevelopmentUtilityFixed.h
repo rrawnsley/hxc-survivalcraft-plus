@@ -35,6 +35,7 @@ inline constexpr std::array Myotoxin = { AbilityRank{ 572304, 1, { 40, 1 } } };
 inline constexpr std::array Antivenom = { AbilityRank{ 800905, 1, { 16, 1 } } };
 inline constexpr std::array SmashLock = { AbilityRank{ 570122, 1, { 16, 1 } } };
 inline constexpr std::array MeltLock = { AbilityRank{ 804662, 1, { 16, 1 } } };
+inline constexpr std::array TinkerPickLock = { AbilityRank{ 804154, 1, { 14, 1 } } };
 
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -84,7 +85,9 @@ inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 12, 570122, AbilityKind::Fixed, SmashLock, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
-        { 24, 804662, AbilityKind::Fixed, MeltLock, {} }, Development::Policy, OutcomeKind::None }
+        { 24, 804662, AbilityKind::Fixed, MeltLock, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 28, 804154, AbilityKind::Fixed, TinkerPickLock, {} }, Development::Policy, OutcomeKind::None }
 };
 
 struct Mechanic
@@ -126,7 +129,9 @@ inline constexpr std::array Mechanics = {
     Mechanic{ 12, 570122, { 33, 0, 0 }, { 26, 0, 0 }, {}, {}, {},
         std::array<std::int32_t, 3>{ 1, 0, 0 }, std::array<std::int32_t, 3>{ 4, 0, 0 } },
     Mechanic{ 24, 804662, { 33, 0, 0 }, { 26, 0, 0 }, {}, {}, {},
-        std::array<std::int32_t, 3>{ 1, 0, 0 }, std::array<std::int32_t, 3>{ 14, 0, 0 } }
+        std::array<std::int32_t, 3>{ 1, 0, 0 }, std::array<std::int32_t, 3>{ 14, 0, 0 } },
+    Mechanic{ 28, 804154, { 33, 64, 0 }, { 26, 1, 0 }, {}, {}, { 0, 71495, 0 },
+        std::array<std::int32_t, 3>{ 1, 0, 0 }, std::array<std::int32_t, 3>{ 4, 0, 0 } }
 };
 
 struct HelperMechanic
@@ -138,7 +143,8 @@ struct HelperMechanic
 
 inline constexpr std::array Helpers = {
     HelperMechanic{ 572407, { 38, 0, 0 }, { 6, 0, 0 } },
-    HelperMechanic{ 803680, { 38, 38, 0 }, { 21, 21, 0 } }
+    HelperMechanic{ 803680, { 38, 38, 0 }, { 21, 21, 0 } },
+    HelperMechanic{ 71495, { 3, 0, 0 }, { 18, 0, 0 } }
 };
 }
 
