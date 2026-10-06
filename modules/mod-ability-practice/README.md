@@ -2098,3 +2098,25 @@ For example, an authoring input can express a situational Lava Shard assumption:
 
 This example is not approved class tuning and is not installed. A slow cadence can produce a transition outside
 the target window when integer uses cannot meet it; the export counts and retains those cases for review.
+
+## Explicit saved-progress conversion support
+
+Persistence now provides RebaseStoredProgress and CacheRebasedPlayerProgress for future authored policy upgrades.
+Conversion requires valid old/new policies and stored fields, a strictly newer nonzero definition version and an
+exactly representable partial-point fraction. It preserves proficiency and the learned-rank migration marker.
+The multiplication uses uint64 after validating Points below the old uint32 point cost; its maximum product is
+therefore bounded below uint64 overflow. Nonrepresentable fractions are refused rather than rounded or erased.
+
+The explicit cache operation requires the current saved row to match the expected prior definition, migration
+marker, proficiency and partial points. Missing, unreadable, mismatched or changed rows are refused. The next row
+is derived by conversion, without accepting arbitrary caller-supplied new progress. Ordinary CachePlayerProgress
+still rejects definition mismatches; this separate operation cannot be entered by ordinary practice or menu requests.
+
+No active profile declares a version upgrade and no gameplay callback invokes these operations. Native pacing
+integration, mapping each reviewed old/new definition, durable save lifecycle and runtime migration qualification
+remain outstanding. Rank/cap/ownership changes require separate authored review; these operations only preserve
+numeric proficiency and its next-point fraction. Source exports now include persistence/progression provenance.
+
+Source/native compilation passed in .cache/verify-all/20261006-002445/report.json (two source checks,33.2s
+native build), C++ style/whitespace passed, and64-source authoring exports refreshed. No unit/harness/gameplay
+tests, server startup, policy activation, saved-row conversion or production operations were performed.
