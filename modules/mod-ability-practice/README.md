@@ -2887,3 +2887,30 @@ passives, no client/protocol/version change and no production operation.
 Thirteen-entry passive roadmap source2/native29.3s passed at .cache/verify-all/20261006-155553/report.json.
 C++ style/whitespace and current source exports passed; unit/harness/gameplay skipped. No tests, client chunks,
 startup, runtime helper execution, deployment or production operations.
+
+## Native unranked tactical utility roadmap
+
+Default-off AbilityPractice.AllowDevelopmentUtilityFixedCatalog adds20 individually reviewed singleton
+interrupts, cleanses and spell steals as Fixed definitions with exact native class introduction levels.
+They retain full utility, native cooldowns, dispel quantities, targets, area behavior and class scripts.
+No practice counter, proficiency gate, cached progress, automatic teaching or authored mastery benefit.
+
+Scope: Hexbreak13; Consume Magic and Eye of Archimonde14; Purge Evil and Guard Strike15; Gust of Wind,
+Calm the Storm and Stormbreaker16; Rebuke19; Fray Magic22; Spellburn24; Devour Magic25; Elunes Purification26;
+Sanctify27; Nullifying Toxin29; Soul Shear30; Soothing Touch31; Leyfeed, Ley Lock and Resonance Rune32.
+Native spell names retain their apostrophes. Myotoxin and Antivenom29 remain separately pending because
+of periodic/triggered behavior; this is not blanket promotion of all dispels, interrupts or steals.
+
+Startup validates exact authored definitions, native acquisition/rank checks, nonpassive flags and precise
+effect/target slots, with no aura or trigger field. Gust of Wind retains interrupt plus knockback; no added
+damage or invented rank is inferred from ability names. Existing Fixed menu shows native learned status
+and upcoming class introduction without use forecasts. Source/native scripts and loaded menu behavior still
+need isolated qualification. No client/protocol/version change.
+
+98-source exports show191 unique profiles/193 declarations (120 ranked/7 mastery/64 fixed),126 baselines,
+533 missing definitions (106 ranked/427 standalone) and850 runtime-unqualified groups. Earlier profiles,
+trainer extensions and pacing definitions remain unchanged. All development switches remain0.
+
+Twenty-utility source2/native30.8s passed at .cache/verify-all/20261006-160056/report.json. C++ style/whitespace
+and current source exports passed; unit/harness/gameplay skipped. No tests, startup, client chunks, database
+changes, deployment or production operations.

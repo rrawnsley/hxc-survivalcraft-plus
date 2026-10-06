@@ -85,3 +85,7 @@ AbilityPractice.AllowDevelopmentTrainerRankExtensions = 0
 # Development-only reviewed class passive roadmap. Startup-only; native grants and full effects remain.
 # No practice counter, proficiency gate, automatic teaching or authored mastery benefit.
 AbilityPractice.AllowDevelopmentPassiveFixedCatalog = 0
+
+# Development-only reviewed unranked interrupts, cleanses and spell steals. Startup-only.
+# Native unlocks/full utility remain; no practice counter, gate, automatic teaching or authored benefit.
+AbilityPractice.AllowDevelopmentUtilityFixedCatalog = 0
