@@ -10,6 +10,14 @@ namespace AbilityPractice::DevelopmentFixed
 {
 inline constexpr std::array SpiritualRecall = { AbilityRank{ 583092, 1, { 20, 1 } } };
 inline constexpr std::array CavernsTeleport = { AbilityRank{ 804753, 1, { 40, 1 } } };
+inline constexpr std::array TemporalReturn = { AbilityRank{ 583403, 1, { 18, 1 } } };
+inline constexpr std::array FelRiftStormwind = { AbilityRank{ 535595, 1, { 26, 1 } } };
+inline constexpr std::array FelRiftIronforge = { AbilityRank{ 535596, 1, { 30, 1 } } };
+inline constexpr std::array FelRiftDarnassus = { AbilityRank{ 535597, 1, { 36, 1 } } };
+inline constexpr std::array FelRiftTheramore = { AbilityRank{ 535601, 1, { 40, 1 } } };
+inline constexpr std::array FelRiftAltarOfStorms = { AbilityRank{ 535603, 1, { 48, 1 } } };
+inline constexpr std::array FelRiftMannorocCoven = { AbilityRank{ 535604, 1, { 32, 1 } } };
+inline constexpr std::array FelRiftDarkWhisperGorge = { AbilityRank{ 535605, 1, { 56, 1 } } };
 inline constexpr std::array SpiritualAscension = {
     AbilityRank{ 500688, 1, { 20, 1 } }, AbilityRank{ 500757, 2, { 50, 1 } },
     AbilityRank{ 500758, 3, { 60, 1 } }, AbilityRank{ 500759, 4, { 70, 1 } },
@@ -117,6 +125,22 @@ inline constexpr std::array ReturnToLife = {
     AbilityRank{ 803612, 8, { 80, 1 } }
 };
 inline constexpr std::array Profiles = {
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 22, 583403, AbilityKind::Fixed, TemporalReturn, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 14, 535595, AbilityKind::Fixed, FelRiftStormwind, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 14, 535596, AbilityKind::Fixed, FelRiftIronforge, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 14, 535597, AbilityKind::Fixed, FelRiftDarnassus, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 14, 535601, AbilityKind::Fixed, FelRiftTheramore, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 14, 535603, AbilityKind::Fixed, FelRiftAltarOfStorms, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 14, 535604, AbilityKind::Fixed, FelRiftMannorocCoven, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 14, 535605, AbilityKind::Fixed, FelRiftDarkWhisperGorge, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 13, 583092, AbilityKind::Fixed, SpiritualRecall, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,

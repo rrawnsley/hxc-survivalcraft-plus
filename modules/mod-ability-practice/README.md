@@ -2473,3 +2473,25 @@ written observer used nonexistent Unit::HasMovementFlag; corrected to the existi
 style/whitespace,5 Lua5.1 syntax-only compilations and final authoring exports passed. Source stage was skipped
 to avoid its automatic mechanic-map tests; no further tests/client chunks/gameplay/startup ran. Production remains
 untouched. Successful native/control/menu execution, timing and acquisition qualification are outstanding.
+
+
+## Eight additional fixed travel utilities
+
+Optional fixed catalog now includes Temporal Return(class22/583403, level18) and source-consistent Fel Rift
+entries535595/535596/535597/535601/535603/535604/535605(class14, levels26/30/36/40/48/32/56). All raw records are
+nonpassive, single-rank, effects5/0/0 for Temporal Return or50/0/0 for the rifts. Temporal Return's caster/home
+target routes to native homebind destination and teleport handling. FelswornContracts supplies explicit object
+entries from FelswornData, and FelswornSummons checks native portal ownership/group/alive/combat/phase/distance
+before teleporting. These mechanics are unchanged. Existing CanLearnRift/CanLearnRacialSpell gates still decide
+faction/racial acquisition. No stronger invented travel rank, practice credit, stored proficiency or mastery.
+
+Rifts535598/535599/535600/535602 lack source-consistent class-grant roots in the current export; they remain
+outside this catalog pending acquisition review. Dreamway/object-conjuring entries require individual effect/
+ownership review. The new fixed entries are draft classifications, not effective-data/gameplay approval.
+Native provenance adds FelswornData.h and FelswornSummons.cpp, now79 sources. Coverage145 unique/147 declarations
+(119 ranked/3 mastery/23 fixed),102 native baselines,600 needing definitions(112 ranked/488 standalone),42 with
+raw common outcomes. All847 remain runtime-unqualified.119-entry pacing header reproduced identically.
+
+VERIFY ALL PASSED .cache/verify-all/20261006-051047/report.json: source2(no suites/tests selected) and native
+build51.2s. C++ style/whitespace and final authoring exports passed. No addon changes/redundant Lua checks,
+tests/client chunks/gameplay/startup/production configuration/database/client/launcher/deploy/restart operations.
