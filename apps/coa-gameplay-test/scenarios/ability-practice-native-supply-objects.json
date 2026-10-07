@@ -1,0 +1,134 @@
+{
+  "schema": 1,
+  "name": "Ability practice: three native group supply objects remain Fixed",
+  "contract": "Original Ancestral Keg, Mojo Cauldron and Conjure Thunderkeg casts create their native objects with expected displays. Their disabled-development Fixed profiles do not earn practice points. Object interaction benefits and client pixels are separate qualification.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "barbarian",
+      "race": 1,
+      "class": 12,
+      "level": 30
+    },
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    },
+    {
+      "id": "storm",
+      "race": 1,
+      "class": 16,
+      "level": 42
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "barbarian",
+      "spell": 804748
+    },
+    {
+      "action": "cast",
+      "actor": "barbarian",
+      "spell": 804748,
+      "target": "barbarian"
+    },
+    {
+      "action": "assert",
+      "actor": "barbarian",
+      "metric": "owned_gameobject_count",
+      "entry": 9000118,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "barbarian",
+      "metric": "gameobject_display",
+      "entry": 9000118,
+      "equals": 1011172
+    },
+    {
+      "action": "assert",
+      "actor": "barbarian",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.12.804748",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "doctor",
+      "spell": 807908
+    },
+    {
+      "action": "cast",
+      "actor": "doctor",
+      "spell": 807908,
+      "target": "doctor"
+    },
+    {
+      "action": "assert",
+      "actor": "doctor",
+      "metric": "owned_gameobject_count",
+      "entry": 129364,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "doctor",
+      "metric": "gameobject_display",
+      "entry": 129364,
+      "equals": 57580
+    },
+    {
+      "action": "assert",
+      "actor": "doctor",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.13.807908",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "storm",
+      "spell": 807849
+    },
+    {
+      "action": "cast",
+      "actor": "storm",
+      "spell": 807849,
+      "target": "storm"
+    },
+    {
+      "action": "assert",
+      "actor": "storm",
+      "metric": "owned_gameobject_count",
+      "entry": 195002,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "storm",
+      "metric": "gameobject_display",
+      "entry": 195002,
+      "equals": 1013445
+    },
+    {
+      "action": "assert",
+      "actor": "storm",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.16.807849",
+      "index": 4,
+      "equals": 0
+    }
+  ]
+}

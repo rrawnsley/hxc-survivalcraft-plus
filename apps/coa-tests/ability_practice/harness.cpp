@@ -606,7 +606,30 @@ void CheckMasteryFixedAndTrainerPolicies()
             assert(!view.NextTrainingCap && view.Rewards.empty());
         }
     }
-    assert(fixedCount == 83);
+    assert(fixedCount == 88);
+    for (auto const& profile : DevelopmentUtilityFixed::Profiles)
+        for (auto const& rank : profile.Definition.Ranks)
+        {
+            auto const mechanic = std::find_if(DevelopmentUtilityFixed::Mechanics.begin(),
+                DevelopmentUtilityFixed::Mechanics.end(), [&profile, &rank](auto const& entry)
+                {
+                    return entry.ClassId == profile.Definition.ClassId && entry.SpellId == rank.SpellId;
+                });
+            assert(mechanic != DevelopmentUtilityFixed::Mechanics.end());
+            std::vector<std::uint32_t> learned;
+            for (auto const& preceding : profile.Definition.Ranks)
+                if (preceding.RankNumber < rank.RankNumber)
+                    learned.push_back(preceding.SpellId);
+            auto const before = DescribeRank(profile.Definition, rank.RankNumber - 1, profile.Policy,
+                { 1, 0 }, rank.Requirement.CharacterLevel - 1, learned, true);
+            auto const eligible = DescribeRank(profile.Definition, rank.RankNumber - 1, profile.Policy,
+                { 1, 0 }, rank.Requirement.CharacterLevel, learned, true);
+            if (rank.RankNumber > 1)
+            {
+                assert(before.State == RankState::NeedsCharacterLevel);
+                assert(eligible.State == RankState::Ready);
+            }
+        }
     std::array<std::span<DevelopmentTrainerRanks::Entry const>, 4> const trainers = {
         DevelopmentTrainerRanks::Entries, DevelopmentBuffTrainerRanks::Entries,
         DevelopmentStatBuffTrainerRanks::Entries, DevelopmentSpellPowerBuffTrainerRanks::Entries };
@@ -668,7 +691,7 @@ void CheckMasteryFixedAndTrainerPolicies()
             assert(converted && converted->State.Proficiency == entry.PreviousRanks.back().Requirement.Proficiency);
         }
     assert(extensions == 12 && addedRanks == 24);
-    std::cout << "PASS: 7 mastery policies/rewards, 83 fixed declarations, 12 trainer extensions/24 added ranks\n";
+    std::cout << "PASS: 7 mastery policies/rewards, 88 fixed declarations, 12 trainer extensions/24 added ranks\n";
 }
 
 void WriteTypedMasteryAndFixedCases(std::ofstream& output, std::uint32_t& revision)

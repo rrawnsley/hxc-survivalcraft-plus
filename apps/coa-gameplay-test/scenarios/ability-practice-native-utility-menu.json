@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native Fixed utility menu and future resurrection rank",
+  "contract": "A learned native Campfire and Reborn from Ash are accurately delivered as Fixed utilities: proficiency1, no practice points or point threshold, and the next resurrection rank at native character level52. The complete schema4 snapshot is received. Run with the real clock for deliberately paced native addon transport; client pixels are separate.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 46,
+      "name": "Aputility"
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 570121
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 804231
+    },
+    {
+      "action": "whisper",
+      "actor": "caster",
+      "to": "Aputility",
+      "text": "HXAP\tHELLO|4",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "HXAP\tB|4|1|24|46|",
+      "min": 1,
+      "within_ms": 10000,
+      "label": "Current schema4 header"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "|570121|570121|1|1|0|1|0|6",
+      "min": 1,
+      "within_ms": 10000,
+      "label": "Learned Campfire is Fixed with no practice"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "|804231|804231|1|1|0|1|0|6",
+      "min": 1,
+      "within_ms": 10000,
+      "label": "Learned resurrection is Fixed with no practice"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "|807678|2|52|1|5|",
+      "min": 1,
+      "within_ms": 10000,
+      "label": "Next resurrection rank requires native level52"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "HXAP\tE|1",
+      "min": 1,
+      "within_ms": 10000,
+      "label": "Complete utility snapshot delivered"
+    }
+  ]
+}

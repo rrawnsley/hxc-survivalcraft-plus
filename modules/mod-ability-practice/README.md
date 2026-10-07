@@ -1,24 +1,24 @@
-# Ability practice — isolated development
+# Ability practice â€” isolated development
 
 Development continues on `codex/ability-practice-catalog` in
 `C:/Azerothcore-CoA/worktrees/ability-practice-catalog`. Production remains unchanged.
 The feature is not complete or approved for release.
 
-## Current state — 6 October 2026
+## Current state â€” 6 October 2026
 
 - Per-ability deterministic meaningful-use practice, automatic ranks, preserved learned ranks and saved
   progress, and one upcoming rank of preparation are implemented in the development module.
-- The catalog contains 241 unique profiles across all 21 classes: 151 ranked, seven mastery and 83 Fixed.
-  There are 243 declarations with two shared identities, 147 native baseline exclusions, and 462 groups
-  still needing definitions (75 ranked and 387 standalone). Startup acceptance of metadata does not
+- The catalog contains 246 unique profiles across all 21 classes: 151 ranked, seven mastery and 88 Fixed.
+  There are 248 declarations with two shared identities, 147 native baseline exclusions, and 457 groups
+  still needing definitions (74 ranked and 383 standalone). Startup acceptance of metadata does not
   qualify every ability's gameplay. The discovery exports intentionally retain their unqualified status.
-- Draft pacing targets 30–60 combat minutes per rank, with 45-minute authored assumptions. Effective
+- Draft pacing targets 30â€“60 combat minutes per rank, with 45-minute authored assumptions. Effective
   use frequency and final balance have not been measured or approved.
 - The addon is 0.4.43-development, protocol 4. It shows current ranks, proficiency, exact qualifying uses
   remaining, level requirements, future caps, mastery milestones and Fixed native utilities.
   It is unpublished and has not been installed in the active client.
-- The authorized C++/Lua 5.1 harness checks all 151 ranked policies, seven mastery policies and 83 Fixed
-  declarations; 730 typed snapshots decode, validate and mock-render. These are not client pixel tests.
+- The authorized C++/Lua 5.1 harness checks all 151 ranked policies, seven mastery policies and 88 Fixed
+  declarations; 745 typed snapshots decode, validate and mock-render. These are not client pixel tests.
 - Native isolated gameplay has exercised original-cast enrollment and bot exclusion, version1-to4
   fraction conversion, automatic level-gated rank learning, owned buff contribution, gray/dummy
   exclusions, unknown saved-version preservation, healing mastery progress and periodic shared receipts.
@@ -30,20 +30,31 @@ The feature is not complete or approved for release.
 - Native activation now accepts an exact verified trainer prefix when appended trainer ranks have no
   core chain nodes. Missing, partial or foreign nodes still reject activation. Demon's Blood validates
   its loaded Xoroth aura conversion separately from its raw DBC shape. Full development startup accepts
-  241 profiles on the disposable test server; default production switches remain zero.
-- Latest build/harness: `.cache/verify-all/20261007-023125/report.json`, build42.7s and harness4.5s
-  passed. Its source stage failed on a new scenario typo and existing Windows fixture assumptions;
-  those were repaired. Subsequent source verification passed all 15 selected checks at
-  `.cache/verify-all/20261007-025348/report.json` (111.2s).
-- Native gameplay reports: saved-rank and owned-buff cases passed in `20261007-021024`; original cast
-  in `20261007-021223`; farming/unknown version in `20261007-021829`; healing in `20261007-022338`;
-  periodic receipts in `20261007-022641`; one-rank-ahead in `20261007-025153`; typed menu in
-  `20261007-024804` (real clock for intentionally
-  paced transport). The saved-rank/buff report's overall result failed because another fixture in that
-  batch was incorrect; only those passing cases are cited as evidence. All-class menu groups passed
-  in `20261007-025336` (172.7s, three cases, real clock). Manafeed passed `20261007-030446`
-  (58.0s); absorption passed `20261007-030037` (67.5s); native healing benefit passed `20261007-030554`
-  (59.6s). Latest source passed all nine selected checks `20261007-030603` (82.3s).
+  246 profiles on the disposable test server; default production switches remain zero.
+- Five new Fixed utilities preserve native functionality and acquisition: Conjure Campfire, Reborn
+  from Ash (five ranks), Ancestral Keg, Mojo Cauldron and Conjure Thunderkeg. Every authored utility rank
+  is checked against loaded effects, auras, targets, triggers and optional exact values. Summoned
+  objects must match their loaded entry, type and display. Reborn from Ash validates the native
+  SELF_RESURRECT caster-target correction, with SpellInfoCorrections.cpp added to source provenance.
+- Native tests confirm Campfire and three supply objects spawn, an accepting ally is resurrected,
+  and all four higher Reborn from Ash ranks retain trainer level gates without practice. Native
+  utility-menu delivery shows Fixed proficiency1/points0/threshold0 and the next rank at level52.
+  The spellbook retains its native purchase behavior; Fixed learning remains unmanaged.
+- Latest build/harness passed in `.cache/verify-all/20261007-032638/report.json`: build35.1s,
+  harness5.5s. Its overall result failed one intermittent fake-worker log-reader check. Windows
+  fixture log writes are now serialized and a four-worker, 400-record stress check was added.
+  Final source verification passed all nine selected checks in
+  `.cache/verify-all/20261007-033221/report.json` (87.8s), including that regression.
+- Native gameplay passed both utility cases in `20261007-032947` (71.9s, simulated clock), and
+  utility-menu delivery in `20261007-033237` (71.8s, real clock), without isolated reruns.
+  Earlier utility failures were incorrect fixture assumptions about native learning and a raw
+  self-resurrection target mistaken for its loaded target. Native mechanics were preserved.
+- Prior native reports: saved-rank/owned-buff cases `021024`; original cast `021223`;
+  farming/unknown version `021829`; healing `022338`; periodic receipts `022641`;
+  one-rank-ahead `025153`; typed menu `024804` (real clock); three all-class menu groups
+  `025336` (real clock, tested on the earlier241-profile catalog); Manafeed `030446`;
+  absorption `030037`; healing benefit `030554`. All report directories use prefix20261007-.
+  Some early combined reports failed different fixtures; only their passing cases are cited.
 
 ## Reproducing native qualification
 
@@ -91,7 +102,7 @@ Raw rank amounts10/20/20 receive a distinct effective-benefit review queue: nati
 and no claim of stronger resistance is made. Greater Rite575842 remains its distinct native ability.
 
 
-## Current state — 5 October 2026
+## Current state â€” 5 October 2026
 
 - Native prototype: three Pyromancer class-grant profiles, with draft tuning. The full rollout still targets
   all 21 CoA classes. An optional startup-only sample catalog adds 20 ranked class-grant profiles for the other
@@ -139,7 +150,7 @@ and no claim of stronger resistance is made. Greater Rite575842 remains its dist
 Later sections are chronological implementation notes. Their older protocol/addon shapes are historical;
 the current unpublished shape and activation requirements above take precedence. Source checking/building is not release acceptance.
 
-## Client-request attribution checkpoint — 5 October 2026
+## Client-request attribution checkpoint â€” 5 October 2026
 
 The module registers the existing `MISCHOOK_VALIDATE_SPELL_AT_CAST_SPELL_RESULT` observer. Its current core
 caller is `WorldSession::HandleCastSpellOpcode`, after the cast has its resolved spell identity and before
@@ -158,15 +169,15 @@ C++ lint, whitespace and five addon Lua 5.1 syntax compilations passed. No behav
 and draft discovery artifacts were regenerated against the changed native source hashes. Production remains
 untouched and the draft tuning and three prototype profiles are unchanged.
 
-## Representative all-class catalog — 5 October 2026
+## Representative all-class catalog â€” 5 October 2026
 
 `AbilityPractice.AllowDevelopmentClassSamples = 1` selects an expanded development catalog at startup,
 provided the existing enable and observation flags are also enabled. It does not enable rank learning; that
 still requires its independent flag. Reloading configuration does not change the selected static catalog.
 The default remains the original three Pyromancer profiles. No configuration or server was changed live.
 
-`AbilityPracticeDevelopmentSamples.h` contains 20 explicit ranked samples for custom class IDs 12–23 and
-25–32. Each has a source-consistent root class grant and complete generated rank chain, and a common raw
+`AbilityPracticeDevelopmentSamples.h` contains 20 explicit ranked samples for custom class IDs 12â€“23 and
+25â€“32. Each has a source-consistent root class grant and complete generated rank chain, and a common raw
 native damage or healing route. IDs and character levels came from the current provenance-checked draft
 artifact. Existing native startup validation still checks the complete source grant chain and each effective
 SpellInfo's supported direct outcome and nonpassive status. Any rejected selected sample leaves observation
@@ -184,7 +195,7 @@ were regenerated; the 847 draft groups and 179 common-outcome candidates are unc
 isolated native build passed in `.cache/verify-all/20261005-134959/report.json`; changed C++ lint and whitespace
 passed. No behavioral tests or live client/server checks ran.
 
-## Typed roadmap consistency — 5 October 2026
+## Typed roadmap consistency â€” 5 October 2026
 
 The unpublished protocol-4 encoder and addon model now check roadmap records together. Rank numbers must be
 contiguous from one, introductory proficiency must be one, and the selected ability kind must match its rank
@@ -201,7 +212,7 @@ Source checks and the isolated native build passed in `.cache/verify-all/2026100
 C++ lint, whitespace and five Lua 5.1 syntax compilations passed. Malformed/valid snapshot behavioral
 acceptance remains pending explicit testing authorization. Production remains untouched.
 
-## Effective rank-chain consistency — 5 October 2026
+## Effective rank-chain consistency â€” 5 October 2026
 
 Startup now refuses a selected profile if its class-grant root has duplicate source grant rows, even when one
 row happens to match the requested level. When SpellMgr supplies native rank-chain nodes, every profile rank
@@ -218,7 +229,7 @@ Source checks and the isolated native build passed in `.cache/verify-all/2026100
 changed C++ lint and whitespace passed. Discovery artifacts were regenerated for the changed native hash.
 No behavioral tests or expanded-catalog startup ran. Production remains untouched.
 
-## Shared acquisition and owner-state refresh — 5 October 2026
+## Shared acquisition and owner-state refresh â€” 5 October 2026
 
 `AscensionSpellEligibility.h` extracts the existing native racial/faction-rift acquisition check into a shared
 inline helper. AscensionCompat's existing grant path uses the same check through its old wrapper. Practice
@@ -1209,7 +1220,7 @@ Source checks passed `.cache/verify-all/20261005-104729/report.json`; Python syn
 No tests ran; rejection cases remain qualification. Production untouched.
 
 
-## Original-cast periodic development path — 5 October 2026
+## Original-cast periodic development path â€” 5 October 2026
 
 A startup-only `AbilityPractice.AllowDevelopmentPeriodicObservation` flag enables optional native periodic
 observation and selects two additional development profiles: Cindergrip (Pyromancer, class 24, root 805476) and
@@ -1251,7 +1262,7 @@ that checkout remains stable. Their source-only checks passed in the catalog wor
 were added or run. No production server/client/configuration/database/launcher change was made.
 
 
-## Broader ranked development catalog — 5 October 2026
+## Broader ranked development catalog â€” 5 October 2026
 
 `AbilityPractice.AllowDevelopmentRankedCatalog = 1` selects 106 source-consistent ranked class-grant profiles
 covering 888 authored ranks across all 21 custom classes. It takes priority over the representative sample flag;
@@ -1282,7 +1293,7 @@ worktree. Integration and incremental native build of these catalog additions re
 tests ran and no production server, config, database, launcher or client was changed.
 
 
-## Hand of Elune unranked mastery prototype — 5 October 2026
+## Hand of Elune unranked mastery prototype â€” 5 October 2026
 
 Startup-only `AbilityPractice.AllowDevelopmentMastery` selects one additional Starcaller class-grant profile
 (class 26, Hand of Elune 801990, authored character level 16). It defaults off. The setting enables draft
@@ -1328,10 +1339,10 @@ All mastery rates/rewards and real healing/menu/migration/lifecycle behavior rem
 Production server, client, configuration, DB and launcher remain untouched.
 
 
-## Explicit scripted Manafeed observation — 5 October 2026
+## Explicit scripted Manafeed observation â€” 5 October 2026
 
 Startup-only `AbilityPractice.AllowDevelopmentScriptedObservation` defaults off and adds Felsworn Manafeed
-(class 14, root 552210, ranks 552210–552213 at authored levels 24/36/44/56). Draft proficiency requirements
+(class 14, root 552210, ranks 552210â€“552213 at authored levels 24/36/44/56). Draft proficiency requirements
 are 1/10/20/40, with the existing illustrative training/cap curve. Original observation/rank-learning flags
 remain independent. All options together select 110 development profiles; this is still incomplete production
 coverage and unapproved balance.
@@ -1369,7 +1380,7 @@ Integration, affected incremental build and real scripted-result/lifecycle/menu/
 No behavioral tests were added/run. No live server/configuration/client/database/launcher change occurred.
 
 
-## Cancel outdated owner snapshots — 5 October 2026
+## Cancel outdated owner snapshots â€” 5 October 2026
 
 Owner class/race/talent-set/custom-specialization changes and profiled level/learn/forget events now discard
 unsent menu delivery and request a fresh snapshot at the next eligible delivery opportunity. Partial older
@@ -1384,7 +1395,7 @@ Catalog changes subsequently merged into the main development branch; the affect
 No behavioral tests ran
 and no production files/process/config/client/DB/launcher changed.
 
-## Shared receipt consumption in both award routes — 5 October 2026
+## Shared receipt consumption in both award routes â€” 5 October 2026
 
 The initial review incorrectly claimed a reverse-order duplicate-award gap. `ReceiptMatches` already refuses
 consumed receipts, including in frozen a5ea9902f, and the direct award route already calls that helper. Periodic
@@ -1399,7 +1410,7 @@ build qualifies only frozen a5ea9902f; the integrated catalog/mastery/helper/men
 need an affected rebuild. An independent worldserver build targets C:/Build-Survival, so no concurrent build
 was started. Production remains unchanged.
 
-## Native learning markers and mastery bridge build path — 5 October 2026
+## Native learning markers and mastery bridge build path â€” 5 October 2026
 
 Startup now refuses every selected rank marked `IsDeprecatedForPlayers`, including fixed definitions. CoA sets
 that flag from whole-word deprecated/depreacated markers in English spell names or ranks, and native player
@@ -1421,7 +1432,7 @@ The repair and learning-marker checks were integrated as 5932a106e2. Its source/
 `.cache/verify-all/20261005-172602/report.json` in the main development worktree (five source checks, 48.9s native
 build; unit/harness/gameplay skipped). The output was neither installed nor started.
 
-## Show the currently earned mastery benefit — 5 October 2026
+## Show the currently earned mastery benefit â€” 5 October 2026
 
 Addon 0.4.12-development adds a compact current-benefit line beneath the learned-ability label. It selects the
 highest reward whose authoritative snapshot state is earned, describes its qualifying PvE healing condition,
@@ -1435,7 +1446,7 @@ Source checks passed `.cache/verify-all/20261005-172956/report.json` (two checks
 passed and all five Lua 5.1 files compiled for syntax only. No addon chunks, gameplay or behavioral tests ran;
 in-game appearance and lifecycle acceptance remain outstanding. The staged addon was not installed or published.
 
-## Fixed utility menu examples — 5 October 2026
+## Fixed utility menu examples â€” 5 October 2026
 
 The optional startup-only `AbilityPractice.AllowDevelopmentFixedCatalog` setting appends two explicit fixed
 definitions: class 13 Spiritual Recall (583092, native level 20) and class 22 Teleport: Caverns of Time (804753,
@@ -1458,7 +1469,7 @@ worktree (two source checks, 39.1s native build; unit/harness/gameplay skipped).
 passed; authoring artifacts regenerated with unchanged counts and 31 provenance entries. No behavioral tests,
 addon installation, server start, production configuration/database changes or deployment occurred.
 
-## Original-cast health-leech damage practice — 5 October 2026
+## Original-cast health-leech damage practice â€” 5 October 2026
 
 Native periodic observation now includes PERIODIC_LEECH damage. The tick handler snapshots the original cast
 receipt and numeric spell/aura identity before script hooks, then reports only actual positive DealDamage result
@@ -1484,7 +1495,7 @@ Changed C++ style/whitespace and five Lua5.1 syntax compilations passed. No addo
 and no live installation/start/restart/configuration/database/client/launcher change occurred. Runtime lifecycle,
 AoE/channel/target/source/save/menu acceptance and final balance remain outstanding.
 
-## Compose shared catalog definitions and report coverage — 5 October 2026
+## Compose shared catalog definitions and report coverage â€” 5 October 2026
 
 Authoring coverage found Shadra's Prayer in both the broad ranked and optional periodic declarations. The old
 combined array would include its class/ability identity twice, and existing ProfileIndex validation would refuse
@@ -1519,12 +1530,12 @@ the counts above. No new behavioral tests or runtime startup checks ran. This fi
 composition conflict; effective-data readiness and in-game acceptance remain unqualified. Production remains
 unchanged and all development options default off.
 
-## Realm maximum level metadata — 5 October 2026
+## Realm maximum level metadata â€” 5 October 2026
 
 The typed snapshot now appends the server-configured MaxPlayerLevel to its header (B8).
 The new client also accepts older unpublished B7 snapshots with an unknown realm cap.
 Schemas 1/2/3 and existing typed ability records keep their formats. The maximum is validated
-as 1–255 without requiring it to exceed the character level, preserving existing above-cap characters.
+as 1â€“255 without requiring it to exceed the character level, preserving existing above-cap characters.
 The subtitle shows the realm cap; rank/mastery requirements, upcoming entries and future-cap help
 identify milestones above that cap when the character has not reached the required level.
 This metadata does not change native rank requirements, practice policies, earned benefits or saved progress.
@@ -1533,7 +1544,7 @@ Addon version is 0.4.14-development. Source checks and the isolated native build
 Five Lua 5.1 files compiled for syntax without execution. Behavioral/gameplay/UI acceptance remains pending.
 No production changes were made.
 
-## Explicit development character selection — 5 October 2026
+## Explicit development character selection â€” 5 October 2026
 
 `AbilityPractice.DevelopmentCharacterGuids` is a reloadable, comma-separated list of positive
 character database GUIDs, limited to 128 entries and 4,096 configuration bytes. It defaults empty.
@@ -1559,7 +1570,7 @@ Affected source and isolated native build passed in `.cache/verify-all/20261005-
 Runtime enrollment, reload/receipt behavior and persistence acceptance have not been exercised.
 All live server/client/configuration/database files remain unchanged.
 
-## Skill list progress and hover detail — 5 October 2026
+## Skill list progress and hover detail â€” 5 October 2026
 
 Addon0.4.15-development displays proficiency/current cap in skill rows and a thin bar using
 the authoritative partial points for the next proficiency level. Paused ownership/level states are grey,
@@ -1571,7 +1582,7 @@ owned by that row. No gameplay, persistence or protocol changes. Source checks p
 `.cache/verify-all/20261005-184742/report.json`; five Lua5.1 syntax compilations passed without execution.
 In-game rendering/interaction remains unqualified. No addon installation or live changes.
 
-## Condemn and Decomposition periodic profiles — 5 October 2026
+## Condemn and Decomposition periodic profiles â€” 5 October 2026
 
 The optional startup-only periodic group now includes Condemn (Templar/class19, root804906,
 ten ranks at4/12/20/28/36/44/52/60/68/76) and Decomposition (Chronomancer/class22, root800856,
@@ -1595,7 +1606,7 @@ Affected source and native build passed `.cache/verify-all/20261005-185012/repor
 (two source checks;35.2-second build). C++ style/whitespace passed; authoring artifacts regenerated.
 No behavioral tests, runtime startup, active addon installation, live configuration/database changes or restart.
 
-## Dedicated session view — 5 October 2026
+## Dedicated session view â€” 5 October 2026
 
 Addon0.4.16-development adds a fourth Session tab alongside My Skills, Upcoming and Tracked.
 It lists only nonfixed abilities with actual recorded session uses or proficiency gains. Entries sort
@@ -1614,14 +1625,14 @@ No native/protocol/storage change or rebuild. Source passed `.cache/verify-all/2
 (two source checks); five Lua5.1 files compiled for syntax without execution. In-game acceptance remains pending.
 No active addon installation or production changes.
 
-## Authoritative acquisition menu metadata — 5 October 2026
+## Authoritative acquisition menu metadata â€” 5 October 2026
 
 Each server view now carries the selected profile acquisition source. Current validated definitions are
 class grants, so their menu source is Class progression; no talent/spec/item gameplay support is enabled.
-AcquisitionSource uses explicit stable numeric IDs0–4. An optional final source ID extends the unpublished
+AcquisitionSource uses explicit stable numeric IDs0â€“4. An optional final source ID extends the unpublished
 protocol4 typed record from T10 to T11. New clients accept T10 as unknown source, and encoder fixtures
 without a source retain T10. Legacy schemas1/2/3 keep their formats. Unknown/invalid source IDs are
-rejected; the view range is1–4 or absent. No extra message/queue-count changes.
+rejected; the view range is1â€“4 or absent. No extra message/queue-count changes.
 
 Addon0.4.17-development shows Acquisition in row/practice-help tooltips and identifies the learning source
 in introductory/rank/mastery/fixed-acquisition text. Older source-less snapshots retain generic wording.
@@ -1631,7 +1642,7 @@ Source/native build passed `.cache/verify-all/20261005-190423/report.json` (two 
 C++ style/whitespace and five Lua5.1 syntax compilations without execution. Authoring provenance refreshed.
 Actual wire delivery/menu/acquisition acceptance remains pending. No production installation or changes.
 
-## Authoritative learned-ability/rank session history — 5 October 2026
+## Authoritative learned-ability/rank session history â€” 5 October 2026
 
 Successful native OnPlayerLearnSpell notifications now record profiled ability/rank learning events
 for enrolled human characters outside saved-character loading. Events are class-scoped numeric values
@@ -1662,7 +1673,7 @@ After a Lua line wrap, source passed `.cache/verify-all/20261005-192047/report.j
 compilations passed without executing chunks. C++ style/whitespace passed; authoring provenance refreshed.
 No unit/harness/gameplay tests, runtime startup or production installation/restart/configuration/DB/client changes.
 
-## Consistent direct-cast owner/session receipts — 5 October 2026
+## Consistent direct-cast owner/session receipts â€” 5 October 2026
 
 Every eligible direct profiled nonfixed cast now captures the existing numeric original-cast receipt,
 including damage/healing and utility routes with periodic observation disabled. Direct awards require
@@ -1683,7 +1694,7 @@ C++ style/whitespace and authoring regeneration passed. Ownership/lifecycle/game
 pending; no tests or production server/client/configuration/database/launcher changes or restart.
 
 
-## Neglected-ability catch-up — 5 October 2026
+## Neglected-ability catch-up â€” 5 October 2026
 
 Optional startup-only AllowDevelopmentCatchup defaults off. Draft Gap40/Multiplier2 settings are configurable
 within Gap1-500/Multiplier2-4. A qualifying original cast earns multiplied practice while proficiency is
@@ -1714,7 +1725,7 @@ provenance regenerated with37 native sources; catalog remains115 unique/116 decl
 gameplay tests, runtime startup or live server/client/configuration/database/launcher changes or restart.
 
 
-## Recorded session mastery rewards — 5 October 2026
+## Recorded session mastery rewards â€” 5 October 2026
 
 Session mastery events are now server observations of newly met reward requirements, not client forecast
 inferences. Class/ability reward bitmasks establish a silent baseline from retained/migrated proficiency and
@@ -1745,7 +1756,7 @@ provenance/coverage regenerated (37 native sources;115 unique profiles/116 decla
 client/configuration/database/launcher changes, installation, startup or restart.
 
 
-## Visible catch-up and explicit remaining review queues — 5 October 2026
+## Visible catch-up and explicit remaining review queues â€” 5 October 2026
 
 Addon0.4.21-development shows eligible active catch-up on the selected progress bar, with saved boost
 labels for cached views. Row hover describes active/normal/capped/paused/unlearned catch-up without claiming
@@ -1766,7 +1777,7 @@ Source/Lua passed .cache/verify-all/20261005-201427/report.json (two source chec
 compilations with no chunk execution); coverage export completed. Final source check after a Python line wrap passed .cache/verify-all/20261005-201519/report.json. No tests, runtime startup, native rebuild or production server/client/config/DB/launcher change.
 
 
-## Mastery baseline before new casts and levels — 5 October 2026
+## Mastery baseline before new casts and levels â€” 5 October 2026
 
 A mastery cast observes cached progress before HandleOutcome, then records milestone changes after the
 award. First valid observation silently baselines pre-cast progress, so delayed login/update ordering cannot
@@ -1783,7 +1794,7 @@ C++ style/whitespace and updated37-source authoring provenance/coverage passed. 
 server/client/configuration/database/launcher changes.
 
 
-## Original-cast provenance for direct healing mastery — 5 October 2026
+## Original-cast provenance for direct healing mastery â€” 5 October 2026
 
 Direct native Spell healing passes the existing CastReceipt synchronously through an optional HealBySpell
 parameter to the mastery provider. Other callers default to a null receipt and retain normal healing.
@@ -1816,7 +1827,7 @@ is refreshed separately. No production server/client/configuration/database/laun
 restart; CoA process42440 remains the original process.
 
 
-## Emerald Veil meaningful shield use — 5 October 2026
+## Emerald Veil meaningful shield use â€” 5 October 2026
 
 Optional startup-only AllowDevelopmentAbsorption defaults off and adds the six-rank Emerald Veil
 (class29, root800926) profile, exactly reusing its broad-ranked definition. A thin native school-absorb
@@ -1841,7 +1852,7 @@ completed. Unit/harness/gameplay stages skipped; no runtime startup or productio
 launcher installation, update or restart.
 
 
-## Browse by exact next-milestone forecast — 5 October 2026
+## Browse by exact next-milestone forecast â€” 5 October 2026
 
 Addon0.4.23-development adds a compact Default/Name/Uses sort button beside search. Default preserves
 required-level ordering for Upcoming and actual-gains ordering for Session. Uses prioritizes learned,
@@ -1857,7 +1868,7 @@ Source passed .cache/verify-all/20261005-213613/report.json (two checks);five Lu
 and whitespace passed. No addon chunks, behavioral tests, native rebuild, runtime startup or production changes.
 
 
-## Three more native periodic damage profiles — 5 October 2026
+## Three more native periodic damage profiles â€” 5 October 2026
 
 The disabled periodic catalog now includes Taldaram's Torment (Bloodmage20/root800772,8ranks), Blaze
 (Pyromancer24/root805500,8ranks) and Seismic Crash (Primalist31/root803981,8ranks). Native class-grant and
@@ -1880,7 +1891,7 @@ syntax checks. Unit/harness/gameplay stages skipped; no native startup or produc
 configuration/database/launcher changes. Live CoA remains process42440, started4October2026 21:36:56 local.
 
 
-## Ranger and Chronomancer periodic rank profiles — 5 October 2026
+## Ranger and Chronomancer periodic rank profiles â€” 5 October 2026
 
 The disabled periodic catalog now adds Ranger21/Serrated Shot500073 (7ranks), Ranger21/Toxic Dart807237
 (8ranks) and Chronomancer22/Unmake804418 (11ranks), using source grant/progression levels. Every raw rank
@@ -1902,7 +1913,7 @@ the host; no competing build was started or other process changed. Unit/harness/
 unchanged since0.4.23 syntax checks. Runtime rotations/gameplay remain unqualified. No production changes.
 
 
-## Browse by reported training state — 5 October 2026
+## Browse by reported training state â€” 5 October 2026
 
 Addon0.4.24-development adds a filter beneath the ability list: All, Training, At cap, Paused and Not learned.
 Filters use validated server availability/learned-rank fields, work with the selected tab and search, and save
@@ -1917,7 +1928,7 @@ and whitespace passed. No addon chunks, behavioral tests, native rebuild, runtim
 The pending Ranger/Chronomancer native compilation still waits for the unrelated C:/Build-CoA build.
 
 
-## Explicit raw periodic review evidence — 5 October 2026
+## Explicit raw periodic review evidence â€” 5 October 2026
 
 Read-only candidate discovery now compares native periodic damage/percent-damage/leech (aura3/89/53) and
 healing (aura8), separately from direct/removal routes. It requires nonpassive/nondeprecated valid raw evidence
@@ -1945,7 +1956,7 @@ read-only exports passed. No tests, native rebuild, addon execution/startup or p
 Ranger/Chronomancer native compilation is still pending the other C:/Build-CoA build.
 
 
-## Pending periodic catalog native build completed — 5 October 2026
+## Pending periodic catalog native build completed â€” 5 October 2026
 
 The unrelated C:/Build-CoA build completed; only idle reusable MSBuild nodes remained. Then the isolated
 candidate b87626940d was compiled through verify_all, with source frozen and BelowNormal priority/four
@@ -1961,7 +1972,7 @@ Live CoA process42440 remains unchanged, started4October2026 21:36:56 local. No 
 server/client/configuration/database/launcher update, native startup or restart was performed.
 
 
-## Native replacement ownership and menu explanation — 5 October 2026
+## Native replacement ownership and menu explanation â€” 5 October 2026
 
 Development acquisition checks now consult Player::GetTemporarySpellReplacement across the original rank
 chain. That existing cached native getter returns the original spell when no active replacement exists;
@@ -1998,7 +2009,7 @@ chunks executed. Unit/harness/gameplay skipped. No native startup or production 
 installation, update or restart; development remains disabled and requires explicit enrollment.
 
 
-## Direct damage mastery checkpoint — 5 October 2026
+## Direct damage mastery checkpoint â€” 5 October 2026
 
 Optional unranked mastery now includes Venomancer Vile Sting (805097, introduction level 12) and Reaper
 Soulslam (504014, introduction level 20). Their draft reward chains require proficiency 40/70/100 and
@@ -2018,7 +2029,7 @@ Unpublished protocol 4 preserves healing M10/O8 records; damage M11/O9 records a
 Native and addon validation require the reward effect to match the ability route and session history
 must match the same snapshot's definition. Current benefit, roadmap, rules and session tooltips name
 damage or healing correctly. Older unpublished protocol-4 addons reject the new damage records, so the
-staged server/addon pair requires joint qualification. Protocols 1–3 retain their existing behavior.
+staged server/addon pair requires joint qualification. Protocols 1â€“3 retain their existing behavior.
 
 Source/native build passed in .cache/verify-all/20261005-234443/report.json (two source checks, 46.6-second
 native build). Five Lua 5.1 files compiled syntactically without executing chunks; C++ style and whitespace
@@ -2029,7 +2040,7 @@ remain unapproved. Unit, harness and gameplay stages were skipped. No production
 was performed by this task.
 
 
-## Filter overview checkpoint — 5 October 2026
+## Filter overview checkpoint â€” 5 October 2026
 
 Addon 0.4.27 displays the selected filter's matching ability count. Its tooltip summarizes All/Training/At cap/
 Paused/Not learned for the current tab and search before applying the selected filter. Categories can overlap;
@@ -2039,7 +2050,7 @@ server protocol, training policy, persistence or gameplay change is needed. Sour
 compilations passed without addon chunk execution. Rendered client behavior remains unqualified.
 
 
-## Native replacement notification checkpoint — 5 October 2026
+## Native replacement notification checkpoint â€” 5 October 2026
 
 The existing native replacement setter now notifies the optional practice provider only after a real mapping
 change. The module accepts enrolled, nonloading players with an existing session and a managed original spell;
@@ -2055,7 +2066,7 @@ rank provider interface and implementation. Catalog counts remain 123 unique/125
 replacement-transition/menu qualification remain deferred; no production deployment/startup was performed.
 
 
-## Ranked hybrid utility checkpoint — 5 October 2026
+## Ranked hybrid utility checkpoint â€” 5 October 2026
 
 Shield of Denial (class 18, root 704159, five ranks) and Gavel of Wrath (class 27, root 800617, five ranks)
 now explicitly accept direct damage or their native successful interrupt/dispel outcome respectively. Both
@@ -2078,7 +2089,7 @@ exports preserve 61 provenance sources including Sun Cleric's triggered-cast con
 Unit/harness/gameplay skipped. No native/addon startup or production modifications were performed.
 
 
-## Forgotten ability receipt checkpoint — 5 October 2026
+## Forgotten ability receipt checkpoint â€” 5 October 2026
 
 The native forgotten-spell callback now rotates the existing action session for managed abilities, in addition
 to refreshing menu/ranks. An original cast started before a managed ability is forgotten cannot regain credit
@@ -2093,7 +2104,7 @@ whitespace and 61-source export refresh. Unit/harness/gameplay skipped, lifecycl
 Addon 0.4.28 and catalog counts remain unchanged. No production changes or startup were performed.
 
 
-## Ability-specific periodic rule descriptions — 5 October 2026
+## Ability-specific periodic rule descriptions â€” 5 October 2026
 
 Menu rules now advertise periodic practice only for ranked class/ability identities whose effective startup
 SpellInfo contains the supported periodic aura for that selected outcome and whose periodic mode is enabled.
@@ -2109,7 +2120,7 @@ remains deferred; no unit/harness/gameplay tests or production changes were perf
 125declared and addon0.4.28 are unchanged. Report dates are UTC; this local checkpoint remains 5 October.
 
 
-## Qualification queues for declared profiles — 5 October 2026 local
+## Qualification queues for declared profiles â€” 5 October 2026 local
 
 Coverage preserves qualificationReviewQueues for every source group, including abilities that already have a
 development header declaration. Existing pendingReviewQueues still describe only missing definitions. Separate
@@ -2125,7 +2136,7 @@ checks), and the 61-source authoring exports refreshed. Native/gameplay/addon co
 native build are unchanged; unit/harness/gameplay were skipped. No production operations were performed.
 
 
-## Preserve raw timing for per-ability tuning — 5 October 2026 local
+## Preserve raw timing for per-ability tuning â€” 5 October 2026 local
 
 Each source-consistent draft rank now carries a strict rawCastProfile with casting-time index and ordinary,
 category and start recovery milliseconds. The shape, exact raw-data scope and unsigned integer values are
@@ -2141,9 +2152,9 @@ production operations performed. The optional rank pacing preference remains pen
 rates remain unapproved.
 
 
-## Rank pacing proposals — 5 October 2026 local
+## Rank pacing proposals â€” 5 October 2026 local
 
-The user selected 30–60 minutes of meaningful combat per stronger rank once its character-level gate is met.
+The user selected 30â€“60 minutes of meaningful combat per stronger rank once its character-level gate is met.
 The new read-only authoring tool tools/pacing_drafts.py prepares a 45-minute midpoint proposal for each of244
 source-consistent ranked groups/1412 transitions. It uses the currently practiced rank's raw recovery evidence
 with an explicitly assumed common-use interval floor of5seconds. This is not measured cast frequency or
@@ -2157,7 +2168,7 @@ an exact fraction-preserving conversion from the existing prototype's30-point ba
 saved-progress migration and native policy integration are explicitly not implemented. Proposals do not reset
 or alter any saved state, native header, flag, rate or reward. Applying these policies remains future work after
 migration review and measured meaningful-use qualification. Source/default5-second proposals alone are not a
-promise that observed play will take45minutes. None of the1412 default proposals fall outside30–60minutes under
+promise that observed play will take45minutes. None of the1412 default proposals fall outside30â€“60minutes under
 their stated assumptions.
 
 Generate the proposal using the same provenance-checked draft/DBC inputs as coverage:
@@ -2238,7 +2249,7 @@ and other effective modifiers remain unresolved. This supersedes the previous ma
 assumption, without claiming observed frequency or changing native rates.
 
 Source checks passed in .cache/verify-all/20261006-002853/report.json (two checks);64-source exports refreshed.
-The244 ranked proposals/1412 transitions remain within30–60minutes under the default assumptions. Native C++
+The244 ranked proposals/1412 transitions remain within30â€“60minutes under the default assumptions. Native C++
 remains the002731 passing build; no tests, actual-frequency measurements or production operations performed.
 
 ## Authored rank-ladder agreement in coverage
@@ -2273,7 +2284,7 @@ Native C++ remains the002731 passing build. Unit/harness/gameplay stages and pro
 
 AllowDevelopmentRankPacing is a startup-only flag, disabled by default and still requiring module observation,
 explicit selected human character GUIDs and successful native catalog validation. It substitutes generated
-per-ability policies for the118 declared ranked profiles only. Defaults target45minutes within30–60 under raw
+per-ability policies for the118 declared ranked profiles only. Defaults target45minutes within30â€“60 under raw
 cast/recovery and five-second cadence assumptions. These are draft rates, not measured or approved balance.
 Mastery/fixed profiles, ranks, level gates, caps, acquisition checks and outcome routes remain unchanged.
 
@@ -2319,7 +2330,7 @@ The menu preserves the saved view and its stale indicator, names a mismatched sk
 progress is preserved and needs a matching progression version. It directs the player to an administrator,
 without offering a reset or claiming the row is corrupt. Unreadable issue1 retains its existing message.
 No saved values, versions or implementation settings are exposed in the response. Older unpublished protocol4
-addons reject issue2; the staged addon/native pair requires joint qualification before any release. Protocols1–3
+addons reject issue2; the staged addon/native pair requires joint qualification before any release. Protocols1â€“3
 are unchanged. Outcome/wire sources are now included in native authoring provenance.
 
 Source/native compilation passed in .cache/verify-all/20261006-004245/report.json (two checks,32.1s native
@@ -3070,7 +3081,7 @@ Frozen-policy refinement source2/native30.2s passed at .cache/verify-all/2026100
 C++ style/whitespace and99-source exports passed; existing trainer header reproduced with no rewrite.
 Unit/harness/gameplay skipped. No tests, startup, actual saved-row conversion, deployment or production change.
 
-## Bounded raw helper-reference review — 6 October 2026
+## Bounded raw helper-reference review â€” 6 October 2026
 
 Catalog discovery follows raw trigger fields with limits64 nodes/192 edges/depth8 per root.
 Raw references include inactive effect slots and are not a prediction of executed casts, outcomes,
@@ -3081,7 +3092,7 @@ Depth-first back-edge detection reports encountered cycle paths, not an exhausti
 Actual export:3044 roots,9841 raw nodes,73 roots with detected cycles,9 incomplete roots.
 Five source-consistent ability groups require cyclic-reference review: Brand of the Damned, Titanstrike,
 Reliquary of the Lost, Soul Capture and Soul Collector. One is already a native Fixed development
-profile; four still lack definitions. Soul Capture includes500363→805077→805078→500363.
+profile; four still lack definitions. Soul Capture includes500363â†’805077â†’805078â†’500363.
 This is raw resource-helper evidence, not a confirmed live recursion defect. Soul Shock includes
 801260/Babify with native raw HEAL_PCT against target6; its attribution still requires loaded/script review.
 
@@ -3089,7 +3100,7 @@ Source review165334 passed2 checks. Native sources unchanged from163946; no redu
 205 definitions,126 baselines,519 missing definitions and850 runtime-unqualified groups unchanged.
 No tests, native startup, migration execution, active-client changes or deployment.
 
-## Forecast and session menu guidance — 6 October 2026
+## Forecast and session menu guidance â€” 6 October 2026
 
 Unpublished addon0.4.35-development retains protocol4. The existing per-ability help explains
 qualifying-use forecasts, catch-up, separate level/acquisition requirements and awarded session uses.
@@ -3101,7 +3112,7 @@ All five addon files parsed with Lua5.1 loadstring; no addon chunks executed. So
 2 checks, all other stages skipped. Native remains163946; no render or gameplay acceptance claimed.
 No active addon installation, launcher/payload publication, tests, server startup or production changes.
 
-## Soul Capture execution-path evidence — 6 October 2026
+## Soul Capture execution-path evidence â€” 6 October 2026
 
 AscensionReaperTalents.cpp::spell_ascension_soul_capture overrides the raw corpse-selector path.
 CheckCorpse searches dead units and stores one eligible hostile corpse GUID. Eligible requires
@@ -3119,7 +3130,7 @@ for reliable practice across its normal post-fight use. No Soul Capture profile,
 counter was added. Source165820 passed2 checks;205 definitions/519 missing unchanged.
 Native unchanged from163946. No tests, startup, SQL mutation, active-client changes or deployment.
 
-## Mixed and helper-backed control roadmap draft — 6 October 2026
+## Mixed and helper-backed control roadmap draft â€” 6 October 2026
 
 Blackjack21/520568 at character12 and Soul Shock30/803989 at8 join the disabled
 AllowDevelopmentControlFixedCatalog draft, now14 entries. Optional crowd-control preference
@@ -3138,7 +3149,7 @@ zero values; source2/native29.9s passed170121. C++ style/whitespace and101-sourc
 definitions (106 ranked/411 standalone),850 runtime-unqualified groups. Earlier curves unchanged.
 Addon0.4.35-development/protocol4 unchanged. No tests, startup, SQL mutation or production changes.
 
-## Ravenous Strike rank practice — 6 October 2026
+## Ravenous Strike rank practice â€” 6 October 2026
 
 Disabled direct-leech catalog includes Bloodmage20/500123 Ravenous Strike, ten native ranks
 at6/12/18/24/30/36/42/48/54/60. Stronger ranks require proficiency10/20/40/60/80/100/120/140/160
@@ -3158,7 +3169,7 @@ profiles/210 declarations:121 ranked,7 mastery,80 fixed;126 baselines,516 missin
 (105 ranked/411 standalone),850 runtime-unqualified groups. Addon0.4.35-development/protocol4
 unchanged. No tests, startup, migration execution, active-client or production changes.
 
-## Titanstrike rank practice and duration-reference evidence — 6 October 2026
+## Titanstrike rank practice and duration-reference evidence â€” 6 October 2026
 
 Disabled direct-leech catalog includes Templar19/806521 Titanstrike, ranks at34/42/52
 requiring proficiency1/10/20. Original qualifying PvE damage earns at most one shared-receipt
@@ -3182,7 +3193,7 @@ baselines,515 missing definitions (104 ranked/411 standalone),850 runtime-unqual
 Addon0.4.35-development/protocol4 unchanged. All switches0. No tests, startup, migration
 execution, native spell changes, active-client installation or production changes.
 
-## Owned buff combat contribution prototype — 6 October 2026
+## Owned buff combat contribution prototype â€” 6 October 2026
 
 AllowDevelopmentBuffContribution=0 adds only class12 Brutal Shout300857, six native ranks at
 4/10/24/38/52/60 with proficiency1/10/20/40/60/80. It requires development rank pacing.
@@ -3219,7 +3230,7 @@ files syntax parsed using Lua5.1 loadstring, no addon chunks executed.210 profil
 850 runtime-unqualified groups. No tests, startup, contribution/rank/cache/menu execution,
 migration execution, launcher/payload publication or deployment. All switches remain0.
 
-## Complete Brutal Shout trainer ladder — 6 October 2026
+## Complete Brutal Shout trainer ladder â€” 6 October 2026
 
 Source trainer review found rank7 spell300887 at level65, trainer900012, requiring300886.
 The six-rank buff prefix alone fails the existing loaded trainer-boundary guard. A separate frozen
@@ -3243,7 +3254,7 @@ all850 source groups still require runtime qualification. Source2/native30.0s pa
 .cache/verify-all/20261006-200727/report.json; C++ style/whitespace and actual source exports passed.
 No tests, native startup, migration execution, gameplay, active addon changes or production operations.
 
-## Buff practice readiness in the menu — 6 October 2026
+## Buff practice readiness in the menu â€” 6 October 2026
 
 Unpublished addon0.4.37-development retains protocol4 and adds bounded typed Q state records only for
 BuffCombat route13. Missing, duplicate, out-of-range or unrelated state records reject the snapshot.
@@ -3262,7 +3273,7 @@ Source2/native30.5s passed .cache/verify-all/20261006-201157/report.json. C++ st
 104-source exports and five Lua5.1 syntax parses passed; addon chunks were not executed. No tests,
 native startup, gameplay/menu execution, active-client installation or production operations.
 
-## Preserve native melee auto attack — 6 October 2026
+## Preserve native melee auto attack â€” 6 October 2026
 
 Auto Attack6603 is explicitly excluded from ability practice for all21 custom classes. The actual
 native baseline grants it at level1 for classes12-32 without racial restrictions; source guards require
@@ -3276,7 +3287,7 @@ Source2/native32.2s passed .cache/verify-all/20261006-202046/report.json. C++ st
 standalone),210 profile identities/850 runtime-unqualified groups unchanged. No tests, startup,
 gameplay, active-client changes or production operations. The addon remains0.4.37-development.
 
-## Buff activity at combat cast start — 6 October 2026
+## Buff activity at combat cast start â€” 6 October 2026
 
 Buff contribution now latches accepted original owned buff eligibility during CanPrepare, before
 the native cast begins. A combat spell started without that buff cannot earn retroactive buff credit
@@ -3294,7 +3305,7 @@ Source2/native36.9s passed .cache/verify-all/20261006-202502/report.json, C++ st
 105-source exports and five Lua5.1 syntax parses passed. No tests/chunk execution/startup/gameplay,
 active-client installation or production changes. All flags0; addon0.4.37/protocol4 unchanged.
 
-## Effective owned buff eligibility — 6 October 2026
+## Effective owned buff eligibility â€” 6 October 2026
 
 The shared menu/award resolver requires a live self-owned aura application with effect0 applied,
 no pending removal, and a positive MOD_STAT amount. Native exclusive same-effect group queries
@@ -3315,7 +3326,7 @@ Source2/native31.6s passed .cache/verify-all/20261006-203259/report.json. C++ st
 entry was rejected and removed; final exports passed. No tests, addon execution, native startup,
 actual stacking/gameplay/menu qualification, active-client install or production changes. All flags0.
 
-## Paused buff menu categories — 6 October 2026
+## Paused buff menu categories â€” 6 October 2026
 
 Unpublished addon0.4.39-development/protocol4 uses shared model predicates for current training
 and paused practice. A learned trainable buff without ready owned-effect state belongs in Paused;
@@ -3329,7 +3340,7 @@ Five Lua5.1 files syntax parsed; no addon chunks executed. Whitespace passed. Na
 unchanged from1759bc7 and its source2/native31.6s passing203259 report, so no native rebuild was run.
 No tests, gameplay, startup, active-client install or production operations. All flags0.
 
-## One upcoming rank of practice — 6 October 2026
+## One upcoming rank of practice â€” 6 October 2026
 
 The user selected preparing one rank ahead. Startup-only AllowDevelopmentOneRankAhead defaults0
 and requires ranked pacing. Ranked version2/3 profiles compose into definition4 after any selected
@@ -3372,7 +3383,7 @@ an overly narrow source-level bound; final exports account for native levels abo
 claiming they can currently be learned. Source2 passed205236 with no selected suites; native
 unchanged from204851. No tests, native/client execution or production operations.
 
-## Native lock utility roadmap — 6 October 2026
+## Native lock utility roadmap â€” 6 October 2026
 
 Class12 Smash Lock570122 and class24 Melt Lock804662 appear as Fixed utilities at their native
 level16 introductions when the disabled utility roadmap is selected. Both are active unranked
@@ -3399,7 +3410,7 @@ native31.9s. C++ style/whitespace and actual source/coverage exports passed. No 
 startup, lock/skill/menu gameplay execution, client install, deployment or production changes.
 Addon0.4.39-development/protocol4 unchanged; all development switches remain0.
 
-## Independent owned stat buffs — 6 October 2026
+## Independent owned stat buffs â€” 6 October 2026
 
 The disabled owned-buff prototype now supports Enduring Shout12/680302 at native levels24/36/48/58,
 spells680302/681439/681440/681441 and proficiency1/10/20/40. Source/raw shape is frozen: active
@@ -3439,7 +3450,7 @@ source2 with no selected suites/native30.4s after snapshot coalescing; earlier21
 also passed. Style/whitespace/source exports passed. No tests, server startup, gameplay/migration/menu
 execution, active-client install, deployment or production changes. All switches remain0.
 
-## Tinker native lock utility — 6 October 2026
+## Tinker native lock utility â€” 6 October 2026
 
 Tinker28 Pick Lock804154 joins the disabled Fixed utility roadmap at native level14. The root
 retains OPEN_LOCK33/type1/base4/gameobject-item26 plus its self-targeted TRIGGER_SPELL64/helper71495.
@@ -3454,7 +3465,7 @@ counter/gate/benefit or automatic teaching. Existing racial/faction acquisition 
 style/whitespace/actual exports passed. Addon0.4.40/protocol4 unchanged; no new Lua syntax run needed.
 No tests, native startup, visual/lock/menu/gameplay execution, active install or production changes.
 
-## Complete source stat-buff ladders across classes — 6 October 2026
+## Complete source stat-buff ladders across classes â€” 6 October 2026
 
 The disabled owned stat-buff catalog adds eleven complete native source/trainer ladders:
 Inquisitor's Edict15/706741, Call of the Storm16/578311, Gift of Zeal19/706634,
@@ -3493,7 +3504,7 @@ VERIFY ALL: PASSED212214 source2/no selected suites/native30.9s, style/whitespac
 source/coverage/pacing/trainer exports passed. Addon0.4.40/protocol4 unchanged; no repeat Lua parsing.
 No tests, native startup, migration/menu/gameplay execution, active install or production changes.
 
-## Trainer gate audit — 6 October 2026
+## Trainer gate audit â€” 6 October 2026
 
 The source report separately audits all244 consistent ranked class-grant roots against3732 SQL
 trainer offers. Same-name raw ranks are reported with their actual prerequisites, without turning
@@ -3514,7 +3525,7 @@ The linked-ladder extension generator still reproduces all three frozen headers 
 Source213856 passed2 checks with no selected suites; native unchanged from212847. No tests,
 native startup, active installation, production mutation, publishing or server process operations.
 
-## Owned spell-power buff practice — 6 October 2026
+## Owned spell-power buff practice â€” 6 October 2026
 
 Four disabled ladders join owned-buff practice: Witching Edict15/707684, Grim Mandate23/572787,
 Devotion of Radiance27/575040 and Toxic Pheromones29/707689. Native source introductions/ranks and
@@ -3553,7 +3564,7 @@ including spell power, instead of calling every effect a stat. Wire schema4 and 
 Five Lua5.1 chunks syntax-parsed without execution; source214613 passed2/no selected suites.
 Native unchanged from214418. No active client install, publishing or production changes.
 
-## Owned mana-regeneration buff practice — 6 October 2026
+## Owned mana-regeneration buff practice â€” 6 October 2026
 
 Call of the Wind16/804018 six ranks14/24/34/44/54/60 and Seal of Al'ar24/803649 five ranks
 16/26/36/46/56 join the disabled owned-buff catalog. Complete source and same-name trainer ladders
@@ -3581,7 +3592,7 @@ coverage/trainer exports and five Lua5.1 syntax parses passed without chunks exe
 No tests, native startup, client/menu/gameplay/migration execution, active install, publish, deploy,
 restart or production configuration/database/process operations.
 
-## Owned resistance-buff practice — 6 October 2026
+## Owned resistance-buff practice â€” 6 October 2026
 
 Fire Protection18/582533 retains ranks36/48/60; Chill of the Tomb23/572173 retains26/32/44/50.
 Both complete source/trainer ladders join disabled owned-buff practice with active APPLY_AURA6/
@@ -3603,7 +3614,7 @@ VERIFY ALL: PASSED215104 source2/no selected suites/native31.5s; style/whitespac
 passed. No repeat Lua check needed. All switches0; no tests, native startup, client/menu/gameplay/
 migration execution, active install, publish, deploy, restart or production mutations.
 
-## Complete Arcane Protection and additive frozen catalogs — 6 October 2026
+## Complete Arcane Protection and additive frozen catalogs â€” 6 October 2026
 
 Arcane Protection26/573343 native prefix30/42/56 now joins disabled resistance practice, with
 trainer573346 at68/proficiency40 and573347 at76/proficiency60. Exact trainer900026/zero skill and
@@ -3628,7 +3639,7 @@ source/coverage/trainer exports passed. Report directory uses host date; task da
 America/Phoenix. No tests, native startup, gameplay/menu/client/migration execution, active install,
 publish, deploy, restart or production mutations. All development switches0.
 
-## Cultist exclusive Whispers practice — 6 October 2026
+## Cultist exclusive Whispers practice â€” 6 October 2026
 
 Whispers of Y'shaarj25/561389 native14/25/50 and Whispers of C'thun25/572791 native38/46/54
 join the disabled owned-buff catalog with complete three-rank source/trainer ladders. Shapes remain
@@ -3664,7 +3675,7 @@ VERIFY ALL: PASSED20261007-010428 source2/no selected suites/native31.2s, C++ st
 and final source/coverage/trainer exports passed. Addon0.4.43 unchanged; no redundant Lua parse.
 All switches0; owned-buff rules remain an isolated reversible design draft.
 
-## Chromie's complete trainer ladder — 6 October 2026
+## Chromie's complete trainer ladder â€” 6 October 2026
 
 Chromie's Wisdom22/801523 adds its four native source ranks12/28/42/56 to the disabled buff catalog,
 then composes through a separate frozen DevelopmentStatBuffTrainerRanks definition3 into rank5

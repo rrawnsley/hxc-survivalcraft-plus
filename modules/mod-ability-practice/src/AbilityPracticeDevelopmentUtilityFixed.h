@@ -31,6 +31,18 @@ inline constexpr std::array Class32Ability520269 = { AbilityRank{ 520269, 1, { 2
 inline constexpr std::array Class32Ability800995 = { AbilityRank{ 800995, 1, { 18, 1 } } };
 inline constexpr std::array Class32Ability803679 = { AbilityRank{ 803679, 1, { 28, 1 } } };
 
+inline constexpr std::array AncestralKeg = { AbilityRank{ 804748, 1, { 30, 1 } } };
+inline constexpr std::array MojoCauldron = { AbilityRank{ 807908, 1, { 60, 1 } } };
+inline constexpr std::array ConjureThunderkeg = { AbilityRank{ 807849, 1, { 42, 1 } } };
+inline constexpr std::array ConjureCampfire = { AbilityRank{ 570121, 1, { 6, 1 } } };
+inline constexpr std::array RebornFromAsh = {
+    AbilityRank{ 804231, 1, { 46, 1 } },
+    AbilityRank{ 807678, 2, { 52, 1 } },
+    AbilityRank{ 807679, 3, { 60, 1 } },
+    AbilityRank{ 807680, 4, { 70, 1 } },
+    AbilityRank{ 807681, 5, { 80, 1 } }
+};
+
 inline constexpr std::array Myotoxin = { AbilityRank{ 572304, 1, { 40, 1 } } };
 inline constexpr std::array Antivenom = { AbilityRank{ 800905, 1, { 16, 1 } } };
 inline constexpr std::array SmashLock = { AbilityRank{ 570122, 1, { 16, 1 } } };
@@ -38,6 +50,16 @@ inline constexpr std::array MeltLock = { AbilityRank{ 804662, 1, { 16, 1 } } };
 inline constexpr std::array TinkerPickLock = { AbilityRank{ 804154, 1, { 14, 1 } } };
 
 inline constexpr std::array Profiles = {
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 12, 804748, AbilityKind::Fixed, AncestralKeg, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 13, 807908, AbilityKind::Fixed, MojoCauldron, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 16, 807849, AbilityKind::Fixed, ConjureThunderkeg, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 24, 570121, AbilityKind::Fixed, ConjureCampfire, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 24, 804231, AbilityKind::Fixed, RebornFromAsh, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 13, 806240, AbilityKind::Fixed, Class13Ability806240, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -104,6 +126,24 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 12, 804748, { 50, 0, 0 }, { 47, 0, 0 }, {}, {}, {},
+        std::array<std::int32_t, 3>{ 9000118, 0, 0 }, std::array<std::int32_t, 3>{ 0, 0, 0 } },
+    Mechanic{ 13, 807908, { 50, 0, 0 }, { 47, 0, 0 }, {}, {}, {},
+        std::array<std::int32_t, 3>{ 129364, 0, 0 }, std::array<std::int32_t, 3>{ 0, 0, 0 } },
+    Mechanic{ 16, 807849, { 50, 0, 0 }, { 47, 0, 0 }, {}, {}, {},
+        std::array<std::int32_t, 3>{ 195002, 0, 0 }, std::array<std::int32_t, 3>{ 0, 0, 0 } },
+    Mechanic{ 24, 570121, { 50, 0, 0 }, { 47, 0, 0 }, {}, {}, {},
+        std::array<std::int32_t, 3>{ 194528, 0, 0 }, std::array<std::int32_t, 3>{ 0, 0, 0 } },
+    Mechanic{ 24, 804231, { 113, 94, 0 }, { 0, 1, 0 }, {}, {}, {},
+        std::array<std::int32_t, 3>{ 635, 635, 0 }, std::array<std::int32_t, 3>{ 399, 399, 0 } },
+    Mechanic{ 24, 807678, { 113, 94, 0 }, { 0, 1, 0 }, {}, {}, {},
+        std::array<std::int32_t, 3>{ 833, 833, 0 }, std::array<std::int32_t, 3>{ 582, 582, 0 } },
+    Mechanic{ 24, 807679, { 113, 94, 0 }, { 0, 1, 0 }, {}, {}, {},
+        std::array<std::int32_t, 3>{ 1030, 1030, 0 }, std::array<std::int32_t, 3>{ 819, 819, 0 } },
+    Mechanic{ 24, 807680, { 113, 94, 0 }, { 0, 1, 0 }, {}, {}, {},
+        std::array<std::int32_t, 3>{ 1250, 1250, 0 }, std::array<std::int32_t, 3>{ 1319, 1319, 0 } },
+    Mechanic{ 24, 807681, { 113, 94, 0 }, { 0, 1, 0 }, {}, {}, {},
+        std::array<std::int32_t, 3>{ 1750, 1750, 0 }, std::array<std::int32_t, 3>{ 2419, 2419, 0 } },
     Mechanic{ 13, 806240, { 38, 0, 0 }, { 21, 0, 0 }, { 0, 0, 0 } },
     Mechanic{ 14, 800353, { 126, 0, 0 }, { 6, 0, 0 }, { 0, 0, 0 } },
     Mechanic{ 14, 804052, { 38, 38, 0 }, { 22, 22, 0 }, { 15, 15, 0 } },
@@ -132,6 +172,22 @@ inline constexpr std::array Mechanics = {
         std::array<std::int32_t, 3>{ 1, 0, 0 }, std::array<std::int32_t, 3>{ 14, 0, 0 } },
     Mechanic{ 28, 804154, { 33, 64, 0 }, { 26, 1, 0 }, {}, {}, { 0, 71495, 0 },
         std::array<std::int32_t, 3>{ 1, 0, 0 }, std::array<std::int32_t, 3>{ 4, 0, 0 } }
+};
+
+struct ObjectMechanic
+{
+    std::uint32_t ClassId;
+    std::uint32_t SpellId;
+    std::uint32_t Entry;
+    std::uint32_t Type;
+    std::uint32_t DisplayId;
+};
+
+inline constexpr std::array Objects = {
+    ObjectMechanic{ 12, 804748, 9000118, 22, 1011172 },
+    ObjectMechanic{ 13, 807908, 129364, 22, 57580 },
+    ObjectMechanic{ 16, 807849, 195002, 22, 1013445 },
+    ObjectMechanic{ 24, 570121, 194528, 8, 602 }
 };
 
 struct HelperMechanic

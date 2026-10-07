@@ -1,0 +1,462 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Pyromancer native campfire and resurrection utilities",
+  "contract": "Conjure Campfire creates its native Brazier and Reborn from Ash resurrects an accepting dead ally. Both remain Fixed with no practice points. All five resurrection ranks retain native trainer-level unlocks without practice. Native original casts and spellbook purchases are exercised in an isolated realm with native auto-progression disabled.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 46
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 24,
+      "level": 46
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 570121
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 804231
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 570121,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 804231,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 807678,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 570121,
+      "target": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "owned_gameobject_count",
+      "entry": 194528,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.570121",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 7068,
+      "count": 1
+    },
+    {
+      "action": "die",
+      "actor": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 804231,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_cast_count",
+      "spell": 804231,
+      "equals": 1,
+      "within_ms": 12000
+    },
+    {
+      "action": "client_packet",
+      "actor": "ally",
+      "opcode": 348,
+      "fields": [
+        {
+          "actor_guid": "caster"
+        },
+        {
+          "u8": 1
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "alive",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "health",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.804231",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "money",
+      "actor": "caster",
+      "copper": 1000000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 97930
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "owned_creature_count",
+      "entry": 75115,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_level",
+      "actor": "caster",
+      "value": 51
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 807678,
+      "equals": 0
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "trainer_window_state",
+      "spell": 807678,
+      "equals": 1
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "caster",
+      "spell": 807678
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 807678,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "actor": "caster",
+      "value": 52
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "trainer_window_state",
+      "spell": 807678,
+      "equals": 0
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "caster",
+      "spell": 807678
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 807678,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.804231",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "actor": "caster",
+      "value": 59
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 807679,
+      "equals": 0
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "trainer_window_state",
+      "spell": 807679,
+      "equals": 1
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "caster",
+      "spell": 807679
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 807679,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "actor": "caster",
+      "value": 60
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "trainer_window_state",
+      "spell": 807679,
+      "equals": 0
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "caster",
+      "spell": 807679
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 807679,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.804231",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "actor": "caster",
+      "value": 69
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 807680,
+      "equals": 0
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "trainer_window_state",
+      "spell": 807680,
+      "equals": 1
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "caster",
+      "spell": 807680
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 807680,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "actor": "caster",
+      "value": 70
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "trainer_window_state",
+      "spell": 807680,
+      "equals": 0
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "caster",
+      "spell": 807680
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 807680,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.804231",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "actor": "caster",
+      "value": 79
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 807681,
+      "equals": 0
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "trainer_window_state",
+      "spell": 807681,
+      "equals": 1
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "caster",
+      "spell": 807681
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 807681,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "actor": "caster",
+      "value": 80
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "trainer_window_state",
+      "spell": 807681,
+      "equals": 0
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "caster",
+      "spell": 807681
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 807681,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.804231",
+      "index": 4,
+      "equals": 0
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  }
+}

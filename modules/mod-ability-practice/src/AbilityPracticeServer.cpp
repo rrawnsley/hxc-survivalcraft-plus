@@ -845,28 +845,30 @@ bool MatchesPassiveFixedMechanic(Practice::AbilityProfile const& profile)
     return true;
 }
 
-bool MatchesUtilityFixedMechanic(Practice::AbilityProfile const& profile)
+bool MatchesUtilityFixedRankMechanic(std::uint32_t classId, std::uint32_t spellId)
 {
-    auto const& authored = Practice::DevelopmentUtilityFixed::Profiles;
-    auto const found = std::find_if(authored.begin(), authored.end(),
-        [&profile](Practice::AbilityProfile const& entry)
-        {
-            return entry.Definition.ClassId == profile.Definition.ClassId &&
-                entry.Definition.AbilityId == profile.Definition.AbilityId;
-        });
-    if (found == authored.end())
-        return true;
-    if (!SameProfile(profile, *found))
-        return false;
     auto const& mechanics = Practice::DevelopmentUtilityFixed::Mechanics;
     auto const mechanic = std::find_if(mechanics.begin(), mechanics.end(),
-        [&profile](Practice::DevelopmentUtilityFixed::Mechanic const& entry)
+        [classId, spellId](Practice::DevelopmentUtilityFixed::Mechanic const& entry)
         {
-            return entry.ClassId == profile.Definition.ClassId && entry.SpellId == profile.Definition.AbilityId;
+            return entry.ClassId == classId && entry.SpellId == spellId;
         });
-    SpellInfo const* info = sSpellMgr->GetSpellInfo(profile.Definition.AbilityId);
+    SpellInfo const* info = sSpellMgr->GetSpellInfo(spellId);
     if (mechanic == mechanics.end() || !info || info->IsPassive())
         return false;
+    if (info->Effects[0].IsEffect(SPELL_EFFECT_TRANS_DOOR))
+    {
+        auto const& objects = Practice::DevelopmentUtilityFixed::Objects;
+        auto const spec = std::find_if(objects.begin(), objects.end(), [classId, spellId](auto const& entry)
+        {
+            return entry.ClassId == classId && entry.SpellId == spellId;
+        });
+        if (spec == objects.end() || info->Effects[0].MiscValue != static_cast<std::int32_t>(spec->Entry))
+            return false;
+        GameObjectTemplate const* object = sObjectMgr->GetGameObjectTemplate(spec->Entry);
+        if (!object || object->type != spec->Type || object->displayId != spec->DisplayId)
+            return false;
+    }
     for (std::size_t index = 0; index < mechanic->EffectIds.size(); ++index)
     {
         auto const& effect = info->Effects[index];
@@ -874,10 +876,22 @@ bool MatchesUtilityFixedMechanic(Practice::AbilityProfile const& profile)
             effect.TriggerSpell != mechanic->TriggerSpellIds[index] ||
             effect.TargetA.GetTarget() != mechanic->TargetAIds[index] ||
             effect.TargetB.GetTarget() != mechanic->TargetBIds[index])
+        {
+            LOG_ERROR("module.ability_practice",
+                "Rejected utility shape: class={}, spell={}, slot={}, effect={}, aura={}, trigger={}, "
+                "targetA={}, targetB={}",
+                classId, spellId, index, effect.Effect, effect.ApplyAuraName, effect.TriggerSpell,
+                effect.TargetA.GetTarget(), effect.TargetB.GetTarget());
             return false;
+        }
         if ((mechanic->MiscValues && effect.MiscValue != (*mechanic->MiscValues)[index]) ||
             (mechanic->BasePoints && effect.BasePoints != (*mechanic->BasePoints)[index]))
+        {
+            LOG_ERROR("module.ability_practice",
+                "Rejected utility values: class={}, spell={}, slot={}, misc={}, base={}",
+                classId, spellId, index, effect.MiscValue, effect.BasePoints);
             return false;
+        }
         if (!effect.TriggerSpell)
             continue;
         auto const& helpers = Practice::DevelopmentUtilityFixed::Helpers;
@@ -898,6 +912,26 @@ bool MatchesUtilityFixedMechanic(Practice::AbilityProfile const& profile)
         }
     }
     return true;
+}
+
+bool MatchesUtilityFixedMechanic(Practice::AbilityProfile const& profile)
+{
+    auto const& authored = Practice::DevelopmentUtilityFixed::Profiles;
+    auto const found = std::find_if(authored.begin(), authored.end(),
+        [&profile](Practice::AbilityProfile const& entry)
+        {
+            return entry.Definition.ClassId == profile.Definition.ClassId &&
+                entry.Definition.AbilityId == profile.Definition.AbilityId;
+        });
+    if (found == authored.end())
+        return true;
+    if (!SameProfile(profile, *found))
+        return false;
+    return std::all_of(profile.Definition.Ranks.begin(), profile.Definition.Ranks.end(),
+        [&profile](Practice::AbilityRank const& rank)
+        {
+            return MatchesUtilityFixedRankMechanic(profile.Definition.ClassId, rank.SpellId);
+        });
 }
 
 bool MatchesControlFixedMechanic(Practice::AbilityProfile const& profile)

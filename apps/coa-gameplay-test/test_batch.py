@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import secrets
 import signal
+import subprocess
 import sys
 import tempfile
 import threading
@@ -49,9 +50,24 @@ def write(path, value):
     os.replace(temporary, path)
 
 
+def append_log(name, value):
+    with open(Path(__file__).with_name(name), 'a', encoding='utf-8', newline='\n') as stream:
+        if os.name == 'nt':
+            import msvcrt
+            stream.seek(0)
+            msvcrt.locking(stream.fileno(), msvcrt.LK_LOCK, 1)
+        try:
+            stream.seek(0, os.SEEK_END)
+            stream.write(value)
+            stream.flush()
+        finally:
+            if os.name == 'nt':
+                stream.seek(0)
+                msvcrt.locking(stream.fileno(), msvcrt.LK_UNLCK, 1)
+
+
 def log(name, value):
-    with open(Path(__file__).with_name(name), 'a') as stream:
-        stream.write(json.dumps(value) + '\n')
+    append_log(name, json.dumps(value) + '\n')
 
 
 def listen():
@@ -160,8 +176,7 @@ simulated = clock == 'simulated'
 start_hour = int(config['CoAGameplayTest.StartHour'])
 realm = {'hour': start_hour}
 starts = Path(__file__).with_name('starts.log')
-with open(starts, 'a') as stream:
-    stream.write(f"{'queue' if cases else 'single'} {os.getpid()}\n")
+append_log('starts.log', f"{'queue' if cases else 'single'} {os.getpid()}\n")
 log('clocks.log', {'mode': 'queue' if cases else 'single',
                    **{name: config[f'CoAGameplayTest.{name}'] for name in run.CLOCK_SETTINGS}})
 log('databases.log', {'mode': 'queue' if cases else 'single', **{key: config[key] for key in DATABASE_KEYS}})
@@ -389,6 +404,28 @@ class BatchTests(unittest.TestCase):
 
     def simulated(self, *arguments):
         return self.batch('--fresh-databases', '--clock', 'simulated', *arguments)
+
+    def test_fake_worker_log_appends_are_complete(self):
+        prefix = FAKE_SERVER.split("\n\ndef listen():", 1)[0]
+        code = "__file__ = " + repr(str(self.fake)) + "\n" + prefix + (
+            "\nfor index in range(100):\n"
+            "    log('stress.log', {'worker': sys.argv[2], 'index': index, 'payload': 'x' * 4096})\n")
+        processes = [subprocess.Popen([sys.executable, '-c', code, str(DIRECTORY), str(worker)],
+                     stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) for worker in range(4)]
+        try:
+            for process in processes:
+                stdout, stderr = process.communicate(timeout=20)
+                self.assertEqual(process.returncode, 0, stdout + stderr)
+        finally:
+            for process in processes:
+                if process.poll() is None:
+                    process.kill()
+                    process.wait(timeout=5)
+        events = self.events('stress.log')
+        self.assertEqual(len(events), 400)
+        self.assertEqual({(event['worker'], event['index']) for event in events},
+                         {(str(worker), index) for worker in range(4) for index in range(100)})
+        self.assertTrue(all(event['payload'] == 'x' * 4096 for event in events))
 
     def test_cases_pass_across_two_workers_with_verifiable_bundles(self):
         code, result = self.batch('--fresh-databases', '--jobs', '2', '--scenario', *SLOW, 'alpha')
