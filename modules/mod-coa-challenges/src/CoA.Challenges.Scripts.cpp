@@ -998,11 +998,23 @@ namespace CoAChallenges
     // Adventure player to hit an untapped monster (or one their group tapped)
     // scales it by their tier until it leaves combat. A flat TOTAL_VALUE
     // modifier survives the aura-driven recalculation of the health multiplier.
+    Player const* ChallengeParticipant(Player const* player)
+    {
+        if (!player || !player->GetSession() || !player->GetSession()->IsBot())
+            return player;
+        Group const* group = player->GetGroup();
+        Player const* leader = group ? ObjectAccessor::FindPlayer(group->GetLeaderGUID()) : nullptr;
+        if (leader && leader->GetSession() && !leader->GetSession()->IsBot())
+            return leader;
+        return player;
+    }
+
     uint32 AdventureModeTier(Player* player)
     {
         if (!player || !ChallengesEnabled())
             return 0;
-        for (auto const& [cid, level] : CachedCharChallenges(player->GetGUID().GetCounter()))
+        Player const* participant = ChallengeParticipant(player);
+        for (auto const& [cid, level] : CachedCharChallenges(participant->GetGUID().GetCounter()))
             if (cid == 211 || cid == 425)
                 return std::max<uint32>(level, 1);
         return 0;
@@ -1077,6 +1089,8 @@ namespace CoAChallenges
     // other.
     uint32 RestrictedTappingChallenge(ObjectGuid guid)
     {
+        if (Player const* participant = ChallengeParticipant(ObjectAccessor::FindPlayer(guid)))
+            guid = participant->GetGUID();
         for (auto const& [cid, unusedLevel] : CachedCharChallenges(guid.GetCounter()))
             if (RuleListContains(ChallengeRules(cid), "CHALLENGE_RULES_TYPE_STRICT_CHALLENGE_RESTRICTED_TAPPING"))
                 return cid;
