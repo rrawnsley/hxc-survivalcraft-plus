@@ -13953,7 +13953,7 @@ void Player::SetTemporarySpellReplacement(uint32 original, uint32 replacement)
             return;
         m_temporarySpellReplacements[original] = replacement;
     }
-    if (previous != replacement && IsInWorld())
+    if (previous != replacement && IsInWorld() && HasActiveSpell(original))
     {
         WorldPacket packet(SMSG_SUPERCEDED_SPELL, 8);
         packet << previous << replacement;
@@ -17064,6 +17064,7 @@ void Player::SetRestFlag(RestFlag restFlag, uint32 triggerId /*= 0*/)
     {
         _restTime = GameTime::GetGameTime().count();
         SetPlayerFlag(PLAYER_FLAGS_RESTING);
+        UpdateManaRegen();
     }
 
     if (triggerId)
@@ -17079,6 +17080,7 @@ void Player::RemoveRestFlag(RestFlag restFlag)
     {
         _restTime = 0;
         RemovePlayerFlag(PLAYER_FLAGS_RESTING);
+        UpdateManaRegen();
     }
 }
 
