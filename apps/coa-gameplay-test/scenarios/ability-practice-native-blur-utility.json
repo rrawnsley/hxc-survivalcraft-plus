@@ -1,0 +1,204 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Blur native defense and cooldown",
+  "contract": "Native Blur retains both six-second defensive aura amounts, expiry and thirty-second cooldown without practice. Aura evidence does not measure combat threat or area-damage deltas.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apblurtest",
+      "race": 1,
+      "class": 14,
+      "level": 26
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 578345
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.578345",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.578345",
+      "index": 1,
+      "value": 999
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.578345",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.578345",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.578345",
+      "index": 4,
+      "value": 101
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 578345
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_stacks",
+      "spell": 578345,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 578345,
+      "effect": 0,
+      "equals": -90000000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 578345,
+      "effect": 1,
+      "equals": -20
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 578345,
+      "min": 5500,
+      "max": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cooldown_ms",
+      "spell": 578345,
+      "min": 29000,
+      "max": 30000
+    },
+    {
+      "action": "wait",
+      "ms": 6500
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_stacks",
+      "spell": 578345,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 578345
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_stacks",
+      "spell": 578345,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cooldown_ms",
+      "spell": 578345,
+      "min": 22000,
+      "max": 24000
+    },
+    {
+      "action": "wait",
+      "ms": 24000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 578345
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_stacks",
+      "spell": 578345,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.578345",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.578345",
+      "index": 1,
+      "equals": 999
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.578345",
+      "index": 2,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.578345",
+      "index": 3,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.578345",
+      "index": 4,
+      "equals": 101
+    }
+  ]
+}

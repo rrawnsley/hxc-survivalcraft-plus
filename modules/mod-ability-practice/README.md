@@ -8,8 +8,8 @@ The feature is not complete or approved for release.
 
 - Per-ability deterministic meaningful-use practice, automatic ranks, preserved learned ranks and saved
   progress, and one upcoming rank of preparation are implemented in the development module.
-- The catalog contains 253 unique profiles across all 21 classes: 152 ranked, eight mastery and 93 Fixed.
-  There are 255 declarations with two shared identities, 147 native baseline exclusions, and 450 groups
+- The catalog contains 254 unique profiles across all 21 classes: 152 ranked, eight mastery and 94 Fixed.
+  There are 256 declarations with two shared identities, 147 native baseline exclusions, and 449 groups
   still needing definitions (73 ranked and 378 standalone). Startup acceptance of metadata does not
   qualify every ability's gameplay. The discovery exports intentionally retain their unqualified status.
 - Draft pacing targets 30â€“60 combat minutes per rank, with 45-minute authored assumptions. Effective
@@ -18,7 +18,7 @@ The feature is not complete or approved for release.
   remaining, level requirements, future caps, mastery milestones and Fixed native utilities.
   It is unpublished and has not been installed in the active client.
 - The authorized C++/Lua 5.1 harness checks all 152 ranked policies, eight mastery policies and 92 Fixed
-  declarations; 775 typed snapshots decode, validate and mock-render. These are not client pixel tests.
+  declarations; 778 typed snapshots decode, validate and mock-render. These are not client pixel tests.
 - Native isolated gameplay has exercised original-cast enrollment and bot exclusion, version1-to4
   fraction conversion, automatic level-gated rank learning, owned buff contribution, gray/dummy
   exclusions, unknown saved-version preservation, healing mastery progress and periodic shared receipts.
@@ -109,6 +109,21 @@ for all three rank IDs. Real-clock menu PASSED `20261007-152744` (68.5s), includ
 and no practice requirement. Unknown definition999/proficiency100/points101 remain unchanged.
 No isolated retry qualified any case. Native movement animation/client acknowledgement and pixels
 remain unverified. No gameplay formulas, cooldowns, charges or production settings were changed.
+
+### Blur native defense utility
+
+Blur (class14/578345, native level26 and matching trainer900014 offer) remains full-strength native
+utility without practice, rewards or automatic teaching. Loaded aura slots103/229, native threat amount,
+all-school mask127, six-second duration and30-second cooldown guard its Fixed declaration.
+Native test observed threat aura-90000000 and area avoidance-20, expiry, early-recast refusal and a
+successful recast after cooldown. Unknown definition999/proficiency100/points101 stayed unchanged.
+These are actual aura/lifecycle observations, not measured combat threat or area-damage deltas.
+
+Source9/build31.8s/harness4.2s PASSED `20261007-153308`, including778typed snapshots.
+Native utility PASSED `20261007-153526` (63.6s simulated), real-clock menu PASSED
+`20261007-153650` (71.8s). No failed cases or isolated reruns qualified. Source exports254unique/
+256declarations,152ranked/8mastery/94Fixed,449pending. Actual client pixels remain unverified.
+No native effects, cooldowns, balance, production configuration or active client were changed.
 
 ## Reproducing native qualification
 

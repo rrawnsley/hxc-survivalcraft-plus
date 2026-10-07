@@ -441,6 +441,17 @@ def build_drafts(candidates, root):
             required.extend(['soul-capture-loaded-script-registration-and-trigger-suppression',
                              'soul-capture-corpse-resource-and-post-combat-use-design',
                              'soul-capture-native-corpse-proof-and-actual-recovery-original-cast'])
+        if (class_id, ability_id) == (14, 578345):
+            raw = members[ability_id].get('rawDbc', {})
+            details = raw.get('effectDetails', [])
+            expected = [(6, 103, 1, 0, 0, -90000001), (6, 229, 1, 0, 0, -21), (0, 0, 0, 0, 0, 0)]
+            if (len(ranks) != 1 or ranks[0]['characterLevel'] != 26 or raw.get('passive') is not False or
+                    raw.get('rankLabel') or len(details) != 3 or [(v.get('effectId'), v.get('auraId'),
+                        v.get('implicitTargetA'), v.get('implicitTargetB'), v.get('triggerSpellId'),
+                        v.get('basePoints')) for v in details] != expected or
+                    ranks[0]['rawCastProfile']['recoveryMilliseconds'] != 30000):
+                raise ValueError('Reviewed Blur source/raw evidence changed')
+            required.append('native-temporary-threat-and-area-damage-protection-not-recast-practice')
         if (class_id, ability_id) == (14, 500028):
             expected_ids = [500028, 500422, 500423]
             if ([rank['spellId'] for rank in ranks] != expected_ids or

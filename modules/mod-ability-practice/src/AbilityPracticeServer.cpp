@@ -947,6 +947,9 @@ bool MatchesUtilityFixedRankMechanic(std::uint32_t classId, std::uint32_t spellI
                 return false;
         }
     }
+    if (spellId == 578345 &&
+        (info->SpellFamilyName != 20 || info->RecoveryTime != 30000 || info->GetDuration() != 6000))
+        return false;
     if (spellId == 562720 &&
         (info->SpellFamilyName != 26 || info->Effects[EFFECT_1].Amplitude != 3000 ||
             info->Effects[EFFECT_2].Amplitude != 3000 ||
