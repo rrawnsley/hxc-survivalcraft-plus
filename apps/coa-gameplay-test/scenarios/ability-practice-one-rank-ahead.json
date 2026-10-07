@@ -1,0 +1,174 @@
+{
+  "schema": 1,
+  "name": "Ability practice: one rank ahead at native level boundary",
+  "contract": "Rank2 may be prepared at level9, but further qualifying casts retain proficiency10 and partial progress0. Reaching character level10 automatically learns the prepared rank2 and opens practice toward rank3.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 9,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "caster",
+      "entry": 36,
+      "level": 9,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803950
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 3,
+      "value": 10
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "relog",
+      "actor": "caster"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803950,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 3,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 4,
+      "equals": 0,
+      "label": "Preparation stays capped one rank ahead"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 503231,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 6000,
+      "label": "Allow the shared native Lava Shard category cooldown to expire"
+    },
+    {
+      "action": "set_level",
+      "actor": "caster",
+      "value": 10
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 503231,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 503231
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 503231,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 503231,
+      "equals": 0,
+      "label": "Rank2 cast has no native failure"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 503231,
+      "target": "target",
+      "min": 1,
+      "label": "Rank2 actually deals damage"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 4,
+      "equals": 300,
+      "label": "New character level opens next practice band"
+    }
+  ]
+}

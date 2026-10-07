@@ -6,6 +6,8 @@
 #include "AbilityPracticeDevelopment.h"
 #include "AbilityPracticeProfiles.h"
 
+#include <optional>
+
 namespace AbilityPractice::DevelopmentPassiveFixed
 {
 inline constexpr std::array BarbaricRage = { AbilityRank{ 804337, 1, { 2, 1 } } };
@@ -60,6 +62,8 @@ struct Mechanic
     std::array<std::uint32_t, 3> TriggerSpellIds = {};
     std::array<std::uint32_t, 3> TargetAIds = { 1, 0, 0 };
     std::uint32_t RequiredSpellFamily = 0;
+    std::optional<std::array<std::uint32_t, 3>> EffectiveAuraIds{};
+    std::optional<std::array<std::uint32_t, 3>> EffectiveTriggerSpellIds{};
 };
 
 inline constexpr std::array Mechanics = {
@@ -69,7 +73,8 @@ inline constexpr std::array Mechanics = {
     Mechanic{ 29, 503907, { 4, 0, 0 } },
     Mechanic{ 30, 561082, { 4, 0, 0 } },
     Mechanic{ 30, 807084, { 107, 0, 0 } },
-    Mechanic{ 17, 804345, { 4, 42, 0 }, { 6, 6, 0 }, { 0, 800999, 0 }, { 1, 1, 0 } },
+    Mechanic{ 17, 804345, { 4, 42, 0 }, { 6, 6, 0 }, { 0, 800999, 0 }, { 1, 1, 0 }, 23,
+        std::array<std::uint32_t, 3>{ 4, 4, 0 }, std::array<std::uint32_t, 3>{ 0, 0, 0 } },
     Mechanic{ 18, 707372, { 42, 0, 0 }, { 6, 0, 0 }, { 707373, 0, 0 } },
     Mechanic{ 23, 680283, { 107, 0, 0 }, { 6, 183, 0 }, { 0, 500524, 0 }, { 1, 1, 0 } },
     Mechanic{ 23, 804360, { 4, 107, 4 }, { 6, 6, 6 }, {}, { 1, 1, 1 }, 29 },

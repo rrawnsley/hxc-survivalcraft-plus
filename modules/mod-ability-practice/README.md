@@ -1,8 +1,66 @@
-# Ability practice â€” development foundation
+# Ability practice — isolated development
 
-This module is under development on `codex/ability-practice`. It implements the deterministic
-practice policy, explicit catalog model, bounded original-action accounting and a development observation path.
-The module and addon are staged in this checkout. Nothing is installed or activated in production.
+Development continues on `codex/ability-practice-catalog` in
+`C:/Azerothcore-CoA/worktrees/ability-practice-catalog`. Production remains unchanged.
+The feature is not complete or approved for release.
+
+## Current state — 6 October 2026
+
+- Per-ability deterministic meaningful-use practice, automatic ranks, preserved learned ranks and saved
+  progress, and one upcoming rank of preparation are implemented in the development module.
+- The catalog contains 241 unique profiles across all 21 classes: 151 ranked, seven mastery and 83 Fixed.
+  There are 243 declarations with two shared identities, 147 native baseline exclusions, and 462 groups
+  still needing definitions (75 ranked and 387 standalone). Startup acceptance of metadata does not
+  qualify every ability's gameplay. The discovery exports intentionally retain their unqualified status.
+- Draft pacing targets 30–60 combat minutes per rank, with 45-minute authored assumptions. Effective
+  use frequency and final balance have not been measured or approved.
+- The addon is 0.4.43-development, protocol 4. It shows current ranks, proficiency, exact qualifying uses
+  remaining, level requirements, future caps, mastery milestones and Fixed native utilities.
+  It is unpublished and has not been installed in the active client.
+- The authorized C++/Lua 5.1 harness checks all 151 ranked policies, seven mastery policies and 83 Fixed
+  declarations; 730 typed snapshots decode, validate and mock-render. These are not client pixel tests.
+- Native isolated gameplay has exercised original-cast enrollment and bot exclusion, version1-to4
+  fraction conversion, automatic level-gated rank learning, owned buff contribution, gray/dummy
+  exclusions, unknown saved-version preservation, healing mastery progress and periodic shared receipts.
+  Native typed chat delivery also returns the exact Lava Shard state, 29 uses to the next point, rank2
+  requirements and the next cap at level10. All 21 classes received complete native schema4 snapshots
+  without unreadable-progress failures. The one-rank-ahead boundary also passed: practice pauses at proficiency10 before level10, then
+  rank2 is learned and its next meaningful cast earns300 points after the shared cooldown expires.
+- Native activation now accepts an exact verified trainer prefix when appended trainer ranks have no
+  core chain nodes. Missing, partial or foreign nodes still reject activation. Demon's Blood validates
+  its loaded Xoroth aura conversion separately from its raw DBC shape. Full development startup accepts
+  241 profiles on the disposable test server; default production switches remain zero.
+- Latest build/harness: `.cache/verify-all/20261007-023125/report.json`, build42.7s and harness4.5s
+  passed. Its source stage failed on a new scenario typo and existing Windows fixture assumptions;
+  those were repaired. Subsequent source verification passed all 15 selected checks at
+  `.cache/verify-all/20261007-025348/report.json` (111.2s).
+- Native gameplay reports: saved-rank and owned-buff cases passed in `20261007-021024`; original cast
+  in `20261007-021223`; farming/unknown version in `20261007-021829`; healing in `20261007-022338`;
+  periodic receipts in `20261007-022641`; one-rank-ahead in `20261007-025153`; typed menu in
+  `20261007-024804` (real clock for intentionally
+  paced transport). The saved-rank/buff report's overall result failed because another fixture in that
+  batch was incorrect; only those passing cases are cited as evidence. All-class menu groups passed
+  in `20261007-025336` (172.7s, three cases, real clock).
+
+## Reproducing native qualification
+
+Use `py -B tools/verify_all.py` with an isolated settings file and separate module configuration directory.
+The fixture `apps/coa-tests/ability_practice/native-qualification.conf` supplies the tested switches;
+copy it as `AbilityPractice.conf` into that separate test directory. The runner must create disposable
+`coa_test_*` auth/character databases, use its isolated world copy and bind loopback on an unused port.
+Keep source configurations read-only. Do not copy credentials into this repository or reports.
+
+Select `ability-practice-*` scenarios explicitly, with `--gameplay-jobs 1` for bounded resource use. Use `--gameplay-clock real` for the native-menu case,
+whose contract tests real-time paced addon delivery. Other qualified cases used the simulated clock.
+Runtime DLLs must match the built binary's dependencies, including its OpenSSL provider.
+
+Continue remaining definitions, outcome/acquisition qualification, native mastery benefit checks,
+measured pacing and actual client rendering before release. A production release must be coordinated
+with the user's explicit requirement to preserve ongoing play.
+
+## Earlier catalog review notes
+
+The following notes predate the runtime qualification above. Their pending-test statements are historical.
 
 Honor18/300856 stages its six native ranks6/12/24/38/52/60 and Rite of Power30/578126 its four
 native ranks24/38/52/60. Both retain positive strength effects in slot1, with all other slots empty.

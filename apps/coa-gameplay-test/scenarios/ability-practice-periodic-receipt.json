@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "name": "Ability practice: original periodic cast shares one award",
+  "contract": "One original Cindergrip application earns one qualifying use. Its successful root and multiple actual damage ticks share the original cast receipt; neither later ticks nor relogging mint additional practice.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 6,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "caster",
+      "entry": 36,
+      "level": 6,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 805476
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 805476,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 15000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 805476,
+      "target": "target",
+      "min": 2,
+      "label": "Several actual damage ticks resolve"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.805476",
+      "index": 3,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.805476",
+      "index": 4,
+      "equals": 270,
+      "label": "Root and repeated ticks share one qualifying use"
+    },
+    {
+      "action": "wait",
+      "ms": 15000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.805476",
+      "index": 4,
+      "equals": 270,
+      "label": "Further ticks do not mint extra uses"
+    },
+    {
+      "action": "relog",
+      "actor": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.805476",
+      "index": 4,
+      "equals": 270,
+      "label": "Receipt award remains saved once"
+    }
+  ]
+}

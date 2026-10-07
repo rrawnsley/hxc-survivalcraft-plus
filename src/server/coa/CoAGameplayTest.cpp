@@ -2763,13 +2763,14 @@ private:
             return std::any_of(lines.begin(), lines.end(), [&needle](std::string const& line)
                 { return line.find(needle) != std::string::npos; }) ? 1.0 : 0.0;
         }
-        if (metric == "whispers_received")
+        if (metric == "whispers_received" || metric == "whisper_contains")
         {
             ObjectGuid const from = GetPlayer(step.get<std::string>("from"))->GetGUID();
             std::string const text = step.get<std::string>("text");
             auto const& whispers = _actors.at(step.get<std::string>("actor")).whispers;
             return double(std::count_if(whispers.begin(), whispers.end(), [&](auto const& whisper)
-                { return whisper.first == from && whisper.second == text; }));
+                { return whisper.first == from && (metric == "whisper_contains"
+                    ? whisper.second.find(text) != std::string::npos : whisper.second == text); }));
         }
         if (metric == "notifications")
             return double(_actors.at(step.get<std::string>("actor")).notifications);

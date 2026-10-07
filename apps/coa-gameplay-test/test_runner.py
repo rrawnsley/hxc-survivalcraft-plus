@@ -15,6 +15,19 @@ import run
 
 
 class RunnerTests(unittest.TestCase):
+    def test_whisper_contains_requires_a_sender_and_nonempty_text(self):
+        for extra in ({'from': 'caster', 'text': 'HXAP\tB|4|'}, {},
+                      {'from': 'missing', 'text': 'HXAP'}, {'from': 'caster', 'text': ''}):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({'action': 'assert', 'actor': 'caster',
+                                     'metric': 'whisper_contains', 'min': 1, **extra})
+            with self.subTest(extra=extra):
+                if extra.get('from') == 'caster' and extra.get('text'):
+                    self.assertIs(run.validate(scenario), scenario)
+                else:
+                    with self.assertRaises(ValueError):
+                        run.validate(scenario)
+
     def test_spell_family_flags_require_a_spell_and_valid_word(self):
         for word in (0, 1, 2):
             scenario = copy.deepcopy(self.scenario)

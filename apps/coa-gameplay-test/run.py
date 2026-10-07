@@ -50,7 +50,7 @@ METRICS = {
     'mail_pool_item_count', 'notifications', 'notification_contains',
     'bank_bag_slots', 'bank_shows',
     'system_messages',
-    'system_message_contains', 'whispers_received', 'challenge_start_responses', 'challenge_start_code',
+    'system_message_contains', 'whispers_received', 'whisper_contains', 'challenge_start_responses', 'challenge_start_code',
     'owned_creature_scale', 'owned_creature_visible', 'unit_scale', 'combat_reach', 'token_count', 'item_sell_price', 'creature_model_scale', 'creature_model_display',
     'taxi_node', 'in_flight', 'taxi_destination', 'stabled_pet_count', 'stable_result', 'pet_rows', 'instance_binds_listed', 'pet_entry', 'pet_aura_stacks', 'pet_aura_duration_ms', 'pet_is_banker', 'pet_display',
     'pet_scale', 'pet_knows_spell', 'pet_distance', 'pet_casting', 'pet_spell_bar_count',
@@ -662,7 +662,7 @@ def validate(scenario):
             if metric == 'system_message_contains':
                 require(isinstance(step.get('text'), str) and step['text'].strip(),
                         f'{where}: metric needs the text to look for')
-            if metric == 'whispers_received':
+            if metric in {'whispers_received', 'whisper_contains'}:
                 require(step.get('from') in player_ids and isinstance(step.get('text'), str)
                         and step['text'].strip(), f'{where}: metric needs a sending player and text')
             if metric in {'spellbook_offers_spell', 'spellbook_learned_alerts',
@@ -720,7 +720,7 @@ def validate(scenario):
                           'bank_bag_slots', 'taxi_node', 'in_flight', 'taxi_destination', 'stabled_pet_count',
                           'stable_result', 'pet_rows', 'instance_binds_listed', 'spell_active',
                           'cast_pushback_ms',
-                          'bank_shows', 'system_messages', 'system_message_contains', 'whispers_received',
+                          'bank_shows', 'system_messages', 'system_message_contains', 'whispers_received', 'whisper_contains',
                           'challenge_start_responses', 'challenge_start_code', 'owned_creature_scale', 'cast_failure',
                           'owned_creature_weapon_damage_min', 'owned_creature_spell_hit_chance',
                           'owned_creature_attackable',

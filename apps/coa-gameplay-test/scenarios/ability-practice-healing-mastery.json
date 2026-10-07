@@ -1,0 +1,168 @@
+{
+  "schema": 1,
+  "name": "Ability practice: meaningful healing and mastery reward",
+  "contract": "An isolated Starcaller earns no Hand of Elune practice outside an eligible encounter despite actual healing. A combat heal advances the near-complete proficiency point once with the configured catch-up rate and persists the first mastery milestone.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 26,
+      "level": 16,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 16,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 801990
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "maximum": 100000,
+      "value": 90000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.26.801990",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.26.801990",
+      "index": 1,
+      "value": 2
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.26.801990",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.26.801990",
+      "index": 3,
+      "value": 39
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.26.801990",
+      "index": 4,
+      "value": 13860
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "health",
+      "save_as": "before_peaceful_heal"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 801990,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "health",
+      "relative_to": "before_peaceful_heal",
+      "min": 1,
+      "label": "Out-of-combat heal actually heals"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.26.801990",
+      "index": 4,
+      "equals": 13860,
+      "label": "Out-of-combat healing earns no practice"
+    },
+    {
+      "action": "attack",
+      "actor": "caster",
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 801990
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 801990,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.26.801990",
+      "index": 3,
+      "equals": 40,
+      "label": "One meaningful heal earns first mastery proficiency milestone"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.26.801990",
+      "index": 4,
+      "equals": 0,
+      "label": "Catch-up use completes exact point without extra awards"
+    },
+    {
+      "action": "relog",
+      "actor": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.26.801990",
+      "index": 3,
+      "equals": 40,
+      "label": "Mastery progress survives relog"
+    }
+  ]
+}

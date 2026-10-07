@@ -1,0 +1,177 @@
+{
+  "schema": 1,
+  "name": "Ability practice: saved fraction and automatic rank boundary",
+  "contract": "An isolated character retains exact half-point version1 progress when converted to version4. Completing rank2 practice atlevel9 preserves it until level10, when the native hook learns rank2 automatically. Further rank preparation opens only at that character-level boundary.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 9,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "caster",
+      "entry": 36,
+      "level": 9,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803950
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 1,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 3,
+      "value": 9
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 4,
+      "value": 15
+    },
+    {
+      "action": "relog",
+      "actor": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 1,
+      "equals": 4,
+      "label": "Saved definition rebases"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 2,
+      "equals": 1,
+      "label": "Migration marker stays seeded"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 3,
+      "equals": 9,
+      "label": "Earned proficiency retained"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 4,
+      "equals": 4050,
+      "label": "Half of old30 becomes half of8100 exactly"
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 4,
+      "value": 7830
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803950,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 3,
+      "equals": 10,
+      "label": "Final use completes rank2 practice"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 4,
+      "equals": 0,
+      "label": "Point threshold wraps exactly"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 503231,
+      "equals": 0,
+      "label": "Rank2 waits for level10"
+    },
+    {
+      "action": "set_level",
+      "actor": "caster",
+      "value": 10
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 503231,
+      "equals": 1,
+      "within_ms": 5000,
+      "label": "Level hook automatically learns practiced rank2"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 3,
+      "equals": 10,
+      "label": "Learning rank preserves earned proficiency"
+    }
+  ]
+}

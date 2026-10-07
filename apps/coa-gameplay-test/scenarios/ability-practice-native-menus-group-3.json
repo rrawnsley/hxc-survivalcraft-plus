@@ -1,0 +1,315 @@
+{
+  "schema": 1,
+  "name": "Ability practice: complete native typed menus, class group 3",
+  "contract": "All seven class fixtures request their own schema4 addon snapshot. Every fixture receives a typed header and complete end marker, without an unreadable-progress failure. This qualifies native construction and delivery for the current development catalog, not client pixels or every ability outcome. Use the real gameplay clock for the deliberately real-time paced transport.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "class26",
+      "name": "Apmenuo",
+      "race": 1,
+      "class": 26,
+      "level": 80
+    },
+    {
+      "id": "class27",
+      "name": "Apmenup",
+      "race": 1,
+      "class": 27,
+      "level": 80
+    },
+    {
+      "id": "class28",
+      "name": "Apmenuq",
+      "race": 1,
+      "class": 28,
+      "level": 80
+    },
+    {
+      "id": "class29",
+      "name": "Apmenur",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    },
+    {
+      "id": "class30",
+      "name": "Apmenus",
+      "race": 1,
+      "class": 30,
+      "level": 80
+    },
+    {
+      "id": "class31",
+      "name": "Apmenut",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    },
+    {
+      "id": "class32",
+      "name": "Apmenuu",
+      "race": 1,
+      "class": 32,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "whisper",
+      "actor": "class26",
+      "to": "Apmenuo",
+      "text": "HXAP\tHELLO|4",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "class26",
+      "metric": "whisper_contains",
+      "from": "class26",
+      "text": "HXAP\tB|4|",
+      "min": 1,
+      "within_ms": 5000,
+      "label": "Class26 current typed header"
+    },
+    {
+      "action": "assert",
+      "actor": "class26",
+      "metric": "whisper_contains",
+      "from": "class26",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 5000,
+      "label": "Class26 complete snapshot"
+    },
+    {
+      "action": "assert",
+      "actor": "class26",
+      "metric": "whisper_contains",
+      "from": "class26",
+      "text": "HXAP\tF|",
+      "equals": 0,
+      "label": "Class26 no unreadable-progress failure"
+    },
+    {
+      "action": "whisper",
+      "actor": "class27",
+      "to": "Apmenup",
+      "text": "HXAP\tHELLO|4",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "class27",
+      "metric": "whisper_contains",
+      "from": "class27",
+      "text": "HXAP\tB|4|",
+      "min": 1,
+      "within_ms": 5000,
+      "label": "Class27 current typed header"
+    },
+    {
+      "action": "assert",
+      "actor": "class27",
+      "metric": "whisper_contains",
+      "from": "class27",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 5000,
+      "label": "Class27 complete snapshot"
+    },
+    {
+      "action": "assert",
+      "actor": "class27",
+      "metric": "whisper_contains",
+      "from": "class27",
+      "text": "HXAP\tF|",
+      "equals": 0,
+      "label": "Class27 no unreadable-progress failure"
+    },
+    {
+      "action": "whisper",
+      "actor": "class28",
+      "to": "Apmenuq",
+      "text": "HXAP\tHELLO|4",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "class28",
+      "metric": "whisper_contains",
+      "from": "class28",
+      "text": "HXAP\tB|4|",
+      "min": 1,
+      "within_ms": 5000,
+      "label": "Class28 current typed header"
+    },
+    {
+      "action": "assert",
+      "actor": "class28",
+      "metric": "whisper_contains",
+      "from": "class28",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 5000,
+      "label": "Class28 complete snapshot"
+    },
+    {
+      "action": "assert",
+      "actor": "class28",
+      "metric": "whisper_contains",
+      "from": "class28",
+      "text": "HXAP\tF|",
+      "equals": 0,
+      "label": "Class28 no unreadable-progress failure"
+    },
+    {
+      "action": "whisper",
+      "actor": "class29",
+      "to": "Apmenur",
+      "text": "HXAP\tHELLO|4",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "class29",
+      "metric": "whisper_contains",
+      "from": "class29",
+      "text": "HXAP\tB|4|",
+      "min": 1,
+      "within_ms": 5000,
+      "label": "Class29 current typed header"
+    },
+    {
+      "action": "assert",
+      "actor": "class29",
+      "metric": "whisper_contains",
+      "from": "class29",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 5000,
+      "label": "Class29 complete snapshot"
+    },
+    {
+      "action": "assert",
+      "actor": "class29",
+      "metric": "whisper_contains",
+      "from": "class29",
+      "text": "HXAP\tF|",
+      "equals": 0,
+      "label": "Class29 no unreadable-progress failure"
+    },
+    {
+      "action": "whisper",
+      "actor": "class30",
+      "to": "Apmenus",
+      "text": "HXAP\tHELLO|4",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "class30",
+      "metric": "whisper_contains",
+      "from": "class30",
+      "text": "HXAP\tB|4|",
+      "min": 1,
+      "within_ms": 5000,
+      "label": "Class30 current typed header"
+    },
+    {
+      "action": "assert",
+      "actor": "class30",
+      "metric": "whisper_contains",
+      "from": "class30",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 5000,
+      "label": "Class30 complete snapshot"
+    },
+    {
+      "action": "assert",
+      "actor": "class30",
+      "metric": "whisper_contains",
+      "from": "class30",
+      "text": "HXAP\tF|",
+      "equals": 0,
+      "label": "Class30 no unreadable-progress failure"
+    },
+    {
+      "action": "whisper",
+      "actor": "class31",
+      "to": "Apmenut",
+      "text": "HXAP\tHELLO|4",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "class31",
+      "metric": "whisper_contains",
+      "from": "class31",
+      "text": "HXAP\tB|4|",
+      "min": 1,
+      "within_ms": 5000,
+      "label": "Class31 current typed header"
+    },
+    {
+      "action": "assert",
+      "actor": "class31",
+      "metric": "whisper_contains",
+      "from": "class31",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 5000,
+      "label": "Class31 complete snapshot"
+    },
+    {
+      "action": "assert",
+      "actor": "class31",
+      "metric": "whisper_contains",
+      "from": "class31",
+      "text": "HXAP\tF|",
+      "equals": 0,
+      "label": "Class31 no unreadable-progress failure"
+    },
+    {
+      "action": "whisper",
+      "actor": "class32",
+      "to": "Apmenuu",
+      "text": "HXAP\tHELLO|4",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "class32",
+      "metric": "whisper_contains",
+      "from": "class32",
+      "text": "HXAP\tB|4|",
+      "min": 1,
+      "within_ms": 5000,
+      "label": "Class32 current typed header"
+    },
+    {
+      "action": "assert",
+      "actor": "class32",
+      "metric": "whisper_contains",
+      "from": "class32",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 5000,
+      "label": "Class32 complete snapshot"
+    },
+    {
+      "action": "assert",
+      "actor": "class32",
+      "metric": "whisper_contains",
+      "from": "class32",
+      "text": "HXAP\tF|",
+      "equals": 0,
+      "label": "Class32 no unreadable-progress failure"
+    }
+  ]
+}

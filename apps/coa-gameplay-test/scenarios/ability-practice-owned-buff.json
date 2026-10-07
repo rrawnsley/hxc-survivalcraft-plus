@@ -1,0 +1,143 @@
+{
+  "schema": 1,
+  "name": "Ability practice: owned buff contribution and removal",
+  "contract": "An isolated Pyromancer earns no buff practice from application alone. One eligible original combat cast practices an owned effective buff once. Removing that buff retains progress and prevents credit from subsequent combat casts.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 10,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "caster",
+      "entry": 36,
+      "level": 10,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800196
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803950
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800196,
+      "target": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 800196,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.800196",
+      "index": 4,
+      "equals": 0,
+      "label": "Buff application grants no practice"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803950,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.800196",
+      "index": 1,
+      "equals": 4,
+      "label": "Buff current definition persisted"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.800196",
+      "index": 4,
+      "equals": 270,
+      "label": "Original combat use practices owned buff once"
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "caster",
+      "spell": 800196
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 800196,
+      "caster": "caster",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.800196",
+      "index": 4,
+      "equals": 270,
+      "label": "Removal retains partial progress"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 803950
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803950,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.800196",
+      "index": 4,
+      "equals": 270,
+      "label": "Inactive buff earns no additional practice"
+    }
+  ]
+}

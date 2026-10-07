@@ -1,0 +1,127 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native typed menu after original cast",
+  "contract": "An isolated original Lava Shard cast is represented accurately in the native schema4 addon delivery: proficiency1, points270, cap10, 29 more qualifying uses for the next point, and the next cap at character level10. This checks chat delivery and data, not client pixels. Run with the real gameplay clock for the deliberately real-time paced menu transport.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 4,
+      "spell_hit_rating": 10000,
+      "name": "Aptraining"
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "caster",
+      "entry": 36,
+      "level": 4,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803950
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "save_as": "caster_health"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803950,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "caster_health",
+      "max": -1
+    },
+    {
+      "action": "whisper",
+      "actor": "caster",
+      "to": "Aptraining",
+      "text": "HXAP\tHELLO|4",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "HXAP\tB|4|1|24|4|",
+      "min": 1,
+      "within_ms": 5000,
+      "label": "Current typed header delivered"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "A|6|803950|803950|1|1|270|10|8100|4",
+      "min": 1,
+      "within_ms": 5000,
+      "label": "Authoritative Lava Shard current rank and progress delivered"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "P|6|1|29",
+      "min": 1,
+      "within_ms": 5000,
+      "label": "Exact 29 uses to next point"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "C|6|1|10|20",
+      "min": 1,
+      "within_ms": 5000,
+      "label": "Next training cap opens at character level10"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "R|6|1|503231|2|10|10|",
+      "min": 1,
+      "within_ms": 5000,
+      "label": "Next native rank requires level10 and proficiency10"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "HXAP\tE|1",
+      "min": 1,
+      "within_ms": 5000,
+      "label": "Complete snapshot end delivered"
+    }
+  ]
+}

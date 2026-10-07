@@ -23,6 +23,7 @@
 #include "AbilityPracticeDevelopmentUtilityFixed.h"
 #include "AbilityPracticeDevelopmentControlFixed.h"
 #include "AbilityPracticeDevelopmentTrainerFixed.h"
+#include "AbilityPracticeNativeRankChain.h"
 
 #include <array>
 #include <cassert>
@@ -626,6 +627,23 @@ void CheckMasteryFixedAndTrainerPolicies()
                 assert(prior.Requirement.CharacterLevel == current.Requirement.CharacterLevel);
                 assert(prior.Requirement.Proficiency == current.Requirement.Proficiency);
             }
+            std::vector<std::optional<NativeRankLink>> links(profile.Definition.Ranks.size());
+            for (std::size_t index = 0; index < entry.PreviousRanks.size(); ++index)
+                links[index] = NativeRankLink{ entry.PreviousRanks.front().SpellId,
+                    entry.PreviousRanks.back().SpellId, index ? entry.PreviousRanks[index - 1].SpellId : 0,
+                    index + 1 < entry.PreviousRanks.size() ? entry.PreviousRanks[index + 1].SpellId : 0,
+                    entry.PreviousRanks[index].RankNumber };
+            assert(!MatchesNativeRankChain(profile.Definition.Ranks, links));
+            assert(MatchesNativeRankChain(profile.Definition.Ranks, links, entry.PreviousRanks.size()));
+            auto broken = links;
+            broken.front()->Last = 1;
+            assert(!MatchesNativeRankChain(profile.Definition.Ranks, broken, entry.PreviousRanks.size()));
+            broken = links;
+            broken.front() = std::nullopt;
+            assert(!MatchesNativeRankChain(profile.Definition.Ranks, broken, entry.PreviousRanks.size()));
+            broken = links;
+            broken.back() = NativeRankLink{ 1, 2, 3, 4, 5 };
+            assert(!MatchesNativeRankChain(profile.Definition.Ranks, broken, entry.PreviousRanks.size()));
             auto revised = DevelopmentRankCaps::Build(profile);
             assert(revised);
             auto definition = profile.Definition;

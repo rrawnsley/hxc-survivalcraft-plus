@@ -64,7 +64,8 @@ def crash():
     if hasattr(signal, 'SIGKILL'):
         os.kill(os.getpid(), signal.SIGKILL)
     import ctypes
-    ctypes.string_at(0)
+    ctypes.windll.kernel32.TerminateProcess(ctypes.c_void_p(-1), ctypes.c_uint(0xC0000005))
+    raise RuntimeError('Fake server termination failed')
 
 
 def measures(item, lane, seconds):

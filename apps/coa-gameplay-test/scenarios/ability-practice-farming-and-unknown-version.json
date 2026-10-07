@@ -1,0 +1,255 @@
+{
+  "schema": 1,
+  "name": "Ability practice: excluded farming and unknown saved version",
+  "contract": "Original casts against grey enemies and training dummies earn no practice; an ordinary eligible enemy does. An unknown saved definition survives relog and qualifying casts unchanged while the introductory ability retains native function.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 10,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "grey",
+      "owner": "caster",
+      "entry": 36,
+      "level": 1,
+      "health": 100000,
+      "distance": 3
+    },
+    {
+      "id": "dummy",
+      "owner": "caster",
+      "entry": 31146,
+      "level": 10,
+      "health": 100000,
+      "distance": 3
+    },
+    {
+      "id": "eligible",
+      "owner": "caster",
+      "entry": 36,
+      "level": 10,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "caster",
+      "value": 0
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "view_level",
+      "target": "grey",
+      "equals": 1,
+      "label": "Enemy is genuinely grey with character scaling disabled"
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803950
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 803950
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803950,
+      "target": "grey"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "spell": 803950,
+      "target": "grey",
+      "min": 1,
+      "label": "Excluded grey cast actually deals damage"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 4,
+      "equals": 0,
+      "label": "grey qualification credit"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 803950
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803950,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 4,
+      "equals": 0,
+      "label": "dummy qualification credit"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 803950
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803950,
+      "target": "eligible"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 4,
+      "equals": 270,
+      "label": "eligible qualification credit"
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 1,
+      "value": 99
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 3,
+      "value": 23
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 4,
+      "value": 111
+    },
+    {
+      "action": "relog",
+      "actor": "caster"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 803950
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "eligible",
+      "metric": "health",
+      "save_as": "unknown_health"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803950,
+      "target": "eligible"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "eligible",
+      "metric": "health",
+      "relative_to": "unknown_health",
+      "max": -1,
+      "label": "Introductory ability retains native function"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 1,
+      "equals": 99,
+      "label": "Unknown saved field retained"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 3,
+      "equals": 23,
+      "label": "Unknown saved field retained"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 4,
+      "equals": 111,
+      "label": "Unknown saved field retained"
+    }
+  ]
+}

@@ -29,6 +29,7 @@
 #include "AbilityPracticeMasteryPolicy.h"
 #include "AbilityPracticeCastReceipt.h"
 #include "AbilityPracticeOutcome.h"
+#include "AbilityPracticeNativeRankChain.h"
 #include "AbilityPracticeWire.h"
 #include "AscensionCustomClassData.h"
 #include "AscensionSpellProgressionData.h"
@@ -827,11 +828,14 @@ bool MatchesPassiveFixedMechanic(Practice::AbilityProfile const& profile)
     if (mechanic == mechanics.end() || !info || !info->IsPassive() ||
         (mechanic->RequiredSpellFamily && info->SpellFamilyName != mechanic->RequiredSpellFamily))
         return false;
-    for (std::size_t index = 0; index < mechanic->AuraIds.size(); ++index)
+    auto const& auraIds = mechanic->EffectiveAuraIds ? *mechanic->EffectiveAuraIds : mechanic->AuraIds;
+    auto const& triggers = mechanic->EffectiveTriggerSpellIds ?
+        *mechanic->EffectiveTriggerSpellIds : mechanic->TriggerSpellIds;
+    for (std::size_t index = 0; index < auraIds.size(); ++index)
     {
         auto const& effect = info->Effects[index];
-        if (effect.Effect != mechanic->EffectIds[index] || effect.ApplyAuraName != mechanic->AuraIds[index] ||
-            effect.TriggerSpell != mechanic->TriggerSpellIds[index] ||
+        if (effect.Effect != mechanic->EffectIds[index] || effect.ApplyAuraName != auraIds[index] ||
+            effect.TriggerSpell != triggers[index] ||
             effect.TargetA.GetTarget() != mechanic->TargetAIds[index] ||
             effect.TargetB.GetTarget())
             return false;
@@ -976,24 +980,24 @@ bool MatchesNativeClassTrainer(Practice::AbilityProfile const& profile)
         }) == 1;
 }
 
-bool MatchesEffectiveRankChain(Practice::AbilityDefinition const& ability)
+bool MatchesEffectiveRankChain(Practice::AbilityProfile const& profile)
 {
-    std::size_t present = 0;
-    for (std::size_t index = 0; index < ability.Ranks.size(); ++index)
+    auto const& ability = profile.Definition;
+    std::vector<std::optional<Practice::NativeRankLink>> links;
+    links.reserve(ability.Ranks.size());
+    for (auto const& rank : ability.Ranks)
     {
-        Practice::AbilityRank const& rank = ability.Ranks[index];
         SpellChainNode const* node = sSpellMgr->GetSpellChainNode(rank.SpellId);
         if (!node)
-            continue;
-        ++present;
-        std::uint32_t const previous = index ? ability.Ranks[index - 1].SpellId : 0;
-        std::uint32_t const next = index + 1 < ability.Ranks.size() ? ability.Ranks[index + 1].SpellId : 0;
-        if (!node->first || !node->last || node->first->Id != ability.Ranks.front().SpellId ||
-            node->last->Id != ability.Ranks.back().SpellId || node->rank != rank.RankNumber ||
-            (node->prev ? node->prev->Id : 0) != previous || (node->next ? node->next->Id : 0) != next)
-            return false;
+            links.push_back(std::nullopt);
+        else
+            links.push_back(Practice::NativeRankLink{ node->first ? node->first->Id : 0,
+                node->last ? node->last->Id : 0, node->prev ? node->prev->Id : 0,
+                node->next ? node->next->Id : 0, node->rank });
     }
-    return !present || present == ability.Ranks.size();
+    auto const* extension = TrainerRankExtensionEntry(profile);
+    return Practice::MatchesNativeRankChain(ability.Ranks, links,
+        extension && TrainerRanksRequested ? extension->PreviousRanks.size() : 0);
 }
 
 std::optional<std::uint32_t> NativeRankLabel(SpellInfo const* info)
@@ -2114,7 +2118,7 @@ public:
                 LOG_ERROR("module.ability_practice", "Rejected native acquisition: class={}, ability={}",
                     profile.Definition.ClassId, profile.Definition.AbilityId);
             }
-            if (!MatchesEffectiveRankChain(profile.Definition) || !MatchesTrainerRankBoundary(profile.Definition))
+            if (!MatchesEffectiveRankChain(profile) || !MatchesTrainerRankBoundary(profile.Definition))
             {
                 Ready = false;
                 LOG_ERROR("module.ability_practice", "Rejected effective rank chain: class={}, ability={}",

@@ -1,0 +1,162 @@
+{
+  "schema": 1,
+  "name": "Ability practice: original cast and realm enrollment",
+  "contract": "On the isolated development realm, one eligible original Lava Shard cast advances its saved practice; socketless human fixtures enroll while bot fixtures do not. Rank 2 requires both character level and practice.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 24,
+      "level": 4,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "bot",
+      "race": 1,
+      "class": 24,
+      "level": 4,
+      "spell_hit_rating": 10000,
+      "bot": true
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "caster",
+      "entry": 36,
+      "level": 4,
+      "health": 100000,
+      "distance": 3
+    },
+    {
+      "id": "bot_target",
+      "owner": "bot",
+      "entry": 36,
+      "level": 4,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803950
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "save_as": "caster_health"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803950,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "caster_health",
+      "max": -1
+    },
+    {
+      "action": "learn",
+      "actor": "bot",
+      "spell": 803950
+    },
+    {
+      "action": "snapshot",
+      "actor": "bot_target",
+      "metric": "health",
+      "save_as": "bot_health"
+    },
+    {
+      "action": "cast",
+      "actor": "bot",
+      "spell": 803950,
+      "target": "bot_target"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "bot_target",
+      "metric": "health",
+      "relative_to": "bot_health",
+      "max": -1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 1,
+      "equals": 4,
+      "label": "Current definition persisted"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 2,
+      "equals": 1,
+      "label": "Learned-rank seeding marked once"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 3,
+      "equals": 1,
+      "label": "One cast keeps proficiency1"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 4,
+      "equals": 270,
+      "label": "One qualifying use earns270 points"
+    },
+    {
+      "action": "assert",
+      "actor": "bot",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.803950",
+      "index": 1,
+      "equals": 0,
+      "label": "Bot is not enrolled"
+    },
+    {
+      "action": "set_level",
+      "actor": "caster",
+      "value": 10,
+      "label": "Reach rank2 character level without completing practice"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 503231,
+      "equals": 0,
+      "label": "Character level alone does not learn rank2"
+    }
+  ]
+}
