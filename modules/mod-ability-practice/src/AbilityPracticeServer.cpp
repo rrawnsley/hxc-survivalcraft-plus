@@ -40,6 +40,7 @@
 #include "CryptoRandom.h"
 #include "CombatManager.h"
 #include "Creature.h"
+#include "DBCStores.h"
 #include "Formulas.h"
 #include "Log.h"
 #include "ObjectAccessor.h"
@@ -944,6 +945,26 @@ bool MatchesUtilityFixedRankMechanic(std::uint32_t classId, std::uint32_t spellI
             if (effect.Effect != (index == 0 ? 164u : 0u) || effect.ApplyAuraName ||
                 effect.TriggerSpell != (index == 0 ? 802025u : 0u) ||
                 effect.TargetA.GetTarget() != (index == 0 ? 1u : 0u) || effect.TargetB.GetTarget())
+                return false;
+        }
+    }
+    if (spellId == 532229)
+    {
+        SummonPropertiesEntry const* summon = sSummonPropertiesStore.LookupEntry(65);
+        CreatureTemplate const* eye = sObjectMgr->GetCreatureTemplate(4277);
+        CreatureAddon const* addon = sObjectMgr->GetCreatureTemplateAddon(4277);
+        SpellInfo const* stealth = sSpellMgr->GetSpellInfo(2585);
+        if (info->SpellFamilyName != 20 || !info->IsChanneled() || info->GetDuration() != 45000 ||
+            info->Effects[EFFECT_0].MiscValueB != 65 || !summon || summon->Category != SUMMON_CATEGORY_PUPPET ||
+            summon->Faction || summon->Type || summon->Slot || summon->Flags || !eye || eye->type != 3 ||
+            eye->unit_class != 2 || !addon || addon->auras != std::vector<std::uint32_t>{ 2585 } || !stealth)
+            return false;
+        constexpr std::array<std::uint32_t, 3> auras = { 16, 105, 31 };
+        for (std::size_t index = 0; index < auras.size(); ++index)
+        {
+            auto const& effect = stealth->Effects[index];
+            if (effect.Effect != SPELL_EFFECT_APPLY_AURA || effect.ApplyAuraName != auras[index] ||
+                effect.TargetA.GetTarget() != TARGET_UNIT_CASTER || effect.TargetB.GetTarget() || effect.TriggerSpell)
                 return false;
         }
     }

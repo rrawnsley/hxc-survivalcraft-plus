@@ -8,8 +8,8 @@ The feature is not complete or approved for release.
 
 - Per-ability deterministic meaningful-use practice, automatic ranks, preserved learned ranks and saved
   progress, and one upcoming rank of preparation are implemented in the development module.
-- The catalog contains 254 unique profiles across all 21 classes: 152 ranked, eight mastery and 94 Fixed.
-  There are 256 declarations with two shared identities, 147 native baseline exclusions, and 449 groups
+- The catalog contains 255 unique profiles across all 21 classes: 152 ranked, eight mastery and 95 Fixed.
+  There are 257 declarations with two shared identities, 147 native baseline exclusions, and 448 groups
   still needing definitions (73 ranked and 378 standalone). Startup acceptance of metadata does not
   qualify every ability's gameplay. The discovery exports intentionally retain their unqualified status.
 - Draft pacing targets 30â€“60 combat minutes per rank, with 45-minute authored assumptions. Effective
@@ -18,7 +18,7 @@ The feature is not complete or approved for release.
   remaining, level requirements, future caps, mastery milestones and Fixed native utilities.
   It is unpublished and has not been installed in the active client.
 - The authorized C++/Lua 5.1 harness checks all 152 ranked policies, eight mastery policies and 92 Fixed
-  declarations; 778 typed snapshots decode, validate and mock-render. These are not client pixel tests.
+  declarations; 781 typed snapshots decode, validate and mock-render. These are not client pixel tests.
 - Native isolated gameplay has exercised original-cast enrollment and bot exclusion, version1-to4
   fraction conversion, automatic level-gated rank learning, owned buff contribution, gray/dummy
   exclusions, unknown saved-version preservation, healing mastery progress and periodic shared receipts.
@@ -124,6 +124,27 @@ Native utility PASSED `20261007-153526` (63.6s simulated), real-clock menu PASSE
 `20261007-153650` (71.8s). No failed cases or isolated reruns qualified. Source exports254unique/
 256declarations,152ranked/8mastery/94Fixed,449pending. Actual client pixels remain unverified.
 No native effects, cooldowns, balance, production configuration or active client were changed.
+
+### Twisted Sight native scouting utility
+
+Twisted Sight (class14/532229, native level24 and matching trainer900014 offer) joins the optional
+Fixed utility menu without practice, rewards or automatic teaching. Exact summon4277/property65,
+caster stealth,45-second channel, puppet category, creature template and2585native eye addon guard
+its declaration. The native puppet inherits caster level; template level80 is not used as an acquisition gate.
+
+Native utility observed one possessed Eye of Kilrogg, controls_self0, caster stealth300 and eye2585.
+Natural expiry removed the eye/charm/stealth and returned controls_self1; stored unknown definition999,
+proficiency100 and points101 remained unchanged. Rendered viewpoint and actual client pixels are unverified.
+Source9/build32.2s/harness4.2s PASSED `20261007-154923`, including781typed snapshots.
+Native utility PASSED `20261007-155139` (244.3s simulated), real-clock menu PASSED
+`20261007-155625` (136.2s). Both ran without isolated retries. Longer total wall time was observed;
+its cause is unknown. No gameplay mechanics, production settings or active client were changed.
+Source exports255unique/257declarations,152ranked/8mastery/95Fixed,448pending(72ranked/376standalone).
+
+Illidari Intuition remains under review: the five captured class-grant ranks match levels24/32/42/52/60,
+but source trainer900014 also offers ranks6/7 at65,8 at70,9 at77,10 at80 and12 at74, all requiring
+rank5. Later ranks include a different stat-aura type. This is inconsistent native acquisition evidence;
+no new ranked declaration, practice gate or native-data repair was authored for it.
 
 ## Reproducing native qualification
 

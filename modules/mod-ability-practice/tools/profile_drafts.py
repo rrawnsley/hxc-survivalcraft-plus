@@ -441,6 +441,16 @@ def build_drafts(candidates, root):
             required.extend(['soul-capture-loaded-script-registration-and-trigger-suppression',
                              'soul-capture-corpse-resource-and-post-combat-use-design',
                              'soul-capture-native-corpse-proof-and-actual-recovery-original-cast'])
+        if (class_id, ability_id) == (14, 532229):
+            raw = members[ability_id].get('rawDbc', {})
+            details = raw.get('effectDetails', [])
+            expected = [(28, 0, 32, 0, 0, 0), (6, 16, 1, 0, 0, 299), (0, 0, 0, 0, 0, 0)]
+            if (len(ranks) != 1 or ranks[0]['characterLevel'] != 24 or raw.get('passive') is not False or
+                    raw.get('rankLabel') or len(details) != 3 or [(v.get('effectId'), v.get('auraId'),
+                        v.get('implicitTargetA'), v.get('implicitTargetB'), v.get('triggerSpellId'),
+                        v.get('basePoints')) for v in details] != expected):
+                raise ValueError('Reviewed Twisted Sight source/raw evidence changed')
+            required.append('native-possessed-scouting-eye-and-stealth-not-pet-combat-practice')
         if (class_id, ability_id) == (14, 578345):
             raw = members[ability_id].get('rawDbc', {})
             details = raw.get('effectDetails', [])
