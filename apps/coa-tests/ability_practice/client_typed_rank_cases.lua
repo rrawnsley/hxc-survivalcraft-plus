@@ -36,6 +36,11 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
             ability.route = route
             assert(Model.Validate(result))
         end
+        if ability.abilityId == 807942 then
+            assert(ability.route == 2 and (ability.ruleSet == 1 or ability.ruleSet == 4))
+            assert(string.find(Model.PracticeRules(ability), "Energy spent without actual healing", 1, true))
+            assert(string.find(Model.PracticeRules(ability), "One original cast earns at most one award", 1, true))
+        end
         if ability.abilityId == 561289 then
             assert(ability.ruleSet == 9 or ability.ruleSet == 10)
             assert(string.find(Model.PracticeRules(ability), "Reaped Soul", 1, true))
@@ -72,7 +77,7 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
     end
     count = count + 1
 end
-assert(count == 781)
-assert(kinds[1] == 456 and kinds[2] == 40 and kinds[3] == 285)
+assert(count == 786)
+assert(kinds[1] == 456 and kinds[2] == 45 and kinds[3] == 285)
 for classId = 12, 32 do assert(classes[classId]) end
-print("PASS: 781 typed snapshots across 21 classes: 456 ranked, 40 mastery, 285 fixed and menu rendering")
+print("PASS: 786 typed snapshots across 21 classes: 456 ranked, 45 mastery, 285 fixed and menu rendering")

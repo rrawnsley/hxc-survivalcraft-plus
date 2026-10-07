@@ -567,6 +567,21 @@ std::array<std::span<AbilityProfile const>, 2> MasteryCatalogs()
 void CheckMasteryFixedAndTrainerPolicies()
 {
     assert(DevelopmentMastery::Profiles.size() == 6);
+    auto const& bargain = DevelopmentMastery::ScriptedProfiles.front();
+    assert(DevelopmentMastery::IsFelBargain(bargain));
+    assert(CapAtLevel(bargain.Definition, 21) == 1);
+    assert(CapAtLevel(bargain.Definition, 22) == 40);
+    assert(CapAtLevel(bargain.Definition, 29) == 40);
+    assert(CapAtLevel(bargain.Definition, 30) == 70);
+    assert(CapAtLevel(bargain.Definition, 37) == 70);
+    assert(CapAtLevel(bargain.Definition, 38) == 100);
+    assert(UsesUntil(bargain.Policy, { 1, 0 }, 40, 40).Uses == 15);
+    assert(UsesUntil(bargain.Policy, { 40, 0 }, 70, 70).Uses == 15);
+    assert(UsesUntil(bargain.Policy, { 70, 0 }, 100, 100).Uses == 15);
+    assert(HealingMasteryBonus(bargain.Definition, bargain.Rewards, { 100, 0 }, 29, true, true) == 0);
+    assert(HealingMasteryBonus(bargain.Definition, bargain.Rewards, { 40, 0 }, 30, true, true) == 50);
+    assert(HealingMasteryBonus(bargain.Definition, bargain.Rewards, { 70, 0 }, 38, true, true) == 100);
+    assert(HealingMasteryBonus(bargain.Definition, bargain.Rewards, { 100, 0 }, 46, true, true) == 200);
     for (auto const catalog : MasteryCatalogs())
     {
         for (auto const& authored : catalog)
@@ -703,7 +718,7 @@ void CheckMasteryFixedAndTrainerPolicies()
             assert(converted && converted->State.Proficiency == entry.PreviousRanks.back().Requirement.Proficiency);
         }
     assert(extensions == 12 && addedRanks == 24);
-    std::cout << "PASS: 8 mastery policies/rewards, 95 fixed declarations, 12 trainer extensions/24 added ranks\n";
+    std::cout << "PASS: 9 mastery policies/rewards, 95 fixed declarations, 12 trainer extensions/24 added ranks\n";
 }
 
 void WriteTypedMasteryAndFixedCases(std::ofstream& output, std::uint32_t& revision)
@@ -749,6 +764,8 @@ void WriteTypedMasteryAndFixedCases(std::ofstream& output, std::uint32_t& revisi
         {
             auto const profile = CurrentMasteryProfile(authored);
             write(profile, profile.Definition.Ranks.front().Requirement.CharacterLevel, true, { 1, 0 });
+            if (DevelopmentMastery::IsFelBargain(profile))
+                write(profile, profile.Definition.Ranks.front().Requirement.CharacterLevel, false, { 1, 0 });
             for (auto const& reward : profile.Rewards)
                 write(profile, reward.Requirement.CharacterLevel, true, { reward.Requirement.Proficiency, 0 });
             if (DevelopmentMastery::IsBaneOfBetrayal(profile) || DevelopmentMastery::IsSoulCapture(profile))

@@ -1,0 +1,168 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Fel Bargain outside",
+  "contract": "Native Energy conversion and effective self-healing retain one original PvE practice award; mastered eligible healing adds at most 2%. Excluded outcomes and unknown records do not practice.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apbaroutside",
+      "race": 1,
+      "class": 14,
+      "level": 46,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 807942
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 201
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 1180
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 674
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 801901
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 25
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 2092
+    },
+    {
+      "action": "equip",
+      "actor": "caster",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "equip",
+      "actor": "caster",
+      "item": 2092,
+      "slot": 16
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 808303
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.807942",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.807942",
+      "index": 1,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.807942",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.807942",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.807942",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "maximum": 100000,
+      "value": 10000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 807942
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "power",
+      "power": 3,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_effective_heal_total",
+      "target": "caster",
+      "spell": 807942,
+      "equals": 50000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.807942",
+      "index": 3,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.807942",
+      "index": 4,
+      "equals": 0
+    }
+  ]
+}

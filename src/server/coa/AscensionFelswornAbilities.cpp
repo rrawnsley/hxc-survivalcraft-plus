@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionFelsworn.h"
+#include "AbilityPracticeCastReceipt.h"
 #include "GameObject.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
@@ -378,7 +379,9 @@ class spell_ascension_felsworn_ability : public SpellScript
             player->ModifyPower(POWER_ENERGY, -int32(spent));
             HealInfo heal(player, player, player->CountPctFromMaxHealth(spent / 2), GetSpellInfo(),
                           GetSpellInfo()->GetSchoolMask());
-            player->HealBySpell(heal);
+            player->HealBySpell(heal, false, GetSpell()->GetPracticeCast().get());
+            if (GetSpell()->GetPracticeCast())
+                GetSpell()->SetScriptValue(CoAAbilityPractice::ScriptedHealingAmountKey, heal.GetEffectiveHeal());
         }
         if (id == 705121)
         {

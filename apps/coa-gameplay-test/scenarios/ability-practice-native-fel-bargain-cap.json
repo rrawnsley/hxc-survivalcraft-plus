@@ -1,0 +1,259 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Fel Bargain one reward ahead",
+  "contract": "At level 22, proficiency 40 cannot bank the second reward. Level 30 activates the first 0.5% reward and permits practice toward proficiency 70.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apbarcap",
+      "race": 1,
+      "class": 14,
+      "level": 22,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 807942
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 201
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 1180
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 674
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 801901
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 25
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 2092
+    },
+    {
+      "action": "equip",
+      "actor": "caster",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "equip",
+      "actor": "caster",
+      "item": 2092,
+      "slot": 16
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 808303
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.807942",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.807942",
+      "index": 1,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.807942",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.807942",
+      "index": 3,
+      "value": 40
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.807942",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "attack",
+      "actor": "caster",
+      "target": "enemy"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 801901,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "maximum": 100000,
+      "value": 10000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 807942
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "power",
+      "power": 3,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_effective_heal_total",
+      "target": "caster",
+      "spell": 807942,
+      "equals": 50000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.807942",
+      "index": 3,
+      "equals": 40
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.807942",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "actor": "caster",
+      "value": 30
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 807942
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "maximum": 100000,
+      "value": 10000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 807942
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_effective_heal_total",
+      "target": "caster",
+      "spell": 807942,
+      "equals": 100250
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.807942",
+      "index": 3,
+      "equals": 42
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.807942",
+      "index": 4,
+      "equals": 0
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 22,
+      "health": 100000,
+      "distance": 3,
+      "stationary": true
+    }
+  ]
+}

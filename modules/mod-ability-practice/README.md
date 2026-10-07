@@ -3912,3 +3912,41 @@ caster-control groups remain without declarations, which does not qualify all re
 All switches remain0 by default, addon0.4.45-development/schema4 unpublished, no production changes.
 
 Final source and real-clock menu PASSED141506:9source checks90.5s and native menu69.3s.
+
+
+## Fel Bargain native healing mastery development
+
+Fel Bargain (class14,807942, native level22) uses actual effective self-healing from its original
+client cast. Its native even Energy spend, half-Energy healing conversion and180-second cooldown
+remain. Only missing health restored during an eligible PvE encounter earns one award. A numeric
+script value forwards effective healing without scheduling another heal or retaining gameplay pointers.
+Native script, loaded effect/target shape, class acquisition and owner/session receipt remain guarded.
+
+Proficiency40/70/100 grants0.5%/1%/2% healing at character levels30/38/46. Caps permit only one upcoming
+reward:40 at22,70 at30,100 at38. Each milestone takes15 qualifying uses under these authored rules.
+The45-minute midpoint derives from the native three-minute cooldown; ordinary play cadence is unmeasured.
+These values are development tuning, not an original EverQuest formula.
+
+Build/source220907 passed10checks97.4s/build61.6s; its harness failed an incorrect helper name.
+Harness221355 then exposed three UTF-8 menu characters corrupted by an earlier edit. Both were corrected;
+final harness221432 passed4.4s with786typed snapshots, including Fel Bargain practice-rule text.
+Initial native fixtures queried a healing modifier instead of received healing and seeded definition4
+(menu schema) instead of authored definition1. Timing was also corrected for the global cooldown.
+No native gameplay defect was inferred from those fixture failures.
+
+Final native222127 PASSED ten cases51.8s simulated, no failures or isolated reruns: first award reaches
+proficiency3/points270; mastered healing50000 to51000; full-health, outside combat, low Energy, dummy,
+gray and unknown-definition records earn no practice. The native one-reward-ahead boundary passed,
+including0.5% healing at level30. Soul Capture benefit regression passed in the same run.
+
+Real menu222608 PASSED54.6s fresh-server, native rank/proficiency/cap40/cost450 and exact15-use first
+milestone. Bane menu222726 PASSED55.4s fresh-server. Twin menu passed in222241 with its shifted row index.
+The earlier combined menu run's Bane/Fel cases assumed revision1 on a shared server; its automatic fresh
+server passes were diagnostic only. Independent runs qualified both menus. Client pixels remain unverified.
+
+Coverage256unique/258declarations:152ranked/9mastery/95Fixed,447pending(72ranked/375standalone).
+All850source groups still have runtimeQualified:false in discovery; aggregate coverage is not runtime
+approval. Addon0.4.47-development/schema4 remains unpublished. All development defaults remain0.
+No production restart, configuration/database change, active-client installation or launcher publication.
+
+Final source222907 PASSED10checks79.9s; scoped C++ style and whitespace checks passed.

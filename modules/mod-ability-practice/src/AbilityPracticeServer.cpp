@@ -61,6 +61,7 @@
 #include <chrono>
 #include <charconv>
 #include <memory>
+#include <limits>
 #include <mutex>
 #include <string_view>
 #include <unordered_map>
@@ -537,6 +538,8 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
 {
     if (!info)
         return false;
+    if (HelpersRequested && MasteryRequested && Practice::DevelopmentMastery::IsFelBargain(profile))
+        return info->Id == 807942 && profile.Outcome == Practice::OutcomeKind::Healing;
     if (HelpersRequested && Practice::DevelopmentHelpers::IsTwinSlice(profile))
     {
         auto const rank = std::find_if(Practice::DevelopmentHelpers::TwinSlice.begin(),
@@ -703,6 +706,26 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
 
 bool MatchesAdditionalMasteryMechanic(SpellInfo const* info, Practice::AbilityProfile const& profile)
 {
+    if (Practice::DevelopmentMastery::IsFelBargain(profile))
+    {
+        if (!HelpersRequested || !MasteryRequested || !info || info->Id != 807942 ||
+            info->SpellFamilyName != 20 || info->IsPassive() || info->RecoveryTime != 180000)
+            return false;
+        for (std::size_t index = 0; index < 3; ++index)
+        {
+            auto const& effect = info->Effects[index];
+            if (effect.Effect != (index == 0 ? SPELL_EFFECT_DUMMY : 0u) || effect.ApplyAuraName ||
+                effect.TriggerSpell || effect.TargetB.GetTarget() ||
+                effect.TargetA.GetTarget() != (index == 0 ? TARGET_UNIT_CASTER : 0u))
+                return false;
+        }
+        auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+        auto entry = scripts.first;
+        if (entry == scripts.second || sObjectMgr->GetScriptName(entry->second) !=
+            "spell_ascension_felsworn_ability")
+            return false;
+        return ++entry == scripts.second;
+    }
     if (Practice::DevelopmentMastery::IsSoulCapture(profile))
     {
         if (!HelpersRequested || !MasteryRequested || !info || info->Id != 561289)
@@ -2721,6 +2744,12 @@ public:
         Player* player = spell->GetCaster()->ToPlayer();
         if (!IsProfiledPlayer(player))
             return;
+        auto const* scriptedProfile = FindProfile(player, spell->GetSpellInfo()->Id);
+        auto const scriptedHealing = spell->GetScriptValue(CoAAbilityPractice::ScriptedHealingAmountKey);
+        if (target == player && HelpersRequested && MasteryRequested && scriptedProfile &&
+            Practice::DevelopmentMastery::IsFelBargain(*scriptedProfile) && spell->GetPracticeCast() &&
+            scriptedHealing <= std::numeric_limits<std::uint32_t>::max())
+            healing = std::max(healing, static_cast<std::uint32_t>(scriptedHealing));
         BindBuffOrigin(player, spell, target);
         auto const receipt = spell->GetPracticeCast();
         auto const* corpseProfile = FindProfile(player, spell->GetSpellInfo()->Id);

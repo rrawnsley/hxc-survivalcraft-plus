@@ -441,6 +441,17 @@ def build_drafts(candidates, root):
             required.extend(['soul-capture-loaded-script-registration-and-trigger-suppression',
                              'soul-capture-corpse-resource-and-post-combat-use-design',
                              'soul-capture-native-corpse-proof-and-actual-recovery-original-cast'])
+        if (class_id, ability_id) == (14, 807942):
+            raw = members[ability_id].get('rawDbc', {})
+            details = raw.get('effectDetails', [])
+            expected = [(6, 4, 1, 0, 0, 0), (0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0)]
+            if (len(ranks) != 1 or ranks[0]['characterLevel'] != 22 or raw.get('passive') is not False or
+                    raw.get('rankLabel') or len(details) != 3 or [(v.get('effectId'), v.get('auraId'),
+                        v.get('implicitTargetA'), v.get('implicitTargetB'), v.get('triggerSpellId'),
+                        v.get('basePoints')) for v in details] != expected or
+                    ranks[0]['rawCastProfile']['recoveryMilliseconds'] != 180000):
+                raise ValueError('Reviewed Fel Bargain source/raw evidence changed')
+            required.append('native-energy-spend-and-effective-self-heal-original-receipt-in-pve')
         if (class_id, ability_id) == (14, 532229):
             raw = members[ability_id].get('rawDbc', {})
             details = raw.get('effectDetails', [])

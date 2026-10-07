@@ -87,7 +87,23 @@ inline constexpr std::array SoulCaptureRewards = {
     MasteryReward{ { 14, 70 }, 100 },
     MasteryReward{ { 20, 100 }, 200 }
 };
+inline constexpr std::array FelBargain = { AbilityRank{ 807942, 1, { 22, 1 } } };
+inline constexpr std::array FelBargainCaps = {
+    ProficiencyCap{ 1, 1 }, ProficiencyCap{ 22, 40 }, ProficiencyCap{ 30, 70 }, ProficiencyCap{ 38, 100 }
+};
+inline constexpr std::array FelBargainBands = {
+    TrainingBand{ 1, 450, 1170 }, TrainingBand{ 40, 450, 900 }
+};
+inline constexpr TrainingPolicy FelBargainPolicy{ FelBargainBands };
+inline constexpr std::array FelBargainRewards = {
+    MasteryReward{ { 30, 40 }, 50 },
+    MasteryReward{ { 38, 70 }, 100 },
+    MasteryReward{ { 46, 100 }, 200 }
+};
 inline constexpr std::array ScriptedProfiles = {
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 14, 807942, AbilityKind::Mastery, FelBargain, FelBargainCaps }, FelBargainPolicy, OutcomeKind::Healing,
+        FelBargainRewards },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 30, 561289, AbilityKind::Mastery, SoulCapture, Caps }, SoulCapturePolicy, OutcomeKind::Healing,
         SoulCaptureRewards },
@@ -99,6 +115,11 @@ inline bool IsBaneOfBetrayal(AbilityProfile const& profile)
 {
     return profile.Definition.ClassId == 14 && profile.Definition.AbilityId == 712483 &&
         profile.Definition.Kind == AbilityKind::Mastery && profile.Outcome == OutcomeKind::Damage;
+}
+inline bool IsFelBargain(AbilityProfile const& profile)
+{
+    return profile.Definition.ClassId == 14 && profile.Definition.AbilityId == 807942 &&
+        profile.Definition.Kind == AbilityKind::Mastery && profile.Outcome == OutcomeKind::Healing;
 }
 inline bool IsSoulCapture(AbilityProfile const& profile)
 {

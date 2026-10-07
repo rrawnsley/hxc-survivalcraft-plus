@@ -13,6 +13,8 @@ class Spell;
 
 namespace CoAAbilityPractice
 {
+inline constexpr std::uint32_t ScriptedHealingAmountKey = 0x41504841;
+
 class CastReceipt
 {
 public:
