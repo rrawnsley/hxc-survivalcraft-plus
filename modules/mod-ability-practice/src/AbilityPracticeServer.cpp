@@ -929,6 +929,24 @@ bool MatchesUtilityFixedRankMechanic(std::uint32_t classId, std::uint32_t spellI
     SpellInfo const* info = sSpellMgr->GetSpellInfo(spellId);
     if (mechanic == mechanics.end() || !info || info->IsPassive())
         return false;
+    if (classId == 14 && (spellId == 500028 || spellId == 500422 || spellId == 500423))
+    {
+        SpellInfo const* jump = sSpellMgr->GetSpellInfo(802028);
+        SpellInfo const* removal = sSpellMgr->GetSpellInfo(802030);
+        if (info->SpellFamilyName != 20 || info->MaxCharges != 3 || info->ChargeRecoveryTime != 10000 ||
+            info->ChargeRecoveryKey != 500028 || info->ChargeCategoryId != 356 || !jump || !removal ||
+            jump->SpellFamilyName != 20 || jump->Effects[EFFECT_1].Amplitude != 90 ||
+            removal->SpellFamilyName != 20 || removal->IsPassive() || removal->IsDeprecatedForPlayers)
+            return false;
+        for (std::size_t index = 0; index < 3; ++index)
+        {
+            auto const& effect = removal->Effects[index];
+            if (effect.Effect != (index == 0 ? 164u : 0u) || effect.ApplyAuraName ||
+                effect.TriggerSpell != (index == 0 ? 802025u : 0u) ||
+                effect.TargetA.GetTarget() != (index == 0 ? 1u : 0u) || effect.TargetB.GetTarget())
+                return false;
+        }
+    }
     if (spellId == 562720 &&
         (info->SpellFamilyName != 26 || info->Effects[EFFECT_1].Amplitude != 3000 ||
             info->Effects[EFFECT_2].Amplitude != 3000 ||
@@ -984,7 +1002,8 @@ bool MatchesUtilityFixedRankMechanic(std::uint32_t classId, std::uint32_t spellI
         for (std::size_t helperIndex = 0; helperIndex < spec->EffectIds.size(); ++helperIndex)
         {
             auto const& slot = helper->Effects[helperIndex];
-            if (slot.Effect != spec->EffectIds[helperIndex] || slot.ApplyAuraName || slot.TriggerSpell ||
+            if (slot.Effect != spec->EffectIds[helperIndex] || slot.ApplyAuraName != spec->AuraIds[helperIndex] ||
+                slot.TriggerSpell != spec->TriggerSpellIds[helperIndex] ||
                 slot.TargetA.GetTarget() != spec->TargetAIds[helperIndex] || slot.TargetB.GetTarget())
                 return false;
         }

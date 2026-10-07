@@ -1,0 +1,150 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Chaos Rush native third charges and root escape",
+  "contract": "Native utility keeps three shared charges, root escape and recharge; unknown saved practice remains unchanged.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Aprushthird",
+      "race": 1,
+      "class": 14,
+      "level": 44
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 500423
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.500028",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.500028",
+      "index": 1,
+      "value": 999
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.500028",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.500028",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.500028",
+      "index": 4,
+      "value": 101
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_charges",
+      "spell": 500423,
+      "equals": 3
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 12494,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "rooted",
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 500423
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_charges",
+      "spell": 500423,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "rooted",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 11000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_charges",
+      "spell": 500423,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.500028",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.500028",
+      "index": 1,
+      "equals": 999
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.500028",
+      "index": 2,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.500028",
+      "index": 3,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.500028",
+      "index": 4,
+      "equals": 101
+    }
+  ]
+}

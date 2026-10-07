@@ -8,8 +8,8 @@ The feature is not complete or approved for release.
 
 - Per-ability deterministic meaningful-use practice, automatic ranks, preserved learned ranks and saved
   progress, and one upcoming rank of preparation are implemented in the development module.
-- The catalog contains 252 unique profiles across all 21 classes: 152 ranked, eight mastery and 92 Fixed.
-  There are 254 declarations with two shared identities, 147 native baseline exclusions, and 451 groups
+- The catalog contains 253 unique profiles across all 21 classes: 152 ranked, eight mastery and 93 Fixed.
+  There are 255 declarations with two shared identities, 147 native baseline exclusions, and 450 groups
   still needing definitions (73 ranked and 378 standalone). Startup acceptance of metadata does not
   qualify every ability's gameplay. The discovery exports intentionally retain their unqualified status.
 - Draft pacing targets 30â€“60 combat minutes per rank, with 45-minute authored assumptions. Effective
@@ -18,7 +18,7 @@ The feature is not complete or approved for release.
   remaining, level requirements, future caps, mastery milestones and Fixed native utilities.
   It is unpublished and has not been installed in the active client.
 - The authorized C++/Lua 5.1 harness checks all 152 ranked policies, eight mastery policies and 92 Fixed
-  declarations; 772 typed snapshots decode, validate and mock-render. These are not client pixel tests.
+  declarations; 775 typed snapshots decode, validate and mock-render. These are not client pixel tests.
 - Native isolated gameplay has exercised original-cast enrollment and bot exclusion, version1-to4
   fraction conversion, automatic level-gated rank learning, owned buff contribution, gray/dummy
   exclusions, unknown saved-version preservation, healing mastery progress and periodic shared receipts.
@@ -93,6 +93,22 @@ its unchanged fake-worker crash/requeue test; the final source rerun passed. Ini
 names, wrote schema2 instead of1, loaded higher ranks before progress, lost rating overrides on relog,
 and used wrong menu state codes. Corrected fixtures passed without isolated rerun qualification.
 The explicit test-only rating setter restores controlled stats after relog without changing game balance.
+
+### Chaos Rush native utility
+
+Chaos Rush (class14/root500028) retains native ranks at levels4/24/44, full movement/root-escape
+mechanics and ordinary acquisition. It is Fixed utility: no practice gate, rewards or automatic teaching.
+Loaded parent slots, jump helper802028, removal helper802030, shared charge category356/root500028,
+three charges,10-second recharge and90ms helper periodic interval are guarded. The native first rank
+has a dispel-mechanic slot where later ranks have an immunity aura; both exact shapes are retained.
+
+Source9/build32.1s/harness4.1s PASSED `20261007-152059`, including775typed snapshots.
+Native three-rank charge/root-removal cases PASSED `20261007-152316` (61.7s simulated).
+Expanded shared-pool case PASSED `20261007-152629` (64.3s simulated): spending rank1 leaves two charges
+for all three rank IDs. Real-clock menu PASSED `20261007-152744` (68.5s), including level24/44 roadmap
+and no practice requirement. Unknown definition999/proficiency100/points101 remain unchanged.
+No isolated retry qualified any case. Native movement animation/client acknowledgement and pixels
+remain unverified. No gameplay formulas, cooldowns, charges or production settings were changed.
 
 ## Reproducing native qualification
 

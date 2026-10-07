@@ -32,6 +32,11 @@ inline constexpr std::array Class32Ability800995 = { AbilityRank{ 800995, 1, { 1
 inline constexpr std::array Class32Ability803679 = { AbilityRank{ 803679, 1, { 28, 1 } } };
 
 inline constexpr std::array MoonGaze = { AbilityRank{ 562723, 1, { 16, 1 } } };
+inline constexpr std::array ChaosRush = {
+    AbilityRank{ 500028, 1, { 4, 1 } },
+    AbilityRank{ 500422, 2, { 24, 1 } },
+    AbilityRank{ 500423, 3, { 44, 1 } }
+};
 inline constexpr std::array BloodCurse = { AbilityRank{ 562720, 1, { 6, 1 } } };
 inline constexpr std::array AncestralKeg = { AbilityRank{ 804748, 1, { 30, 1 } } };
 inline constexpr std::array MojoCauldron = { AbilityRank{ 807908, 1, { 60, 1 } } };
@@ -52,6 +57,8 @@ inline constexpr std::array MeltLock = { AbilityRank{ 804662, 1, { 16, 1 } } };
 inline constexpr std::array TinkerPickLock = { AbilityRank{ 804154, 1, { 14, 1 } } };
 
 inline constexpr std::array Profiles = {
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 14, 500028, AbilityKind::Fixed, ChaosRush, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 20, 562723, AbilityKind::Fixed, MoonGaze, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -132,6 +139,12 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 14, 500028, { 6, 64, 108 }, { 1, 1, 1 }, {}, { 107, 0, 77 }, { 0, 802028, 0 },
+        std::array<std::int32_t, 3>{ 6, 524287, 7 }, std::array<std::int32_t, 3>{ 14, 49, 1 } },
+    Mechanic{ 14, 500422, { 6, 64, 6 }, { 1, 1, 1 }, {}, { 107, 0, 77 }, { 0, 802028, 0 },
+        std::array<std::int32_t, 3>{ 6, 524287, 7 }, std::array<std::int32_t, 3>{ 14, 49, 1 } },
+    Mechanic{ 14, 500423, { 6, 64, 6 }, { 1, 1, 1 }, {}, { 107, 0, 77 }, { 0, 802028, 0 },
+        std::array<std::int32_t, 3>{ 6, 524287, 7 }, std::array<std::int32_t, 3>{ 14, 49, 1 } },
     Mechanic{ 20, 562723, { 6, 6, 6 }, { 1, 1, 1 }, {}, { 36, 4, 12 }, {},
         std::array<std::int32_t, 3>{ 57, 0, 0 }, std::array<std::int32_t, 3>{ -1, 8, 0 } },
     Mechanic{ 20, 562720, { 6, 6, 6 }, { 1, 1, 1 }, {}, { 36, 24, 8 }, {},
@@ -205,9 +218,12 @@ struct HelperMechanic
     std::uint32_t SpellId;
     std::array<std::uint32_t, 3> EffectIds;
     std::array<std::uint32_t, 3> TargetAIds;
+    std::array<std::uint32_t, 3> AuraIds = {};
+    std::array<std::uint32_t, 3> TriggerSpellIds = {};
 };
 
 inline constexpr std::array Helpers = {
+    HelperMechanic{ 802028, { 149, 6, 0 }, { 47, 1, 0 }, { 0, 23, 0 }, { 0, 802030, 0 } },
     HelperMechanic{ 572407, { 38, 0, 0 }, { 6, 0, 0 } },
     HelperMechanic{ 803680, { 38, 38, 0 }, { 21, 21, 0 } },
     HelperMechanic{ 71495, { 3, 0, 0 }, { 18, 0, 0 } }

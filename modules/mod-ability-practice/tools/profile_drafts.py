@@ -441,6 +441,22 @@ def build_drafts(candidates, root):
             required.extend(['soul-capture-loaded-script-registration-and-trigger-suppression',
                              'soul-capture-corpse-resource-and-post-combat-use-design',
                              'soul-capture-native-corpse-proof-and-actual-recovery-original-cast'])
+        if (class_id, ability_id) == (14, 500028):
+            expected_ids = [500028, 500422, 500423]
+            if ([rank['spellId'] for rank in ranks] != expected_ids or
+                    [rank['characterLevel'] for rank in ranks] != [4, 24, 44]):
+                raise ValueError('Reviewed Chaos Rush native rank ladder changed')
+            for index, spell_id in enumerate(expected_ids):
+                raw = members[spell_id].get('rawDbc', {})
+                details = raw.get('effectDetails', [])
+                expected = [(6, 107, 1, 0, 0, 14), (64, 0, 1, 0, 802028, 49),
+                            (108 if index == 0 else 6, 77, 1, 0, 0, 1)]
+                if (raw.get('passive') is not False or len(details) != 3 or
+                        [(v.get('effectId'), v.get('auraId'), v.get('implicitTargetA'),
+                          v.get('implicitTargetB'), v.get('triggerSpellId'), v.get('basePoints'))
+                         for v in details] != expected):
+                    raise ValueError('Reviewed Chaos Rush parent/helper raw shape changed')
+            required.append('native-three-shared-charges-root-removal-and-movement-not-combat-practice')
         if (class_id, ability_id) == (20, 562723):
             raw = members[ability_id].get('rawDbc', {})
             details = raw.get('effectDetails', [])
