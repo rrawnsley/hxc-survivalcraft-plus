@@ -28,6 +28,10 @@ def check_client(wire_path):
         runtime.execute(path.read_text(encoding='utf-8'))
     runtime.globals().EncodedPracticeSnapshot = runtime.table_from(wire_path.read_text().splitlines())
     runtime.execute((HERE / 'client_wire_cases.lua').read_text(encoding='utf-8'))
+    snapshots = [runtime.table_from(block.splitlines()) for block in
+                 Path(str(wire_path) + '.typed').read_text().strip().split('\n\n')]
+    runtime.globals().EncodedTypedPracticeSnapshots = runtime.table_from(snapshots)
+    runtime.execute((HERE / 'client_typed_rank_cases.lua').read_text(encoding='utf-8'))
     runtime.execute((client / 'Transport.lua').read_text(encoding='utf-8'))
     runtime.execute((HERE / 'client_transport_cases.lua').read_text(encoding='utf-8'))
 
@@ -113,6 +117,18 @@ def check_catalog_candidates(inventory):
     assert all(row['classification'] == 'pending' and not row['productionApproved'] for row in result['candidates'])
     observed = {(row['classId'], member['spellId']) for row in result['candidates'] for member in row['members']}
     assert observed == {(row['classId'], row['spellId']) for row in inventory['spells']}
+    bloodbolt = [804685, 806928, 806929, 806930, 806931, 806932, 578304, 578305]
+    missing_leech = [{'classId': 20, 'spellId': spell} for spell in bloodbolt]
+    review = module.native_direct_leech_review(missing_leech)
+    assert not review['commonRoutes'] and review['blockedMembers']
+    malformed_leech = [{**member, 'rawDbc': {'effects': [9, 6, 0], 'effectDetails': []}}
+                       for member in missing_leech]
+    try:
+        module.native_direct_leech_review(malformed_leech)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError('Changed reviewed leech shape accepted')
     sample = {'schemaVersion': 1, 'sources': [], 'relationships': [], 'spells': [
         {'classId': 24, 'spellId': spell, 'reportedLevels': [1], 'reviewFlags': [],
          'rawRankNumber': 1, 'rawDbc': {'name': 'Same name'}} for spell in (101, 102, 103)]}
@@ -133,7 +149,12 @@ def check_catalog_candidates(inventory):
             'scope': 'raw-data-reference-not-character-entitlement'}
     module.annotate_acquisition(conflicting, lambda spell: [node, node] if spell == 103 else [], [])
     assert conflicting['summary']['withRawAcquisitionCount'] == 2
-    assert all(row['rawAcquisition'] == [node] for row in conflicting['candidates'])
+    assert all(len(row['rawAcquisition']) == 1 for row in conflicting['candidates'])
+    for row in conflicting['candidates']:
+        observed_node = row['rawAcquisition'][0]
+        assert {key: value for key, value in observed_node.items() if key != 'nativeLoaderReview'} == node
+        assert observed_node['nativeLoaderReview']['status'] == 'missing-or-invalid-class-evidence'
+    assert 'nativeLoaderReview' not in node
     assert all('native-acquisition-filtering-unobserved' in row['reviewFlags'] for row in conflicting['candidates'])
     assert all(not row['productionApproved'] and row['classification'] == 'pending'
                for row in conflicting['candidates'])

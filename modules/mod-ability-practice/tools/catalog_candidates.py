@@ -288,7 +288,8 @@ def native_direct_leech_review(members):
                                 else {},
                                 'raw-reviewed-direct-leech-damage-not-effective-or-attribution-approval',
                                 'no-reviewed-direct-leech-profile')
-    if selected or selected_ravenous or selected_titanstrike:
+    if (selected or selected_ravenous or selected_titanstrike) and all(
+            member.get('rawDbc') and not member['rawDbc'].get('fieldErrors') for member in members):
         for member in members:
             raw = member.get('rawDbc') or {}
             details = raw.get('effectDetails', [])

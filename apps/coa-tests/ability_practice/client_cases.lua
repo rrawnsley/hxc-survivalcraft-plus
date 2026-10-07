@@ -49,7 +49,8 @@ capped.abilities[1].availability = 5
 capped.abilities[1].nextPoint = { status = 3, uses = "0" }
 capped.abilities[1].proficiency = 80
 assert(Model.Validate(capped))
-assert(string.find(Model.PointText(capped.abilities[1]), "current proficiency cap", 1, true))
+assert(Model.PointText(capped.abilities[1]) ==
+    "Current proficiency cap reached. Check the next milestone for remaining requirements.")
 local fixed = Fixture()
 fixed.abilities[1].availability = 6
 fixed.abilities[1].pointsPerLevel = 0

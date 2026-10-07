@@ -7,6 +7,22 @@
 #include "AbilityPracticePersistence.h"
 #include "AbilityPracticeOutcome.h"
 #include "AbilityPracticeDevelopment.h"
+#include "AbilityPracticeDevelopmentPacing.h"
+#include "AbilityPracticeDevelopmentRankCaps.h"
+#include "AbilityPracticeCatchup.h"
+#include "AbilityPracticeDevelopmentBuffs.h"
+#include "AbilityPracticeDevelopmentMastery.h"
+#include "AbilityPracticeDevelopmentMasteryPacing.h"
+#include "AbilityPracticeDevelopmentTrainerRanks.h"
+#include "AbilityPracticeDevelopmentBuffTrainerRanks.h"
+#include "AbilityPracticeDevelopmentStatBuffTrainerRanks.h"
+#include "AbilityPracticeDevelopmentSpellPowerBuffTrainerRanks.h"
+#include "AbilityPracticeDevelopmentFixed.h"
+#include "AbilityPracticeDevelopmentConjureFixed.h"
+#include "AbilityPracticeDevelopmentPassiveFixed.h"
+#include "AbilityPracticeDevelopmentUtilityFixed.h"
+#include "AbilityPracticeDevelopmentControlFixed.h"
+#include "AbilityPracticeDevelopmentTrainerFixed.h"
 
 #include <array>
 #include <cassert>
@@ -429,6 +445,305 @@ void CheckCatalog(TrainingPolicy policy)
     assert(ValidateDefinition(changed) == CatalogError::InvalidCap);
 }
 
+void CheckCurrentRankPolicies()
+{
+    std::uint32_t forecasts = 0;
+    std::array<bool, 21> classes{};
+    assert(DevelopmentPacing::Entries.size() == 151);
+    for (auto const& entry : DevelopmentPacing::Entries)
+    {
+        classes.at(entry.ClassId - 12) = true;
+        std::array<ProficiencyCap, 80> caps{};
+        for (std::size_t index = 0; index < caps.size(); ++index)
+            caps[index] = { static_cast<std::uint32_t>(index + 1),
+                std::min(static_cast<std::uint32_t>((index + 1) * 5),
+                    entry.ExpectedRanks.back().Requirement.Proficiency) };
+        AbilityProfile profile{ 2, AcquisitionSource::ClassGrant,
+            { entry.ClassId, entry.AbilityId, AbilityKind::Ranked, entry.ExpectedRanks, caps },
+            entry.Policy, OutcomeKind::Damage };
+        auto revised = DevelopmentRankCaps::Build(profile);
+        assert(revised);
+        profile.Definition.Caps = revised->Caps;
+        profile.DefinitionVersion = 4;
+        for (std::uint32_t level = 1; level <= 80; ++level)
+        {
+            std::uint32_t permitted = entry.ExpectedRanks.back().Requirement.Proficiency;
+            for (auto const& rank : entry.ExpectedRanks.subspan(1))
+                if (level < rank.Requirement.CharacterLevel)
+                {
+                    permitted = rank.Requirement.Proficiency;
+                    break;
+                }
+            assert(CapAtLevel(profile.Definition, level) == std::min(level * 5, permitted));
+        }
+        for (std::size_t rankIndex = 1; rankIndex < entry.ExpectedRanks.size(); ++rankIndex)
+        {
+            auto const& previous = entry.ExpectedRanks[rankIndex - 1];
+            auto const& rank = entry.ExpectedRanks[rankIndex];
+            auto const level = previous.Requirement.CharacterLevel;
+            auto const cap = CapAtLevel(profile.Definition, level);
+            std::vector<std::uint32_t> learned;
+            for (auto const& known : entry.ExpectedRanks.first(rankIndex))
+                learned.push_back(known.SpellId);
+            auto const waiting = DescribeRank(profile.Definition, rankIndex, profile.Policy,
+                { rank.Requirement.Proficiency, 0 }, rank.Requirement.CharacterLevel - 1, learned, true);
+            assert(waiting.State == RankState::NeedsCharacterLevel);
+            for (auto const catchup : { CatchupSettings{}, CatchupSettings{ true, 40, 2 } })
+            {
+                auto const effective = BuildCatchupPolicy(entry.Policy, cap, catchup);
+                assert(effective);
+                auto const policy = effective->View();
+                auto const proficiency = previous.Requirement.Proficiency;
+                auto const cost = policy.Bands[Detail::BandIndex(policy, proficiency)].PointsPerLevel;
+                for (std::uint32_t points : { 0U, cost / 2, cost - 1 })
+                {
+                    Progress const initial{ proficiency, points };
+                    auto const target = std::min(rank.Requirement.Proficiency, cap);
+                    auto const forecast = UsesUntil(policy, initial, target, cap);
+                    Progress observed = initial;
+                    std::uint64_t actual = 0;
+                    while (observed.Proficiency < target)
+                    {
+                        auto const award = ApplyQualifyingUse(policy, observed, cap);
+                        assert(award.Status == AwardStatus::Applied);
+                        observed = award.State;
+                        assert(++actual < 100000);
+                    }
+                    assert(forecast.Uses == actual);
+                    ++forecasts;
+                    StoredProgress const old{ 1, 1, { proficiency, 15 } };
+                    auto const rebased = RebaseStoredProgress(DevelopmentPacing::PreviousPolicy,
+                        entry.Policy, 2, old);
+                    assert(rebased && rebased->State.Proficiency == proficiency);
+                    auto const nextCost = entry.Policy.Bands[
+                        Detail::BandIndex(entry.Policy, proficiency)].PointsPerLevel;
+                    assert(rebased->State.Points * 30 == std::uint64_t(15) * nextCost);
+                    auto const version4 = RebaseStoredProgress(entry.Policy, entry.Policy, 4, *rebased);
+                    assert(version4 && version4->State.Points == rebased->State.Points);
+                    auto const retainedCost = policy.Bands[Detail::BandIndex(policy, cap + 1)].PointsPerLevel;
+                    auto const retainedPoints = std::min(points, retainedCost - 1);
+                    auto const capped = ApplyQualifyingUse(policy, { cap + 1, retainedPoints }, cap);
+                    assert(capped.Status == AwardStatus::Capped && capped.State.Proficiency == cap + 1);
+                    assert(capped.State.Points == retainedPoints);
+                }
+            }
+        }
+    }
+    assert(std::all_of(classes.begin(), classes.end(), [](bool present) { return present; }));
+    std::cout << "PASS: 151 current rank policies, 21 classes, one-rank-ahead caps, exact rebases and "
+        << forecasts << " current forecast/award comparisons\n";
+}
+
+std::array<std::span<AbilityProfile const>, 6> FixedCatalogs()
+{
+    return { DevelopmentFixed::Profiles, DevelopmentConjureFixed::Profiles, DevelopmentPassiveFixed::Profiles,
+        DevelopmentUtilityFixed::Profiles, DevelopmentControlFixed::Profiles, DevelopmentTrainerFixed::Profiles };
+}
+
+AbilityProfile CurrentMasteryProfile(AbilityProfile profile)
+{
+    for (auto const& entry : DevelopmentMasteryPacing::Entries)
+        if (profile.Definition.ClassId == entry.ClassId && profile.Definition.AbilityId == entry.AbilityId)
+        {
+            auto const migrated = RebaseStoredProgress(entry.PreviousPolicy, entry.Policy, 2, { 1, 1, { 39, 15 } });
+            assert(migrated && migrated->State.Proficiency == 39);
+            assert(migrated->State.Points * 30 == std::uint64_t(15) * entry.Policy.Bands.front().PointsPerLevel);
+            profile.Policy = entry.Policy;
+            profile.DefinitionVersion = 2;
+        }
+    return profile;
+}
+
+void CheckMasteryFixedAndTrainerPolicies()
+{
+    assert(DevelopmentMastery::Profiles.size() == 7);
+    for (auto const& authored : DevelopmentMastery::Profiles)
+    {
+        auto const profile = CurrentMasteryProfile(authored);
+        assert(ValidateProfiles(std::span(&profile, 1)));
+        bool const healing = profile.Outcome == OutcomeKind::Healing;
+        for (auto const& reward : profile.Rewards)
+        {
+            auto const level = reward.Requirement.CharacterLevel;
+            Progress const progress{ reward.Requirement.Proficiency, 0 };
+            auto const bonus = MasteryBonus(profile.Definition, profile.Rewards, progress, level, true, true, healing);
+            assert(bonus == MasteryBonusAmount(reward));
+            assert(MasteryBonus(profile.Definition, profile.Rewards, progress, level, false, true, healing) == 0);
+            assert(MasteryBonus(profile.Definition, profile.Rewards, progress, level, true, false, healing) == 0);
+            auto const waiting = DescribeMasteryRewards(profile.Definition, profile.Rewards, profile.Policy,
+                progress, level - 1, true, true);
+            auto const index = static_cast<std::size_t>(&reward - profile.Rewards.data());
+            assert(waiting[index].State == RankState::NeedsCharacterLevel);
+            auto const cap = CapAtLevel(profile.Definition, level);
+            auto const forecast = UsesUntil(profile.Policy, { 1, 0 }, progress.Proficiency, cap);
+            Progress observed{ 1, 0 };
+            std::uint64_t uses = 0;
+            while (observed.Proficiency < progress.Proficiency)
+            {
+                auto const award = ApplyQualifyingUse(profile.Policy, observed, cap);
+                assert(award.Status == AwardStatus::Applied);
+                observed = award.State;
+                assert(++uses < 100000);
+            }
+            assert(forecast.Uses == uses);
+        }
+    }
+    std::uint32_t fixedCount = 0;
+    for (auto const catalog : FixedCatalogs())
+    {
+        assert(ValidateProfiles(catalog));
+        for (auto const& profile : catalog)
+        {
+            ++fixedCount;
+            auto const& definition = profile.Definition;
+            assert(definition.Kind == AbilityKind::Fixed && definition.Caps.empty());
+            std::array learned{ definition.Ranks.front().SpellId };
+            auto const view = BuildAbilityView(definition, profile.Policy, { 99, 1000 },
+                definition.Ranks.front().Requirement.CharacterLevel, learned, true);
+            assert(view.Availability == PracticeAvailability::Fixed && view.LearnedRank == 1);
+            assert(view.State.Proficiency == 1 && view.State.Points == 0 && view.PointsPerLevel == 0);
+            assert(!view.NextTrainingCap && view.Rewards.empty());
+        }
+    }
+    assert(fixedCount == 83);
+    std::array<std::span<DevelopmentTrainerRanks::Entry const>, 4> const trainers = {
+        DevelopmentTrainerRanks::Entries, DevelopmentBuffTrainerRanks::Entries,
+        DevelopmentStatBuffTrainerRanks::Entries, DevelopmentSpellPowerBuffTrainerRanks::Entries };
+    std::uint32_t extensions = 0;
+    std::uint32_t addedRanks = 0;
+    for (auto const catalog : trainers)
+        for (auto const& entry : catalog)
+        {
+            ++extensions;
+            auto const& profile = entry.Profile;
+            assert(ValidateProfiles(std::span(&profile, 1)));
+            assert(profile.Definition.Ranks.size() == entry.PreviousRanks.size() + entry.AdditionalTrainerRanks.size());
+            for (std::size_t index = 0; index < entry.PreviousRanks.size(); ++index)
+            {
+                auto const& prior = entry.PreviousRanks[index];
+                auto const& current = profile.Definition.Ranks[index];
+                assert(prior.SpellId == current.SpellId && prior.RankNumber == current.RankNumber);
+                assert(prior.Requirement.CharacterLevel == current.Requirement.CharacterLevel);
+                assert(prior.Requirement.Proficiency == current.Requirement.Proficiency);
+            }
+            auto revised = DevelopmentRankCaps::Build(profile);
+            assert(revised);
+            auto definition = profile.Definition;
+            definition.Caps = revised->Caps;
+            for (std::size_t index = 0; index < entry.AdditionalTrainerRanks.size(); ++index)
+            {
+                ++addedRanks;
+                auto const& trainer = entry.AdditionalTrainerRanks[index];
+                auto const& rank = definition.Ranks[entry.PreviousRanks.size() + index];
+                auto const& previous = definition.Ranks[entry.PreviousRanks.size() + index - 1];
+                assert(rank.SpellId == trainer.SpellId && rank.Requirement.CharacterLevel == trainer.CharacterLevel);
+                assert(trainer.TrainerId && trainer.RequiredAbilities[0]);
+                auto const preceding = definition.Ranks.first(entry.PreviousRanks.size() + index);
+                assert(std::any_of(preceding.begin(), preceding.end(), [&trainer](AbilityRank const& known)
+                {
+                    return known.SpellId == trainer.RequiredAbilities[0];
+                }));
+                assert(CapAtLevel(definition, previous.Requirement.CharacterLevel) <= rank.Requirement.Proficiency);
+            }
+            auto const converted = RebaseStoredProgress(profile.Policy, profile.Policy, 4,
+                { 3, 1, { entry.PreviousRanks.back().Requirement.Proficiency, 0 } });
+            assert(converted && converted->State.Proficiency == entry.PreviousRanks.back().Requirement.Proficiency);
+        }
+    assert(extensions == 12 && addedRanks == 24);
+    std::cout << "PASS: 7 mastery policies/rewards, 83 fixed declarations, 12 trainer extensions/24 added ranks\n";
+}
+
+void WriteTypedMasteryAndFixedCases(std::ofstream& output, std::uint32_t& revision)
+{
+    auto write = [&output, &revision](AbilityProfile const& profile, std::uint32_t level, bool learned, Progress state)
+    {
+        std::vector<std::uint32_t> known;
+        if (learned)
+            known.push_back(profile.Definition.Ranks.front().SpellId);
+        auto view = BuildAbilityView(profile.Definition, profile.Policy, state, level, known, true);
+        view.Route = profile.Definition.Kind == AbilityKind::Fixed ? PracticeRoute::Fixed :
+            profile.Outcome == OutcomeKind::Healing ? PracticeRoute::Healing : PracticeRoute::Damage;
+        view.RuleSet = 1;
+        view.AcquisitionSourceId = static_cast<std::uint32_t>(profile.Acquisition);
+        if (profile.Definition.Kind == AbilityKind::Mastery)
+            view.Rewards = DescribeMasteryRewards(profile.Definition, profile.Rewards, profile.Policy,
+                state, level, learned, true);
+        std::array views{ view };
+        auto const encoded = EncodeMenuSnapshot(profile.Definition.ClassId, level, ++revision, views,
+            SessionPractice{}, true, true, 777, 80);
+        assert(encoded);
+        for (auto const& line : *encoded)
+            output << line << '\n';
+        output << '\n';
+    };
+    for (auto const& authored : DevelopmentMastery::Profiles)
+    {
+        auto const profile = CurrentMasteryProfile(authored);
+        write(profile, profile.Definition.Ranks.front().Requirement.CharacterLevel, true, { 1, 0 });
+        for (auto const& reward : profile.Rewards)
+            write(profile, reward.Requirement.CharacterLevel, true, { reward.Requirement.Proficiency, 0 });
+    }
+    for (auto const catalog : FixedCatalogs())
+        for (auto const& profile : catalog)
+        {
+            auto const level = profile.Definition.Ranks.front().Requirement.CharacterLevel;
+            write(profile, std::max(1U, level - 1), false, { 1, 0 });
+            write(profile, level, false, { 1, 0 });
+            write(profile, level, true, { 1, 0 });
+        }
+}
+
+void WriteTypedRankCases(std::string const& filename)
+{
+    std::ofstream output(filename);
+    std::uint32_t revision = 100;
+    for (auto const& entry : DevelopmentPacing::Entries)
+    {
+        std::array<ProficiencyCap, 80> caps{};
+        for (std::size_t index = 0; index < caps.size(); ++index)
+            caps[index] = { static_cast<std::uint32_t>(index + 1),
+                std::min(static_cast<std::uint32_t>((index + 1) * 5),
+                    entry.ExpectedRanks.back().Requirement.Proficiency) };
+        AbilityProfile profile{ 2, AcquisitionSource::ClassGrant,
+            { entry.ClassId, entry.AbilityId, AbilityKind::Ranked, entry.ExpectedRanks, caps },
+            entry.Policy, OutcomeKind::Damage };
+        auto revised = DevelopmentRankCaps::Build(profile);
+        assert(revised);
+        profile.Definition.Caps = revised->Caps;
+        std::array learned{ entry.ExpectedRanks.front().SpellId };
+        auto const level = entry.ExpectedRanks.front().Requirement.CharacterLevel;
+        auto const cap = CapAtLevel(profile.Definition, level);
+        auto const effective = BuildCatchupPolicy(entry.Policy, cap, { true, 40, 2 });
+        assert(effective);
+        auto const policy = effective->View();
+        for (std::uint32_t phase = 0; phase < 3; ++phase)
+        {
+            Progress state{ phase == 0 ? 1U : phase == 1 ? cap : cap + 1, 0 };
+            auto view = BuildAbilityView(profile.Definition, policy, state, level, learned, true);
+            bool const buff = DevelopmentBuffs::IsSupportedStatBuff(profile);
+            view.Route = buff ? PracticeRoute::BuffCombat : PracticeRoute::Damage;
+            view.RuleSet = 4;
+            view.AcquisitionSourceId = 1;
+            if (buff)
+                view.BuffState = phase == 0 ? BuffPracticeState::Inactive :
+                    phase == 1 ? BuffPracticeState::Ready : BuffPracticeState::Suppressed;
+            auto const base = entry.Policy.Bands[Detail::BandIndex(entry.Policy, state.Proficiency)];
+            auto const rate = policy.Bands[Detail::BandIndex(policy, state.Proficiency)];
+            view.Catchup = CatchupView{ 40, 2, base.PointsPerUse, rate.PointsPerUse,
+                state.Proficiency < cap && cap - state.Proficiency >= 40 };
+            std::array views{ view };
+            auto const encoded = EncodeMenuSnapshot(entry.ClassId, level, ++revision, views,
+                SessionPractice{}, true, true, 777, 80);
+            assert(encoded);
+            for (auto const& line : *encoded)
+                output << line << '\n';
+            output << '\n';
+        }
+    }
+    WriteTypedMasteryAndFixedCases(output, revision);
+    assert(output.good());
+}
+
 int main(int argc, char** argv)
 {
     std::array const bands = { TrainingBand{ 1, 30, 2 }, TrainingBand{ 20, 30, 1 } };
@@ -439,6 +754,8 @@ int main(int argc, char** argv)
     CheckMenu(policy);
     CheckPersistence(policy);
     CheckOutcome(policy);
+    CheckCurrentRankPolicies();
+    CheckMasteryFixedAndTrainerPolicies();
     assert(ValidateCatalog(Development::Abilities) == CatalogError::None);
     assert(Development::Find(503232)->AbilityId == 803950);
     assert(Development::Find(803825)->AbilityId == 803819);
@@ -450,6 +767,7 @@ int main(int argc, char** argv)
     assert(pyro.NextRank->SpellId == 503233 && pyro.NextRank->Practice.Uses == 492);
     if (argc > 1)
     {
+        WriteTypedRankCases(std::string(argv[1]) + ".typed");
         std::array const ranks = { AbilityRank{ 101, 1, { 4, 1 } }, AbilityRank{ 102, 2, { 16, 20 } },
             AbilityRank{ 103, 3, { 24, 40 } } };
         std::array const caps = { ProficiencyCap{ 1, 10 }, ProficiencyCap{ 16, 30 }, ProficiencyCap{ 24, 60 } };
