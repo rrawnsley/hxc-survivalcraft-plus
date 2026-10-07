@@ -193,8 +193,8 @@ class felsworn_casts : public AllSpellScript
                 if (Aura* aura = pair.second->GetBase(); aura->GetId() == 712483 && Owner(aura->GetCaster()))
                 {
                     uint64 count = std::min<uint64>(30, aura->GetScriptValue(712483) + 1);
-                    aura->SetScriptValue(712483, count);
                     aura->SetStackAmount(std::max<uint64>(1, count));
+                    aura->SetScriptValue(712483, count);
                 }
         Player* player = Owner(caster);
         if (!player || info->SpellFamilyName != 20 || Triggered(spell))

@@ -25,7 +25,10 @@
 #include "AbilityPracticeDevelopmentTrainerFixed.h"
 #include "AbilityPracticeNativeRankChain.h"
 
+#include "../../../src/server/game/Spells/AbilityPracticeCastReceipt.h"
+
 #include <array>
+#include <thread>
 #include <cassert>
 #include <iostream>
 #include <fstream>
@@ -555,38 +558,46 @@ AbilityProfile CurrentMasteryProfile(AbilityProfile profile)
     return profile;
 }
 
+std::array<std::span<AbilityProfile const>, 2> MasteryCatalogs()
+{
+    return { DevelopmentMastery::Profiles, DevelopmentMastery::ScriptedProfiles };
+}
+
 void CheckMasteryFixedAndTrainerPolicies()
 {
     assert(DevelopmentMastery::Profiles.size() == 6);
-    for (auto const& authored : DevelopmentMastery::Profiles)
+    for (auto const catalog : MasteryCatalogs())
     {
-        auto const profile = CurrentMasteryProfile(authored);
-        assert(ValidateProfiles(std::span(&profile, 1)));
-        bool const healing = profile.Outcome == OutcomeKind::Healing;
-        for (auto const& reward : profile.Rewards)
+        for (auto const& authored : catalog)
         {
-            auto const level = reward.Requirement.CharacterLevel;
-            Progress const progress{ reward.Requirement.Proficiency, 0 };
-            auto const bonus = MasteryBonus(profile.Definition, profile.Rewards, progress, level, true, true, healing);
-            assert(bonus == MasteryBonusAmount(reward));
-            assert(MasteryBonus(profile.Definition, profile.Rewards, progress, level, false, true, healing) == 0);
-            assert(MasteryBonus(profile.Definition, profile.Rewards, progress, level, true, false, healing) == 0);
-            auto const waiting = DescribeMasteryRewards(profile.Definition, profile.Rewards, profile.Policy,
-                progress, level - 1, true, true);
-            auto const index = static_cast<std::size_t>(&reward - profile.Rewards.data());
-            assert(waiting[index].State == RankState::NeedsCharacterLevel);
-            auto const cap = CapAtLevel(profile.Definition, level);
-            auto const forecast = UsesUntil(profile.Policy, { 1, 0 }, progress.Proficiency, cap);
-            Progress observed{ 1, 0 };
-            std::uint64_t uses = 0;
-            while (observed.Proficiency < progress.Proficiency)
+            auto const profile = CurrentMasteryProfile(authored);
+            assert(ValidateProfiles(std::span(&profile, 1)));
+            bool const healing = profile.Outcome == OutcomeKind::Healing;
+            for (auto const& reward : profile.Rewards)
             {
-                auto const award = ApplyQualifyingUse(profile.Policy, observed, cap);
-                assert(award.Status == AwardStatus::Applied);
-                observed = award.State;
-                assert(++uses < 100000);
+                auto const level = reward.Requirement.CharacterLevel;
+                Progress const progress{ reward.Requirement.Proficiency, 0 };
+                auto const bonus = MasteryBonus(profile.Definition, profile.Rewards, progress, level, true, true, healing);
+                assert(bonus == MasteryBonusAmount(reward));
+                assert(MasteryBonus(profile.Definition, profile.Rewards, progress, level, false, true, healing) == 0);
+                assert(MasteryBonus(profile.Definition, profile.Rewards, progress, level, true, false, healing) == 0);
+                auto const waiting = DescribeMasteryRewards(profile.Definition, profile.Rewards, profile.Policy,
+                    progress, level - 1, true, true);
+                auto const index = static_cast<std::size_t>(&reward - profile.Rewards.data());
+                assert(waiting[index].State == RankState::NeedsCharacterLevel);
+                auto const cap = CapAtLevel(profile.Definition, level);
+                auto const forecast = UsesUntil(profile.Policy, { 1, 0 }, progress.Proficiency, cap);
+                Progress observed{ 1, 0 };
+                std::uint64_t uses = 0;
+                while (observed.Proficiency < progress.Proficiency)
+                {
+                    auto const award = ApplyQualifyingUse(profile.Policy, observed, cap);
+                    assert(award.Status == AwardStatus::Applied);
+                    observed = award.State;
+                    assert(++uses < 100000);
+                }
+                assert(forecast.Uses == uses);
             }
-            assert(forecast.Uses == uses);
         }
     }
     std::uint32_t fixedCount = 0;
@@ -691,23 +702,35 @@ void CheckMasteryFixedAndTrainerPolicies()
             assert(converted && converted->State.Proficiency == entry.PreviousRanks.back().Requirement.Proficiency);
         }
     assert(extensions == 12 && addedRanks == 24);
-    std::cout << "PASS: 6 mastery policies/rewards, 89 fixed declarations, 12 trainer extensions/24 added ranks\n";
+    std::cout << "PASS: 7 mastery policies/rewards, 89 fixed declarations, 12 trainer extensions/24 added ranks\n";
 }
 
 void WriteTypedMasteryAndFixedCases(std::ofstream& output, std::uint32_t& revision)
 {
-    auto write = [&output, &revision](AbilityProfile const& profile, std::uint32_t level, bool learned, Progress state)
+    auto write = [&output, &revision](AbilityProfile const& profile, std::uint32_t level, bool learned,
+        Progress state, bool catchup = false)
     {
         std::vector<std::uint32_t> known;
         if (learned)
             known.push_back(profile.Definition.Ranks.front().SpellId);
-        auto view = BuildAbilityView(profile.Definition, profile.Policy, state, level, known, true);
+        auto const effective = BuildCatchupPolicy(profile.Policy, CapAtLevel(profile.Definition, level),
+            { catchup, 40, 2 });
+        assert(effective);
+        auto view = BuildAbilityView(profile.Definition, effective->View(), state, level, known, true);
         view.Route = profile.Definition.Kind == AbilityKind::Fixed ? PracticeRoute::Fixed :
             profile.Outcome == OutcomeKind::Healing ? PracticeRoute::Healing : PracticeRoute::Damage;
-        view.RuleSet = 1;
+        view.RuleSet = DevelopmentMastery::IsBaneOfBetrayal(profile) ?
+            (catchup ? HumanPvEScriptedDamageCatchupRuleSet : HumanPvEScriptedDamageRuleSet) : 1;
+        if (catchup)
+        {
+            auto const base = profile.Policy.Bands[Detail::BandIndex(profile.Policy, state.Proficiency)];
+            auto const rate = effective->View().Bands[Detail::BandIndex(effective->View(), state.Proficiency)];
+            view.Catchup = CatchupView{ 40, 2, base.PointsPerUse, rate.PointsPerUse,
+                state.Proficiency < view.Cap && view.Cap - state.Proficiency >= 40 };
+        }
         view.AcquisitionSourceId = static_cast<std::uint32_t>(profile.Acquisition);
         if (profile.Definition.Kind == AbilityKind::Mastery)
-            view.Rewards = DescribeMasteryRewards(profile.Definition, profile.Rewards, profile.Policy,
+            view.Rewards = DescribeMasteryRewards(profile.Definition, profile.Rewards, effective->View(),
                 state, level, learned, true);
         std::array views{ view };
         auto const encoded = EncodeMenuSnapshot(profile.Definition.ClassId, level, ++revision, views,
@@ -717,12 +740,21 @@ void WriteTypedMasteryAndFixedCases(std::ofstream& output, std::uint32_t& revisi
             output << line << '\n';
         output << '\n';
     };
-    for (auto const& authored : DevelopmentMastery::Profiles)
+    for (auto const catalog : MasteryCatalogs())
     {
-        auto const profile = CurrentMasteryProfile(authored);
-        write(profile, profile.Definition.Ranks.front().Requirement.CharacterLevel, true, { 1, 0 });
-        for (auto const& reward : profile.Rewards)
-            write(profile, reward.Requirement.CharacterLevel, true, { reward.Requirement.Proficiency, 0 });
+        for (auto const& authored : catalog)
+        {
+            auto const profile = CurrentMasteryProfile(authored);
+            write(profile, profile.Definition.Ranks.front().Requirement.CharacterLevel, true, { 1, 0 });
+            for (auto const& reward : profile.Rewards)
+                write(profile, reward.Requirement.CharacterLevel, true, { reward.Requirement.Proficiency, 0 });
+            if (DevelopmentMastery::IsBaneOfBetrayal(profile))
+            {
+                write(profile, profile.Definition.Ranks.front().Requirement.CharacterLevel, true, { 1, 0 }, true);
+                for (auto const& reward : profile.Rewards)
+                    write(profile, reward.Requirement.CharacterLevel, true, { reward.Requirement.Proficiency, 0 }, true);
+            }
+        }
     }
     for (auto const catalog : FixedCatalogs())
         for (auto const& profile : catalog)
@@ -785,10 +817,52 @@ void WriteTypedRankCases(std::string const& filename)
     assert(output.good());
 }
 
+void CheckScriptedDamageReceipts()
+{
+    using CoAAbilityPractice::CastReceipt;
+    using Scope = CoAAbilityPractice::ScopedScriptedDamageCast;
+    auto original = std::make_shared<CastReceipt>(1, 2, 14, 712483, 1, 0, 0);
+    assert(!Scope::Take(1, 3, 807554));
+    {
+        Scope outer(original, 3, 807554);
+        assert(!Scope::Take(9, 3, 807554));
+        assert(!Scope::Take(1, 9, 807554));
+        assert(!Scope::Take(1, 3, 9));
+        std::thread other([] { assert(!Scope::Take(1, 3, 807554)); });
+        other.join();
+        {
+            Scope inner({}, 3, 807554);
+            assert(!Scope::Take(1, 3, 807554));
+        }
+        auto bound = Scope::Take(1, 3, 807554);
+        assert(bound == original);
+        assert(!Scope::Take(1, 3, 807554));
+        auto secondTarget = bound;
+        bound->MarkConsumed();
+        assert(secondTarget->IsConsumed());
+    }
+    assert(!Scope::Take(1, 3, 807554));
+    {
+        Scope consumed(original, 3, 807554);
+        assert(!Scope::Take(1, 3, 807554));
+    }
+    auto nested = std::make_shared<CastReceipt>(1, 2, 14, 712483, 1, 0, 0);
+    {
+        Scope outer(nested, 3, 807554);
+        {
+            auto another = std::make_shared<CastReceipt>(1, 2, 14, 712483, 1, 0, 0);
+            Scope inner(another, 4, 807554);
+            assert(Scope::Take(1, 4, 807554) == another);
+        }
+        assert(Scope::Take(1, 3, 807554) == nested);
+    }
+}
+
 int main(int argc, char** argv)
 {
     std::array const bands = { TrainingBand{ 1, 30, 2 }, TrainingBand{ 20, 30, 1 } };
     TrainingPolicy const policy{ bands };
+    CheckScriptedDamageReceipts();
     CheckCatalog(policy);
     CheckActions();
     CheckState(policy);

@@ -3606,7 +3606,8 @@ private:
             Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown spell: " + std::to_string(spell));
             Unit* target = step.get_optional<std::string>("target")
                 ? GetUnit(step.get<std::string>("target")) : creature;
-            SpellCastResult result = creature->CastSpell(target, spell, TRIGGERED_FULL_MASK);
+            SpellCastResult result = creature->CastSpell(target, spell,
+                step.get<bool>("creature_triggered", true) ? TRIGGERED_FULL_MASK : TRIGGERED_NONE);
             record.put("cast_result", uint32(result));
             Require(result == SPELL_CAST_OK, "Creature cast failed: " + std::to_string(result));
             return;

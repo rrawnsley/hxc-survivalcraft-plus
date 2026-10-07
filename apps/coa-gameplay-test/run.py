@@ -152,7 +152,7 @@ ACTIONS = {
     'set_aura': ({'actor', 'spell', 'stacks'}, {'actor', 'spell', 'stacks', 'pet', 'owned_entry'}),
     'cancel_aura': ({'actor', 'spell'}, {'actor', 'spell'}),
     'cancel_mount': ({'actor'}, {'actor'}),
-    'cast': ({'actor', 'spell'}, {'actor', 'spell', 'target', 'destination', 'target_pet', 'target_item', 'target_gameobject'}),
+    'cast': ({'actor', 'spell'}, {'actor', 'spell', 'target', 'destination', 'target_pet', 'target_item', 'target_gameobject', 'creature_triggered'}),
     'attack': ({'actor', 'target'}, {'actor', 'target', 'pet'}),
     'pvp': ({'actor', 'enabled'}, {'actor', 'enabled'}),
     'group': ({'actor', 'target'}, {'actor', 'target', 'loot_method'}),
@@ -345,6 +345,9 @@ def validate(scenario):
             require(action in {'snapshot', 'assert', 'set_health', 'cast', 'attack_owned_creature'}
                     or step['actor'] in player_ids,
                     f'{where}: action needs a player')
+            if action == 'cast' and 'creature_triggered' in step:
+                require(step['actor'] not in player_ids and type(step['creature_triggered']) is bool,
+                        f'{where}: creature_triggered needs a creature and boolean')
             if action == 'cast' and step['actor'] not in player_ids:
                 require('destination' not in step, f'{where}: creature cast has no destination')
             if action == 'cast' and 'target_item' in step:

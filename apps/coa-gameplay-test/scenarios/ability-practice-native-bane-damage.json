@@ -1,0 +1,681 @@
+{
+  "schema": 1,
+  "name": "Ability practice: original Bane expiry damage and mastery",
+  "contract": "Native enemy casts accumulate Bane stacks. Aura application and enemy casts grant no practice. Native contracts make expiry damage single-target. Full proficiency adds2% to that native delayed damage. An actually cast unscoped shared helper grants no Bane practice.",
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 14,
+      "level": 46,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000
+    },
+    {
+      "id": "mastered",
+      "race": 1,
+      "class": 14,
+      "level": 46,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "control",
+      "entry": 36,
+      "level": 46,
+      "health": 1000000,
+      "distance": 3,
+      "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "nearby",
+      "owner": "control",
+      "entry": 36,
+      "level": 46,
+      "health": 1000000,
+      "distance": 4,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 712483
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "control",
+      "source": "core.hxc.ability_practice.14.712483",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "control",
+      "source": "core.hxc.ability_practice.14.712483",
+      "index": 1,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "control",
+      "source": "core.hxc.ability_practice.14.712483",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "control",
+      "source": "core.hxc.ability_practice.14.712483",
+      "index": 3,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "control",
+      "source": "core.hxc.ability_practice.14.712483",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "mastered",
+      "spell": 712483
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "mastered",
+      "source": "core.hxc.ability_practice.14.712483",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "mastered",
+      "source": "core.hxc.ability_practice.14.712483",
+      "index": 1,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "mastered",
+      "source": "core.hxc.ability_practice.14.712483",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "mastered",
+      "source": "core.hxc.ability_practice.14.712483",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "mastered",
+      "source": "core.hxc.ability_practice.14.712483",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 712483,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 712483,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.712483",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_stacks",
+      "spell": 712483,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.712483",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 32000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 712483,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 807554,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_damage_total",
+      "spell": 807554,
+      "target": "enemy",
+      "min": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 807554,
+      "target": "nearby",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_damage_total",
+      "spell": 807554,
+      "target": "nearby",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_damage_total",
+      "spell": 807554,
+      "target": "enemy",
+      "save_as": "base_damage"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.712483",
+      "index": 3,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.712483",
+      "index": 4,
+      "equals": 2340
+    },
+    {
+      "action": "cast",
+      "actor": "mastered",
+      "spell": 712483,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 712483,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "mastered",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.712483",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_stacks",
+      "spell": 712483,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "actor": "mastered",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.712483",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 32000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 712483,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "mastered",
+      "metric": "spell_damage_count",
+      "spell": 807554,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "mastered",
+      "metric": "spell_damage_total",
+      "spell": 807554,
+      "target": "enemy",
+      "min": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "mastered",
+      "metric": "spell_damage_count",
+      "spell": 807554,
+      "target": "nearby",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "mastered",
+      "metric": "spell_damage_total",
+      "spell": 807554,
+      "target": "nearby",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "mastered",
+      "metric": "spell_damage_total",
+      "spell": 807554,
+      "target": "enemy",
+      "ratio_to": "base_damage",
+      "min": 1.018,
+      "max": 1.022
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 807554
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "knows_spell",
+      "spell": 807554,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 807554,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.712483",
+      "index": 4,
+      "equals": 2340
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 807554,
+      "target": "enemy",
+      "equals": 2
+    }
+  ]
+}

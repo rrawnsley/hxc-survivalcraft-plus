@@ -189,7 +189,7 @@ def main():
             flags = ['/nologo', '/std:c++20', '/EHsc', '/W4', '/WX', '/utf-8', '/I' + str(include),
                      str(source), '/Fe' + str(executable)]
         else:
-            flags = ['-std=c++20', '-Wall', '-Wextra', '-Werror', '-I' + str(include),
+            flags = ['-std=c++20', '-Wall', '-Wextra', '-Werror', '-pthread', '-I' + str(include),
                      str(source), '-o', str(executable)]
         subprocess.run([compiler, *flags], cwd=output, check=True, timeout=60)
         wire = output / 'menu-wire.txt'

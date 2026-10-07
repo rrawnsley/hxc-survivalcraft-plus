@@ -17,6 +17,8 @@ inline constexpr std::uint32_t RoadmapMenuSchemaVersion = 3;
 inline constexpr std::uint32_t TypedMenuSchemaVersion = 4;
 inline constexpr std::uint32_t HumanPvEPeriodicRuleSet = 2;
 inline constexpr std::uint32_t HumanPvEScriptedHealRuleSet = 3;
+inline constexpr std::uint32_t HumanPvEScriptedDamageRuleSet = 7;
+inline constexpr std::uint32_t HumanPvEScriptedDamageCatchupRuleSet = 8;
 
 struct SessionPractice
 {

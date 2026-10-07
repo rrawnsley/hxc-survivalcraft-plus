@@ -102,7 +102,9 @@ def build_report(drafts, declarations, profiles, cast_times, durations, common_i
             continue
         validate_rank_agreement(draft, declarations[identity])
         profile, rank = profiles[identity], draft['ranks'][0]
-        if profile['outcome'] not in draft['candidateOutcomeRoutes']:
+        scripted_bane = identity == (14, 712483) and profile['outcome'] == 'damage' and (
+            'bane-native-dummy-expiry-counter-and-single-target-helper-original-cast' in draft['requiredReviews'])
+        if profile['outcome'] not in draft['candidateOutcomeRoutes'] and not scripted_bane:
             raise ValueError('Mastery route lacks raw common outcome evidence')
         timing = rank['rawCastProfile']
         cast_index = timing['castingTimeIndex']
@@ -114,6 +116,11 @@ def build_report(drafts, declarations, profiles, cast_times, durations, common_i
         channel_duration = channel['rawConstantChannelDurationMilliseconds']
         interval = max(common_interval, timing['startRecoveryMilliseconds'], max(0, cast_time) + recovery,
                        max(0, cast_time) + channel_duration if channel_duration is not None else 0)
+        if scripted_bane:
+            if rank['rawChannelProfile']['durationIndex'] != 9 or durations.get(9) != {
+                    'Duration': 30000, 'DurationPerLevel': 0, 'MaxDuration': 30000}:
+                raise ValueError('Reviewed Bane expiry duration changed')
+            interval = max(interval, durations[9]['Duration'])
         milestones, proposed_bands = [], []
         previous_level, previous_proficiency, previous_bonus = rank['characterLevel'], 1, 0
         for level, proficiency, healing, damage in profile['rewards']:

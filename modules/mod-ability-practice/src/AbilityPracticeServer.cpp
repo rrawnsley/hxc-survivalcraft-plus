@@ -640,6 +640,22 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
         }
         return true;
     }
+    if (HelpersRequested && MasteryRequested && Practice::DevelopmentMastery::IsBaneOfBetrayal(profile))
+    {
+        SpellInfo const* helper = sSpellMgr->GetSpellInfo(807554);
+        auto const& root = info->Effects;
+        return info->Id == 712483 && info->GetDuration() == 30000 && info->StackAmount == 30 &&
+            root[EFFECT_0].Effect == SPELL_EFFECT_APPLY_AURA &&
+            root[EFFECT_0].ApplyAuraName == SPELL_AURA_DUMMY &&
+            root[EFFECT_0].TargetA.GetTarget() == TARGET_UNIT_TARGET_ENEMY &&
+            !root[EFFECT_0].TargetB.GetTarget() && !root[EFFECT_0].TriggerSpell &&
+            !root[EFFECT_1].Effect && !root[EFFECT_2].Effect && helper &&
+            helper->Effects[EFFECT_0].Effect == SPELL_EFFECT_SCHOOL_DAMAGE &&
+            helper->Effects[EFFECT_0].TargetA.GetTarget() == TARGET_UNIT_TARGET_ENEMY &&
+            !helper->Effects[EFFECT_0].TargetB.GetTarget() &&
+            !helper->Effects[EFFECT_0].TriggerSpell && !helper->Effects[EFFECT_1].Effect &&
+            !helper->Effects[EFFECT_2].Effect;
+    }
     return HelpersRequested && Practice::DevelopmentHelpers::IsManafeed(profile) &&
         info->Effects[EFFECT_0].Effect == SPELL_EFFECT_APPLY_AURA &&
         info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_PERIODIC_DUMMY;
@@ -1535,13 +1551,17 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
             if (view.Route == Practice::PracticeRoute::BuffCombat)
                 view.BuffState = BuffStateFor(player, session, profile);
             view.ReplacementSpellId = NativeReplacement(player, ability);
-            view.RuleSet = HelpersRequested && Practice::DevelopmentHelpers::IsManafeed(profile) ?
+            view.RuleSet = HelpersRequested && MasteryRequested &&
+                Practice::DevelopmentMastery::IsBaneOfBetrayal(profile) ?
+                Practice::HumanPvEScriptedDamageRuleSet :
+                HelpersRequested && Practice::DevelopmentHelpers::IsManafeed(profile) ?
                 Practice::HumanPvEScriptedHealRuleSet :
                 PeriodicPracticeAbilities.contains(ProfileKey(ability)) ?
                     Practice::HumanPvEPeriodicRuleSet : Practice::HumanPvERuleSet;
             if (Catchup.Enabled && ability.Kind != Practice::AbilityKind::Fixed)
             {
-                view.RuleSet += 3;
+                view.RuleSet = view.RuleSet == Practice::HumanPvEScriptedDamageRuleSet ?
+                    Practice::HumanPvEScriptedDamageCatchupRuleSet : view.RuleSet + 3;
                 auto const base = profile.Policy.Bands[Practice::Detail::BandIndex(profile.Policy, state.Proficiency)];
                 auto const rate = effective->View().Bands[
                     Practice::Detail::BandIndex(effective->View(), state.Proficiency)];
@@ -1676,6 +1696,12 @@ void AwardOutcome(Player* player, Spell* spell, Practice::AbilityProfile const& 
     RecordAward(player, session, profile, award);
 }
 
+bool IsBaneDamage(Practice::AbilityProfile const* profile, std::uint32_t spellId)
+{
+    return HelpersRequested && MasteryRequested && profile &&
+        Practice::DevelopmentMastery::IsBaneOfBetrayal(*profile) && spellId == 807554;
+}
+
 struct ReceiptCast
 {
     Player* Caster;
@@ -1695,6 +1721,35 @@ struct ReceiptCast
             Receipt.MarkConsumed();
     }
 };
+
+void AwardScriptedDamage(Player* player, Spell* spell, Unit* target, std::uint32_t damage)
+{
+    auto const receipt = spell->GetPracticeCast();
+    if (!receipt || receipt->IsConsumed())
+        return;
+    auto const* profile = FindProfile(player, receipt->SpellId);
+    if (!IsBaneDamage(profile, spell->GetSpellInfo()->Id) ||
+        !QualifiesDevelopmentOutcome(Practice::OutcomeKind::Damage, player, target, damage, 0))
+        return;
+    std::lock_guard lock(Mutex);
+    auto const found = Sessions.find(player->GetGUID().GetRawValue());
+    if (!Affects(player) || player->isBeingLoaded() || found == Sessions.end() ||
+        !ReceiptMatches(player, found->second, *receipt) ||
+        !AcquisitionAllowed(player, profile->Definition, receipt->SpellId))
+        return;
+    auto const effective = Practice::BuildCatchupPolicy(profile->Policy,
+        Practice::CapAtLevel(profile->Definition, player->GetLevel()), Catchup);
+    if (!effective)
+        return;
+    ObserveMastery(player, found->second, false);
+    ReceiptCast cast{ player, sSpellMgr->GetSpellInfo(receipt->SpellId), *receipt };
+    Practice::OutcomeContext const context{ true, true, true, true, player->GetLevel() };
+    auto const award = Practice::HandleOutcome(*player, cast, profile->Definition,
+        effective->View(), profile->DefinitionVersion, context);
+    if (award.Status == Practice::OutcomeStatus::Capped)
+        receipt->MarkConsumed();
+    RecordAward(player, found->second, *profile, award);
+}
 
 void BindBuffOrigin(Player* player, Spell* spell, Unit* target)
 {
@@ -2101,6 +2156,8 @@ public:
             AppendProfiles(RuntimeProfiles, Practice::DevelopmentPeriodic::Profiles);
         bool const masteryValid = !MasteryRequested ||
             AppendProfiles(RuntimeProfiles, Practice::DevelopmentMastery::Profiles);
+        bool const scriptedMasteryValid = !HelpersRequested || !MasteryRequested ||
+            AppendProfiles(RuntimeProfiles, Practice::DevelopmentMastery::ScriptedProfiles);
         bool const helpersValid = !HelpersRequested ||
             AppendProfiles(RuntimeProfiles, Practice::DevelopmentHelpers::Profiles);
         bool const directLeechValid = !DirectLeechRequested ||
@@ -2131,7 +2188,8 @@ public:
             (PacingRequested && pacingValid && trainerRanksValid && ApplyDevelopmentRankCaps(RuntimeProfiles));
         std::span<Practice::AbilityProfile const> const profiles(RuntimeProfiles);
         ProfileLookup.emplace(profiles);
-        Ready = ProfileLookup->IsValid() && periodicValid && masteryValid && helpersValid && fixedValid &&
+        Ready = ProfileLookup->IsValid() && periodicValid && masteryValid && scriptedMasteryValid &&
+            helpersValid && fixedValid &&
             absorptionValid && controlValid && pacingValid && masteryPacingValid && trainerFixedValid &&
             directLeechValid && conjureFixedValid && trainerRanksValid && passiveFixedValid && utilityFixedValid &&
             controlFixedValid && buffValid && rankCapsValid &&
@@ -2397,21 +2455,21 @@ std::uint32_t ModifyMasteryHealing(Unit* healer, Unit* target, std::uint32_t spe
 std::uint32_t ModifyMasteryDamage(Unit* caster, Unit* target, std::uint32_t spellId, std::uint32_t damage,
     CoAAbilityPractice::CastReceipt const* receipt)
 {
-    if (!Active.load() || !MasteryRequested || !target || !caster || !spellId || !damage || !receipt ||
-        receipt->SpellId != spellId)
+    if (!Active.load() || !MasteryRequested || !target || !caster || !spellId || !damage || !receipt)
         return damage;
     Player* player = caster->ToPlayer();
     if (!IsProfiledPlayer(player) || player->isBeingLoaded())
         return damage;
-    auto const* profile = FindProfile(player, spellId);
-    if (!profile || profile->Definition.Kind != Practice::AbilityKind::Mastery ||
+    auto const* profile = FindProfile(player, receipt->SpellId);
+    if (!profile || (receipt->SpellId != spellId && !IsBaneDamage(profile, spellId)) ||
+        profile->Definition.Kind != Practice::AbilityKind::Mastery ||
         profile->Outcome != Practice::OutcomeKind::Damage ||
         !QualifiesDevelopmentOutcome(Practice::OutcomeKind::Damage, player, target, damage, 0))
         return damage;
     std::lock_guard lock(Mutex);
     auto const session = Sessions.find(player->GetGUID().GetRawValue());
     if (!Affects(player) || session == Sessions.end() || !ReceiptOwnerMatches(player, session->second, *receipt) ||
-        !player->HasSpell(spellId) || !AcquisitionAllowed(player, profile->Definition, spellId))
+        !player->HasSpell(receipt->SpellId) || !AcquisitionAllowed(player, profile->Definition, receipt->SpellId))
         return damage;
     auto const loaded = Practice::ReadPlayerProgress(*player, profile->Definition.ClassId,
         profile->Definition.AbilityId, profile->Policy, profile->DefinitionVersion);
@@ -2430,7 +2488,7 @@ public:
         { ALLSPELLHOOK_CAN_PREPARE, ALLSPELLHOOK_ON_HIT_RESULT, ALLSPELLHOOK_ON_SUCCESSFUL_INTERRUPT,
             ALLSPELLHOOK_ON_SUCCESSFUL_DISPEL, ALLSPELLHOOK_ON_SUCCESSFUL_STEAL }) { }
 
-    bool CanPrepare(Spell* spell, SpellCastTargets const*, AuraEffect const* triggeredByAura) override
+    bool CanPrepare(Spell* spell, SpellCastTargets const* targets, AuraEffect const* triggeredByAura) override
     {
         if (!Active.load() || !spell || !spell->GetCaster() || !spell->GetSpellInfo())
             return true;
@@ -2438,11 +2496,30 @@ public:
         if (!IsProfiledPlayer(player))
             return true;
         auto const* profile = FindProfile(player, spell->GetSpellInfo()->Id);
-        if (!profile && !IsBuffObserver(player))
+        bool const scriptedDamage = HelpersRequested && MasteryRequested && player->getClass() == 14 &&
+            spell->GetSpellInfo()->Id == 807554;
+        if (!profile && !IsBuffObserver(player) && !scriptedDamage)
             return true;
         std::lock_guard lock(Mutex);
         spell->SetPracticeCast({});
         spell->SetScriptValue(PracticeBuffEligibilityKey, 0);
+        if (scriptedDamage && targets && spell->IsTriggered() && !triggeredByAura && !spell->m_CastItem &&
+            spell->m_castItemGUID.IsEmpty() && spell->GetOriginalCasterGUID() == player->GetGUID())
+        {
+            auto const receipt = CoAAbilityPractice::ScopedScriptedDamageCast::Take(
+                player->GetGUID().GetRawValue(), targets->GetUnitTargetGUID().GetRawValue(), 807554);
+            auto const* origin = receipt ? FindProfile(player, receipt->SpellId) : nullptr;
+            auto const session = Sessions.find(player->GetGUID().GetRawValue());
+            if (IsBaneDamage(origin, 807554) && Affects(player) && !player->isBeingLoaded() &&
+                session != Sessions.end() && ReceiptMatches(player, session->second, *receipt) &&
+                AcquisitionAllowed(player, origin->Definition, receipt->SpellId))
+            {
+                spell->SetPracticeCast(receipt);
+                spell->SetScriptValue(PracticeCastSourceKey,
+                    (static_cast<std::uint64_t>(receipt->ClassId) << 32) | receipt->SpellId);
+                return true;
+            }
+        }
         std::uint64_t const request = (static_cast<std::uint64_t>(player->getClass()) << 32) |
             spell->GetSpellInfo()->Id;
         bool const direct = spell->GetScriptValue(PracticeClientRequestKey) == request && !triggeredByAura &&
@@ -2488,6 +2565,7 @@ public:
         BindBuffOrigin(player, spell, target);
         if (!damage && !healing)
             return;
+        AwardScriptedDamage(player, spell, target, damage);
         AwardBuffContribution(player, spell, target, damage, healing);
         auto const* profile = FindProfile(player, spell->GetSpellInfo()->Id);
         if (profile && !Practice::DevelopmentBuffs::IsSupportedStatBuff(*profile) &&

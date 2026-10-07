@@ -21,6 +21,21 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
     if ability.kind == 1 then assert(ability.catchup) end
     if ability.kind == 2 then
         assert(Model.IsMastery(ability) and #ability.rewards == 3)
+        if ability.abilityId == 712483 then
+            assert(ability.ruleSet == 7 or ability.ruleSet == 8)
+            assert(string.find(Model.PracticeRules(ability), "delayed damage", 1, true))
+            local ruleSet = ability.ruleSet
+            ability.ruleSet = 9
+            assert(not Model.Validate(result))
+            ability.ruleSet = ruleSet == 7 and 8 or 7
+            assert(not Model.Validate(result))
+            ability.ruleSet = ruleSet
+            local route = ability.route
+            ability.route = 2
+            assert(not Model.Validate(result))
+            ability.route = route
+            assert(Model.Validate(result))
+        end
         for _, reward in ipairs(ability.rewards) do
             if reward.characterLevel <= result.characterLevel and reward.proficiency <= ability.proficiency then
                 assert(reward.state == 1)
@@ -42,7 +57,7 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
     end
     count = count + 1
 end
-assert(count == 744)
-assert(kinds[1] == 453 and kinds[2] == 24 and kinds[3] == 267)
+assert(count == 752)
+assert(kinds[1] == 453 and kinds[2] == 32 and kinds[3] == 267)
 for classId = 12, 32 do assert(classes[classId]) end
-print("PASS: 744 typed snapshots across 21 classes: 453 ranked, 24 mastery, 267 fixed and menu rendering")
+print("PASS: 752 typed snapshots across 21 classes: 453 ranked, 32 mastery, 267 fixed and menu rendering")

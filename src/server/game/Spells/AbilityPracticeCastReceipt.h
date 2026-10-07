@@ -6,6 +6,7 @@
 #include <atomic>
 #include <cstdint>
 #include <memory>
+#include <utility>
 
 class Unit;
 
@@ -32,6 +33,41 @@ public:
 
 private:
     std::atomic<bool> Consumed = false;
+};
+
+class ScopedScriptedDamageCast
+{
+public:
+    ScopedScriptedDamageCast(std::shared_ptr<CastReceipt> origin, std::uint64_t anchorGUID,
+        std::uint32_t helperId)
+        : Origin(std::move(origin)), AnchorGUID(anchorGUID), HelperId(helperId), Previous(Active)
+    {
+        Active = this;
+    }
+
+    ~ScopedScriptedDamageCast() { Active = Previous; }
+    ScopedScriptedDamageCast(ScopedScriptedDamageCast const&) = delete;
+    ScopedScriptedDamageCast& operator=(ScopedScriptedDamageCast const&) = delete;
+
+    static std::shared_ptr<CastReceipt> Take(std::uint64_t casterGUID, std::uint64_t anchorGUID,
+        std::uint32_t helperId)
+    {
+        auto* scope = Active;
+        if (!scope || scope->Bound || !scope->Origin || scope->Origin->IsConsumed() ||
+            scope->Origin->CasterGUID != casterGUID || scope->AnchorGUID != anchorGUID ||
+            scope->HelperId != helperId)
+            return {};
+        scope->Bound = true;
+        return scope->Origin;
+    }
+
+private:
+    std::shared_ptr<CastReceipt> const Origin;
+    std::uint64_t const AnchorGUID;
+    std::uint32_t const HelperId;
+    ScopedScriptedDamageCast* const Previous;
+    bool Bound = false;
+    inline static thread_local ScopedScriptedDamageCast* Active = nullptr;
 };
 
 using PeriodicOutcomeProvider = void (*)(Unit*, Unit*, std::uint32_t, std::uint32_t,

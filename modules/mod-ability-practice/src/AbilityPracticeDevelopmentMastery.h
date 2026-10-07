@@ -67,6 +67,26 @@ inline constexpr std::array LungeRewards = {
     MasteryReward{ { 16, 70 }, 0, 100 },
     MasteryReward{ { 24, 100 }, 0, 200 }
 };
+inline constexpr std::array BaneOfBetrayal = { AbilityRank{ 712483, 1, { 30, 1 } } };
+inline constexpr std::array BaneOfBetrayalBands = {
+    TrainingBand{ 1, 2700, 1170 }, TrainingBand{ 40, 2700, 900 }
+};
+inline constexpr TrainingPolicy BaneOfBetrayalPolicy{ BaneOfBetrayalBands };
+inline constexpr std::array BaneOfBetrayalRewards = {
+    MasteryReward{ { 30, 40 }, 0, 50 },
+    MasteryReward{ { 38, 70 }, 0, 100 },
+    MasteryReward{ { 46, 100 }, 0, 200 }
+};
+inline constexpr std::array ScriptedProfiles = {
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 14, 712483, AbilityKind::Mastery, BaneOfBetrayal, Caps }, BaneOfBetrayalPolicy, OutcomeKind::Damage,
+        BaneOfBetrayalRewards }
+};
+inline bool IsBaneOfBetrayal(AbilityProfile const& profile)
+{
+    return profile.Definition.ClassId == 14 && profile.Definition.AbilityId == 712483 &&
+        profile.Definition.Kind == AbilityKind::Mastery && profile.Outcome == OutcomeKind::Damage;
+}
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 15, 680515, AbilityKind::Mastery, PommelSmash, Caps }, PommelSmashPolicy, OutcomeKind::Damage,

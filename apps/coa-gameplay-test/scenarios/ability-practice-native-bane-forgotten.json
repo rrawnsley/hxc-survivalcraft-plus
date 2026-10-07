@@ -1,0 +1,206 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Bane forgotten exclusion",
+  "contract": "Native original Bane expiry must not award practice for forgotten. Assertions distinguish actual delayed damage from the no-casts outcome and preserve stored progress.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 14,
+      "level": 46,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 46,
+      "health": 1000000,
+      "distance": 3,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 712483
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.712483",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.712483",
+      "index": 1,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.712483",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.712483",
+      "index": 3,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.712483",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 712483,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 712483,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 10049,
+      "creature_triggered": false
+    },
+    {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_stacks",
+      "spell": 712483,
+      "equals": 3
+    },
+    {
+      "action": "unlearn",
+      "actor": "caster",
+      "spell": 712483
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 712483
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 712483,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 32000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 712483,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 807554,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "spell": 807554,
+      "target": "enemy",
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.712483",
+      "index": 1,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.712483",
+      "index": 3,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.712483",
+      "index": 4,
+      "equals": 0
+    }
+  ]
+}

@@ -715,6 +715,7 @@ def main():
                          'src/server/coa/AscensionRacialAbilities.h',
                          'src/server/coa/AscensionFelsworn.cpp',
                          'src/server/coa/AscensionFelswornAuras.cpp',
+                'src/server/coa/AscensionFelswornAbilities.cpp', 'src/server/coa/AscensionFelswornEvents.cpp',
                          'src/server/coa/AscensionFelswornContracts.cpp',
                 'src/server/coa/AscensionFelswornData.h', 'src/server/coa/AscensionFelswornSummons.cpp',
                 'src/server/coa/AscensionXorothAbilities.cpp', 'src/server/coa/AscensionXorothData.h',

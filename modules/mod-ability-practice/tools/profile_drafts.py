@@ -89,6 +89,7 @@ def verify_provenance(candidates, root, dbc):
                 'src/server/coa/AscensionSpellEligibility.h', 'src/server/coa/AscensionRacialAbilities.h',
                 'src/server/coa/AscensionFelsworn.cpp',
                 'src/server/coa/AscensionFelswornAuras.cpp',
+                'src/server/coa/AscensionFelswornAbilities.cpp', 'src/server/coa/AscensionFelswornEvents.cpp',
                 'src/server/coa/AscensionFelswornContracts.cpp',
                 'src/server/coa/AscensionFelswornData.h', 'src/server/coa/AscensionFelswornSummons.cpp',
                 'src/server/coa/AscensionXorothAbilities.cpp', 'src/server/coa/AscensionXorothData.h',
@@ -412,6 +413,16 @@ def build_drafts(candidates, root):
         if class_id == 30 and ability_id == 561289:
             required.extend(['soul-capture-loaded-script-registration-and-trigger-suppression',
                              'soul-capture-corpse-resource-and-post-combat-use-design'])
+        if (class_id, ability_id) == (14, 712483):
+            raw = members[ability_id].get('rawDbc', {})
+            details = raw.get('effectDetails', [])
+            expected = [(6, 3, 6, 0, 0, 85), (0, 0, 0, 0, 0, -1), (0, 0, 0, 0, 0, -1)]
+            if (len(ranks) != 1 or ranks[0]['characterLevel'] != 30 or raw.get('passive') is not False or
+                    raw.get('rankLabel') or len(details) != 3 or [(v.get('effectId'), v.get('auraId'),
+                        v.get('implicitTargetA'), v.get('implicitTargetB'), v.get('triggerSpellId'),
+                        v.get('basePoints')) for v in details] != expected):
+                raise ValueError('Reviewed Bane source/raw evidence changed')
+            required.append('bane-native-dummy-expiry-counter-and-single-target-helper-original-cast')
         if class_id == 19 and ability_id == 806521:
             required.append('titanstrike-loaded-aura-duration-helper-and-original-leech-damage')
         if (class_id, ability_id) in {(12, 570122), (24, 804662), (28, 804154)}:

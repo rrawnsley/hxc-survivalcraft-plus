@@ -181,8 +181,9 @@ local function Ability(value, schema, characterLevel)
         if value.acquisitionSource ~= nil and not Integer(value.acquisitionSource, 1, 5) then return nil end
         if value.acquisitionSource == 5 and value.kind ~= 3 then return nil end
         if not session or not Integer(value.kind, 1, 3) or not Integer(value.route, 1, 13)
-            or not Integer(value.ruleSet, 1, 6)
+            or not Integer(value.ruleSet, 1, 8)
             or ((value.ruleSet == 3 or value.ruleSet == 6) and (value.kind ~= 1 or value.route ~= 2))
+            or ((value.ruleSet == 7 or value.ruleSet == 8) and (value.kind ~= 2 or value.route ~= 1))
             or (value.route == 13 and (value.kind ~= 1 or (value.ruleSet ~= 1 and value.ruleSet ~= 4)))
             or ((value.kind == 3) ~= (value.route == 6)) then return nil end
         if value.route == 13 then
@@ -194,7 +195,8 @@ local function Ability(value, schema, characterLevel)
                 if entry.spellId == value.replacementSpellId then return nil end
             end
         end
-        if (value.ruleSet > 3) ~= (value.catchup ~= nil) then return nil end
+        if ((value.ruleSet >= 4 and value.ruleSet <= 6) or value.ruleSet == 8)
+            ~= (value.catchup ~= nil) then return nil end
         if value.catchup then
             local policy = value.catchup
             if type(policy) ~= "table" or value.kind == 3 or not Integer(policy.gap, 1, 500)
@@ -585,7 +587,8 @@ function Model.PracticeRules(ability, saved)
     if Model.IsFixed(ability) then
         return "This ability has no practice levels. " .. LearnText(ability.acquisitionSource)
     end
-    local ruleSet = Integer(ability.ruleSet, 1, 6) and ((ability.ruleSet - 1) % 3 + 1) or nil
+    local ruleSet = Integer(ability.ruleSet, 1, 8) and
+        (ability.ruleSet >= 7 and 7 or ((ability.ruleSet - 1) % 3 + 1)) or nil
     if not ruleSet then
         return "Practice rules are unavailable in this update. Refresh to request the current rules."
     end
@@ -631,7 +634,11 @@ function Model.PracticeRules(ability, saved)
     if not rule then return "Practice rules are unavailable in this update." end
     local buffState = Model.BuffStateText(ability, saved)
     if buffState then rule = buffState .. "\n\n" .. rule end
-    if ruleSet == 3 then
+    if ruleSet == 7 then
+        rule = "Earn practice when this ability's delayed damage lands on a level-appropriate PvE opponent."
+            .. " Applying the ability and the enemy's casts do not earn extra practice."
+            .. " One original cast earns at most one award."
+    elseif ruleSet == 3 then
         rule = "Drain mana from a live, level-appropriate PvE opponent while this ability restores your missing health."
             .. " You must be in a qualifying PvE fight. No mana drained or full overhealing does not count."
             .. " Drain-and-heal ticks count once for your original cast."

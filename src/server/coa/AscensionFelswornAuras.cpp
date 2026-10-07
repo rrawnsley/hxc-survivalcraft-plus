@@ -187,6 +187,8 @@ class aura_ascension_felsworn_lifecycle : public AuraScript
         AuraRemoveMode mode = GetTargetApplication()->GetRemoveMode();
         if (id == 712483 && mode == AURA_REMOVE_BY_EXPIRE && GetTarget()->IsAlive())
         {
+            CoAAbilityPractice::ScopedScriptedDamageCast origin(GetAura()->GetPracticeCast(),
+                GetTarget()->GetGUID().GetRawValue(), 807554);
             uint64 count = GetAura()->GetScriptValue(id);
             Copy(
                 player, GetTarget(), 807554,

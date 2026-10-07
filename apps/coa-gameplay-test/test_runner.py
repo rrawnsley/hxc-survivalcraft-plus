@@ -42,6 +42,19 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(extra=extra), self.assertRaises(ValueError):
                 run.validate(scenario)
 
+    def test_ordinary_creature_cast_option(self):
+        for triggered in (True, False):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({'action': 'cast', 'actor': 'target', 'spell': 10049,
+                                     'creature_triggered': triggered})
+            self.assertIs(run.validate(scenario), scenario)
+        for actor, triggered in (('caster', False), ('target', 0), ('target', 'false')):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({'action': 'cast', 'actor': actor, 'spell': 10049,
+                                     'creature_triggered': triggered})
+            with self.subTest(actor=actor, triggered=triggered), self.assertRaises(ValueError):
+                run.validate(scenario)
+
     def test_creature_spell_hit_bonus_and_native_metric(self):
         for bonus in (0, 4, 100):
             scenario = copy.deepcopy(self.scenario)

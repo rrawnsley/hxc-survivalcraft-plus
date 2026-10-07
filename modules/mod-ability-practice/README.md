@@ -3719,3 +3719,19 @@ No old profile progress or published definitions were changed by that rejected d
 VERIFY ALL: PASSED212847 source2/no selected suites/native31.0s; style/whitespace/source/coverage/
 trainer exports passed. Addon0.4.40/protocol4 unchanged; no repeat Lua parsing. All switches0.
 No tests, native startup, migration/menu/gameplay execution, active install or production changes.
+
+
+## Bane of Betrayal delayed damage development
+
+Bane of Betrayal (class14,712483) has a separately gated mastery profile when both development mastery and
+scripted observation are enabled. Native Felsworn contracts convert the raw periodic aura to a dummy and
+make shared helper807554 single-target. Only the original client cast's expiry binds that helper to its
+receipt. Applying the aura, enemy casts, unrelated helper casts and stale receipts do not earn practice.
+One qualifying expiry earns one award. The bounded native counter fix stores its count after stack reapply,
+which otherwise resets it. The original damage calculation, target contract and expiry remain native.
+
+Authored proficiency40/70/100 rewards at character levels30/38/46 add0.5%/1%/2% damage in eligible PvE.
+The2700-point policy assumes a qualifying expiry every30seconds for approximately45minutes per milestone
+without catch-up. Actual ordinary frequency is unmeasured. Typed rules7/8 describe delayed damage without
+and with catch-up. Addon0.4.44-development remains unpublished; schema4 is unchanged. Saved unknown versions
+must remain stored. All options remain off by default and no live server or active-client files are changed.

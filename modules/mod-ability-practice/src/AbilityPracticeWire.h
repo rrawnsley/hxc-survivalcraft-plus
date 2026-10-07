@@ -265,9 +265,11 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
             if (!Detail::ConsistentTypedRoadmap(view, characterLevel) ||
                 !Detail::ConsistentTypedMastery(view, characterLevel))
                 return std::nullopt;
-            if (view.RuleSet < 1 || view.RuleSet > 6 ||
+            if (view.RuleSet < 1 || view.RuleSet > 8 ||
                 ((view.RuleSet == HumanPvEScriptedHealRuleSet || view.RuleSet == 6) &&
                     (view.Route != PracticeRoute::Healing || view.Kind != AbilityKind::Ranked)) ||
+                ((view.RuleSet == 7 || view.RuleSet == 8) &&
+                    (view.Route != PracticeRoute::Damage || view.Kind != AbilityKind::Mastery)) ||
                 view.Route < PracticeRoute::Damage ||
                 view.Route > PracticeRoute::BuffCombat ||
                 (view.Route == PracticeRoute::BuffCombat &&
@@ -290,7 +292,7 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
                 return std::nullopt;
             if (view.AcquisitionSourceId > 5 ||
                 (view.AcquisitionSourceId == 5 && view.Kind != AbilityKind::Fixed) ||
-                (view.RuleSet > 3) != view.Catchup.has_value())
+                ((view.RuleSet >= 4 && view.RuleSet <= 6) || view.RuleSet == 8) != view.Catchup.has_value())
                 return std::nullopt;
             if ((view.Route == PracticeRoute::BuffCombat) != view.BuffState.has_value())
                 return std::nullopt;
