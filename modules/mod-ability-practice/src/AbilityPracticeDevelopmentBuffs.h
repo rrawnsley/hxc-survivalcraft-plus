@@ -8,6 +8,15 @@
 
 namespace AbilityPractice::DevelopmentBuffs
 {
+inline constexpr std::array SanguinaryOffering = {
+    AbilityRank{ 706630, 1, { 16, 1 } },
+    AbilityRank{ 707336, 2, { 26, 10 } },
+    AbilityRank{ 707337, 3, { 36, 20 } },
+    AbilityRank{ 707338, 4, { 48, 40 } },
+    AbilityRank{ 707339, 5, { 60, 60 } }
+};
+inline constexpr auto SanguinaryOfferingCaps = Development::RankCaps(SanguinaryOffering);
+
 inline constexpr std::array WoodsmanAdaptation = {
     AbilityRank{ 800266, 1, { 8, 1 } },
     AbilityRank{ 803320, 2, { 18, 10 } },
@@ -281,6 +290,9 @@ inline constexpr auto RiteOfPowerCaps = Development::RankCaps(RiteOfPower);
 
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 20, 706630, AbilityKind::Ranked, SanguinaryOffering, SanguinaryOfferingCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 21, 800266, AbilityKind::Ranked, WoodsmanAdaptation, WoodsmanAdaptationCaps },
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -417,6 +429,7 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 20, 706630, 21, 2 },
     Mechanic{ 21, 800266, 21, 0, 99 },
     Mechanic{ 27, 572384, 21, 0, 99 },
     Mechanic{ 31, 800197, 21, 0, 99 },

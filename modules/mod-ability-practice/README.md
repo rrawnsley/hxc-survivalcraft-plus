@@ -4064,3 +4064,23 @@ raw intermediate ranks707347 through707350 use primary misc1 and secondary targe
 shape in first/second/final ranks. No partial ladder or native correction was introduced.
 Coverage262unique/264declared156ranked9mastery97Fixed441pending(68ranked373standalone).
 Defaults0/addon0.4.50schema4 unpublished. No production or active-client changes; pixels/cadence unqualified.
+
+
+## Sanguinary Offering owned stamina-buff development
+
+Sanguinary Offering (class20/706630) adds five native stamina-buff ranks16/26/36/48/60, matching
+trainer900020 immediate prerequisites and exact native positive stat29/selector2/target21 effects.
+Native amounts8/20/32/43/54 remain. Original owned-buff combat contribution and existing eligibility,
+cast-start/end/effective-effect/five-second guards apply. No bonus stamina or additional healing is added.
+One additive pacing entry preserves the previous156; definition4 caps prepare one upcoming rank.
+540 qualifying uses estimate45minutes at assumed five-second cadence before catch-up, unmeasured in play.
+
+Source/build/harness232950 PASSED9checks79.6s/build31.1s/harness4.3s and807typed snapshots.
+Native233152 PASSED four cases52.1s simulated, no retries, including Woodsman/Pyromancer regressions.
+Native stamina amount/delta8, application zero, original Bloodmoon Blast270points, cancellation stops gains.
+Boundary9/15930 to10/0 automatically learns707336 at26,707337 locked,native stamina amount/delta20.
+Fresh real menu233308 PASSED57.2s, exact540-use forecast/five native ranks/cap20. All21 native menu delivery
+fixtures233421 PASSED three groups71.4s real, no failures/retries, complete typed snapshots without failure markers.
+This qualifies current catalog construction/delivery, not client pixels or every ability's gameplay.
+Scoped style/whitespace/provenance exports passed. Coverage263unique/265declared157ranked9mastery97Fixed,
+440pending(67ranked373standalone). Defaults0/addon0.4.51schema4 unpublished, no production changes.
