@@ -1,0 +1,362 @@
+{
+  "schema": 1,
+  "name": "Ability practice: real Hand of Elune mastery benefit is PvE scoped",
+  "contract": "Identical level32 Starcallers use guaranteed critical Hand of Elune healing with a large equal fixture spell-power bonus. Proficiency100 gives the authored 2% benefit during an eligible PvE encounter. The same saved proficiency outside combat gives baseline healing. Logged effective healing is compared, with a narrow tolerance for the spell native base roll; no effect or reward value is changed.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 26,
+      "level": 32,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000
+    },
+    {
+      "id": "mastered",
+      "race": 1,
+      "class": 26,
+      "level": 32,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000
+    },
+    {
+      "id": "peaceful",
+      "race": 1,
+      "class": 26,
+      "level": 32,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "control_enemy",
+      "owner": "control",
+      "entry": 36,
+      "level": 32,
+      "health": 100000,
+      "distance": 3
+    },
+    {
+      "id": "mastered_enemy",
+      "owner": "mastered",
+      "entry": 36,
+      "level": 32,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 801990
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 10030,
+      "stacks": 50
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_power",
+      "school": 6,
+      "min": 49000,
+      "label": "Equal large spell-power fixture"
+    },
+    {
+      "action": "set_health",
+      "actor": "control",
+      "maximum": 500000,
+      "value": 100000
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_done_crit_chance",
+      "spell": 801990,
+      "target": "control",
+      "min": 100,
+      "label": "Remove critical-roll variance"
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "control",
+      "source": "core.hxc.ability_practice.26.801990",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "control",
+      "source": "core.hxc.ability_practice.26.801990",
+      "index": 1,
+      "value": 2
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "control",
+      "source": "core.hxc.ability_practice.26.801990",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "control",
+      "source": "core.hxc.ability_practice.26.801990",
+      "index": 3,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "control",
+      "source": "core.hxc.ability_practice.26.801990",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "attack",
+      "actor": "control",
+      "target": "control_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 801990,
+      "target": "control"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_effective_heal_total",
+      "spell": 801990,
+      "target": "control",
+      "min": 20000,
+      "label": "Large actual baseline avoids a vacuous ratio"
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_effective_heal_total",
+      "spell": 801990,
+      "target": "control",
+      "save_as": "base_healing"
+    },
+    {
+      "action": "learn",
+      "actor": "mastered",
+      "spell": 801990
+    },
+    {
+      "action": "set_aura",
+      "actor": "mastered",
+      "spell": 10030,
+      "stacks": 50
+    },
+    {
+      "action": "assert",
+      "actor": "mastered",
+      "metric": "spell_power",
+      "school": 6,
+      "min": 49000,
+      "label": "Equal large spell-power fixture"
+    },
+    {
+      "action": "set_health",
+      "actor": "mastered",
+      "maximum": 500000,
+      "value": 100000
+    },
+    {
+      "action": "assert",
+      "actor": "mastered",
+      "metric": "spell_done_crit_chance",
+      "spell": 801990,
+      "target": "mastered",
+      "min": 100,
+      "label": "Remove critical-roll variance"
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "mastered",
+      "source": "core.hxc.ability_practice.26.801990",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "mastered",
+      "source": "core.hxc.ability_practice.26.801990",
+      "index": 1,
+      "value": 2
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "mastered",
+      "source": "core.hxc.ability_practice.26.801990",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "mastered",
+      "source": "core.hxc.ability_practice.26.801990",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "mastered",
+      "source": "core.hxc.ability_practice.26.801990",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "attack",
+      "actor": "mastered",
+      "target": "mastered_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "mastered",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "mastered",
+      "spell": 801990,
+      "target": "mastered"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "mastered",
+      "metric": "spell_effective_heal_total",
+      "spell": 801990,
+      "target": "mastered",
+      "ratio_to": "base_healing",
+      "min": 1.018,
+      "max": 1.022,
+      "label": "Authored PvE 2% benefit"
+    },
+    {
+      "action": "learn",
+      "actor": "peaceful",
+      "spell": 801990
+    },
+    {
+      "action": "set_aura",
+      "actor": "peaceful",
+      "spell": 10030,
+      "stacks": 50
+    },
+    {
+      "action": "assert",
+      "actor": "peaceful",
+      "metric": "spell_power",
+      "school": 6,
+      "min": 49000,
+      "label": "Equal large spell-power fixture"
+    },
+    {
+      "action": "set_health",
+      "actor": "peaceful",
+      "maximum": 500000,
+      "value": 100000
+    },
+    {
+      "action": "assert",
+      "actor": "peaceful",
+      "metric": "spell_done_crit_chance",
+      "spell": 801990,
+      "target": "peaceful",
+      "min": 100,
+      "label": "Remove critical-roll variance"
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "peaceful",
+      "source": "core.hxc.ability_practice.26.801990",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "peaceful",
+      "source": "core.hxc.ability_practice.26.801990",
+      "index": 1,
+      "value": 2
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "peaceful",
+      "source": "core.hxc.ability_practice.26.801990",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "peaceful",
+      "source": "core.hxc.ability_practice.26.801990",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "peaceful",
+      "source": "core.hxc.ability_practice.26.801990",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "assert",
+      "actor": "peaceful",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "peaceful",
+      "spell": 801990,
+      "target": "peaceful"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "peaceful",
+      "metric": "spell_effective_heal_total",
+      "spell": 801990,
+      "target": "peaceful",
+      "ratio_to": "base_healing",
+      "min": 0.998,
+      "max": 1.002,
+      "label": "No mastery bonus outside the qualifying encounter"
+    }
+  ]
+}

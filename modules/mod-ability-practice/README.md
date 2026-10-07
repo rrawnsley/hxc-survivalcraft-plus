@@ -24,7 +24,8 @@ The feature is not complete or approved for release.
   exclusions, unknown saved-version preservation, healing mastery progress and periodic shared receipts.
   Native typed chat delivery also returns the exact Lava Shard state, 29 uses to the next point, rank2
   requirements and the next cap at level10. All 21 classes received complete native schema4 snapshots
-  without unreadable-progress failures. The one-rank-ahead boundary also passed: practice pauses at proficiency10 before level10, then
+  without unreadable-progress failures. Hand of Elune proficiency100 heals about2% more in eligible PvE
+  (observed ratio1.019960); the same proficiency outside combat stays at baseline (ratio0.999972). The one-rank-ahead boundary also passed: practice pauses at proficiency10 before level10, then
   rank2 is learned and its next meaningful cast earns300 points after the shared cooldown expires.
 - Native activation now accepts an exact verified trainer prefix when appended trainer ranks have no
   core chain nodes. Missing, partial or foreign nodes still reject activation. Demon's Blood validates
@@ -40,7 +41,9 @@ The feature is not complete or approved for release.
   `20261007-024804` (real clock for intentionally
   paced transport). The saved-rank/buff report's overall result failed because another fixture in that
   batch was incorrect; only those passing cases are cited as evidence. All-class menu groups passed
-  in `20261007-025336` (172.7s, three cases, real clock).
+  in `20261007-025336` (172.7s, three cases, real clock). Manafeed passed `20261007-030446`
+  (58.0s); absorption passed `20261007-030037` (67.5s); native healing benefit passed `20261007-030554`
+  (59.6s). Latest source passed all nine selected checks `20261007-030603` (82.3s).
 
 ## Reproducing native qualification
 
@@ -54,7 +57,7 @@ Select `ability-practice-*` scenarios explicitly, with `--gameplay-jobs 1` for b
 whose contract tests real-time paced addon delivery. Other qualified cases used the simulated clock.
 Runtime DLLs must match the built binary's dependencies, including its OpenSSL provider.
 
-Continue remaining definitions, outcome/acquisition qualification, native mastery benefit checks,
+Continue remaining definitions, outcome/acquisition qualification, other native mastery benefit checks,
 measured pacing and actual client rendering before release. A production release must be coordinated
 with the user's explicit requirement to preserve ongoing play.
 

@@ -1,0 +1,192 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Emerald Veil absorption and shared healing receipt",
+  "contract": "At full health Emerald Veil application earns no practice. An eligible PvE hit consumes some of its real school shield and earns one use. A later original cast first produces real healing; subsequent absorption by that same cast cannot award a second use.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 29,
+      "level": 14,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "caster",
+      "entry": 36,
+      "level": 14,
+      "health": 100000,
+      "distance": 3,
+      "spell_hit_bonus": 100
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800926
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "maximum": 100000,
+      "value": 100000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800926,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 800926,
+      "caster": "caster",
+      "effect": 1,
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 800926,
+      "caster": "caster",
+      "effect": 1,
+      "save_as": "shield_before"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.29.800926",
+      "index": 4,
+      "equals": 0,
+      "label": "Application without healing or absorption earns nothing"
+    },
+    {
+      "action": "cast",
+      "actor": "target",
+      "spell": 133,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 800926,
+      "caster": "caster",
+      "effect": 1,
+      "relative_to": "shield_before",
+      "max": -1,
+      "label": "An actual PvE hit consumes the shield"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.29.800926",
+      "index": 4,
+      "equals": 270,
+      "label": "Actual absorption earns one use"
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "value": 90000
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "health",
+      "save_as": "heal_before"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 800926
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800926,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "health",
+      "relative_to": "heal_before",
+      "min": 1,
+      "label": "Second original cast actually heals"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.29.800926",
+      "index": 4,
+      "equals": 540,
+      "label": "Second cast earns its one use from healing"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 800926,
+      "caster": "caster",
+      "effect": 1,
+      "save_as": "second_shield"
+    },
+    {
+      "action": "cast",
+      "actor": "target",
+      "spell": 133,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 800926,
+      "caster": "caster",
+      "effect": 1,
+      "relative_to": "second_shield",
+      "max": -1,
+      "label": "Second cast also absorbs real damage"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.29.800926",
+      "index": 4,
+      "equals": 540,
+      "label": "Healing and absorption share the same award"
+    }
+  ]
+}

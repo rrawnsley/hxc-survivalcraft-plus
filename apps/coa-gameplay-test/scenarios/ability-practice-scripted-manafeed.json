@@ -1,0 +1,187 @@
+{
+  "schema": 1,
+  "name": "Ability practice: original scripted Manafeed drain and healing",
+  "contract": "Manafeed drains a mana-using PvE creature in combat. At full health its real drain earns no practice; an injured caster then receives actual healing from several scripted ticks, all sharing one original-cast award. This qualifies the custom periodic dummy path, not general helper or pet attribution.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 14,
+      "level": 24,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "caster",
+      "entry": 5744,
+      "level": 24,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 552210
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "power",
+      "power": 0,
+      "min": 500,
+      "label": "Native enemy has enough mana to drain"
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "maximum": 100000,
+      "value": 100000
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "power",
+      "power": 0,
+      "save_as": "mana_before"
+    },
+    {
+      "action": "attack",
+      "actor": "caster",
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 552210,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "aura",
+      "spell": 552210,
+      "caster": "caster",
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "Original Manafeed channel is applied to the enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 2100
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "power",
+      "power": 0,
+      "relative_to": "mana_before",
+      "max": -1,
+      "label": "Full-health channel actually drains mana"
+    },
+    {
+      "action": "wait",
+      "ms": 7900,
+      "label": "Allow full-health channel to finish after measuring the first drain tick"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.552210",
+      "index": 4,
+      "equals": 0,
+      "label": "Drain without actual healing earns no practice"
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "value": 90000
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_effective_heal_total",
+      "spell": 552210,
+      "target": "caster",
+      "save_as": "effective_healing_before"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 552210
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 552210,
+      "target": "target"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_effective_heal_total",
+      "spell": 552210,
+      "target": "caster",
+      "relative_to": "effective_healing_before",
+      "min": 1,
+      "label": "Injured caster actually receives scripted healing"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_effective_heal_total",
+      "spell": 552210,
+      "target": "caster",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.552210",
+      "index": 1,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.552210",
+      "index": 4,
+      "equals": 270,
+      "label": "Multiple scripted ticks share one use"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.552210",
+      "index": 4,
+      "equals": 270
+    }
+  ]
+}
