@@ -8,6 +8,17 @@
 
 namespace AbilityPractice::DevelopmentBuffs
 {
+inline constexpr std::array WoodsmanAdaptation = {
+    AbilityRank{ 800266, 1, { 8, 1 } },
+    AbilityRank{ 803320, 2, { 18, 10 } },
+    AbilityRank{ 803321, 3, { 28, 20 } },
+    AbilityRank{ 803322, 4, { 38, 40 } },
+    AbilityRank{ 803323, 5, { 48, 60 } },
+    AbilityRank{ 803324, 6, { 54, 80 } },
+    AbilityRank{ 803666, 7, { 60, 100 } }
+};
+inline constexpr auto WoodsmanAdaptationCaps = Development::RankCaps(WoodsmanAdaptation);
+
 inline constexpr std::array DevotionOfDawn = {
     AbilityRank{ 572384, 1, { 12, 1 } },
     AbilityRank{ 572385, 2, { 22, 10 } },
@@ -270,6 +281,9 @@ inline constexpr auto RiteOfPowerCaps = Development::RankCaps(RiteOfPower);
 
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 21, 800266, AbilityKind::Ranked, WoodsmanAdaptation, WoodsmanAdaptationCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 27, 572384, AbilityKind::Ranked, DevotionOfDawn, DevotionOfDawnCaps },
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -403,6 +417,7 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 21, 800266, 21, 0, 99 },
     Mechanic{ 27, 572384, 21, 0, 99 },
     Mechanic{ 31, 800197, 21, 0, 99 },
     Mechanic{ 31, 572810, 21, 0, 85 },

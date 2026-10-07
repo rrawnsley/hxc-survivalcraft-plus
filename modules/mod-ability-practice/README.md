@@ -4041,3 +4041,26 @@ stronger amounts55/55 and40/40 remain. Fresh real menus231754/231858 PASSED58.1s
 Coverage261unique/263declared:155ranked/9mastery/97Fixed,442pending(69ranked/373standalone).
 Addon0.4.49-development/schema4 unpublished, all development defaults0, production untouched.
 Ally-only buff support, actual client pixels, native ranged contribution and ordinary cadence remain unqualified.
+
+
+## Woodsman's Adaptation native ranged buff development
+
+Woodsman's Adaptation (class21/800266) adds seven paired attack-power ranks at8/18/28/38/48/54/60.
+Complete native trainer900021 prerequisites and exact two positive target21 effects match across ranks.
+The existing owned-buff route requires useful original melee/ranged ability damage and both active effects.
+One additive pacing entry preserves the previous155; definition4 caps prepare one upcoming rank.
+540 qualifying uses estimate45minutes at assumed five-second cadence before catch-up, unmeasured in play.
+There are33 owned buff tracks across17classes.
+
+Source/build/harness232324 PASSED9checks79.2s/build31.4s/harness4.3s with804typed snapshots.
+Native232543 PASSED four cases52.3s simulated, no retries: Quick Shot original ranged damage earns270,
+application earns nothing and cancellation stops further gains. Native first attack-power amounts30/30 remain.
+Boundary9/15930 to10/0 learns803320 at18, keeps803321 locked, stronger native amounts35/35 remain.
+Devotion of Dawn and Primal Instinct combat regressions passed. Fresh real menu232650 PASSED59.9s,
+seven native rank requirements and exact540-use forecast. Style/whitespace/provenance exports passed.
+
+Power Module28/706742 remains pending: read-only native binding is aura_ascension_tinker_lifecycle;
+raw intermediate ranks707347 through707350 use primary misc1 and secondary target0, differing from paired
+shape in first/second/final ranks. No partial ladder or native correction was introduced.
+Coverage262unique/264declared156ranked9mastery97Fixed441pending(68ranked373standalone).
+Defaults0/addon0.4.50schema4 unpublished. No production or active-client changes; pixels/cadence unqualified.
