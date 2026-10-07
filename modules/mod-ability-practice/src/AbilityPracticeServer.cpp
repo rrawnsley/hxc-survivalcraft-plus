@@ -508,12 +508,37 @@ bool HasSupportedOutcome(SpellInfo const* info, Practice::OutcomeKind outcome)
     return false;
 }
 
+bool HasExpectedRiteGroup(std::uint32_t spellId)
+{
+    constexpr auto group = static_cast<SpellGroup>(2100001);
+    if (sSpellMgr->GetSpellGroupStackRule(group) != SPELL_GROUP_STACK_RULE_EXCLUSIVE ||
+        !sSpellMgr->IsSpellMemberOfSpellGroup(spellId, group))
+        return false;
+    constexpr std::array<std::int32_t, 6> expected{ 575839, 575842, 578126, 578130, 800198, 680298 };
+    std::array<bool, expected.size()> seen{};
+    auto const members = sSpellMgr->GetSpellGroupSpellMapBounds(group);
+    for (auto member = members.first; member != members.second; ++member)
+    {
+        auto const found = std::find(expected.begin(), expected.end(), member->second);
+        if (found == expected.end())
+            return false;
+        auto const index = static_cast<std::size_t>(found - expected.begin());
+        if (seen[index])
+            return false;
+        seen[index] = true;
+    }
+    return std::all_of(seen.begin(), seen.end(), [](bool present) { return present; });
+}
+
 bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProfile const& profile)
 {
     if (!info)
         return false;
     if (BuffContributionRequested && Practice::DevelopmentBuffs::IsSupportedStatBuff(profile))
     {
+        if (profile.Definition.ClassId == 30 && profile.Definition.AbilityId == 575839 &&
+            !HasExpectedRiteGroup(info->Id))
+            return false;
         if (Practice::DevelopmentBuffs::IsCultistWhispers(profile))
         {
             auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);

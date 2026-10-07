@@ -731,6 +731,7 @@ def main():
                          'src/server/game/Spells/AbilityPracticeCastReceipt.h',
                          'src/server/game/Spells/Spell.h', 'src/server/game/Spells/Spell.cpp',
                 'src/server/game/Spells/SpellInfo.cpp',
+                         'src/server/game/Spells/SpellMgr.cpp', 'src/server/game/Spells/SpellMgr.h',
                          'src/server/game/Spells/SpellEffects.cpp',
                          'src/server/game/Spells/Auras/SpellAuras.h',
                          'src/server/game/Spells/Auras/SpellAuras.cpp',

@@ -16,7 +16,9 @@ the original25 buffs retain slot0. Startup and active-application checks use the
 additional effects/triggers. Independent receipts, combat contribution, five-second cadence and overlap
 guards remain. A stronger resistance effect overlapping any school pauses this track; equal amounts remain
 eligible under the draft policy. Native Rite group2100001 replacement retains proficiency when an aura ends.
-Source group membership is checked and hashed; loaded group behavior still requires runtime qualification.
+Source group membership is checked and hashed. Startup also requires exact loaded six-member group2100001,
+exclusive replacement rule1 and membership of each native rank; missing/extra/duplicate/nested members or
+a different rule reject development activation. Loaded metadata is not aura replacement execution proof.
 Raw rank amounts10/20/20 receive a distinct effective-benefit review queue: native rank3 data is preserved,
 and no claim of stronger resistance is made. Greater Rite575842 remains its distinct native ability.
 
