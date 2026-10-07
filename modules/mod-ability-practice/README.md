@@ -3487,6 +3487,28 @@ VERIFY ALL: PASSED214905 source2/no selected suites/native31.4s; style/whitespac
 coverage/trainer exports and five Lua5.1 syntax parses passed without chunks executed. All flags0.
 No tests, native startup, client/menu/gameplay/migration execution, active install, publish, deploy,
 restart or production configuration/database/process operations.
+
+## Owned resistance-buff practice — 6 October 2026
+
+Fire Protection18/582533 retains ranks36/48/60; Chill of the Tomb23/572173 retains26/32/44/50.
+Both complete source/trainer ladders join disabled owned-buff practice with active APPLY_AURA6/
+MOD_RESISTANCE_EXCLUSIVE143/friendly21/single school masks4 or16 and positive amounts. No other
+effects/triggers; full exact loaded trainer, native ranks and prerequisites remain mandatory.
+
+Native HandleAuraModResistanceExclusive uses the greatest positive aura amount for each school,
+independently of spell-group rules. Readiness uses the same GetMaxPositiveAuraModifierByMiscMask
+excluding its own effect, so a stronger overlapping multi-school buff pauses practice. Equal amounts
+retain the existing authored practice eligibility rule. No native resistance power/stacking changes.
+Combat practice does not claim resistance absorption or require being hit by that specific school.
+Arcane Protection26/573343 remains pending two higher trainer ranks beyond its three-rank prefix.
+
+Two additive pacing entries preserve142 prior curves, now144;540 qualifying uses/45min per rank
+under assumed5s combat cadence before catch-up. All four trainer headers reproduce unchanged.
+234 profiles/236 declarations,144 ranked/7 mastery/83 Fixed,469 pending(82 ranked/387 standalone),
+147 baselines/109 hashes/850 runtime-unqualified;22 buff tracks/14 classes. Addon0.4.42 unchanged.
+VERIFY ALL: PASSED215104 source2/no selected suites/native31.5s; style/whitespace/final exports
+passed. No repeat Lua check needed. All switches0; no tests, native startup, client/menu/gameplay/
+migration execution, active install, publish, deploy, restart or production mutations.
 All switches0; owned-buff rules remain an isolated reversible design draft.
 
 ## Chromie's complete trainer ladder — 6 October 2026

@@ -203,7 +203,8 @@ def reviewed_stat_buffs(root):
         aura = int(match[5]) if match[5] is not None else 29
         if (not 12 <= class_id <= 32 or not ability_id or target not in {21, 56} or
                 not (aura == 29 and stat in range(5) or aura == 345 and stat == 127 and target == 21 or
-                     aura == 85 and stat == 0 and target == 21)):
+                     aura == 85 and stat == 0 and target == 21 or
+                     aura == 143 and stat in {4, 16, 64} and target == 21)):
             raise ValueError('Unsupported owned stat-buff mechanic')
         identity = (class_id, ability_id)
         if identity in result:
@@ -401,6 +402,8 @@ def build_drafts(candidates, root):
             if mechanic['auraId'] == 85:
                 required.extend(['primary-mana-resource-and-native-regeneration-availability',
                                  'meaningful-combat-practice-not-mana-tick-awards'])
+            if mechanic['auraId'] == 143:
+                required.append('native-intrinsic-resistance-maximum-across-overlapping-school-masks')
             if ability_id == 680302:
                 expected_spells = [680302, 681439, 681440, 681441]
                 expected_levels = [24, 36, 48, 58]
