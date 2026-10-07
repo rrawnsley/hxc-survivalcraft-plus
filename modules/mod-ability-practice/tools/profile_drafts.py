@@ -423,6 +423,16 @@ def build_drafts(candidates, root):
             required.extend(['soul-capture-loaded-script-registration-and-trigger-suppression',
                              'soul-capture-corpse-resource-and-post-combat-use-design',
                              'soul-capture-native-corpse-proof-and-actual-recovery-original-cast'])
+        if (class_id, ability_id) == (20, 562720):
+            raw = members[ability_id].get('rawDbc', {})
+            details = raw.get('effectDetails', [])
+            expected = [(6, 36, 1, 0, 0, -1), (6, 24, 1, 0, 0, 99), (6, 8, 1, 0, 0, 9)]
+            if (len(ranks) != 1 or ranks[0]['characterLevel'] != 6 or raw.get('passive') is not False or
+                    raw.get('rankLabel') != 'Cursed Form' or len(details) != 3 or [(v.get('effectId'), v.get('auraId'),
+                        v.get('implicitTargetA'), v.get('implicitTargetB'), v.get('triggerSpellId'),
+                        v.get('basePoints')) for v in details] != expected):
+                raise ValueError('Reviewed Blood Curse source/raw evidence changed')
+            required.append('native-transformation-and-passive-health-rage-recovery-not-recast-practice')
         if (class_id, ability_id) == (28, 807846):
             raw = members[ability_id].get('rawDbc', {})
             details = raw.get('effectDetails', [])

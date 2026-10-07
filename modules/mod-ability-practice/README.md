@@ -3793,3 +3793,31 @@ Current249 unique/251 declared profiles:151ranked/8mastery/90Fixed;454groups sti
 All defaults remain0; addon0.4.45-development/schema4 stays unpublished. No live server/client changes.
 
 Final source PASSED135014:9 checks in80.2seconds. C++ style and whitespace passed.
+
+
+## Blood Curse native transformation development
+
+Blood Curse (class20,562720, native level6) joins the optional Fixed utility catalog as a reversible
+draft. The optional preference remains unanswered; the announced default keeps transformation, health
+and rage recovery at full native effectiveness without practice. No recasting, passive ticks, mastery,
+rank gate or automatic teaching is added. Loaded shape, selectors57/1/127, native amounts and periodic
+timing are guarded. Native replacements and form-specific ability/weapon rules remain authoritative.
+
+Raw rank-label Cursed Form is a form description, not a numeric rank; authoring explicitly retains it.
+The initial raw review rejected it until this boundary was corrected. At level20 native periodic healing
+is24:10 base plus14 levels above spell/base level6. Early fixtures incorrectly expected30.
+Source/build/harness PASSED135347:two source checks,29.5second build,4.3second harness,766typed snapshots.
+Native menu passed individually135508; both recovery fixtures failed the incorrect healing assertion,
+including their automatic real-clock isolated failures. Corrected source passed9checks79.1s135838,
+and full-health/rage behavior passed; its positive fixture incorrectly expected expiry by32seconds.
+Native duration observation140343 records about34seconds remaining after one second and3seconds at32,
+so the observed duration is35seconds. Manual cancellation starts about29seconds of remaining cooldown.
+That utility case passed, including48 effective healing from two ticks,200rage and saved version999/
+points101 preserved. No native duration or formula was changed, and no passing isolated retry qualified.
+
+Current250unique/252declared profiles:151ranked/8mastery/91Fixed;453groups remain without definitions.
+Both direct and periodic raw common-outcome queues now have zero undeclared groups, which does not imply
+all abilities or runtime behavior are complete. All defaults remain0, addon0.4.45-development unpublished.
+
+Final native expiry and source PASSED140615:9source checks77.1s and47.8s isolated native run.
+The35second form expires naturally and starts its native cooldown without practice. Style/whitespace passed.

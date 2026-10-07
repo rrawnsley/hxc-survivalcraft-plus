@@ -891,6 +891,11 @@ bool MatchesUtilityFixedRankMechanic(std::uint32_t classId, std::uint32_t spellI
     SpellInfo const* info = sSpellMgr->GetSpellInfo(spellId);
     if (mechanic == mechanics.end() || !info || info->IsPassive())
         return false;
+    if (spellId == 562720 &&
+        (info->SpellFamilyName != 26 || info->Effects[EFFECT_1].Amplitude != 3000 ||
+            info->Effects[EFFECT_2].Amplitude != 3000 ||
+            info->Effects[EFFECT_2].RealPointsPerLevel != 1.0f))
+        return false;
     if (info->Effects[0].IsEffect(SPELL_EFFECT_TRANS_DOOR))
     {
         auto const& objects = Practice::DevelopmentUtilityFixed::Objects;

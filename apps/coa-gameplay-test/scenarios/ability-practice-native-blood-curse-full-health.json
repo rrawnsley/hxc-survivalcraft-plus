@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Blood Curse full health preserves rage and utility",
+  "contract": "Full health suppresses effective recovery without suppressing native rage or modifying saved utility progress.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 20,
+      "level": 20,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 562720
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.20.562720",
+      "index": 0,
+      "value": 999
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.20.562720",
+      "index": 1,
+      "value": 2
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.20.562720",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.20.562720",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.20.562720",
+      "index": 4,
+      "value": 101
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 572856,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_stacks",
+      "spell": 572856,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 562720
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_stacks",
+      "spell": 562720,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_stacks",
+      "spell": 572856,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 562720,
+      "effect": 2,
+      "equals": 24
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "maximum": 500000,
+      "value": 500000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "wait",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_effective_heal_total",
+      "spell": 562720,
+      "target": "caster",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "health",
+      "equals": 500000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "power",
+      "power": 1,
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.20.562720",
+      "index": 0,
+      "equals": 999
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.20.562720",
+      "index": 4,
+      "equals": 101
+    }
+  ]
+}
