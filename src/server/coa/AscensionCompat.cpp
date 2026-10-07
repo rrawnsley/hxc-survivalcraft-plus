@@ -1007,7 +1007,7 @@ public:
         {
             if (player->GetSpellMap().find(id) == player->GetSpellMap().end())
             {
-                player->learnSpell(id, true);
+                player->learnSpellWithoutAnnouncement(id);
                 if (player->HasSpell(id))
                     ++learned;
             }
@@ -3635,6 +3635,7 @@ public:
     std::lock_guard lock(_mutex);
     _streamedPlayers.erase(guid);
     _sentItemRows.erase(guid);
+    _sentItemSpellRows.erase(guid);
     _onDemandItemRows.erase(guid);
     _lastStreamMs.erase(guid);
     _fallbackTimers[guid] = { DISPLAY_PATCH_FALLBACK_DELAY_MS, false };
@@ -3647,15 +3648,16 @@ public:
       std::lock_guard lock(_mutex);
       _streamedPlayers.erase(guid);
       _sentItemRows.erase(guid);
+      _sentItemSpellRows.erase(guid);
       _fallbackTimers.erase(guid);
       _lastStreamMs.erase(guid);
       if (auto node = _onDemandItemRows.extract(guid))
         onDemand = node.mapped();
     }
 
-    if (onDemand.Rows)
-      LOG_INFO("coa", "Streamed {} Item patch rows ({} bytes) on demand to {} during the session",
-               onDemand.Rows, onDemand.Bytes, player->GetName());
+    if (onDemand.Rows || onDemand.SpellRows)
+      LOG_INFO("coa", "Streamed {} Item and {} linked Spell patch rows ({} bytes) on demand to {} during the session",
+               onDemand.Rows, onDemand.SpellRows, onDemand.Bytes, player->GetName());
   }
 
     void SendItemRowOnDemand(Player* player, uint32 itemId)
@@ -3669,7 +3671,7 @@ public:
             return;
 
         PatchRowTally const sent = SendItemRows(player, rows, { *row });
-        if (!sent.Rows)
+        if (!sent.Rows && !sent.SpellRows)
             return;
 
         std::lock_guard lock(_mutex);
@@ -3759,9 +3761,10 @@ public:
     PatchRowTally const sentItems = SendItemRows(player, rows, std::move(itemRows));
     bytes += sentItems.Bytes;
 
-    uint32 sentSpells = 0;
+    uint32 sentSpells = sentItems.SpellRows;
     for (SpellPatchRow const& row : rows.Spells)
-      if (!row.RequiresRegistration || Ascension::ClientSpellPatches::Instance().Contains(row.Values[0]))
+      if (!row.RequiresRegistration || Ascension::ClientSpellPatches::Instance().Contains(row.Values[0],
+          Ascension::ClientSpellPatches::Delivery::Login))
       {
         SpellPatchRow active = row;
         ApplyServerSpellSelectors(active);
@@ -3821,10 +3824,12 @@ private:
 
   struct PatchRowTally {
     uint32 Rows = 0;
+    uint32 SpellRows = 0;
     std::size_t Bytes = 0;
 
     void Add(PatchRowTally const &other) {
       Rows += other.Rows;
+      SpellRows += other.SpellRows;
       Bytes += other.Bytes;
     }
   };
@@ -3872,6 +3877,7 @@ private:
     std::unordered_set<uint32> SqlItemIds;
     std::unordered_map<uint32, std::size_t> ItemRowIndexById;
     std::vector<SpellPatchRow> Spells;
+    std::unordered_map<uint32, std::size_t> SpellRowIndexById;
     std::vector<SuperTrackPatchRow> SuperTracks;
     std::vector<ShapeshiftFormPatchRow> ShapeshiftForms;
     std::vector<CreatureModelPatchRow> CreatureModels;
@@ -3910,22 +3916,40 @@ private:
 
     PatchRowTally SendItemRows(Player* player, PreparedPatchRows const& rows, std::vector<ItemPatchRow> itemRows)
     {
-        for (std::size_t index : rows.ItemCapacityOrder)
-            if (auto const capacity = FindItemRow(rows, rows.Items[index][0]))
-            {
-                itemRows.insert(itemRows.begin(), *capacity);
-                break;
-            }
-
         PatchRowTally sent;
         std::lock_guard lock(_mutex);
         std::unordered_set<uint32>& sentItemRows = _sentItemRows[player->GetGUID().GetCounter()];
-        for (ItemPatchRow const& row : itemRows)
+        std::unordered_set<uint32>& sentItemSpellRows = _sentItemSpellRows[player->GetGUID().GetCounter()];
+        auto const sendItem = [&](ItemPatchRow const& row)
+        {
             if (sentItemRows.insert(row[0]).second)
             {
                 sent.Bytes += SendItemRow(player, row);
                 ++sent.Rows;
             }
+        };
+        for (std::size_t index : rows.ItemCapacityOrder)
+            if (auto const capacity = FindItemRow(rows, rows.Items[index][0]))
+            {
+                sendItem(*capacity);
+                break;
+            }
+        for (ItemPatchRow const& row : itemRows)
+        {
+            if (ItemTemplate const* item = sObjectMgr->GetItemTemplate(row[0]))
+                for (auto const& spell : item->Spells)
+                    if (spell.SpellId > 0 && Ascension::ClientSpellPatches::Instance().Contains(spell.SpellId,
+                        Ascension::ClientSpellPatches::Delivery::Item))
+                        if (auto const found = rows.SpellRowIndexById.find(spell.SpellId);
+                            found != rows.SpellRowIndexById.end() && sentItemSpellRows.insert(spell.SpellId).second)
+                        {
+                            SpellPatchRow active = rows.Spells[found->second];
+                            ApplyServerSpellSelectors(active);
+                            sent.Bytes += SendSpellRow(player, active);
+                            ++sent.SpellRows;
+                        }
+            sendItem(row);
+        }
         return sent;
     }
 
@@ -4106,6 +4130,8 @@ private:
       std::sort(_rows.ItemCapacityOrder.begin(), _rows.ItemCapacityOrder.end(),
           [this](std::size_t left, std::size_t right) { return _rows.Items[left][0] > _rows.Items[right][0]; });
       _rows.Spells = BuildSpellPatchRows();
+      for (std::size_t index = 0; index < _rows.Spells.size(); ++index)
+        _rows.SpellRowIndexById.emplace(_rows.Spells[index].Values[0], index);
       _rows.SuperTracks = LoadSuperTrackPatchRows();
       _rows.ShapeshiftForms = LoadShapeshiftFormPatchRows();
       _rows.CreatureModels = BuildCreatureModelPatchRows();
@@ -4569,6 +4595,7 @@ private:
   std::mutex _mutex;
   std::unordered_set<uint32> _streamedPlayers;
   std::unordered_map<uint32, std::unordered_set<uint32>> _sentItemRows;
+  std::unordered_map<uint32, std::unordered_set<uint32>> _sentItemSpellRows;
   std::unordered_map<uint32, PatchRowTally> _onDemandItemRows;
   struct FallbackResend
   {
