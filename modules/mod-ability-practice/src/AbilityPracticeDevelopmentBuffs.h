@@ -213,6 +213,19 @@ inline constexpr std::array Class25Ability572791 = {
 };
 inline constexpr auto Class25Ability572791Caps = Development::RankCaps(Class25Ability572791);
 
+inline constexpr std::array Class16Ability575843 = {
+    AbilityRank{ 575843, 1, { 40, 1 } },
+    AbilityRank{ 575844, 2, { 50, 10 } },
+    AbilityRank{ 575845, 3, { 60, 20 } }
+};
+inline constexpr auto Class16Ability575843Caps = Development::RankCaps(Class16Ability575843);
+inline constexpr std::array Class30Ability575839 = {
+    AbilityRank{ 575839, 1, { 40, 1 } },
+    AbilityRank{ 575840, 2, { 50, 10 } },
+    AbilityRank{ 575841, 3, { 60, 20 } }
+};
+inline constexpr auto Class30Ability575839Caps = Development::RankCaps(Class30Ability575839);
+
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 12, 300857, AbilityKind::Ranked, BrutalShout, BrutalShoutCaps },
@@ -288,6 +301,12 @@ inline constexpr std::array Profiles = {
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 25, 572791, AbilityKind::Ranked, Class25Ability572791, Class25Ability572791Caps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 16, 575843, AbilityKind::Ranked, Class16Ability575843, Class16Ability575843Caps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 30, 575839, AbilityKind::Ranked, Class30Ability575839, Class30Ability575839Caps },
         Development::Policy, OutcomeKind::Damage }
 };
 
@@ -323,6 +342,7 @@ struct Mechanic
     std::uint32_t TargetA;
     std::int32_t Stat;
     std::uint32_t Aura = 29;
+    std::uint8_t EffectIndex = 0;
 };
 
 inline constexpr std::array Mechanics = {
@@ -350,7 +370,9 @@ inline constexpr std::array Mechanics = {
     Mechanic{ 23, 572173, 21, 16, 143 },
     Mechanic{ 26, 573343, 21, 64, 143 },
     Mechanic{ 25, 561389, 21, 0, 85 },
-    Mechanic{ 25, 572791, 21, 127, 345 }
+    Mechanic{ 25, 572791, 21, 127, 345 },
+    Mechanic{ 16, 575843, 21, 126, 143, 2 },
+    Mechanic{ 30, 575839, 21, 126, 143, 2 }
 };
 
 static_assert(Mechanics.size() == Profiles.size());
@@ -378,6 +400,12 @@ inline std::uint32_t Aura(AbilityProfile const& profile)
 {
     auto const* mechanic = MechanicFor(profile);
     return mechanic ? mechanic->Aura : 0;
+}
+
+inline std::uint8_t EffectIndex(AbilityProfile const& profile)
+{
+    auto const* mechanic = MechanicFor(profile);
+    return mechanic ? mechanic->EffectIndex : 3;
 }
 
 inline std::uint32_t Target(AbilityProfile const& profile)

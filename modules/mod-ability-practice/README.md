@@ -10,6 +10,16 @@ and coverage queues. Visibility does not establish castability, helper identity 
 The current source export has 2,806 raw hidden candidate groups; none of the 850 source-consistent draft
 groups carries this flag. No existing profile, baseline exclusion or pending classification changes.
 
+Call of the Lightning16/575843 and Rite of Perseverance30/575839 each stage three native ranks40/50/60
+in the disabled buff catalog. They use effect slot2, exclusive resistance143 and magical-school mask126;
+the original25 buffs retain slot0. Startup and active-application checks use the authored slot and reject
+additional effects/triggers. Independent receipts, combat contribution, five-second cadence and overlap
+guards remain. A stronger resistance effect overlapping any school pauses this track; equal amounts remain
+eligible under the draft policy. Native Rite group2100001 replacement retains proficiency when an aura ends.
+Source group membership is checked and hashed; loaded group behavior still requires runtime qualification.
+Raw rank amounts10/20/20 receive a distinct effective-benefit review queue: native rank3 data is preserved,
+and no claim of stronger resistance is made. Greater Rite575842 remains its distinct native ability.
+
 
 ## Current state — 5 October 2026
 

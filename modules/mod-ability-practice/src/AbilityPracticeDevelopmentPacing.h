@@ -472,6 +472,16 @@ inline constexpr std::array BandsClass16Ability500040 = {
     TrainingBand{ 200, 16200, 600 }
 };
 
+inline constexpr std::array RanksClass16Ability575843 = {
+    AbilityRank{ 575843, 1, { 40, 1 } },
+    AbilityRank{ 575844, 2, { 50, 10 } },
+    AbilityRank{ 575845, 3, { 60, 20 } }
+};
+inline constexpr std::array BandsClass16Ability575843 = {
+    TrainingBand{ 1, 16200, 270 },
+    TrainingBand{ 10, 16200, 300 }
+};
+
 inline constexpr std::array RanksClass16Ability578311 = {
     AbilityRank{ 578311, 1, { 4, 1 } },
     AbilityRank{ 578312, 2, { 14, 10 } },
@@ -2620,6 +2630,16 @@ inline constexpr std::array BandsClass30Ability573316 = {
     TrainingBand{ 100, 16200, 600 }
 };
 
+inline constexpr std::array RanksClass30Ability575839 = {
+    AbilityRank{ 575839, 1, { 40, 1 } },
+    AbilityRank{ 575840, 2, { 50, 10 } },
+    AbilityRank{ 575841, 3, { 60, 20 } }
+};
+inline constexpr std::array BandsClass30Ability575839 = {
+    TrainingBand{ 1, 16200, 270 },
+    TrainingBand{ 10, 16200, 300 }
+};
+
 inline constexpr std::array RanksClass30Ability800174 = {
     AbilityRank{ 800174, 1, { 16, 1 } },
     AbilityRank{ 502989, 2, { 24, 10 } },
@@ -2861,6 +2881,7 @@ inline constexpr std::array Entries = {
     Entry{ 15, 804191, RanksClass15Ability804191, { BandsClass15Ability804191 } },
     Entry{ 16, 500038, RanksClass16Ability500038, { BandsClass16Ability500038 } },
     Entry{ 16, 500040, RanksClass16Ability500040, { BandsClass16Ability500040 } },
+    Entry{ 16, 575843, RanksClass16Ability575843, { BandsClass16Ability575843 } },
     Entry{ 16, 578311, RanksClass16Ability578311, { BandsClass16Ability578311 } },
     Entry{ 16, 707044, RanksClass16Ability707044, { BandsClass16Ability707044 } },
     Entry{ 16, 800227, RanksClass16Ability800227, { BandsClass16Ability800227 } },
@@ -2973,6 +2994,7 @@ inline constexpr std::array Entries = {
     Entry{ 30, 500376, RanksClass30Ability500376, { BandsClass30Ability500376 } },
     Entry{ 30, 500517, RanksClass30Ability500517, { BandsClass30Ability500517 } },
     Entry{ 30, 573316, RanksClass30Ability573316, { BandsClass30Ability573316 } },
+    Entry{ 30, 575839, RanksClass30Ability575839, { BandsClass30Ability575839 } },
     Entry{ 30, 800174, RanksClass30Ability800174, { BandsClass30Ability800174 } },
     Entry{ 30, 800198, RanksClass30Ability800198, { BandsClass30Ability800198 } },
     Entry{ 31, 680448, RanksClass31Ability680448, { BandsClass31Ability680448 } },

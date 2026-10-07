@@ -742,6 +742,7 @@ def main():
                          'src/server/coa/AscensionCultist.cpp', 'src/server/coa/AscensionCultist.h',
                          'src/server/coa/AscensionCultistData.h', 'src/server/coa/AscensionCultistContracts.cpp',
                          'data/sql/updates/pending_db_world/rev_20260909_12_cultist_completion.sql',
+                         'data/sql/updates/pending_db_world/rev_20260916_61_rite_buffs_exclusive.sql',
                          'src/server/shared/SharedDefines.h')]
     if args.dbc:
         from inventory import load_dbc_lookup

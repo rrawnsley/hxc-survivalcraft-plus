@@ -105,6 +105,8 @@ def review_queues(draft):
         queues.add('corpse-resource-and-post-combat-use-design')
     if draft.get('ownedStatBuffReview'):
         queues.add('owned-buff-original-combat-cast-contribution')
+        if 'equal-raw-resistance-rank-amounts-need-effective-benefit-review' in draft.get('requiredReviews', []):
+            queues.add('equal-resistance-rank-benefit-review')
     if len(draft['ranks']) == 1:
         queues.add('unranked-mastery-or-fixed-design')
     if set(routes) & {'interrupt', 'dispel', 'steal'}:

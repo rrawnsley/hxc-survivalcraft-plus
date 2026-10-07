@@ -524,14 +524,17 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
             if (++entry != scripts.second)
                 return false;
         }
+        auto const effectIndex = Practice::DevelopmentBuffs::EffectIndex(profile);
+        if (effectIndex >= 3)
+            return false;
         for (std::size_t index = 0; index < 3; ++index)
         {
             auto const& slot = info->Effects[index];
-            if (slot.Effect != (index == 0 ? SPELL_EFFECT_APPLY_AURA : 0u) ||
-                slot.ApplyAuraName != (index == 0 ? Practice::DevelopmentBuffs::Aura(profile) : 0u) ||
-                slot.TargetA.GetTarget() != (index == 0 ? Practice::DevelopmentBuffs::Target(profile) : 0u) ||
+            if (slot.Effect != (index == effectIndex ? SPELL_EFFECT_APPLY_AURA : 0u) ||
+                slot.ApplyAuraName != (index == effectIndex ? Practice::DevelopmentBuffs::Aura(profile) : 0u) ||
+                slot.TargetA.GetTarget() != (index == effectIndex ? Practice::DevelopmentBuffs::Target(profile) : 0u) ||
                 slot.TargetB.GetTarget() || slot.TriggerSpell ||
-                slot.MiscValue != (index == 0 ? Practice::DevelopmentBuffs::StatSelector(profile) : 0))
+                slot.MiscValue != (index == effectIndex ? Practice::DevelopmentBuffs::StatSelector(profile) : 0))
                 return false;
         }
         return true;
@@ -1147,10 +1150,11 @@ bool IsBuffObserver(Player const* player)
 bool EffectiveBuffApplication(Player* player, AuraApplication const& application,
     Practice::AbilityProfile const& profile)
 {
-    if (application.GetRemoveMode() != AURA_REMOVE_NONE || !application.HasEffect(EFFECT_0) ||
+    auto const effectIndex = Practice::DevelopmentBuffs::EffectIndex(profile);
+    if (effectIndex >= 3 || application.GetRemoveMode() != AURA_REMOVE_NONE || !application.HasEffect(effectIndex) ||
         application.GetBase()->IsRemoved())
         return false;
-    AuraEffect const* effect = application.GetBase()->GetEffect(EFFECT_0);
+    AuraEffect const* effect = application.GetBase()->GetEffect(effectIndex);
     std::uint32_t const aura = Practice::DevelopmentBuffs::Aura(profile);
     if ((aura != SPELL_AURA_MOD_STAT && aura != SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT &&
             aura != SPELL_AURA_MOD_POWER_REGEN && aura != SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE) ||

@@ -111,7 +111,8 @@ def verify_provenance(candidates, root, dbc):
     expected.update({'src/server/coa/AscensionCultistAuras.cpp',
                      'src/server/coa/AscensionCultist.cpp', 'src/server/coa/AscensionCultist.h',
                      'src/server/coa/AscensionCultistData.h', 'src/server/coa/AscensionCultistContracts.cpp',
-                     'data/sql/updates/pending_db_world/rev_20260909_12_cultist_completion.sql'})
+                     'data/sql/updates/pending_db_world/rev_20260909_12_cultist_completion.sql',
+                     'data/sql/updates/pending_db_world/rev_20260916_61_rite_buffs_exclusive.sql'})
     if not isinstance(native_sources, list) or len(native_sources) != len(expected) or {
             source.get('path') for source in native_sources} != expected:
         raise ValueError('Missing native outcome provenance')
@@ -195,7 +196,7 @@ def reviewed_stat_buffs(root):
     body = re.search(r'inline\s+constexpr\s+std::array\s+Mechanics\s*=\s*\{(.*?)\};', text, re.DOTALL)
     if body is None:
         raise ValueError('Missing owned stat-buff mechanic catalog')
-    pattern = r'Mechanic\s*\{\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+))?\s*\}'
+    pattern = r'Mechanic\s*\{\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+)(?:,\s*(\d+))?)?\s*\}'
     matches = list(re.finditer(pattern, body[1]))
     if not matches or re.sub(pattern, '', body[1]).replace(',', '').strip():
         raise ValueError('Unsupported owned stat-buff mechanic declaration')
@@ -205,18 +206,30 @@ def reviewed_stat_buffs(root):
     for match in matches:
         class_id, ability_id, target, stat = map(int, match.groups()[:4])
         aura = int(match[5]) if match[5] is not None else 29
+        effect_index = int(match[6]) if match[6] is not None else 0
         if (not 12 <= class_id <= 32 or not ability_id or target not in {21, 56} or
                 not (aura == 29 and stat in range(5) or aura == 345 and stat == 127 and target == 21 or
                      aura == 85 and stat == 0 and target == 21 or
-                     aura == 143 and stat in {4, 16, 64} and target == 21)):
+                     aura == 143 and stat in {4, 16, 64, 126} and target == 21) or
+                ((effect_index != 0 or aura == 143 and stat == 126) and not (
+                    effect_index == 2 and aura == 143 and stat == 126 and
+                    (class_id, ability_id) in {(16, 575843), (30, 575839)}))):
             raise ValueError('Unsupported owned stat-buff mechanic')
         identity = (class_id, ability_id)
         if identity in result:
             raise ValueError('Duplicate owned stat-buff mechanic')
         result[identity] = {'scope': 'reviewed-source-shape-not-effective-runtime-buff',
-                            'targetA': target, 'statSelector': stat, 'auraId': aura}
+                            'targetA': target, 'statSelector': stat, 'auraId': aura, 'effectIndex': effect_index}
     if set(result) != profiles:
         raise ValueError('Owned stat-buff profiles and mechanics differ')
+    if (30, 575839) in result:
+        rites = (root / 'data/sql/updates/pending_db_world/rev_20260916_61_rite_buffs_exclusive.sql').read_text(
+            encoding='utf-8')
+        family = [int(value) for value in re.findall(r'\(2100001,\s*(\d+)\)', rites)]
+        if family != [575839, 575842, 578126, 578130, 800198, 680298, 1]:
+            raise ValueError('Native Rite exclusive group source changed')
+        result[(30, 575839)]['nativeExclusiveGroupId'] = 2100001
+        result[(30, 575839)]['nativeExclusiveFamilySpellIds'] = family[:-1]
     whispers = {(25, 561389): (561389, 561390, 561391), (25, 572791): (572791, 572819, 572905)}
     if set(result).intersection(whispers):
         lifecycle = (root / 'src/server/coa/AscensionCultistAuras.cpp').read_text(encoding='utf-8')
@@ -408,16 +421,21 @@ def build_drafts(candidates, root):
             required.append('native-lock-requirements-and-existing-skill-progression-preserved')
         if (class_id, ability_id) in stat_buffs:
             mechanic = stat_buffs[(class_id, ability_id)]
-            expected = [(6, mechanic['auraId'], mechanic['targetA'], 0, 0, mechanic['statSelector']),
-                        (0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0)]
+            effect_index = mechanic['effectIndex']
+            expected = [(0, 0, 0, 0, 0, 0)] * 3
+            expected[effect_index] = (6, mechanic['auraId'], mechanic['targetA'], 0, 0, mechanic['statSelector'])
+            amounts = []
             for rank in ranks:
                 raw = members[rank['spellId']].get('rawDbc', {})
                 details = raw.get('effectDetails', [])
                 if raw.get('passive') is not False or len(details) != 3 or [(v.get('effectId'),
                         v.get('auraId'), v.get('implicitTargetA'), v.get('implicitTargetB'),
                         v.get('triggerSpellId'), v.get('miscValue')) for v in details] != expected or (
-                        type(details[0].get('basePoints')) is not int or details[0]['basePoints'] < 0):
+                        type(details[effect_index].get('basePoints')) is not int or
+                        details[effect_index]['basePoints'] < 0):
                     raise ValueError('Reviewed owned stat-buff source shape changed')
+                amounts.append(details[effect_index]['basePoints'] + 1)
+            mechanic['rawRankAmounts'] = amounts
             required.extend(['owned-buff-original-application-and-combat-cast-contribution',
                              'buff-contribution-five-second-cadence-and-per-cast-deduplication',
                              'independent-owned-buff-origin-eligibility-and-cadence',
@@ -427,6 +445,10 @@ def build_drafts(candidates, root):
                                  'meaningful-combat-practice-not-mana-tick-awards'])
             if mechanic['auraId'] == 143:
                 required.append('native-intrinsic-resistance-maximum-across-overlapping-school-masks')
+                if len(set(amounts)) != len(amounts):
+                    required.append('equal-raw-resistance-rank-amounts-need-effective-benefit-review')
+            if mechanic.get('nativeExclusiveGroupId'):
+                required.append('loaded-native-rite-exclusive-group-and-replacement-pauses-practice')
             if class_id == 25 and ability_id in {561389, 572791}:
                 required.extend(['cultist-exclusive-whisper-family-replacement-pauses-original-practice',
                                  'loaded-cultist-lifecycle-binding-and-original-buff-receipt',
