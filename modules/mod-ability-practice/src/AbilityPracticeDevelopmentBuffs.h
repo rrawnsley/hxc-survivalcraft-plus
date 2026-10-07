@@ -8,6 +8,26 @@
 
 namespace AbilityPractice::DevelopmentBuffs
 {
+inline constexpr std::array DevotionOfDawn = {
+    AbilityRank{ 572384, 1, { 12, 1 } },
+    AbilityRank{ 572385, 2, { 22, 10 } },
+    AbilityRank{ 572386, 3, { 32, 20 } },
+    AbilityRank{ 572387, 4, { 42, 40 } },
+    AbilityRank{ 572388, 5, { 52, 60 } },
+    AbilityRank{ 572389, 6, { 60, 80 } }
+};
+inline constexpr auto DevotionOfDawnCaps = Development::RankCaps(DevotionOfDawn);
+inline constexpr std::array PrimalInstinct = {
+    AbilityRank{ 800197, 1, { 8, 1 } },
+    AbilityRank{ 803315, 2, { 18, 10 } },
+    AbilityRank{ 803316, 3, { 28, 20 } },
+    AbilityRank{ 803317, 4, { 38, 40 } },
+    AbilityRank{ 803318, 5, { 48, 60 } },
+    AbilityRank{ 803319, 6, { 54, 80 } },
+    AbilityRank{ 573349, 7, { 60, 100 } }
+};
+inline constexpr auto PrimalInstinctCaps = Development::RankCaps(PrimalInstinct);
+
 inline constexpr std::array GroveInstinct = {
     AbilityRank{ 572810, 1, { 2, 1 } },
     AbilityRank{ 572811, 2, { 14, 10 } },
@@ -250,6 +270,12 @@ inline constexpr auto RiteOfPowerCaps = Development::RankCaps(RiteOfPower);
 
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 27, 572384, AbilityKind::Ranked, DevotionOfDawn, DevotionOfDawnCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 31, 800197, AbilityKind::Ranked, PrimalInstinct, PrimalInstinctCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 31, 572810, AbilityKind::Ranked, GroveInstinct, GroveInstinctCaps },
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -377,6 +403,8 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 27, 572384, 21, 0, 99 },
+    Mechanic{ 31, 800197, 21, 0, 99 },
     Mechanic{ 31, 572810, 21, 0, 85 },
     Mechanic{ 12, 300857, 56, 1 },
     Mechanic{ 12, 680302, 56, 2 },
@@ -446,6 +474,12 @@ inline std::uint32_t Target(AbilityProfile const& profile)
 {
     auto const* mechanic = MechanicFor(profile);
     return mechanic ? mechanic->TargetA : 0;
+}
+
+inline bool IsPairedAttackPower(AbilityProfile const& profile)
+{
+    return IsSupportedStatBuff(profile) && Aura(profile) == 99 && EffectIndex(profile) == 0 &&
+        Target(profile) == 21 && StatSelector(profile) == 0;
 }
 
 inline bool IsBrutalShout(AbilityProfile const& profile)

@@ -600,6 +600,15 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
         for (std::size_t index = 0; index < 3; ++index)
         {
             auto const& slot = info->Effects[index];
+            if (Practice::DevelopmentBuffs::IsPairedAttackPower(profile) && index == 1)
+            {
+                if (slot.Effect != SPELL_EFFECT_APPLY_AURA || slot.ApplyAuraName != SPELL_AURA_MOD_RANGED_ATTACK_POWER ||
+                    slot.TargetA.GetTarget() != TARGET_UNIT_TARGET_ALLY || slot.TargetB.GetTarget() ||
+                    slot.TriggerSpell || slot.MiscValue || slot.BasePoints != info->Effects[EFFECT_0].BasePoints ||
+                    slot.DieSides != info->Effects[EFFECT_0].DieSides)
+                    return false;
+                continue;
+            }
             if (slot.Effect != (index == effectIndex ? SPELL_EFFECT_APPLY_AURA : 0u) ||
                 slot.ApplyAuraName != (index == effectIndex ? Practice::DevelopmentBuffs::Aura(profile) : 0u) ||
                 slot.TargetA.GetTarget() != (index == effectIndex ? Practice::DevelopmentBuffs::Target(profile) : 0u) ||
@@ -1367,6 +1376,11 @@ bool AcquisitionAllowed(Player const* player, Practice::AbilityDefinition const&
         AscensionAcquisition::CanLearnRacialSpell(player, spellId);
 }
 
+bool IsMeleeOrRangedAbility(SpellInfo const* info)
+{
+    return info && (info->DmgClass == SPELL_DAMAGE_CLASS_MELEE || info->DmgClass == SPELL_DAMAGE_CLASS_RANGED);
+}
+
 bool IsBuffObserver(Player const* player)
 {
     if (!BuffContributionRequested || !player)
@@ -1389,10 +1403,22 @@ bool EffectiveBuffApplication(Player* player, AuraApplication const& application
     AuraEffect const* effect = application.GetBase()->GetEffect(effectIndex);
     std::uint32_t const aura = Practice::DevelopmentBuffs::Aura(profile);
     if ((aura != SPELL_AURA_MOD_STAT && aura != SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT &&
-            aura != SPELL_AURA_MOD_POWER_REGEN && aura != SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE) ||
+            aura != SPELL_AURA_MOD_POWER_REGEN && aura != SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE &&
+            aura != SPELL_AURA_MOD_ATTACK_POWER) ||
         !effect || effect->GetAuraType() != aura || effect->GetAmount() <= 0 ||
         effect->GetMiscValue() != Practice::DevelopmentBuffs::StatSelector(profile))
         return false;
+    if (Practice::DevelopmentBuffs::IsPairedAttackPower(profile))
+    {
+        AuraEffect const* ranged = application.GetBase()->GetEffect(EFFECT_1);
+        if (!application.HasEffect(EFFECT_1) || !ranged || ranged->GetAuraType() != SPELL_AURA_MOD_RANGED_ATTACK_POWER ||
+            ranged->GetAmount() <= 0 || ranged->GetMiscValue())
+            return false;
+        std::int64_t const competing = player->GetHighestExclusiveSameEffectSpellGroupValue(
+            ranged, ranged->GetAuraType(), true, ranged->GetMiscValue());
+        if ((competing < 0 ? -competing : competing) > ranged->GetAmount())
+            return false;
+    }
     if (aura == SPELL_AURA_MOD_POWER_REGEN && (player->getPowerType() != POWER_MANA ||
         !player->GetMaxPower(POWER_MANA) ||
         player->HasAuraTypeWithMiscvalue(SPELL_AURA_PREVENT_REGENERATE_POWER, POWER_MANA + 1) ||
@@ -1979,6 +2005,9 @@ void AwardBuffContribution(Player* player, Spell* spell, Unit* target, std::uint
     auto const now = Clock::now();
     for (auto const* profile : ProfilesForClass(player->getClass()))
     {
+        if (Practice::DevelopmentBuffs::IsPairedAttackPower(*profile) &&
+            (!damage || !IsMeleeOrRangedAbility(spell->GetSpellInfo())))
+            continue;
         std::uint64_t const bit = Practice::DevelopmentBuffs::ContributionBit(*profile);
         if (!bit || !(spell->GetScriptValue(PracticeBuffEligibilityKey) & bit) ||
             (spell->GetScriptValue(PracticeBuffContributionKey) & bit))
@@ -2742,7 +2771,9 @@ public:
                 if (IsBuffObserver(player))
                     for (auto const* buff : ProfilesForClass(player->getClass()))
                         if (Practice::DevelopmentBuffs::IsSupportedStatBuff(*buff) &&
-                            AcceptedBuffSpell(player, session, *buff))
+                            AcceptedBuffSpell(player, session, *buff) &&
+                            (!Practice::DevelopmentBuffs::IsPairedAttackPower(*buff) ||
+                                IsMeleeOrRangedAbility(spell->GetSpellInfo())))
                             eligible |= Practice::DevelopmentBuffs::ContributionBit(*buff);
                 spell->SetScriptValue(PracticeBuffEligibilityKey, eligible);
             }

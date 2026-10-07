@@ -215,7 +215,7 @@ def reviewed_stat_buffs(root):
         effect_index = int(match[6]) if match[6] is not None else 0
         if (not 12 <= class_id <= 32 or not ability_id or target not in {21, 56} or
                 not (aura == 29 and stat in range(5) or aura == 345 and stat == 127 and target == 21 or
-                     aura == 85 and stat == 0 and target == 21 or
+                     aura in {85, 99} and stat == 0 and target == 21 or
                      aura == 143 and stat in {4, 16, 64, 126} and target == 21) or
                 ((effect_index != 0 or aura == 143 and stat == 126) and not (
                     effect_index == 2 and aura == 143 and stat == 126 and
@@ -570,6 +570,10 @@ def build_drafts(candidates, root):
             effect_index = mechanic['effectIndex']
             expected = [(0, 0, 0, 0, 0, 0)] * 3
             expected[effect_index] = (6, mechanic['auraId'], mechanic['targetA'], 0, 0, mechanic['statSelector'])
+            if mechanic['auraId'] == 99:
+                expected[1] = (6, 124, 21, 0, 0, 0)
+                required.extend(['paired-melee-and-ranged-attack-power-effects-both-active-for-practice',
+                                 'original-melee-or-ranged-damage-ability-contribution-only'])
             amounts = []
             for rank in ranks:
                 raw = members[rank['spellId']].get('rawDbc', {})
@@ -580,6 +584,8 @@ def build_drafts(candidates, root):
                         type(details[effect_index].get('basePoints')) is not int or
                         details[effect_index]['basePoints'] < 0):
                     raise ValueError('Reviewed owned stat-buff source shape changed')
+                if mechanic['auraId'] == 99 and details[1].get('basePoints') != details[0]['basePoints']:
+                    raise ValueError('Paired attack-power rank amounts differ')
                 amounts.append(details[effect_index]['basePoints'] + 1)
             mechanic['rawRankAmounts'] = amounts
             required.extend(['owned-buff-original-application-and-combat-cast-contribution',

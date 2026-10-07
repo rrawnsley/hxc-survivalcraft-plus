@@ -1,0 +1,278 @@
+{
+  "schema": 1,
+  "name": "Ability practice: primal-instinct automatic attack-power rank boundary",
+  "contract": "One qualifying original melee cast completes practice, automatically learns the native second rank and leaves the following rank locked. Both native attack-power amounts remain.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apinstbound",
+      "race": 1,
+      "class": 31,
+      "level": 18,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 18,
+      "health": 100000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800197
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 680448
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800140
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 196
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 37
+    },
+    {
+      "action": "equip",
+      "actor": "caster",
+      "item": 37,
+      "slot": 15
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.800197",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.800197",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.800197",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.800197",
+      "index": 3,
+      "value": 9
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.800197",
+      "index": 4,
+      "value": 15930
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "attack_power",
+      "save_as": "attack_power_base"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "ranged_attack_power",
+      "save_as": "ranged_attack_power_base"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800197,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 800197,
+      "effect": 0,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 800197,
+      "effect": 1,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "attack_power",
+      "relative_to": "attack_power_base",
+      "min": 29.9,
+      "max": 30.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "ranged_attack_power",
+      "relative_to": "ranged_attack_power_base",
+      "min": 29.9,
+      "max": 30.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.31.800197",
+      "index": 4,
+      "equals": 15930
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 680448,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 680448,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.31.800197",
+      "index": 4,
+      "equals": 15930
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800140,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 800140,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.31.800197",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.31.800197",
+      "index": 3,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 803315,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 803316,
+      "equals": 0
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "caster",
+      "spell": 800197
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803315,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 803315,
+      "effect": 0,
+      "equals": 40
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 803315,
+      "effect": 1,
+      "equals": 40
+    }
+  ]
+}

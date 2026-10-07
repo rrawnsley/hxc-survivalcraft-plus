@@ -4012,3 +4012,32 @@ Scoped style/whitespace and additive pacing preservation passed.
 
 Coverage259unique/261declared:153ranked/9mastery/97Fixed,444pending(71ranked/373standalone).
 All defaults0; addon0.4.48-development/schema4 unpublished. No production changes.
+
+
+## Paired attack-power buff practice development
+
+Devotion of Dawn (class27/572384, six ranks12/22/32/42/52/60) and Primal Instinct
+(class31/800197, seven ranks8/18/28/38/48/54/60) retain both native melee and ranged attack-power effects.
+Captured ranks match complete trainer ladders with immediate prerequisites. Original self-application,
+positive active effects and native exclusive-effect availability are required at cast start and outcome.
+Only useful original learned melee or ranged damage abilities contribute. Unrelated spell damage, healing,
+auto-attacks, buff application and inactive casts earn nothing. Native amounts and mechanics remain.
+
+Two additive definition2 pacing entries preserve the previous153 curves. Rank cap definition4 permits
+one upcoming rank.540 qualifying uses per transition estimate45minutes at assumed five-second cadence
+before catch-up; ordinary play frequency is unmeasured. There are32 owned buff tracks across16classes.
+
+Corrected source/build/harness230921 PASSED9checks80.6s/build30.6s/harness4.3s and801typed snapshots.
+Initial native230533 exposed an incorrect Dawn fixture amount30; raw and native amount is35.
+The subsequent design correction restricts attack-power contribution to melee/ranged damage abilities.
+Native231247 passed three cases but Primal fixture failed learning unavailable sword proficiency201.
+Changing that test equipment to native axe proficiency196/item37 corrected setup without changing gameplay.
+Final contribution231410 PASSED four cases51.0s simulated, no isolated reruns, with Grove and Pyromancer
+regressions. Dawn native35/35 and Primal30/30 remain; unrelated magic gives zero practice, melee gives270,
+and cancelling the buff prevents further awards. Source/boundary231526 PASSED9checks81.3s and two cases52.0s:
+proficiency9/15930 advances to10/0, learns the second native rank and leaves the following rank locked;
+stronger amounts55/55 and40/40 remain. Fresh real menus231754/231858 PASSED58.1s/57.8s, exact540-use forecasts.
+
+Coverage261unique/263declared:155ranked/9mastery/97Fixed,442pending(69ranked/373standalone).
+Addon0.4.49-development/schema4 unpublished, all development defaults0, production untouched.
+Ally-only buff support, actual client pixels, native ranged contribution and ordinary cadence remain unqualified.

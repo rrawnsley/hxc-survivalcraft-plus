@@ -599,6 +599,7 @@ function Model.PracticeRules(ability, saved)
             .. " Your owned buff must be valid when the combat cast begins and when its result qualifies."
             .. " Its supported buff effect must be active and positive; a stronger exclusive effect prevents practice."
             .. " Equal-strength exclusive effects remain eligible."
+            .. " Paired attack-power buffs require both their melee and ranged effects to remain active."
             .. " Mana regeneration buffs also require an active mana resource and available native regeneration."
             .. " One combat cast can earn one use for this buff, with at least five seconds between counted uses."
             .. " Supported buffs progress independently; a combat cast can practice more than one active buff."
@@ -640,6 +641,12 @@ function Model.PracticeRules(ability, saved)
             .. " Post-combat recovery counts. Players, pets, training dummies and gray opponents do not count."
             .. " Capturing a corpse without healing or gaining a soul earns no practice."
             .. " Each original cast earns at most one award; the native once-per-corpse rule remains."
+    elseif (ability.abilityId == 572384 or ability.abilityId == 800197) and ability.route == 13 then
+        rule = "Keep your own attack-power buff active and land a learned melee or ranged damage ability"
+            .. " on a level-appropriate PvE opponent."
+            .. " Both their melee and ranged effects must remain active and useful."
+            .. " Unrelated spell damage, healing, buff application and auto-attacks earn no practice."
+            .. " One original ability cast earns one use, with at least five seconds between counted uses."
     elseif ability.abilityId == 807942 and ability.route == 2 and ability.kind == 2 then
         rule = "Restore your missing health with Fel Bargain during an eligible PvE fight."
             .. " Energy spent without actual healing earns no practice."
