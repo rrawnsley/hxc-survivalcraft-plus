@@ -181,9 +181,10 @@ local function Ability(value, schema, characterLevel)
         if value.acquisitionSource ~= nil and not Integer(value.acquisitionSource, 1, 5) then return nil end
         if value.acquisitionSource == 5 and value.kind ~= 3 then return nil end
         if not session or not Integer(value.kind, 1, 3) or not Integer(value.route, 1, 13)
-            or not Integer(value.ruleSet, 1, 8)
+            or not Integer(value.ruleSet, 1, 10)
             or ((value.ruleSet == 3 or value.ruleSet == 6) and (value.kind ~= 1 or value.route ~= 2))
             or ((value.ruleSet == 7 or value.ruleSet == 8) and (value.kind ~= 2 or value.route ~= 1))
+            or ((value.ruleSet == 9 or value.ruleSet == 10) and (value.kind ~= 2 or value.route ~= 2))
             or (value.route == 13 and (value.kind ~= 1 or (value.ruleSet ~= 1 and value.ruleSet ~= 4)))
             or ((value.kind == 3) ~= (value.route == 6)) then return nil end
         if value.route == 13 then
@@ -195,7 +196,7 @@ local function Ability(value, schema, characterLevel)
                 if entry.spellId == value.replacementSpellId then return nil end
             end
         end
-        if ((value.ruleSet >= 4 and value.ruleSet <= 6) or value.ruleSet == 8)
+        if ((value.ruleSet >= 4 and value.ruleSet <= 6) or value.ruleSet == 8 or value.ruleSet == 10)
             ~= (value.catchup ~= nil) then return nil end
         if value.catchup then
             local policy = value.catchup
@@ -587,8 +588,8 @@ function Model.PracticeRules(ability, saved)
     if Model.IsFixed(ability) then
         return "This ability has no practice levels. " .. LearnText(ability.acquisitionSource)
     end
-    local ruleSet = Integer(ability.ruleSet, 1, 8) and
-        (ability.ruleSet >= 7 and 7 or ((ability.ruleSet - 1) % 3 + 1)) or nil
+    local ruleSet = Integer(ability.ruleSet, 1, 10) and
+        (ability.ruleSet >= 9 and 9 or ability.ruleSet >= 7 and 7 or ((ability.ruleSet - 1) % 3 + 1)) or nil
     if not ruleSet then
         return "Practice rules are unavailable in this update. Refresh to request the current rules."
     end
@@ -634,7 +635,12 @@ function Model.PracticeRules(ability, saved)
     if not rule then return "Practice rules are unavailable in this update." end
     local buffState = Model.BuffStateText(ability, saved)
     if buffState then rule = buffState .. "\n\n" .. rule end
-    if ruleSet == 7 then
+    if ruleSet == 9 then
+        rule = "Capture a new corpse from a level-appropriate hostile NPC and restore missing health or gain a Reaped Soul."
+            .. " Post-combat recovery counts. Players, pets, training dummies and gray opponents do not count."
+            .. " Capturing a corpse without healing or gaining a soul earns no practice."
+            .. " Each original cast earns at most one award; the native once-per-corpse rule remains."
+    elseif ruleSet == 7 then
         rule = "Earn practice when this ability's delayed damage lands on a level-appropriate PvE opponent."
             .. " Applying the ability and the enemy's casts do not earn extra practice."
             .. " One original cast earns at most one award."
@@ -651,7 +657,8 @@ function Model.PracticeRules(ability, saved)
     end
     if Model.IsMastery(ability) then
         rule = rule .. " Mastery improves this ability's " .. (ability.route == 1 and "damage" or "healing")
-            .. " in the same qualifying PvE encounters."
+            .. (ruleSet == 9 and " when recovering health from eligible NPC corpses."
+                or " in the same qualifying PvE encounters.")
             .. " Only the highest earned benefit applies; mastery benefits do not add together."
     end
     if ability.catchup then

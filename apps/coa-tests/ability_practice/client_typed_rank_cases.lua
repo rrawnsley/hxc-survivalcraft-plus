@@ -25,7 +25,7 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
             assert(ability.ruleSet == 7 or ability.ruleSet == 8)
             assert(string.find(Model.PracticeRules(ability), "delayed damage", 1, true))
             local ruleSet = ability.ruleSet
-            ability.ruleSet = 9
+            ability.ruleSet = 11
             assert(not Model.Validate(result))
             ability.ruleSet = ruleSet == 7 and 8 or 7
             assert(not Model.Validate(result))
@@ -34,6 +34,21 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
             ability.route = 2
             assert(not Model.Validate(result))
             ability.route = route
+            assert(Model.Validate(result))
+        end
+        if ability.abilityId == 561289 then
+            assert(ability.ruleSet == 9 or ability.ruleSet == 10)
+            assert(string.find(Model.PracticeRules(ability), "Reaped Soul", 1, true))
+            assert(string.find(Model.PracticeRules(ability), "Post-combat recovery counts", 1, true))
+            assert(string.find(Model.PracticeRules(ability), "recovering health from eligible NPC corpses", 1, true))
+            local route = ability.route
+            ability.route = 1
+            assert(not Model.Validate(result))
+            ability.route = route
+            local ruleSet = ability.ruleSet
+            ability.ruleSet = ruleSet == 9 and 10 or 9
+            assert(not Model.Validate(result))
+            ability.ruleSet = ruleSet
             assert(Model.Validate(result))
         end
         for _, reward in ipairs(ability.rewards) do
@@ -57,7 +72,7 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
     end
     count = count + 1
 end
-assert(count == 752)
-assert(kinds[1] == 453 and kinds[2] == 32 and kinds[3] == 267)
+assert(count == 760)
+assert(kinds[1] == 453 and kinds[2] == 40 and kinds[3] == 267)
 for classId = 12, 32 do assert(classes[classId]) end
-print("PASS: 752 typed snapshots across 21 classes: 453 ranked, 32 mastery, 267 fixed and menu rendering")
+print("PASS: 760 typed snapshots across 21 classes: 453 ranked, 40 mastery, 267 fixed and menu rendering")

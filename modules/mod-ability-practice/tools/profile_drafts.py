@@ -411,8 +411,18 @@ def build_drafts(candidates, root):
         if trigger_summary['incompleteRootSpellIds']:
             required.append('incomplete-raw-trigger-reference-review')
         if class_id == 30 and ability_id == 561289:
+            raw = members[ability_id].get('rawDbc', {})
+            details = raw.get('effectDetails', [])
+            expected = [(64, 0, 93, 0, 572887, 1), (64, 0, 93, 0, 500363, 0), (136, 0, 1, 0, 0, 9)]
+            if (len(ranks) != 1 or ranks[0]['characterLevel'] != 4 or raw.get('passive') is not False or
+                    raw.get('rankLabel') or len(details) != 3 or [(v.get('effectId'), v.get('auraId'),
+                        v.get('implicitTargetA'), v.get('implicitTargetB'), v.get('triggerSpellId'),
+                        v.get('basePoints')) for v in details] != expected or
+                    ranks[0]['rawCastProfile']['recoveryMilliseconds'] != 15000):
+                raise ValueError('Reviewed Soul Capture source/raw evidence changed')
             required.extend(['soul-capture-loaded-script-registration-and-trigger-suppression',
-                             'soul-capture-corpse-resource-and-post-combat-use-design'])
+                             'soul-capture-corpse-resource-and-post-combat-use-design',
+                             'soul-capture-native-corpse-proof-and-actual-recovery-original-cast'])
         if (class_id, ability_id) == (14, 712483):
             raw = members[ability_id].get('rawDbc', {})
             details = raw.get('effectDetails', [])

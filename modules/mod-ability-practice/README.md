@@ -3735,3 +3735,39 @@ The2700-point policy assumes a qualifying expiry every30seconds for approximatel
 without catch-up. Actual ordinary frequency is unmeasured. Typed rules7/8 describe delayed damage without
 and with catch-up. Addon0.4.44-development remains unpublished; schema4 is unchanged. Saved unknown versions
 must remain stored. All options remain off by default and no live server or active-client files are changed.
+
+
+## Soul Capture corpse recovery development
+
+Soul Capture (class30,561289) now has a separately gated healing mastery profile. Native successful capture
+binds its selected corpse GUID and observed Reaped Soul increase to the original client cast receipt.
+Practice requires an eligible hostile NPC corpse and either effective healing or an actual soul increase.
+Post-combat recovery counts. Full health with a full soul resource earns nothing. The native marker,
+once-per-corpse restriction, healing, resource cap and cooldown remain intact. Corpse proof does not store
+a gameplay pointer; map, phase, owner, known ability, acquisition, saved version and session checks fail closed.
+
+Proficiency40/70/100 at character levels8/14/20 adds0.5%/1%/2% healing to eligible corpse recovery.
+The5400-point policy assumes one qualifying use every15seconds, yielding180 uses/45minutes per milestone
+without catch-up. Ordinary corpse availability is unmeasured and can make actual training slower.
+Typed rules9/10 explicitly describe post-combat health or soul gain, exclusions and single-award behavior.
+Addon0.4.45-development remains unpublished; protocol4 is unchanged. Both development switches are required.
+
+Native benefit qualification PASSED20261007-051551: actual healing50000 versus51000 at2% mastery,
+one soul per capture, one2340-point catch-up award for combined recovery, and post-combat execution.
+Six boundary cases ran in051739: healing-only at the soul cap, gray exclusion and unknown saved version
+passed; full-health assertions incorrectly used raw attempted healing and a dummy could not be killed.
+Corrected resource-only, no-gain and live-dummy cases PASSED051905. The native invulnerable dummy case
+proves no corpse/recovery/practice, not a dead-dummy outcome. Used-corpse rejection and real-clock native
+menu delivery PASSED052021. No isolated passing retry was used. Initial051014 source/gameplay failed an
+unsupported player health field; the native build passed. The corrected fixture uses existing maximum
+health support. Initial source/build/harness050808 passed760 typed snapshots before final menu wording.
+
+Source declaration coverage is248 unique/250 declarations:151 ranked,8 mastery,89 Fixed,147 baseline
+exclusions and455 groups awaiting definitions. Frozen historical pacing headers remain unchanged.
+All options remain off by default. No live restart, configuration/database change, client install or publication.
+
+Final source qualification PASSED052152:10 checks in78.7seconds. Its harness invocation lacked the
+compiler environment and failed before compilation; this was a verification prerequisite, not a behavior
+failure. Final build/harness PASSED052334 after Visual Studio environment initialization:29.2seconds
+and4.3seconds, all760 typed snapshots. C++ style and whitespace passed. Final C++ edits after the source
+check only wrapped a long condition and ordered includes; no additional behavior changed.

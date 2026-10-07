@@ -1,0 +1,175 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Soul Capture no-gain",
+  "contract": "Native corpse capture remains intact; practice requires actual recovery or soul gain from an eligible NPC and a valid saved record.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 30,
+      "level": 20,
+      "spell_crit_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "control_enemy",
+      "owner": "control",
+      "entry": 36,
+      "level": 20,
+      "health": 10000,
+      "distance": 3,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 561289
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "control",
+      "source": "core.hxc.ability_practice.30.561289",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "control",
+      "source": "core.hxc.ability_practice.30.561289",
+      "index": 1,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "control",
+      "source": "core.hxc.ability_practice.30.561289",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "control",
+      "source": "core.hxc.ability_practice.30.561289",
+      "index": 3,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "control",
+      "source": "core.hxc.ability_practice.30.561289",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 500363,
+      "stacks": 3
+    },
+    {
+      "action": "set_health",
+      "actor": "control",
+      "value": 500000,
+      "maximum": 500000
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "equals": 3
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "control",
+      "entry": 36,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 561289
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_heal_count",
+      "spell": 561289,
+      "target": "control",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_heal_total",
+      "spell": 561289,
+      "target": "control",
+      "min": 0
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.30.561289",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_effective_heal_total",
+      "spell": 561289,
+      "target": "control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "health",
+      "equals": 500000
+    }
+  ]
+}

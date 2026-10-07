@@ -1,0 +1,293 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Soul Capture native post-combat recovery and mastery",
+  "contract": "Actual new hostile NPC corpses grant one native Reaped Soul and heal after combat. Unpracticed recovery awards once for combined soul and health gain. Otherwise equal fully practiced recovery adds 2% to native healing.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 30,
+      "level": 20,
+      "spell_crit_rating": 10000,
+      "allow_regeneration": false
+    },
+    {
+      "id": "mastered",
+      "race": 1,
+      "class": 30,
+      "level": 20,
+      "spell_crit_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "control_enemy",
+      "owner": "control",
+      "entry": 36,
+      "level": 20,
+      "health": 10000,
+      "distance": 3,
+      "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "mastered_enemy",
+      "owner": "mastered",
+      "entry": 36,
+      "level": 20,
+      "health": 10000,
+      "distance": 3,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 561289
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "control",
+      "source": "core.hxc.ability_practice.30.561289",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "control",
+      "source": "core.hxc.ability_practice.30.561289",
+      "index": 1,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "control",
+      "source": "core.hxc.ability_practice.30.561289",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "control",
+      "source": "core.hxc.ability_practice.30.561289",
+      "index": 3,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "control",
+      "source": "core.hxc.ability_practice.30.561289",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "control",
+      "value": 250000,
+      "maximum": 500000
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "mastered",
+      "spell": 561289
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "mastered",
+      "source": "core.hxc.ability_practice.30.561289",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "mastered",
+      "source": "core.hxc.ability_practice.30.561289",
+      "index": 1,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "mastered",
+      "source": "core.hxc.ability_practice.30.561289",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "mastered",
+      "source": "core.hxc.ability_practice.30.561289",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "mastered",
+      "source": "core.hxc.ability_practice.30.561289",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "mastered",
+      "value": 250000,
+      "maximum": 500000
+    },
+    {
+      "action": "assert",
+      "actor": "mastered",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "control",
+      "entry": 36,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 561289
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_heal_count",
+      "spell": 561289,
+      "target": "control",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_heal_total",
+      "spell": 561289,
+      "target": "control",
+      "min": 40000
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_heal_total",
+      "spell": 561289,
+      "target": "control",
+      "save_as": "base_heal"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.30.561289",
+      "index": 4,
+      "equals": 2340
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "mastered",
+      "entry": 36,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "mastered",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "mastered",
+      "spell": 561289
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "mastered",
+      "metric": "aura_stacks",
+      "spell": 500363,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "mastered",
+      "metric": "spell_heal_count",
+      "spell": 561289,
+      "target": "mastered",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "mastered",
+      "metric": "spell_heal_total",
+      "spell": 561289,
+      "target": "mastered",
+      "min": 40000
+    },
+    {
+      "action": "assert",
+      "actor": "mastered",
+      "metric": "spell_heal_total",
+      "spell": 561289,
+      "target": "mastered",
+      "ratio_to": "base_heal",
+      "min": 1.018,
+      "max": 1.022
+    }
+  ]
+}

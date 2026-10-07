@@ -1,5 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionReaperTalents.h"
+#include "AbilityPracticeCastReceipt.h"
+#include "Spell.h"
 #include "CellImpl.h"
 #include "GridNotifiersImpl.h"
 #include "ObjectAccessor.h"
@@ -299,7 +301,10 @@ class spell_ascension_soul_capture : public SpellScript
             PreventHitDefaultEffect(index);
             return;
         }
+        uint32 const previousSouls = caster->GetAuraCount(SPELL_REAPED_SOUL);
         caster->CastSpell(caster, SPELL_REAPED_SOUL, true);
+        CoAAbilityPractice::ReportCorpseCapture(GetSpell(), corpse,
+            caster->GetAuraCount(SPELL_REAPED_SOUL) > previousSouls);
     }
 
     void Register() override

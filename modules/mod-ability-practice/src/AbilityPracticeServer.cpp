@@ -42,6 +42,7 @@
 #include "Creature.h"
 #include "Formulas.h"
 #include "Log.h"
+#include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "ScriptMgr.h"
@@ -663,6 +664,24 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
 
 bool MatchesAdditionalMasteryMechanic(SpellInfo const* info, Practice::AbilityProfile const& profile)
 {
+    if (Practice::DevelopmentMastery::IsSoulCapture(profile))
+    {
+        if (!HelpersRequested || !MasteryRequested || !info || info->Id != 561289)
+            return false;
+        constexpr std::array effects = { 64u, 64u, 136u };
+        constexpr std::array targets = { 93u, 93u, 1u };
+        constexpr std::array triggers = { 572887u, 500363u, 0u };
+        for (std::size_t index = 0; index < effects.size(); ++index)
+            if (info->Effects[index].Effect != effects[index] || info->Effects[index].ApplyAuraName ||
+                info->Effects[index].TargetA.GetTarget() != targets[index] ||
+                info->Effects[index].TargetB.GetTarget() || info->Effects[index].TriggerSpell != triggers[index])
+                return false;
+        auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+        auto entry = scripts.first;
+        if (entry == scripts.second || sObjectMgr->GetScriptName(entry->second) != "spell_ascension_soul_capture")
+            return false;
+        return ++entry == scripts.second && info->Effects[EFFECT_2].BasePoints == 9;
+    }
     auto const& ability = profile.Definition;
     if (ability.Kind != Practice::AbilityKind::Mastery ||
         (ability.AbilityId != 680515 && ability.AbilityId != 500126))
@@ -1330,6 +1349,39 @@ bool IsDevelopmentOpponent(Player const* player, Unit const* opponent)
     return script != "npc_training_dummy" && script != "npc_target_dummy";
 }
 
+bool HasCapturedCorpse(Player const* player, CoAAbilityPractice::CastReceipt const& receipt)
+{
+    if (!HelpersRequested || !MasteryRequested || !player || !player->IsInWorld() || !player->FindMap() ||
+        receipt.ClassId != 30 || receipt.SpellId != 561289 || !receipt.GetCapturedCorpseGUID())
+        return false;
+    Unit* corpse = ObjectAccessor::GetUnit(*player, ObjectGuid(receipt.GetCapturedCorpseGUID()));
+    return corpse && !corpse->IsAlive() && corpse->IsInMap(player) && corpse->InSamePhase(player) &&
+        corpse->HasAura(572887, player->GetGUID()) && IsDevelopmentOpponent(player, corpse);
+}
+
+void BindCorpseRecovery(Spell* spell, Unit* corpse, bool resourceGain)
+{
+    if (!Active.load() || !HelpersRequested || !MasteryRequested || !spell || !corpse || corpse->IsAlive() ||
+        !spell->GetCaster() || !spell->GetSpellInfo() || spell->GetSpellInfo()->Id != 561289)
+        return;
+    Player* player = spell->GetCaster()->ToPlayer();
+    auto const* profile = FindProfile(player, 561289);
+    auto const receipt = spell->GetPracticeCast();
+    std::uint64_t const source = (std::uint64_t{ 30 } << 32) | 561289;
+    if (!IsProfiledPlayer(player) || !player->IsInWorld() || !player->FindMap() || !player->HasSpell(561289) ||
+        !profile || !Practice::DevelopmentMastery::IsSoulCapture(*profile) ||
+        !receipt || spell->GetScriptValue(PracticeCastSourceKey) != source || spell->IsTriggered() ||
+        receipt->SpellId != 561289 || !IsDevelopmentOpponent(player, corpse) ||
+        !corpse->HasAura(572887, player->GetGUID()))
+        return;
+    std::lock_guard lock(Mutex);
+    auto const session = Sessions.find(player->GetGUID().GetRawValue());
+    if (Affects(player) && !player->isBeingLoaded() && session != Sessions.end() &&
+        ReceiptMatches(player, session->second, *receipt) &&
+        AcquisitionAllowed(player, profile->Definition, 561289))
+        receipt->BindCapturedCorpse(corpse->GetGUID().GetRawValue(), resourceGain);
+}
+
 bool HasDevelopmentEncounter(Player const* player, Unit const* recipient)
 {
     for (auto const& entry : recipient->GetCombatManager().GetPvECombatRefs())
@@ -1552,7 +1604,8 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
                 view.BuffState = BuffStateFor(player, session, profile);
             view.ReplacementSpellId = NativeReplacement(player, ability);
             view.RuleSet = HelpersRequested && MasteryRequested &&
-                Practice::DevelopmentMastery::IsBaneOfBetrayal(profile) ?
+                Practice::DevelopmentMastery::IsSoulCapture(profile) ? Practice::HumanPvECorpseRecoveryRuleSet :
+                HelpersRequested && MasteryRequested && Practice::DevelopmentMastery::IsBaneOfBetrayal(profile) ?
                 Practice::HumanPvEScriptedDamageRuleSet :
                 HelpersRequested && Practice::DevelopmentHelpers::IsManafeed(profile) ?
                 Practice::HumanPvEScriptedHealRuleSet :
@@ -1560,7 +1613,9 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
                     Practice::HumanPvEPeriodicRuleSet : Practice::HumanPvERuleSet;
             if (Catchup.Enabled && ability.Kind != Practice::AbilityKind::Fixed)
             {
-                view.RuleSet = view.RuleSet == Practice::HumanPvEScriptedDamageRuleSet ?
+                view.RuleSet = view.RuleSet == Practice::HumanPvECorpseRecoveryRuleSet ?
+                    Practice::HumanPvECorpseRecoveryCatchupRuleSet :
+                    view.RuleSet == Practice::HumanPvEScriptedDamageRuleSet ?
                     Practice::HumanPvEScriptedDamageCatchupRuleSet : view.RuleSet + 3;
                 auto const base = profile.Policy.Bands[Practice::Detail::BandIndex(profile.Policy, state.Proficiency)];
                 auto const rate = effective->View().Bands[
@@ -2435,7 +2490,9 @@ std::uint32_t ModifyMasteryHealing(Unit* healer, Unit* target, std::uint32_t spe
     auto const* profile = FindProfile(player, spellId);
     if (!profile || profile->Definition.Kind != Practice::AbilityKind::Mastery ||
         profile->Outcome != Practice::OutcomeKind::Healing ||
-        !QualifiesDevelopmentOutcome(Practice::OutcomeKind::Healing, player, target, 0, healing))
+        !(Practice::DevelopmentMastery::IsSoulCapture(*profile) ?
+            target == player && HasCapturedCorpse(player, *receipt) :
+            QualifiesDevelopmentOutcome(Practice::OutcomeKind::Healing, player, target, 0, healing)))
         return healing;
     std::lock_guard lock(Mutex);
     auto const session = Sessions.find(player->GetGUID().GetRawValue());
@@ -2563,7 +2620,14 @@ public:
         if (!IsProfiledPlayer(player))
             return;
         BindBuffOrigin(player, spell, target);
-        if (!damage && !healing)
+        auto const receipt = spell->GetPracticeCast();
+        auto const* corpseProfile = FindProfile(player, spell->GetSpellInfo()->Id);
+        bool const corpseRecovery = target == player && corpseProfile && receipt &&
+            Practice::DevelopmentMastery::IsSoulCapture(*corpseProfile) && HasCapturedCorpse(player, *receipt) &&
+            (healing || receipt->HasCapturedResourceGain());
+        if (corpseRecovery)
+            AwardOutcome(player, spell, *corpseProfile);
+        if (!damage && !healing && !corpseRecovery)
             return;
         AwardScriptedDamage(player, spell, target, damage);
         AwardBuffContribution(player, spell, target, damage, healing);
@@ -2603,6 +2667,7 @@ void AddSC_ability_practice()
     CoAAbilityPractice::SetControlOutcomeProvider(AwardControlOutcome);
     CoAAbilityPractice::SetHealingMasteryProvider(ModifyMasteryHealing);
     CoAAbilityPractice::SetDamageMasteryProvider(ModifyMasteryDamage);
+    CoAAbilityPractice::SetCorpseCaptureProvider(BindCorpseRecovery);
     new PracticeWorld();
     new PracticePlayer();
     new PracticeClientCast();

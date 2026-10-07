@@ -702,7 +702,7 @@ void CheckMasteryFixedAndTrainerPolicies()
             assert(converted && converted->State.Proficiency == entry.PreviousRanks.back().Requirement.Proficiency);
         }
     assert(extensions == 12 && addedRanks == 24);
-    std::cout << "PASS: 7 mastery policies/rewards, 89 fixed declarations, 12 trainer extensions/24 added ranks\n";
+    std::cout << "PASS: 8 mastery policies/rewards, 89 fixed declarations, 12 trainer extensions/24 added ranks\n";
 }
 
 void WriteTypedMasteryAndFixedCases(std::ofstream& output, std::uint32_t& revision)
@@ -719,7 +719,9 @@ void WriteTypedMasteryAndFixedCases(std::ofstream& output, std::uint32_t& revisi
         auto view = BuildAbilityView(profile.Definition, effective->View(), state, level, known, true);
         view.Route = profile.Definition.Kind == AbilityKind::Fixed ? PracticeRoute::Fixed :
             profile.Outcome == OutcomeKind::Healing ? PracticeRoute::Healing : PracticeRoute::Damage;
-        view.RuleSet = DevelopmentMastery::IsBaneOfBetrayal(profile) ?
+        view.RuleSet = DevelopmentMastery::IsSoulCapture(profile) ?
+            (catchup ? HumanPvECorpseRecoveryCatchupRuleSet : HumanPvECorpseRecoveryRuleSet) :
+            DevelopmentMastery::IsBaneOfBetrayal(profile) ?
             (catchup ? HumanPvEScriptedDamageCatchupRuleSet : HumanPvEScriptedDamageRuleSet) : 1;
         if (catchup)
         {
@@ -748,7 +750,7 @@ void WriteTypedMasteryAndFixedCases(std::ofstream& output, std::uint32_t& revisi
             write(profile, profile.Definition.Ranks.front().Requirement.CharacterLevel, true, { 1, 0 });
             for (auto const& reward : profile.Rewards)
                 write(profile, reward.Requirement.CharacterLevel, true, { reward.Requirement.Proficiency, 0 });
-            if (DevelopmentMastery::IsBaneOfBetrayal(profile))
+            if (DevelopmentMastery::IsBaneOfBetrayal(profile) || DevelopmentMastery::IsSoulCapture(profile))
             {
                 write(profile, profile.Definition.Ranks.front().Requirement.CharacterLevel, true, { 1, 0 }, true);
                 for (auto const& reward : profile.Rewards)
@@ -822,6 +824,11 @@ void CheckScriptedDamageReceipts()
     using CoAAbilityPractice::CastReceipt;
     using Scope = CoAAbilityPractice::ScopedScriptedDamageCast;
     auto original = std::make_shared<CastReceipt>(1, 2, 14, 712483, 1, 0, 0);
+    assert(!original->BindCapturedCorpse(0, true));
+    assert(original->BindCapturedCorpse(4, true));
+    assert(original->GetCapturedCorpseGUID() == 4 && original->HasCapturedResourceGain());
+    assert(!original->BindCapturedCorpse(5, false));
+    assert(original->GetCapturedCorpseGUID() == 4 && original->HasCapturedResourceGain());
     assert(!Scope::Take(1, 3, 807554));
     {
         Scope outer(original, 3, 807554);
@@ -842,6 +849,7 @@ void CheckScriptedDamageReceipts()
         assert(secondTarget->IsConsumed());
     }
     assert(!Scope::Take(1, 3, 807554));
+    assert(!original->BindCapturedCorpse(6, false));
     {
         Scope consumed(original, 3, 807554);
         assert(!Scope::Take(1, 3, 807554));

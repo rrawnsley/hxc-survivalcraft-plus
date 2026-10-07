@@ -9,6 +9,7 @@
 #include <utility>
 
 class Unit;
+class Spell;
 
 namespace CoAAbilityPractice
 {
@@ -23,6 +24,17 @@ public:
     bool IsConsumed() const { return Consumed.load(); }
     void MarkConsumed() { Consumed.store(true); }
 
+    bool BindCapturedCorpse(std::uint64_t guid, bool resourceGain)
+    {
+        std::uint64_t expected = 0;
+        if (!guid || IsConsumed() || !CapturedCorpse.compare_exchange_strong(expected, guid))
+            return false;
+        CapturedResourceGain.store(resourceGain);
+        return true;
+    }
+    std::uint64_t GetCapturedCorpseGUID() const { return CapturedCorpse.load(); }
+    bool HasCapturedResourceGain() const { return CapturedResourceGain.load(); }
+
     std::uint64_t const CasterGUID;
     std::uint64_t const Session;
     std::uint32_t const ClassId;
@@ -33,6 +45,8 @@ public:
 
 private:
     std::atomic<bool> Consumed = false;
+    std::atomic<std::uint64_t> CapturedCorpse = 0;
+    std::atomic<bool> CapturedResourceGain = false;
 };
 
 class ScopedScriptedDamageCast
@@ -69,6 +83,21 @@ private:
     bool Bound = false;
     inline static thread_local ScopedScriptedDamageCast* Active = nullptr;
 };
+
+using CorpseCaptureProvider = void (*)(Spell*, Unit*, bool);
+inline std::atomic<CorpseCaptureProvider> CorpseCaptureHandler = nullptr;
+
+inline void SetCorpseCaptureProvider(CorpseCaptureProvider provider)
+{
+    CorpseCaptureHandler.store(provider);
+}
+
+inline void ReportCorpseCapture(Spell* spell, Unit* corpse, bool resourceGain)
+{
+    auto const provider = CorpseCaptureHandler.load();
+    if (spell && corpse && provider)
+        provider(spell, corpse, resourceGain);
+}
 
 using PeriodicOutcomeProvider = void (*)(Unit*, Unit*, std::uint32_t, std::uint32_t,
     std::uint32_t, std::uint32_t, std::shared_ptr<CastReceipt> const&);
