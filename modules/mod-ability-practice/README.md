@@ -8,7 +8,7 @@ The feature is not complete or approved for release.
 
 - Per-ability deterministic meaningful-use practice, automatic ranks, preserved learned ranks and saved
   progress, and one upcoming rank of preparation are implemented in the development module.
-- The catalog contains 246 unique profiles across all 21 classes: 151 ranked, seven mastery and 88 Fixed.
+- The catalog contains 246 unique profiles across all 21 classes: 151 ranked, six mastery and 89 Fixed.
   There are 248 declarations with two shared identities, 147 native baseline exclusions, and 457 groups
   still needing definitions (74 ranked and 383 standalone). Startup acceptance of metadata does not
   qualify every ability's gameplay. The discovery exports intentionally retain their unqualified status.
@@ -17,8 +17,8 @@ The feature is not complete or approved for release.
 - The addon is 0.4.43-development, protocol 4. It shows current ranks, proficiency, exact qualifying uses
   remaining, level requirements, future caps, mastery milestones and Fixed native utilities.
   It is unpublished and has not been installed in the active client.
-- The authorized C++/Lua 5.1 harness checks all 151 ranked policies, seven mastery policies and 88 Fixed
-  declarations; 745 typed snapshots decode, validate and mock-render. These are not client pixel tests.
+- The authorized C++/Lua 5.1 harness checks all 151 ranked policies, six mastery policies and 89 Fixed
+  declarations; 744 typed snapshots decode, validate and mock-render. These are not client pixel tests.
 - Native isolated gameplay has exercised original-cast enrollment and bot exclusion, version1-to4
   fraction conversion, automatic level-gated rank learning, owned buff contribution, gray/dummy
   exclusions, unknown saved-version preservation, healing mastery progress and periodic shared receipts.
@@ -40,15 +40,32 @@ The feature is not complete or approved for release.
   and all four higher Reborn from Ash ranks retain trainer level gates without practice. Native
   utility-menu delivery shows Fixed proficiency1/points0/threshold0 and the next rank at level52.
   The spellbook retains its native purchase behavior; Fixed learning remains unmanaged.
-- Latest build/harness passed in `.cache/verify-all/20261007-032638/report.json`: build35.1s,
-  harness5.5s. Its overall result failed one intermittent fake-worker log-reader check. Windows
-  fixture log writes are now serialized and a four-worker, 400-record stress check was added.
-  Final source verification passed all nine selected checks in
-  `.cache/verify-all/20261007-033221/report.json` (87.8s), including that regression.
-- Native gameplay passed both utility cases in `20261007-032947` (71.9s, simulated clock), and
-  utility-menu delivery in `20261007-033237` (71.8s, real clock), without isolated reruns.
-  Earlier utility failures were incorrect fixture assumptions about native learning and a raw
-  self-resurrection target mistaken for its loaded target. Native mechanics were preserved.
+- All six current mastery abilities have native benefit evidence. Pommel, Lunge, Soulslam, Stomp and
+  Trample show about2% additional original PvE damage at proficiency100; Hand of Elune previously
+  passed the healing comparison. Stomp and Trample retain baseline damage against real training
+  dummies even when their same area cast also hits eligible enemies.
+- Native testing confirmed missing AP scaling for Lunge and Soulslam: the source database has zero
+  coefficient rows, while their native tooltips specify20% and34.2% AP. Pending migration
+  `data/sql/updates/pending_db_world/rev_1791344940928777200.sql` adds those exact coefficients.
+  The isolated updater applied it; read-only inspection confirmed both rows and its recorded hash.
+  Production has not received it. Lunge compares one enemy with equal measured armor; Pommel also
+  waits for its30-second debuff to expire. Native effects and mastery percentages remain unchanged.
+- Vile Sting is a definition3 Fixed utility, preserving its level12 Beetle Form taunt and active Venoms.
+  Its own1-point hit makes a2% damage reward ineffective. Native checks confirm victim switching and
+  Debilitating Venom; version1/2 draft records survive relog and casts unchanged. Real-clock menu
+  delivery shows Fixed/no practice and retains the stored record. Its frozen old mastery pacing
+  entry remains historical and is not applied to the Fixed profile.
+- Build/harness PASSED in `20261007-035803` (33.4s/5.5s). Final source and Vile menu verification
+  PASSED in `20261007-041411` (nine source checks87.8s; real-clock native menu71.0s). C++/SQL style and
+  whitespace passed. Exports include122 native provenance paths and remain explicitly unqualified.
+- Native damage evidence: Pommel `041058` (combined report failed the then-incorrect Vile setup),
+  Lunge `035539`, Soulslam `034902` (other cases failed), Stomp/Trample `035235` (Lunge fixture failed).
+  Corrected Vile utility `041238` PASSED66.2s simulated. Each cited passing case had no isolated rerun.
+  Initial failures were missing coefficients or incorrect fixtures: unequal creature armor, an ordinary
+  mob mistaken for a dummy, an unsupported aura-removal action and idle-taunt setup. The earlier
+  real-clock combined attempt failed both cases and its isolated retries.
+- Utility/supply cases passed in `20261007-032947` and utility menu in `20261007-033237`. Windows
+  fake-worker fixture appends remain serialized with their400-record regression.
 - Prior native reports: saved-rank/owned-buff cases `021024`; original cast `021223`;
   farming/unknown version `021829`; healing `022338`; periodic receipts `022641`;
   one-rank-ahead `025153`; typed menu `024804` (real clock); three all-class menu groups

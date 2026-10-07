@@ -557,7 +557,7 @@ AbilityProfile CurrentMasteryProfile(AbilityProfile profile)
 
 void CheckMasteryFixedAndTrainerPolicies()
 {
-    assert(DevelopmentMastery::Profiles.size() == 7);
+    assert(DevelopmentMastery::Profiles.size() == 6);
     for (auto const& authored : DevelopmentMastery::Profiles)
     {
         auto const profile = CurrentMasteryProfile(authored);
@@ -606,7 +606,7 @@ void CheckMasteryFixedAndTrainerPolicies()
             assert(!view.NextTrainingCap && view.Rewards.empty());
         }
     }
-    assert(fixedCount == 88);
+    assert(fixedCount == 89);
     for (auto const& profile : DevelopmentUtilityFixed::Profiles)
         for (auto const& rank : profile.Definition.Ranks)
         {
@@ -691,7 +691,7 @@ void CheckMasteryFixedAndTrainerPolicies()
             assert(converted && converted->State.Proficiency == entry.PreviousRanks.back().Requirement.Proficiency);
         }
     assert(extensions == 12 && addedRanks == 24);
-    std::cout << "PASS: 7 mastery policies/rewards, 88 fixed declarations, 12 trainer extensions/24 added ranks\n";
+    std::cout << "PASS: 6 mastery policies/rewards, 89 fixed declarations, 12 trainer extensions/24 added ranks\n";
 }
 
 void WriteTypedMasteryAndFixedCases(std::ofstream& output, std::uint32_t& revision)

@@ -1,0 +1,384 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Vile Sting retains native utility and saved draft history",
+  "contract": "Vile Sting remains a level12 native Beetle Form taunt and triggers the active Debilitating Venom helper. Its 1-point hit is not assigned a damage mastery reward. Previous mastery definition1/2 records survive relog and casts unchanged.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "legacy1",
+      "name": "Apvileone",
+      "race": 1,
+      "class": 29,
+      "level": 40,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "legacy2",
+      "name": "Apvile",
+      "race": 1,
+      "class": 29,
+      "level": 40,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "legacy1_enemy",
+      "owner": "legacy1",
+      "entry": 36,
+      "level": 40,
+      "health": 100000,
+      "distance": 3,
+      "reaction": 1,
+      "stationary": true
+    },
+    {
+      "id": "legacy2_enemy",
+      "owner": "legacy2",
+      "entry": 36,
+      "level": 40,
+      "health": 100000,
+      "distance": 3,
+      "reaction": 1,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "legacy1",
+      "spell": 805097
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "legacy1",
+      "source": "core.hxc.ability_practice.29.805097",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "legacy1",
+      "source": "core.hxc.ability_practice.29.805097",
+      "index": 1,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "legacy1",
+      "source": "core.hxc.ability_practice.29.805097",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "legacy1",
+      "source": "core.hxc.ability_practice.29.805097",
+      "index": 3,
+      "value": 70
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "legacy1",
+      "source": "core.hxc.ability_practice.29.805097",
+      "index": 4,
+      "value": 15
+    },
+    {
+      "action": "relog",
+      "actor": "legacy1"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "legacy1",
+      "maximum": 500000,
+      "value": 500000
+    },
+    {
+      "action": "set_aura",
+      "actor": "legacy1",
+      "spell": 803183,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "legacy1",
+      "spell": 805731,
+      "stacks": 1
+    },
+    {
+      "action": "learn",
+      "actor": "legacy2",
+      "spell": 805097
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "legacy2",
+      "source": "core.hxc.ability_practice.29.805097",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "legacy2",
+      "source": "core.hxc.ability_practice.29.805097",
+      "index": 1,
+      "value": 2
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "legacy2",
+      "source": "core.hxc.ability_practice.29.805097",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "legacy2",
+      "source": "core.hxc.ability_practice.29.805097",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "legacy2",
+      "source": "core.hxc.ability_practice.29.805097",
+      "index": 4,
+      "value": 101
+    },
+    {
+      "action": "relog",
+      "actor": "legacy2"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "legacy2",
+      "maximum": 500000,
+      "value": 500000
+    },
+    {
+      "action": "set_aura",
+      "actor": "legacy2",
+      "spell": 803183,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "legacy2",
+      "spell": 805731,
+      "stacks": 1
+    },
+    {
+      "action": "attack",
+      "actor": "legacy2",
+      "target": "legacy1_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "legacy1_enemy",
+      "metric": "victim",
+      "target": "legacy2",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "legacy2"
+    },
+    {
+      "action": "set_power",
+      "actor": "legacy1",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "legacy1",
+      "spell": 805097,
+      "target": "legacy1_enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "actor": "legacy1_enemy",
+      "metric": "victim",
+      "target": "legacy1",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "legacy1_enemy",
+      "metric": "aura",
+      "spell": 805097,
+      "caster": "legacy1",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "legacy1_enemy",
+      "metric": "aura",
+      "spell": 805895,
+      "caster": "legacy1",
+      "equals": 1,
+      "label": "Vile Sting triggers active Debilitating Venom"
+    },
+    {
+      "action": "assert",
+      "actor": "legacy1",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.29.805097",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "legacy1",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.29.805097",
+      "index": 1,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "legacy1",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.29.805097",
+      "index": 2,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "legacy1",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.29.805097",
+      "index": 3,
+      "equals": 70
+    },
+    {
+      "action": "assert",
+      "actor": "legacy1",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.29.805097",
+      "index": 4,
+      "equals": 15
+    },
+    {
+      "action": "attack",
+      "actor": "legacy1",
+      "target": "legacy2_enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "legacy2_enemy",
+      "metric": "victim",
+      "target": "legacy1",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "legacy1"
+    },
+    {
+      "action": "set_power",
+      "actor": "legacy2",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "legacy2",
+      "spell": 805097,
+      "target": "legacy2_enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "actor": "legacy2_enemy",
+      "metric": "victim",
+      "target": "legacy2",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "legacy2_enemy",
+      "metric": "aura",
+      "spell": 805097,
+      "caster": "legacy2",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "legacy2_enemy",
+      "metric": "aura",
+      "spell": 805895,
+      "caster": "legacy2",
+      "equals": 1,
+      "label": "Vile Sting triggers active Debilitating Venom"
+    },
+    {
+      "action": "assert",
+      "actor": "legacy2",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.29.805097",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "legacy2",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.29.805097",
+      "index": 1,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "legacy2",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.29.805097",
+      "index": 2,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "legacy2",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.29.805097",
+      "index": 3,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "legacy2",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.29.805097",
+      "index": 4,
+      "equals": 101
+    }
+  ]
+}

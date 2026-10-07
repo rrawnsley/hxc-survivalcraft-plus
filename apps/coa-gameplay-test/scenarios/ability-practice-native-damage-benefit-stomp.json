@@ -1,0 +1,357 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native stomp damage mastery benefit",
+  "contract": "Equal level40 casters retain native form and equipment requirements. Equal large fixture power suppresses base-roll variance. Original damage to eligible PvE targets compares proficiency1 against100 for the authored 2% bonus; native gameplay and bonus values are unchanged. The same original area cast also hits training dummies; they retain baseline damage despite eligible enemies in the encounter.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 17,
+      "level": 40,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "melee_crit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "mastered",
+      "race": 1,
+      "class": 17,
+      "level": 40,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "melee_crit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "control_enemy",
+      "owner": "control",
+      "entry": 36,
+      "level": 40,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "mastered_enemy",
+      "owner": "mastered",
+      "entry": 36,
+      "level": 40,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "control_dummy",
+      "owner": "control",
+      "entry": 31146,
+      "level": 40,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "mastered_dummy",
+      "owner": "mastered",
+      "entry": 31146,
+      "level": 40,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "control",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "control",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 804703,
+      "stacks": 1
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 804702
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 10030,
+      "stacks": 50
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 10031,
+      "stacks": 50
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_power",
+      "school": 2,
+      "min": 49000
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "attack_power",
+      "min": 49000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "control",
+      "source": "core.hxc.ability_practice.17.804702",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "control",
+      "source": "core.hxc.ability_practice.17.804702",
+      "index": 1,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "control",
+      "source": "core.hxc.ability_practice.17.804702",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "control",
+      "source": "core.hxc.ability_practice.17.804702",
+      "index": 3,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "control",
+      "source": "core.hxc.ability_practice.17.804702",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "learn",
+      "actor": "mastered",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "mastered",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "mastered",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "set_aura",
+      "actor": "mastered",
+      "spell": 804703,
+      "stacks": 1
+    },
+    {
+      "action": "learn",
+      "actor": "mastered",
+      "spell": 804702
+    },
+    {
+      "action": "set_aura",
+      "actor": "mastered",
+      "spell": 10030,
+      "stacks": 50
+    },
+    {
+      "action": "set_aura",
+      "actor": "mastered",
+      "spell": 10031,
+      "stacks": 50
+    },
+    {
+      "action": "assert",
+      "actor": "mastered",
+      "metric": "spell_power",
+      "school": 2,
+      "min": 49000
+    },
+    {
+      "action": "assert",
+      "actor": "mastered",
+      "metric": "attack_power",
+      "min": 49000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "mastered",
+      "source": "core.hxc.ability_practice.17.804702",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "mastered",
+      "source": "core.hxc.ability_practice.17.804702",
+      "index": 1,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "mastered",
+      "source": "core.hxc.ability_practice.17.804702",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "mastered",
+      "source": "core.hxc.ability_practice.17.804702",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "mastered",
+      "source": "core.hxc.ability_practice.17.804702",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "mastered",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 804702,
+      "target": "control_enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 804702,
+      "target": "control_enemy",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_damage_total",
+      "spell": 804702,
+      "target": "control_enemy",
+      "min": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_damage_total",
+      "spell": 804702,
+      "target": "control_enemy",
+      "save_as": "base_damage"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "spell_damage_total",
+      "spell": 804702,
+      "target": "control_dummy",
+      "min": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_damage_total",
+      "spell": 804702,
+      "target": "control_dummy",
+      "save_as": "dummy_damage"
+    },
+    {
+      "action": "cast",
+      "actor": "mastered",
+      "spell": 804702,
+      "target": "mastered_enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "mastered",
+      "metric": "spell_damage_count",
+      "spell": 804702,
+      "target": "mastered_enemy",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "mastered",
+      "metric": "spell_damage_total",
+      "spell": 804702,
+      "target": "mastered_enemy",
+      "ratio_to": "base_damage",
+      "min": 1.018,
+      "max": 1.022,
+      "label": "Authored 2% original PvE damage benefit"
+    },
+    {
+      "action": "assert",
+      "actor": "mastered",
+      "metric": "spell_damage_total",
+      "spell": 804702,
+      "target": "mastered_dummy",
+      "ratio_to": "dummy_damage",
+      "min": 0.998,
+      "max": 1.002,
+      "label": "No bonus on a training dummy in the same encounter"
+    }
+  ]
+}

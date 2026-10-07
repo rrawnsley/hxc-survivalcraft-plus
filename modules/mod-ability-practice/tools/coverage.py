@@ -15,7 +15,8 @@ PROFILE_HEADERS = ('AbilityPracticeDevelopmentRanked.h', 'AbilityPracticeDevelop
                    'AbilityPracticeDevelopmentPassiveFixed.h', 'AbilityPracticeDevelopmentUtilityFixed.h',
                    'AbilityPracticeDevelopmentControlFixed.h', 'AbilityPracticeDevelopmentBuffs.h')
 PROFILE_PATTERN = re.compile(
-    r'AbilityProfile\s*\{\s*Development::DefinitionVersion,\s*AcquisitionSource::(?:ClassGrant|ClassTrainer),\s*'
+    r'AbilityProfile\s*\{\s*(?:Development::DefinitionVersion|NativeUtilityDefinitionVersion),\s*'
+    r'AcquisitionSource::(?:ClassGrant|ClassTrainer),\s*'
     r'\{\s*(\d+),\s*(\d+),\s*AbilityKind::(Ranked|Mastery|Fixed)\s*,\s*([\w:]+)\s*,')
 
 
@@ -56,6 +57,11 @@ def declared_profiles(root):
             raise ValueError('Unsupported profile declaration shape: ' + relative)
         for match in matches:
             identity = (int(match[1]), int(match[2]))
+            if "NativeUtilityDefinitionVersion" in match[0] and (
+                    filename != "AbilityPracticeDevelopmentControlFixed.h" or identity != (29, 805097) or
+                    match[3] != "Fixed" or not re.search(
+                        r"inline\s+constexpr\s+std::uint32_t\s+NativeUtilityDefinitionVersion\s*=\s*3\s*;", text)):
+                raise ValueError("Unsupported native utility version")
             kind = match[3].lower()
             acquisition = ('class-trainer-source-evidence' if 'AcquisitionSource::ClassTrainer' in match[0] else
                            'class-grant-source-evidence')

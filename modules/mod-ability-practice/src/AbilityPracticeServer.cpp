@@ -956,6 +956,10 @@ bool MatchesControlFixedMechanic(Practice::AbilityProfile const& profile)
     SpellInfo const* info = sSpellMgr->GetSpellInfo(profile.Definition.AbilityId);
     if (mechanic == mechanics.end() || !info || info->IsPassive())
         return false;
+    if (profile.Definition.AbilityId == 805097 &&
+        (info->CasterAuraSpell != 803183 || info->Effects[EFFECT_2].BasePoints != 0 ||
+            info->Effects[EFFECT_2].DieSides != 1))
+        return false;
     for (std::size_t index = 0; index < mechanic->EffectIds.size(); ++index)
     {
         auto const& effect = info->Effects[index];
