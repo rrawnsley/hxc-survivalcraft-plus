@@ -3509,6 +3509,31 @@ under assumed5s combat cadence before catch-up. All four trainer headers reprodu
 VERIFY ALL: PASSED215104 source2/no selected suites/native31.5s; style/whitespace/final exports
 passed. No repeat Lua check needed. All switches0; no tests, native startup, client/menu/gameplay/
 migration execution, active install, publish, deploy, restart or production mutations.
+
+## Complete Arcane Protection and additive frozen catalogs — 6 October 2026
+
+Arcane Protection26/573343 native prefix30/42/56 now joins disabled resistance practice, with
+trainer573346 at68/proficiency40 and573347 at76/proficiency60. Exact trainer900026/zero skill and
+immediate preceding573345/573346 prerequisites remain. Higher raw active6/aura143/friendly21/
+arcane mask64/base69 or129/no secondary or trigger shapes are confirmed; loaded guards validate
+the complete five-rank ladder. Native resistance power, acquisition levels and mechanics remain.
+
+The existing stat-buff trainer catalog gains a separate Arcane per-identity definition3, using
+guarded readable1/2 conversion and one-upcoming cap4. Chromie's existing definition remains exact.
+Explicit --allow-profile-additions requires the previous identities to be a nonempty strict subset,
+then re-renders only them and compares every byte with the previous header before writing the new
+catalog. Same-identity edits/removal, duplicate identities and changes to frozen ranks/caps/pacing/
+prerequisites fail. Normal mode continues rejecting changed definition3 files. Actual source writer
+proved the old header bytes first; final rerun without the additions flag reproduces all four headers.
+
+Twelve extensions add24 trainer ranks with all prior pacing preserved. The145th paced entry preserves
+the previous144;540 qualifying uses/45min per transition under assumed5s before catch-up.235 profiles/
+237 declarations,145 ranked/7 mastery/83 Fixed,468 pending(81 ranked/387 standalone),147 baselines/
+109 hashes/850 runtime-unqualified;23 owned buff tracks/14 classes. Addon0.4.42/schema4 unchanged.
+VERIFY ALL: PASSED20261007-005655 source2/no selected suites/native33.2s; style/whitespace and final
+source/coverage/trainer exports passed. Report directory uses host date; task date remains6October
+America/Phoenix. No tests, native startup, gameplay/menu/client/migration execution, active install,
+publish, deploy, restart or production mutations. All development switches0.
 All switches0; owned-buff rules remain an isolated reversible design draft.
 
 ## Chromie's complete trainer ladder — 6 October 2026

@@ -193,6 +193,13 @@ inline constexpr std::array Class23Ability572173 = {
 };
 inline constexpr auto Class23Ability572173Caps = Development::RankCaps(Class23Ability572173);
 
+inline constexpr std::array Class26Ability573343 = {
+    AbilityRank{ 573343, 1, { 30, 1 } },
+    AbilityRank{ 573344, 2, { 42, 10 } },
+    AbilityRank{ 573345, 3, { 56, 20 } }
+};
+inline constexpr auto Class26Ability573343Caps = Development::RankCaps(Class26Ability573343);
+
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 12, 300857, AbilityKind::Ranked, BrutalShout, BrutalShoutCaps },
@@ -259,6 +266,9 @@ inline constexpr std::array Profiles = {
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 23, 572173, AbilityKind::Ranked, Class23Ability572173, Class23Ability572173Caps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 26, 573343, AbilityKind::Ranked, Class26Ability573343, Class26Ability573343Caps },
         Development::Policy, OutcomeKind::Damage }
 };
 
@@ -311,7 +321,8 @@ inline constexpr std::array Mechanics = {
     Mechanic{ 16, 804018, 21, 0, 85 },
     Mechanic{ 24, 803649, 21, 0, 85 },
     Mechanic{ 18, 582533, 21, 4, 143 },
-    Mechanic{ 23, 572173, 21, 16, 143 }
+    Mechanic{ 23, 572173, 21, 16, 143 },
+    Mechanic{ 26, 573343, 21, 64, 143 }
 };
 
 static_assert(Mechanics.size() == Profiles.size());

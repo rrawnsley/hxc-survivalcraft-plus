@@ -123,11 +123,11 @@ def declared_outcome(root, row):
     return next(iter(outcomes))
 
 
-STAT_BUFF_IDENTITIES = {(22, 801523)}
+STAT_BUFF_IDENTITIES = {(22, 801523), (26, 573343)}
 SPELL_POWER_BUFF_IDENTITIES = {(27, 575040)}
 
 
-def render_native_header(root, rows, buff=False, stat=False, power=False):
+def render_native_header(root, rows, buff=False, stat=False, power=False, retained=None):
     if sum((buff, stat, power)) > 1:
         raise ValueError('Conflicting native extension scopes')
     expected = {(13, 807037), (16, 707044), (19, 801165), (26, 575039),
@@ -138,6 +138,10 @@ def render_native_header(root, rows, buff=False, stat=False, power=False):
         expected = STAT_BUFF_IDENTITIES
     if power:
         expected = SPELL_POWER_BUFF_IDENTITIES
+    if retained is not None:
+        if not retained or not retained.issubset(expected):
+            raise ValueError('Unsupported retained native extension identities')
+        expected = retained
     if (len(rows) != len(expected) or {(row['classId'], row['abilityId']) for row in rows} != expected or
             any(row['blockingFlags'] or not row.get('priorPacingPreserved') for row in rows)):
         raise ValueError('Native extension scope differs from explicitly reviewed complete projections')
@@ -210,6 +214,20 @@ def render_native_header(root, rows, buff=False, stat=False, power=False):
     return '\n'.join(lines)
 
 
+def preserves_existing_definitions(root, path, rows, buff, stat, power):
+    original = path.read_bytes()
+    pattern = r'\{\s*(\d+),\s*(\d+),\s*AbilityKind::Ranked,'
+    identities = [(int(match[1]), int(match[2])) for match in re.finditer(pattern, original.decode('utf-8'))]
+    previous = set(identities)
+    current = {(row['classId'], row['abilityId']) for row in rows}
+    if len(identities) != len(previous) or not previous or not previous < current:
+        raise ValueError('Native extension additions must preserve a nonempty strict identity subset')
+    retained = [row for row in rows if (row['classId'], row['abilityId']) in previous]
+    if render_native_header(root, retained, buff, stat, power, previous).encode('utf-8') != original:
+        raise ValueError('Native extension addition would change a frozen existing definition')
+    return len(current - previous)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--root', type=Path, default=Path(__file__).resolve().parents[3])
@@ -222,6 +240,7 @@ def main():
     parser.add_argument('--buff-native-header', type=Path)
     parser.add_argument('--stat-buff-native-header', type=Path)
     parser.add_argument('--spell-power-buff-native-header', type=Path)
+    parser.add_argument('--allow-profile-additions', action='store_true')
     args = parser.parse_args()
     root, dbc = args.root.resolve(), args.dbc.resolve()
     candidates = json.loads(args.candidates.read_text(encoding='utf-8'))
@@ -291,14 +310,18 @@ def main():
         path.parent.mkdir(parents=True, exist_ok=True)
         encoded = header.encode('utf-8')
         exists = path.exists()
+        added = 0
         if exists and path.read_bytes() != encoded:
-            raise ValueError('Existing native definition3 differs; author a new definition version explicitly')
-        if not exists:
+            if not args.allow_profile_additions:
+                raise ValueError('Existing native definition3 differs; author a new definition version explicitly')
+            added = preserves_existing_definitions(root, path, selected, buff, stat, power)
+        if not exists or added:
             path.write_bytes(encoded)
         prefix = ('spellPowerBuffNativeHeader' if power else 'statBuffNativeHeader' if stat else
                   'buffNativeHeader' if buff else 'nativeHeader')
         result['nativeHeaderGenerated'] = True
-        result[prefix + 'Updated'] = not exists
+        result[prefix + 'Updated'] = not exists or bool(added)
+        result[prefix + 'AddedProfileCount'] = added
         result[prefix] = {'path': str(path.resolve()), 'sha256': hashlib.sha256(encoded).hexdigest()}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + '\n', encoding='utf-8')

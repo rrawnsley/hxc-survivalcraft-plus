@@ -46,6 +46,39 @@ inline constexpr std::array TrainerRanksClass22Ability801523 = {
     TrainerRank{ 802830, 70, 900022, { 802829, 0, 0 } }
 };
 
+inline constexpr std::array PreviousRanksClass26Ability573343 = {
+    AbilityRank{ 573343, 1, { 30, 1 } },
+    AbilityRank{ 573344, 2, { 42, 10 } },
+    AbilityRank{ 573345, 3, { 56, 20 } }
+};
+
+inline constexpr std::array RanksClass26Ability573343 = {
+    AbilityRank{ 573343, 1, { 30, 1 } },
+    AbilityRank{ 573344, 2, { 42, 10 } },
+    AbilityRank{ 573345, 3, { 56, 20 } },
+    AbilityRank{ 573346, 4, { 68, 40 } },
+    AbilityRank{ 573347, 5, { 76, 60 } }
+};
+
+inline constexpr std::array PreviousBandsClass26Ability573343 = {
+    TrainingBand{ 1, 16200, 270 },
+    TrainingBand{ 10, 16200, 300 }
+};
+
+inline constexpr std::array BandsClass26Ability573343 = {
+    TrainingBand{ 1, 16200, 270 },
+    TrainingBand{ 10, 16200, 300 },
+    TrainingBand{ 20, 16200, 600 },
+    TrainingBand{ 40, 16200, 600 }
+};
+
+inline constexpr auto PreviousCapsClass26Ability573343 = Development::RankCaps(PreviousRanksClass26Ability573343);
+inline constexpr auto CapsClass26Ability573343 = Development::RankCaps(RanksClass26Ability573343);
+inline constexpr std::array TrainerRanksClass26Ability573343 = {
+    TrainerRank{ 573346, 68, 900026, { 573345, 0, 0 } },
+    TrainerRank{ 573347, 76, 900026, { 573346, 0, 0 } }
+};
+
 inline constexpr std::array Entries = {
     Entry{
         { DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -53,6 +86,13 @@ inline constexpr std::array Entries = {
             { BandsClass22Ability801523 }, OutcomeKind::Damage },
         PreviousRanksClass22Ability801523, PreviousCapsClass22Ability801523,
         { PreviousBandsClass22Ability801523 }, TrainerRanksClass22Ability801523
+    },
+    Entry{
+        { DefinitionVersion, AcquisitionSource::ClassGrant,
+            { 26, 573343, AbilityKind::Ranked, RanksClass26Ability573343, CapsClass26Ability573343 },
+            { BandsClass26Ability573343 }, OutcomeKind::Damage },
+        PreviousRanksClass26Ability573343, PreviousCapsClass26Ability573343,
+        { PreviousBandsClass26Ability573343 }, TrainerRanksClass26Ability573343
     }
 };
 }
