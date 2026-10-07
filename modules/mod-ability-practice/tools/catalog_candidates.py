@@ -14,12 +14,29 @@ CONTROL_ROUTES = {'fear': {7}, 'stun': {12}, 'root': {26}}
 TRIGGER_NODE_LIMIT = 64
 TRIGGER_EDGE_LIMIT = 192
 TRIGGER_DEPTH_LIMIT = 8
+DO_NOT_DISPLAY_FLAG = 0x80
 DEPRECATED_WORD = re.compile(r'(?<![a-z0-9_])(?:deprecated|depreacated)(?![a-z0-9_])', re.IGNORECASE | re.ASCII)
 
 
 def raw_player_deprecated(raw):
     return any(isinstance(raw.get(field), str) and DEPRECATED_WORD.search(raw[field])
                for field in ('name', 'rankLabel'))
+
+
+def visibility_review(members):
+    rows = []
+    for member in members:
+        raw = member.get('rawDbc') or {}
+        attributes = raw.get('attributes')
+        valid = not raw.get('fieldErrors') and type(attributes) is int and 0 <= attributes <= 0xFFFFFFFF
+        rows.append({'spellId': member['spellId'], 'rawAttributes': attributes if valid else None,
+                     'rawDoNotDisplay': bool(attributes & DO_NOT_DISPLAY_FLAG) if valid else None})
+    hidden = [row['spellId'] for row in rows if row['rawDoNotDisplay'] is True]
+    unknown = [row['spellId'] for row in rows if row['rawDoNotDisplay'] is None]
+    return {'scope': 'raw-client-visibility-not-castability-or-practice-classification',
+            'flagSymbol': 'SPELL_ATTR0_DO_NOT_DISPLAY', 'flagValue': DO_NOT_DISPLAY_FLAG,
+            'members': rows, 'hiddenSpellIds': hidden, 'unknownSpellIds': unknown,
+            'requiresEffectiveAttributeAndPlayerAcquisitionReview': True}
 
 
 def action_review(members):
@@ -69,6 +86,11 @@ def action_review(members):
                 traits.add('unknown-raw-aura-review')
         if raw.get('castProfile'):
             timing.append({'spellId': member['spellId'], **raw['castProfile']})
+    visibility = visibility_review(members)
+    if visibility['hiddenSpellIds']:
+        traits.add('raw-client-hidden-review')
+    if visibility['unknownSpellIds']:
+        traits.add('raw-client-visibility-unknown-review')
     return {'traits': sorted(traits), 'triggerSpellIds': sorted(triggers), 'castProfiles': timing,
             'scope': 'raw-action-routing-review-not-runtime-qualification'}
 
@@ -420,6 +442,7 @@ def build_candidates(inventory):
             'sourceKind': 'claimed-root-group' if claimed else 'standalone-source',
             'classification': 'pending', 'productionApproved': False,
             'rawActionReview': action_review(members),
+            'rawVisibilityReview': visibility_review(members),
             'nativeDirectReview': native_direct_review(members),
             'nativeOutcomeReview': native_outcome_review(members),
             'nativePeriodicReview': native_periodic_review(members),
@@ -440,6 +463,10 @@ def build_candidates(inventory):
             'conflictingMembershipCount': sum('conflicting-chain-membership' in row['reviewFlags']
                                              for row in candidates),
             'productionApprovedCount': 0,
+            'rawClientHiddenCandidateCount': sum(bool(row['rawVisibilityReview']['hiddenSpellIds'])
+                                                 for row in candidates),
+            'rawClientVisibilityUnknownCandidateCount': sum(bool(row['rawVisibilityReview']['unknownSpellIds'])
+                                                            for row in candidates),
             'rawNativeDirectStatuses': dict(sorted(Counter(
                 row['nativeDirectReview']['status'] for row in candidates).items())),
             'rawNativeCommonRoutes': dict(sorted(Counter(route for row in candidates
@@ -600,6 +627,11 @@ def main():
     parser.add_argument('--dbc', type=Path)
     parser.add_argument('--root', type=Path, default=Path(__file__).resolve().parents[3])
     args = parser.parse_args()
+    attributes_source = (args.root / 'src/server/shared/SharedDefines.h').read_text(encoding='utf-8')
+    flags = re.findall(r'^\s*SPELL_ATTR0_DO_NOT_DISPLAY\s*=\s*(0x[0-9a-fA-F]+)\s*,',
+                       attributes_source, re.MULTILINE)
+    if len(flags) != 1 or int(flags[0], 16) != DO_NOT_DISPLAY_FLAG:
+        raise ValueError('Native client visibility flag differs from reviewed source')
     result = build_candidates(json.loads(args.inventory.read_text(encoding='utf-8')))
     result['nativeOutcomeSources'] = [
         {'path': relative, 'sha256': hashlib.sha256((args.root / relative).read_bytes()).hexdigest()}

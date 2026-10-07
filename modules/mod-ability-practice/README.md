@@ -4,6 +4,12 @@ This module is under development on `codex/ability-practice`. It implements the 
 practice policy, explicit catalog model, bounded original-action accounting and a development observation path.
 The module and addon are staged in this checkout. Nothing is installed or activated in production.
 
+Catalog review includes raw client visibility evidence from `SPELL_ATTR0_DO_NOT_DISPLAY`, with the
+native enum value checked before export. Per-member attributes and hidden/unknown IDs survive into drafts
+and coverage queues. Visibility does not establish castability, helper identity or practice eligibility.
+The current source export has 2,806 raw hidden candidate groups; none of the 850 source-consistent draft
+groups carries this flag. No existing profile, baseline exclusion or pending classification changes.
+
 
 ## Current state — 5 October 2026
 

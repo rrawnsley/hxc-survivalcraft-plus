@@ -469,6 +469,7 @@ def build_drafts(candidates, root):
                        'candidateOutcomeRoutes': list(routes),
                        'candidatePeriodicOutcomeRoutes': list(periodic), 'ranks': ranks,
                        'rawTriggerReferenceSummary': trigger_summary,
+                       'rawVisibilityReview': candidate.get('rawVisibilityReview'),
                        'proficiencyCaps': [], 'trainingBands': [], 'masteryRewards': [],
                        'reviewFlags': list(candidate['reviewFlags']),
                        'actionTraits': list(candidate['rawActionReview']['traits']),

@@ -87,6 +87,8 @@ def review_queues(draft):
     if len(set(periodic)) != len(periodic) or any(route not in {'damage', 'healing'} for route in periodic):
         raise ValueError('Invalid periodic candidate routes')
     mapping = {'passive-flag-review': 'passive-classification',
+               'raw-client-hidden-review': 'effective-client-visibility-and-player-acquisition',
+               'raw-client-visibility-unknown-review': 'missing-raw-client-visibility',
                'triggered-attribution-review': 'triggered-attribution',
                'pet-or-summon-ownership-review': 'pet-or-summon-ownership',
                'scripted-behavior-review': 'scripted-outcome',
@@ -172,6 +174,7 @@ def build_coverage(drafts, declarations):
                      'candidateOutcomeRoutes': draft['candidateOutcomeRoutes'],
                      'candidatePeriodicOutcomeRoutes': draft.get('candidatePeriodicOutcomeRoutes', []),
                      'rawTriggerReferenceSummary': draft.get('rawTriggerReferenceSummary'),
+                     'rawVisibilityReview': draft.get('rawVisibilityReview'),
                      'actionTraits': draft['actionTraits'], 'requiredReviews': draft['requiredReviews'],
                      'reviewFlags': draft['reviewFlags'],
                      'pendingReviewQueues': [] if declaration or baseline else review_queues(draft),
