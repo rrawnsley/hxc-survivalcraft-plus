@@ -991,6 +991,11 @@ bool MatchesControlFixedMechanic(Practice::AbilityProfile const& profile)
     SpellInfo const* info = sSpellMgr->GetSpellInfo(profile.Definition.AbilityId);
     if (mechanic == mechanics.end() || !info || info->IsPassive())
         return false;
+    if (profile.Definition.AbilityId == 807846 &&
+        (info->TargetCreatureType != 256 || info->Effects[EFFECT_0].BasePoints != 0 ||
+            info->Effects[EFFECT_0].RealPointsPerLevel != 1.0f || info->Effects[EFFECT_1].BasePoints != 24 ||
+            info->Effects[EFFECT_2].BasePoints != 1 || info->Effects[EFFECT_2].Amplitude != 3000))
+        return false;
     if (profile.Definition.AbilityId == 805097 &&
         (info->CasterAuraSpell != 803183 || info->Effects[EFFECT_2].BasePoints != 0 ||
             info->Effects[EFFECT_2].DieSides != 1))

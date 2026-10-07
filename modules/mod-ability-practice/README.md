@@ -3771,3 +3771,25 @@ compiler environment and failed before compilation; this was a verification prer
 failure. Final build/harness PASSED052334 after Visual Studio environment initialization:29.2seconds
 and4.3seconds, all760 typed snapshots. C++ style and whitespace passed. Final C++ edits after the source
 check only wrapped a long condition and ordered includes; no additional behavior changed.
+
+
+## Control Mechanical native utility development
+
+Control Mechanical (class28,807846, native level24) joins the optional Fixed control catalog. It charms
+a mechanical creature, grants25% attack acceleration and causes native2%-maximum-health short-circuit
+ticks on that controlled unit. These ticks are not ordinary hostile-combat practice. The ability retains
+full native effectiveness and eligibility without proficiency, rewards, rank gating or automatic teaching.
+Exact loaded effect/aura/target slots, mechanical creature mask256, level-derived charm bound and native
+haste/short-circuit values are required. Source raw evidence requires explicit controlled-target review.
+
+Source/build/harness PASSED134527:two source checks,30.7second native build,4.2second harness and763typed
+snapshots. Native nonmechanical and over-level rejection cases passed134646; its positive case asserted
+damage only3.5seconds after starting a3second cast, before the first3second tick. The corrected test waits
+for actual ticks and checks recorded damage rather than health potentially restored by regeneration.
+Native utility and real-clock menu PASSED134836, including charm,0.8 attack-time ratio,2% tick amount,
+actual short-circuit damage and saved-record preservation. No native timing or damage change was made.
+
+Current249 unique/251 declared profiles:151ranked/8mastery/90Fixed;454groups still need definitions.
+All defaults remain0; addon0.4.45-development/schema4 stays unpublished. No live server/client changes.
+
+Final source PASSED135014:9 checks in80.2seconds. C++ style and whitespace passed.

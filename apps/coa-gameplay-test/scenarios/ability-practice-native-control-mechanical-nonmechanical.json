@@ -1,0 +1,137 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Control Mechanical rejects nonmechanical",
+  "contract": "Native target eligibility remains intact, rejected casts apply no charm or short-circuit damage and do not mutate saved progress.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 28,
+      "level": 24,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "machine",
+      "owner": "caster",
+      "entry": 38,
+      "level": 24,
+      "health": 100000,
+      "distance": 3,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "caster",
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 807846
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.28.807846",
+      "index": 0,
+      "value": 999
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.28.807846",
+      "index": 1,
+      "value": 2
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.28.807846",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.28.807846",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.28.807846",
+      "index": 4,
+      "value": 101
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 807846,
+      "target": "machine"
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.28.807846",
+      "index": 0,
+      "equals": 999
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.28.807846",
+      "index": 4,
+      "equals": 101
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "charm_entry",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "machine",
+      "metric": "aura_stacks",
+      "spell": 807846,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "machine",
+      "metric": "health",
+      "equals": 100000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 807846,
+      "min": 1
+    }
+  ]
+}
