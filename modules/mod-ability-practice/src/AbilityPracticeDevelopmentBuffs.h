@@ -200,6 +200,19 @@ inline constexpr std::array Class26Ability573343 = {
 };
 inline constexpr auto Class26Ability573343Caps = Development::RankCaps(Class26Ability573343);
 
+inline constexpr std::array Class25Ability561389 = {
+    AbilityRank{ 561389, 1, { 14, 1 } },
+    AbilityRank{ 561390, 2, { 25, 10 } },
+    AbilityRank{ 561391, 3, { 50, 20 } }
+};
+inline constexpr auto Class25Ability561389Caps = Development::RankCaps(Class25Ability561389);
+inline constexpr std::array Class25Ability572791 = {
+    AbilityRank{ 572791, 1, { 38, 1 } },
+    AbilityRank{ 572819, 2, { 46, 10 } },
+    AbilityRank{ 572905, 3, { 54, 20 } }
+};
+inline constexpr auto Class25Ability572791Caps = Development::RankCaps(Class25Ability572791);
+
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 12, 300857, AbilityKind::Ranked, BrutalShout, BrutalShoutCaps },
@@ -269,6 +282,12 @@ inline constexpr std::array Profiles = {
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 26, 573343, AbilityKind::Ranked, Class26Ability573343, Class26Ability573343Caps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 25, 561389, AbilityKind::Ranked, Class25Ability561389, Class25Ability561389Caps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 25, 572791, AbilityKind::Ranked, Class25Ability572791, Class25Ability572791Caps },
         Development::Policy, OutcomeKind::Damage }
 };
 
@@ -322,7 +341,9 @@ inline constexpr std::array Mechanics = {
     Mechanic{ 24, 803649, 21, 0, 85 },
     Mechanic{ 18, 582533, 21, 4, 143 },
     Mechanic{ 23, 572173, 21, 16, 143 },
-    Mechanic{ 26, 573343, 21, 64, 143 }
+    Mechanic{ 26, 573343, 21, 64, 143 },
+    Mechanic{ 25, 561389, 21, 0, 85 },
+    Mechanic{ 25, 572791, 21, 127, 345 }
 };
 
 static_assert(Mechanics.size() == Profiles.size());

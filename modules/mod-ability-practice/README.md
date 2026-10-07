@@ -3534,6 +3534,34 @@ VERIFY ALL: PASSED20261007-005655 source2/no selected suites/native33.2s; style/
 source/coverage/trainer exports passed. Report directory uses host date; task date remains6October
 America/Phoenix. No tests, native startup, gameplay/menu/client/migration execution, active install,
 publish, deploy, restart or production mutations. All development switches0.
+
+## Cultist exclusive Whispers practice — 6 October 2026
+
+Whispers of Y'shaarj25/561389 native14/25/50 and Whispers of C'thun25/572791 native38/46/54
+join the disabled owned-buff catalog with complete three-rank source/trainer ladders. Shapes remain
+single active6/friendly21/positive aura85/mana0 or345/all-school127 with no secondary effects or
+triggers. Native Cultist aura lifecycle replaces other own-caster Whispers family applications,
+then refreshes existing helpers. Calc/remove/refresh source has no new progression behavior.
+Original aura receipt/application checks pause the removed buff and retain its stored progression.
+The mana track also uses the existing primary-mana/native-regeneration guard. No core/SQL changes.
+
+Source authoring verifies the exact eleven-member native family and one SQL lifecycle insertion
+for each of the six ranks. Cultist source/header/data/contracts and binding SQL add six provenance
+paths, now115. Loaded bindings, family replacement and helper exclusion remain explicit runtime
+qualification requirements; source evidence is not loaded-runtime proof. Greater Whispers573067
+has a separate name and native introduction58, not a fourth captured rank of572791. Greater
+561392/other family buffs remain outside this new profile scope and need their own design review.
+
+Two additive entries preserve145 previous pacing definitions, now147;540 qualifying uses/45min
+per transition under assumed5s before catch-up. All four trainer headers reproduce unchanged,
+twelve projections/24 extra ranks.237 profiles/239 declarations,147 ranked/7 mastery/83 Fixed,
+466 pending(79 ranked/387 standalone),147 baselines/115 hashes/850 runtime-unqualified.25 owned
+buff tracks/15 classes. Addon0.4.43/schema4 help explains native replacement pauses without loss.
+
+VERIFY ALL: PASSED20261007-010133 source2/no selected suites/native32.1s. Style/whitespace/final
+source/coverage/trainer exports and five Lua5.1 syntax parses passed without executing addon chunks.
+All switches0; no tests, native startup, client/menu/gameplay/migration execution, active install,
+publish, deploy, restart or production configuration/database/process operations.
 All switches0; owned-buff rules remain an isolated reversible design draft.
 
 ## Chromie's complete trainer ladder — 6 October 2026

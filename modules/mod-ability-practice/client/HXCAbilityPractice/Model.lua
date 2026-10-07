@@ -598,6 +598,7 @@ function Model.PracticeRules(ability, saved)
             .. " Mana regeneration buffs also require an active mana resource and available native regeneration."
             .. " One combat cast can earn one use for this buff, with at least five seconds between counted uses."
             .. " Supported buffs progress independently; a combat cast can practice more than one active buff."
+            .. " Native buff replacement rules still apply; a replaced buff pauses without losing progress."
             .. " Applying or refreshing the buff, auto-attacks and triggered helper spells earn no buff practice."
             .. " Other players' actions do not count. Reapply your buff after login or a class or specialization change.",
         [11] = "Deal direct damage or newly stun a live, level-appropriate PvE opponent with the learned ability."

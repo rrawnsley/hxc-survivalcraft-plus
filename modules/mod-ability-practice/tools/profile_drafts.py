@@ -108,6 +108,10 @@ def verify_provenance(candidates, root, dbc):
                 'src/server/game/Spells/Auras/SpellAuraEffects.h',
                 'src/server/game/Entities/Unit/Unit.h', 'src/server/game/Entities/Unit/Unit.cpp',
                 'src/server/game/Entities/Unit/StatSystem.cpp'}
+    expected.update({'src/server/coa/AscensionCultistAuras.cpp',
+                     'src/server/coa/AscensionCultist.cpp', 'src/server/coa/AscensionCultist.h',
+                     'src/server/coa/AscensionCultistData.h', 'src/server/coa/AscensionCultistContracts.cpp',
+                     'data/sql/updates/pending_db_world/rev_20260909_12_cultist_completion.sql'})
     if not isinstance(native_sources, list) or len(native_sources) != len(expected) or {
             source.get('path') for source in native_sources} != expected:
         raise ValueError('Missing native outcome provenance')
@@ -213,6 +217,25 @@ def reviewed_stat_buffs(root):
                             'targetA': target, 'statSelector': stat, 'auraId': aura}
     if set(result) != profiles:
         raise ValueError('Owned stat-buff profiles and mechanics differ')
+    whispers = {(25, 561389): (561389, 561390, 561391), (25, 572791): (572791, 572819, 572905)}
+    if set(result).intersection(whispers):
+        lifecycle = (root / 'src/server/coa/AscensionCultistAuras.cpp').read_text(encoding='utf-8')
+        families = [tuple(int(value.strip()) for value in match[1].split(',')) for match in
+                    re.finditer(r'std::vector<uint32>\s*\{([\d,\s]+)\}', lifecycle)]
+        expected = (561386, 561387, 561389, 561390, 561391, 561392, 572637, 572791, 572819, 572905, 573067)
+        if families.count(expected) != 1:
+            raise ValueError('Native Cultist exclusive whisper family changed')
+        bindings = (root / 'data/sql/updates/pending_db_world/rev_20260909_12_cultist_completion.sql').read_text(
+            encoding='utf-8-sig')
+        for identity, spells in whispers.items():
+            if identity not in result:
+                continue
+            for spell in spells:
+                pattern = (r"INSERT\s+INTO\s+`spell_script_names`\s*\(`spell_id`,\s*`ScriptName`\)\s*VALUES\s*"
+                           r"\(\s*" + str(spell) + r",\s*'aura_ascension_cultist_lifecycle'\s*\)\s*;")
+                if len(re.findall(pattern, bindings)) != 1:
+                    raise ValueError('Missing or ambiguous source Cultist whisper lifecycle binding')
+            result[identity]['nativeExclusiveFamilySpellIds'] = list(expected)
     return result
 
 
@@ -404,6 +427,10 @@ def build_drafts(candidates, root):
                                  'meaningful-combat-practice-not-mana-tick-awards'])
             if mechanic['auraId'] == 143:
                 required.append('native-intrinsic-resistance-maximum-across-overlapping-school-masks')
+            if class_id == 25 and ability_id in {561389, 572791}:
+                required.extend(['cultist-exclusive-whisper-family-replacement-pauses-original-practice',
+                                 'loaded-cultist-lifecycle-binding-and-original-buff-receipt',
+                                 'cultist-refresh-helper-casts-cannot-earn-buff-practice'])
             if ability_id == 680302:
                 expected_spells = [680302, 681439, 681440, 681441]
                 expected_levels = [24, 36, 48, 58]
