@@ -640,6 +640,10 @@ function Model.PracticeRules(ability, saved)
             .. " Post-combat recovery counts. Players, pets, training dummies and gray opponents do not count."
             .. " Capturing a corpse without healing or gaining a soul earns no practice."
             .. " Each original cast earns at most one award; the native once-per-corpse rule remains."
+    elseif ability.abilityId == 801901 and ability.route == 1 then
+        rule = "Land a Twin Slice weapon hit on a level-appropriate PvE opponent."
+            .. " The two weapon hits share one practice award for your original cast."
+            .. " Felfury generation and independently cast helpers do not earn practice."
     elseif ruleSet == 7 then
         rule = "Earn practice when this ability's delayed damage lands on a level-appropriate PvE opponent."
             .. " Applying the ability and the enemy's casts do not earn extra practice."

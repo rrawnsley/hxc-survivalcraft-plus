@@ -406,6 +406,24 @@ def build_drafts(candidates, root):
         }
         if raw_graphs:
             required.append('trigger-reference-loaded-data-script-and-original-cast-attribution')
+        if (class_id, ability_id) == (14, 801901):
+            expected_ids = [801901, 501257, 501258, 501259, 501260, 501261, 547210, 547211]
+            expected_levels = [1, 6, 14, 24, 34, 44, 52, 60]
+            if ([rank['spellId'] for rank in ranks] != expected_ids or
+                    [rank['characterLevel'] for rank in ranks] != expected_levels):
+                raise ValueError('Reviewed Twin Slice native rank ladder changed')
+            for index, spell_id in enumerate(expected_ids):
+                raw = members[spell_id].get('rawDbc', {})
+                details = raw.get('effectDetails', [])
+                helpers = [(808303, 808304), (808305, 808306)][index] if index < 2 else (803462, 520243)
+                effect = 64 if index < 2 else 142
+                expected = [(effect, 0, 6, 0, helpers[0]), (effect, 0, 6, 0, helpers[1]),
+                            (64, 0, 6, 0, 800058)]
+                if (raw.get('passive') is not False or len(details) != 3 or
+                        [(v.get('effectId'), v.get('auraId'), v.get('implicitTargetA'),
+                          v.get('implicitTargetB'), v.get('triggerSpellId')) for v in details] != expected):
+                    raise ValueError('Reviewed Twin Slice parent/helper raw shape changed')
+            required.append('twin-slice-two-native-weapon-hits-share-one-original-cast-award-not-felfury')
         if trigger_summary['rootsWithDetectedCycles']:
             required.append('cyclic-raw-trigger-reference-execution-review')
         if trigger_summary['incompleteRootSpellIds']:

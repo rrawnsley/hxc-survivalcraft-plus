@@ -4330,6 +4330,17 @@ private:
             player->UpdatePlayerSetting(step.get<std::string>("source"), step.get<uint8>("index"),
                 step.get<uint32>("value"));
         }
+        else if (action == "set_combat_rating")
+        {
+            uint32 const rating = step.get<uint32>("rating");
+            uint32 const value = step.get<uint32>("value");
+            Require(rating < MAX_COMBAT_RATING && value <= 100000, "Invalid fixture combat rating");
+            uint32 const previous = player->GetUInt32Value(
+                static_cast<uint16>(PLAYER_FIELD_COMBAT_RATING_1) + rating);
+            Require(previous <= INT32_MAX, "Fixture combat rating exceeds signed range");
+            player->ApplyRatingMod(static_cast<CombatRating>(rating), static_cast<int32>(previous), false);
+            player->ApplyRatingMod(static_cast<CombatRating>(rating), static_cast<int32>(value), true);
+        }
         else if (action == "set_skill")
         {
             uint32 const skill = step.get<uint32>("skill");

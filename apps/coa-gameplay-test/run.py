@@ -204,6 +204,7 @@ ACTIONS = {
     'loot_gameobject': ({'actor', 'entry'}, {'actor', 'entry'}),
     'mapless_loot_hook': ({'actor', 'store'}, {'actor', 'store'}),
     'set_skill': ({'actor', 'skill', 'value', 'maximum'}, {'actor', 'skill', 'value', 'maximum'}),
+    'set_combat_rating': ({'actor', 'rating', 'value'}, {'actor', 'rating', 'value'}),
     'set_player_setting': ({'actor', 'source', 'index', 'value'}, {'actor', 'source', 'index', 'value'}),
     'gather_skill': ({'actor', 'skill', 'required'}, {'actor', 'skill', 'required'}),
     'set_xp_enabled': ({'actor', 'enabled'}, {'actor', 'enabled'}),
@@ -429,6 +430,9 @@ def validate(scenario):
         if action == 'set_skill':
             number(step['maximum'], f'{where}.maximum', 1, 450, True)
             number(step['value'], f'{where}.value', 0, step['maximum'], True)
+        if action == 'set_combat_rating':
+            number(step['rating'], f'{where}.rating', 0, 24, True)
+            number(step['value'], f'{where}.value', 0, 100000, True)
         if action == 'gather_skill':
             require(step['skill'] in {182, 186, 393, 633, 773, 755}, f'{where}: unsupported gathering skill')
             number(step['required'], f'{where}.required', 0, 450, True)

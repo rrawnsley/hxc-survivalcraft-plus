@@ -1,0 +1,255 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Twin Slice forwarded",
+  "contract": "Both native weapon hits land, sharing one original client-cast award. An independently cast helper cannot award parent practice. Native damage and Felfury effects remain.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Aptwinc",
+      "race": 1,
+      "class": 14,
+      "level": 23,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 23,
+      "health": 100000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 201
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 1180
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 674
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 801901
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 25
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 2092
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 35
+    },
+    {
+      "action": "equip",
+      "actor": "caster",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "equip",
+      "actor": "caster",
+      "item": 2092,
+      "slot": 16
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.801901",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.801901",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.801901",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.801901",
+      "index": 3,
+      "value": 20
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.801901",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "relog",
+      "actor": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_combat_rating",
+      "actor": "caster",
+      "rating": 5,
+      "value": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "combat_rating",
+      "rating": 5,
+      "equals": 0
+    },
+    {
+      "action": "set_combat_rating",
+      "actor": "caster",
+      "rating": 5,
+      "value": 10000
+    },
+    {
+      "action": "set_combat_rating",
+      "actor": "caster",
+      "rating": 23,
+      "value": 10000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 501258
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "combat_rating",
+      "rating": 5,
+      "equals": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "combat_rating",
+      "rating": 23,
+      "equals": 10000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 501258,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 803462,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "spell": 803462,
+      "target": "enemy",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 520243,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "spell": 520243,
+      "target": "enemy",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.801901",
+      "index": 4,
+      "equals": 600
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803462
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803462,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.801901",
+      "index": 4,
+      "equals": 600
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 803462,
+      "target": "enemy",
+      "equals": 2
+    }
+  ]
+}

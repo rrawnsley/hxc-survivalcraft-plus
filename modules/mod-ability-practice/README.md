@@ -8,17 +8,17 @@ The feature is not complete or approved for release.
 
 - Per-ability deterministic meaningful-use practice, automatic ranks, preserved learned ranks and saved
   progress, and one upcoming rank of preparation are implemented in the development module.
-- The catalog contains 246 unique profiles across all 21 classes: 151 ranked, six mastery and 89 Fixed.
-  There are 248 declarations with two shared identities, 147 native baseline exclusions, and 457 groups
-  still needing definitions (74 ranked and 383 standalone). Startup acceptance of metadata does not
+- The catalog contains 252 unique profiles across all 21 classes: 152 ranked, eight mastery and 92 Fixed.
+  There are 254 declarations with two shared identities, 147 native baseline exclusions, and 451 groups
+  still needing definitions (73 ranked and 378 standalone). Startup acceptance of metadata does not
   qualify every ability's gameplay. The discovery exports intentionally retain their unqualified status.
 - Draft pacing targets 30â€“60 combat minutes per rank, with 45-minute authored assumptions. Effective
   use frequency and final balance have not been measured or approved.
-- The addon is 0.4.43-development, protocol 4. It shows current ranks, proficiency, exact qualifying uses
+- The addon is 0.4.46-development, protocol 4. It shows current ranks, proficiency, exact qualifying uses
   remaining, level requirements, future caps, mastery milestones and Fixed native utilities.
   It is unpublished and has not been installed in the active client.
-- The authorized C++/Lua 5.1 harness checks all 151 ranked policies, six mastery policies and 89 Fixed
-  declarations; 744 typed snapshots decode, validate and mock-render. These are not client pixel tests.
+- The authorized C++/Lua 5.1 harness checks all 152 ranked policies, eight mastery policies and 92 Fixed
+  declarations; 772 typed snapshots decode, validate and mock-render. These are not client pixel tests.
 - Native isolated gameplay has exercised original-cast enrollment and bot exclusion, version1-to4
   fraction conversion, automatic level-gated rank learning, owned buff contribution, gray/dummy
   exclusions, unknown saved-version preservation, healing mastery progress and periodic shared receipts.
@@ -30,7 +30,7 @@ The feature is not complete or approved for release.
 - Native activation now accepts an exact verified trainer prefix when appended trainer ranks have no
   core chain nodes. Missing, partial or foreign nodes still reject activation. Demon's Blood validates
   its loaded Xoroth aura conversion separately from its raw DBC shape. Full development startup accepts
-  246 profiles on the disposable test server; default production switches remain zero.
+  the current catalog on the disposable test server; default production switches remain zero.
 - Five new Fixed utilities preserve native functionality and acquisition: Conjure Campfire, Reborn
   from Ash (five ranks), Ancestral Keg, Mojo Cauldron and Conjure Thunderkeg. Every authored utility rank
   is checked against loaded effects, auras, targets, triggers and optional exact values. Summoned
@@ -72,6 +72,27 @@ The feature is not complete or approved for release.
   `025336` (real clock, tested on the earlier241-profile catalog); Manafeed `030446`;
   absorption `030037`; healing benefit `030554`. All report directories use prefix20261007-.
   Some early combined reports failed different fixtures; only their passing cases are cited.
+
+### Twin Slice original weapon-hit attribution
+
+Twin Slice now declares all eight native class-grant ranks, also confirmed in trainer900014's
+complete8-row source ladder. Root casts and their exact two damage helpers share one numeric receipt.
+Actual eligible PvE damage earns at most one award; Felfury, failed/immune casts and independently cast
+helpers do not practice. Native weapon requirements, forwarded values and damage formulas remain.
+
+Native first/second/forwarded ranks passed with270/300/600 points once per cast; the forwarded case
+observed44 main-hand and18 off-hand damage. Its independent helper dealt damage without another award.
+Weapon refusal, dummy, genuinely gray, unknown definition, immunity and one-rank-ahead boundary passed.
+Real-clock menu transport passed:60 uses to the next point,540 uses to rank2, level6/proficiency10 gates.
+These use counts are exact for that saved state; the five-second/45-minute cadence remains an assumption.
+The ten native cases do not represent all ability gameplay or actual client rendering.
+
+Evidence: gameplay `20261007-145649`, passing cases in `20261007-145013`, menu `20261007-150816`;
+source15/harness772 `20261007-145700`; build37.5s within `20261007-145349`. That earlier source run failed
+its unchanged fake-worker crash/requeue test; the final source rerun passed. Initial fixtures reused
+names, wrote schema2 instead of1, loaded higher ranks before progress, lost rating overrides on relog,
+and used wrong menu state codes. Corrected fixtures passed without isolated rerun qualification.
+The explicit test-only rating setter restores controlled stats after relog without changing game balance.
 
 ## Reproducing native qualification
 

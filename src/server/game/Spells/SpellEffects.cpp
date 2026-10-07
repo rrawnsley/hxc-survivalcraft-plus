@@ -49,6 +49,7 @@
 #include "SkillExtraItems.h"
 #include "SocialMgr.h"
 #include "Spell.h"
+#include "AbilityPracticeCastReceipt.h"
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
 #include "SpellMgr.h"
@@ -1250,6 +1251,8 @@ void Spell::EffectTriggerSpell(SpellEffIndex effIndex)
         m_caster->ToPlayer()->RemoveSpellCooldown(spellInfo->Id);
     }
 
+    CoAAbilityPractice::ScopedScriptedDamageCast practiceOrigin(GetPracticeCast(),
+        targets.GetUnitTargetGUID().GetRawValue(), triggered_spell_id);
     // original caster guid only for GO cast
     m_caster->CastSpell(targets, spellInfo, &values, TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_NO_PERIODIC_RESET), nullptr, nullptr, m_originalCasterGUID);
 }

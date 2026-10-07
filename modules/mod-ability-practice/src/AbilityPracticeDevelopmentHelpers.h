@@ -15,10 +15,51 @@ inline constexpr std::array Manafeed = {
     AbilityRank{ 552213, 4, { 56, 40 } }
 };
 inline constexpr auto Caps = Development::RankCaps(Manafeed);
+inline constexpr std::array TwinSlice = {
+    AbilityRank{ 801901, 1, { 1, 1 } },
+    AbilityRank{ 501257, 2, { 6, 10 } },
+    AbilityRank{ 501258, 3, { 14, 20 } },
+    AbilityRank{ 501259, 4, { 24, 40 } },
+    AbilityRank{ 501260, 5, { 34, 60 } },
+    AbilityRank{ 501261, 6, { 44, 80 } },
+    AbilityRank{ 547210, 7, { 52, 100 } },
+    AbilityRank{ 547211, 8, { 60, 120 } }
+};
+inline constexpr auto TwinCaps = Development::RankCaps(TwinSlice);
+inline constexpr std::array TwinDamageHelpers = {
+    std::array{ 808303u, 808304u }, std::array{ 808305u, 808306u },
+    std::array{ 803462u, 520243u }, std::array{ 803462u, 520243u },
+    std::array{ 803462u, 520243u }, std::array{ 803462u, 520243u },
+    std::array{ 803462u, 520243u }, std::array{ 803462u, 520243u }
+};
 inline constexpr std::array Profiles = {
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 14, 801901, AbilityKind::Ranked, TwinSlice, TwinCaps }, Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 14, 552210, AbilityKind::Ranked, Manafeed, Caps }, Development::Policy, OutcomeKind::Healing }
 };
+
+inline bool IsTwinSlice(AbilityProfile const& profile)
+{
+    return profile.Definition.ClassId == 14 && profile.Definition.AbilityId == 801901 &&
+        profile.Definition.Kind == AbilityKind::Ranked && profile.Outcome == OutcomeKind::Damage;
+}
+
+inline bool IsTwinDamage(std::uint32_t originId, std::uint32_t helperId)
+{
+    for (std::size_t index = 0; index < TwinSlice.size(); ++index)
+        if (TwinSlice[index].SpellId == originId)
+            return TwinDamageHelpers[index][0] == helperId || TwinDamageHelpers[index][1] == helperId;
+    return false;
+}
+
+inline bool IsTwinDamageHelper(std::uint32_t helperId)
+{
+    for (auto const& pair : TwinDamageHelpers)
+        if (pair[0] == helperId || pair[1] == helperId)
+            return true;
+    return false;
+}
 
 inline bool IsManafeed(AbilityProfile const& profile)
 {

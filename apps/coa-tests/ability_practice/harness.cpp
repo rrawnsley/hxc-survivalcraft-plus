@@ -18,6 +18,7 @@
 #include "AbilityPracticeDevelopmentStatBuffTrainerRanks.h"
 #include "AbilityPracticeDevelopmentSpellPowerBuffTrainerRanks.h"
 #include "AbilityPracticeDevelopmentFixed.h"
+#include "AbilityPracticeDevelopmentHelpers.h"
 #include "AbilityPracticeDevelopmentConjureFixed.h"
 #include "AbilityPracticeDevelopmentPassiveFixed.h"
 #include "AbilityPracticeDevelopmentUtilityFixed.h"
@@ -453,7 +454,7 @@ void CheckCurrentRankPolicies()
 {
     std::uint32_t forecasts = 0;
     std::array<bool, 21> classes{};
-    assert(DevelopmentPacing::Entries.size() == 151);
+    assert(DevelopmentPacing::Entries.size() == 152);
     for (auto const& entry : DevelopmentPacing::Entries)
     {
         classes.at(entry.ClassId - 12) = true;
@@ -534,7 +535,7 @@ void CheckCurrentRankPolicies()
         }
     }
     assert(std::all_of(classes.begin(), classes.end(), [](bool present) { return present; }));
-    std::cout << "PASS: 151 current rank policies, 21 classes, one-rank-ahead caps, exact rebases and "
+    std::cout << "PASS: 152 current rank policies, 21 classes, one-rank-ahead caps, exact rebases and "
         << forecasts << " current forecast/award comparisons\n";
 }
 
@@ -823,6 +824,33 @@ void CheckScriptedDamageReceipts()
 {
     using CoAAbilityPractice::CastReceipt;
     using Scope = CoAAbilityPractice::ScopedScriptedDamageCast;
+    for (std::size_t index = 0; index < DevelopmentHelpers::TwinSlice.size(); ++index)
+    {
+        auto const originId = DevelopmentHelpers::TwinSlice[index].SpellId;
+        auto const& pair = DevelopmentHelpers::TwinDamageHelpers[index];
+        assert(DevelopmentHelpers::IsTwinDamage(originId, pair[0]));
+        assert(DevelopmentHelpers::IsTwinDamage(originId, pair[1]));
+        assert(!DevelopmentHelpers::IsTwinDamage(originId, 800058));
+        assert(!DevelopmentHelpers::IsTwinDamage(originId, 807554));
+        assert(!DevelopmentHelpers::IsTwinDamage(712483, pair[0]));
+        auto twin = std::make_shared<CastReceipt>(1, 2, 14, originId, 1, 0, 0);
+        std::shared_ptr<CastReceipt> main;
+        std::shared_ptr<CastReceipt> off;
+        {
+            Scope scope(twin, 3, pair[0]);
+            assert(!Scope::Take(1, 3, pair[1]));
+            main = Scope::Take(1, 3, pair[0]);
+        }
+        {
+            Scope scope(twin, 3, pair[1]);
+            off = Scope::Take(1, 3, pair[1]);
+        }
+        assert(main == twin && off == twin);
+        main->MarkConsumed();
+        assert(off->IsConsumed());
+        Scope consumed(twin, 3, pair[1]);
+        assert(!Scope::Take(1, 3, pair[1]));
+    }
     auto original = std::make_shared<CastReceipt>(1, 2, 14, 712483, 1, 0, 0);
     assert(!original->BindCapturedCorpse(0, true));
     assert(original->BindCapturedCorpse(4, true));

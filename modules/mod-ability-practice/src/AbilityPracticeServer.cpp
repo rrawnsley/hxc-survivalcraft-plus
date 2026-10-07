@@ -536,6 +536,44 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
 {
     if (!info)
         return false;
+    if (HelpersRequested && Practice::DevelopmentHelpers::IsTwinSlice(profile))
+    {
+        auto const rank = std::find_if(Practice::DevelopmentHelpers::TwinSlice.begin(),
+            Practice::DevelopmentHelpers::TwinSlice.end(), [info](Practice::AbilityRank const& value)
+            {
+                return value.SpellId == info->Id;
+            });
+        if (rank == Practice::DevelopmentHelpers::TwinSlice.end())
+            return false;
+        auto const index = std::distance(Practice::DevelopmentHelpers::TwinSlice.begin(), rank);
+        auto const& helpers = Practice::DevelopmentHelpers::TwinDamageHelpers[index];
+        for (std::size_t slot = 0; slot < 3; ++slot)
+        {
+            auto const& effect = info->Effects[slot];
+            auto const expectedEffect = slot == 2 || index < 2 ? SPELL_EFFECT_TRIGGER_SPELL :
+                SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE;
+            if (effect.Effect != expectedEffect || effect.ApplyAuraName ||
+                effect.TargetA.GetTarget() != TARGET_UNIT_TARGET_ENEMY || effect.TargetB.GetTarget() ||
+                effect.TriggerSpell != (slot < 2 ? helpers[slot] : 800058u))
+                return false;
+            if (slot == 2)
+                continue;
+            SpellInfo const* helper = sSpellMgr->GetSpellInfo(helpers[slot]);
+            if (!helper || helper->IsPassive() || helper->IsDeprecatedForPlayers)
+                return false;
+            for (std::size_t helperSlot = 0; helperSlot < 3; ++helperSlot)
+            {
+                auto const& value = helper->Effects[helperSlot];
+                auto const expected = helperSlot == 0 ? SPELL_EFFECT_NORMALIZED_WEAPON_DMG :
+                    helperSlot == 1 && index < 2 ? SPELL_EFFECT_WEAPON_PERCENT_DAMAGE : 0u;
+                if (value.Effect != expected || value.ApplyAuraName || value.TriggerSpell ||
+                    value.TargetA.GetTarget() != (helperSlot == 0 ? TARGET_UNIT_TARGET_ENEMY : 0u) ||
+                    value.TargetB.GetTarget())
+                    return false;
+            }
+        }
+        return true;
+    }
     if (BuffContributionRequested && Practice::DevelopmentBuffs::IsSupportedStatBuff(profile))
     {
         if (profile.Definition.ClassId == 30 &&
@@ -1767,6 +1805,13 @@ bool IsBaneDamage(Practice::AbilityProfile const* profile, std::uint32_t spellId
         Practice::DevelopmentMastery::IsBaneOfBetrayal(*profile) && spellId == 807554;
 }
 
+bool IsScriptedDamage(Practice::AbilityProfile const* profile, std::uint32_t originId, std::uint32_t helperId)
+{
+    return IsBaneDamage(profile, helperId) || (HelpersRequested && profile &&
+        Practice::DevelopmentHelpers::IsTwinSlice(*profile) &&
+        Practice::DevelopmentHelpers::IsTwinDamage(originId, helperId));
+}
+
 struct ReceiptCast
 {
     Player* Caster;
@@ -1793,7 +1838,7 @@ void AwardScriptedDamage(Player* player, Spell* spell, Unit* target, std::uint32
     if (!receipt || receipt->IsConsumed())
         return;
     auto const* profile = FindProfile(player, receipt->SpellId);
-    if (!IsBaneDamage(profile, spell->GetSpellInfo()->Id) ||
+    if (!IsScriptedDamage(profile, receipt->SpellId, spell->GetSpellInfo()->Id) ||
         !QualifiesDevelopmentOutcome(Practice::OutcomeKind::Damage, player, target, damage, 0))
         return;
     std::lock_guard lock(Mutex);
@@ -1806,7 +1851,8 @@ void AwardScriptedDamage(Player* player, Spell* spell, Unit* target, std::uint32
         Practice::CapAtLevel(profile->Definition, player->GetLevel()), Catchup);
     if (!effective)
         return;
-    ObserveMastery(player, found->second, false);
+    if (profile->Definition.Kind == Practice::AbilityKind::Mastery)
+        ObserveMastery(player, found->second, false);
     ReceiptCast cast{ player, sSpellMgr->GetSpellInfo(receipt->SpellId), *receipt };
     Practice::OutcomeContext const context{ true, true, true, true, player->GetLevel() };
     auto const award = Practice::HandleOutcome(*player, cast, profile->Definition,
@@ -2563,8 +2609,10 @@ public:
         if (!IsProfiledPlayer(player))
             return true;
         auto const* profile = FindProfile(player, spell->GetSpellInfo()->Id);
-        bool const scriptedDamage = HelpersRequested && MasteryRequested && player->getClass() == 14 &&
-            spell->GetSpellInfo()->Id == 807554;
+        auto const helperId = spell->GetSpellInfo()->Id;
+        bool const scriptedDamage = HelpersRequested && player->getClass() == 14 &&
+            ((MasteryRequested && helperId == 807554) ||
+                Practice::DevelopmentHelpers::IsTwinDamageHelper(helperId));
         if (!profile && !IsBuffObserver(player) && !scriptedDamage)
             return true;
         std::lock_guard lock(Mutex);
@@ -2574,10 +2622,11 @@ public:
             spell->m_castItemGUID.IsEmpty() && spell->GetOriginalCasterGUID() == player->GetGUID())
         {
             auto const receipt = CoAAbilityPractice::ScopedScriptedDamageCast::Take(
-                player->GetGUID().GetRawValue(), targets->GetUnitTargetGUID().GetRawValue(), 807554);
+                player->GetGUID().GetRawValue(), targets->GetUnitTargetGUID().GetRawValue(), helperId);
             auto const* origin = receipt ? FindProfile(player, receipt->SpellId) : nullptr;
             auto const session = Sessions.find(player->GetGUID().GetRawValue());
-            if (IsBaneDamage(origin, 807554) && Affects(player) && !player->isBeingLoaded() &&
+            if (receipt && IsScriptedDamage(origin, receipt->SpellId, helperId) &&
+                Affects(player) && !player->isBeingLoaded() &&
                 session != Sessions.end() && ReceiptMatches(player, session->second, *receipt) &&
                 AcquisitionAllowed(player, origin->Definition, receipt->SpellId))
             {

@@ -15,6 +15,21 @@ import run
 
 
 class RunnerTests(unittest.TestCase):
+    def test_explicit_combat_rating_fixture(self):
+        for rating, value in ((0, 0), (5, 10000), (23, 10000), (24, 100000)):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({'action': 'set_combat_rating', 'actor': 'caster',
+                                      'rating': rating, 'value': value})
+            self.assertIs(run.validate(scenario), scenario)
+        for actor, rating, value in (('target', 5, 100), ('caster', -1, 0), ('caster', 25, 0),
+                                     ('caster', 5, -1), ('caster', 5, 100001), ('caster', True, 0),
+                                     ('caster', 5, True)):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({'action': 'set_combat_rating', 'actor': actor,
+                                      'rating': rating, 'value': value})
+            with self.subTest(actor=actor, rating=rating, value=value), self.assertRaises(ValueError):
+                run.validate(scenario)
+
     def test_whisper_contains_requires_a_sender_and_nonempty_text(self):
         for extra in ({'from': 'caster', 'text': 'HXAP\tB|4|'}, {},
                       {'from': 'missing', 'text': 'HXAP'}, {'from': 'caster', 'text': ''}):
