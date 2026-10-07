@@ -536,7 +536,8 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
         return false;
     if (BuffContributionRequested && Practice::DevelopmentBuffs::IsSupportedStatBuff(profile))
     {
-        if (profile.Definition.ClassId == 30 && profile.Definition.AbilityId == 575839 &&
+        if (profile.Definition.ClassId == 30 &&
+            (profile.Definition.AbilityId == 575839 || profile.Definition.AbilityId == 578126) &&
             !HasExpectedRiteGroup(info->Id))
             return false;
         if (Practice::DevelopmentBuffs::IsCultistWhispers(profile))

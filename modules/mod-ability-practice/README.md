@@ -4,6 +4,13 @@ This module is under development on `codex/ability-practice`. It implements the 
 practice policy, explicit catalog model, bounded original-action accounting and a development observation path.
 The module and addon are staged in this checkout. Nothing is installed or activated in production.
 
+Honor18/300856 stages its six native ranks6/12/24/38/52/60 and Rite of Power30/578126 its four
+native ranks24/38/52/60. Both retain positive strength effects in slot1, with all other slots empty.
+Their complete source trainer ladders have zero skill requirements and preceding-rank prerequisites.
+Rite of Power requires the same exact loaded native Rite replacement group as Perseverance; replacement
+pauses practice while preserving progress. Two additive pacing definitions preserve the previous149.
+All settings remain disabled; native execution and migration acceptance remain unqualified.
+
 Catalog review includes raw client visibility evidence from `SPELL_ATTR0_DO_NOT_DISPLAY`, with the
 native enum value checked before export. Per-member attributes and hidden/unknown IDs survive into drafts
 and coverage queues. Visibility does not establish castability, helper identity or practice eligibility.

@@ -214,7 +214,9 @@ def reviewed_stat_buffs(root):
                      aura == 143 and stat in {4, 16, 64, 126} and target == 21) or
                 ((effect_index != 0 or aura == 143 and stat == 126) and not (
                     effect_index == 2 and aura == 143 and stat == 126 and
-                    (class_id, ability_id) in {(16, 575843), (30, 575839)}))):
+                    (class_id, ability_id) in {(16, 575843), (30, 575839)} or
+                    effect_index == 1 and aura == 29 and stat == 0 and target == 21 and
+                    (class_id, ability_id) in {(18, 300856), (30, 578126)}))):
             raise ValueError('Unsupported owned stat-buff mechanic')
         identity = (class_id, ability_id)
         if identity in result:
@@ -223,14 +225,16 @@ def reviewed_stat_buffs(root):
                             'targetA': target, 'statSelector': stat, 'auraId': aura, 'effectIndex': effect_index}
     if set(result) != profiles:
         raise ValueError('Owned stat-buff profiles and mechanics differ')
-    if (30, 575839) in result:
+    rite_profiles = {(30, 575839), (30, 578126)}.intersection(result)
+    if rite_profiles:
         rites = (root / 'data/sql/updates/pending_db_world/rev_20260916_61_rite_buffs_exclusive.sql').read_text(
             encoding='utf-8')
         family = [int(value) for value in re.findall(r'\(2100001,\s*(\d+)\)', rites)]
         if family != [575839, 575842, 578126, 578130, 800198, 680298, 1]:
             raise ValueError('Native Rite exclusive group source changed')
-        result[(30, 575839)]['nativeExclusiveGroupId'] = 2100001
-        result[(30, 575839)]['nativeExclusiveFamilySpellIds'] = family[:-1]
+        for identity in rite_profiles:
+            result[identity]['nativeExclusiveGroupId'] = 2100001
+            result[identity]['nativeExclusiveFamilySpellIds'] = family[:-1]
     whispers = {(25, 561389): (561389, 561390, 561391), (25, 572791): (572791, 572819, 572905)}
     if set(result).intersection(whispers):
         lifecycle = (root / 'src/server/coa/AscensionCultistAuras.cpp').read_text(encoding='utf-8')
