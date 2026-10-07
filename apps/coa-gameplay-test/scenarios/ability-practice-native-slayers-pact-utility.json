@@ -1,0 +1,242 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Slayer pact native travel utility",
+  "contract": "Native Slayer pact retains20% mounted speed, party propagation and exclusive pact replacement without practice. Saved unknown progress remains unchanged.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apslayer",
+      "race": 1,
+      "class": 14,
+      "level": 40
+    },
+    {
+      "id": "ally",
+      "name": "Apslayerally",
+      "race": 1,
+      "class": 24,
+      "level": 40
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803343
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800031
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 458
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 33388
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "ally"
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.803343",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.803343",
+      "index": 1,
+      "value": 999
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.803343",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.803343",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.803343",
+      "index": 4,
+      "value": 101
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "run_speed_rate",
+      "save_as": "foot"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803343
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803343,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 803343,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "run_speed_rate",
+      "ratio_to": "foot",
+      "min": 0.99,
+      "max": 1.01
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 803343,
+      "equals": 20,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 458
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 458,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "run_speed_rate",
+      "save_as": "mounted_pact"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800031
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803343,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 800031,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "run_speed_rate",
+      "ratio_to": "mounted_pact",
+      "min": 0.832,
+      "max": 0.835
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 803343,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803343
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 800031,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "run_speed_rate",
+      "ratio_to": "mounted_pact",
+      "min": 0.99,
+      "max": 1.01
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.803343",
+      "index": 1,
+      "equals": 999
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.803343",
+      "index": 3,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.803343",
+      "index": 4,
+      "equals": 101
+    }
+  ]
+}

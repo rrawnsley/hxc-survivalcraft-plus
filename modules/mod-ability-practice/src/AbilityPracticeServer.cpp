@@ -971,6 +971,16 @@ bool MatchesUtilityFixedRankMechanic(std::uint32_t classId, std::uint32_t spellI
                 return false;
         }
     }
+    if (spellId == 803343)
+    {
+        if (info->SpellFamilyName != 20 || info->RecoveryTime || info->GetDuration() != -1)
+            return false;
+        auto const scripts = sObjectMgr->GetSpellScriptsBounds(spellId);
+        auto entry = scripts.first;
+        if (entry == scripts.second || sObjectMgr->GetScriptName(entry->second) !=
+            "aura_ascension_felsworn_lifecycle" || ++entry != scripts.second)
+            return false;
+    }
     if (spellId == 532229)
     {
         SummonPropertiesEntry const* summon = sSummonPropertiesStore.LookupEntry(65);

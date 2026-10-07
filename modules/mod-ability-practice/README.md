@@ -3950,3 +3950,20 @@ approval. Addon0.4.47-development/schema4 remains unpublished. All development d
 No production restart, configuration/database change, active-client installation or launcher publication.
 
 Final source222907 PASSED10checks79.9s; scoped C++ style and whitespace checks passed.
+
+
+## Slayer's Pact native travel development
+
+Slayer's Pact (class14,803343, native level24/trainer900014) joins the optional Fixed utility catalog.
+Native permanent party aura65 with mounted-speed aura172 retains its20% effect. Exact slots, selectors,
+amounts, family20, permanence, zero cooldown and Felsworn lifecycle binding are guarded. Native pact
+exclusivity and party propagation remain; neither travel nor recasts earn practice or mastery.
+
+Source/build/harness223303 PASSED9checks79.9s/build31.8s/harness4.2s and789typed snapshots.
+Native utility223514 PASSED51.2s simulated: on-foot rate1 unchanged; test mount rate1.92 with pact,
+1.60 after replacing it with Demonfire Pact, and1.92 after restoration. Party member receives amount20;
+replacement removes Slayer's Pact from both members. Unknown definition999/proficiency100/points101
+remain unchanged. Real menu223625 PASSED57.7s with fixed native level24 entry and preserved records.
+Both native runs passed without failures or automatic isolated reruns. Scoped C++ style/whitespace passed.
+Coverage257unique/259declared:152ranked/9mastery/96Fixed,446pending(72ranked/374standalone).
+Addon0.4.47-development/schema4 remains unpublished; all defaults0 and production untouched.

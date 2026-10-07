@@ -452,6 +452,16 @@ def build_drafts(candidates, root):
                     ranks[0]['rawCastProfile']['recoveryMilliseconds'] != 180000):
                 raise ValueError('Reviewed Fel Bargain source/raw evidence changed')
             required.append('native-energy-spend-and-effective-self-heal-original-receipt-in-pve')
+        if (class_id, ability_id) == (14, 803343):
+            raw = members[ability_id].get('rawDbc', {})
+            details = raw.get('effectDetails', [])
+            expected = [(65, 172, 1, 0, 0, 19), (0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0)]
+            if (len(ranks) != 1 or ranks[0]['characterLevel'] != 24 or raw.get('passive') is not False or
+                    raw.get('rankLabel') or len(details) != 3 or [(v.get('effectId'), v.get('auraId'),
+                        v.get('implicitTargetA'), v.get('implicitTargetB'), v.get('triggerSpellId'),
+                        v.get('basePoints')) for v in details] != expected):
+                raise ValueError('Reviewed Slayer pact source/raw evidence changed')
+            required.append('native-mounted-speed-party-aura-and-exclusive-pact-without-practice')
         if (class_id, ability_id) == (14, 532229):
             raw = members[ability_id].get('rawDbc', {})
             details = raw.get('effectDetails', [])
