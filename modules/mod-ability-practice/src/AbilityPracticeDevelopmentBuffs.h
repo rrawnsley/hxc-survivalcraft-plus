@@ -309,6 +309,13 @@ inline bool IsSupportedStatBuff(AbilityProfile const& profile)
     return ContributionBit(profile) != 0;
 }
 
+inline bool IsCultistWhispers(AbilityProfile const& profile)
+{
+    return profile.Definition.ClassId == 25 &&
+        (profile.Definition.AbilityId == 561389 || profile.Definition.AbilityId == 572791) &&
+        IsSupportedStatBuff(profile);
+}
+
 struct Mechanic
 {
     std::uint32_t ClassId;

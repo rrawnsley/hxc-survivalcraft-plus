@@ -513,6 +513,16 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
         return false;
     if (BuffContributionRequested && Practice::DevelopmentBuffs::IsSupportedStatBuff(profile))
     {
+        if (Practice::DevelopmentBuffs::IsCultistWhispers(profile))
+        {
+            auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+            auto entry = scripts.first;
+            if (entry == scripts.second || sObjectMgr->GetScriptName(entry->second) !=
+                "aura_ascension_cultist_lifecycle")
+                return false;
+            if (++entry != scripts.second)
+                return false;
+        }
         for (std::size_t index = 0; index < 3; ++index)
         {
             auto const& slot = info->Effects[index];

@@ -3562,6 +3562,13 @@ VERIFY ALL: PASSED20261007-010133 source2/no selected suites/native32.1s. Style/
 source/coverage/trainer exports and five Lua5.1 syntax parses passed without executing addon chunks.
 All switches0; no tests, native startup, client/menu/gameplay/migration execution, active install,
 publish, deploy, restart or production configuration/database/process operations.
+
+Cultist startup validation now additionally requires exactly one loaded spell-script binding per
+Whispers rank, named aura_ascension_cultist_lifecycle. Missing, different or additional bindings
+make the development profile unavailable. This checks loaded binding metadata, not execution or
+script registration success; family/receipt/helper gameplay qualification remains pending.
+VERIFY ALL: PASSED20261007-010428 source2/no selected suites/native31.2s, C++ style/whitespace
+and final source/coverage/trainer exports passed. Addon0.4.43 unchanged; no redundant Lua parse.
 All switches0; owned-buff rules remain an isolated reversible design draft.
 
 ## Chromie's complete trainer ladder — 6 October 2026
