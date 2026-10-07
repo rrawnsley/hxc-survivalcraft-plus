@@ -3821,3 +3821,21 @@ all abilities or runtime behavior are complete. All defaults remain0, addon0.4.4
 
 Final native expiry and source PASSED140615:9source checks77.1s and47.8s isolated native run.
 The35second form expires naturally and starts its native cooldown without practice. Style/whitespace passed.
+
+
+## Moon Gaze native preview development
+
+Moon Gaze (class20,562723, native level16) joins the optional Fixed utility catalog. The native tooltip
+describes an out-of-combat Cursed Form ability-bar preview while movement, attacks and spells are locked.
+Its raw stun targets the caster, so it is not an enemy-control practice route. Exact shapeshift/dummy/stun
+slots, caster targets, selectors and native amounts are guarded. No duration, cooldown, preview mechanics,
+practice, reward or automatic teaching change is added. Actual client ability-bar rendering is unverified.
+
+Source/build/harness PASSED141200:two source checks,29.7second build,4.2second harness and769typed snapshots.
+Native preview/self-stun/cancellation/cooldown and combat exclusion PASSED141323 without isolated reruns.
+Unknown version999 and saved points101 remain unchanged through activation and cancellation.
+Source coverage251unique/253declarations,151ranked/8mastery/92Fixed,452pending. No raw direct, periodic or
+caster-control groups remain without declarations, which does not qualify all remaining scripted abilities.
+All switches remain0 by default, addon0.4.45-development/schema4 unpublished, no production changes.
+
+Final source and real-clock menu PASSED141506:9source checks90.5s and native menu69.3s.

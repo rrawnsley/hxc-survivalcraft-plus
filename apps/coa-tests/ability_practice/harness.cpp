@@ -617,7 +617,7 @@ void CheckMasteryFixedAndTrainerPolicies()
             assert(!view.NextTrainingCap && view.Rewards.empty());
         }
     }
-    assert(fixedCount == 91);
+    assert(fixedCount == 92);
     for (auto const& profile : DevelopmentUtilityFixed::Profiles)
         for (auto const& rank : profile.Definition.Ranks)
         {
@@ -702,7 +702,7 @@ void CheckMasteryFixedAndTrainerPolicies()
             assert(converted && converted->State.Proficiency == entry.PreviousRanks.back().Requirement.Proficiency);
         }
     assert(extensions == 12 && addedRanks == 24);
-    std::cout << "PASS: 8 mastery policies/rewards, 91 fixed declarations, 12 trainer extensions/24 added ranks\n";
+    std::cout << "PASS: 8 mastery policies/rewards, 92 fixed declarations, 12 trainer extensions/24 added ranks\n";
 }
 
 void WriteTypedMasteryAndFixedCases(std::ofstream& output, std::uint32_t& revision)

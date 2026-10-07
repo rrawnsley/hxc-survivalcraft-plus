@@ -31,6 +31,7 @@ inline constexpr std::array Class32Ability520269 = { AbilityRank{ 520269, 1, { 2
 inline constexpr std::array Class32Ability800995 = { AbilityRank{ 800995, 1, { 18, 1 } } };
 inline constexpr std::array Class32Ability803679 = { AbilityRank{ 803679, 1, { 28, 1 } } };
 
+inline constexpr std::array MoonGaze = { AbilityRank{ 562723, 1, { 16, 1 } } };
 inline constexpr std::array BloodCurse = { AbilityRank{ 562720, 1, { 6, 1 } } };
 inline constexpr std::array AncestralKeg = { AbilityRank{ 804748, 1, { 30, 1 } } };
 inline constexpr std::array MojoCauldron = { AbilityRank{ 807908, 1, { 60, 1 } } };
@@ -51,6 +52,8 @@ inline constexpr std::array MeltLock = { AbilityRank{ 804662, 1, { 16, 1 } } };
 inline constexpr std::array TinkerPickLock = { AbilityRank{ 804154, 1, { 14, 1 } } };
 
 inline constexpr std::array Profiles = {
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 20, 562723, AbilityKind::Fixed, MoonGaze, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 20, 562720, AbilityKind::Fixed, BloodCurse, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -129,6 +132,8 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 20, 562723, { 6, 6, 6 }, { 1, 1, 1 }, {}, { 36, 4, 12 }, {},
+        std::array<std::int32_t, 3>{ 57, 0, 0 }, std::array<std::int32_t, 3>{ -1, 8, 0 } },
     Mechanic{ 20, 562720, { 6, 6, 6 }, { 1, 1, 1 }, {}, { 36, 24, 8 }, {},
         std::array<std::int32_t, 3>{ 57, 1, 127 }, std::array<std::int32_t, 3>{ -1, 99, 9 } },
     Mechanic{ 12, 804748, { 50, 0, 0 }, { 47, 0, 0 }, {}, {}, {},
