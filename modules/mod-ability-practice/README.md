@@ -15,8 +15,9 @@ The module and addon are staged in this checkout. Nothing is installed or activa
   definition in the broad ranked mode). Optional mastery adds Hand of Elune, Vile Sting and Soulslam, each with an independently authored reward roadmap. Optional scripted observation adds Manafeed and an independent fixed-utility option adds two
   nontraining profiles. Optional Emerald Veil absorption reuses its existing six ranked definitions;
   the largest staged catalog has 123 unique profiles from 125 source declarations.
-  All development settings default off. A nonempty explicit `AbilityPractice.DevelopmentCharacterGuids`
-  selection is also required; unselected characters keep native progression and receive no practice effects.
+  All development settings default off. Enrollment requires a nonempty explicit
+  `AbilityPractice.DevelopmentCharacterGuids` selection or the startup-only development realm mode
+  described below. Playerbots are excluded from both modes.
 - Outcomes: resolved direct damage/healing, successful interruption, dispel and beneficial-aura steal.
   Each profile requires its own outcome route. The existing client-cast callback records numeric class/spell
   identity; preparation requires that identity and rejects item/aura-triggered sources. Script-created casts
@@ -1450,7 +1451,8 @@ No production changes were made.
 
 `AbilityPractice.DevelopmentCharacterGuids` is a reloadable, comma-separated list of positive
 character database GUIDs, limited to 128 entries and 4,096 configuration bytes. It defaults empty.
-Empty selection disables observation, storage initialization, rank learning/gating, mastery and menu delivery.
+Empty selection disables observation, storage initialization, rank learning/gating, mastery and menu delivery
+unless the startup-only `AbilityPractice.AllowDevelopmentRealmEnrollment` option is enabled.
 Malformed values, overflow, zero, duplicate IDs or empty entries reject the entire selection and disable effects.
 The immutable selection is cached and published atomically; cast callbacks do not parse configuration or query
 the database. Human-player ownership still applies; listed playerbots are not enrolled.
@@ -1459,7 +1461,12 @@ Configuration reload removes excluded GUID sessions, cancels their unsent menu d
 old original-cast receipts. Retained sessions also receive new action epochs. Login/update/chat callbacks
 recheck selection under the configuration mutex before creating a session. Removed characters retain
 learned ranks and cached/saved proficiency; native rank learning resumes without erasing earned progress.
-This selection is an isolated-development enrollment mechanism, not the final all-class rollout policy.
+The default remains selected-character enrollment. Development realm enrollment requires an empty valid
+GUID selection and enrolls existing and future human characters whose class has a loaded practice profile.
+A nonempty or malformed selection in realm mode disables effects. Both primary enable flags, valid native
+data and the individual feature gates remain required. Reload cannot toggle realm mode; it invalidates retained
+receipts and cancels unsent delivery. Saved proficiency and learned ranks remain intact. This is isolated
+development capability; production rollout and enrollment execution remain unqualified.
 
 Affected source and isolated native build passed in `.cache/verify-all/20261005-184316/report.json`
 (two source checks; 35.0-second build). Changed C++ style and whitespace passed.

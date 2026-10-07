@@ -339,6 +339,7 @@ bool Ready = false;
 bool CharacterSelectionReady = false;
 using CharacterSelection = std::unordered_set<std::uint64_t>;
 std::atomic<std::shared_ptr<CharacterSelection const>> SelectedCharacters;
+std::atomic<bool> RealmEnrollment{ false };
 bool RankRequested = false;
 bool PeriodicRequested = false;
 bool MasteryRequested = false;
@@ -1070,7 +1071,11 @@ bool IsDevelopmentPlayer(Player const* player)
     if (!player || !player->GetSession() || player->GetSession()->IsBot())
         return false;
     auto const selection = SelectedCharacters.load();
-    return selection && selection->contains(player->GetGUID().GetRawValue());
+    if (!selection)
+        return false;
+    if (RealmEnrollment.load())
+        return selection->empty() && ProfileLookup && !ProfileLookup->ForClass(player->getClass()).empty();
+    return selection->contains(player->GetGUID().GetRawValue());
 }
 
 Practice::AbilityProfile const* FindProfile(Player const* player, std::uint32_t spellId)
@@ -1928,16 +1933,19 @@ public:
         auto const selected = ParseSelectedCharacters(
             sConfigMgr->GetOption<std::string>("AbilityPractice.DevelopmentCharacterGuids", ""));
         SelectedCharacters.store(selected);
-        CharacterSelectionReady = selected && !selected->empty();
+        bool const realmEnrollment = RealmEnrollment.load();
+        CharacterSelectionReady = selected && (realmEnrollment ? selected->empty() : !selected->empty());
         if (!selected)
             LOG_ERROR("module.ability_practice", "Rejected invalid development character selection; effects disabled");
+        if (realmEnrollment && selected && !selected->empty())
+            LOG_ERROR("module.ability_practice", "Rejected simultaneous realm and character enrollment; effects disabled");
         LOG_INFO("module.ability_practice", "Development character selection: valid={}, selected count={}",
             static_cast<bool>(selected), selected ? selected->size() : 0);
         Active.store(Requested && DevelopmentAllowed && Ready && CharacterSelectionReady);
         RankActive.store(Requested && DevelopmentAllowed && Ready && CharacterSelectionReady && RankRequested);
         for (auto entry = Sessions.begin(); entry != Sessions.end();)
         {
-            if (!selected || !selected->contains(entry->first))
+            if (!selected || (realmEnrollment ? !selected->empty() : !selected->contains(entry->first)))
             {
                 entry = Sessions.erase(entry);
                 continue;
@@ -1962,6 +1970,12 @@ public:
             LOG_ERROR("module.ability_practice", "Rejected repeated development catalog initialization");
             return;
         }
+        RealmEnrollment.store(sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentRealmEnrollment", false));
+        auto const characterSelection = SelectedCharacters.load();
+        CharacterSelectionReady = characterSelection &&
+            (RealmEnrollment.load() ? characterSelection->empty() : !characterSelection->empty());
+        if (RealmEnrollment.load() && characterSelection && !characterSelection->empty())
+            LOG_ERROR("module.ability_practice", "Rejected simultaneous realm and character enrollment; effects disabled");
         Catchup.Enabled = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentCatchup", false);
         Catchup.Gap = sConfigMgr->GetOption<std::uint32_t>("AbilityPractice.DevelopmentCatchupGap", 40);
         Catchup.Multiplier = sConfigMgr->GetOption<std::uint32_t>("AbilityPractice.DevelopmentCatchupMultiplier", 2);
@@ -2112,6 +2126,8 @@ public:
         RankActive.store(Requested && DevelopmentAllowed && Ready && CharacterSelectionReady && RankRequested);
         LOG_INFO("module.ability_practice", "Development observation: requested={}, allowed={}, data ready={}",
             Requested, DevelopmentAllowed, Ready);
+        LOG_INFO("module.ability_practice", "Development realm enrollment: enabled={}, enrollment ready={}",
+            RealmEnrollment.load(), CharacterSelectionReady);
         LOG_INFO("module.ability_practice", "Development class samples: enabled={}, profile count={}",
             classSamples, profiles.size());
         LOG_INFO("module.ability_practice", "Development periodic observation: enabled={}", PeriodicRequested);
