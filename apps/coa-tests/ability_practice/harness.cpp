@@ -454,7 +454,7 @@ void CheckCurrentRankPolicies()
 {
     std::uint32_t forecasts = 0;
     std::array<bool, 21> classes{};
-    assert(DevelopmentPacing::Entries.size() == 152);
+    assert(DevelopmentPacing::Entries.size() == 153);
     for (auto const& entry : DevelopmentPacing::Entries)
     {
         classes.at(entry.ClassId - 12) = true;
@@ -535,7 +535,7 @@ void CheckCurrentRankPolicies()
         }
     }
     assert(std::all_of(classes.begin(), classes.end(), [](bool present) { return present; }));
-    std::cout << "PASS: 152 current rank policies, 21 classes, one-rank-ahead caps, exact rebases and "
+    std::cout << "PASS: 153 current rank policies, 21 classes, one-rank-ahead caps, exact rebases and "
         << forecasts << " current forecast/award comparisons\n";
 }
 

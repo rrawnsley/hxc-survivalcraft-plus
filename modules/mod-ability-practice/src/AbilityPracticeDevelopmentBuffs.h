@@ -8,6 +8,16 @@
 
 namespace AbilityPractice::DevelopmentBuffs
 {
+inline constexpr std::array GroveInstinct = {
+    AbilityRank{ 572810, 1, { 2, 1 } },
+    AbilityRank{ 572811, 2, { 14, 10 } },
+    AbilityRank{ 572812, 3, { 24, 20 } },
+    AbilityRank{ 572813, 4, { 38, 40 } },
+    AbilityRank{ 572814, 5, { 52, 60 } },
+    AbilityRank{ 572815, 6, { 60, 80 } }
+};
+inline constexpr auto GroveInstinctCaps = Development::RankCaps(GroveInstinct);
+
 inline constexpr std::uint32_t ClassId = 12;
 inline constexpr std::uint32_t AbilityId = 300857;
 inline constexpr std::array BrutalShout = {
@@ -240,6 +250,9 @@ inline constexpr auto RiteOfPowerCaps = Development::RankCaps(RiteOfPower);
 
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 31, 572810, AbilityKind::Ranked, GroveInstinct, GroveInstinctCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 12, 300857, AbilityKind::Ranked, BrutalShout, BrutalShoutCaps },
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -364,6 +377,7 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 31, 572810, 21, 0, 85 },
     Mechanic{ 12, 300857, 56, 1 },
     Mechanic{ 12, 680302, 56, 2 },
     Mechanic{ 15, 706741, 21, 1 },

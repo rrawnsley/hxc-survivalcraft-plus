@@ -3984,3 +3984,31 @@ forty-second expiry clears control. Unknown definition999/proficiency100/points1
 Real menu224439 PASSED57.3s, Fixed/native level20/no practice and retained records. Scoped style passed.
 Coverage258unique/260declared:152ranked/9mastery/97Fixed,445pending(72ranked/373standalone).
 All defaults0; addon0.4.47-development/schema4 unpublished. No live actions or active client changes.
+
+
+## Grove Instinct owned mana-buff practice development
+
+Grove Instinct (class31,572810) adds six native ranks at2/14/24/38/52/60, matching trainer900031's
+immediate prerequisites and captured native progression. It uses the existing owned mana-regeneration
+buff route: a positive effective original self-application supports one useful original combat cast
+per five-second contribution cadence. Application, mana ticks, removal and inactive-buff casts do not
+practice. Native mana regeneration, costs and duration remain. Existing primary-mana and regeneration
+availability guards apply. Ally-only support practice and rendered client pixels are not qualified.
+
+One additive authored definition2 pacing entry preserves the prior152 curves; rank cap conversion4
+prepares only one upcoming rank.540 qualifying casts per next rank target45minutes at the assumed
+five-second cadence before catch-up. This is unmeasured play frequency, not a claim of observed pacing.
+The buff catalog now has30 tracks across16classes.
+
+Source/build/harness225013 PASSED9/81.0s,31.2s,4.3s and795typed snapshots. Native contribution225225
+PASSED two cases51.9s simulated, including the existing Pyromancer owned-buff regression. Grove's native
+amount5 and mana recovery19 observed after depleting mana;19 includes native regeneration and is not
+attributed wholly to the buff. Recovery/application give zero practice, combat gives270points once,
+and cancellation retains270 and prevents another award. Real menu225350 PASSED57.4s: six ranks,
+cap20 at14 and exact540-use next-rank forecast. Source/native boundary225503 PASSED9/80.4s and52.8s:
+last270points advance proficiency9 to10, automatically learn572811 at14, retain572812 locked and
+restore native stronger aura amount10. No failures or automatic isolated reruns in these checks.
+Scoped style/whitespace and additive pacing preservation passed.
+
+Coverage259unique/261declared:153ranked/9mastery/97Fixed,444pending(71ranked/373standalone).
+All defaults0; addon0.4.48-development/schema4 unpublished. No production changes.
