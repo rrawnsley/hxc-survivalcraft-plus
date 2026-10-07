@@ -452,6 +452,16 @@ def build_drafts(candidates, root):
                     ranks[0]['rawCastProfile']['recoveryMilliseconds'] != 180000):
                 raise ValueError('Reviewed Fel Bargain source/raw evidence changed')
             required.append('native-energy-spend-and-effective-self-heal-original-receipt-in-pve')
+        if (class_id, ability_id) == (14, 954534):
+            raw = members[ability_id].get('rawDbc', {})
+            details = raw.get('effectDetails', [])
+            expected = [(6, 6, 6, 0, 0, -1), (0, 0, 0, 0, 0, -1), (0, 0, 0, 0, 0, -1)]
+            if (len(ranks) != 1 or ranks[0]['characterLevel'] != 20 or raw.get('passive') is not False or
+                    raw.get('rankLabel') or len(details) != 3 or [(v.get('effectId'), v.get('auraId'),
+                        v.get('implicitTargetA'), v.get('implicitTargetB'), v.get('triggerSpellId'),
+                        v.get('basePoints')) for v in details] != expected):
+                raise ValueError('Reviewed Enslave Elemental source/raw evidence changed')
+            required.append('native-elemental-charm-duration-and-single-charm-without-practice')
         if (class_id, ability_id) == (14, 803343):
             raw = members[ability_id].get('rawDbc', {})
             details = raw.get('effectDetails', [])

@@ -9,6 +9,7 @@
 namespace AbilityPractice::DevelopmentControlFixed
 {
 inline constexpr std::uint32_t NativeUtilityDefinitionVersion = 3;
+inline constexpr std::array EnslaveElemental = { AbilityRank{ 954534, 1, { 20, 1 } } };
 inline constexpr std::array ControlMechanical = { AbilityRank{ 807846, 1, { 24, 1 } } };
 inline constexpr std::array VileSting = { AbilityRank{ 805097, 1, { 12, 1 } } };
 inline constexpr std::array Class13Ability803325 = { AbilityRank{ 803325, 1, { 22, 1 } } };
@@ -27,6 +28,8 @@ inline constexpr std::array Class32Ability524930 = { AbilityRank{ 524930, 1, { 1
 inline constexpr std::array Class32Ability807822 = { AbilityRank{ 807822, 1, { 8, 1 } } };
 
 inline constexpr std::array Profiles = {
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 14, 954534, AbilityKind::Fixed, EnslaveElemental, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 28, 807846, AbilityKind::Fixed, ControlMechanical, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ NativeUtilityDefinitionVersion, AcquisitionSource::ClassGrant,
@@ -73,6 +76,7 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 14, 954534, { 6, 0, 0 }, { 6, 0, 0 }, { 6, 0, 0 }, {} },
     Mechanic{ 28, 807846, { 6, 6, 6 }, { 6, 192, 89 }, { 6, 6, 6 }, { 0, 0, 0 } },
     Mechanic{ 29, 805097, { 114, 6, 2 }, { 0, 11, 0 }, { 6, 6, 6 }, { 0, 0, 0 } },
     Mechanic{ 13, 803325, { 6, 6, 0 }, { 7, 31, 0 }, { 6, 6, 0 }, { 0, 0, 0 } },

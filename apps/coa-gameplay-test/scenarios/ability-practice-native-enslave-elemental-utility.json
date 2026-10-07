@@ -1,0 +1,216 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Enslave Elemental native charm",
+  "contract": "Native elemental charm lasts forty seconds, permits one charm and rejects non-elementals; no practice or saved-progress changes.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apelemtest",
+      "race": 1,
+      "class": 14,
+      "level": 20,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "elemental",
+      "owner": "caster",
+      "entry": 832,
+      "level": 20,
+      "health": 100000,
+      "distance": 3,
+      "stationary": true,
+      "reaction": 0
+    },
+    {
+      "id": "second",
+      "owner": "caster",
+      "entry": 17157,
+      "level": 20,
+      "health": 100000,
+      "distance": 5,
+      "stationary": true,
+      "reaction": 0
+    },
+    {
+      "id": "humanoid",
+      "owner": "caster",
+      "entry": 38,
+      "level": 20,
+      "health": 100000,
+      "distance": 4,
+      "stationary": true,
+      "reaction": 0
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 954534
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.954534",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.954534",
+      "index": 1,
+      "value": 999
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.954534",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.954534",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.954534",
+      "index": 4,
+      "value": 101
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 954534,
+      "target": "humanoid"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 954534,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "charm_entry",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "humanoid",
+      "metric": "aura",
+      "spell": 954534,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 954534,
+      "target": "elemental"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "charm_entry",
+      "equals": 832
+    },
+    {
+      "action": "assert",
+      "actor": "elemental",
+      "metric": "aura",
+      "spell": 954534,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "elemental",
+      "metric": "aura_duration_ms",
+      "spell": 954534,
+      "min": 38000,
+      "max": 40000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 954534,
+      "target": "second"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 954534,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "second",
+      "metric": "aura",
+      "spell": 954534,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 41000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "charm_entry",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "elemental",
+      "metric": "aura",
+      "spell": 954534,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.954534",
+      "index": 1,
+      "equals": 999
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.954534",
+      "index": 3,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.954534",
+      "index": 4,
+      "equals": 101
+    }
+  ]
+}

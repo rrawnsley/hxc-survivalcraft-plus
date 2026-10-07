@@ -3967,3 +3967,20 @@ remain unchanged. Real menu223625 PASSED57.7s with fixed native level24 entry an
 Both native runs passed without failures or automatic isolated reruns. Scoped C++ style/whitespace passed.
 Coverage257unique/259declared:152ranked/9mastery/96Fixed,446pending(72ranked/374standalone).
 Addon0.4.47-development/schema4 remains unpublished; all defaults0 and production untouched.
+
+
+## Enslave Elemental native control development
+
+Enslave Elemental (class14,954534, native level20/trainer900014) joins the optional Fixed control catalog.
+Native three-second cast and forty-second NPC charm remain; elemental mask8, aura6 and empty other slots,
+family20,zero cooldown and zero calculated level ceiling are guarded. No level cap is invented from the
+spell's introductory level. Native pet/charm/ownership and PvP restrictions remain authoritative.
+
+Build/harness224000 PASSED31.2s/4.3s with792typed snapshots; source failed an unsupported `failure`
+field in the new scenario. The fixture now asserts the returned native failure code with `equals`.
+Corrected source/native224217 PASSED9checks80.5s/native52.1s simulated, no isolated retry: non-elemental
+rejected, elemental832 charmed, second elemental17157 refused with ALREADY_HAVE_CHARM6, and natural
+forty-second expiry clears control. Unknown definition999/proficiency100/points101 unchanged.
+Real menu224439 PASSED57.3s, Fixed/native level20/no practice and retained records. Scoped style passed.
+Coverage258unique/260declared:152ranked/9mastery/97Fixed,445pending(72ranked/373standalone).
+All defaults0; addon0.4.47-development/schema4 unpublished. No live actions or active client changes.
