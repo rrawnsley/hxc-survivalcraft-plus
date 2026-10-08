@@ -8,6 +8,16 @@
 
 namespace AbilityPractice::DevelopmentBuffs
 {
+inline constexpr std::array EarthTattoo = {
+    AbilityRank{ 801094, 1, { 4, 1 } },
+    AbilityRank{ 803754, 2, { 12, 10 } },
+    AbilityRank{ 803755, 3, { 22, 20 } },
+    AbilityRank{ 803756, 4, { 34, 40 } },
+    AbilityRank{ 803757, 5, { 46, 60 } },
+    AbilityRank{ 803758, 6, { 58, 80 } }
+};
+inline constexpr auto EarthTattooCaps = Development::RankCaps(EarthTattoo);
+
 inline constexpr std::array ManariIntuition = {
     AbilityRank{ 523478, 1, { 8, 1 } },
     AbilityRank{ 523479, 2, { 20, 10 } },
@@ -399,6 +409,9 @@ inline constexpr auto RiteOfPowerCaps = Development::RankCaps(RiteOfPower);
 
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 32, 801094, AbilityKind::Ranked, EarthTattoo, EarthTattooCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 14, 523478, AbilityKind::Ranked, ManariIntuition, ManariIntuitionCaps },
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -574,6 +587,7 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 32, 801094, 1, 1, 22 },
     Mechanic{ 14, 523478, 21, 1, 22 },
     Mechanic{ 15, 523485, 21, 1, 22 },
     Mechanic{ 29, 803651, 21, 1, 22 },
@@ -625,6 +639,7 @@ inline constexpr std::array Mechanics = {
 static_assert(Mechanics.size() == Profiles.size());
 
 inline constexpr std::array SecondaryMechanics = {
+    Mechanic{ 32, 801094, 1, 8, 22, 1 },
     Mechanic{ 14, 523478, 21, -1, 29, 1 },
     Mechanic{ 15, 523485, 21, -1, 29, 1 },
     Mechanic{ 29, 803651, 21, -1, 29, 1 },

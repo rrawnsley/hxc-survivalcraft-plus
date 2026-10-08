@@ -697,6 +697,10 @@ function Model.PracticeRules(ability, saved)
             .. " spell-cost reduction must remain active. Switching devotions pauses this practice."
             .. " Applying, refreshing, or receiving mana ticks earns no practice."
             .. " One original ability cast earns one use, with at least five seconds between counted uses."
+    elseif ability.abilityId == 801094 and ability.route == 13 then
+        rule = "Keep your own Earth Tattoo active and use a learned ability for useful damage or healing"
+            .. " in a non-gray PvE encounter. Its armor and Nature resistance must both remain effective."
+            .. " Applying or refreshing the tattoo gives no practice. Switching tattoos pauses Earth practice."
     elseif (ability.abilityId == 523478 or ability.abilityId == 523485
         or ability.abilityId == 803651) and ability.route == 13 then
         rule = "Keep your own armor and all-stat buff active and use a learned ability for useful damage or healing"

@@ -65,6 +65,9 @@ def verify_provenance(candidates, root, dbc):
                 'src/server/coa/AscensionSunClericContracts.cpp',
                 'src/server/coa/AscensionSunClericData.h',
                 'src/server/coa/AscensionSunClericDevotion.cpp',
+                'src/server/coa/AscensionRunemasterRunicTalents.cpp',
+                'src/server/coa/AscensionRunemasterTalents.cpp',
+                'src/server/coa/AscensionRunemasterManuscription.cpp',
                          'src/server/coa/AscensionVenomancerAuras.cpp',
                 'src/server/coa/AscensionVenomancer.cpp',
                          'src/server/coa/AscensionReaperTalentProcs.h',
@@ -231,8 +234,9 @@ def reviewed_stat_buffs(root):
         class_id, ability_id, target, stat = map(int, match.groups()[:4])
         aura = int(match[5]) if match[5] is not None else 29
         effect_index = int(match[6]) if match[6] is not None else 0
-        if (not 12 <= class_id <= 32 or not ability_id or target not in {21, 56} or
-                not (aura == 29 and stat in range(5) or aura == 345 and stat == 127 and target == 21 or
+        earth_tattoo = (class_id, ability_id, target, stat, aura, effect_index) == (32, 801094, 1, 1, 22, 0)
+        if (not 12 <= class_id <= 32 or not ability_id or (target not in {21, 56} and not earth_tattoo) or
+                not (earth_tattoo or aura == 29 and stat in range(5) or aura == 345 and stat == 127 and target == 21 or
                      aura in {85, 99} and stat == 0 and target == 21 or
                      aura == 22 and stat == 1 and target == 21 and (class_id, ability_id) in {
                          (21, 523489), (14, 523478), (15, 523485), (29, 803651)} or
@@ -257,7 +261,7 @@ def reviewed_stat_buffs(root):
     secondary_matches = list(re.finditer(pattern, secondary_body[1]))
     if re.sub(pattern, '', secondary_body[1]).replace(',', '').strip():
         raise ValueError('Unsupported secondary buff mechanic declaration')
-    expected_secondary = {(14, 523478, 1): (21, -1, 29), (15, 523485, 1): (21, -1, 29),
+    expected_secondary = {(32, 801094, 1): (1, 8, 22), (14, 523478, 1): (21, -1, 29), (15, 523485, 1): (21, -1, 29),
                           (29, 803651, 1): (21, -1, 29), (27, 800852, 1): (21, 127, 72), (21, 523489, 1): (21, -1, 29),
                           (17, 707693, 1): (21, 32, 143),
                           (13, 560294, 1): (21, 126, 143), (17, 706589, 1): (21, 0, 29),
@@ -660,6 +664,9 @@ def build_drafts(candidates, root):
                 if mechanic['auraId'] == 99 and details[1].get('basePoints') != details[0]['basePoints']:
                     raise ValueError('Paired attack-power rank amounts differ')
                 amounts.append(details[effect_index]['basePoints'] + 1)
+            if (class_id, ability_id) == (32, 801094):
+                required.extend(['native-self-targeted-earth-armor-and-nature-resistance',
+                                 'native-exclusive-tattoos-and-conditional-runemaster-talents'])
             if (class_id, ability_id) == (27, 800852):
                 required.extend(['native-sun-cleric-lifecycle-and-devotion-replacement',
                                  'native-negative-five-percent-cost-component-and-primary-mana'])

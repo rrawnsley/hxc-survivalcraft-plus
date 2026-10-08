@@ -667,6 +667,16 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
             if (++entry != scripts.second)
                 return false;
         }
+        if (profile.Definition.ClassId == 32 && profile.Definition.AbilityId == 801094)
+        {
+            constexpr std::array<std::int32_t, 6> tattoos{ 801094, 801106, 801107, 802630, 803748, 807834 };
+            auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+            if (info->SpellFamilyName != 38 || info->SpellFamilyFlags[0] != 1024 ||
+                info->SpellFamilyFlags[1] || info->SpellFamilyFlags[2] != 16386 ||
+                scripts.first != scripts.second ||
+                !HasExactBuffGroup(info->Id, 111001, SPELL_GROUP_STACK_RULE_EXCLUSIVE, tattoos))
+                return false;
+        }
         if (IsArmorOrEdictProfile(profile))
         {
             auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
