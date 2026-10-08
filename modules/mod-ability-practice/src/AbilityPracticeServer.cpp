@@ -578,6 +578,12 @@ bool HasExactBuffGroup(std::uint32_t spellId, std::uint32_t groupId, SpellGroupS
     return std::equal(members.begin(), members.end(), expected.begin());
 }
 
+bool HasExpectedModuleGroup(std::uint32_t spellId)
+{
+    constexpr std::array<std::int32_t, 4> modules{ 680315, 706742, 803658, 803665 };
+    return HasExactBuffGroup(spellId, 1136, SPELL_GROUP_STACK_RULE_EXCLUSIVE_FROM_SAME_CASTER, modules);
+}
+
 bool HasExpectedEtchingGroup(std::uint32_t abilityId, std::uint32_t spellId)
 {
     constexpr std::array<std::int32_t, 6> etchings{ 560295, 561236, 561237, 561241, 561242, 561243 };
@@ -805,7 +811,9 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
         {
             auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
             auto entry = scripts.first;
-            if (info->SpellFamilyName != 34 || entry == scripts.second ||
+            if (info->SpellFamilyName != 34 || info->SpellFamilyFlags[0] != 524288 ||
+                info->SpellFamilyFlags[1] || info->SpellFamilyFlags[2] || !HasExpectedModuleGroup(info->Id) ||
+                entry == scripts.second ||
                 sObjectMgr->GetScriptName(entry->second) != "aura_ascension_tinker_lifecycle")
                 return false;
             if (++entry != scripts.second)
@@ -1401,6 +1409,13 @@ bool MatchesSharedBuffVariants()
             if (entry == scripts.second ||
                 sObjectMgr->GetScriptName(entry->second) != "aura_ascension_witch_doctor_lifecycle" ||
                 ++entry != scripts.second)
+                return false;
+        }
+        else if (variant.ClassId == 28)
+        {
+            if (!Practice::DevelopmentBuffs::IsPowerModule(*profile) || !HasExpectedModuleGroup(info->Id) ||
+                entry == scripts.second || sObjectMgr->GetScriptName(entry->second) !=
+                    "aura_ascension_tinker_lifecycle" || ++entry != scripts.second)
                 return false;
         }
         else if (variant.ClassId == 32)

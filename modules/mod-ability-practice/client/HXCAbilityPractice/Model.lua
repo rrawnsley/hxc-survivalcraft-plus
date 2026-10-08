@@ -747,8 +747,12 @@ function Model.PracticeRules(ability, saved)
             .. " in a qualifying PvE fight. Both Spirit and magic resistance effects must remain active and useful."
             .. " Applying or refreshing the buff earns no practice."
             .. " One original ability cast earns one use, with at least five seconds between counted uses."
-    elseif (ability.abilityId == 572384 or ability.abilityId == 800197 or ability.abilityId == 800266
-        or ability.abilityId == 706742) and ability.route == 13 then
+    elseif ability.abilityId == 706742 and ability.route == 13 then
+        rule = "Keep your own Power Module active and land a learned melee or ranged damage ability"
+            .. " on a non-gray PvE opponent. Its melee and ranged effects must both remain effective."
+            .. " Greater Power Module shares this practice. Switching modules pauses Power practice."
+            .. " Healing, unrelated spell damage, application, auto-attacks and triggered helpers give no practice."
+    elseif (ability.abilityId == 572384 or ability.abilityId == 800197 or ability.abilityId == 800266) and ability.route == 13 then
         rule = "Keep your own attack-power buff active and land a learned melee or ranged damage ability"
             .. " on a level-appropriate PvE opponent."
             .. " Both its melee and ranged effects must remain active and useful."

@@ -65,6 +65,10 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
         assert(ability.kind == 3)
         assert(string.find(Model.PracticeRules(ability), "same native benefit", 1, true))
     end
+    if ability.abilityId == 706742 and ability.route == 13 then
+        assert(string.find(Model.PracticeRules(ability), "Greater Power Module shares", 1, true))
+        assert(string.find(Model.PracticeRules(ability), "Switching modules", 1, true))
+    end
     if ability.abilityId == 801107 and ability.route == 13 then
         assert(string.find(Model.PracticeRules(ability), "character-level scaling", 1, true))
         assert(string.find(Model.PracticeRules(ability), "mana ticks gives no practice", 1, true))

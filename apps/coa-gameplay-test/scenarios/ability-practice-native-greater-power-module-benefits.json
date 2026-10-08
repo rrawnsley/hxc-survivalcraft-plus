@@ -1,0 +1,272 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native Greater Power Module party benefits",
+  "contract": "Greater Power Module retains native232 melee and ranged attack power on caster and party, matching regular final rank; unknown saved progress remains.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Aptinkpowerc",
+      "race": 1,
+      "class": 28,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "name": "Aptinkpowera",
+      "race": 1,
+      "class": 28,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "ally"
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.28.706742",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.28.706742",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.28.706742",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.28.706742",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.28.706742",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 706742
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707346
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707347
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707348
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707349
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707350
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707688
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 680315
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.28.706742",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.28.706742",
+      "index": 1,
+      "value": 999
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.28.706742",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.28.706742",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.28.706742",
+      "index": 4,
+      "value": 101
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "attack_power",
+      "save_as": "caster_attack_power"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "ranged_attack_power",
+      "save_as": "caster_ranged_attack_power"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "attack_power",
+      "save_as": "ally_attack_power"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "ranged_attack_power",
+      "save_as": "ally_ranged_attack_power"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 680315,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 680315,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 680315,
+      "effect": 0,
+      "equals": 232
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "attack_power",
+      "relative_to": "caster_attack_power",
+      "min": 231.9,
+      "max": 232.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 680315,
+      "effect": 1,
+      "equals": 232
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "ranged_attack_power",
+      "relative_to": "caster_ranged_attack_power",
+      "min": 231.9,
+      "max": 232.1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 680315,
+      "effect": 0,
+      "equals": 232
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "attack_power",
+      "relative_to": "ally_attack_power",
+      "min": 231.9,
+      "max": 232.1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 680315,
+      "effect": 1,
+      "equals": 232
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "ranged_attack_power",
+      "relative_to": "ally_ranged_attack_power",
+      "min": 231.9,
+      "max": 232.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.28.706742",
+      "index": 1,
+      "equals": 999
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.28.706742",
+      "index": 3,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.28.706742",
+      "index": 4,
+      "equals": 101
+    }
+  ]
+}

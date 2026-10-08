@@ -728,7 +728,7 @@ void CheckMasteryFixedAndTrainerPolicies()
                 { 3, 1, { entry.PreviousRanks.back().Requirement.Proficiency, 0 } });
             assert(converted && converted->State.Proficiency == entry.PreviousRanks.back().Requirement.Proficiency);
         }
-    assert(DevelopmentBuffVariants::Variants.size() == 13);
+    assert(DevelopmentBuffVariants::Variants.size() == 14);
     for (auto const& variant : DevelopmentBuffVariants::Variants)
     {
         AbilityProfile const* parent = nullptr;
@@ -747,7 +747,7 @@ void CheckMasteryFixedAndTrainerPolicies()
             variant.SpellId == 680303 ? 80u : variant.SpellId == 561241 || variant.SpellId == 680872 ||
             variant.SpellId == 523510 ||
             variant.SpellId == 681442 ? 40u : variant.SpellId == 523513 || variant.SpellId == 803657 ? 60u :
-            variant.SpellId == 680294 ? 100u : 1u));
+            variant.SpellId == 680294 || variant.SpellId == 680315 ? 100u : 1u));
         auto invalid = variant;
         invalid.EquivalentSpellId = 1;
         assert(!DevelopmentBuffVariants::EquivalentRank(*parent, invalid));

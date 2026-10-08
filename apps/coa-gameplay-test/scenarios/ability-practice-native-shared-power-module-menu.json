@@ -1,0 +1,120 @@
+{
+  "schema": 1,
+  "name": "Ability practice: shared Greater Power Module menu",
+  "contract": "Greater Power Module shows its matching final-rank requirement, needs-practice state, and exact one-use forecast.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "castera",
+      "name": "Apmodmenu",
+      "race": 1,
+      "class": 28,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "castera",
+      "source": "core.hxc.ability_practice.28.706742",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "castera",
+      "source": "core.hxc.ability_practice.28.706742",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "castera",
+      "source": "core.hxc.ability_practice.28.706742",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "castera",
+      "source": "core.hxc.ability_practice.28.706742",
+      "index": 3,
+      "value": 99
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "castera",
+      "source": "core.hxc.ability_practice.28.706742",
+      "index": 4,
+      "value": 15600
+    },
+    {
+      "action": "learn",
+      "actor": "castera",
+      "spell": 706742
+    },
+    {
+      "action": "learn",
+      "actor": "castera",
+      "spell": 707346
+    },
+    {
+      "action": "learn",
+      "actor": "castera",
+      "spell": 707347
+    },
+    {
+      "action": "learn",
+      "actor": "castera",
+      "spell": 707348
+    },
+    {
+      "action": "learn",
+      "actor": "castera",
+      "spell": 707349
+    },
+    {
+      "action": "learn",
+      "actor": "castera",
+      "spell": 707350
+    },
+    {
+      "action": "whisper",
+      "actor": "castera",
+      "to": "Apmodmenu",
+      "text": "HXAP\tHELLO|5",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "castera",
+      "metric": "whisper_contains",
+      "from": "castera",
+      "text": "HXAP\tB|5|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "castera",
+      "metric": "whisper_contains",
+      "from": "castera",
+      "text": "|680315|707688|60|100|4|1|1",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "castera",
+      "metric": "whisper_contains",
+      "from": "castera",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 10000
+    }
+  ]
+}
