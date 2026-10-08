@@ -1,0 +1,197 @@
+{
+  "schema": 1,
+  "name": "Ability practice: shared Runemaster etching menus",
+  "contract": "Dextrous greater shows its matching rank and exact one-use forecast; single-rank Leylines and Magi retain native acquisition without practice forecasts.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "castera",
+      "name": "Apetcmenua",
+      "race": 1,
+      "class": 32,
+      "level": 60
+    },
+    {
+      "id": "casterb",
+      "name": "Apetcmenub",
+      "race": 1,
+      "class": 32,
+      "level": 52
+    },
+    {
+      "id": "casterc",
+      "name": "Apetcmenuc",
+      "race": 1,
+      "class": 32,
+      "level": 54
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "castera",
+      "source": "core.hxc.ability_practice.32.561237",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "castera",
+      "source": "core.hxc.ability_practice.32.561237",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "castera",
+      "source": "core.hxc.ability_practice.32.561237",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "castera",
+      "source": "core.hxc.ability_practice.32.561237",
+      "index": 3,
+      "value": 39
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "castera",
+      "source": "core.hxc.ability_practice.32.561237",
+      "index": 4,
+      "value": 15600
+    },
+    {
+      "action": "learn",
+      "actor": "castera",
+      "spell": 561237
+    },
+    {
+      "action": "learn",
+      "actor": "castera",
+      "spell": 561238
+    },
+    {
+      "action": "learn",
+      "actor": "castera",
+      "spell": 561239
+    },
+    {
+      "action": "whisper",
+      "actor": "castera",
+      "to": "Apetcmenua",
+      "text": "HXAP\tHELLO|5",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "castera",
+      "metric": "whisper_contains",
+      "from": "castera",
+      "text": "HXAP\tB|5|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "castera",
+      "metric": "whisper_contains",
+      "from": "castera",
+      "text": "|561241|561240|60|40|4|1|1",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "castera",
+      "metric": "whisper_contains",
+      "from": "castera",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "learn",
+      "actor": "casterb",
+      "spell": 561236
+    },
+    {
+      "action": "whisper",
+      "actor": "casterb",
+      "to": "Apetcmenub",
+      "text": "HXAP\tHELLO|5",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "casterb",
+      "metric": "whisper_contains",
+      "from": "casterb",
+      "text": "HXAP\tB|5|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "casterb",
+      "metric": "whisper_contains",
+      "from": "casterb",
+      "text": "|561242|561236|52|1|2|0|0",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "casterb",
+      "metric": "whisper_contains",
+      "from": "casterb",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "learn",
+      "actor": "casterc",
+      "spell": 560295
+    },
+    {
+      "action": "whisper",
+      "actor": "casterc",
+      "to": "Apetcmenuc",
+      "text": "HXAP\tHELLO|5",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "casterc",
+      "metric": "whisper_contains",
+      "from": "casterc",
+      "text": "HXAP\tB|5|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "casterc",
+      "metric": "whisper_contains",
+      "from": "casterc",
+      "text": "|561243|560295|54|1|2|0|0",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "casterc",
+      "metric": "whisper_contains",
+      "from": "casterc",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 10000
+    }
+  ]
+}

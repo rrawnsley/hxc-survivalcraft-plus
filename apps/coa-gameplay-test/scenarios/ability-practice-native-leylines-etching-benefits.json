@@ -1,0 +1,190 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native leylines-etching benefits",
+  "contract": "Native regular or raid etching benefits and unknown saved rows remain. Percent-stat rounding and real Primordial Blast mana costs are observed.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apetchabc",
+      "race": 1,
+      "class": 32,
+      "level": 52
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 561236
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.561236",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.561236",
+      "index": 1,
+      "value": 999
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.561236",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.561236",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.561236",
+      "index": 4,
+      "value": 101
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 0,
+      "save_as": "caster_stat0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 1,
+      "save_as": "caster_stat1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 2,
+      "save_as": "caster_stat2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 3,
+      "save_as": "caster_stat3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 4,
+      "save_as": "caster_stat4"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561236,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 561236,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 561236,
+      "effect": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 0,
+      "ratio_to": "caster_stat0",
+      "min": 1.07,
+      "max": 1.115
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 1,
+      "ratio_to": "caster_stat1",
+      "min": 1.07,
+      "max": 1.115
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 2,
+      "ratio_to": "caster_stat2",
+      "min": 1.07,
+      "max": 1.115
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 3,
+      "ratio_to": "caster_stat3",
+      "min": 1.07,
+      "max": 1.115
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 4,
+      "ratio_to": "caster_stat4",
+      "min": 1.07,
+      "max": 1.115
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.561236",
+      "index": 1,
+      "equals": 999
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.561236",
+      "index": 3,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.561236",
+      "index": 4,
+      "equals": 101
+    }
+  ]
+}

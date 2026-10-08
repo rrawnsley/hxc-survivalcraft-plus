@@ -31,6 +31,9 @@ inline constexpr std::array Class32Ability520269 = { AbilityRank{ 520269, 1, { 2
 inline constexpr std::array Class32Ability800995 = { AbilityRank{ 800995, 1, { 18, 1 } } };
 inline constexpr std::array Class32Ability803679 = { AbilityRank{ 803679, 1, { 28, 1 } } };
 
+inline constexpr std::array LeylinesEtching = { AbilityRank{ 561236, 1, { 2, 1 } } };
+inline constexpr std::array MagiEtching = { AbilityRank{ 560295, 1, { 40, 1 } } };
+
 inline constexpr std::array ResourcefulWuju = { AbilityRank{ 578344, 1, { 16, 1 } } };
 inline constexpr std::array SlayersPact = { AbilityRank{ 803343, 1, { 24, 1 } } };
 inline constexpr std::array TwistedSight = { AbilityRank{ 532229, 1, { 24, 1 } } };
@@ -61,6 +64,10 @@ inline constexpr std::array MeltLock = { AbilityRank{ 804662, 1, { 16, 1 } } };
 inline constexpr std::array TinkerPickLock = { AbilityRank{ 804154, 1, { 14, 1 } } };
 
 inline constexpr std::array Profiles = {
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 32, 561236, AbilityKind::Fixed, LeylinesEtching, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 32, 560295, AbilityKind::Fixed, MagiEtching, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 13, 578344, AbilityKind::Fixed, ResourcefulWuju, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -151,6 +158,10 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 32, 561236, { 6, 0, 0 }, { 21, 0, 0 }, {}, { 137, 0, 0 }, {},
+        std::array<std::int32_t, 3>{ -1, 0, 0 }, std::array<std::int32_t, 3>{ 9, -1, -1 } },
+    Mechanic{ 32, 560295, { 0, 6, 0 }, { 0, 21, 0 }, {}, { 0, 72, 0 }, {},
+        std::array<std::int32_t, 3>{ 0, 127, 0 }, std::array<std::int32_t, 3>{ 0, -6, -1 } },
     Mechanic{ 13, 578344, { 6, 168, 0 }, { 21, 21, 0 }, {}, { 72, 0, 0 }, {},
         std::array<std::int32_t, 3>{ 127, 117041, 0 }, std::array<std::int32_t, 3>{ -6, -1, -1 } },
     Mechanic{ 14, 803343, { 65, 0, 0 }, { 1, 0, 0 }, {}, { 172, 0, 0 }, {},

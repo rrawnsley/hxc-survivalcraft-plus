@@ -16,12 +16,13 @@ for _, lines in ipairs(EncodedSharedPracticeSnapshots) do
     assert(shared.spellId == 712458 or shared.spellId == 680872 or shared.spellId == 800195
         or shared.spellId == 523513 or shared.spellId == 680294
         or shared.spellId == 523495 or shared.spellId == 523510 or shared.spellId == 803657
-        or shared.spellId == 680303 or shared.spellId == 681442)
+        or shared.spellId == 680303 or shared.spellId == 681442
+        or shared.spellId == 561241 or shared.spellId == 561242 or shared.spellId == 561243)
     assert(string.find(Model.SharedAbilityText(ability, shared, 80, result.characterLevel),
         "no separate practice counter", 1, true))
     HXCAbilityPractice.Reset()
     assert(HXCAbilityPractice.ApplySnapshot(result))
-    if ability.kind == 3 and shared.state ~= 1 then assert(Model.NextMilestone(ability).spellId == 800195) end
+    if ability.kind == 3 and shared.state ~= 1 then assert(Model.NextMilestone(ability).spellId == shared.spellId) end
     local button
     for _, widget in ipairs(MockWidgets) do
         if widget.shown and widget.text == "All milestones" then button = widget end
@@ -79,5 +80,5 @@ for _, lines in ipairs(EncodedSharedPracticeSnapshots) do
     end
     count = count + 1
 end
-assert(count == 30)
-print("PASS: 30 shared buff snapshots, exact parent forecasts, model rejection and menu rendering")
+assert(count == 39)
+print("PASS: 39 shared buff snapshots, exact parent forecasts, model rejection and menu rendering")

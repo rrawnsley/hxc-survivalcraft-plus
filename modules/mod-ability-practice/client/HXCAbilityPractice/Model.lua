@@ -630,6 +630,11 @@ function Model.PracticeRules(ability, saved)
             .. " The original ability can resume practice when it is available again."
     end
     if Model.IsFixed(ability) then
+        if ability.abilityId == 561236 or ability.abilityId == 560295 then
+            return "This etching has no practice levels. " .. LearnText(ability.acquisitionSource)
+                .. " Regular and greater versions retain the same native benefit."
+                .. " Another etching from the same caster can replace it."
+        end
         return "This ability has no practice levels. " .. LearnText(ability.acquisitionSource)
     end
     local ruleSet = Integer(ability.ruleSet, 1, 10) and
@@ -697,6 +702,11 @@ function Model.PracticeRules(ability, saved)
             .. " spell-cost reduction must remain active. Switching devotions pauses this practice."
             .. " Applying, refreshing, or receiving mana ticks earns no practice."
             .. " One original ability cast earns one use, with at least five seconds between counted uses."
+    elseif ability.abilityId == 561237 and ability.route == 13 then
+        rule = "Keep your own Dextrous Etching active and use a learned ability for useful damage or healing"
+            .. " in a non-gray PvE encounter. Its Agility benefit must remain effective."
+            .. " The greater version shares this practice. Switching etchings pauses Dextrous practice."
+            .. " Applying or refreshing an etching gives no practice."
     elseif ability.abilityId == 801094 and ability.route == 13 then
         rule = "Keep your own Earth Tattoo active and use a learned ability for useful damage or healing"
             .. " in a non-gray PvE encounter. Its armor and Nature resistance must both remain effective."

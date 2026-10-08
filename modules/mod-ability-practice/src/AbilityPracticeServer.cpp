@@ -578,6 +578,21 @@ bool HasExactBuffGroup(std::uint32_t spellId, std::uint32_t groupId, SpellGroupS
     return std::equal(members.begin(), members.end(), expected.begin());
 }
 
+bool HasExpectedEtchingGroup(std::uint32_t abilityId, std::uint32_t spellId)
+{
+    constexpr std::array<std::int32_t, 6> etchings{ 560295, 561236, 561237, 561241, 561242, 561243 };
+    constexpr std::array<std::int32_t, 2> dextrous{ 561237, 561241 };
+    constexpr std::array<std::int32_t, 2> leylines{ 561236, 561242 };
+    constexpr std::array<std::int32_t, 2> magi{ 560295, 561243 };
+    if (!HasExactBuffGroup(spellId, 1140, SPELL_GROUP_STACK_RULE_EXCLUSIVE_FROM_SAME_CASTER, etchings))
+        return false;
+    if (abilityId == 561237)
+        return HasExactBuffGroup(spellId, 1042, SPELL_GROUP_STACK_RULE_EXCLUSIVE, dextrous);
+    if (abilityId == 561236)
+        return HasExactBuffGroup(spellId, 1043, SPELL_GROUP_STACK_RULE_EXCLUSIVE, leylines);
+    return abilityId == 560295 && HasExactBuffGroup(spellId, 1044, SPELL_GROUP_STACK_RULE_EXCLUSIVE, magi);
+}
+
 bool HasExpectedArmorOrEdictGroup(std::uint32_t abilityId, std::uint32_t spellId)
 {
     constexpr std::array<std::int32_t, 4> intuition{ 1126, 523478, 523495, 1101126 };
@@ -665,6 +680,14 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
                 "aura_ascension_cultist_lifecycle")
                 return false;
             if (++entry != scripts.second)
+                return false;
+        }
+        if (profile.Definition.ClassId == 32 && profile.Definition.AbilityId == 561237)
+        {
+            auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+            if (info->SpellFamilyName != 38 || info->SpellFamilyFlags[0] ||
+                info->SpellFamilyFlags[1] || info->SpellFamilyFlags[2] != 2048 ||
+                scripts.first != scripts.second || !HasExpectedEtchingGroup(561237, info->Id))
                 return false;
         }
         if (profile.Definition.ClassId == 32 && profile.Definition.AbilityId == 801094)
@@ -1141,6 +1164,18 @@ bool MatchesUtilityFixedRankMechanic(std::uint32_t classId, std::uint32_t spellI
     SpellInfo const* info = sSpellMgr->GetSpellInfo(spellId);
     if (mechanic == mechanics.end() || !info || info->IsPassive())
         return false;
+    if (classId == 32 && (spellId == 561236 || spellId == 560295))
+    {
+        auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+        if (info->SpellFamilyName != 38 || info->SpellFamilyFlags[0] ||
+            info->SpellFamilyFlags[1] || info->SpellFamilyFlags[2] ||
+            scripts.first != scripts.second || !HasExpectedEtchingGroup(spellId, info->Id))
+            return false;
+        for (std::size_t index = 0; index < 3; ++index)
+            if (info->Effects[index].DieSides != (spellId == 560295 && index == 0 ? 0 : 1) ||
+                info->Effects[index].RealPointsPerLevel || info->Effects[index].MiscValueB)
+                return false;
+    }
     if (classId == 13 && spellId == 578344)
     {
         auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
@@ -1332,6 +1367,11 @@ bool MatchesSharedBuffVariants()
             if (entry == scripts.second ||
                 sObjectMgr->GetScriptName(entry->second) != "aura_ascension_witch_doctor_lifecycle" ||
                 ++entry != scripts.second)
+                return false;
+        }
+        else if (variant.ClassId == 32)
+        {
+            if (entry != scripts.second || !HasExpectedEtchingGroup(variant.AbilityId, info->Id))
                 return false;
         }
         else if (variant.ClassId == 21)

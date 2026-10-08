@@ -542,6 +542,18 @@ def build_drafts(candidates, root):
                     ranks[0]['rawCastProfile']['recoveryMilliseconds'] != 30000):
                 raise ValueError('Reviewed Blur source/raw evidence changed')
             required.append('native-temporary-threat-and-area-damage-protection-not-recast-practice')
+        if class_id == 32 and ability_id in {561236, 560295}:
+            raw = members[ability_id].get('rawDbc', {})
+            details = raw.get('effectDetails', [])
+            expected = ([(6, 137, 21, 0, 0, -1, 9), (0, 0, 0, 0, 0, 0, -1), (0, 0, 0, 0, 0, 0, -1)]
+                        if ability_id == 561236 else
+                        [(0, 0, 0, 0, 0, 0, 0), (6, 72, 21, 0, 0, 127, -6), (0, 0, 0, 0, 0, 0, -1)])
+            if (len(ranks) != 1 or ranks[0]['characterLevel'] != (2 if ability_id == 561236 else 40) or
+                    raw.get('passive') is not False or raw.get('rankLabel') or len(details) != 3 or
+                    [(v.get('effectId'), v.get('auraId'), v.get('implicitTargetA'), v.get('implicitTargetB'),
+                      v.get('triggerSpellId'), v.get('miscValue'), v.get('basePoints')) for v in details] != expected):
+                raise ValueError('Reviewed native unranked etching source/raw evidence changed')
+            required.append('native-fixed-percent-benefit-and-exclusive-etching-not-recast-practice')
         if (class_id, ability_id) == (14, 500028):
             expected_ids = [500028, 500422, 500423]
             if ([rank['spellId'] for rank in ranks] != expected_ids or

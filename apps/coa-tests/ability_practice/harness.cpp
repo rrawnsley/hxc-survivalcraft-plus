@@ -644,7 +644,7 @@ void CheckMasteryFixedAndTrainerPolicies()
             assert(!view.NextTrainingCap && view.Rewards.empty());
         }
     }
-    assert(fixedCount == 98);
+    assert(fixedCount == 100);
     for (auto const& profile : DevelopmentUtilityFixed::Profiles)
         for (auto const& rank : profile.Definition.Ranks)
         {
@@ -728,7 +728,7 @@ void CheckMasteryFixedAndTrainerPolicies()
                 { 3, 1, { entry.PreviousRanks.back().Requirement.Proficiency, 0 } });
             assert(converted && converted->State.Proficiency == entry.PreviousRanks.back().Requirement.Proficiency);
         }
-    assert(DevelopmentBuffVariants::Variants.size() == 10);
+    assert(DevelopmentBuffVariants::Variants.size() == 13);
     for (auto const& variant : DevelopmentBuffVariants::Variants)
     {
         AbilityProfile const* parent = nullptr;
@@ -744,7 +744,8 @@ void CheckMasteryFixedAndTrainerPolicies()
         auto const* rank = DevelopmentBuffVariants::EquivalentRank(*parent, variant);
         assert(rank && rank->SpellId == variant.EquivalentSpellId);
         assert(rank->Requirement.Proficiency == (variant.SpellId == 712458 || variant.SpellId == 523495 ||
-            variant.SpellId == 680303 ? 80u : variant.SpellId == 680872 || variant.SpellId == 523510 ||
+            variant.SpellId == 680303 ? 80u : variant.SpellId == 561241 || variant.SpellId == 680872 ||
+            variant.SpellId == 523510 ||
             variant.SpellId == 681442 ? 40u : variant.SpellId == 523513 || variant.SpellId == 803657 ? 60u :
             variant.SpellId == 680294 ? 100u : 1u));
         auto invalid = variant;
@@ -755,7 +756,7 @@ void CheckMasteryFixedAndTrainerPolicies()
         assert(!DevelopmentBuffVariants::EquivalentRank(*parent, invalid));
     }
     assert(extensions == 14 && addedRanks == 26);
-    std::cout << "PASS: 9 mastery policies/rewards, 98 fixed declarations, 14 trainer extensions/26 added ranks\n";
+    std::cout << "PASS: 9 mastery policies/rewards, 100 fixed declarations, 14 trainer extensions/26 added ranks\n";
 }
 
 void WriteSharedCases(std::string const& filename)
