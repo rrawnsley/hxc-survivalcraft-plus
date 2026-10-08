@@ -1487,6 +1487,14 @@ bool MatchesSharedBuffVariants()
                     "aura_ascension_tinker_lifecycle" || ++entry != scripts.second)
                 return false;
         }
+        else if (variant.ClassId == 18)
+        {
+            auto const groups = sSpellMgr->GetSpellSpellGroupMapBounds(info->Id);
+            auto const regular = sSpellMgr->GetSpellSpellGroupMapBounds(parent->Id);
+            if (info->SpellFamilyName != 24 || entry != scripts.second ||
+                groups.first != groups.second || regular.first != regular.second)
+                return false;
+        }
         else if (variant.ClassId == 16)
         {
             if (info->SpellFamilyName != 22 || entry != scripts.second ||
