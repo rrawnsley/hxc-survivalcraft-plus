@@ -259,7 +259,7 @@
       "actor": "caster",
       "metric": "spell_damage_count",
       "spell": 800140,
-      "min": 1
+      "min": 2
     },
     {
       "action": "assert",

@@ -19,7 +19,7 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
     local ability = result.abilities[1]
     kinds[ability.kind] = kinds[ability.kind] + 1
     if ability.kind == 1 then assert(ability.catchup) end
-    if ability.abilityId == 572384 or ability.abilityId == 800197 or ability.abilityId == 800266 then
+    if ability.abilityId == 572384 or ability.abilityId == 800197 or ability.abilityId == 800266 or ability.abilityId == 706742 then
         assert(ability.route == 13)
         assert(string.find(Model.PracticeRules(ability), "melee and ranged effects", 1, true))
     end
@@ -40,7 +40,7 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
             ability.route = route
             assert(Model.Validate(result))
         end
-        if ability.abilityId == 807942 then
+        if ability.abilityId == 810942 then
             assert(ability.route == 2 and (ability.ruleSet == 1 or ability.ruleSet == 4))
             assert(string.find(Model.PracticeRules(ability), "Energy spent without actual healing", 1, true))
             assert(string.find(Model.PracticeRules(ability), "One original cast earns at most one award", 1, true))
@@ -81,7 +81,7 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
     end
     count = count + 1
 end
-assert(count == 807)
-assert(kinds[1] == 471 and kinds[2] == 45 and kinds[3] == 291)
+assert(count == 810)
+assert(kinds[1] == 474 and kinds[2] == 45 and kinds[3] == 291)
 for classId = 12, 32 do assert(classes[classId]) end
-print("PASS: 807 typed snapshots across 21 classes: 471 ranked, 45 mastery, 291 fixed and menu rendering")
+print("PASS: 810 typed snapshots across 21 classes: 474 ranked, 45 mastery, 291 fixed and menu rendering")

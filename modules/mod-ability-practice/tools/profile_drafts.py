@@ -91,6 +91,12 @@ def verify_provenance(candidates, root, dbc):
                 'src/server/coa/AscensionFelswornAuras.cpp',
                 'src/server/coa/AscensionFelswornAbilities.cpp', 'src/server/coa/AscensionFelswornEvents.cpp',
                 'src/server/coa/AscensionFelswornContracts.cpp',
+                'src/server/coa/AscensionTinker.cpp',
+                'src/server/coa/AscensionTinker.h',
+                'src/server/coa/AscensionTinkerData.h',
+                'src/server/coa/AscensionTinkerAuras.cpp',
+                'src/server/coa/AscensionTinkerAbilities.cpp',
+                'src/server/coa/AscensionTinkerContracts.cpp',
                 'src/server/coa/AscensionFelswornData.h', 'src/server/coa/AscensionFelswornSummons.cpp',
                 'src/server/coa/AscensionXorothAbilities.cpp', 'src/server/coa/AscensionXorothData.h',
                 'src/server/coa/AscensionXorothContracts.cpp', 'src/server/coa/AscensionCompat.cpp',
@@ -578,15 +584,22 @@ def build_drafts(candidates, root):
             for rank in ranks:
                 raw = members[rank['spellId']].get('rawDbc', {})
                 details = raw.get('effectDetails', [])
+                rank_expected = list(expected)
+                if (class_id, ability_id) == (28, 706742) and rank['spellId'] in {707347, 707348, 707349, 707350}:
+                    rank_expected[0] = (6, 99, 21, 0, 0, 1)
+                    rank_expected[1] = (6, 124, 0, 0, 0, 0)
                 if raw.get('passive') is not False or len(details) != 3 or [(v.get('effectId'),
                         v.get('auraId'), v.get('implicitTargetA'), v.get('implicitTargetB'),
-                        v.get('triggerSpellId'), v.get('miscValue')) for v in details] != expected or (
+                        v.get('triggerSpellId'), v.get('miscValue')) for v in details] != rank_expected or (
                         type(details[effect_index].get('basePoints')) is not int or
                         details[effect_index]['basePoints'] < 0):
                     raise ValueError('Reviewed owned stat-buff source shape changed')
                 if mechanic['auraId'] == 99 and details[1].get('basePoints') != details[0]['basePoints']:
                     raise ValueError('Paired attack-power rank amounts differ')
                 amounts.append(details[effect_index]['basePoints'] + 1)
+            if (class_id, ability_id) == (28, 706742):
+                required.extend(['native-tinker-lifecycle-single-loaded-binding-and-family',
+                                 'native-power-module-rank-variants-and-both-attack-power-totals'])
             mechanic['rawRankAmounts'] = amounts
             required.extend(['owned-buff-original-application-and-combat-cast-contribution',
                              'buff-contribution-five-second-cadence-and-per-cast-deduplication',

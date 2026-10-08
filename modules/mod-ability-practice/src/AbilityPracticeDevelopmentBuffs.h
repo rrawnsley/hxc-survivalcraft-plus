@@ -8,6 +8,17 @@
 
 namespace AbilityPractice::DevelopmentBuffs
 {
+inline constexpr std::array PowerModule = {
+    AbilityRank{ 706742, 1, { 4, 1 } },
+    AbilityRank{ 707346, 2, { 12, 10 } },
+    AbilityRank{ 707347, 3, { 22, 20 } },
+    AbilityRank{ 707348, 4, { 32, 40 } },
+    AbilityRank{ 707349, 5, { 42, 60 } },
+    AbilityRank{ 707350, 6, { 52, 80 } },
+    AbilityRank{ 707688, 7, { 60, 100 } }
+};
+inline constexpr auto PowerModuleCaps = Development::RankCaps(PowerModule);
+
 inline constexpr std::array SanguinaryOffering = {
     AbilityRank{ 706630, 1, { 16, 1 } },
     AbilityRank{ 707336, 2, { 26, 10 } },
@@ -290,6 +301,9 @@ inline constexpr auto RiteOfPowerCaps = Development::RankCaps(RiteOfPower);
 
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 28, 706742, AbilityKind::Ranked, PowerModule, PowerModuleCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 20, 706630, AbilityKind::Ranked, SanguinaryOffering, SanguinaryOfferingCaps },
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -429,6 +443,7 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 28, 706742, 21, 0, 99 },
     Mechanic{ 20, 706630, 21, 2 },
     Mechanic{ 21, 800266, 21, 0, 99 },
     Mechanic{ 27, 572384, 21, 0, 99 },
@@ -508,6 +523,27 @@ inline bool IsPairedAttackPower(AbilityProfile const& profile)
 {
     return IsSupportedStatBuff(profile) && Aura(profile) == 99 && EffectIndex(profile) == 0 &&
         Target(profile) == 21 && StatSelector(profile) == 0;
+}
+
+inline bool IsPowerModule(AbilityProfile const& profile)
+{
+    return profile.Definition.ClassId == 28 && profile.Definition.AbilityId == 706742 &&
+        IsPairedAttackPower(profile);
+}
+
+inline bool UsesPowerModuleVariant(AbilityProfile const& profile, std::uint32_t spellId)
+{
+    return IsPowerModule(profile) && spellId >= 707347 && spellId <= 707350;
+}
+
+inline std::int32_t StatSelector(AbilityProfile const& profile, std::uint32_t spellId)
+{
+    return UsesPowerModuleVariant(profile, spellId) ? 1 : StatSelector(profile);
+}
+
+inline std::uint32_t RangedTarget(AbilityProfile const& profile, std::uint32_t spellId)
+{
+    return UsesPowerModuleVariant(profile, spellId) ? 0u : Target(profile);
 }
 
 inline bool IsBrutalShout(AbilityProfile const& profile)

@@ -4084,3 +4084,32 @@ fixtures233421 PASSED three groups71.4s real, no failures/retries, complete type
 This qualifies current catalog construction/delivery, not client pixels or every ability's gameplay.
 Scoped style/whitespace/provenance exports passed. Coverage263unique/265declared157ranked9mastery97Fixed,
 440pending(67ranked373standalone). Defaults0/addon0.4.51schema4 unpublished, no production changes.
+
+
+## Power Module paired native attack-power buff development
+
+Power Module28/706742 adds its complete seven-rank4/12/22/32/42/52/60 native trainer ladder.
+Both native melee and ranged attack-power effects remain:19/35/55/85/130/185/232.
+Explicit intermediate707347–707350 primary misc1/secondary target0 variants require the exact
+single native Tinker lifecycle binding/family34; native amounts and execution remain unchanged.
+Both positive effective effects and original owned self-application are required for useful original
+melee/ranged ability damage. Application, magic, healing, auto-attacks and inactive casts earn nothing.
+One additive definition2 pacing entry preserves157 prior curves; rank cap definition4 prepares one
+upcoming rank.540 qualifying uses estimate45minutes at assumed5s cadence, unmeasured in play.
+
+Native pre-enrollment233740 passed seven rank benefits50.8s. Source/build/harness001406 passed
+9checks79.3s/build31.1s/harness4.3s/810typed. Final native003015 passed15cases49.5s simulated:
+all seven native amounts and both total attack-power benefits; unknown saved versions preserved;
+root and intermediate variant combat contribution; automatic second-rank boundary; Mana Module
+replacement removes Power Module and stops awards. Dawn/Primal/Woodsman/Sanguinary regressions
+now require two landed attacks, proving the second inactive attack receives no credit.
+Source/real menu003250 passed9checks79.5s and58.0s, exact540uses and all seven native rank requirements.
+No failures or automatic isolated reruns in the final checks. Scoped style/whitespace/exports passed.
+
+Earlier enrolled higher-rank fixtures failed because they skipped immediate native prerequisites;
+corrected setup seeds current proficiency then learns ascending prerequisite ranks. An initial replacement
+fixture incorrectly required internal module marker707495. Feature-disabled baseline002232 passed123s
+and observed that marker absent after both Power and Mana, while native buff replacement worked.
+No native correction was made; internal marker and party lifecycle behavior remain unqualified.
+Coverage264unique/266declared158ranked9mastery97Fixed439pending(66ranked373standalone),35buffs17classes.
+Addon0.4.52-development/schema4 unpublished; all defaults0. No live server/client changes.

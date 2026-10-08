@@ -594,6 +594,16 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
             if (++entry != scripts.second)
                 return false;
         }
+        if (Practice::DevelopmentBuffs::IsPowerModule(profile))
+        {
+            auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+            auto entry = scripts.first;
+            if (info->SpellFamilyName != 34 || entry == scripts.second ||
+                sObjectMgr->GetScriptName(entry->second) != "aura_ascension_tinker_lifecycle")
+                return false;
+            if (++entry != scripts.second)
+                return false;
+        }
         auto const effectIndex = Practice::DevelopmentBuffs::EffectIndex(profile);
         if (effectIndex >= 3)
             return false;
@@ -603,8 +613,9 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
             if (Practice::DevelopmentBuffs::IsPairedAttackPower(profile) && index == 1)
             {
                 if (slot.Effect != SPELL_EFFECT_APPLY_AURA || slot.ApplyAuraName != SPELL_AURA_MOD_RANGED_ATTACK_POWER ||
-                    slot.TargetA.GetTarget() != TARGET_UNIT_TARGET_ALLY || slot.TargetB.GetTarget() ||
-                    slot.TriggerSpell || slot.MiscValue || slot.BasePoints != info->Effects[EFFECT_0].BasePoints ||
+                    slot.TargetA.GetTarget() != Practice::DevelopmentBuffs::RangedTarget(profile, info->Id) ||
+                    slot.TargetB.GetTarget() || slot.TriggerSpell || slot.MiscValue ||
+                    slot.BasePoints != info->Effects[EFFECT_0].BasePoints ||
                     slot.DieSides != info->Effects[EFFECT_0].DieSides)
                     return false;
                 continue;
@@ -613,7 +624,7 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
                 slot.ApplyAuraName != (index == effectIndex ? Practice::DevelopmentBuffs::Aura(profile) : 0u) ||
                 slot.TargetA.GetTarget() != (index == effectIndex ? Practice::DevelopmentBuffs::Target(profile) : 0u) ||
                 slot.TargetB.GetTarget() || slot.TriggerSpell ||
-                slot.MiscValue != (index == effectIndex ? Practice::DevelopmentBuffs::StatSelector(profile) : 0))
+                slot.MiscValue != (index == effectIndex ? Practice::DevelopmentBuffs::StatSelector(profile, info->Id) : 0))
                 return false;
         }
         return true;
@@ -1406,7 +1417,8 @@ bool EffectiveBuffApplication(Player* player, AuraApplication const& application
             aura != SPELL_AURA_MOD_POWER_REGEN && aura != SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE &&
             aura != SPELL_AURA_MOD_ATTACK_POWER) ||
         !effect || effect->GetAuraType() != aura || effect->GetAmount() <= 0 ||
-        effect->GetMiscValue() != Practice::DevelopmentBuffs::StatSelector(profile))
+        effect->GetMiscValue() != Practice::DevelopmentBuffs::StatSelector(
+            profile, application.GetBase()->GetSpellInfo()->Id))
         return false;
     if (Practice::DevelopmentBuffs::IsPairedAttackPower(profile))
     {
@@ -1415,7 +1427,7 @@ bool EffectiveBuffApplication(Player* player, AuraApplication const& application
             ranged->GetAmount() <= 0 || ranged->GetMiscValue())
             return false;
         std::int64_t const competing = player->GetHighestExclusiveSameEffectSpellGroupValue(
-            ranged, ranged->GetAuraType(), true, ranged->GetMiscValue());
+            ranged, ranged->GetAuraType());
         if ((competing < 0 ? -competing : competing) > ranged->GetAmount())
             return false;
     }
@@ -1429,7 +1441,9 @@ bool EffectiveBuffApplication(Player* player, AuraApplication const& application
         return player->GetMaxPositiveAuraModifierByMiscMask(SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE,
             static_cast<std::uint32_t>(effect->GetMiscValue()), effect) <= effect->GetAmount();
     std::int64_t const competing = player->GetHighestExclusiveSameEffectSpellGroupValue(
-        effect, effect->GetAuraType(), aura != SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT, effect->GetMiscValue());
+        effect, effect->GetAuraType(),
+        aura != SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT && aura != SPELL_AURA_MOD_ATTACK_POWER,
+        effect->GetMiscValue());
     std::int64_t const magnitude = competing < 0 ? -competing : competing;
     return magnitude <= effect->GetAmount();
 }

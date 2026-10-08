@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "name": "Power Module native switching baseline characterization",
+  "contract": "Observe native module switching and internal marker with ability practice disabled. No gameplay correction or practice qualification.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apmodbase",
+      "race": 1,
+      "class": 28,
+      "level": 12
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 706742
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803658
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 706742,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 706742,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 707495,
+      "save_as": "power_marker_present"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 707495,
+      "save_as": "power_marker_amount"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803658,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803658,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 706742,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 707495,
+      "save_as": "mana_marker_present"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 707495,
+      "save_as": "mana_marker_amount"
+    }
+  ]
+}

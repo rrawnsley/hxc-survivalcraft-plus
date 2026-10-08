@@ -641,7 +641,8 @@ function Model.PracticeRules(ability, saved)
             .. " Post-combat recovery counts. Players, pets, training dummies and gray opponents do not count."
             .. " Capturing a corpse without healing or gaining a soul earns no practice."
             .. " Each original cast earns at most one award; the native once-per-corpse rule remains."
-    elseif (ability.abilityId == 572384 or ability.abilityId == 800197 or ability.abilityId == 800266) and ability.route == 13 then
+    elseif (ability.abilityId == 572384 or ability.abilityId == 800197 or ability.abilityId == 800266
+        or ability.abilityId == 706742) and ability.route == 13 then
         rule = "Keep your own attack-power buff active and land a learned melee or ranged damage ability"
             .. " on a level-appropriate PvE opponent."
             .. " Both its melee and ranged effects must remain active and useful."
