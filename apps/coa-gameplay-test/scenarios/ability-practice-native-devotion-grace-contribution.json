@@ -1,0 +1,296 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Devotion of Grace combat contribution",
+  "contract": "Original useful spell damage practices the active owned mana buff; application, other devotion and mana ticks do not. Reapplication resumes retained progress.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apgraceuse",
+      "race": 1,
+      "class": 27,
+      "level": 14,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 14,
+      "health": 100000,
+      "distance": 15,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800852
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800231
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 572384
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.27.800852",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.27.800852",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.27.800852",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.27.800852",
+      "index": 3,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.27.800852",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800852,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 800852,
+      "effect": 0,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 800852,
+      "effect": 1,
+      "equals": -5
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.27.800852",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 800231
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 200
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 200
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800231,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 800231,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.27.800852",
+      "index": 4,
+      "equals": 270
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 572384,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 800852,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 572384,
+      "effect": 0,
+      "equals": 35
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 800231
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 200
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 200
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800231,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 800231,
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.27.800852",
+      "index": 4,
+      "equals": 270
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800852,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 572384,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.27.800852",
+      "index": 4,
+      "equals": 270
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 800231
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 200
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 200
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800231,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 800231,
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.27.800852",
+      "index": 4,
+      "equals": 540
+    }
+  ]
+}

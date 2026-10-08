@@ -8,6 +8,17 @@
 
 namespace AbilityPractice::DevelopmentBuffs
 {
+inline constexpr std::array DevotionOfGrace = {
+    AbilityRank{ 800852, 1, { 4, 1 } },
+    AbilityRank{ 300858, 2, { 14, 10 } },
+    AbilityRank{ 300859, 3, { 24, 20 } },
+    AbilityRank{ 300862, 4, { 34, 40 } },
+    AbilityRank{ 300863, 5, { 44, 60 } },
+    AbilityRank{ 300864, 6, { 54, 80 } },
+    AbilityRank{ 300865, 7, { 60, 100 } }
+};
+inline constexpr auto DevotionOfGraceCaps = Development::RankCaps(DevotionOfGrace);
+
 inline constexpr std::array FootpadAdaptation = {
     AbilityRank{ 523489, 1, { 20, 1 } },
     AbilityRank{ 523490, 2, { 30, 10 } },
@@ -361,6 +372,9 @@ inline constexpr auto RiteOfPowerCaps = Development::RankCaps(RiteOfPower);
 
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 27, 800852, AbilityKind::Ranked, DevotionOfGrace, DevotionOfGraceCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 21, 523489, AbilityKind::Ranked, FootpadAdaptation, FootpadAdaptationCaps },
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -524,6 +538,7 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 27, 800852, 21, 0, 85 },
     Mechanic{ 21, 523489, 21, 1, 22 },
     Mechanic{ 17, 707693, 21, 127, 345 },
     Mechanic{ 31, 570752, 21, 1, 143 },
@@ -571,6 +586,7 @@ inline constexpr std::array Mechanics = {
 static_assert(Mechanics.size() == Profiles.size());
 
 inline constexpr std::array SecondaryMechanics = {
+    Mechanic{ 27, 800852, 21, 127, 72, 1 },
     Mechanic{ 21, 523489, 21, -1, 29, 1 },
     Mechanic{ 17, 707693, 21, 32, 143, 1 },
     Mechanic{ 31, 570752, 21, -1, 29, 1 },
@@ -587,6 +603,12 @@ inline Mechanic const* SecondaryMechanicFor(AbilityProfile const& profile, std::
             mechanic.EffectIndex == effectIndex)
             return &mechanic;
     return nullptr;
+}
+
+inline bool IsDevotionOfGrace(AbilityProfile const& profile)
+{
+    return profile.Definition.ClassId == 27 && profile.Definition.AbilityId == 800852 &&
+        IsSupportedStatBuff(profile);
 }
 
 inline bool IsRangerAdaptation(AbilityProfile const& profile)

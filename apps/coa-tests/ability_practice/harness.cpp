@@ -174,6 +174,16 @@ void CheckPersistence(TrainingPolicy policy)
     broken[4] = 30;
     assert(DecodeStoredProgress(policy, 7, broken, true).Status == LoadStatus::Invalid);
     assert(DecodeStoredProgress(policy, 7, std::span(*fields).first(4), true).Status == LoadStatus::Invalid);
+    LoadedProgress partial{ LoadStatus::Loaded, { 7, 0, { 9, 15 } } };
+    auto const retained = MigrateLearnedRanks(ability, policy, partial, known);
+    assert(retained && retained->State.Proficiency == 20 && retained->State.Points == 15);
+    assert(retained->MigrationVersion == 1);
+    std::array const scaledBands = { TrainingBand{ 1, 30, 2 }, TrainingBand{ 20, 60, 1 } };
+    auto const scaled = MigrateLearnedRanks(ability, { scaledBands }, partial, known);
+    assert(scaled && scaled->State.Proficiency == 20 && scaled->State.Points == 30);
+    std::array const inexactBands = { TrainingBand{ 1, 30, 2 }, TrainingBand{ 20, 7, 1 } };
+    assert(!MigrateLearnedRanks(ability, { inexactBands }, partial, known));
+    assert(partial.Record.State.Proficiency == 9 && partial.Record.State.Points == 15);
     LoadedProgress once{ LoadStatus::Loaded, { 7, 1, { 1, 0 } } };
     auto const notReseeded = MigrateLearnedRanks(ability, policy, once, known);
     assert(notReseeded && notReseeded->State.Proficiency == 1);
@@ -455,7 +465,7 @@ void CheckCurrentRankPolicies()
 {
     std::uint32_t forecasts = 0;
     std::array<bool, 21> classes{};
-    assert(DevelopmentPacing::Entries.size() == 165);
+    assert(DevelopmentPacing::Entries.size() == 166);
     for (auto const& entry : DevelopmentPacing::Entries)
     {
         classes.at(entry.ClassId - 12) = true;
@@ -743,8 +753,8 @@ void CheckMasteryFixedAndTrainerPolicies()
         invalid.CharacterLevel = 1;
         assert(!DevelopmentBuffVariants::EquivalentRank(*parent, invalid));
     }
-    assert(extensions == 13 && addedRanks == 25);
-    std::cout << "PASS: 9 mastery policies/rewards, 98 fixed declarations, 13 trainer extensions/25 added ranks\n";
+    assert(extensions == 14 && addedRanks == 26);
+    std::cout << "PASS: 9 mastery policies/rewards, 98 fixed declarations, 14 trainer extensions/26 added ranks\n";
 }
 
 void WriteSharedCases(std::string const& filename)

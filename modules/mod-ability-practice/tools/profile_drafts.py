@@ -61,6 +61,10 @@ def verify_provenance(candidates, root, dbc):
                 'src/server/game/Movement/MotionMaster.h', 'src/server/game/Movement/MotionMaster.cpp',
                          'src/server/coa/AscensionVenomancerAbilities.cpp',
                          'src/server/coa/AscensionSunClericAbilities.cpp',
+                'src/server/coa/AscensionSunClericAuras.cpp',
+                'src/server/coa/AscensionSunClericContracts.cpp',
+                'src/server/coa/AscensionSunClericData.h',
+                'src/server/coa/AscensionSunClericDevotion.cpp',
                          'src/server/coa/AscensionVenomancerAuras.cpp',
                 'src/server/coa/AscensionVenomancer.cpp',
                          'src/server/coa/AscensionReaperTalentProcs.h',
@@ -252,7 +256,8 @@ def reviewed_stat_buffs(root):
     secondary_matches = list(re.finditer(pattern, secondary_body[1]))
     if re.sub(pattern, '', secondary_body[1]).replace(',', '').strip():
         raise ValueError('Unsupported secondary buff mechanic declaration')
-    expected_secondary = {(21, 523489, 1): (21, -1, 29), (17, 707693, 1): (21, 32, 143),
+    expected_secondary = {(27, 800852, 1): (21, 127, 72), (21, 523489, 1): (21, -1, 29),
+                          (17, 707693, 1): (21, 32, 143),
                           (13, 560294, 1): (21, 126, 143), (17, 706589, 1): (21, 0, 29),
                           (17, 803667, 1): (21, 16, 143), (31, 570752, 1): (21, -1, 29),
                           (31, 570752, 2): (21, 126, 143)}
@@ -613,7 +618,9 @@ def build_drafts(candidates, root):
                 expected[secondary['effectIndex']] = (6, secondary['auraId'], secondary['targetA'],
                                                      0, 0, secondary['statSelector'])
             if secondary_components:
-                required.append('all-authored-buff-components-positive-active-and-effective')
+                required.append('all-authored-buff-components-beneficial-active-and-effective' if
+                    (class_id, ability_id) == (27, 800852) else
+                    'all-authored-buff-components-positive-active-and-effective')
                 if (class_id, ability_id) == (13, 560294):
                     required.append('native-wuju-lifecycle-and-exclusive-replacement-preserved')
                 elif (class_id, ability_id) in {(17, 706589), (17, 803667), (17, 707693)}:
@@ -640,12 +647,20 @@ def build_drafts(candidates, root):
                         type(details[effect_index].get('basePoints')) is not int or
                         details[effect_index]['basePoints'] < 0):
                     raise ValueError('Reviewed owned stat-buff source shape changed')
-                if any(type(details[v['effectIndex']].get('basePoints')) is not int or
-                       details[v['effectIndex']]['basePoints'] < 0 for v in secondary_components):
-                    raise ValueError('Reviewed secondary buff amount is not positive')
+                for component in secondary_components:
+                    value = details[component['effectIndex']]
+                    grace_cost = (class_id, ability_id, component['effectIndex']) == (27, 800852, 1)
+                    valid_amount = type(value.get('basePoints')) is int and (
+                        value['basePoints'] == -6 if grace_cost else
+                        value['basePoints'] >= 0)
+                    if not valid_amount:
+                        raise ValueError('Reviewed secondary buff benefit changed')
                 if mechanic['auraId'] == 99 and details[1].get('basePoints') != details[0]['basePoints']:
                     raise ValueError('Paired attack-power rank amounts differ')
                 amounts.append(details[effect_index]['basePoints'] + 1)
+            if (class_id, ability_id) == (27, 800852):
+                required.extend(['native-sun-cleric-lifecycle-and-devotion-replacement',
+                                 'native-negative-five-percent-cost-component-and-primary-mana'])
             if (class_id, ability_id) == (21, 523489):
                 required.extend(['native-armor-allstats-and-agility-armor-contribution',
                                  'native-ranger-strongest-buff-group-and-shared-greater-practice'])

@@ -691,6 +691,12 @@ function Model.PracticeRules(ability, saved)
             .. " Its armor, all five stats, and magic resistance effects must remain active and useful."
             .. " Applying or refreshing the buff earns no practice."
             .. " One original ability cast earns one use, with at least five seconds between counted uses."
+    elseif ability.abilityId == 800852 and ability.route == 13 then
+        rule = "Keep your own Devotion of Grace active and use a learned ability for useful damage or healing"
+            .. " in a qualifying PvE fight. Native mana regeneration must be available, and its five-percent"
+            .. " spell-cost reduction must remain active. Switching devotions pauses this practice."
+            .. " Applying, refreshing, or receiving mana ticks earns no practice."
+            .. " One original ability cast earns one use, with at least five seconds between counted uses."
     elseif ability.abilityId == 523489 and ability.route == 13 then
         rule = "Keep your own Footpad's Adaptation active and use a learned ability for useful damage or healing"
             .. " in a qualifying PvE fight. Its armor and all five stat effects must remain active and useful."

@@ -1,0 +1,191 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native Devotion of Grace rank 6",
+  "contract": "The native rank retains mana regeneration and five-percent spell-cost reduction; unknown saved records remain untouched.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apgracesix",
+      "race": 1,
+      "class": 27,
+      "level": 54
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.27.800852",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.27.800852",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.27.800852",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.27.800852",
+      "index": 3,
+      "value": 80
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.27.800852",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800852
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 300858
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 300859
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 300862
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 300863
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 300864
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 500143
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_power_cost",
+      "spell": 500143,
+      "min": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.27.800852",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.27.800852",
+      "index": 1,
+      "value": 999
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.27.800852",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.27.800852",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.27.800852",
+      "index": 4,
+      "value": 101
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_power_cost",
+      "spell": 500143,
+      "save_as": "basecost"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 300864,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 300864,
+      "effect": 0,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 300864,
+      "effect": 1,
+      "equals": -5
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_power_cost",
+      "spell": 500143,
+      "ratio_to": "basecost",
+      "min": 0.9,
+      "max": 0.951
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.27.800852",
+      "index": 1,
+      "equals": 999
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.27.800852",
+      "index": 4,
+      "equals": 101
+    }
+  ]
+}

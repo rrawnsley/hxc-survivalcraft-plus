@@ -106,7 +106,15 @@ inline std::optional<StoredProgress> MigrateLearnedRanks(AbilityDefinition const
     StoredProgress record = loaded.Record;
     if (record.MigrationVersion < LearnedRankMigrationVersion)
     {
-        record.State = SeedLearnedRanks(ability, record.State, learnedSpells);
+        Progress const seeded = SeedLearnedRanks(ability, record.State, learnedSpells);
+        std::uint32_t const previousCost = policy.Bands[
+            Detail::BandIndex(policy, record.State.Proficiency)].PointsPerLevel;
+        std::uint32_t const nextCost = policy.Bands[
+            Detail::BandIndex(policy, seeded.Proficiency)].PointsPerLevel;
+        std::uint64_t const scaledPoints = record.State.Points * nextCost;
+        if (scaledPoints % previousCost)
+            return std::nullopt;
+        record.State = { seeded.Proficiency, scaledPoints / previousCost };
         record.MigrationVersion = LearnedRankMigrationVersion;
     }
     return record;

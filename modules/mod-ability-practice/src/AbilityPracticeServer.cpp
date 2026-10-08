@@ -621,6 +621,17 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
             if (++entry != scripts.second)
                 return false;
         }
+        if (Practice::DevelopmentBuffs::IsDevotionOfGrace(profile))
+        {
+            auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+            auto entry = scripts.first;
+            if (info->SpellFamilyName != 33 || info->SpellFamilyFlags[0] ||
+                info->SpellFamilyFlags[1] != 32768u || info->SpellFamilyFlags[2] || entry == scripts.second ||
+                sObjectMgr->GetScriptName(entry->second) != "aura_ascension_sun_cleric_lifecycle")
+                return false;
+            if (++entry != scripts.second)
+                return false;
+        }
         if (Practice::DevelopmentBuffs::IsRangerAdaptation(profile))
         {
             auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
@@ -679,10 +690,11 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
             auto const* secondary = Practice::DevelopmentBuffs::SecondaryMechanicFor(profile, index);
             if (secondary && index == secondary->EffectIndex)
             {
+                bool const graceCost = Practice::DevelopmentBuffs::IsDevotionOfGrace(profile) && index == 1;
                 if (slot.Effect != SPELL_EFFECT_APPLY_AURA || slot.ApplyAuraName != secondary->Aura ||
                     slot.TargetA.GetTarget() != secondary->TargetA || slot.TargetB.GetTarget() ||
                     slot.TriggerSpell || slot.MiscValue != secondary->Stat || slot.MiscValueB ||
-                    slot.BasePoints < 0)
+                    (graceCost ? (slot.BasePoints != -6 || slot.DieSides != 1) : slot.BasePoints < 0))
                     return false;
                 continue;
             }
@@ -1602,12 +1614,16 @@ bool EffectiveBuffComponent(Player* player, AuraApplication const& application, 
         application.GetBase()->IsRemoved())
         return false;
     AuraEffect const* effect = application.GetBase()->GetEffect(effectIndex);
+    bool const costReduction = aura == SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT;
     if ((aura != SPELL_AURA_MOD_STAT && aura != SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT &&
             aura != SPELL_AURA_MOD_POWER_REGEN && aura != SPELL_AURA_MOD_RESISTANCE &&
-            aura != SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE &&
+            aura != SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE && aura != SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT &&
             aura != SPELL_AURA_MOD_ATTACK_POWER && aura != SPELL_AURA_MOD_RANGED_ATTACK_POWER) ||
-        !effect || effect->GetAuraType() != aura || effect->GetAmount() <= 0 || effect->GetMiscValue() != selector)
+        !effect || effect->GetAuraType() != aura || effect->GetMiscValue() != selector ||
+        (costReduction ? (effect->GetAmount() != -5 || selector != 127) : effect->GetAmount() <= 0))
         return false;
+    if (costReduction)
+        return true;
     if (aura == SPELL_AURA_MOD_POWER_REGEN && (player->getPowerType() != POWER_MANA ||
         !player->GetMaxPower(POWER_MANA) ||
         player->HasAuraTypeWithMiscvalue(SPELL_AURA_PREVENT_REGENERATE_POWER, POWER_MANA + 1) ||
