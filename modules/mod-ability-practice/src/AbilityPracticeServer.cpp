@@ -594,6 +594,17 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
             if (++entry != scripts.second)
                 return false;
         }
+        if (Practice::DevelopmentBuffs::IsSpiritWuju(profile))
+        {
+            auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+            auto entry = scripts.first;
+            if (info->SpellFamilyName != 19 || info->SpellFamilyFlags[0] != 256 ||
+                info->SpellFamilyFlags[1] || info->SpellFamilyFlags[2] || entry == scripts.second ||
+                sObjectMgr->GetScriptName(entry->second) != "aura_ascension_witch_doctor_lifecycle")
+                return false;
+            if (++entry != scripts.second)
+                return false;
+        }
         if (Practice::DevelopmentBuffs::IsPowerModule(profile))
         {
             auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
@@ -610,6 +621,16 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
         for (std::size_t index = 0; index < 3; ++index)
         {
             auto const& slot = info->Effects[index];
+            auto const* secondary = Practice::DevelopmentBuffs::SecondaryMechanicFor(profile);
+            if (secondary && index == secondary->EffectIndex)
+            {
+                if (slot.Effect != SPELL_EFFECT_APPLY_AURA || slot.ApplyAuraName != secondary->Aura ||
+                    slot.TargetA.GetTarget() != secondary->TargetA || slot.TargetB.GetTarget() ||
+                    slot.TriggerSpell || slot.MiscValue != secondary->Stat || slot.MiscValueB ||
+                    slot.BasePoints < 0)
+                    return false;
+                continue;
+            }
             if (Practice::DevelopmentBuffs::IsPairedAttackPower(profile) && index == 1)
             {
                 if (slot.Effect != SPELL_EFFECT_APPLY_AURA || slot.ApplyAuraName != SPELL_AURA_MOD_RANGED_ATTACK_POWER ||
@@ -1404,33 +1425,18 @@ bool IsBuffObserver(Player const* player)
         });
 }
 
-bool EffectiveBuffApplication(Player* player, AuraApplication const& application,
-    Practice::AbilityProfile const& profile)
+bool EffectiveBuffComponent(Player* player, AuraApplication const& application, std::uint8_t effectIndex,
+    std::uint32_t aura, std::int32_t selector)
 {
-    auto const effectIndex = Practice::DevelopmentBuffs::EffectIndex(profile);
     if (effectIndex >= 3 || application.GetRemoveMode() != AURA_REMOVE_NONE || !application.HasEffect(effectIndex) ||
         application.GetBase()->IsRemoved())
         return false;
     AuraEffect const* effect = application.GetBase()->GetEffect(effectIndex);
-    std::uint32_t const aura = Practice::DevelopmentBuffs::Aura(profile);
     if ((aura != SPELL_AURA_MOD_STAT && aura != SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT &&
             aura != SPELL_AURA_MOD_POWER_REGEN && aura != SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE &&
-            aura != SPELL_AURA_MOD_ATTACK_POWER) ||
-        !effect || effect->GetAuraType() != aura || effect->GetAmount() <= 0 ||
-        effect->GetMiscValue() != Practice::DevelopmentBuffs::StatSelector(
-            profile, application.GetBase()->GetSpellInfo()->Id))
+            aura != SPELL_AURA_MOD_ATTACK_POWER && aura != SPELL_AURA_MOD_RANGED_ATTACK_POWER) ||
+        !effect || effect->GetAuraType() != aura || effect->GetAmount() <= 0 || effect->GetMiscValue() != selector)
         return false;
-    if (Practice::DevelopmentBuffs::IsPairedAttackPower(profile))
-    {
-        AuraEffect const* ranged = application.GetBase()->GetEffect(EFFECT_1);
-        if (!application.HasEffect(EFFECT_1) || !ranged || ranged->GetAuraType() != SPELL_AURA_MOD_RANGED_ATTACK_POWER ||
-            ranged->GetAmount() <= 0 || ranged->GetMiscValue())
-            return false;
-        std::int64_t const competing = player->GetHighestExclusiveSameEffectSpellGroupValue(
-            ranged, ranged->GetAuraType());
-        if ((competing < 0 ? -competing : competing) > ranged->GetAmount())
-            return false;
-    }
     if (aura == SPELL_AURA_MOD_POWER_REGEN && (player->getPowerType() != POWER_MANA ||
         !player->GetMaxPower(POWER_MANA) ||
         player->HasAuraTypeWithMiscvalue(SPELL_AURA_PREVENT_REGENERATE_POWER, POWER_MANA + 1) ||
@@ -1442,10 +1448,25 @@ bool EffectiveBuffApplication(Player* player, AuraApplication const& application
             static_cast<std::uint32_t>(effect->GetMiscValue()), effect) <= effect->GetAmount();
     std::int64_t const competing = player->GetHighestExclusiveSameEffectSpellGroupValue(
         effect, effect->GetAuraType(),
-        aura != SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT && aura != SPELL_AURA_MOD_ATTACK_POWER,
-        effect->GetMiscValue());
+        aura != SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT && aura != SPELL_AURA_MOD_ATTACK_POWER &&
+            aura != SPELL_AURA_MOD_RANGED_ATTACK_POWER, effect->GetMiscValue());
     std::int64_t const magnitude = competing < 0 ? -competing : competing;
     return magnitude <= effect->GetAmount();
+}
+
+bool EffectiveBuffApplication(Player* player, AuraApplication const& application,
+    Practice::AbilityProfile const& profile)
+{
+    if (!EffectiveBuffComponent(player, application, Practice::DevelopmentBuffs::EffectIndex(profile),
+        Practice::DevelopmentBuffs::Aura(profile), Practice::DevelopmentBuffs::StatSelector(
+            profile, application.GetBase()->GetSpellInfo()->Id)))
+        return false;
+    if (Practice::DevelopmentBuffs::IsPairedAttackPower(profile) &&
+        !EffectiveBuffComponent(player, application, EFFECT_1, SPELL_AURA_MOD_RANGED_ATTACK_POWER, 0))
+        return false;
+    auto const* secondary = Practice::DevelopmentBuffs::SecondaryMechanicFor(profile);
+    return !secondary || EffectiveBuffComponent(player, application, secondary->EffectIndex,
+        secondary->Aura, secondary->Stat);
 }
 
 SpellInfo const* AcceptedBuffSpell(Player* player, MenuSession const& session,

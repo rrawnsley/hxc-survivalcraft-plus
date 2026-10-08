@@ -1,0 +1,268 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Spirit Wuju native rank3 benefit",
+  "contract": "Complete native Spirit and six magic resistance benefits remain; unknown saved versions are preserved. Human Spirit scaling may affect the stat total.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apwujuprobec",
+      "race": 1,
+      "class": 13,
+      "level": 42
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 560294
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.560294",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.560294",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.560294",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.560294",
+      "index": 3,
+      "value": 20
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.560294",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 561140
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 561141
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.560294",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.560294",
+      "index": 1,
+      "value": 999
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.560294",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.560294",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.560294",
+      "index": 4,
+      "value": 101
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 4,
+      "save_as": "spirit_base"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 1,
+      "save_as": "resistance_base_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 2,
+      "save_as": "resistance_base_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 3,
+      "save_as": "resistance_base_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 4,
+      "save_as": "resistance_base_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 5,
+      "save_as": "resistance_base_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 6,
+      "save_as": "resistance_base_6"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561141,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 561141,
+      "effect": 0,
+      "equals": 23
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 561141,
+      "effect": 1,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 4,
+      "relative_to": "spirit_base",
+      "min": 22.9,
+      "max": 25.3
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 1,
+      "relative_to": "resistance_base_1",
+      "min": 9.9,
+      "max": 10.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 2,
+      "relative_to": "resistance_base_2",
+      "min": 9.9,
+      "max": 10.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 3,
+      "relative_to": "resistance_base_3",
+      "min": 9.9,
+      "max": 10.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 4,
+      "relative_to": "resistance_base_4",
+      "min": 9.9,
+      "max": 10.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 5,
+      "relative_to": "resistance_base_5",
+      "min": 9.9,
+      "max": 10.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 6,
+      "relative_to": "resistance_base_6",
+      "min": 9.9,
+      "max": 10.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.13.560294",
+      "index": 1,
+      "equals": 999
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.13.560294",
+      "index": 3,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.13.560294",
+      "index": 4,
+      "equals": 101
+    }
+  ]
+}

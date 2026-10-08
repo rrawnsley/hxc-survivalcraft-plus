@@ -91,6 +91,9 @@ def verify_provenance(candidates, root, dbc):
                 'src/server/coa/AscensionFelswornAuras.cpp',
                 'src/server/coa/AscensionFelswornAbilities.cpp', 'src/server/coa/AscensionFelswornEvents.cpp',
                 'src/server/coa/AscensionFelswornContracts.cpp',
+                'src/server/coa/AscensionWitchDoctorAuras.cpp',
+                'src/server/coa/AscensionWitchDoctorCompletion.h',
+                'src/server/coa/AscensionWitchDoctorAbilities.cpp',
                 'src/server/coa/AscensionTinker.cpp',
                 'src/server/coa/AscensionTinker.h',
                 'src/server/coa/AscensionTinkerData.h',
@@ -236,6 +239,23 @@ def reviewed_stat_buffs(root):
                             'targetA': target, 'statSelector': stat, 'auraId': aura, 'effectIndex': effect_index}
     if set(result) != profiles:
         raise ValueError('Owned stat-buff profiles and mechanics differ')
+    secondary_body = re.search(r'inline\s+constexpr\s+std::array\s+SecondaryMechanics\s*=\s*\{(.*?)\};', text, re.S)
+    if secondary_body is None:
+        raise ValueError('Missing reviewed secondary buff mechanics')
+    secondary_matches = list(re.finditer(pattern, secondary_body[1]))
+    if re.sub(pattern, '', secondary_body[1]).replace(',', '').strip():
+        raise ValueError('Unsupported secondary buff mechanic declaration')
+    expected_secondary = {(13, 560294): (21, 126, 143, 1)}
+    observed_secondary = {}
+    for match in secondary_matches:
+        values = tuple(map(int, match.groups()))
+        identity, shape = values[:2], values[2:]
+        if identity not in result or identity in observed_secondary or expected_secondary.get(identity) != shape:
+            raise ValueError('Unsupported reviewed secondary buff mechanic')
+        observed_secondary[identity] = shape
+        result[identity]['secondaryComponent'] = dict(zip(('targetA', 'statSelector', 'auraId', 'effectIndex'), shape))
+    if observed_secondary != expected_secondary:
+        raise ValueError('Reviewed secondary buff catalog changed')
     rite_profiles = {(30, 575839), (30, 578126)}.intersection(result)
     if rite_profiles:
         rites = (root / 'data/sql/updates/pending_db_world/rev_20260916_61_rite_buffs_exclusive.sql').read_text(
@@ -576,6 +596,12 @@ def build_drafts(candidates, root):
             effect_index = mechanic['effectIndex']
             expected = [(0, 0, 0, 0, 0, 0)] * 3
             expected[effect_index] = (6, mechanic['auraId'], mechanic['targetA'], 0, 0, mechanic['statSelector'])
+            secondary = mechanic.get('secondaryComponent')
+            if secondary:
+                expected[secondary['effectIndex']] = (6, secondary['auraId'], secondary['targetA'],
+                                                     0, 0, secondary['statSelector'])
+                required.extend(['all-authored-buff-components-positive-active-and-effective',
+                                 'native-wuju-lifecycle-and-exclusive-replacement-preserved'])
             if mechanic['auraId'] == 99:
                 expected[1] = (6, 124, 21, 0, 0, 0)
                 required.extend(['paired-melee-and-ranged-attack-power-effects-both-active-for-practice',
@@ -594,6 +620,9 @@ def build_drafts(candidates, root):
                         type(details[effect_index].get('basePoints')) is not int or
                         details[effect_index]['basePoints'] < 0):
                     raise ValueError('Reviewed owned stat-buff source shape changed')
+                if secondary and (type(details[secondary['effectIndex']].get('basePoints')) is not int or
+                                  details[secondary['effectIndex']]['basePoints'] < 0):
+                    raise ValueError('Reviewed secondary buff amount is not positive')
                 if mechanic['auraId'] == 99 and details[1].get('basePoints') != details[0]['basePoints']:
                     raise ValueError('Paired attack-power rank amounts differ')
                 amounts.append(details[effect_index]['basePoints'] + 1)

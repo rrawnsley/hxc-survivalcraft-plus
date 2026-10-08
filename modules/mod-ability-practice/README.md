@@ -4111,5 +4111,41 @@ corrected setup seeds current proficiency then learns ascending prerequisite ran
 fixture incorrectly required internal module marker707495. Feature-disabled baseline002232 passed123s
 and observed that marker absent after both Power and Mana, while native buff replacement worked.
 No native correction was made; internal marker and party lifecycle behavior remain unqualified.
-Coverage264unique/266declared158ranked9mastery97Fixed439pending(66ranked373standalone),35buffs17classes.
+Coverage264unique/266declared158ranked9mastery97Fixed439pending(66ranked373standalone),35buffs18classes.
 Addon0.4.52-development/schema4 unpublished; all defaults0. No live server/client changes.
+
+
+## Spirit Wuju native stat and resistance buff practice
+
+Spirit Wuju13/560294 retains four complete native ranks2/28/42/56, matching trainer900013 immediate
+prerequisites and exact single Witch Doctor lifecycle binding/family19/Wuju flag256.
+Native Spirit amounts3/17/23/40 and six magic resistance amounts5/5/10/20 remain. Rank2 increases
+Spirit while retaining the same resistance; no artificial benefit is added. Every authored positive
+component must be active and effective at original combat cast start and outcome. Native Wuju family
+replacement remains; application/refresh/removal earn no practice. Stronger overlapping resistance
+pauses practice even while the Spirit effect remains. Removing it restores practice eligibility.
+
+Secondary effect metadata and a shared component resolver preserve stat, spell-power, mana, resistance
+and paired attack-power guards. One additive authored pacing entry preserves158 prior curves,now159;
+cap definition4 prepares one upcoming rank.540 qualifying uses estimate45minutes at assumed5s cadence,
+unmeasured in ordinary play. There are36 owned buff tracks across19classes; the previous Power Module
+class count was misstated as17 and is18 when counted directly from its mechanic catalog.
+
+Source/build/harness004320 passed9checks81.6s/build31.5s/harness4.3s/813typed snapshots.
+Initial native004526 had a queue-file/requeue failure plus three fixtures with overlong character names;
+those cases timed out in character creation with zero executed steps. Shortening names corrected setup.
+Native004858 passed11cases51.7s simulated, including all four native rank benefits/unknown record retention;
+secondary suppression resumed too quickly for the native five-real-second practice floor and remained270.
+Focused unchanged real-clock005026 passed76.4s: first270, stronger external Fire resistance30 pauses gains
+while Spirit remains3 and its own resistance aura remains5; removal restores Fire resistance5 and next
+original damage reaches540. Final005157 source9/79.2s,harness4.3s and nine real-clock cases214.5s passed,
+no failures/retries: contribution, boundary, Wuju replacement, suppression, exact menu and four existing
+buff regressions. Repeated suppression reference passes support the intended real-clock cadence rule.
+
+Boundary9/15930 to10/0 learns561140 at28,561141 stays locked,native Spirit17/resistance5 remain.
+Resourceful Wuju578344 removes Spirit Wuju and stops its practice; no native lifecycle changes made.
+Menu accurately delivers four native ranks,cap20,exact540-use next-rank forecast and both-component rule;
+813 C++/Lua snapshots are477ranked45mastery291Fixed. Coverage265unique/267declared159ranked9mastery97Fixed,
+438pending(65ranked373standalone),133native provenance paths. Addon0.4.53-development/schema4 unpublished.
+All defaults0; no production/client operations. Native friendly healing contribution, client pixels,
+ordinary cadence and every other ability outcome remain unqualified.

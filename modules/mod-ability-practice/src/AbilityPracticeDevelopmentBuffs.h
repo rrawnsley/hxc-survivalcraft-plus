@@ -8,6 +8,14 @@
 
 namespace AbilityPractice::DevelopmentBuffs
 {
+inline constexpr std::array SpiritWuju = {
+    AbilityRank{ 560294, 1, { 2, 1 } },
+    AbilityRank{ 561140, 2, { 28, 10 } },
+    AbilityRank{ 561141, 3, { 42, 20 } },
+    AbilityRank{ 561142, 4, { 56, 40 } }
+};
+inline constexpr auto SpiritWujuCaps = Development::RankCaps(SpiritWuju);
+
 inline constexpr std::array PowerModule = {
     AbilityRank{ 706742, 1, { 4, 1 } },
     AbilityRank{ 707346, 2, { 12, 10 } },
@@ -301,6 +309,9 @@ inline constexpr auto RiteOfPowerCaps = Development::RankCaps(RiteOfPower);
 
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 13, 560294, AbilityKind::Ranked, SpiritWuju, SpiritWujuCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 28, 706742, AbilityKind::Ranked, PowerModule, PowerModuleCaps },
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -443,6 +454,7 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 13, 560294, 21, 4 },
     Mechanic{ 28, 706742, 21, 0, 99 },
     Mechanic{ 20, 706630, 21, 2 },
     Mechanic{ 21, 800266, 21, 0, 99 },
@@ -481,6 +493,24 @@ inline constexpr std::array Mechanics = {
 };
 
 static_assert(Mechanics.size() == Profiles.size());
+
+inline constexpr std::array SecondaryMechanics = {
+    Mechanic{ 13, 560294, 21, 126, 143, 1 }
+};
+
+inline Mechanic const* SecondaryMechanicFor(AbilityProfile const& profile)
+{
+    for (auto const& mechanic : SecondaryMechanics)
+        if (mechanic.ClassId == profile.Definition.ClassId && mechanic.AbilityId == profile.Definition.AbilityId)
+            return &mechanic;
+    return nullptr;
+}
+
+inline bool IsSpiritWuju(AbilityProfile const& profile)
+{
+    return profile.Definition.ClassId == 13 && profile.Definition.AbilityId == 560294 &&
+        IsSupportedStatBuff(profile);
+}
 
 inline Mechanic const* MechanicFor(AbilityProfile const& profile)
 {
