@@ -1,0 +1,172 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Water Tattoo native rank 2",
+  "contract": "Native rank power at its acquisition level, exact percent mana cost and unused flat modifier remain; level scaling is not replaced by practice. Unknown saves stay untouched.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apwaterb",
+      "race": 1,
+      "class": 32,
+      "level": 24
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.801107",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.801107",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.801107",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.801107",
+      "index": 3,
+      "value": 10
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.801107",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 801107
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803783
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800732
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_power_cost",
+      "spell": 800732,
+      "save_as": "basecost"
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.801107",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.801107",
+      "index": 1,
+      "value": 999
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.801107",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.801107",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.801107",
+      "index": 4,
+      "value": 101
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803783,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 803783,
+      "effect": 0,
+      "equals": 43
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 803783,
+      "effect": 1,
+      "equals": -10
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 803783,
+      "effect": 2,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_power_cost",
+      "spell": 800732,
+      "ratio_to": "basecost",
+      "min": 0.87,
+      "max": 0.901
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.801107",
+      "index": 1,
+      "equals": 999
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.801107",
+      "index": 4,
+      "equals": 101
+    }
+  ]
+}

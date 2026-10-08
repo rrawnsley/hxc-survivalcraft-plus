@@ -690,6 +690,36 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
                 scripts.first != scripts.second || !HasExpectedEtchingGroup(561237, info->Id))
                 return false;
         }
+        if (Practice::DevelopmentBuffs::IsWaterTattoo(profile))
+        {
+            constexpr std::array<std::int32_t, 6> tattoos{ 801094, 801106, 801107, 802630, 803748, 807834 };
+            constexpr std::array spells{ 801107u, 803783u, 803784u, 803785u };
+            constexpr std::array regeneration{ 9, 42, 99, 145 };
+            constexpr std::array levels{ 12u, 24u, 36u, 48u };
+            constexpr std::array maximumLevels{ 22u, 34u, 46u, 60u };
+            auto const rank = std::find(spells.begin(), spells.end(), info->Id);
+            auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+            if (rank == spells.end() || info->SpellFamilyName != 38 ||
+                info->SpellFamilyFlags[0] != 2097152 || info->SpellFamilyFlags[1] || info->SpellFamilyFlags[2] ||
+                scripts.first != scripts.second ||
+                !HasExactBuffGroup(info->Id, 111001, SPELL_GROUP_STACK_RULE_EXCLUSIVE, tattoos))
+                return false;
+            auto const index = static_cast<std::size_t>(rank - spells.begin());
+            if (info->SpellLevel != levels[index] || info->BaseLevel != levels[index] ||
+                info->MaxLevel != maximumLevels[index] ||
+                info->Effects[EFFECT_1].SpellClassMask != flag96(2097152, 2147483648u, 2) ||
+                info->Effects[EFFECT_0].BasePoints != regeneration[index] ||
+                info->Effects[EFFECT_0].RealPointsPerLevel != 3.3f || info->Effects[EFFECT_0].DieSides != 1 ||
+                info->Effects[EFFECT_1].BasePoints != -6 - 5 * static_cast<std::int32_t>(index) ||
+                info->Effects[EFFECT_1].DieSides != 1 || info->Effects[EFFECT_1].RealPointsPerLevel)
+                return false;
+            auto const& modifier = info->Effects[EFFECT_2];
+            if (modifier.Effect != SPELL_EFFECT_APPLY_AURA || modifier.ApplyAuraName != SPELL_AURA_ADD_FLAT_MODIFIER ||
+                modifier.TargetA.GetTarget() != 1 || modifier.TargetB.GetTarget() || modifier.TriggerSpell ||
+                modifier.MiscValue != 12 || modifier.MiscValueB || modifier.BasePoints != -1 || modifier.DieSides != 1 ||
+                modifier.RealPointsPerLevel || modifier.SpellClassMask != flag96(0, 0, 1024))
+                return false;
+        }
         if (profile.Definition.ClassId == 32 && profile.Definition.AbilityId == 801094)
         {
             constexpr std::array<std::int32_t, 6> tattoos{ 801094, 801106, 801107, 802630, 803748, 807834 };
@@ -791,13 +821,17 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
             if (secondary && index == secondary->EffectIndex)
             {
                 bool const graceCost = Practice::DevelopmentBuffs::IsDevotionOfGrace(profile) && index == 1;
+                bool const waterCost = Practice::DevelopmentBuffs::IsWaterTattoo(profile) && index == 1;
                 if (slot.Effect != SPELL_EFFECT_APPLY_AURA || slot.ApplyAuraName != secondary->Aura ||
                     slot.TargetA.GetTarget() != secondary->TargetA || slot.TargetB.GetTarget() ||
                     slot.TriggerSpell || slot.MiscValue != secondary->Stat || slot.MiscValueB ||
-                    (graceCost ? (slot.BasePoints != -6 || slot.DieSides != 1) : slot.BasePoints < 0))
+                    (graceCost ? (slot.BasePoints != -6 || slot.DieSides != 1) :
+                        waterCost ? (slot.BasePoints >= -1 || slot.DieSides != 1) : slot.BasePoints < 0))
                     return false;
                 continue;
             }
+            if (Practice::DevelopmentBuffs::IsWaterTattoo(profile) && index == 2)
+                continue;
             if (Practice::DevelopmentBuffs::IsPairedAttackPower(profile) && index == 1)
             {
                 bool const finalPowerWuju = Practice::DevelopmentBuffs::IsPowerWuju(profile) && info->Id == 707677;
@@ -1730,7 +1764,7 @@ bool IsBuffObserver(Player const* player)
 }
 
 bool EffectiveBuffComponent(Player* player, AuraApplication const& application, std::uint8_t effectIndex,
-    std::uint32_t aura, std::int32_t selector)
+    std::uint32_t aura, std::int32_t selector, bool rankedCostReduction = false)
 {
     if (effectIndex >= 3 || application.GetRemoveMode() != AURA_REMOVE_NONE || !application.HasEffect(effectIndex) ||
         application.GetBase()->IsRemoved())
@@ -1742,7 +1776,8 @@ bool EffectiveBuffComponent(Player* player, AuraApplication const& application, 
             aura != SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE && aura != SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT &&
             aura != SPELL_AURA_MOD_ATTACK_POWER && aura != SPELL_AURA_MOD_RANGED_ATTACK_POWER) ||
         !effect || effect->GetAuraType() != aura || effect->GetMiscValue() != selector ||
-        (costReduction ? (effect->GetAmount() != -5 || selector != 127) : effect->GetAmount() <= 0))
+        (costReduction ? ((rankedCostReduction ? effect->GetAmount() >= 0 : effect->GetAmount() != -5) ||
+            selector != 127) : effect->GetAmount() <= 0))
         return false;
     if (costReduction)
         return true;
@@ -1775,7 +1810,8 @@ bool EffectiveBuffApplication(Player* player, AuraApplication const& application
         return false;
     for (std::uint8_t index = 0; index < 3; ++index)
         if (auto const* secondary = Practice::DevelopmentBuffs::SecondaryMechanicFor(profile, index))
-            if (!EffectiveBuffComponent(player, application, secondary->EffectIndex, secondary->Aura, secondary->Stat))
+            if (!EffectiveBuffComponent(player, application, secondary->EffectIndex, secondary->Aura, secondary->Stat,
+                Practice::DevelopmentBuffs::IsWaterTattoo(profile)))
                 return false;
     return true;
 }
