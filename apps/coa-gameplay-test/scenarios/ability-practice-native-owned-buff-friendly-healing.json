@@ -1,0 +1,685 @@
+{
+  "schema": 1,
+  "name": "Ability practice: owned buff friendly effective healing",
+  "contract": "Native Celestial Mind intellect and Hand of Elune healing remain unchanged. Only original effective friendly healing in a real eligible PvE encounter advances the caster owned buff; application, full health, peaceful healing, cancellation and foreign ownership earn none. Five-second cadence uses the real clock.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apbuffheal",
+      "race": 1,
+      "class": 26,
+      "level": 32,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "friend",
+      "name": "Aphealally",
+      "race": 1,
+      "class": 26,
+      "level": 32,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "friend",
+      "entry": 36,
+      "level": 32,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 300255
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 801990
+    },
+    {
+      "action": "learn",
+      "actor": "friend",
+      "spell": 300255
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.26.300255",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.26.300255",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.26.300255",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.26.300255",
+      "index": 3,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.26.300255",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1000,
+      "label": "Bounded mana fixture stays within native maximum"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 300255,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 300255,
+      "effect": 0,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.26.300255",
+      "index": 4,
+      "equals": 0,
+      "label": "Application earns no practice"
+    },
+    {
+      "action": "set_health",
+      "actor": "friend",
+      "maximum": 100000,
+      "value": 100000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1000,
+      "label": "Bounded mana fixture stays within native maximum"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 801990,
+      "target": "friend"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 801990,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_effective_heal_total",
+      "spell": 801990,
+      "target": "friend",
+      "equals": 0,
+      "label": "Full-health heal has no effective healing"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.26.300255",
+      "index": 4,
+      "equals": 0,
+      "label": "Full-health healing earns no practice"
+    },
+    {
+      "action": "set_health",
+      "actor": "friend",
+      "value": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "friend",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_effective_heal_total",
+      "spell": 801990,
+      "target": "friend",
+      "save_as": "healing_before_1"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1000,
+      "label": "Bounded mana fixture stays within native maximum"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 801990,
+      "target": "friend"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 801990,
+      "equals": 0,
+      "label": "Peaceful useful healing cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_effective_heal_total",
+      "spell": 801990,
+      "target": "friend",
+      "relative_to": "healing_before_1",
+      "min": 1,
+      "label": "Peaceful useful healing heals actual missing health"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.26.300255",
+      "index": 4,
+      "equals": 0,
+      "label": "Useful healing outside an eligible encounter earns no practice"
+    },
+    {
+      "action": "attack",
+      "actor": "friend",
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "friend",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "friend"
+    },
+    {
+      "action": "set_health",
+      "actor": "friend",
+      "value": 100000
+    },
+    {
+      "action": "assert",
+      "actor": "friend",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_effective_heal_total",
+      "spell": 801990,
+      "target": "friend",
+      "save_as": "combat_overheal_before"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1000,
+      "label": "Bounded mana fixture stays within native maximum"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 801990,
+      "target": "friend"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 801990,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "friend",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_effective_heal_total",
+      "spell": 801990,
+      "target": "friend",
+      "relative_to": "combat_overheal_before",
+      "equals": 0,
+      "label": "Full-health native healing contributes nothing even during PvE combat"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.26.300255",
+      "index": 4,
+      "equals": 0,
+      "label": "Combat overhealing earns no buff practice"
+    },
+    {
+      "action": "set_health",
+      "actor": "friend",
+      "value": 10000
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_effective_heal_total",
+      "spell": 801990,
+      "target": "friend",
+      "save_as": "healing_before_2"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1000,
+      "label": "Bounded mana fixture stays within native maximum"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 801990,
+      "target": "friend"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 801990,
+      "equals": 0,
+      "label": "Friendly PvE healing cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_effective_heal_total",
+      "spell": 801990,
+      "target": "friend",
+      "relative_to": "healing_before_2",
+      "min": 1,
+      "label": "Friendly PvE healing heals actual missing health"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.26.300255",
+      "index": 4,
+      "equals": 270,
+      "label": "One useful native heal earns one owned-buff use"
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "caster",
+      "spell": 300255
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 300255,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "friend",
+      "value": 10000
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_effective_heal_total",
+      "spell": 801990,
+      "target": "friend",
+      "save_as": "healing_before_3"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1000,
+      "label": "Bounded mana fixture stays within native maximum"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 801990,
+      "target": "friend"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 801990,
+      "equals": 0,
+      "label": "Healing after cancellation cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_effective_heal_total",
+      "spell": 801990,
+      "target": "friend",
+      "relative_to": "healing_before_3",
+      "min": 1,
+      "label": "Healing after cancellation heals actual missing health"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.26.300255",
+      "index": 4,
+      "equals": 270,
+      "label": "Removed owned buff cannot practice"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1000,
+      "label": "Bounded mana fixture stays within native maximum"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 300255,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.26.300255",
+      "index": 4,
+      "equals": 270,
+      "label": "Reapplication itself earns no practice"
+    },
+    {
+      "action": "set_health",
+      "actor": "friend",
+      "value": 10000
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_effective_heal_total",
+      "spell": 801990,
+      "target": "friend",
+      "save_as": "healing_before_4"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1000,
+      "label": "Bounded mana fixture stays within native maximum"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 801990,
+      "target": "friend"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 801990,
+      "equals": 0,
+      "label": "Healing with restored owned buff cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_effective_heal_total",
+      "spell": 801990,
+      "target": "friend",
+      "relative_to": "healing_before_4",
+      "min": 1,
+      "label": "Healing with restored owned buff heals actual missing health"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.26.300255",
+      "index": 4,
+      "equals": 540,
+      "label": "New original owned application resumes retained practice"
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "caster",
+      "spell": 300255
+    },
+    {
+      "action": "assert",
+      "actor": "friend",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1000,
+      "label": "Bounded mana fixture stays within native maximum"
+    },
+    {
+      "action": "set_power",
+      "actor": "friend",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "friend",
+      "spell": 300255,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 300255,
+      "effect": 0,
+      "equals": 3
+    },
+    {
+      "action": "set_health",
+      "actor": "friend",
+      "value": 10000
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_effective_heal_total",
+      "spell": 801990,
+      "target": "friend",
+      "save_as": "healing_before_5"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1000,
+      "label": "Bounded mana fixture stays within native maximum"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 801990,
+      "target": "friend"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 801990,
+      "equals": 0,
+      "label": "Healing with another player buff cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_effective_heal_total",
+      "spell": 801990,
+      "target": "friend",
+      "relative_to": "healing_before_5",
+      "min": 1,
+      "label": "Healing with another player buff heals actual missing health"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.26.300255",
+      "index": 4,
+      "equals": 540,
+      "label": "Foreign application cannot practice the caster owned buff"
+    }
+  ]
+}

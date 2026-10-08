@@ -4366,3 +4366,32 @@ unchanged13extensions/25extra ranks. Coverage271unique/273declared164ranked9mast
 41owned buff tracks20classes. Aggregate850drafts remain runtime-unqualified and unapproved.
 Defaults0; no live process/config/database/client/launcher changes or release. Actual client pixels,
 ordinary pacing, friendly healing contribution and broader ability outcomes still need qualification.
+
+
+## Friendly effective healing qualifies owned buff practice
+
+Two native Starcaller cases qualify the existing contribution route using Celestial Mind300255 and
+Hand of Elune801990. Native intellect3 and actual missing-health healing318 remain. Application,
+full-health peaceful healing, effective peaceful healing, full-health PvE healing, cancellation and
+another player's buff earn no practice. A useful original friendly heal during the recipient's
+eligible non-gray PvE encounter awards270points; recasting the owned buff itself adds0, then a later
+useful heal resumes retained progress at540. Foreign intellect3 remains useful but cannot practice
+this caster's buff. Both actors use native class/race/learned spells and original socketless casts.
+Bounded1000mana refills assert native max_power first; native costs and effects remain unchanged.
+
+The boundary case starts9/15930. Peaceful healing and combat overhealing preserve15930. One actual
+combat heal moves10/0, automatically learns301222 and leaves301223 locked despite its satisfied
+character level. Recasting newly learned301222 retains native intellect7 and actual stat increase7.
+This qualifies friendly healing on the common owned-buff route, not every buff/heal combination.
+
+Initial070313 authoring validation rejected duplicate snapshot names before server startup. Fixed
+names then070335 timed out during character creation: Apbufffriend contains three consecutive f's,
+which native CheckPlayerName rejects. Corrected name071153 passed all negatives and first270award,
+then native cast_failure85/no mana prevented cancellation healing. No production behavior changed.
+Bounded refill correction071539 passed127.9s real without case retry. Final071824 VERIFY ALL PASSED:
+source9/105.8s, real2cases/273.5s, no failed case or isolated case retry. Initial cached-world startup
+failed Incomplete world checksums; automatic replacement rebuilt a disposable world and both cases
+passed. Use --fresh-databases for subsequent native runs to avoid the recurring cache preparation issue.
+C++/Lua/server/config unchanged; prior063504 build and065809 harness remain applicable. Counts and
+addon0.4.59-development unchanged. Defaults0/unpublished/no live process/config/database/client or
+launcher changes. Client pixels, measured ordinary pacing and broader ability outcomes remain pending.
