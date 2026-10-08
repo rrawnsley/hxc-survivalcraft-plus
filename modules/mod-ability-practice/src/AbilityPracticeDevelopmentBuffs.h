@@ -8,6 +8,33 @@
 
 namespace AbilityPractice::DevelopmentBuffs
 {
+inline constexpr std::array ManariIntuition = {
+    AbilityRank{ 523478, 1, { 8, 1 } },
+    AbilityRank{ 523479, 2, { 20, 10 } },
+    AbilityRank{ 523480, 3, { 30, 20 } },
+    AbilityRank{ 523481, 4, { 40, 40 } },
+    AbilityRank{ 523482, 5, { 50, 60 } },
+    AbilityRank{ 523483, 6, { 60, 80 } }
+};
+inline constexpr auto ManariIntuitionCaps = Development::RankCaps(ManariIntuition);
+
+inline constexpr std::array KnightsEdict = {
+    AbilityRank{ 523485, 1, { 30, 1 } },
+    AbilityRank{ 523486, 2, { 40, 10 } },
+    AbilityRank{ 523487, 3, { 50, 20 } },
+    AbilityRank{ 523488, 4, { 60, 40 } }
+};
+inline constexpr auto KnightsEdictCaps = Development::RankCaps(KnightsEdict);
+
+inline constexpr std::array BeetlePheromones = {
+    AbilityRank{ 803651, 1, { 20, 1 } },
+    AbilityRank{ 803652, 2, { 30, 10 } },
+    AbilityRank{ 803653, 3, { 40, 20 } },
+    AbilityRank{ 803654, 4, { 50, 40 } },
+    AbilityRank{ 803655, 5, { 60, 60 } }
+};
+inline constexpr auto BeetlePheromonesCaps = Development::RankCaps(BeetlePheromones);
+
 inline constexpr std::array DevotionOfGrace = {
     AbilityRank{ 800852, 1, { 4, 1 } },
     AbilityRank{ 300858, 2, { 14, 10 } },
@@ -372,6 +399,15 @@ inline constexpr auto RiteOfPowerCaps = Development::RankCaps(RiteOfPower);
 
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 14, 523478, AbilityKind::Ranked, ManariIntuition, ManariIntuitionCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 15, 523485, AbilityKind::Ranked, KnightsEdict, KnightsEdictCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 29, 803651, AbilityKind::Ranked, BeetlePheromones, BeetlePheromonesCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 27, 800852, AbilityKind::Ranked, DevotionOfGrace, DevotionOfGraceCaps },
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -538,6 +574,9 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 14, 523478, 21, 1, 22 },
+    Mechanic{ 15, 523485, 21, 1, 22 },
+    Mechanic{ 29, 803651, 21, 1, 22 },
     Mechanic{ 27, 800852, 21, 0, 85 },
     Mechanic{ 21, 523489, 21, 1, 22 },
     Mechanic{ 17, 707693, 21, 127, 345 },
@@ -586,6 +625,9 @@ inline constexpr std::array Mechanics = {
 static_assert(Mechanics.size() == Profiles.size());
 
 inline constexpr std::array SecondaryMechanics = {
+    Mechanic{ 14, 523478, 21, -1, 29, 1 },
+    Mechanic{ 15, 523485, 21, -1, 29, 1 },
+    Mechanic{ 29, 803651, 21, -1, 29, 1 },
     Mechanic{ 27, 800852, 21, 127, 72, 1 },
     Mechanic{ 21, 523489, 21, -1, 29, 1 },
     Mechanic{ 17, 707693, 21, 32, 143, 1 },

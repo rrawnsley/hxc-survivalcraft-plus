@@ -561,6 +561,52 @@ bool HasExpectedAdaptationGroup(std::uint32_t abilityId, std::uint32_t spellId)
     return std::all_of(seen.begin(), seen.end(), [](bool present) { return present; });
 }
 
+bool HasExactBuffGroup(std::uint32_t spellId, std::uint32_t groupId, SpellGroupStackRule rule,
+    std::span<std::int32_t const> expected)
+{
+    auto const group = static_cast<SpellGroup>(groupId);
+    if (sSpellMgr->GetSpellGroupStackRule(group) != rule ||
+        !sSpellMgr->IsSpellMemberOfSpellGroup(spellId, group))
+        return false;
+    std::vector<std::int32_t> members;
+    auto const bounds = sSpellMgr->GetSpellGroupSpellMapBounds(group);
+    for (auto member = bounds.first; member != bounds.second; ++member)
+        members.push_back(member->second);
+    if (members.size() != expected.size())
+        return false;
+    std::sort(members.begin(), members.end());
+    return std::equal(members.begin(), members.end(), expected.begin());
+}
+
+bool HasExpectedArmorOrEdictGroup(std::uint32_t abilityId, std::uint32_t spellId)
+{
+    constexpr std::array<std::int32_t, 4> intuition{ 1126, 523478, 523495, 1101126 };
+    constexpr std::array<std::int32_t, 6> pheromones{ 680312, 707689, 712459, 803177, 803651, 803657 };
+    constexpr std::array<std::int32_t, 6> edicts{ 523485, 523510, 680303, 681442, 706741, 707684 };
+    constexpr std::array<std::int32_t, 2> knights{ 523485, 523510 };
+    constexpr std::array<std::int32_t, 2> inquisitors{ 680303, 706741 };
+    constexpr std::array<std::int32_t, 2> witching{ 681442, 707684 };
+    if (abilityId == 523478)
+        return HasExactBuffGroup(spellId, 1078, SPELL_GROUP_STACK_RULE_DEFAULT, intuition);
+    if (abilityId == 803651)
+        return HasExactBuffGroup(spellId, 1138, SPELL_GROUP_STACK_RULE_EXCLUSIVE_FROM_SAME_CASTER, pheromones);
+    if (!HasExactBuffGroup(spellId, 1139, SPELL_GROUP_STACK_RULE_EXCLUSIVE_FROM_SAME_CASTER, edicts))
+        return false;
+    if (abilityId == 523485)
+        return HasExactBuffGroup(spellId, 1039, SPELL_GROUP_STACK_RULE_EXCLUSIVE, knights);
+    if (abilityId == 706741)
+        return HasExactBuffGroup(spellId, 1040, SPELL_GROUP_STACK_RULE_EXCLUSIVE, inquisitors);
+    return abilityId == 707684 && HasExactBuffGroup(spellId, 1041, SPELL_GROUP_STACK_RULE_EXCLUSIVE, witching);
+}
+
+bool IsArmorOrEdictProfile(Practice::AbilityProfile const& profile)
+{
+    return (profile.Definition.ClassId == 14 && profile.Definition.AbilityId == 523478) ||
+        (profile.Definition.ClassId == 29 && profile.Definition.AbilityId == 803651) ||
+        (profile.Definition.ClassId == 15 && (profile.Definition.AbilityId == 523485 ||
+            profile.Definition.AbilityId == 706741 || profile.Definition.AbilityId == 707684));
+}
+
 bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProfile const& profile)
 {
     if (!info)
@@ -619,6 +665,27 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
                 "aura_ascension_cultist_lifecycle")
                 return false;
             if (++entry != scripts.second)
+                return false;
+        }
+        if (IsArmorOrEdictProfile(profile))
+        {
+            auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+            auto entry = scripts.first;
+            std::uint32_t const classId = profile.Definition.ClassId;
+            if (info->SpellFamilyName != classId + 6 ||
+                info->SpellFamilyFlags[0] != (classId == 14 ? 512u : 0u) ||
+                info->SpellFamilyFlags[1] != (classId == 29 ? 4096u : 0u) ||
+                info->SpellFamilyFlags[2] != (classId == 15 ? 536870912u : 0u) ||
+                !HasExpectedArmorOrEdictGroup(profile.Definition.AbilityId, info->Id))
+                return false;
+            if (classId == 15)
+            {
+                if (entry == scripts.second ||
+                    sObjectMgr->GetScriptName(entry->second) != "spell_ascension_witch_hunter_ability" ||
+                    ++entry != scripts.second)
+                    return false;
+            }
+            else if (entry != scripts.second)
                 return false;
         }
         if (Practice::DevelopmentBuffs::IsDevotionOfGrace(profile))
@@ -1257,8 +1324,13 @@ bool MatchesSharedBuffVariants()
                 ++entry != scripts.second)
                 return false;
         }
-        else if (variant.ClassId != 21 || entry != scripts.second ||
-            !HasExpectedAdaptationGroup(variant.AbilityId, info->Id))
+        else if (variant.ClassId == 21)
+        {
+            if (entry != scripts.second || !HasExpectedAdaptationGroup(variant.AbilityId, info->Id))
+                return false;
+        }
+        else if (!IsArmorOrEdictProfile(*profile) || entry != scripts.second ||
+            !HasExpectedArmorOrEdictGroup(variant.AbilityId, info->Id))
             return false;
         std::array const ranks = { Practice::AbilityRank{ variant.SpellId, 1, { variant.CharacterLevel, 1 } } };
         Practice::AbilityProfile const native{

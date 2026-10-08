@@ -234,7 +234,8 @@ def reviewed_stat_buffs(root):
         if (not 12 <= class_id <= 32 or not ability_id or target not in {21, 56} or
                 not (aura == 29 and stat in range(5) or aura == 345 and stat == 127 and target == 21 or
                      aura in {85, 99} and stat == 0 and target == 21 or
-                     aura == 22 and stat == 1 and target == 21 and (class_id, ability_id) == (21, 523489) or
+                     aura == 22 and stat == 1 and target == 21 and (class_id, ability_id) in {
+                         (21, 523489), (14, 523478), (15, 523485), (29, 803651)} or
                      aura == 143 and (stat in {4, 16, 64, 126} or
                          stat == 1 and (class_id, ability_id) == (31, 570752)) and target == 21) or
                 ((effect_index != 0 or aura == 143 and stat == 126) and not (
@@ -256,7 +257,8 @@ def reviewed_stat_buffs(root):
     secondary_matches = list(re.finditer(pattern, secondary_body[1]))
     if re.sub(pattern, '', secondary_body[1]).replace(',', '').strip():
         raise ValueError('Unsupported secondary buff mechanic declaration')
-    expected_secondary = {(27, 800852, 1): (21, 127, 72), (21, 523489, 1): (21, -1, 29),
+    expected_secondary = {(14, 523478, 1): (21, -1, 29), (15, 523485, 1): (21, -1, 29),
+                          (29, 803651, 1): (21, -1, 29), (27, 800852, 1): (21, 127, 72), (21, 523489, 1): (21, -1, 29),
                           (17, 707693, 1): (21, 32, 143),
                           (13, 560294, 1): (21, 126, 143), (17, 706589, 1): (21, 0, 29),
                           (17, 803667, 1): (21, 16, 143), (31, 570752, 1): (21, -1, 29),
@@ -661,6 +663,11 @@ def build_drafts(candidates, root):
             if (class_id, ability_id) == (27, 800852):
                 required.extend(['native-sun-cleric-lifecycle-and-devotion-replacement',
                                  'native-negative-five-percent-cost-component-and-primary-mana'])
+            if (class_id, ability_id) in {(14, 523478), (15, 523485), (29, 803651)}:
+                required.extend(['native-armor-allstats-and-agility-armor-contribution',
+                                 'native-stacking-groups-and-shared-greater-practice'])
+                if class_id == 14:
+                    required.append('native-variable-armor-dice-preserved')
             if (class_id, ability_id) == (21, 523489):
                 required.extend(['native-armor-allstats-and-agility-armor-contribution',
                                  'native-ranger-strongest-buff-group-and-shared-greater-practice'])

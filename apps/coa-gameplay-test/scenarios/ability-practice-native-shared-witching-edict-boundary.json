@@ -1,0 +1,361 @@
+{
+  "schema": 1,
+  "name": "Ability practice: shared greater witching-edict boundary",
+  "contract": "Native trainer cannot bypass shared practice. The final original combat use learns regular and greater ranks together. Native raid benefits remain and final proficiency stops further awards without a separate alias counter.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apgategec",
+      "race": 1,
+      "class": 15,
+      "level": 58,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "ally",
+      "name": "Apgategea",
+      "race": 1,
+      "class": 15,
+      "level": 58,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 58,
+      "health": 1000000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707684
+    },
+    {
+      "action": "money",
+      "actor": "caster",
+      "copper": 1000000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 97930
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "caster"
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "caster",
+      "spell": 681442
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 681442,
+      "equals": 0
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.15.707684",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.15.707684",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.15.707684",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.15.707684",
+      "index": 3,
+      "value": 39
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.15.707684",
+      "index": 4,
+      "value": 15600
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707684
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707685
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707686
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "caster",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 802024
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 707686,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 707686,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.15.707684",
+      "index": 4,
+      "equals": 15600
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 1,
+      "min": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 802024
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 802024,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 802024,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 802024,
+      "target": "enemy",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.15.707684",
+      "index": 3,
+      "equals": 40
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.15.707684",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 707687,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 681442,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 681442,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 681442,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 681442,
+      "effect": 0,
+      "min": 62,
+      "max": 62
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 681442,
+      "effect": 0,
+      "min": 62,
+      "max": 62
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 1,
+      "min": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 802024
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 802024,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 802024,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 802024,
+      "target": "enemy",
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.15.707684",
+      "index": 3,
+      "equals": 40
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.15.707684",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.15.681442",
+      "index": 0,
+      "equals": 0
+    }
+  ]
+}

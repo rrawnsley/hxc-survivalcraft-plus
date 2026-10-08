@@ -1,0 +1,151 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native greater beetle-pheromones benefits",
+  "contract": "Native raid targeting and every active component match the final regular version, preserving any native amount dice.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apgreatercc",
+      "race": 1,
+      "class": 29,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "name": "Apgreaterca",
+      "race": 1,
+      "class": 29,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "ally"
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.29.803651",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.29.803651",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.29.803651",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.29.803651",
+      "index": 3,
+      "value": 60
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.29.803651",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803651
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803652
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803653
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803654
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803655
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803657
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803657,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 803657,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 803657,
+      "effect": 0,
+      "min": 285,
+      "max": 285
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 803657,
+      "effect": 1,
+      "min": 12,
+      "max": 12
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 803657,
+      "effect": 0,
+      "min": 285,
+      "max": 285
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 803657,
+      "effect": 1,
+      "min": 12,
+      "max": 12
+    }
+  ]
+}

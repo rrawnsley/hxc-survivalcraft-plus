@@ -465,7 +465,7 @@ void CheckCurrentRankPolicies()
 {
     std::uint32_t forecasts = 0;
     std::array<bool, 21> classes{};
-    assert(DevelopmentPacing::Entries.size() == 166);
+    assert(DevelopmentPacing::Entries.size() == 169);
     for (auto const& entry : DevelopmentPacing::Entries)
     {
         classes.at(entry.ClassId - 12) = true;
@@ -728,7 +728,7 @@ void CheckMasteryFixedAndTrainerPolicies()
                 { 3, 1, { entry.PreviousRanks.back().Requirement.Proficiency, 0 } });
             assert(converted && converted->State.Proficiency == entry.PreviousRanks.back().Requirement.Proficiency);
         }
-    assert(DevelopmentBuffVariants::Variants.size() == 5);
+    assert(DevelopmentBuffVariants::Variants.size() == 10);
     for (auto const& variant : DevelopmentBuffVariants::Variants)
     {
         AbilityProfile const* parent = nullptr;
@@ -743,8 +743,9 @@ void CheckMasteryFixedAndTrainerPolicies()
         assert(!DevelopmentBuffVariants::Find(variant.ClassId, variant.AbilityId));
         auto const* rank = DevelopmentBuffVariants::EquivalentRank(*parent, variant);
         assert(rank && rank->SpellId == variant.EquivalentSpellId);
-        assert(rank->Requirement.Proficiency == (variant.SpellId == 712458 ? 80u :
-            variant.SpellId == 680872 ? 40u : variant.SpellId == 523513 ? 60u :
+        assert(rank->Requirement.Proficiency == (variant.SpellId == 712458 || variant.SpellId == 523495 ||
+            variant.SpellId == 680303 ? 80u : variant.SpellId == 680872 || variant.SpellId == 523510 ||
+            variant.SpellId == 681442 ? 40u : variant.SpellId == 523513 || variant.SpellId == 803657 ? 60u :
             variant.SpellId == 680294 ? 100u : 1u));
         auto invalid = variant;
         invalid.EquivalentSpellId = 1;

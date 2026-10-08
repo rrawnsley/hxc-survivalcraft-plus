@@ -1,0 +1,138 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native greater inquisitors-edict benefits",
+  "contract": "Native raid targeting and every active component match the final regular version, preserving any native amount dice.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apgreaterdc",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "name": "Apgreaterda",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "ally"
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.15.706741",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.15.706741",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.15.706741",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.15.706741",
+      "index": 3,
+      "value": 80
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.15.706741",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 706741
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707351
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707352
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707353
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707354
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707355
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 680303
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 680303,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 680303,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 680303,
+      "effect": 0,
+      "min": 77,
+      "max": 77
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 680303,
+      "effect": 0,
+      "min": 77,
+      "max": 77
+    }
+  ]
+}

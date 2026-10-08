@@ -1,0 +1,281 @@
+{
+  "schema": 1,
+  "name": "Ability practice: beetle-pheromones contribution",
+  "contract": "Native original class damage earns one meaningful combat award while every owned buff component is active. Buff application and cancelled-buff damage earn no practice; automatic ranks preserve native effects.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Aparmoruseca",
+      "race": 1,
+      "class": 29,
+      "level": 30,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 30,
+      "health": 1000000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803651
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800869
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.29.803651",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.29.803651",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.29.803651",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.29.803651",
+      "index": 3,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.29.803651",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803651,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 803651,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.29.803651",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 400
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 400
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 800869
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800869,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 800869,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "enemy",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.29.803651",
+      "index": 4,
+      "equals": 270
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "caster",
+      "spell": 803651
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 400
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 400
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 800869
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800869,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 800869,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "enemy",
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.29.803651",
+      "index": 4,
+      "equals": 270
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803651,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.29.803651",
+      "index": 4,
+      "equals": 270
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 400
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 400
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 800869
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800869,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 800869,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 800869,
+      "target": "enemy",
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.29.803651",
+      "index": 4,
+      "equals": 540
+    }
+  ]
+}

@@ -697,6 +697,14 @@ function Model.PracticeRules(ability, saved)
             .. " spell-cost reduction must remain active. Switching devotions pauses this practice."
             .. " Applying, refreshing, or receiving mana ticks earns no practice."
             .. " One original ability cast earns one use, with at least five seconds between counted uses."
+    elseif (ability.abilityId == 523478 or ability.abilityId == 523485
+        or ability.abilityId == 803651) and ability.route == 13 then
+        rule = "Keep your own armor and all-stat buff active and use a learned ability for useful damage or healing"
+            .. " in a non-gray PvE encounter. Every component must remain effective."
+            .. " Applying the buff itself gives no practice; greater versions share this ability's progress."
+        if ability.abilityId == 523478 then
+            rule = rule .. " Native armor varies within the spell's existing range."
+        end
     elseif ability.abilityId == 523489 and ability.route == 13 then
         rule = "Keep your own Footpad's Adaptation active and use a learned ability for useful damage or healing"
             .. " in a qualifying PvE fight. Its armor and all five stat effects must remain active and useful."

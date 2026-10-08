@@ -1,0 +1,494 @@
+{
+  "schema": 1,
+  "name": "Ability practice: armor and Edict shared milestone menus",
+  "contract": "Five native greater versions show their matching regular rank, native unlock level and one remaining qualifying combat use in complete schema-five frames. Snapshot revisions are global and may advance between actors; checks use each actor's own schema header, milestones and end frame.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "castera",
+      "name": "Apsharemenua",
+      "race": 1,
+      "class": 14,
+      "level": 60
+    },
+    {
+      "id": "casterb",
+      "name": "Apsharemenub",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    },
+    {
+      "id": "casterc",
+      "name": "Apsharemenuc",
+      "race": 1,
+      "class": 29,
+      "level": 60
+    },
+    {
+      "id": "casterd",
+      "name": "Apsharemenud",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    },
+    {
+      "id": "castere",
+      "name": "Apsharemenue",
+      "race": 1,
+      "class": 15,
+      "level": 58
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "castera",
+      "source": "core.hxc.ability_practice.14.523478",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "castera",
+      "source": "core.hxc.ability_practice.14.523478",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "castera",
+      "source": "core.hxc.ability_practice.14.523478",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "castera",
+      "source": "core.hxc.ability_practice.14.523478",
+      "index": 3,
+      "value": 79
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "castera",
+      "source": "core.hxc.ability_practice.14.523478",
+      "index": 4,
+      "value": 15600
+    },
+    {
+      "action": "learn",
+      "actor": "castera",
+      "spell": 523478
+    },
+    {
+      "action": "learn",
+      "actor": "castera",
+      "spell": 523479
+    },
+    {
+      "action": "learn",
+      "actor": "castera",
+      "spell": 523480
+    },
+    {
+      "action": "learn",
+      "actor": "castera",
+      "spell": 523481
+    },
+    {
+      "action": "learn",
+      "actor": "castera",
+      "spell": 523482
+    },
+    {
+      "action": "whisper",
+      "actor": "castera",
+      "to": "Apsharemenua",
+      "text": "HXAP\tHELLO|5",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "castera",
+      "metric": "whisper_contains",
+      "from": "castera",
+      "text": "HXAP\tB|5|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "castera",
+      "metric": "whisper_contains",
+      "from": "castera",
+      "text": "|523495|523483|60|80|4|1|1",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "castera",
+      "metric": "whisper_contains",
+      "from": "castera",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "casterb",
+      "source": "core.hxc.ability_practice.15.523485",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "casterb",
+      "source": "core.hxc.ability_practice.15.523485",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "casterb",
+      "source": "core.hxc.ability_practice.15.523485",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "casterb",
+      "source": "core.hxc.ability_practice.15.523485",
+      "index": 3,
+      "value": 39
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "casterb",
+      "source": "core.hxc.ability_practice.15.523485",
+      "index": 4,
+      "value": 15600
+    },
+    {
+      "action": "learn",
+      "actor": "casterb",
+      "spell": 523485
+    },
+    {
+      "action": "learn",
+      "actor": "casterb",
+      "spell": 523486
+    },
+    {
+      "action": "learn",
+      "actor": "casterb",
+      "spell": 523487
+    },
+    {
+      "action": "whisper",
+      "actor": "casterb",
+      "to": "Apsharemenub",
+      "text": "HXAP\tHELLO|5",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "casterb",
+      "metric": "whisper_contains",
+      "from": "casterb",
+      "text": "HXAP\tB|5|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "casterb",
+      "metric": "whisper_contains",
+      "from": "casterb",
+      "text": "|523510|523488|60|40|4|1|1",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "casterb",
+      "metric": "whisper_contains",
+      "from": "casterb",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "casterc",
+      "source": "core.hxc.ability_practice.29.803651",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "casterc",
+      "source": "core.hxc.ability_practice.29.803651",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "casterc",
+      "source": "core.hxc.ability_practice.29.803651",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "casterc",
+      "source": "core.hxc.ability_practice.29.803651",
+      "index": 3,
+      "value": 59
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "casterc",
+      "source": "core.hxc.ability_practice.29.803651",
+      "index": 4,
+      "value": 15600
+    },
+    {
+      "action": "learn",
+      "actor": "casterc",
+      "spell": 803651
+    },
+    {
+      "action": "learn",
+      "actor": "casterc",
+      "spell": 803652
+    },
+    {
+      "action": "learn",
+      "actor": "casterc",
+      "spell": 803653
+    },
+    {
+      "action": "learn",
+      "actor": "casterc",
+      "spell": 803654
+    },
+    {
+      "action": "whisper",
+      "actor": "casterc",
+      "to": "Apsharemenuc",
+      "text": "HXAP\tHELLO|5",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "casterc",
+      "metric": "whisper_contains",
+      "from": "casterc",
+      "text": "HXAP\tB|5|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "casterc",
+      "metric": "whisper_contains",
+      "from": "casterc",
+      "text": "|803657|803655|60|60|4|1|1",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "casterc",
+      "metric": "whisper_contains",
+      "from": "casterc",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "casterd",
+      "source": "core.hxc.ability_practice.15.706741",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "casterd",
+      "source": "core.hxc.ability_practice.15.706741",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "casterd",
+      "source": "core.hxc.ability_practice.15.706741",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "casterd",
+      "source": "core.hxc.ability_practice.15.706741",
+      "index": 3,
+      "value": 79
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "casterd",
+      "source": "core.hxc.ability_practice.15.706741",
+      "index": 4,
+      "value": 15600
+    },
+    {
+      "action": "learn",
+      "actor": "casterd",
+      "spell": 706741
+    },
+    {
+      "action": "learn",
+      "actor": "casterd",
+      "spell": 707351
+    },
+    {
+      "action": "learn",
+      "actor": "casterd",
+      "spell": 707352
+    },
+    {
+      "action": "learn",
+      "actor": "casterd",
+      "spell": 707353
+    },
+    {
+      "action": "learn",
+      "actor": "casterd",
+      "spell": 707354
+    },
+    {
+      "action": "whisper",
+      "actor": "casterd",
+      "to": "Apsharemenud",
+      "text": "HXAP\tHELLO|5",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "casterd",
+      "metric": "whisper_contains",
+      "from": "casterd",
+      "text": "HXAP\tB|5|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "casterd",
+      "metric": "whisper_contains",
+      "from": "casterd",
+      "text": "|680303|707355|60|80|4|1|1",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "casterd",
+      "metric": "whisper_contains",
+      "from": "casterd",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "castere",
+      "source": "core.hxc.ability_practice.15.707684",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "castere",
+      "source": "core.hxc.ability_practice.15.707684",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "castere",
+      "source": "core.hxc.ability_practice.15.707684",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "castere",
+      "source": "core.hxc.ability_practice.15.707684",
+      "index": 3,
+      "value": 39
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "castere",
+      "source": "core.hxc.ability_practice.15.707684",
+      "index": 4,
+      "value": 15600
+    },
+    {
+      "action": "learn",
+      "actor": "castere",
+      "spell": 707684
+    },
+    {
+      "action": "learn",
+      "actor": "castere",
+      "spell": 707685
+    },
+    {
+      "action": "learn",
+      "actor": "castere",
+      "spell": 707686
+    },
+    {
+      "action": "whisper",
+      "actor": "castere",
+      "to": "Apsharemenue",
+      "text": "HXAP\tHELLO|5",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "castere",
+      "metric": "whisper_contains",
+      "from": "castere",
+      "text": "HXAP\tB|5|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "castere",
+      "metric": "whisper_contains",
+      "from": "castere",
+      "text": "|681442|707687|58|40|4|1|1",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "castere",
+      "metric": "whisper_contains",
+      "from": "castere",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 10000
+    }
+  ]
+}
