@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native Arcane Protection trainer rank four",
+  "contract": "Supplemental native trainer rank and resistance retained with sufficient practice.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apstarfour",
+      "race": 1,
+      "class": 26,
+      "level": 68
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.26.573343",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.26.573343",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.26.573343",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.26.573343",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.26.573343",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 573343
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 573344
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 573345
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 573346
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 573346,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 573346,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 573346,
+      "effect": 0,
+      "equals": 70
+    }
+  ]
+}

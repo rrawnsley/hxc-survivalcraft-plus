@@ -1,0 +1,121 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native Greater Arcane Protection party benefits",
+  "contract": "Native56 greater party benefit before shared enrollment with sufficient regular proficiency; native effects and acquisition preserved.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apstargac",
+      "race": 1,
+      "class": 26,
+      "level": 56
+    },
+    {
+      "id": "ally",
+      "name": "Apstargaa",
+      "race": 1,
+      "class": 26,
+      "level": 56
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "ally"
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.26.573343",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.26.573343",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.26.573343",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.26.573343",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.26.573343",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 573343
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 573344
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 573345
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 573348
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 573348,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 573348,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 573348,
+      "effect": 0,
+      "equals": 60
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 573348,
+      "effect": 0,
+      "equals": 60
+    }
+  ]
+}

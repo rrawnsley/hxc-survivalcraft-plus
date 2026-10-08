@@ -29,12 +29,14 @@
 
 #include "../../../src/server/game/Spells/AbilityPracticeCastReceipt.h"
 
+#include <algorithm>
 #include <array>
 #include <thread>
 #include <cassert>
 #include <iostream>
 #include <fstream>
 #include <map>
+#include <utility>
 
 using namespace AbilityPractice;
 
@@ -728,7 +730,18 @@ void CheckMasteryFixedAndTrainerPolicies()
                 { 3, 1, { entry.PreviousRanks.back().Requirement.Proficiency, 0 } });
             assert(converted && converted->State.Proficiency == entry.PreviousRanks.back().Requirement.Proficiency);
         }
-    assert(DevelopmentBuffVariants::Variants.size() == 21);
+    assert(DevelopmentBuffVariants::Variants.size() == 23);
+    constexpr std::array expectedProficiencies = {
+        std::pair{ 680294u, 100u }, std::pair{ 680315u, 100u }, std::pair{ 680310u, 100u },
+        std::pair{ 712458u, 80u }, std::pair{ 523495u, 80u }, std::pair{ 680303u, 80u },
+        std::pair{ 803665u, 80u }, std::pair{ 572817u, 80u }, std::pair{ 680298u, 80u },
+        std::pair{ 561241u, 40u }, std::pair{ 680872u, 40u }, std::pair{ 523510u, 40u },
+        std::pair{ 681442u, 40u }, std::pair{ 570756u, 40u }, std::pair{ 578130u, 40u },
+        std::pair{ 523513u, 60u }, std::pair{ 803657u, 60u }, std::pair{ 680301u, 60u },
+        std::pair{ 575842u, 20u }, std::pair{ 573348u, 20u }, std::pair{ 561242u, 1u },
+        std::pair{ 561243u, 1u }, std::pair{ 800195u, 1u }
+    };
+    assert(expectedProficiencies.size() == DevelopmentBuffVariants::Variants.size());
     for (auto const& variant : DevelopmentBuffVariants::Variants)
     {
         AbilityProfile const* parent = nullptr;
@@ -743,11 +756,9 @@ void CheckMasteryFixedAndTrainerPolicies()
         assert(!DevelopmentBuffVariants::Find(variant.ClassId, variant.AbilityId));
         auto const* rank = DevelopmentBuffVariants::EquivalentRank(*parent, variant);
         assert(rank && rank->SpellId == variant.EquivalentSpellId);
-        assert(rank->Requirement.Proficiency == (variant.SpellId == 712458 || variant.SpellId == 523495 ||
-            variant.SpellId == 680303 || variant.SpellId == 803665 || variant.SpellId == 572817 || variant.SpellId == 680298 ? 80u : variant.SpellId == 561241 || variant.SpellId == 680872 ||
-            variant.SpellId == 523510 ||
-            variant.SpellId == 681442 || variant.SpellId == 570756 || variant.SpellId == 578130 ? 40u : variant.SpellId == 523513 || variant.SpellId == 803657 ? 60u :
-            variant.SpellId == 680294 || variant.SpellId == 680315 || variant.SpellId == 680310 ? 100u : variant.SpellId == 575842 ? 20u : 1u));
+        auto const expected = std::find_if(expectedProficiencies.begin(), expectedProficiencies.end(),
+            [&variant](auto const& entry) { return entry.first == variant.SpellId; });
+        assert(expected != expectedProficiencies.end() && rank->Requirement.Proficiency == expected->second);
         auto invalid = variant;
         invalid.EquivalentSpellId = 1;
         assert(!DevelopmentBuffVariants::EquivalentRank(*parent, invalid));

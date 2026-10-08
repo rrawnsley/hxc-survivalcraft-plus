@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native Greater Celestial Mind party benefits",
+  "contract": "Native56 greater party benefit before shared enrollment with sufficient regular proficiency; native effects and acquisition preserved.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apstargmc",
+      "race": 1,
+      "class": 26,
+      "level": 56
+    },
+    {
+      "id": "ally",
+      "name": "Apstargma",
+      "race": 1,
+      "class": 26,
+      "level": 56
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "ally"
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.26.300255",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.26.300255",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.26.300255",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.26.300255",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.26.300255",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 300255
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 301222
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 301223
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 301224
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 301225
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 680301
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 680301,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 680301,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 680301,
+      "effect": 0,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 680301,
+      "effect": 0,
+      "equals": 31
+    }
+  ]
+}
