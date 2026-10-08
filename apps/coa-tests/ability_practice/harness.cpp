@@ -455,7 +455,7 @@ void CheckCurrentRankPolicies()
 {
     std::uint32_t forecasts = 0;
     std::array<bool, 21> classes{};
-    assert(DevelopmentPacing::Entries.size() == 164);
+    assert(DevelopmentPacing::Entries.size() == 165);
     for (auto const& entry : DevelopmentPacing::Entries)
     {
         classes.at(entry.ClassId - 12) = true;
@@ -718,7 +718,7 @@ void CheckMasteryFixedAndTrainerPolicies()
                 { 3, 1, { entry.PreviousRanks.back().Requirement.Proficiency, 0 } });
             assert(converted && converted->State.Proficiency == entry.PreviousRanks.back().Requirement.Proficiency);
         }
-    assert(DevelopmentBuffVariants::Variants.size() == 3);
+    assert(DevelopmentBuffVariants::Variants.size() == 5);
     for (auto const& variant : DevelopmentBuffVariants::Variants)
     {
         AbilityProfile const* parent = nullptr;
@@ -728,13 +728,14 @@ void CheckMasteryFixedAndTrainerPolicies()
         for (auto const& profile : DevelopmentUtilityFixed::Profiles)
             if (profile.Definition.AbilityId == variant.AbilityId)
                 parent = &profile;
-        assert(parent && DevelopmentBuffVariants::Find(13, variant.SpellId) == &variant);
-        assert(!DevelopmentBuffVariants::Find(14, variant.SpellId));
-        assert(!DevelopmentBuffVariants::Find(13, variant.AbilityId));
+        assert(parent && DevelopmentBuffVariants::Find(variant.ClassId, variant.SpellId) == &variant);
+        assert(!DevelopmentBuffVariants::Find(variant.ClassId == 13 ? 14 : 13, variant.SpellId));
+        assert(!DevelopmentBuffVariants::Find(variant.ClassId, variant.AbilityId));
         auto const* rank = DevelopmentBuffVariants::EquivalentRank(*parent, variant);
         assert(rank && rank->SpellId == variant.EquivalentSpellId);
         assert(rank->Requirement.Proficiency == (variant.SpellId == 712458 ? 80u :
-            variant.SpellId == 680872 ? 40u : 1u));
+            variant.SpellId == 680872 ? 40u : variant.SpellId == 523513 ? 60u :
+            variant.SpellId == 680294 ? 100u : 1u));
         auto invalid = variant;
         invalid.EquivalentSpellId = 1;
         assert(!DevelopmentBuffVariants::EquivalentRank(*parent, invalid));
@@ -780,14 +781,14 @@ void WriteSharedCases(std::string const& filename)
                 phase == 0 ? RankState::NeedsPractice : RankState::Ready;
             view.SharedAbilities.push_back({ shared, variant.EquivalentSpellId });
             std::array views{ view };
-            auto const encoded = EncodeMenuSnapshot(13, variant.CharacterLevel, phase + 1, views,
+            auto const encoded = EncodeMenuSnapshot(variant.ClassId, variant.CharacterLevel, phase + 1, views,
                 SessionPractice{}, true, true, 779, 80, std::nullopt, std::nullopt, true);
             assert(encoded);
             for (auto const& line : *encoded)
                 output << line << '\n';
             output << '\n';
             views[0].SharedAbilities[0].EquivalentSpellId = 999999;
-            assert(!EncodeMenuSnapshot(13, variant.CharacterLevel, phase + 1, views,
+            assert(!EncodeMenuSnapshot(variant.ClassId, variant.CharacterLevel, phase + 1, views,
                 SessionPractice{}, true, true, 779, 80, std::nullopt, std::nullopt, true));
         }
     }

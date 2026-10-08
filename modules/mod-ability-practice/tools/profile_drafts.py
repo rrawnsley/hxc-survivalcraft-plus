@@ -122,6 +122,7 @@ def verify_provenance(candidates, root, dbc):
                 'src/server/game/Spells/SpellInfo.cpp', 'src/server/game/Spells/SpellInfoCorrections.cpp',
                 'src/server/game/Spells/SpellEffects.cpp',
                 'src/server/game/Spells/SpellMgr.cpp', 'src/server/game/Spells/SpellMgr.h',
+                'data/sql/updates/pending_db_world/rev_20260928_22_ranger_adaptation_exclusive.sql',
                 'src/server/game/Spells/Auras/SpellAuras.h', 'src/server/game/Spells/Auras/SpellAuras.cpp',
                 'src/server/game/Spells/Auras/SpellAuraEffects.cpp',
                 'src/server/game/Spells/Auras/SpellAuraEffects.h',
@@ -229,6 +230,7 @@ def reviewed_stat_buffs(root):
         if (not 12 <= class_id <= 32 or not ability_id or target not in {21, 56} or
                 not (aura == 29 and stat in range(5) or aura == 345 and stat == 127 and target == 21 or
                      aura in {85, 99} and stat == 0 and target == 21 or
+                     aura == 22 and stat == 1 and target == 21 and (class_id, ability_id) == (21, 523489) or
                      aura == 143 and (stat in {4, 16, 64, 126} or
                          stat == 1 and (class_id, ability_id) == (31, 570752)) and target == 21) or
                 ((effect_index != 0 or aura == 143 and stat == 126) and not (
@@ -250,7 +252,8 @@ def reviewed_stat_buffs(root):
     secondary_matches = list(re.finditer(pattern, secondary_body[1]))
     if re.sub(pattern, '', secondary_body[1]).replace(',', '').strip():
         raise ValueError('Unsupported secondary buff mechanic declaration')
-    expected_secondary = {(17, 707693, 1): (21, 32, 143), (13, 560294, 1): (21, 126, 143), (17, 706589, 1): (21, 0, 29),
+    expected_secondary = {(21, 523489, 1): (21, -1, 29), (17, 707693, 1): (21, 32, 143),
+                          (13, 560294, 1): (21, 126, 143), (17, 706589, 1): (21, 0, 29),
                           (17, 803667, 1): (21, 16, 143), (31, 570752, 1): (21, -1, 29),
                           (31, 570752, 2): (21, 126, 143)}
     observed_secondary = {}
@@ -643,6 +646,9 @@ def build_drafts(candidates, root):
                 if mechanic['auraId'] == 99 and details[1].get('basePoints') != details[0]['basePoints']:
                     raise ValueError('Paired attack-power rank amounts differ')
                 amounts.append(details[effect_index]['basePoints'] + 1)
+            if (class_id, ability_id) == (21, 523489):
+                required.extend(['native-armor-allstats-and-agility-armor-contribution',
+                                 'native-ranger-strongest-buff-group-and-shared-greater-practice'])
             if (class_id, ability_id) == (31, 570752):
                 required.append('native-earthen-endurance-armor-allstats-and-magic-resistance-benefits')
             if (class_id, ability_id) == (28, 706742):

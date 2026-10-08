@@ -8,6 +8,15 @@
 
 namespace AbilityPractice::DevelopmentBuffs
 {
+inline constexpr std::array FootpadAdaptation = {
+    AbilityRank{ 523489, 1, { 20, 1 } },
+    AbilityRank{ 523490, 2, { 30, 10 } },
+    AbilityRank{ 523491, 3, { 40, 20 } },
+    AbilityRank{ 523492, 4, { 50, 40 } },
+    AbilityRank{ 523493, 5, { 60, 60 } }
+};
+inline constexpr auto FootpadAdaptationCaps = Development::RankCaps(FootpadAdaptation);
+
 inline constexpr std::array EarthenEndurance = {
     AbilityRank{ 570752, 1, { 30, 1 } },
     AbilityRank{ 570753, 2, { 40, 10 } },
@@ -352,6 +361,9 @@ inline constexpr auto RiteOfPowerCaps = Development::RankCaps(RiteOfPower);
 
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 21, 523489, AbilityKind::Ranked, FootpadAdaptation, FootpadAdaptationCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 17, 707693, AbilityKind::Ranked, MarkOfBlaumeux, MarkOfBlaumeuxCaps },
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -512,6 +524,7 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 21, 523489, 21, 1, 22 },
     Mechanic{ 17, 707693, 21, 127, 345 },
     Mechanic{ 31, 570752, 21, 1, 143 },
     Mechanic{ 17, 706589, 21, 4, 143 },
@@ -558,6 +571,7 @@ inline constexpr std::array Mechanics = {
 static_assert(Mechanics.size() == Profiles.size());
 
 inline constexpr std::array SecondaryMechanics = {
+    Mechanic{ 21, 523489, 21, -1, 29, 1 },
     Mechanic{ 17, 707693, 21, 32, 143, 1 },
     Mechanic{ 31, 570752, 21, -1, 29, 1 },
     Mechanic{ 31, 570752, 21, 126, 143, 2 },
@@ -573,6 +587,13 @@ inline Mechanic const* SecondaryMechanicFor(AbilityProfile const& profile, std::
             mechanic.EffectIndex == effectIndex)
             return &mechanic;
     return nullptr;
+}
+
+inline bool IsRangerAdaptation(AbilityProfile const& profile)
+{
+    return profile.Definition.ClassId == 21 &&
+        (profile.Definition.AbilityId == 523489 || profile.Definition.AbilityId == 800266) &&
+        IsSupportedStatBuff(profile);
 }
 
 inline bool IsEarthenEndurance(AbilityProfile const& profile)

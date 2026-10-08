@@ -691,6 +691,12 @@ function Model.PracticeRules(ability, saved)
             .. " Its armor, all five stats, and magic resistance effects must remain active and useful."
             .. " Applying or refreshing the buff earns no practice."
             .. " One original ability cast earns one use, with at least five seconds between counted uses."
+    elseif ability.abilityId == 523489 and ability.route == 13 then
+        rule = "Keep your own Footpad's Adaptation active and use a learned ability for useful damage or healing"
+            .. " in a qualifying PvE fight. Its armor and all five stat effects must remain active and useful."
+            .. " Greater Footpad's Adaptation shares this practice and preserves the native strongest-buff rule."
+            .. " Applying or refreshing either version earns no practice."
+            .. " One original ability cast earns one use, with at least five seconds between counted uses."
     elseif ability.abilityId == 707693 and ability.route == 13 then
         rule = "Keep your own Mark of Blaumeux active and use a learned ability for useful damage or healing"
             .. " in a qualifying PvE fight. Its spell power and Shadow resistance must both remain active and useful."

@@ -536,6 +536,31 @@ bool HasExpectedRiteGroup(std::uint32_t spellId)
     return std::all_of(seen.begin(), seen.end(), [](bool present) { return present; });
 }
 
+bool HasExpectedAdaptationGroup(std::uint32_t abilityId, std::uint32_t spellId)
+{
+    bool const footpad = abilityId == 523489;
+    if (!footpad && abilityId != 800266)
+        return false;
+    auto const group = static_cast<SpellGroup>(footpad ? 2100002 : 2100003);
+    if (sSpellMgr->GetSpellGroupStackRule(group) != SPELL_GROUP_STACK_RULE_EXCLUSIVE_HIGHEST ||
+        !sSpellMgr->IsSpellMemberOfSpellGroup(spellId, group))
+        return false;
+    std::array<std::int32_t, 2> const expected{ footpad ? 523489 : 800266, footpad ? 523513 : 680294 };
+    std::array<bool, 2> seen{};
+    auto const members = sSpellMgr->GetSpellGroupSpellMapBounds(group);
+    for (auto member = members.first; member != members.second; ++member)
+    {
+        auto const found = std::find(expected.begin(), expected.end(), member->second);
+        if (found == expected.end())
+            return false;
+        auto const index = static_cast<std::size_t>(found - expected.begin());
+        if (seen[index])
+            return false;
+        seen[index] = true;
+    }
+    return std::all_of(seen.begin(), seen.end(), [](bool present) { return present; });
+}
+
 bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProfile const& profile)
 {
     if (!info)
@@ -594,6 +619,15 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
                 "aura_ascension_cultist_lifecycle")
                 return false;
             if (++entry != scripts.second)
+                return false;
+        }
+        if (Practice::DevelopmentBuffs::IsRangerAdaptation(profile))
+        {
+            auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+            if (info->SpellFamilyName != 27 || info->SpellFamilyFlags[0] || info->SpellFamilyFlags[1] ||
+                info->SpellFamilyFlags[2] != (info->Id == 800266 ? 0u : 512u) ||
+                scripts.first != scripts.second ||
+                !HasExpectedAdaptationGroup(profile.Definition.AbilityId, info->Id))
                 return false;
         }
         if (Practice::DevelopmentBuffs::IsEarthenEndurance(profile))
@@ -1204,9 +1238,15 @@ bool MatchesSharedBuffVariants()
         }
         auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
         auto entry = scripts.first;
-        if (entry == scripts.second ||
-            sObjectMgr->GetScriptName(entry->second) != "aura_ascension_witch_doctor_lifecycle" ||
-            ++entry != scripts.second)
+        if (variant.ClassId == 13)
+        {
+            if (entry == scripts.second ||
+                sObjectMgr->GetScriptName(entry->second) != "aura_ascension_witch_doctor_lifecycle" ||
+                ++entry != scripts.second)
+                return false;
+        }
+        else if (variant.ClassId != 21 || entry != scripts.second ||
+            !HasExpectedAdaptationGroup(variant.AbilityId, info->Id))
             return false;
         std::array const ranks = { Practice::AbilityRank{ variant.SpellId, 1, { variant.CharacterLevel, 1 } } };
         Practice::AbilityProfile const native{
@@ -1216,7 +1256,7 @@ bool MatchesSharedBuffVariants()
         if (!MatchesNativeClassGrant(native))
             return false;
         auto const& trainers = sObjectMgr->GetTrainers();
-        auto const found = trainers.find(900013);
+        auto const found = trainers.find(900000 + variant.ClassId);
         if (found == trainers.end() || found->second.GetTrainerType() != Trainer::Type::Class ||
             found->second.GetTrainerRequirement() != variant.ClassId)
             return false;
@@ -1563,7 +1603,8 @@ bool EffectiveBuffComponent(Player* player, AuraApplication const& application, 
         return false;
     AuraEffect const* effect = application.GetBase()->GetEffect(effectIndex);
     if ((aura != SPELL_AURA_MOD_STAT && aura != SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT &&
-            aura != SPELL_AURA_MOD_POWER_REGEN && aura != SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE &&
+            aura != SPELL_AURA_MOD_POWER_REGEN && aura != SPELL_AURA_MOD_RESISTANCE &&
+            aura != SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE &&
             aura != SPELL_AURA_MOD_ATTACK_POWER && aura != SPELL_AURA_MOD_RANGED_ATTACK_POWER) ||
         !effect || effect->GetAuraType() != aura || effect->GetAmount() <= 0 || effect->GetMiscValue() != selector)
         return false;

@@ -1,0 +1,184 @@
+{
+  "schema": 1,
+  "name": "Ability practice: shared Ranger adaptation menu",
+  "contract": "Schema five reports both native greater adaptation levels, canonical ranks and exact remaining parent uses.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Aprangemenu",
+      "race": 1,
+      "class": 21,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.523489",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.523489",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.523489",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.523489",
+      "index": 3,
+      "value": 59
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.523489",
+      "index": 4,
+      "value": 15600
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 523489
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 523490
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 523491
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 523492
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.800266",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.800266",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.800266",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.800266",
+      "index": 3,
+      "value": 99
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.800266",
+      "index": 4,
+      "value": 15600
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800266
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803320
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803321
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803322
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803323
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803324
+    },
+    {
+      "action": "whisper",
+      "actor": "caster",
+      "to": "Aprangemenu",
+      "text": "HXAP\tHELLO|5",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "HXAP\tB|5|1|21|60|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "|523513|523493|60|60|4|1|1",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "|680294|803666|60|100|4|1|1",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "HXAP\tE|1",
+      "min": 1,
+      "within_ms": 10000
+    }
+  ]
+}

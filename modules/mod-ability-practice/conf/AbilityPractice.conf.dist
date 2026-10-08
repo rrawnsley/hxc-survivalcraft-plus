@@ -111,5 +111,5 @@ AbilityPractice.AllowDevelopmentUtilityFixedCatalog = 0
 # No practice counter, gate, automatic teaching or authored cooldown/duration benefit.
 AbilityPractice.AllowDevelopmentControlFixedCatalog = 0
 
-# Greater Wuju shares the matching regular ability track. Startup-only; development mode.
+# Reviewed Greater Wuju and Ranger adaptations share their regular tracks. Startup-only; development mode.
 AbilityPractice.AllowDevelopmentSharedBuffVariants = 0

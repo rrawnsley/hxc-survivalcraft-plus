@@ -1,0 +1,459 @@
+{
+  "schema": 1,
+  "name": "Ability practice: greater footpad native party benefits",
+  "contract": "Native Greater footpad benefits equal the matching final regular rank, reach grouped recipients, replace the weaker native version and prevent a weaker recast from replacing the greater buff. Native Human Spirit rounding remains. Unknown regular progress stays unchanged. The regular final rank is active on the caster; the weaker first rank is cast by a second player who has not learned higher ranks.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apftgrone",
+      "race": 1,
+      "class": 21,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "friend",
+      "name": "Apftgrtwo",
+      "race": 1,
+      "class": 21,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "friend"
+    },
+    {
+      "action": "learn",
+      "actor": "friend",
+      "spell": 523489
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.523489",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.523489",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.523489",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.523489",
+      "index": 3,
+      "value": 60
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.523489",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 523489
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 523490
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 523491
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 523492
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 523493
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 523513
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.523489",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.523489",
+      "index": 1,
+      "value": 999
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.523489",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.523489",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.523489",
+      "index": 4,
+      "value": 101
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "armor",
+      "save_as": "caster_armor"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 0,
+      "save_as": "caster_stat_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 1,
+      "save_as": "caster_stat_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 2,
+      "save_as": "caster_stat_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 3,
+      "save_as": "caster_stat_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 4,
+      "save_as": "caster_stat_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "friend",
+      "metric": "armor",
+      "save_as": "friend_armor"
+    },
+    {
+      "action": "snapshot",
+      "actor": "friend",
+      "metric": "stat",
+      "stat": 0,
+      "save_as": "friend_stat_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "friend",
+      "metric": "stat",
+      "stat": 1,
+      "save_as": "friend_stat_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "friend",
+      "metric": "stat",
+      "stat": 2,
+      "save_as": "friend_stat_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "friend",
+      "metric": "stat",
+      "stat": 3,
+      "save_as": "friend_stat_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "friend",
+      "metric": "stat",
+      "stat": 4,
+      "save_as": "friend_stat_4"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 523493,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 523493,
+      "effect": 0,
+      "equals": 285
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 523513,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 523513,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 523493,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 523513,
+      "effect": 0,
+      "equals": 285
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 523513,
+      "effect": 1,
+      "equals": 12
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "armor",
+      "relative_to": "caster_armor",
+      "min": 308.9,
+      "max": 309.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 0,
+      "relative_to": "caster_stat_0",
+      "min": 11.9,
+      "max": 12.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 1,
+      "relative_to": "caster_stat_1",
+      "min": 11.9,
+      "max": 12.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 2,
+      "relative_to": "caster_stat_2",
+      "min": 11.9,
+      "max": 12.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 3,
+      "relative_to": "caster_stat_3",
+      "min": 11.9,
+      "max": 12.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 4,
+      "relative_to": "caster_stat_4",
+      "min": 12.9,
+      "max": 13.1
+    },
+    {
+      "action": "assert",
+      "actor": "friend",
+      "metric": "aura_amount",
+      "spell": 523513,
+      "effect": 0,
+      "equals": 285
+    },
+    {
+      "action": "assert",
+      "actor": "friend",
+      "metric": "aura_amount",
+      "spell": 523513,
+      "effect": 1,
+      "equals": 12
+    },
+    {
+      "action": "assert",
+      "actor": "friend",
+      "metric": "armor",
+      "relative_to": "friend_armor",
+      "min": 308.9,
+      "max": 309.1
+    },
+    {
+      "action": "assert",
+      "actor": "friend",
+      "metric": "stat",
+      "stat": 0,
+      "relative_to": "friend_stat_0",
+      "min": 11.9,
+      "max": 12.1
+    },
+    {
+      "action": "assert",
+      "actor": "friend",
+      "metric": "stat",
+      "stat": 1,
+      "relative_to": "friend_stat_1",
+      "min": 11.9,
+      "max": 12.1
+    },
+    {
+      "action": "assert",
+      "actor": "friend",
+      "metric": "stat",
+      "stat": 2,
+      "relative_to": "friend_stat_2",
+      "min": 11.9,
+      "max": 12.1
+    },
+    {
+      "action": "assert",
+      "actor": "friend",
+      "metric": "stat",
+      "stat": 3,
+      "relative_to": "friend_stat_3",
+      "min": 11.9,
+      "max": 12.1
+    },
+    {
+      "action": "assert",
+      "actor": "friend",
+      "metric": "stat",
+      "stat": 4,
+      "relative_to": "friend_stat_4",
+      "min": 12.9,
+      "max": 13.1
+    },
+    {
+      "action": "cast",
+      "actor": "friend",
+      "spell": 523489,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "friend",
+      "metric": "cast_failure",
+      "spell": 523489,
+      "equals": 9,
+      "label": "Native active weaker rank is rejected by the strongest-buff group"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 523489,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 523513,
+      "effect": 0,
+      "equals": 285
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.21.523489",
+      "index": 1,
+      "equals": 999
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.21.523489",
+      "index": 3,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.21.523489",
+      "index": 4,
+      "equals": 101
+    }
+  ]
+}

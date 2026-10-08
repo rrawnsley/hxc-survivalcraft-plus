@@ -750,6 +750,7 @@ def main():
                          'src/server/game/Spells/Spell.h', 'src/server/game/Spells/Spell.cpp',
                 'src/server/game/Spells/SpellInfo.cpp', 'src/server/game/Spells/SpellInfoCorrections.cpp',
                          'src/server/game/Spells/SpellMgr.cpp', 'src/server/game/Spells/SpellMgr.h',
+                'data/sql/updates/pending_db_world/rev_20260928_22_ranger_adaptation_exclusive.sql',
                          'src/server/game/Spells/SpellEffects.cpp',
                          'src/server/game/Spells/Auras/SpellAuras.h',
                          'src/server/game/Spells/Auras/SpellAuras.cpp',

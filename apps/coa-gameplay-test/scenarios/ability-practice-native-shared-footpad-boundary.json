@@ -1,0 +1,315 @@
+{
+  "schema": 1,
+  "name": "Ability practice: shared greater footpad rank boundary",
+  "contract": "Native trainer cannot bypass practice; final regular and greater adaptations unlock together and share one capped progress record.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apfootgate",
+      "race": 1,
+      "class": 21,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "name": "Apfootally",
+      "race": 1,
+      "class": 21,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 523489
+    },
+    {
+      "action": "money",
+      "actor": "caster",
+      "copper": 1000000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 97930
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "caster"
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "caster",
+      "spell": 523513
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 523513,
+      "equals": 0
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.523489",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.523489",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.523489",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.523489",
+      "index": 3,
+      "value": 59
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.523489",
+      "index": 4,
+      "value": 15600
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 523490
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 523491
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 523492
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 523492
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 264
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 500074
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 2504
+    },
+    {
+      "action": "equip",
+      "actor": "caster",
+      "item": 2504,
+      "slot": 17
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 523492,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 500074,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 500074,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.21.523489",
+      "index": 3,
+      "equals": 60
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.21.523489",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 523493,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 523513,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 523513,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 523513,
+      "effect": 0,
+      "equals": 285
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 523513,
+      "effect": 1,
+      "equals": 12
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 523513,
+      "effect": 0,
+      "equals": 285
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 523513,
+      "effect": 1,
+      "equals": 12
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 500074
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 2,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 500074,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 500074,
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.21.523489",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.21.523513",
+      "index": 0,
+      "equals": 0
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 12,
+      "stationary": true
+    }
+  ]
+}
