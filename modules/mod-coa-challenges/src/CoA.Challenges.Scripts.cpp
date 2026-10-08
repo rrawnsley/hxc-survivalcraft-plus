@@ -1576,8 +1576,9 @@ namespace CoAChallenges
 
         void OnPlayerUpdateCraftingSkill(Player* player, SkillLineAbilityEntry const* skill, uint32 /*current_level*/, uint32& gain) override
         {
-            if (PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_PROFESSION_EXPERIENCE"))
-                gain = 0;
+            // This hook's gain parameter is the profession skill step, not XP.
+            // NO_PROFESSION_EXPERIENCE is enforced by OnPlayerGiveXP below;
+            // zeroing gain here silently prevents the skill itself from rising.
             if (player && PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_PROFESSIONS"))
             {
                 std::lock_guard<std::mutex> lock(CraftRarityMutex);
@@ -1587,8 +1588,9 @@ namespace CoAChallenges
 
         void OnPlayerUpdateGatheringSkill(Player* player, uint32 /*skill_id*/, uint32 /*current*/, uint32 /*gray*/, uint32 /*green*/, uint32 /*yellow*/, uint32& gain) override
         {
-            if (PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_PROFESSION_EXPERIENCE"))
-                gain = 0;
+            // This hook's gain parameter is the profession skill step, not XP.
+            // NO_PROFESSION_EXPERIENCE is enforced by OnPlayerGiveXP below;
+            // zeroing gain here silently prevents the skill itself from rising.
             if (player && PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_PROFESSIONS"))
             {
                 // Gathering has no crafted item: flat XP, also clears a stale
