@@ -454,7 +454,7 @@ void CheckCurrentRankPolicies()
 {
     std::uint32_t forecasts = 0;
     std::array<bool, 21> classes{};
-    assert(DevelopmentPacing::Entries.size() == 162);
+    assert(DevelopmentPacing::Entries.size() == 163);
     for (auto const& entry : DevelopmentPacing::Entries)
     {
         classes.at(entry.ClassId - 12) = true;
@@ -717,8 +717,8 @@ void CheckMasteryFixedAndTrainerPolicies()
                 { 3, 1, { entry.PreviousRanks.back().Requirement.Proficiency, 0 } });
             assert(converted && converted->State.Proficiency == entry.PreviousRanks.back().Requirement.Proficiency);
         }
-    assert(extensions == 12 && addedRanks == 24);
-    std::cout << "PASS: 9 mastery policies/rewards, 97 fixed declarations, 12 trainer extensions/24 added ranks\n";
+    assert(extensions == 13 && addedRanks == 25);
+    std::cout << "PASS: 9 mastery policies/rewards, 97 fixed declarations, 13 trainer extensions/25 added ranks\n";
 }
 
 void WriteTypedMasteryAndFixedCases(std::ofstream& output, std::uint32_t& revision)

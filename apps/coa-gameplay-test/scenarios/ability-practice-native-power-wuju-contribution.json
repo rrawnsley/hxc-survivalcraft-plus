@@ -1,0 +1,226 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Power Wuju contribution",
+  "contract": "Full native seven-rank ladder and both attack-power benefits retained; original ranged damage qualifies, magic does not; practice gates complete native ranks.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Appwcombat",
+      "race": 1,
+      "class": 13,
+      "level": 20,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707671
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 3,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 807037
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 707671,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 807037,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 807037,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 807037
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 92086
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 801674
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 2504
+    },
+    {
+      "action": "equip",
+      "actor": "caster",
+      "item": 2504,
+      "slot": 17
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 707671,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 801674,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 801674,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 4,
+      "equals": 270
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "caster",
+      "spell": 707671
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 801674
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 801674,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 801674,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 4,
+      "equals": 270
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 20,
+      "health": 1000000,
+      "distance": 12,
+      "stationary": true
+    }
+  ]
+}

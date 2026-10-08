@@ -1,0 +1,194 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Power Wuju native rank5 benefit",
+  "contract": "Complete native melee and ranged attack-power amounts preserved, including unequal final rank; unknown saved record untouched.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Appwprobee",
+      "race": 1,
+      "class": 13,
+      "level": 50
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707671
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707672
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707673
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707674
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707675
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 1,
+      "value": 999
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 4,
+      "value": 101
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "attack_power",
+      "save_as": "attack_power_base"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "ranged_attack_power",
+      "save_as": "ranged_attack_power_base"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 707675,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 707675,
+      "effect": 0,
+      "equals": 130
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 707675,
+      "effect": 1,
+      "equals": 130
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "attack_power",
+      "relative_to": "attack_power_base",
+      "min": 129.9,
+      "max": 130.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "ranged_attack_power",
+      "relative_to": "ranged_attack_power_base",
+      "min": 129.9,
+      "max": 130.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 1,
+      "equals": 999
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 3,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 4,
+      "equals": 101
+    }
+  ]
+}

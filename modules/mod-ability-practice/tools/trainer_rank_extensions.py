@@ -123,6 +123,7 @@ def declared_outcome(root, row):
     return next(iter(outcomes))
 
 
+BUFF_IDENTITIES = {(12, 300857), (13, 707671)}
 STAT_BUFF_IDENTITIES = {(22, 801523), (26, 573343)}
 SPELL_POWER_BUFF_IDENTITIES = {(27, 575040)}
 
@@ -133,7 +134,7 @@ def render_native_header(root, rows, buff=False, stat=False, power=False, retain
     expected = {(13, 807037), (16, 707044), (19, 801165), (26, 575039),
                 (28, 802684), (29, 803198), (30, 800174), (31, 803981)}
     if buff:
-        expected = {(12, 300857)}
+        expected = BUFF_IDENTITIES
     if stat:
         expected = STAT_BUFF_IDENTITIES
     if power:
@@ -303,7 +304,7 @@ def main():
                                     (args.spell_power_buff_native_header, False, False, True)]:
         if not path:
             continue
-        selected = [row for row in rows if ((row['classId'], row['abilityId']) == (12, 300857)) == buff and
+        selected = [row for row in rows if ((row['classId'], row['abilityId']) in BUFF_IDENTITIES) == buff and
                     ((row['classId'], row['abilityId']) in STAT_BUFF_IDENTITIES) == stat and
                     ((row['classId'], row['abilityId']) in SPELL_POWER_BUFF_IDENTITIES) == power]
         header = render_native_header(root, selected, buff, stat, power)

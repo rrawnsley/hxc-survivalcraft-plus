@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Power Wuju version1 partial migration",
+  "contract": "Known legacy saved definition converts to complete definition4 while preserving whole proficiency and exact fractional practice; incomplete rank remains locked.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Appwmiga",
+      "race": 1,
+      "class": 13,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707671
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 1,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 3,
+      "value": 9
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 4,
+      "value": 15
+    },
+    {
+      "action": "relog",
+      "actor": "caster"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 707671,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "whisper",
+      "actor": "caster",
+      "to": "Appwmiga",
+      "text": "HXAP\tHELLO|4",
+      "language": 4294967295
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 1,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 3,
+      "equals": 9
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.13.707671",
+      "index": 4,
+      "equals": 8100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 707672,
+      "equals": 0
+    }
+  ]
+}

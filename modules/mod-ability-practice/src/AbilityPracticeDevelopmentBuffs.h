@@ -33,6 +33,16 @@ inline constexpr std::array MarkOfRivendare = {
 };
 inline constexpr auto MarkOfRivendareCaps = Development::RankCaps(MarkOfRivendare);
 
+inline constexpr std::array PowerWuju = {
+    AbilityRank{ 707671, 1, { 10, 1 } },
+    AbilityRank{ 707672, 2, { 20, 10 } },
+    AbilityRank{ 707673, 3, { 30, 20 } },
+    AbilityRank{ 707674, 4, { 40, 40 } },
+    AbilityRank{ 707675, 5, { 50, 60 } },
+    AbilityRank{ 707676, 6, { 60, 80 } }
+};
+inline constexpr auto PowerWujuCaps = Development::RankCaps(PowerWuju);
+
 inline constexpr std::array SpiritWuju = {
     AbilityRank{ 560294, 1, { 2, 1 } },
     AbilityRank{ 561140, 2, { 28, 10 } },
@@ -334,6 +344,9 @@ inline constexpr auto RiteOfPowerCaps = Development::RankCaps(RiteOfPower);
 
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 13, 707671, AbilityKind::Ranked, PowerWuju, PowerWujuCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 31, 570752, AbilityKind::Ranked, EarthenEndurance, EarthenEnduranceCaps },
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -492,6 +505,7 @@ inline constexpr std::array Mechanics = {
     Mechanic{ 17, 706589, 21, 4, 143 },
     Mechanic{ 17, 803667, 21, 2 },
     Mechanic{ 13, 560294, 21, 4 },
+    Mechanic{ 13, 707671, 21, 0, 99 },
     Mechanic{ 28, 706742, 21, 0, 99 },
     Mechanic{ 20, 706630, 21, 2 },
     Mechanic{ 21, 800266, 21, 0, 99 },
@@ -608,6 +622,12 @@ inline bool IsPairedAttackPower(AbilityProfile const& profile)
 {
     return IsSupportedStatBuff(profile) && Aura(profile) == 99 && EffectIndex(profile) == 0 &&
         Target(profile) == 21 && StatSelector(profile) == 0;
+}
+
+inline bool IsPowerWuju(AbilityProfile const& profile)
+{
+    return profile.Definition.ClassId == 13 && profile.Definition.AbilityId == 707671 &&
+        IsPairedAttackPower(profile);
 }
 
 inline bool IsPowerModule(AbilityProfile const& profile)

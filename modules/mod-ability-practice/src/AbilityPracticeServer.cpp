@@ -611,12 +611,14 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
             if (++entry != scripts.second)
                 return false;
         }
-        if (Practice::DevelopmentBuffs::IsSpiritWuju(profile))
+        if (Practice::DevelopmentBuffs::IsSpiritWuju(profile) || Practice::DevelopmentBuffs::IsPowerWuju(profile))
         {
             auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
             auto entry = scripts.first;
-            if (info->SpellFamilyName != 19 || info->SpellFamilyFlags[0] != 256 ||
-                info->SpellFamilyFlags[1] || info->SpellFamilyFlags[2] || entry == scripts.second ||
+            bool const powerWuju = Practice::DevelopmentBuffs::IsPowerWuju(profile);
+            if (info->SpellFamilyName != 19 || info->SpellFamilyFlags[0] != (powerWuju ? 0u : 256u) ||
+                info->SpellFamilyFlags[1] || info->SpellFamilyFlags[2] != (powerWuju ? 16777216u : 0u) ||
+                entry == scripts.second ||
                 sObjectMgr->GetScriptName(entry->second) != "aura_ascension_witch_doctor_lifecycle")
                 return false;
             if (++entry != scripts.second)
@@ -650,11 +652,14 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
             }
             if (Practice::DevelopmentBuffs::IsPairedAttackPower(profile) && index == 1)
             {
+                bool const finalPowerWuju = Practice::DevelopmentBuffs::IsPowerWuju(profile) && info->Id == 707677;
                 if (slot.Effect != SPELL_EFFECT_APPLY_AURA || slot.ApplyAuraName != SPELL_AURA_MOD_RANGED_ATTACK_POWER ||
                     slot.TargetA.GetTarget() != Practice::DevelopmentBuffs::RangedTarget(profile, info->Id) ||
                     slot.TargetB.GetTarget() || slot.TriggerSpell || slot.MiscValue ||
-                    slot.BasePoints != info->Effects[EFFECT_0].BasePoints ||
-                    slot.DieSides != info->Effects[EFFECT_0].DieSides)
+                    (finalPowerWuju ? (slot.BasePoints != 231 || info->Effects[EFFECT_0].BasePoints != 305 ||
+                        slot.DieSides != 1 || info->Effects[EFFECT_0].DieSides != 1) :
+                        (slot.BasePoints != info->Effects[EFFECT_0].BasePoints ||
+                            slot.DieSides != info->Effects[EFFECT_0].DieSides)))
                     return false;
                 continue;
             }

@@ -4220,3 +4220,38 @@ no production/server/client changes. All21 native menu delivery was last refresh
 267-profile catalog; client pixels, ordinary cadence, friendly healing and other ability outcomes
 remain unqualified. Power Wuju next requires its full native trainer-only seventh rank68, including
 native unequal melee/ranged amounts306/232; no partial ladder or native correction should be introduced.
+
+
+## Power Wuju complete native trainer ladder
+
+Power Wuju13/707671 retains six captured ranks10/20/30/40/50/60 and the actual trainer900013
+seventh707677 at68 requiring707676. The additive buff definition3 and definition4 caps include all
+seven; twelve older trainer extensions and162 older pacing entries remain frozen. There are now
+thirteen extensions/25 extra ranks and163 pacing entries. Only one upcoming rank can be prepared.
+Native paired attack power is30/35/55/85/130/232; final melee306/ranged232 remain deliberately unequal.
+Loaded family19 flags0/0/16777216 and exactly one Witch Doctor lifecycle binding are required.
+Only this exact final rank permits unequal basepoints305/231 with die sides1; other paired guards remain.
+
+Original Shadowhunter Malefic Arrow801674 damage with native bow2504 advances owned Power Wuju;
+Malefic Wrath807037 magic, buff application, cancelled/replaced buffs do not. Native Spirit Wuju
+replaces Power Wuju; returning Power Wuju resumes retained progress. No native lifecycle/core changes.
+Rank2 boundary9/15930 becomes10/0 at20, learns707672 and keeps707673 locked. At68,99/15600 becomes
+100/0 and learns native trainer rank707677, retaining306/232.540 qualifying uses estimate45minutes
+at assumed5s before catch-up; ordinary cadence is not measured.40buff tracks span20classes.
+
+Native benefits before enrollment014912 passed seven cases50.1s simulated; after enrollment015604
+all seven benefit cases passed, including unknown999/100/101 rows, while three initial combat fixtures
+failed excessive power setup. Corrected initial combat/boundaries015711 passed three54.3s simulated.
+Build015202 passed29.2s; its source and harness failed fixture/schema/stale-count assertions.
+Source015418 passed9/79.6s and final020701 passed9/80.5s. Harness015553 passed4.7s/825typed snapshots.
+Real015847 contribution/cancel, two boundaries, Wuju replacement and Spirit regression passed;
+that combined report failed two migration fixtures which omitted the login event. Corrected020538
+passed all three real migration cases75.2s without retries: versions1/2 retain9/8100, learned rank7
+seeds100 and retains8100 exact partial points and native306/232. Fresh menu021059 passed57.0s real,
+all seven native levels, cap20, current definition4 and exact540 uses. Earlier menu failure was a
+fixture confusing definition version with rank count. Scoped style/whitespace and coverage exports pass.
+
+Coverage269unique/271declared163ranked9mastery97Fixed434pending(61ranked373standalone),136native paths.
+825typed snapshots489ranked45mastery291Fixed. Defaults0/addon0.4.56-development/schema4 unpublished.
+No live server/config/database/client/launcher operations. All21 native delivery last refreshed267catalog;
+actual client pixels, ordinary cadence, friendly healing and all remaining outcomes are not qualified.
