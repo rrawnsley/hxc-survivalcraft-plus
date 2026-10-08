@@ -1,0 +1,271 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Resourceful Wuju native utility",
+  "contract": "Native allschool mana reduction and exclusive Wuju replacement preserved; original damage does not change retained unknown practice records, including after login.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apresource",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 5,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 578344
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 807037
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 801670
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 560294
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.578344",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.578344",
+      "index": 1,
+      "value": 999
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.578344",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.578344",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.578344",
+      "index": 4,
+      "value": 101
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_power_cost",
+      "spell": 807037,
+      "save_as": "cost807037"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_power_cost",
+      "spell": 807037,
+      "min": 20
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_power_cost",
+      "spell": 801670,
+      "save_as": "cost801670"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_power_cost",
+      "spell": 801670,
+      "min": 20
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 578344,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 578344,
+      "equals": -5
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_power_cost",
+      "spell": 807037,
+      "ratio_to": "cost807037",
+      "min": 0.9,
+      "max": 0.951
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_power_cost",
+      "spell": 801670,
+      "ratio_to": "cost801670",
+      "min": 0.9,
+      "max": 0.951
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 807037,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 807037,
+      "min": 1
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 560294,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 578344,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_power_cost",
+      "spell": 807037,
+      "ratio_to": "cost807037",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_power_cost",
+      "spell": 801670,
+      "ratio_to": "cost801670",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 578344,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 560294,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 578344,
+      "equals": -5
+    },
+    {
+      "action": "relog",
+      "actor": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.13.578344",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.13.578344",
+      "index": 1,
+      "equals": 999
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.13.578344",
+      "index": 2,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.13.578344",
+      "index": 3,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.13.578344",
+      "index": 4,
+      "equals": 101
+    }
+  ]
+}

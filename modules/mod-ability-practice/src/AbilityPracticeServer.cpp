@@ -1016,6 +1016,17 @@ bool MatchesUtilityFixedRankMechanic(std::uint32_t classId, std::uint32_t spellI
     SpellInfo const* info = sSpellMgr->GetSpellInfo(spellId);
     if (mechanic == mechanics.end() || !info || info->IsPassive())
         return false;
+    if (classId == 13 && spellId == 578344)
+    {
+        auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+        auto entry = scripts.first;
+        if (info->SpellFamilyName != 19 || info->SpellFamilyFlags[0] != 256 ||
+            info->SpellFamilyFlags[1] || info->SpellFamilyFlags[2] || entry == scripts.second ||
+            sObjectMgr->GetScriptName(entry->second) != "aura_ascension_witch_doctor_lifecycle")
+            return false;
+        if (++entry != scripts.second)
+            return false;
+    }
     if (classId == 14 && (spellId == 500028 || spellId == 500422 || spellId == 500423))
     {
         SpellInfo const* jump = sSpellMgr->GetSpellInfo(802028);

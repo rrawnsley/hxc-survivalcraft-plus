@@ -93,7 +93,7 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
     end
     count = count + 1
 end
-assert(count == 825)
-assert(kinds[1] == 489 and kinds[2] == 45 and kinds[3] == 291)
+assert(count == 828)
+assert(kinds[1] == 489 and kinds[2] == 45 and kinds[3] == 294)
 for classId = 12, 32 do assert(classes[classId]) end
-print("PASS: 825 typed snapshots across 21 classes: 489 ranked, 45 mastery, 291 fixed and menu rendering")
+print("PASS: 828 typed snapshots across 21 classes: 489 ranked, 45 mastery, 294 fixed and menu rendering")

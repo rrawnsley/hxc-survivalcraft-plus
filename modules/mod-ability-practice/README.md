@@ -4248,10 +4248,38 @@ Real015847 contribution/cancel, two boundaries, Wuju replacement and Spirit regr
 that combined report failed two migration fixtures which omitted the login event. Corrected020538
 passed all three real migration cases75.2s without retries: versions1/2 retain9/8100, learned rank7
 seeds100 and retains8100 exact partial points and native306/232. Fresh menu021059 passed57.0s real,
-all seven native levels, cap20, current definition4 and exact540 uses. Earlier menu failure was a
-fixture confusing definition version with rank count. Scoped style/whitespace and coverage exports pass.
+all seven native levels, cap20, practice availability4 and exact540 uses. Earlier menu failure was a
+fixture confusing practice availability with rank count. Scoped style/whitespace and coverage exports pass.
 
 Coverage269unique/271declared163ranked9mastery97Fixed434pending(61ranked373standalone),136native paths.
 825typed snapshots489ranked45mastery291Fixed. Defaults0/addon0.4.56-development/schema4 unpublished.
 No live server/config/database/client/launcher operations. All21 native delivery last refreshed267catalog;
 actual client pixels, ordinary cadence, friendly healing and all remaining outcomes are not qualified.
+
+
+## Resourceful Wuju fixed native utility
+
+Resourceful Wuju13/578344 remains an unranked level16 native utility with its full-5% allschool mana-cost
+modifier. It is Fixed: no practice requirement, rewards, counter changes or automatic teaching.
+Exact slots6/168/0, auras72/0/0, targets21/21/0, misc127/117041/0 and basepoints-6/-1/-1 are guarded.
+The native second slot168 currently routes to EffectNULL; no intended visual or other effect is inferred.
+Loaded family19 flags256/0/0 and exactly one Witch Doctor lifecycle binding are required. Native trainer900013
+has level16/no prerequisite/no skill requirement and no linked stronger offer. No native spell/core edits.
+
+Before enrollment021344 passed49.5s simulated. After enrollment source/build/harness021523 passed9checks78.4s,
+30.0s build and5.0s harness/828typed. Native021723 passed two real cases100.8s without failures/retries:
+original Resourceful cost reduction, both directions of Wuju replacement, retained unknown999/100/101 rows
+across original damage and relog, and Spirit replacement regression. Malefic Wrath cost164 becomes155,
+Loa's Brew494 becomes469, reflecting native integer rounding. Spirit replacement restores both exact base costs.
+Fresh Fixed menu021915 passed80.6s real: level16, native learned ability and no practice, saved fields untouched.
+All21 native menus022122 passed three groups100.0s real without failures/retries at the270-profile catalog.
+828typed snapshots489ranked45mastery294Fixed. All four frozen trainer headers reproduce unchanged.
+Scoped style/whitespace and source/provenance exports pass.40buff tracks/20classes remain unchanged.
+
+Coverage270unique/272declared163ranked9mastery98Fixed433pending(61ranked372standalone),136native paths.
+Defaults0/addon0.4.57-development/schema4 unpublished. No production/server/client/launcher changes.
+Native menu delivery is not proof of actual client pixels or measured ordinary cadence. Broader ability outcome
+qualification remains. Greater Wuju spells at32/56/60 have no trainer prerequisites and can bypass matching
+regular rank practice; their relationship to regular practice is a pending design question, not silently classified.
+Earlier Power Wuju menu wording corrected: the final ability-row field4 denotes practice availability,
+not definition version or rank count. Saved definition4 is separately verified by migration tests.
