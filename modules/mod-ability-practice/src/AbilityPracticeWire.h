@@ -371,7 +371,9 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
                 auto const parent = std::find_if(view.Ranks.begin(), view.Ranks.end(),
                     [&shared](RankView const& entry) { return entry.SpellId == shared.EquivalentSpellId; });
                 if (parent == view.Ranks.end() || !rank.SpellId || rank.SpellId == shared.EquivalentSpellId ||
-                    rank.Requirement.CharacterLevel < parent->Requirement.CharacterLevel ||
+                    (rank.Requirement.CharacterLevel < parent->Requirement.CharacterLevel &&
+                        !(view.AbilityId == 803658 && rank.SpellId == 803665 && shared.EquivalentSpellId == 803663 &&
+                            rank.Requirement.CharacterLevel == 58 && parent->Requirement.CharacterLevel == 60)) ||
                     rank.Requirement.CharacterLevel > 255 ||
                     rank.Requirement.Proficiency != parent->Requirement.Proficiency ||
                     rank.RankNumber != parent->RankNumber ||

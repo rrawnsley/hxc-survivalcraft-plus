@@ -19,6 +19,7 @@ struct Variant
 };
 
 inline constexpr std::array Variants = {
+    Variant{ 28, 803665, 803658, 803663, 58 },
     Variant{ 28, 680315, 706742, 707688, 60 },
     Variant{ 32, 561241, 561237, 561240, 60 },
     Variant{ 32, 561242, 561236, 561236, 52 },
@@ -43,12 +44,20 @@ inline Variant const* Find(std::uint32_t classId, std::uint32_t spellId)
     return nullptr;
 }
 
+inline bool HasEarlierNativeLevel(Variant const& variant)
+{
+    return variant.ClassId == 28 && variant.SpellId == 803665 && variant.AbilityId == 803658 &&
+        variant.EquivalentSpellId == 803663 && variant.CharacterLevel == 58;
+}
+
 inline AbilityRank const* EquivalentRank(AbilityProfile const& profile, Variant const& variant)
 {
     if (profile.Definition.ClassId != variant.ClassId || profile.Definition.AbilityId != variant.AbilityId)
         return nullptr;
     for (auto const& rank : profile.Definition.Ranks)
-        if (rank.SpellId == variant.EquivalentSpellId && rank.Requirement.CharacterLevel <= variant.CharacterLevel)
+        if (rank.SpellId == variant.EquivalentSpellId &&
+            (rank.Requirement.CharacterLevel <= variant.CharacterLevel ||
+                (rank.Requirement.CharacterLevel == 60 && HasEarlierNativeLevel(variant))))
             return &rank;
     return nullptr;
 }

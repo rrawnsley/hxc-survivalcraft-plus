@@ -636,6 +636,11 @@ def build_drafts(candidates, root):
             for secondary in secondary_components:
                 expected[secondary['effectIndex']] = (6, secondary['auraId'], secondary['targetA'],
                                                      0, 0, secondary['statSelector'])
+            if (class_id, ability_id) == (28, 803658):
+                expected[2] = (168, 0, 1, 0, 0, 117151)
+                required.extend(['native-tinker-lifecycle-and-same-caster-module-replacement',
+                                 'native-inactive-effect168-slot-preserved',
+                                 'greater-native58-and-equivalent-regular60-acquisition'])
             if (class_id, ability_id) == (32, 801107):
                 expected[2] = (6, 107, 1, 0, 0, 12)
                 required.extend(['native-scaled-mana-regeneration-and-ranked-negative-cost',

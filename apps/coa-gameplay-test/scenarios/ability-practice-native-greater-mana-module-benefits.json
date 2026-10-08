@@ -1,0 +1,168 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native Greater Mana Module at58",
+  "contract": "With sufficient shared practice, native greater at58 grants33regeneration to caster and party; matching regular60 stays unlearned. Native acquisition before enrollment passed190746.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apmanaaliasc",
+      "race": 1,
+      "class": 28,
+      "level": 58
+    },
+    {
+      "id": "ally",
+      "name": "Apmanaaliasa",
+      "race": 1,
+      "class": 28,
+      "level": 58
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.28.803658",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.28.803658",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.28.803658",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.28.803658",
+      "index": 3,
+      "value": 80
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.28.803658",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803658
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803659
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803660
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803661
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803662
+    },
+    {
+      "action": "money",
+      "actor": "caster",
+      "copper": 1000000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 97930
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "caster"
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803665
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 803665,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 803663,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803665,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 803665,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 803665,
+      "effect": 0,
+      "equals": 33
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 803665,
+      "effect": 0,
+      "equals": 33
+    }
+  ]
+}

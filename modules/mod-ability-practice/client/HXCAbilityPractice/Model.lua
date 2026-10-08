@@ -253,7 +253,10 @@ local function Ability(value, schema, characterLevel)
                 if candidate.spellId == entry.equivalentSpellId then parent = candidate end
             end
             local practice = Forecast(entry.practice)
-            if not parent or entry.characterLevel < parent.characterLevel or entry.proficiency ~= parent.proficiency
+            local earlierModule = parent and value.abilityId == 803658 and entry.spellId == 803665
+                and entry.equivalentSpellId == 803663 and entry.characterLevel == 58 and parent.characterLevel == 60
+            if not parent or (entry.characterLevel < parent.characterLevel and not earlierModule)
+                or entry.proficiency ~= parent.proficiency
                 or not practice or practice.status ~= parent.practice.status
                 or practice.uses ~= parent.practice.uses then return nil end
             if value.kind == 3 and entry.state ~= 1 and entry.state ~= 2 and entry.state ~= 3
@@ -747,6 +750,12 @@ function Model.PracticeRules(ability, saved)
             .. " in a qualifying PvE fight. Both Spirit and magic resistance effects must remain active and useful."
             .. " Applying or refreshing the buff earns no practice."
             .. " One original ability cast earns one use, with at least five seconds between counted uses."
+    elseif ability.abilityId == 803658 and ability.route == 13 then
+        rule = "Keep your own Mana Module active and use a learned ability for useful damage or healing"
+            .. " in a non-gray PvE encounter while native mana regeneration remains effective."
+            .. " Greater Mana Module shares practice and unlocks at level 58 with proficiency 80;"
+            .. " the matching regular rank still requires level 60. The final regular rank requires level 61."
+            .. " Applying, refreshing, and mana ticks give no practice. Switching modules pauses practice."
     elseif ability.abilityId == 706742 and ability.route == 13 then
         rule = "Keep your own Power Module active and land a learned melee or ranged damage ability"
             .. " on a non-gray PvE opponent. Its melee and ranged effects must both remain effective."

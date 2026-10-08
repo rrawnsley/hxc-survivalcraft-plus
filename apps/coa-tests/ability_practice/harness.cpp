@@ -465,7 +465,7 @@ void CheckCurrentRankPolicies()
 {
     std::uint32_t forecasts = 0;
     std::array<bool, 21> classes{};
-    assert(DevelopmentPacing::Entries.size() == 171);
+    assert(DevelopmentPacing::Entries.size() == 172);
     for (auto const& entry : DevelopmentPacing::Entries)
     {
         classes.at(entry.ClassId - 12) = true;
@@ -728,7 +728,7 @@ void CheckMasteryFixedAndTrainerPolicies()
                 { 3, 1, { entry.PreviousRanks.back().Requirement.Proficiency, 0 } });
             assert(converted && converted->State.Proficiency == entry.PreviousRanks.back().Requirement.Proficiency);
         }
-    assert(DevelopmentBuffVariants::Variants.size() == 14);
+    assert(DevelopmentBuffVariants::Variants.size() == 15);
     for (auto const& variant : DevelopmentBuffVariants::Variants)
     {
         AbilityProfile const* parent = nullptr;
@@ -744,7 +744,7 @@ void CheckMasteryFixedAndTrainerPolicies()
         auto const* rank = DevelopmentBuffVariants::EquivalentRank(*parent, variant);
         assert(rank && rank->SpellId == variant.EquivalentSpellId);
         assert(rank->Requirement.Proficiency == (variant.SpellId == 712458 || variant.SpellId == 523495 ||
-            variant.SpellId == 680303 ? 80u : variant.SpellId == 561241 || variant.SpellId == 680872 ||
+            variant.SpellId == 680303 || variant.SpellId == 803665 ? 80u : variant.SpellId == 561241 || variant.SpellId == 680872 ||
             variant.SpellId == 523510 ||
             variant.SpellId == 681442 ? 40u : variant.SpellId == 523513 || variant.SpellId == 803657 ? 60u :
             variant.SpellId == 680294 || variant.SpellId == 680315 ? 100u : 1u));
@@ -755,8 +755,8 @@ void CheckMasteryFixedAndTrainerPolicies()
         invalid.CharacterLevel = 1;
         assert(!DevelopmentBuffVariants::EquivalentRank(*parent, invalid));
     }
-    assert(extensions == 14 && addedRanks == 26);
-    std::cout << "PASS: 9 mastery policies/rewards, 100 fixed declarations, 14 trainer extensions/26 added ranks\n";
+    assert(extensions == 15 && addedRanks == 27);
+    std::cout << "PASS: 9 mastery policies/rewards, 100 fixed declarations, 15 trainer extensions/27 added ranks\n";
 }
 
 void WriteSharedCases(std::string const& filename)

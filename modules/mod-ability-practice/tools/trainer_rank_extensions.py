@@ -123,7 +123,7 @@ def declared_outcome(root, row):
     return next(iter(outcomes))
 
 
-BUFF_IDENTITIES = {(12, 300857), (13, 707671), (27, 800852)}
+BUFF_IDENTITIES = {(12, 300857), (13, 707671), (27, 800852), (28, 803658)}
 STAT_BUFF_IDENTITIES = {(22, 801523), (26, 573343)}
 SPELL_POWER_BUFF_IDENTITIES = {(27, 575040)}
 

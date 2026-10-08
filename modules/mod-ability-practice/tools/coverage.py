@@ -97,8 +97,10 @@ def declared_shared_variants(root, declarations):
         parent = declarations.get((class_id, ability_id))
         equivalent = next((rank for rank in parent['authoredRanks'] if rank['spellId'] == equivalent_id),
                           None) if parent else None
+        earlier_module = (class_id, spell_id, ability_id, equivalent_id, level) == (28, 803665, 803658, 803663, 58)
         if (identity in result or identity in declarations or spell_id == ability_id or not equivalent or
-                not equivalent['characterLevel'] <= level <= 255):
+                not (equivalent['characterLevel'] <= level <= 255 or
+                    earlier_module and equivalent['characterLevel'] == 60)):
             raise ValueError('Invalid shared variant parent or native level')
         result[identity] = {'source': relative, 'abilityId': ability_id, 'equivalentSpellId': equivalent_id,
                             'characterLevel': level, 'proficiencyRequired': equivalent['proficiencyRequired'],

@@ -142,6 +142,48 @@ inline constexpr std::array TrainerRanksClass27Ability800852 = {
     TrainerRank{ 300866, 65, 900027, { 300865, 0, 0 } }
 };
 
+inline constexpr std::array PreviousRanksClass28Ability803658 = {
+    AbilityRank{ 803658, 1, { 16, 1 } },
+    AbilityRank{ 803659, 2, { 24, 10 } },
+    AbilityRank{ 803660, 3, { 34, 20 } },
+    AbilityRank{ 803661, 4, { 44, 40 } },
+    AbilityRank{ 803662, 5, { 54, 60 } },
+    AbilityRank{ 803663, 6, { 60, 80 } }
+};
+
+inline constexpr std::array RanksClass28Ability803658 = {
+    AbilityRank{ 803658, 1, { 16, 1 } },
+    AbilityRank{ 803659, 2, { 24, 10 } },
+    AbilityRank{ 803660, 3, { 34, 20 } },
+    AbilityRank{ 803661, 4, { 44, 40 } },
+    AbilityRank{ 803662, 5, { 54, 60 } },
+    AbilityRank{ 803663, 6, { 60, 80 } },
+    AbilityRank{ 803664, 7, { 61, 100 } }
+};
+
+inline constexpr std::array PreviousBandsClass28Ability803658 = {
+    TrainingBand{ 1, 16200, 270 },
+    TrainingBand{ 10, 16200, 300 },
+    TrainingBand{ 20, 16200, 600 },
+    TrainingBand{ 40, 16200, 600 },
+    TrainingBand{ 60, 16200, 600 }
+};
+
+inline constexpr std::array BandsClass28Ability803658 = {
+    TrainingBand{ 1, 16200, 270 },
+    TrainingBand{ 10, 16200, 300 },
+    TrainingBand{ 20, 16200, 600 },
+    TrainingBand{ 40, 16200, 600 },
+    TrainingBand{ 60, 16200, 600 },
+    TrainingBand{ 80, 16200, 600 }
+};
+
+inline constexpr auto PreviousCapsClass28Ability803658 = Development::RankCaps(PreviousRanksClass28Ability803658);
+inline constexpr auto CapsClass28Ability803658 = Development::RankCaps(RanksClass28Ability803658);
+inline constexpr std::array TrainerRanksClass28Ability803658 = {
+    TrainerRank{ 803664, 61, 900028, { 803663, 0, 0 } }
+};
+
 inline constexpr std::array Entries = {
     Entry{
         { DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -163,6 +205,13 @@ inline constexpr std::array Entries = {
             { BandsClass27Ability800852 }, OutcomeKind::Damage },
         PreviousRanksClass27Ability800852, PreviousCapsClass27Ability800852,
         { PreviousBandsClass27Ability800852 }, TrainerRanksClass27Ability800852
+    },
+    Entry{
+        { DefinitionVersion, AcquisitionSource::ClassGrant,
+            { 28, 803658, AbilityKind::Ranked, RanksClass28Ability803658, CapsClass28Ability803658 },
+            { BandsClass28Ability803658 }, OutcomeKind::Damage },
+        PreviousRanksClass28Ability803658, PreviousCapsClass28Ability803658,
+        { PreviousBandsClass28Ability803658 }, TrainerRanksClass28Ability803658
     }
 };
 }

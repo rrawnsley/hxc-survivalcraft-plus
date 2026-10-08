@@ -124,6 +124,16 @@ inline constexpr std::array SpiritWuju = {
 };
 inline constexpr auto SpiritWujuCaps = Development::RankCaps(SpiritWuju);
 
+inline constexpr std::array ManaModule = {
+    AbilityRank{ 803658, 1, { 16, 1 } },
+    AbilityRank{ 803659, 2, { 24, 10 } },
+    AbilityRank{ 803660, 3, { 34, 20 } },
+    AbilityRank{ 803661, 4, { 44, 40 } },
+    AbilityRank{ 803662, 5, { 54, 60 } },
+    AbilityRank{ 803663, 6, { 60, 80 } }
+};
+inline constexpr auto ManaModuleCaps = Development::RankCaps(ManaModule);
+
 inline constexpr std::array PowerModule = {
     AbilityRank{ 706742, 1, { 4, 1 } },
     AbilityRank{ 707346, 2, { 12, 10 } },
@@ -417,6 +427,9 @@ inline constexpr auto RiteOfPowerCaps = Development::RankCaps(RiteOfPower);
 
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 28, 803658, AbilityKind::Ranked, ManaModule, ManaModuleCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 32, 801107, AbilityKind::Ranked, WaterTattoo, WaterTattooCaps },
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -598,6 +611,7 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 28, 803658, 21, 0, 85 },
     Mechanic{ 32, 801107, 1, 0, 85 },
     Mechanic{ 32, 801094, 1, 1, 22 },
     Mechanic{ 14, 523478, 21, 1, 22 },
@@ -761,6 +775,12 @@ inline bool IsPowerWuju(AbilityProfile const& profile)
 {
     return profile.Definition.ClassId == 13 && profile.Definition.AbilityId == 707671 &&
         IsPairedAttackPower(profile);
+}
+
+inline bool IsManaModule(AbilityProfile const& profile)
+{
+    return profile.Definition.ClassId == 28 && profile.Definition.AbilityId == 803658 &&
+        IsSupportedStatBuff(profile);
 }
 
 inline bool IsPowerModule(AbilityProfile const& profile)

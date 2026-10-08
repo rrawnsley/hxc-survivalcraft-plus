@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native Mana Module rank 4",
+  "contract": "Full native Mana Module regeneration remains unchanged with sufficient practice, including trainer-only rank7at61.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Aptinkmanad",
+      "race": 1,
+      "class": 28,
+      "level": 44
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.28.803658",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.28.803658",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.28.803658",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.28.803658",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.28.803658",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803658
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803659
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803660
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803661
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803661,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 803661,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 803661,
+      "effect": 0,
+      "equals": 25
+    }
+  ]
+}
