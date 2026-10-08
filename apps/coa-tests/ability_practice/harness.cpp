@@ -728,7 +728,7 @@ void CheckMasteryFixedAndTrainerPolicies()
                 { 3, 1, { entry.PreviousRanks.back().Requirement.Proficiency, 0 } });
             assert(converted && converted->State.Proficiency == entry.PreviousRanks.back().Requirement.Proficiency);
         }
-    assert(DevelopmentBuffVariants::Variants.size() == 15);
+    assert(DevelopmentBuffVariants::Variants.size() == 18);
     for (auto const& variant : DevelopmentBuffVariants::Variants)
     {
         AbilityProfile const* parent = nullptr;
@@ -744,10 +744,10 @@ void CheckMasteryFixedAndTrainerPolicies()
         auto const* rank = DevelopmentBuffVariants::EquivalentRank(*parent, variant);
         assert(rank && rank->SpellId == variant.EquivalentSpellId);
         assert(rank->Requirement.Proficiency == (variant.SpellId == 712458 || variant.SpellId == 523495 ||
-            variant.SpellId == 680303 || variant.SpellId == 803665 ? 80u : variant.SpellId == 561241 || variant.SpellId == 680872 ||
+            variant.SpellId == 680303 || variant.SpellId == 803665 || variant.SpellId == 572817 ? 80u : variant.SpellId == 561241 || variant.SpellId == 680872 ||
             variant.SpellId == 523510 ||
-            variant.SpellId == 681442 ? 40u : variant.SpellId == 523513 || variant.SpellId == 803657 ? 60u :
-            variant.SpellId == 680294 || variant.SpellId == 680315 ? 100u : 1u));
+            variant.SpellId == 681442 || variant.SpellId == 570756 ? 40u : variant.SpellId == 523513 || variant.SpellId == 803657 ? 60u :
+            variant.SpellId == 680294 || variant.SpellId == 680315 || variant.SpellId == 680310 ? 100u : 1u));
         auto invalid = variant;
         invalid.EquivalentSpellId = 1;
         assert(!DevelopmentBuffVariants::EquivalentRank(*parent, invalid));

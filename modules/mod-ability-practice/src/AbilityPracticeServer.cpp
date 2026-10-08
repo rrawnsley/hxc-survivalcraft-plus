@@ -578,6 +578,19 @@ bool HasExactBuffGroup(std::uint32_t spellId, std::uint32_t groupId, SpellGroupS
     return std::equal(members.begin(), members.end(), expected.begin());
 }
 
+bool HasExpectedGeomancerGroup(std::uint32_t abilityId, std::uint32_t spellId)
+{
+    if (abilityId == 570752)
+    {
+        auto const groups = sSpellMgr->GetSpellSpellGroupMapBounds(spellId);
+        return groups.first == groups.second;
+    }
+    if (abilityId != 572810 && abilityId != 800197)
+        return false;
+    constexpr std::array<std::int32_t, 5> instincts{ 572810, 572816, 572817, 680310, 800197 };
+    return HasExactBuffGroup(spellId, 103955, SPELL_GROUP_STACK_RULE_EXCLUSIVE_FROM_SAME_CASTER, instincts);
+}
+
 bool HasExpectedModuleGroup(std::uint32_t spellId)
 {
     constexpr std::array<std::int32_t, 4> modules{ 680315, 706742, 803658, 803665 };
@@ -784,10 +797,12 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
                 !HasExpectedAdaptationGroup(profile.Definition.AbilityId, info->Id))
                 return false;
         }
-        if (Practice::DevelopmentBuffs::IsEarthenEndurance(profile))
+        if (profile.Definition.ClassId == 31 && (profile.Definition.AbilityId == 570752 ||
+            profile.Definition.AbilityId == 572810 || profile.Definition.AbilityId == 800197))
         {
             auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
-            if (info->SpellFamilyName != 37 || scripts.first != scripts.second)
+            if (info->SpellFamilyName != 37 || scripts.first != scripts.second ||
+                !HasExpectedGeomancerGroup(profile.Definition.AbilityId, info->Id))
                 return false;
         }
         if (Practice::DevelopmentBuffs::IsXorothMark(profile))
@@ -1441,6 +1456,12 @@ bool MatchesSharedBuffVariants()
                 !Practice::DevelopmentBuffs::IsManaModule(*profile)) || !HasExpectedModuleGroup(info->Id) ||
                 entry == scripts.second || sObjectMgr->GetScriptName(entry->second) !=
                     "aura_ascension_tinker_lifecycle" || ++entry != scripts.second)
+                return false;
+        }
+        else if (variant.ClassId == 31)
+        {
+            if (info->SpellFamilyName != 37 || entry != scripts.second ||
+                !HasExpectedGeomancerGroup(variant.AbilityId, info->Id))
                 return false;
         }
         else if (variant.ClassId == 32)

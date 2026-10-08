@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native Greater Grove Instinct party benefits",
+  "contract": "Original native greater party effects remain with sufficient regular proficiency; no change to native benefit, rank acquisition or group targets.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apgeoggc",
+      "race": 1,
+      "class": 31,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "name": "Apgeogga",
+      "race": 1,
+      "class": 31,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "ally"
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.572810",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.572810",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.572810",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.572810",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.572810",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 572810
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 572811
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 572812
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 572813
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 572814
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 572815
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 572817
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 572817,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 572817,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 572817,
+      "effect": 0,
+      "equals": 33
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 572817,
+      "effect": 0,
+      "equals": 33
+    }
+  ]
+}
