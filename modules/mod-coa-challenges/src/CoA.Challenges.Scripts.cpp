@@ -1068,7 +1068,10 @@ namespace CoAChallenges
             return;
 
         auto* state = new AdventureHealth();
-        state->extra = float(CalculatePct(creature->GetMaxHealth(), AdventureModeExtraHealthPct(tier)));
+        uint32 const extraHealthPct = AdventureModeExtraHealthPct(tier);
+        float const baseHealth = float(creature->GetMaxHealth());
+        float const extraHealth = float(CalculatePct(creature->GetMaxHealth(), extraHealthPct));
+        state->extra = (baseHealth + extraHealth) * 0.15f + extraHealth;
         creature->CustomData.Set(AdventureHealthKey, state);
         ChangeMaxHealthKeepingPct(creature, state->extra, true);
     }
@@ -1712,6 +1715,9 @@ namespace CoAChallenges
             if ((xpSource == XPSOURCE_PROFESSION || xpSource == XPSOURCE_PROFESSION_SKILL)
                 && PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_PROFESSION_EXPERIENCE"))
                 amount = 0;
+
+            if (amount && AdventureModeTier(player))
+                amount = static_cast<uint32>(std::min<uint64_t>(uint64_t(amount) * 2, 0xFFFFFFFFu));
 
             // NO_KILL_CREDIT_UNLESS_AT_DISADVANTAGE ("Punching Up" / Overwhelming
             // Odds): only monsters above the player's level grant kill credit.
