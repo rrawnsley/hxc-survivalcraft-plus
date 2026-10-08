@@ -594,6 +594,17 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
             if (++entry != scripts.second)
                 return false;
         }
+        if (Practice::DevelopmentBuffs::IsXorothMark(profile))
+        {
+            auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+            auto entry = scripts.first;
+            if (info->SpellFamilyName != 23 || info->SpellFamilyFlags[0] ||
+                info->SpellFamilyFlags[1] != 2147483648u || info->SpellFamilyFlags[2] || entry == scripts.second ||
+                sObjectMgr->GetScriptName(entry->second) != "aura_ascension_xoroth_lifecycle")
+                return false;
+            if (++entry != scripts.second)
+                return false;
+        }
         if (Practice::DevelopmentBuffs::IsSpiritWuju(profile))
         {
             auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);

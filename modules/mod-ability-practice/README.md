@@ -4149,3 +4149,40 @@ Menu accurately delivers four native ranks,cap20,exact540-use next-rank forecast
 438pending(65ranked373standalone),133native provenance paths. Addon0.4.53-development/schema4 unpublished.
 All defaults0; no production/client operations. Native friendly healing contribution, client pixels,
 ordinary cadence and every other ability outcome remain unqualified.
+
+
+## Xoroth Mark native stat and resistance practice
+
+Mark of Korth'azz17/706589 retains six complete ranks2/22/32/42/52/60, native Fire resistance
+5/23/30/35/43/54 and Strength3/27/33/43/61/77. Mark of Rivendare17/803667 retains four complete
+ranks38/48/54/60, native Stamina32/43/43/54 and Frost resistance25/35/45/60. Its middle ranks keep
+Stamina43 while resistance increases. Trainer900017 immediate prerequisites and exact single Xoroth
+lifecycle binding/family23/flag2147483648 are required; native same-caster Mark replacement remains.
+Both positive effective components use the existing owned original buff combat route. Application,
+resource-refused casts and inactive buffs earn nothing. No stat, resistance or native resource changes.
+
+Two additive definition2 pacing entries preserve159 prior curves,now161; definition4 rank caps prepare
+one upcoming rank and stop at the final native rank's proficiency.540 qualifying uses estimate45minutes
+at assumed5s cadence before catch-up; ordinary frequency is unmeasured.38buff tracks span20classes.
+Native rank benefits/unknown saved versions010155 passed10cases50.9s simulated, plus source9/80.2s,
+build31.8s,harness4.4s/819typed. Initial real010458 passed three prior buff regressions but five Mark
+fixtures failed contact because Flames of Xoroth requires Demonfire in addition to Rage; automatic
+isolated diagnostics also failed. Supplying native500906 stacks and using the established cone location
+corrected fixtures without changing gameplay. Corrected contact/boundaries011441 source9/90.2s and
+four simulated66.1s passed, including zero practice on a resource-refused cast.
+
+Real011805 contribution/boundaries passed four cases, but switching incorrectly expected270 for Korth'azz
+at48. Cap60/gap40/cutoff21 enable native2x catch-up, so that award is540; Rivendare cap20 stays270.
+Corrected switching012301 source9/87.6s and real105.6s passed: Korth540 retained when replaced,
+Riv270 retained on switch back, Korth1080 after its next cast. Menu forecasts exactly268/539 match
+both partial records and each current policy. Boundary9/15930 to10/0 automatically learns707341 at22
+or803668 at48, following ranks stay locked, native stronger benefits23/27 or43/35 remain.
+Fresh Korth menu012647 passed91.0s; Riv menu012820 passed58.6s; all21 native menu delivery groups012920
+passed3cases70.4s real. Final qualification checks had no failures or automatic isolated reruns.
+Scoped C++ style/whitespace and authoring exports passed; prior pacing curves remain unchanged.
+
+Coverage267unique/269declared161ranked9mastery97Fixed436pending(63ranked373standalone),136native paths.
+819typed snapshots are483ranked45mastery291Fixed. All-class menu construction/delivery is qualified,
+not client pixels, every native ability outcome or ordinary cadence. Other-caster Mark stacking and
+friendly healing contribution remain unqualified. All defaults0/addon0.4.54-development/schema4
+unpublished. No production/server/client operations.

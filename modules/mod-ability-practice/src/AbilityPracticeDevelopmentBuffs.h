@@ -8,6 +8,23 @@
 
 namespace AbilityPractice::DevelopmentBuffs
 {
+inline constexpr std::array MarkOfKorthazz = {
+    AbilityRank{ 706589, 1, { 2, 1 } },
+    AbilityRank{ 707341, 2, { 22, 10 } },
+    AbilityRank{ 707342, 3, { 32, 20 } },
+    AbilityRank{ 707343, 4, { 42, 40 } },
+    AbilityRank{ 707344, 5, { 52, 60 } },
+    AbilityRank{ 707345, 6, { 60, 80 } }
+};
+inline constexpr auto MarkOfKorthazzCaps = Development::RankCaps(MarkOfKorthazz);
+inline constexpr std::array MarkOfRivendare = {
+    AbilityRank{ 803667, 1, { 38, 1 } },
+    AbilityRank{ 803668, 2, { 48, 10 } },
+    AbilityRank{ 803669, 3, { 54, 20 } },
+    AbilityRank{ 803670, 4, { 60, 40 } }
+};
+inline constexpr auto MarkOfRivendareCaps = Development::RankCaps(MarkOfRivendare);
+
 inline constexpr std::array SpiritWuju = {
     AbilityRank{ 560294, 1, { 2, 1 } },
     AbilityRank{ 561140, 2, { 28, 10 } },
@@ -309,6 +326,12 @@ inline constexpr auto RiteOfPowerCaps = Development::RankCaps(RiteOfPower);
 
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 17, 706589, AbilityKind::Ranked, MarkOfKorthazz, MarkOfKorthazzCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 17, 803667, AbilityKind::Ranked, MarkOfRivendare, MarkOfRivendareCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 13, 560294, AbilityKind::Ranked, SpiritWuju, SpiritWujuCaps },
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -454,6 +477,8 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 17, 706589, 21, 4, 143 },
+    Mechanic{ 17, 803667, 21, 2 },
     Mechanic{ 13, 560294, 21, 4 },
     Mechanic{ 28, 706742, 21, 0, 99 },
     Mechanic{ 20, 706630, 21, 2 },
@@ -495,6 +520,8 @@ inline constexpr std::array Mechanics = {
 static_assert(Mechanics.size() == Profiles.size());
 
 inline constexpr std::array SecondaryMechanics = {
+    Mechanic{ 17, 706589, 21, 0, 29, 1 },
+    Mechanic{ 17, 803667, 21, 16, 143, 1 },
     Mechanic{ 13, 560294, 21, 126, 143, 1 }
 };
 
@@ -504,6 +531,13 @@ inline Mechanic const* SecondaryMechanicFor(AbilityProfile const& profile)
         if (mechanic.ClassId == profile.Definition.ClassId && mechanic.AbilityId == profile.Definition.AbilityId)
             return &mechanic;
     return nullptr;
+}
+
+inline bool IsXorothMark(AbilityProfile const& profile)
+{
+    return profile.Definition.ClassId == 17 &&
+        (profile.Definition.AbilityId == 706589 || profile.Definition.AbilityId == 803667) &&
+        IsSupportedStatBuff(profile);
 }
 
 inline bool IsSpiritWuju(AbilityProfile const& profile)

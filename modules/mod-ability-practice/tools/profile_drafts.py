@@ -101,6 +101,9 @@ def verify_provenance(candidates, root, dbc):
                 'src/server/coa/AscensionTinkerAbilities.cpp',
                 'src/server/coa/AscensionTinkerContracts.cpp',
                 'src/server/coa/AscensionFelswornData.h', 'src/server/coa/AscensionFelswornSummons.cpp',
+                'src/server/coa/AscensionXoroth.cpp',
+                'src/server/coa/AscensionXoroth.h',
+                'src/server/coa/AscensionXorothAuras.cpp',
                 'src/server/coa/AscensionXorothAbilities.cpp', 'src/server/coa/AscensionXorothData.h',
                 'src/server/coa/AscensionXorothContracts.cpp', 'src/server/coa/AscensionCompat.cpp',
                 'src/server/coa/AscensionStarcallerAbilities.cpp',
@@ -245,7 +248,8 @@ def reviewed_stat_buffs(root):
     secondary_matches = list(re.finditer(pattern, secondary_body[1]))
     if re.sub(pattern, '', secondary_body[1]).replace(',', '').strip():
         raise ValueError('Unsupported secondary buff mechanic declaration')
-    expected_secondary = {(13, 560294): (21, 126, 143, 1)}
+    expected_secondary = {(13, 560294): (21, 126, 143, 1), (17, 706589): (21, 0, 29, 1),
+                          (17, 803667): (21, 16, 143, 1)}
     observed_secondary = {}
     for match in secondary_matches:
         values = tuple(map(int, match.groups()))
@@ -600,8 +604,11 @@ def build_drafts(candidates, root):
             if secondary:
                 expected[secondary['effectIndex']] = (6, secondary['auraId'], secondary['targetA'],
                                                      0, 0, secondary['statSelector'])
-                required.extend(['all-authored-buff-components-positive-active-and-effective',
-                                 'native-wuju-lifecycle-and-exclusive-replacement-preserved'])
+                required.append('all-authored-buff-components-positive-active-and-effective')
+                if (class_id, ability_id) == (13, 560294):
+                    required.append('native-wuju-lifecycle-and-exclusive-replacement-preserved')
+                elif (class_id, ability_id) in {(17, 706589), (17, 803667)}:
+                    required.append('native-xoroth-mark-lifecycle-and-same-caster-exclusive-replacement')
             if mechanic['auraId'] == 99:
                 expected[1] = (6, 124, 21, 0, 0, 0)
                 required.extend(['paired-melee-and-ranged-attack-power-effects-both-active-for-practice',

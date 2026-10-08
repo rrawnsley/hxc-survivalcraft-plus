@@ -1,0 +1,218 @@
+{
+  "schema": 1,
+  "name": "Ability practice: korthazzboundary",
+  "contract": "Complete native stat and resistance rank benefits and same-caster Mark exclusivity remain; practice requires original useful combat with both components active and effective.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apmarkkbound",
+      "race": 1,
+      "class": 17,
+      "level": 22,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 706589
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 801059
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.17.706589",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.17.706589",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.17.706589",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.17.706589",
+      "index": 3,
+      "value": 9
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.17.706589",
+      "index": 4,
+      "value": 15930
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 0,
+      "save_as": "stat_base"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 2,
+      "save_as": "resistance_base"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 706589,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 500906,
+      "stacks": 1,
+      "label": "Supply native Demonfire required and consumed by Flames of Xoroth"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 801059,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 801059,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.17.706589",
+      "index": 3,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.17.706589",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 707341,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 707342,
+      "equals": 0
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "caster",
+      "spell": 706589
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 707341,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 707341,
+      "effect": 0,
+      "equals": 23
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 707341,
+      "effect": 1,
+      "equals": 27
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 0,
+      "relative_to": "stat_base",
+      "min": 26.9,
+      "max": 27.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 2,
+      "relative_to": "resistance_base",
+      "min": 22.9,
+      "max": 23.1
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 22,
+      "health": 100000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0.5
+  }
+}

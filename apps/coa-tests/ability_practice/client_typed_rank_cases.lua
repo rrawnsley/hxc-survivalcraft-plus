@@ -23,6 +23,10 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
         assert(ability.route == 13)
         assert(string.find(Model.PracticeRules(ability), "melee and ranged effects", 1, true))
     end
+    if ability.abilityId == 706589 or ability.abilityId == 803667 then
+        assert(ability.route == 13)
+        assert(string.find(Model.PracticeRules(ability), "stat and resistance effects", 1, true))
+    end
     if ability.abilityId == 560294 then
         assert(ability.route == 13)
         assert(string.find(Model.PracticeRules(ability), "Spirit and magic resistance effects", 1, true))
@@ -85,7 +89,7 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
     end
     count = count + 1
 end
-assert(count == 813)
-assert(kinds[1] == 477 and kinds[2] == 45 and kinds[3] == 291)
+assert(count == 819)
+assert(kinds[1] == 483 and kinds[2] == 45 and kinds[3] == 291)
 for classId = 12, 32 do assert(classes[classId]) end
-print("PASS: 813 typed snapshots across 21 classes: 477 ranked, 45 mastery, 291 fixed and menu rendering")
+print("PASS: 819 typed snapshots across 21 classes: 483 ranked, 45 mastery, 291 fixed and menu rendering")
