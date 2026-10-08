@@ -1,0 +1,126 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native Greater Rite of Power party effects",
+  "contract": "Full native greater party benefit before shared enrollment, with sufficient regular proficiency. No native acquisition or effect changes.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apritpowc",
+      "race": 1,
+      "class": 30,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "name": "Apritpowa",
+      "race": 1,
+      "class": 30,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "ally"
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.30.578126",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.30.578126",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.30.578126",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.30.578126",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.30.578126",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 578126
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 578127
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 578128
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 578129
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 578130
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 578130,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 578130,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 578130,
+      "effect": 1,
+      "equals": 77
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 578130,
+      "effect": 1,
+      "equals": 77
+    }
+  ]
+}

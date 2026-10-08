@@ -694,10 +694,13 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
     }
     if (BuffContributionRequested && Practice::DevelopmentBuffs::IsSupportedStatBuff(profile))
     {
-        if (profile.Definition.ClassId == 30 &&
-            (profile.Definition.AbilityId == 575839 || profile.Definition.AbilityId == 578126) &&
-            !HasExpectedRiteGroup(info->Id))
-            return false;
+        if (profile.Definition.ClassId == 30 && (profile.Definition.AbilityId == 575839 ||
+            profile.Definition.AbilityId == 578126 || profile.Definition.AbilityId == 800198))
+        {
+            auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+            if (info->SpellFamilyName != 36 || scripts.first != scripts.second || !HasExpectedRiteGroup(info->Id))
+                return false;
+        }
         if (Practice::DevelopmentBuffs::IsCultistWhispers(profile))
         {
             auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
@@ -1456,6 +1459,11 @@ bool MatchesSharedBuffVariants()
                 !Practice::DevelopmentBuffs::IsManaModule(*profile)) || !HasExpectedModuleGroup(info->Id) ||
                 entry == scripts.second || sObjectMgr->GetScriptName(entry->second) !=
                     "aura_ascension_tinker_lifecycle" || ++entry != scripts.second)
+                return false;
+        }
+        else if (variant.ClassId == 30)
+        {
+            if (info->SpellFamilyName != 36 || entry != scripts.second || !HasExpectedRiteGroup(info->Id))
                 return false;
         }
         else if (variant.ClassId == 31)
