@@ -653,10 +653,50 @@ public:
 class NeedsPlayer : public PlayerScript
 {
 public:
-    NeedsPlayer() : PlayerScript("CoANeedsPlayer", { PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_BEFORE_LOGOUT,
+    NeedsPlayer() : PlayerScript("CoANeedsPlayer", { PLAYERHOOK_ON_CREATE, PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_BEFORE_LOGOUT,
         PLAYERHOOK_ON_SAVE, PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_SPELL_CAST, PLAYERHOOK_ON_LEVEL_CHANGED,
         PLAYERHOOK_ON_PLAYER_ENTER_COMBAT, PLAYERHOOK_CAN_PLAYER_USE_PRIVATE_CHAT, PLAYERHOOK_ON_UPDATE_SKILL, PLAYERHOOK_ON_SET_SKILL }) { }
 
+    void OnPlayerCreate(Player* player) override
+    {
+        if (!player || (player->GetSession() && player->GetSession()->IsBot()))
+            return;
+
+        constexpr uint32 starterBag = 4496; // Small Brown Pouch (6 slots)
+        ItemTemplate const* bagTemplate = sObjectMgr->GetItemTemplate(starterBag);
+        if (!bagTemplate || bagTemplate->ContainerSlots != 6)
+        {
+            LOG_ERROR("module.coa_needs", "Starter bag {} is missing or does not have 6 slots", starterBag);
+            return;
+        }
+
+        uint32 bagCount = player->GetItemCount(starterBag, true);
+        bool changed = false;
+        while (bagCount < 2)
+        {
+            Item* bag = nullptr;
+            for (uint8 slot = INVENTORY_SLOT_BAG_START; slot < INVENTORY_SLOT_BAG_END; ++slot)
+            {
+                if (player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
+                    continue;
+                bag = player->EquipNewItem(slot, starterBag, true);
+                if (bag)
+                    break;
+            }
+
+            if (!bag && !player->AddItem(starterBag, 1))
+            {
+                LOG_ERROR("module.coa_needs", "Could not grant starter bag {} to new character {}", starterBag, player->GetName());
+                break;
+            }
+
+            ++bagCount;
+            changed = true;
+        }
+
+        if (changed)
+            player->SaveToDB(false, false);
+    }
     void OnPlayerLogin(Player* player) override
     {
         std::lock_guard<std::recursive_mutex> lock(Mutex);
