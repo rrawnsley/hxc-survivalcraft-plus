@@ -15,6 +15,33 @@ import run
 
 
 class RunnerTests(unittest.TestCase):
+    def test_spell_cast_and_proc_counts_can_share_relative_snapshots(self):
+        for measured, captured in (('spell_cast_count', 'spell_proc_count'),
+                                   ('spell_proc_count', 'spell_cast_count')):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].extend([
+                {'action': 'snapshot', 'actor': 'caster', 'metric': captured,
+                 'spell': 653267, 'save_as': 'native_procs'},
+                {'action': 'assert', 'actor': 'caster', 'metric': measured,
+                 'spell': 653263, 'relative_to': 'native_procs', 'equals': 0},
+            ])
+            with self.subTest(measured=measured, captured=captured):
+                self.assertIs(run.validate(scenario), scenario)
+
+    def test_spell_event_relative_snapshots_reject_missing_or_incompatible_metrics(self):
+        for captured, reference in (('health', 'baseline'), ('spell_proc_count', 'missing')):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].extend([
+                {'action': 'snapshot', 'actor': 'caster', 'metric': captured,
+                 **({'spell': 653267} if captured == 'spell_proc_count' else {}),
+                 'save_as': 'baseline'},
+                {'action': 'assert', 'actor': 'caster', 'metric': 'spell_cast_count',
+                 'spell': 653263, 'relative_to': reference, 'equals': 0},
+            ])
+            with self.subTest(captured=captured, reference=reference), \
+                    self.assertRaisesRegex(ValueError, 'missing or incompatible snapshot'):
+                run.validate(scenario)
+
     def test_spell_family_flags_require_a_spell_and_valid_word(self):
         for word in (0, 1, 2):
             scenario = copy.deepcopy(self.scenario)
@@ -220,6 +247,22 @@ class RunnerTests(unittest.TestCase):
             scenario['steps'].append(step)
             with self.assertRaises(ValueError):
                 run.validate(scenario)
+
+    def test_packet_float_observation_fields(self):
+        valid = {'action': 'assert', 'actor': 'caster', 'metric': 'server_packet_float',
+                 'opcode': 239, 'from_end': True, 'index': 0, 'equals': -8.6}
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].append(valid)
+        self.assertIs(run.validate(scenario), scenario)
+        for changes in [{'opcode': 0}, {'index': -1}, {'from_end': 1}, {'offset': 4}, {'skip_strings': 1}]:
+            with self.subTest(changes=changes):
+                scenario = copy.deepcopy(self.scenario)
+                scenario['steps'].append({**valid, **changes})
+                with self.assertRaises(ValueError):
+                    run.validate(scenario)
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].append({**valid, 'from_end': False, 'offset': 4})
+        self.assertIs(run.validate(scenario), scenario)
 
     def test_pet_aura_fixture(self):
         self.scenario['steps'].append({'action': 'set_aura', 'actor': 'caster',
