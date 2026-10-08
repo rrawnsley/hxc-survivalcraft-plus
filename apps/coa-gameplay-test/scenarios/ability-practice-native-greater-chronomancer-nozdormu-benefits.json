@@ -1,0 +1,144 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native Chronomancer nozdormu benefits",
+  "contract": "Native trainer acquisition, existing mana pool and exact native benefit before shared enrollment. Native level70 Chromie rank remains unchanged.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apcnbnozc",
+      "race": 1,
+      "class": 22,
+      "level": 58
+    },
+    {
+      "id": "ally",
+      "name": "Apcnbnoza",
+      "race": 1,
+      "class": 22,
+      "level": 58
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "ally"
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.22.572391",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.22.572391",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.22.572391",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.22.572391",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.22.572391",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 572391
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 572392
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 572393
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 572394
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 572395
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 572396
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 572396,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 572396,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 572396,
+      "effect": 0,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 572396,
+      "effect": 0,
+      "equals": 31
+    }
+  ]
+}

@@ -1487,6 +1487,13 @@ bool MatchesSharedBuffVariants()
                     "aura_ascension_tinker_lifecycle" || ++entry != scripts.second)
                 return false;
         }
+        else if (variant.ClassId == 22)
+        {
+            constexpr std::array<std::int32_t, 4> wisdom{ 572391, 572396, 680307, 801523 };
+            if (info->SpellFamilyName != 28 || entry != scripts.second ||
+                !HasExactBuffGroup(info->Id, 1135, SPELL_GROUP_STACK_RULE_EXCLUSIVE_FROM_SAME_CASTER, wisdom))
+                return false;
+        }
         else if (variant.ClassId == 18)
         {
             auto const groups = sSpellMgr->GetSpellSpellGroupMapBounds(info->Id);

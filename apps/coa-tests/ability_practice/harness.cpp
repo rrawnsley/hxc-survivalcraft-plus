@@ -730,8 +730,9 @@ void CheckMasteryFixedAndTrainerPolicies()
                 { 3, 1, { entry.PreviousRanks.back().Requirement.Proficiency, 0 } });
             assert(converted && converted->State.Proficiency == entry.PreviousRanks.back().Requirement.Proficiency);
         }
-    assert(DevelopmentBuffVariants::Variants.size() == 28);
+    assert(DevelopmentBuffVariants::Variants.size() == 30);
     constexpr std::array expectedProficiencies = {
+        std::pair{ 572396u, 60u }, std::pair{ 680307u, 40u },
         std::pair{ 582536u, 20u }, std::pair{ 680280u, 80u },
         std::pair{ 575846u, 20u }, std::pair{ 578316u, 60u }, std::pair{ 680291u, 80u },
         std::pair{ 680294u, 100u }, std::pair{ 680315u, 100u }, std::pair{ 680310u, 100u },
