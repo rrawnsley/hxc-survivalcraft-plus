@@ -1,0 +1,308 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Blaumeux Mark replacement",
+  "contract": "Both native spell power and Shadow resistance stay effective; original meaningful combat, cancellation, automatic rank boundary and exact progress are qualified.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apblreplace",
+      "race": 1,
+      "class": 17,
+      "level": 30,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707693
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 801059
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.17.707693",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.17.707693",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.17.707693",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.17.707693",
+      "index": 3,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.17.707693",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_power",
+      "save_as": "stat_base",
+      "school": 2
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 5,
+      "save_as": "resistance_base"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 707693,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 707693,
+      "effect": 0,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 707693,
+      "effect": 1,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_power",
+      "relative_to": "stat_base",
+      "min": 24.9,
+      "max": 25.1,
+      "school": 2
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 5,
+      "relative_to": "resistance_base",
+      "min": 14.9,
+      "max": 15.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.17.707693",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 500906,
+      "stacks": 1,
+      "label": "Supply native Demonfire required and consumed by Flames of Xoroth"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 801059,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 801059,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.17.707693",
+      "index": 4,
+      "equals": 270
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 706589
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 706589,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 707693,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 500906,
+      "stacks": 1,
+      "label": "Supply native Demonfire required and consumed by Flames of Xoroth"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 801059,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 801059,
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.17.707693",
+      "index": 4,
+      "equals": 270
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 707693,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 706589,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 500906,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 801059
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 801059,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 801059,
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.17.707693",
+      "index": 4,
+      "equals": 540
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 30,
+      "health": 100000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0.5
+  }
+}

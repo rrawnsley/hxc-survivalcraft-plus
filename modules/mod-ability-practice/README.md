@@ -4330,3 +4330,39 @@ Actual client pixels, ordinary-play pacing, friendly healing buff contributions 
 still require qualification. Next: Mark of Blaumeux17/707693 complete four ranks20/30/40/50;
 loaded Xoroth contract corrects raw secondary target0 to ally21. Spell power25/30/37/49 plus Shadow
 resistance15/30/45/60 must both remain native and effective. No partial ladder or raw-target rewrite.
+
+
+## Mark of Blaumeux native practice qualification
+
+Class17/707693 now uses its complete four-rank native ladder at20/30/40/50, proficiency1/10/20/40.
+Spell power25/30/37/49 and Shadow resistance15/30/45/60 remain native. Both components must stay
+positive, active and effective for useful original damage or healing to practice. Applications and
+refreshes earn nothing; five real seconds separate counted casts. Another same-caster Mark replaces
+it and pauses practice. Existing Xoroth family23/flags0,2147483648,0/single lifecycle guards apply.
+The native Xoroth contract corrects raw secondary target0 to ally21; authoring records both shapes,
+without changing native spell data. Trainer900017 exactly matches all four levels and prerequisites.
+
+Additive pacing entry164 preserves163 previous entries; one upcoming rank remains the limit.
+Native first upgrade9/15930->10/0 automatically learns707694 at30, leaving707695 locked. Base
+forecast540 uses assumes5-second opportunities/45minutes, not measured ordinary play.
+Addon0.4.59-development adds explicit spell-power/Shadow-resistance/replacement help.
+
+Native pre-enrollment062943 passed all four original benefits179.2s simulated. Source/build/harness
+063504 passed9/94.9s,57.5s,6.2s. Real063915 passed nine cases including four benefits, contribution,
+cancellation, rank boundary, replacement and two previous Mark regressions; suppression fixture failed.
+That fixture cast a level60 ward onto a level30 recipient, so native level+10 selection downranked it.
+Corrected level60 recipient explicitly verifies ward575845/effect2=20 and cast success. Real064657
+passed113.0s: own spellpower25/Shadow15 remain, stronger native Shadow20 pauses270points, ward
+removal restores15 and next original Flames returns540points. Unknown999/100/101 rows stay unchanged.
+Fresh menu065116 passed251.7s/exact540uses; initial cached-world startup failed before any case,
+then automatic server replacement rebuilt the disposable world and passed. No case retry occurred.
+
+Final065541 source9/111.1s and real all21 schema4/5 delivery6cases/233.0s passed. Its harness stage
+failed because the shell lacked a C++20 compiler; separate VS-enabled065809 harness passed6.5s,
+831 typed snapshots492ranked45mastery294Fixed plus9shared Wuju snapshots. Overall065541 remains
+failed and is not relabeled. Scoped C++ style and whitespace passed. Four trainer headers reproduce
+unchanged13extensions/25extra ranks. Coverage271unique/273declared164ranked9mastery98Fixed,
+147baselines/3shared variants,429pending(60ranked369standalone),137native provenance paths,
+41owned buff tracks20classes. Aggregate850drafts remain runtime-unqualified and unapproved.
+Defaults0; no live process/config/database/client/launcher changes or release. Actual client pixels,
+ordinary pacing, friendly healing contribution and broader ability outcomes still need qualification.

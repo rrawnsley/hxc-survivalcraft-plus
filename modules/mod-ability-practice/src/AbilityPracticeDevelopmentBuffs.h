@@ -16,6 +16,14 @@ inline constexpr std::array EarthenEndurance = {
 };
 inline constexpr auto EarthenEnduranceCaps = Development::RankCaps(EarthenEndurance);
 
+inline constexpr std::array MarkOfBlaumeux = {
+    AbilityRank{ 707693, 1, { 20, 1 } },
+    AbilityRank{ 707694, 2, { 30, 10 } },
+    AbilityRank{ 707695, 3, { 40, 20 } },
+    AbilityRank{ 707696, 4, { 50, 40 } }
+};
+inline constexpr auto MarkOfBlaumeuxCaps = Development::RankCaps(MarkOfBlaumeux);
+
 inline constexpr std::array MarkOfKorthazz = {
     AbilityRank{ 706589, 1, { 2, 1 } },
     AbilityRank{ 707341, 2, { 22, 10 } },
@@ -344,6 +352,9 @@ inline constexpr auto RiteOfPowerCaps = Development::RankCaps(RiteOfPower);
 
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 17, 707693, AbilityKind::Ranked, MarkOfBlaumeux, MarkOfBlaumeuxCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 13, 707671, AbilityKind::Ranked, PowerWuju, PowerWujuCaps },
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -501,6 +512,7 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 17, 707693, 21, 127, 345 },
     Mechanic{ 31, 570752, 21, 1, 143 },
     Mechanic{ 17, 706589, 21, 4, 143 },
     Mechanic{ 17, 803667, 21, 2 },
@@ -546,6 +558,7 @@ inline constexpr std::array Mechanics = {
 static_assert(Mechanics.size() == Profiles.size());
 
 inline constexpr std::array SecondaryMechanics = {
+    Mechanic{ 17, 707693, 21, 32, 143, 1 },
     Mechanic{ 31, 570752, 21, -1, 29, 1 },
     Mechanic{ 31, 570752, 21, 126, 143, 2 },
     Mechanic{ 17, 706589, 21, 0, 29, 1 },
@@ -571,7 +584,8 @@ inline bool IsEarthenEndurance(AbilityProfile const& profile)
 inline bool IsXorothMark(AbilityProfile const& profile)
 {
     return profile.Definition.ClassId == 17 &&
-        (profile.Definition.AbilityId == 706589 || profile.Definition.AbilityId == 803667) &&
+        (profile.Definition.AbilityId == 706589 || profile.Definition.AbilityId == 803667 ||
+            profile.Definition.AbilityId == 707693) &&
         IsSupportedStatBuff(profile);
 }
 

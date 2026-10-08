@@ -250,7 +250,7 @@ def reviewed_stat_buffs(root):
     secondary_matches = list(re.finditer(pattern, secondary_body[1]))
     if re.sub(pattern, '', secondary_body[1]).replace(',', '').strip():
         raise ValueError('Unsupported secondary buff mechanic declaration')
-    expected_secondary = {(13, 560294, 1): (21, 126, 143), (17, 706589, 1): (21, 0, 29),
+    expected_secondary = {(17, 707693, 1): (21, 32, 143), (13, 560294, 1): (21, 126, 143), (17, 706589, 1): (21, 0, 29),
                           (17, 803667, 1): (21, 16, 143), (31, 570752, 1): (21, -1, 29),
                           (31, 570752, 2): (21, 126, 143)}
     observed_secondary = {}
@@ -613,12 +613,14 @@ def build_drafts(candidates, root):
                 required.append('all-authored-buff-components-positive-active-and-effective')
                 if (class_id, ability_id) == (13, 560294):
                     required.append('native-wuju-lifecycle-and-exclusive-replacement-preserved')
-                elif (class_id, ability_id) in {(17, 706589), (17, 803667)}:
+                elif (class_id, ability_id) in {(17, 706589), (17, 803667), (17, 707693)}:
                     required.append('native-xoroth-mark-lifecycle-and-same-caster-exclusive-replacement')
             if mechanic['auraId'] == 99:
                 expected[1] = (6, 124, 21, 0, 0, 0)
                 required.extend(['paired-melee-and-ranged-attack-power-effects-both-active-for-practice',
                                  'original-melee-or-ranged-damage-ability-contribution-only'])
+            if (class_id, ability_id) == (17, 707693):
+                required.append('native-xoroth-contract-corrects-secondary-target-to-friendly-ally')
             amounts = []
             for rank in ranks:
                 raw = members[rank['spellId']].get('rawDbc', {})
@@ -627,6 +629,8 @@ def build_drafts(candidates, root):
                 if (class_id, ability_id) == (28, 706742) and rank['spellId'] in {707347, 707348, 707349, 707350}:
                     rank_expected[0] = (6, 99, 21, 0, 0, 1)
                     rank_expected[1] = (6, 124, 0, 0, 0, 0)
+                if (class_id, ability_id) == (17, 707693):
+                    rank_expected[1] = (6, 143, 0, 0, 0, 32)
                 if raw.get('passive') is not False or len(details) != 3 or [(v.get('effectId'),
                         v.get('auraId'), v.get('implicitTargetA'), v.get('implicitTargetB'),
                         v.get('triggerSpellId'), v.get('miscValue')) for v in details] != rank_expected or (
