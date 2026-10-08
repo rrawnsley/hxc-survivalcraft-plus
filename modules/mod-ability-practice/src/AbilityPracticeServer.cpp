@@ -594,6 +594,12 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
             if (++entry != scripts.second)
                 return false;
         }
+        if (Practice::DevelopmentBuffs::IsEarthenEndurance(profile))
+        {
+            auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+            if (info->SpellFamilyName != 37 || scripts.first != scripts.second)
+                return false;
+        }
         if (Practice::DevelopmentBuffs::IsXorothMark(profile))
         {
             auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
@@ -632,7 +638,7 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
         for (std::size_t index = 0; index < 3; ++index)
         {
             auto const& slot = info->Effects[index];
-            auto const* secondary = Practice::DevelopmentBuffs::SecondaryMechanicFor(profile);
+            auto const* secondary = Practice::DevelopmentBuffs::SecondaryMechanicFor(profile, index);
             if (secondary && index == secondary->EffectIndex)
             {
                 if (slot.Effect != SPELL_EFFECT_APPLY_AURA || slot.ApplyAuraName != secondary->Aura ||
@@ -1475,9 +1481,11 @@ bool EffectiveBuffApplication(Player* player, AuraApplication const& application
     if (Practice::DevelopmentBuffs::IsPairedAttackPower(profile) &&
         !EffectiveBuffComponent(player, application, EFFECT_1, SPELL_AURA_MOD_RANGED_ATTACK_POWER, 0))
         return false;
-    auto const* secondary = Practice::DevelopmentBuffs::SecondaryMechanicFor(profile);
-    return !secondary || EffectiveBuffComponent(player, application, secondary->EffectIndex,
-        secondary->Aura, secondary->Stat);
+    for (std::uint8_t index = 0; index < 3; ++index)
+        if (auto const* secondary = Practice::DevelopmentBuffs::SecondaryMechanicFor(profile, index))
+            if (!EffectiveBuffComponent(player, application, secondary->EffectIndex, secondary->Aura, secondary->Stat))
+                return false;
+    return true;
 }
 
 SpellInfo const* AcceptedBuffSpell(Player* player, MenuSession const& session,

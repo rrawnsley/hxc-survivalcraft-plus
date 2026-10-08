@@ -8,6 +8,14 @@
 
 namespace AbilityPractice::DevelopmentBuffs
 {
+inline constexpr std::array EarthenEndurance = {
+    AbilityRank{ 570752, 1, { 30, 1 } },
+    AbilityRank{ 570753, 2, { 40, 10 } },
+    AbilityRank{ 570754, 3, { 50, 20 } },
+    AbilityRank{ 570755, 4, { 60, 40 } }
+};
+inline constexpr auto EarthenEnduranceCaps = Development::RankCaps(EarthenEndurance);
+
 inline constexpr std::array MarkOfKorthazz = {
     AbilityRank{ 706589, 1, { 2, 1 } },
     AbilityRank{ 707341, 2, { 22, 10 } },
@@ -326,6 +334,9 @@ inline constexpr auto RiteOfPowerCaps = Development::RankCaps(RiteOfPower);
 
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 31, 570752, AbilityKind::Ranked, EarthenEndurance, EarthenEnduranceCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 17, 706589, AbilityKind::Ranked, MarkOfKorthazz, MarkOfKorthazzCaps },
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -477,6 +488,7 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 31, 570752, 21, 1, 143 },
     Mechanic{ 17, 706589, 21, 4, 143 },
     Mechanic{ 17, 803667, 21, 2 },
     Mechanic{ 13, 560294, 21, 4 },
@@ -520,17 +532,26 @@ inline constexpr std::array Mechanics = {
 static_assert(Mechanics.size() == Profiles.size());
 
 inline constexpr std::array SecondaryMechanics = {
+    Mechanic{ 31, 570752, 21, -1, 29, 1 },
+    Mechanic{ 31, 570752, 21, 126, 143, 2 },
     Mechanic{ 17, 706589, 21, 0, 29, 1 },
     Mechanic{ 17, 803667, 21, 16, 143, 1 },
     Mechanic{ 13, 560294, 21, 126, 143, 1 }
 };
 
-inline Mechanic const* SecondaryMechanicFor(AbilityProfile const& profile)
+inline Mechanic const* SecondaryMechanicFor(AbilityProfile const& profile, std::uint8_t effectIndex)
 {
     for (auto const& mechanic : SecondaryMechanics)
-        if (mechanic.ClassId == profile.Definition.ClassId && mechanic.AbilityId == profile.Definition.AbilityId)
+        if (mechanic.ClassId == profile.Definition.ClassId && mechanic.AbilityId == profile.Definition.AbilityId &&
+            mechanic.EffectIndex == effectIndex)
             return &mechanic;
     return nullptr;
+}
+
+inline bool IsEarthenEndurance(AbilityProfile const& profile)
+{
+    return profile.Definition.ClassId == 31 && profile.Definition.AbilityId == 570752 &&
+        IsSupportedStatBuff(profile);
 }
 
 inline bool IsXorothMark(AbilityProfile const& profile)

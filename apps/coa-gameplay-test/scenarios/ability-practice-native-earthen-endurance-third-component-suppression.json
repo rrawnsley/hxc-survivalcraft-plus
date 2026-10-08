@@ -1,0 +1,363 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Earthen Endurance Apearthblock",
+  "contract": "Native armor, all five stats and six magic resistances remain; every original component must be positive, active and effective. Armor total includes two armor per added Agility.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apearthblock",
+      "race": 1,
+      "class": 31,
+      "level": 40,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "name": "Apearthward",
+      "race": 1,
+      "class": 18,
+      "level": 36
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 570752
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 680448
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.570752",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.570752",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.570752",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.570752",
+      "index": 3,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.570752",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "armor",
+      "save_as": "armor_base"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 0,
+      "save_as": "stat_base_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 1,
+      "save_as": "stat_base_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 2,
+      "save_as": "stat_base_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 3,
+      "save_as": "stat_base_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 4,
+      "save_as": "stat_base_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 1,
+      "save_as": "resistance_base_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 2,
+      "save_as": "resistance_base_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 3,
+      "save_as": "resistance_base_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 4,
+      "save_as": "resistance_base_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 5,
+      "save_as": "resistance_base_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 6,
+      "save_as": "resistance_base_6"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 570752,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 680448
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 680448,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 680448,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.31.570752",
+      "index": 4,
+      "equals": 270
+    },
+    {
+      "action": "learn",
+      "actor": "ally",
+      "spell": 582533
+    },
+    {
+      "action": "cast",
+      "actor": "ally",
+      "spell": 582533,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 582533,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 570752,
+      "effect": 0,
+      "equals": 150
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 570752,
+      "effect": 1,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 570752,
+      "effect": 2,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "armor",
+      "relative_to": "armor_base",
+      "min": 161.9,
+      "max": 162.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 2,
+      "relative_to": "resistance_base_2",
+      "min": 29.9,
+      "max": 30.1
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 680448
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 680448,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 680448,
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.31.570752",
+      "index": 4,
+      "equals": 270
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "caster",
+      "spell": 582533
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 2,
+      "relative_to": "resistance_base_2",
+      "min": 4.9,
+      "max": 5.1
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 680448
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 680448,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 680448,
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.31.570752",
+      "index": 4,
+      "equals": 540
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 40,
+      "health": 100000,
+      "distance": 5,
+      "stationary": true
+    }
+  ]
+}

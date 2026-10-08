@@ -1,0 +1,350 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Earthen Endurance Apearthrankb",
+  "contract": "Native armor, all five stats and six magic resistances remain; every original component must be positive, active and effective. Armor total includes two armor per added Agility.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apearthrankb",
+      "race": 1,
+      "class": 31,
+      "level": 40,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 570752
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.570752",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.570752",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.570752",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.570752",
+      "index": 3,
+      "value": 10
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.570752",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 570753
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.570752",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.570752",
+      "index": 1,
+      "value": 999
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.570752",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.570752",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.570752",
+      "index": 4,
+      "value": 101
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "armor",
+      "save_as": "armor_base"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 0,
+      "save_as": "stat_base_0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 1,
+      "save_as": "stat_base_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 2,
+      "save_as": "stat_base_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 3,
+      "save_as": "stat_base_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 4,
+      "save_as": "stat_base_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 1,
+      "save_as": "resistance_base_1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 2,
+      "save_as": "resistance_base_2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 3,
+      "save_as": "resistance_base_3"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 4,
+      "save_as": "resistance_base_4"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 5,
+      "save_as": "resistance_base_5"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 6,
+      "save_as": "resistance_base_6"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 570753,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 570753,
+      "effect": 0,
+      "equals": 195
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 570753,
+      "effect": 1,
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 570753,
+      "effect": 2,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "armor",
+      "relative_to": "armor_base",
+      "min": 210.9,
+      "max": 211.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 0,
+      "relative_to": "stat_base_0",
+      "min": 7.9,
+      "max": 8.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 1,
+      "relative_to": "stat_base_1",
+      "min": 7.9,
+      "max": 8.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 2,
+      "relative_to": "stat_base_2",
+      "min": 7.9,
+      "max": 8.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 3,
+      "relative_to": "stat_base_3",
+      "min": 7.9,
+      "max": 8.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 4,
+      "relative_to": "stat_base_4",
+      "min": 7.9,
+      "max": 8.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 1,
+      "relative_to": "resistance_base_1",
+      "min": 9.9,
+      "max": 10.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 2,
+      "relative_to": "resistance_base_2",
+      "min": 9.9,
+      "max": 10.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 3,
+      "relative_to": "resistance_base_3",
+      "min": 9.9,
+      "max": 10.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 4,
+      "relative_to": "resistance_base_4",
+      "min": 9.9,
+      "max": 10.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 5,
+      "relative_to": "resistance_base_5",
+      "min": 9.9,
+      "max": 10.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 6,
+      "relative_to": "resistance_base_6",
+      "min": 9.9,
+      "max": 10.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.31.570752",
+      "index": 1,
+      "equals": 999
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.31.570752",
+      "index": 3,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.31.570752",
+      "index": 4,
+      "equals": 101
+    }
+  ]
+}

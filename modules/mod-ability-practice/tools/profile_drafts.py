@@ -214,7 +214,7 @@ def reviewed_stat_buffs(root):
     body = re.search(r'inline\s+constexpr\s+std::array\s+Mechanics\s*=\s*\{(.*?)\};', text, re.DOTALL)
     if body is None:
         raise ValueError('Missing owned stat-buff mechanic catalog')
-    pattern = r'Mechanic\s*\{\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+)(?:,\s*(\d+)(?:,\s*(\d+))?)?\s*\}'
+    pattern = r'Mechanic\s*\{\s*(\d+),\s*(\d+),\s*(\d+),\s*(-?\d+)(?:,\s*(\d+)(?:,\s*(\d+))?)?\s*\}'
     matches = list(re.finditer(pattern, body[1]))
     if not matches or re.sub(pattern, '', body[1]).replace(',', '').strip():
         raise ValueError('Unsupported owned stat-buff mechanic declaration')
@@ -228,7 +228,8 @@ def reviewed_stat_buffs(root):
         if (not 12 <= class_id <= 32 or not ability_id or target not in {21, 56} or
                 not (aura == 29 and stat in range(5) or aura == 345 and stat == 127 and target == 21 or
                      aura in {85, 99} and stat == 0 and target == 21 or
-                     aura == 143 and stat in {4, 16, 64, 126} and target == 21) or
+                     aura == 143 and (stat in {4, 16, 64, 126} or
+                         stat == 1 and (class_id, ability_id) == (31, 570752)) and target == 21) or
                 ((effect_index != 0 or aura == 143 and stat == 126) and not (
                     effect_index == 2 and aura == 143 and stat == 126 and
                     (class_id, ability_id) in {(16, 575843), (30, 575839)} or
@@ -248,16 +249,19 @@ def reviewed_stat_buffs(root):
     secondary_matches = list(re.finditer(pattern, secondary_body[1]))
     if re.sub(pattern, '', secondary_body[1]).replace(',', '').strip():
         raise ValueError('Unsupported secondary buff mechanic declaration')
-    expected_secondary = {(13, 560294): (21, 126, 143, 1), (17, 706589): (21, 0, 29, 1),
-                          (17, 803667): (21, 16, 143, 1)}
+    expected_secondary = {(13, 560294, 1): (21, 126, 143), (17, 706589, 1): (21, 0, 29),
+                          (17, 803667, 1): (21, 16, 143), (31, 570752, 1): (21, -1, 29),
+                          (31, 570752, 2): (21, 126, 143)}
     observed_secondary = {}
     for match in secondary_matches:
         values = tuple(map(int, match.groups()))
         identity, shape = values[:2], values[2:]
-        if identity not in result or identity in observed_secondary or expected_secondary.get(identity) != shape:
+        key = (*identity, shape[3])
+        if identity not in result or key in observed_secondary or expected_secondary.get(key) != shape[:3]:
             raise ValueError('Unsupported reviewed secondary buff mechanic')
-        observed_secondary[identity] = shape
-        result[identity]['secondaryComponent'] = dict(zip(('targetA', 'statSelector', 'auraId', 'effectIndex'), shape))
+        observed_secondary[key] = shape[:3]
+        result[identity].setdefault('secondaryComponents', []).append(
+            dict(zip(('targetA', 'statSelector', 'auraId', 'effectIndex'), shape)))
     if observed_secondary != expected_secondary:
         raise ValueError('Reviewed secondary buff catalog changed')
     rite_profiles = {(30, 575839), (30, 578126)}.intersection(result)
@@ -600,10 +604,11 @@ def build_drafts(candidates, root):
             effect_index = mechanic['effectIndex']
             expected = [(0, 0, 0, 0, 0, 0)] * 3
             expected[effect_index] = (6, mechanic['auraId'], mechanic['targetA'], 0, 0, mechanic['statSelector'])
-            secondary = mechanic.get('secondaryComponent')
-            if secondary:
+            secondary_components = mechanic.get('secondaryComponents', [])
+            for secondary in secondary_components:
                 expected[secondary['effectIndex']] = (6, secondary['auraId'], secondary['targetA'],
                                                      0, 0, secondary['statSelector'])
+            if secondary_components:
                 required.append('all-authored-buff-components-positive-active-and-effective')
                 if (class_id, ability_id) == (13, 560294):
                     required.append('native-wuju-lifecycle-and-exclusive-replacement-preserved')
@@ -627,12 +632,14 @@ def build_drafts(candidates, root):
                         type(details[effect_index].get('basePoints')) is not int or
                         details[effect_index]['basePoints'] < 0):
                     raise ValueError('Reviewed owned stat-buff source shape changed')
-                if secondary and (type(details[secondary['effectIndex']].get('basePoints')) is not int or
-                                  details[secondary['effectIndex']]['basePoints'] < 0):
+                if any(type(details[v['effectIndex']].get('basePoints')) is not int or
+                       details[v['effectIndex']]['basePoints'] < 0 for v in secondary_components):
                     raise ValueError('Reviewed secondary buff amount is not positive')
                 if mechanic['auraId'] == 99 and details[1].get('basePoints') != details[0]['basePoints']:
                     raise ValueError('Paired attack-power rank amounts differ')
                 amounts.append(details[effect_index]['basePoints'] + 1)
+            if (class_id, ability_id) == (31, 570752):
+                required.append('native-earthen-endurance-armor-allstats-and-magic-resistance-benefits')
             if (class_id, ability_id) == (28, 706742):
                 required.extend(['native-tinker-lifecycle-single-loaded-binding-and-family',
                                  'native-power-module-rank-variants-and-both-attack-power-totals'])

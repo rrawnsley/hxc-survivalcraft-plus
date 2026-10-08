@@ -4186,3 +4186,37 @@ Coverage267unique/269declared161ranked9mastery97Fixed436pending(63ranked373stand
 not client pixels, every native ability outcome or ordinary cadence. Other-caster Mark stacking and
 friendly healing contribution remain unqualified. All defaults0/addon0.4.54-development/schema4
 unpublished. No production/server/client operations.
+
+
+## Earthen Endurance native three-component buff practice
+
+Earthen Endurance31/570752 retains four complete native ranks30/40/50/60, matching trainer900031
+immediate prerequisites. No positive or negative-rank script bindings were found; loaded family37
+and no bindings are required. Native armor150/195/240/285, all five stats6/8/10/12 and magic resistance
+5/10/15/20 remain. Additional Agility contributes native armor12/16/20/24, so observed total armor
+benefits are162/211/260/309; they are not attributed wholly to the flat armor effect.
+
+Secondary component lookup now includes effect index, permits multiple exact components per profile
+and supports the reviewed signed all-stat selector-1 and physical resistance mask1. All three positive
+effective effects are required at original combat cast start and outcome. Native stat/exclusive-school
+maximum calculations remain. One additive definition2 pacing entry preserves161 prior curves,now162;
+definition4 caps prepare one upcoming rank and stop at the last requirement.540 qualifying uses estimate
+45minutes at assumed5s cadence before catch-up, unmeasured in play.39buff tracks span20classes.
+
+Source/build/harness/native013531 passed9checks80.1s/build29.7s/harness14.2s/822typed and six native
+cases49.2s simulated: all four rank benefits/unknown version999 and100/101 saved progress preserved,
+initial combat and automatic second-rank boundary. Real013903 passed seven cases187.2s, including
+Spirit Wuju suppression, both Mark contributions and Power Module variant regressions. Application
+zero, useful Stoneshard270points, removal stops gains; boundary9/15930 to10/0 auto learns570753 at40,
+570754 remains locked and native stronger armor195/allstats8/magic10 remain. Third-component suppression
+with external Fire resistance30 pauses gains while own armor150/allstats6/magic aura5 remain;
+removal restores Fire5 and the next original cast reaches540. Fresh real menu014219 passed55.9s,
+four native rank levels,cap20 and exact540-use forecast. No failures or automatic isolated reruns.
+Scoped style/whitespace and provenance exports passed; no native mechanics or core source changes.
+
+Coverage268unique/270declared162ranked9mastery97Fixed435pending(62ranked373standalone),136native paths.
+822typed snapshots486ranked45mastery291Fixed. All defaults0/addon0.4.55-development/schema4 unpublished,
+no production/server/client changes. All21 native menu delivery was last refreshed at the previous
+267-profile catalog; client pixels, ordinary cadence, friendly healing and other ability outcomes
+remain unqualified. Power Wuju next requires its full native trainer-only seventh rank68, including
+native unequal melee/ranged amounts306/232; no partial ladder or native correction should be introduced.

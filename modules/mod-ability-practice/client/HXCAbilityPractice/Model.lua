@@ -641,6 +641,12 @@ function Model.PracticeRules(ability, saved)
             .. " Post-combat recovery counts. Players, pets, training dummies and gray opponents do not count."
             .. " Capturing a corpse without healing or gaining a soul earns no practice."
             .. " Each original cast earns at most one award; the native once-per-corpse rule remains."
+    elseif ability.abilityId == 570752 and ability.route == 13 then
+        rule = "Keep your own Earthen Endurance active and use a learned ability for useful damage or healing"
+            .. " in a qualifying PvE fight."
+            .. " Its armor, all five stats, and magic resistance effects must remain active and useful."
+            .. " Applying or refreshing the buff earns no practice."
+            .. " One original ability cast earns one use, with at least five seconds between counted uses."
     elseif (ability.abilityId == 706589 or ability.abilityId == 803667) and ability.route == 13 then
         rule = "Keep your own Mark active and use a learned ability for useful damage or healing"
             .. " in a qualifying PvE fight. Both its stat and resistance effects must remain active and useful."
