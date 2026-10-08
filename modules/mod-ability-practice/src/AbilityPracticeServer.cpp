@@ -578,6 +578,22 @@ bool HasExactBuffGroup(std::uint32_t spellId, std::uint32_t groupId, SpellGroupS
     return std::equal(members.begin(), members.end(), expected.begin());
 }
 
+bool HasExpectedStormbornSharedGroup(std::uint32_t abilityId, std::uint32_t spellId)
+{
+    auto const groups = sSpellMgr->GetSpellSpellGroupMapBounds(spellId);
+    if (groups.first != groups.second)
+        return false;
+    if (abilityId == 575843)
+    {
+        auto const regular = sSpellMgr->GetSpellSpellGroupMapBounds(abilityId);
+        return regular.first == regular.second;
+    }
+    if (abilityId != 578311 && abilityId != 804018)
+        return false;
+    constexpr std::array<std::int32_t, 2> calls{ 578311, 804018 };
+    return HasExactBuffGroup(abilityId, 1171, SPELL_GROUP_STACK_RULE_EXCLUSIVE_FROM_SAME_CASTER, calls);
+}
+
 bool HasExpectedStarcallerGroup(std::uint32_t abilityId, std::uint32_t spellId)
 {
     constexpr std::array<std::int32_t, 2> mind{ 300255, 680301 };
@@ -1469,6 +1485,12 @@ bool MatchesSharedBuffVariants()
                 !Practice::DevelopmentBuffs::IsManaModule(*profile)) || !HasExpectedModuleGroup(info->Id) ||
                 entry == scripts.second || sObjectMgr->GetScriptName(entry->second) !=
                     "aura_ascension_tinker_lifecycle" || ++entry != scripts.second)
+                return false;
+        }
+        else if (variant.ClassId == 16)
+        {
+            if (info->SpellFamilyName != 22 || entry != scripts.second ||
+                !HasExpectedStormbornSharedGroup(variant.AbilityId, info->Id))
                 return false;
         }
         else if (variant.ClassId == 26)

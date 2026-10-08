@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native greater Call of the storm party benefits",
+  "contract": "Native trainer acquisition and full party benefit before shared enrollment with sufficient regular practice. No native data changes.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apstbstoc",
+      "race": 1,
+      "class": 16,
+      "level": 56
+    },
+    {
+      "id": "ally",
+      "name": "Apstbstoa",
+      "race": 1,
+      "class": 16,
+      "level": 56
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "ally"
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.16.578311",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.16.578311",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.16.578311",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.16.578311",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.16.578311",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 578311
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 578312
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 578313
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 578314
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 578315
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 578316
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 578316,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 578316,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 578316,
+      "effect": 0,
+      "equals": 31
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 578316,
+      "effect": 0,
+      "equals": 31
+    }
+  ]
+}
