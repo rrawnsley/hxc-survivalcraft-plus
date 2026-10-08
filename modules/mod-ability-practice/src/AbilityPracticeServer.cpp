@@ -11,6 +11,7 @@
 #include "AbilityPracticeDevelopmentHelpers.h"
 #include "AbilityPracticeDevelopmentLeech.h"
 #include "AbilityPracticeDevelopmentBuffs.h"
+#include "AbilityPracticeDevelopmentBuffVariants.h"
 #include "AbilityPracticeDevelopmentFixed.h"
 #include "AbilityPracticeDevelopmentConjureFixed.h"
 #include "AbilityPracticeDevelopmentPassiveFixed.h"
@@ -350,6 +351,7 @@ bool MasteryRequested = false;
 bool HelpersRequested = false;
 bool DirectLeechRequested = false;
 bool BuffContributionRequested = false;
+bool SharedBuffVariantsRequested = false;
 bool TrainerRanksRequested = false;
 bool AbsorptionRequested = false;
 bool PacingRequested = false;
@@ -1162,6 +1164,77 @@ bool MatchesUtilityFixedMechanic(Practice::AbilityProfile const& profile)
         });
 }
 
+bool MatchesSharedBuffVariants()
+{
+    if (!SharedBuffVariantsRequested)
+        return true;
+    if (!BuffContributionRequested || !RankRequested || !RankCapsRequested || !TrainerRanksRequested ||
+        !ProfileLookup)
+        return false;
+    for (auto const& variant : Practice::DevelopmentBuffVariants::Variants)
+    {
+        auto const* profile = ProfileLookup->Find(variant.ClassId, variant.AbilityId);
+        auto const* rank = profile ? Practice::DevelopmentBuffVariants::EquivalentRank(*profile, variant) : nullptr;
+        SpellInfo const* info = sSpellMgr->GetSpellInfo(variant.SpellId);
+        SpellInfo const* parent = sSpellMgr->GetSpellInfo(variant.EquivalentSpellId);
+        if (ProfileLookup->Find(variant.ClassId, variant.SpellId) ||
+            !rank || !info || !parent || info->IsPassive() || info->IsDeprecatedForPlayers ||
+            info->SpellFamilyName != parent->SpellFamilyName)
+            return false;
+        if (profile->Definition.Kind == Practice::AbilityKind::Ranked &&
+            (profile->DefinitionVersion != Practice::DevelopmentRankCaps::DefinitionVersion ||
+                std::any_of(profile->Policy.Bands.begin(), profile->Policy.Bands.end(),
+                    [profile](auto const& band)
+                    {
+                        return band.PointsPerLevel != profile->Policy.Bands.front().PointsPerLevel;
+                    })))
+            return false;
+        for (std::size_t index = 0; index < 3; ++index)
+        {
+            auto const& slot = info->Effects[index];
+            auto const& expected = parent->Effects[index];
+            if (info->SpellFamilyFlags[index] != parent->SpellFamilyFlags[index] ||
+                slot.Effect != expected.Effect || slot.ApplyAuraName != expected.ApplyAuraName ||
+                slot.TargetA.GetTarget() != (expected.TargetA.GetTarget() ? 56u : 0u) ||
+                slot.TargetB.GetTarget() || slot.TriggerSpell != expected.TriggerSpell ||
+                slot.MiscValue != expected.MiscValue || slot.MiscValueB != expected.MiscValueB ||
+                slot.BasePoints != expected.BasePoints || slot.DieSides != expected.DieSides ||
+                slot.RealPointsPerLevel != expected.RealPointsPerLevel)
+                return false;
+        }
+        auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+        auto entry = scripts.first;
+        if (entry == scripts.second ||
+            sObjectMgr->GetScriptName(entry->second) != "aura_ascension_witch_doctor_lifecycle" ||
+            ++entry != scripts.second)
+            return false;
+        std::array const ranks = { Practice::AbilityRank{ variant.SpellId, 1, { variant.CharacterLevel, 1 } } };
+        Practice::AbilityProfile const native{
+            Practice::Development::DefinitionVersion, Practice::AcquisitionSource::ClassGrant,
+            { variant.ClassId, variant.SpellId, Practice::AbilityKind::Fixed, ranks, {} },
+            Practice::Development::Policy, Practice::OutcomeKind::None };
+        if (!MatchesNativeClassGrant(native))
+            return false;
+        auto const& trainers = sObjectMgr->GetTrainers();
+        auto const found = trainers.find(900013);
+        if (found == trainers.end() || found->second.GetTrainerType() != Trainer::Type::Class ||
+            found->second.GetTrainerRequirement() != variant.ClassId)
+            return false;
+        auto const& offers = found->second.GetSpells();
+        if (std::count_if(offers.begin(), offers.end(), [&variant](Trainer::Spell const& offer)
+            {
+                return offer.SpellId == variant.SpellId;
+            }) != 1)
+            return false;
+        auto const* offer = found->second.GetSpell(variant.SpellId);
+        if (!offer || offer->ReqLevel != variant.CharacterLevel || offer->ReqSkillLine || offer->ReqSkillRank ||
+            std::any_of(offer->ReqAbility.begin(), offer->ReqAbility.end(),
+                [](std::uint32_t required) { return required != 0; }))
+            return false;
+    }
+    return true;
+}
+
 bool MatchesControlFixedMechanic(Practice::AbilityProfile const& profile)
 {
     auto const& authored = Practice::DevelopmentControlFixed::Profiles;
@@ -1389,7 +1462,31 @@ bool IsDevelopmentPlayer(Player const* player)
 
 Practice::AbilityProfile const* FindProfile(Player const* player, std::uint32_t spellId)
 {
-    return player && ProfileLookup ? ProfileLookup->Find(player->getClass(), spellId) : nullptr;
+    if (!player || !ProfileLookup)
+        return nullptr;
+    if (auto const* profile = ProfileLookup->Find(player->getClass(), spellId))
+        return profile;
+    auto const* variant = SharedBuffVariantsRequested ?
+        Practice::DevelopmentBuffVariants::Find(player->getClass(), spellId) : nullptr;
+    return variant ? ProfileLookup->Find(variant->ClassId, variant->AbilityId) : nullptr;
+}
+
+std::uint32_t SharedBuffRankSpellId(Practice::AbilityDefinition const& ability, std::uint32_t spellId)
+{
+    auto const* variant = SharedBuffVariantsRequested ?
+        Practice::DevelopmentBuffVariants::Find(ability.ClassId, spellId) : nullptr;
+    return variant && variant->AbilityId == ability.AbilityId ? variant->EquivalentSpellId : spellId;
+}
+
+std::uint32_t SharedBuffSeedMinimum(Player const* player, Practice::AbilityProfile const& profile)
+{
+    std::uint32_t required = 0;
+    if (SharedBuffVariantsRequested)
+        for (auto const& variant : Practice::DevelopmentBuffVariants::Variants)
+            if (auto const* rank = Practice::DevelopmentBuffVariants::EquivalentRank(profile, variant);
+                rank && player->HasSpell(variant.SpellId))
+                required = std::max(required, rank->Requirement.Proficiency);
+    return required;
 }
 
 std::span<Practice::AbilityProfile const* const> ProfilesForClass(std::uint32_t classId)
@@ -1514,7 +1611,10 @@ SpellInfo const* AcceptedBuffSpell(Player* player, MenuSession const& session,
     if (!origin || !player->HasSpell(origin->SpellId) ||
         !AcquisitionAllowed(player, profile.Definition, origin->SpellId) ||
         std::none_of(profile.Definition.Ranks.begin(), profile.Definition.Ranks.end(),
-            [&origin](Practice::AbilityRank const& rank) { return rank.SpellId == origin->SpellId; }))
+            [&origin, &profile](Practice::AbilityRank const& rank)
+            {
+                return rank.SpellId == SharedBuffRankSpellId(profile.Definition, origin->SpellId);
+            }))
         return nullptr;
     AuraApplication* application = player->GetAuraApplication(origin->SpellId, player->GetGUID());
     return application && EffectiveBuffApplication(player, *application, profile) &&
@@ -1526,8 +1626,14 @@ Practice::BuffPracticeState BuffStateFor(Player* player, MenuSession const& sess
     Practice::AbilityProfile const& profile)
 {
     if (!AcquisitionAllowed(player, profile.Definition, profile.Definition.Ranks.front().SpellId) ||
-        std::none_of(profile.Definition.Ranks.begin(), profile.Definition.Ranks.end(),
-            [player](Practice::AbilityRank const& rank) { return player->HasSpell(rank.SpellId); }))
+        (std::none_of(profile.Definition.Ranks.begin(), profile.Definition.Ranks.end(),
+            [player](Practice::AbilityRank const& rank) { return player->HasSpell(rank.SpellId); }) &&
+            (!SharedBuffVariantsRequested || std::none_of(Practice::DevelopmentBuffVariants::Variants.begin(),
+                Practice::DevelopmentBuffVariants::Variants.end(), [&profile, player](auto const& variant)
+                {
+                    return Practice::DevelopmentBuffVariants::EquivalentRank(profile, variant) &&
+                        player->HasSpell(variant.SpellId);
+                }))))
         return Practice::BuffPracticeState::Unavailable;
     if (AcceptedBuffSpell(player, session, profile))
         return Practice::BuffPracticeState::Ready;
@@ -1536,6 +1642,14 @@ Practice::BuffPracticeState BuffStateFor(Player* player, MenuSession const& sess
             application && !application->GetBase()->IsRemoved() && application->GetRemoveMode() == AURA_REMOVE_NONE)
             return EffectiveBuffApplication(player, *application, profile) ?
                 Practice::BuffPracticeState::Reapply : Practice::BuffPracticeState::Suppressed;
+    if (SharedBuffVariantsRequested)
+        for (auto const& variant : Practice::DevelopmentBuffVariants::Variants)
+            if (Practice::DevelopmentBuffVariants::EquivalentRank(profile, variant))
+                if (AuraApplication* application = player->GetAuraApplication(variant.SpellId, player->GetGUID());
+                    application && !application->GetBase()->IsRemoved() &&
+                        application->GetRemoveMode() == AURA_REMOVE_NONE)
+                    return EffectiveBuffApplication(player, *application, profile) ?
+                        Practice::BuffPracticeState::Reapply : Practice::BuffPracticeState::Suppressed;
     return Practice::BuffPracticeState::Inactive;
 }
 
@@ -1638,6 +1752,11 @@ std::vector<std::uint32_t> Learned(Player const* player, Practice::AbilityDefini
     for (Practice::AbilityRank const& rank : ability.Ranks)
         if (player->HasSpell(rank.SpellId))
             spells.push_back(rank.SpellId);
+    if (SharedBuffVariantsRequested)
+        for (auto const& variant : Practice::DevelopmentBuffVariants::Variants)
+            if (variant.ClassId == ability.ClassId && variant.AbilityId == ability.AbilityId &&
+                player->HasSpell(variant.SpellId) && !Practice::KnowsSpell(spells, variant.EquivalentSpellId))
+                spells.push_back(variant.EquivalentSpellId);
     return spells;
 }
 
@@ -1646,6 +1765,12 @@ CoAAbilityPractice::RankDecision EvaluateRank(Player const* player, std::uint32_
     using Decision = CoAAbilityPractice::RankDecision;
     if (!RankActive.load() || !IsProfiledPlayer(player))
         return Decision::Unmanaged;
+    auto const* variant = SharedBuffVariantsRequested ?
+        Practice::DevelopmentBuffVariants::Find(player->getClass(), spellId) : nullptr;
+    if (variant && player->HasSpell(spellId))
+        return Decision::Allowed;
+    if (variant && player->GetLevel() < variant->CharacterLevel)
+        return Decision::Blocked;
     auto const* profile = FindProfile(player, spellId);
     if (!profile || profile->Definition.Kind == Practice::AbilityKind::Fixed ||
         spellId == profile->Definition.Ranks.front().SpellId)
@@ -1654,8 +1779,9 @@ CoAAbilityPractice::RankDecision EvaluateRank(Player const* player, std::uint32_
     std::lock_guard lock(Mutex);
     if (!RankRequested || !Affects(player))
         return Decision::Unmanaged;
+    std::uint32_t const canonicalSpellId = SharedBuffRankSpellId(*ability, spellId);
     auto const desired = std::find_if(ability->Ranks.begin(), ability->Ranks.end(),
-        [spellId](Practice::AbilityRank const& rank) { return rank.SpellId == spellId; });
+        [canonicalSpellId](Practice::AbilityRank const& rank) { return rank.SpellId == canonicalSpellId; });
     if (desired == ability->Ranks.end())
         return Decision::Blocked;
     auto const learned = Learned(player, *ability);
@@ -1722,6 +1848,16 @@ void PromoteRanks(Player* player)
                 EvaluateRank(player, rank.SpellId) == CoAAbilityPractice::RankDecision::Allowed)
                 player->learnSpell(rank.SpellId, false);
     }
+    if (SharedBuffVariantsRequested)
+        for (auto const& variant : Practice::DevelopmentBuffVariants::Variants)
+        {
+            auto const* profile = FindProfile(player, variant.SpellId);
+            if (variant.ClassId == player->getClass() && profile &&
+                profile->Definition.Kind == Practice::AbilityKind::Ranked &&
+                !player->HasSpell(variant.SpellId) && player->HasSpell(variant.EquivalentSpellId) &&
+                EvaluateRank(player, variant.SpellId) == CoAAbilityPractice::RankDecision::Allowed)
+                player->learnSpell(variant.SpellId, false);
+        }
 }
 
 void SendMenuMessage(Player* player, std::string const& message)
@@ -1775,7 +1911,7 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
             Practice::AbilityDefinition const& ability = profile.Definition;
             if (ability.ClassId != player->getClass())
                 continue;
-            if (session.Protocol != Practice::TypedMenuSchemaVersion &&
+            if (session.Protocol < Practice::TypedMenuSchemaVersion &&
                 (ability.Kind == Practice::AbilityKind::Mastery ||
                     Practice::DevelopmentBuffs::IsSupportedStatBuff(profile)))
                 continue;
@@ -1788,7 +1924,7 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
                 auto const migrated = Practice::MigrateLearnedRanks(ability, profile.Policy, loaded, learned);
                 if (!migrated)
                 {
-                    if (session.Protocol != Practice::TypedMenuSchemaVersion)
+                    if (session.Protocol < Practice::TypedMenuSchemaVersion)
                         return false;
                     auto const failure = Practice::EncodeMenuProgressFailure(++Revision, ability.ClassId,
                         ability.AbilityId, ability.Ranks.front().SpellId, ServerGeneration,
@@ -1856,6 +1992,27 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
                 if (progress != currentProgress->second.Abilities.end())
                     view.Session = progress->second;
             }
+            if (session.Protocol >= Practice::SharedMenuSchemaVersion && SharedBuffVariantsRequested)
+                for (auto const& variant : Practice::DevelopmentBuffVariants::Variants)
+                    if (auto const* equivalent = Practice::DevelopmentBuffVariants::EquivalentRank(profile, variant))
+                    {
+                        auto rank = view.Ranks[equivalent->RankNumber - 1];
+                        rank.SpellId = variant.SpellId;
+                        rank.Requirement.CharacterLevel = variant.CharacterLevel;
+                        bool const levelMet = player->GetLevel() >= variant.CharacterLevel;
+                        bool const practiceMet = state.Proficiency >= equivalent->Requirement.Proficiency;
+                        rank.State = player->HasSpell(variant.SpellId) ? Practice::RankState::Learned :
+                            !AcquisitionAllowed(player, ability, variant.SpellId) ?
+                                Practice::RankState::MissingPrerequisite :
+                            ability.Kind == Practice::AbilityKind::Fixed ?
+                                (levelMet ? Practice::RankState::AcquireIntroductoryAbility :
+                                    Practice::RankState::NeedsCharacterLevel) :
+                            learned.empty() ? Practice::RankState::AcquireIntroductoryAbility :
+                            levelMet && practiceMet ? Practice::RankState::Ready :
+                            levelMet ? Practice::RankState::NeedsPractice :
+                            practiceMet ? Practice::RankState::NeedsCharacterLevel : Practice::RankState::NeedsBoth;
+                        view.SharedAbilities.push_back({ rank, variant.EquivalentSpellId });
+                    }
             views.push_back(std::move(view));
         }
     auto const progress = !supported ? Practice::SessionPractice{ false, 0, 0 } :
@@ -1863,21 +2020,21 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
     auto messages = Practice::EncodeMenuSnapshot(player->getClass(), player->GetLevel(), ++Revision, views,
         session.Protocol >= Practice::SessionMenuSchemaVersion
             ? std::optional<Practice::SessionPractice>(progress) : std::nullopt,
-        session.Protocol >= Practice::RoadmapMenuSchemaVersion, session.Protocol == Practice::TypedMenuSchemaVersion,
+        session.Protocol >= Practice::RoadmapMenuSchemaVersion, session.Protocol >= Practice::TypedMenuSchemaVersion,
         ServerGeneration, sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL),
-        session.Protocol == Practice::TypedMenuSchemaVersion
+        session.Protocol >= Practice::TypedMenuSchemaVersion
             ? std::optional<Practice::SessionLearningView>(!supported
                 ? Practice::SessionLearningView{ false, 0, {} } : currentProgress == session.Progress.end()
                     ? Practice::SessionLearningView{ true, 0, {} } : currentProgress->second.Learning.View())
             : std::nullopt,
-        session.Protocol == Practice::TypedMenuSchemaVersion
+        session.Protocol >= Practice::TypedMenuSchemaVersion
             ? std::optional<Practice::SessionMasteryView>(!supported
                 ? Practice::SessionMasteryView{ false, 0, {} } : currentProgress == session.Progress.end()
                     ? Practice::SessionMasteryView{ true, 0, {} } : currentProgress->second.Mastery.View())
-            : std::nullopt);
+            : std::nullopt, session.Protocol >= Practice::SharedMenuSchemaVersion);
     if (!messages || messages->size() > MaxQueuedMessages)
         return false;
-    if (session.Protocol == Practice::TypedMenuSchemaVersion)
+    if (session.Protocol >= Practice::TypedMenuSchemaVersion)
     {
         QueueDelivery(session, player->getClass(), std::move(*messages), now);
         return true;
@@ -2099,7 +2256,8 @@ void AwardBuffContribution(Player* player, Spell* spell, Unit* target, std::uint
         CoAAbilityPractice::CastReceipt contribution(player->GetGUID().GetRawValue(), session.ActionSession,
             player->getClass(), origin->SpellId, player->getRace(), player->GetActiveSpec(),
             session.LastCustomSpecialization);
-        ReceiptCast cast{ player, info, contribution };
+        ReceiptCast cast{ player, sSpellMgr->GetSpellInfo(
+            SharedBuffRankSpellId(profile->Definition, info->Id)), contribution };
         Practice::OutcomeContext const context{ true, true, true, true, player->GetLevel() };
         auto const award = Practice::HandleOutcome(*player, cast, profile->Definition,
             effective->View(), profile->DefinitionVersion, context);
@@ -2226,8 +2384,8 @@ void InitializeProgress(Player* player)
             profile.Policy, profile.DefinitionVersion);
         if (hasPrevious && loaded.Status == Practice::LoadStatus::DefinitionMismatch)
         {
-            std::uint32_t const minimum = TrainerRankExtensionEntry(profile)
-                ? Practice::SeedLearnedRanks(ability, {}, learned).Proficiency : 0;
+            std::uint32_t const minimum = std::max(SharedBuffSeedMinimum(player, profile),
+                TrainerRankExtensionEntry(profile) ? Practice::SeedLearnedRanks(ability, {}, learned).Proficiency : 0);
             for (auto const& previousDefinition : previousPacing)
             {
                 if (!previousDefinition)
@@ -2246,6 +2404,9 @@ void InitializeProgress(Player* player)
         }
         if (learned.empty())
             continue;
+        if (loaded.Status == Practice::LoadStatus::Loaded)
+            loaded.Record.State.Proficiency = std::max(loaded.Record.State.Proficiency,
+                SharedBuffSeedMinimum(player, profile));
         auto const record = Practice::MigrateLearnedRanks(ability, profile.Policy, loaded, learned);
         if (record)
             Practice::CachePlayerProgress(*player, ability.ClassId, ability.AbilityId, profile.Policy, *record);
@@ -2406,6 +2567,8 @@ public:
             sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentDirectLeech", false);
         BuffContributionRequested =
             sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentBuffContribution", false);
+        SharedBuffVariantsRequested =
+            sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentSharedBuffVariants", false);
         AbsorptionRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentAbsorption", false);
         PacingRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentRankPacing", false);
         RankCapsRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentOneRankAhead", false);
@@ -2483,7 +2646,7 @@ public:
             helpersValid && fixedValid &&
             absorptionValid && controlValid && pacingValid && masteryPacingValid && trainerFixedValid &&
             directLeechValid && conjureFixedValid && trainerRanksValid && passiveFixedValid && utilityFixedValid &&
-            controlFixedValid && buffValid && rankCapsValid &&
+            controlFixedValid && buffValid && rankCapsValid && MatchesSharedBuffVariants() &&
             Practice::ValidCatchupSettings(Catchup);
         for (Practice::AbilityProfile const& profile : profiles)
         {
@@ -2643,6 +2806,11 @@ public:
             MarkDirty(player);
             return;
         }
+        if (SharedBuffVariantsRequested && Practice::DevelopmentBuffVariants::Find(player->getClass(), spellId))
+        {
+            MarkDirty(player);
+            return;
+        }
         auto const rank = std::find_if(profile->Definition.Ranks.begin(), profile->Definition.Ranks.end(),
             [spellId](Practice::AbilityRank const& entry) { return entry.SpellId == spellId; });
         std::lock_guard lock(Mutex);
@@ -2676,7 +2844,7 @@ public:
         if (!Requested || !DevelopmentAllowed || !Ready || !IsDevelopmentPlayer(player))
             return true;
         if (receiver != player || (message != "HXAP\tHELLO|1" && message != "HXAP\tHELLO|2" &&
-            message != "HXAP\tHELLO|3" && message != "HXAP\tHELLO|4"))
+            message != "HXAP\tHELLO|3" && message != "HXAP\tHELLO|4" && message != "HXAP\tHELLO|5"))
             return false;
         auto const now = Clock::now();
         auto& session = Sessions[player->GetGUID().GetRawValue()];
@@ -2684,7 +2852,8 @@ public:
             return false;
         session.LastRequest = now;
         session.InterestedUntil = now + InterestDuration;
-        std::uint32_t const protocol = message == "HXAP\tHELLO|4" ? Practice::TypedMenuSchemaVersion :
+        std::uint32_t const protocol = message == "HXAP\tHELLO|5" ? Practice::SharedMenuSchemaVersion :
+            message == "HXAP\tHELLO|4" ? Practice::TypedMenuSchemaVersion :
             message == "HXAP\tHELLO|3" ? Practice::RoadmapMenuSchemaVersion :
             message == "HXAP\tHELLO|2" ? Practice::SessionMenuSchemaVersion : Practice::MenuSchemaVersion;
         if (protocol != session.Protocol)

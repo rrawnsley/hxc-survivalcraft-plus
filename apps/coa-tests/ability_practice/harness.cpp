@@ -11,6 +11,7 @@
 #include "AbilityPracticeDevelopmentRankCaps.h"
 #include "AbilityPracticeCatchup.h"
 #include "AbilityPracticeDevelopmentBuffs.h"
+#include "AbilityPracticeDevelopmentBuffVariants.h"
 #include "AbilityPracticeDevelopmentMastery.h"
 #include "AbilityPracticeDevelopmentMasteryPacing.h"
 #include "AbilityPracticeDevelopmentTrainerRanks.h"
@@ -717,8 +718,80 @@ void CheckMasteryFixedAndTrainerPolicies()
                 { 3, 1, { entry.PreviousRanks.back().Requirement.Proficiency, 0 } });
             assert(converted && converted->State.Proficiency == entry.PreviousRanks.back().Requirement.Proficiency);
         }
+    assert(DevelopmentBuffVariants::Variants.size() == 3);
+    for (auto const& variant : DevelopmentBuffVariants::Variants)
+    {
+        AbilityProfile const* parent = nullptr;
+        for (auto const& profile : DevelopmentBuffs::Profiles)
+            if (profile.Definition.AbilityId == variant.AbilityId)
+                parent = &profile;
+        for (auto const& profile : DevelopmentUtilityFixed::Profiles)
+            if (profile.Definition.AbilityId == variant.AbilityId)
+                parent = &profile;
+        assert(parent && DevelopmentBuffVariants::Find(13, variant.SpellId) == &variant);
+        assert(!DevelopmentBuffVariants::Find(14, variant.SpellId));
+        assert(!DevelopmentBuffVariants::Find(13, variant.AbilityId));
+        auto const* rank = DevelopmentBuffVariants::EquivalentRank(*parent, variant);
+        assert(rank && rank->SpellId == variant.EquivalentSpellId);
+        assert(rank->Requirement.Proficiency == (variant.SpellId == 712458 ? 80u :
+            variant.SpellId == 680872 ? 40u : 1u));
+        auto invalid = variant;
+        invalid.EquivalentSpellId = 1;
+        assert(!DevelopmentBuffVariants::EquivalentRank(*parent, invalid));
+        invalid = variant;
+        invalid.CharacterLevel = 1;
+        assert(!DevelopmentBuffVariants::EquivalentRank(*parent, invalid));
+    }
     assert(extensions == 13 && addedRanks == 25);
     std::cout << "PASS: 9 mastery policies/rewards, 98 fixed declarations, 13 trainer extensions/25 added ranks\n";
+}
+
+void WriteSharedCases(std::string const& filename)
+{
+    std::ofstream output(filename);
+    for (auto const& variant : DevelopmentBuffVariants::Variants)
+    {
+        AbilityProfile const* parent = nullptr;
+        for (auto const& profile : DevelopmentBuffs::Profiles)
+            if (profile.Definition.AbilityId == variant.AbilityId)
+                parent = &profile;
+        for (auto const& profile : DevelopmentUtilityFixed::Profiles)
+            if (profile.Definition.AbilityId == variant.AbilityId)
+                parent = &profile;
+        assert(parent);
+        auto const* equivalent = DevelopmentBuffVariants::EquivalentRank(*parent, variant);
+        assert(equivalent);
+        for (std::uint32_t phase = 0; phase < 3; ++phase)
+        {
+            std::array known{ parent->Definition.Ranks.front().SpellId };
+            Progress const progress{ phase == 0 ? 1U : equivalent->Requirement.Proficiency, 0 };
+            auto view = BuildAbilityView(parent->Definition, parent->Policy, progress,
+                variant.CharacterLevel, known, true);
+            bool const fixed = parent->Definition.Kind == AbilityKind::Fixed;
+            view.Route = fixed ? PracticeRoute::Fixed : PracticeRoute::BuffCombat;
+            view.RuleSet = 1;
+            view.AcquisitionSourceId = 1;
+            if (!fixed)
+                view.BuffState = BuffPracticeState::Ready;
+            auto shared = view.Ranks[equivalent->RankNumber - 1];
+            shared.SpellId = variant.SpellId;
+            shared.Requirement.CharacterLevel = variant.CharacterLevel;
+            shared.State = phase == 2 ? RankState::Learned : fixed ? RankState::AcquireIntroductoryAbility :
+                phase == 0 ? RankState::NeedsPractice : RankState::Ready;
+            view.SharedAbilities.push_back({ shared, variant.EquivalentSpellId });
+            std::array views{ view };
+            auto const encoded = EncodeMenuSnapshot(13, variant.CharacterLevel, phase + 1, views,
+                SessionPractice{}, true, true, 779, 80, std::nullopt, std::nullopt, true);
+            assert(encoded);
+            for (auto const& line : *encoded)
+                output << line << '\n';
+            output << '\n';
+            views[0].SharedAbilities[0].EquivalentSpellId = 999999;
+            assert(!EncodeMenuSnapshot(13, variant.CharacterLevel, phase + 1, views,
+                SessionPractice{}, true, true, 779, 80, std::nullopt, std::nullopt, true));
+        }
+    }
+    assert(output.good());
 }
 
 void WriteTypedMasteryAndFixedCases(std::ofstream& output, std::uint32_t& revision)
@@ -936,6 +1009,7 @@ int main(int argc, char** argv)
     if (argc > 1)
     {
         WriteTypedRankCases(std::string(argv[1]) + ".typed");
+        WriteSharedCases(std::string(argv[1]) + ".shared");
         std::array const ranks = { AbilityRank{ 101, 1, { 4, 1 } }, AbilityRank{ 102, 2, { 16, 20 } },
             AbilityRank{ 103, 3, { 24, 40 } } };
         std::array const caps = { ProficiencyCap{ 1, 10 }, ProficiencyCap{ 16, 30 }, ProficiencyCap{ 24, 60 } };

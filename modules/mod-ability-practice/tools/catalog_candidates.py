@@ -655,6 +655,7 @@ def main():
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentControlFixed.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentLeech.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentBuffs.h',
+                'modules/mod-ability-practice/src/AbilityPracticeDevelopmentBuffVariants.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentTrainerFixed.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentTrainerRanks.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentBuffTrainerRanks.h',

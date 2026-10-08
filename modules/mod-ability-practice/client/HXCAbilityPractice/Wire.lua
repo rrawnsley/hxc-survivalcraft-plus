@@ -25,7 +25,7 @@ function Wire.Reset() pending = nil end
 
 function Wire.GetDeadline()
     if not pending then return nil end
-    if pending.schemaVersion == 4 then return math.min(pending.started + 90, pending.lastPart + 6) end
+    if pending.schemaVersion >= 4 then return math.min(pending.started + 90, pending.lastPart + 6) end
     return pending.started + 5
 end
 
@@ -60,17 +60,17 @@ local function Accept(message, now, currentRevision, currentGeneration)
         end
         local schema, revision, classId, level, count = tonumber(fields[2]), tonumber(fields[3]),
             tonumber(fields[4]), tonumber(fields[5]), tonumber(fields[6])
-        if (schema ~= 1 and schema ~= 2 and schema ~= 3 and schema ~= 4)
+        if (schema ~= 1 and schema ~= 2 and schema ~= 3 and schema ~= 4 and schema ~= 5)
             or revision < 1 or revision > 4294967295 or classId < 1 or classId > 255
             or level < 1 or level > 255 or count > 512 then return Reject("Unsupported snapshot header") end
-        local generation = schema == 4 and fields[7] or nil
-        local realmMaximumLevel = schema == 4 and fields[8] and tonumber(fields[8]) or nil
+        local generation = schema >= 4 and fields[7] or nil
+        local realmMaximumLevel = schema >= 4 and fields[8] and tonumber(fields[8]) or nil
         if realmMaximumLevel and (realmMaximumLevel < 1 or realmMaximumLevel > 255) then
             return Reject("Invalid realm level cap")
         end
-        if (schema == 4 and ((#fields ~= 7 and #fields ~= 8 and #fields ~= 11)
+        if (schema >= 4 and ((#fields ~= 7 and #fields ~= 8 and #fields ~= 11)
             or not Model.ValidGeneration(generation)))
-            or (schema ~= 4 and #fields ~= 6) then return Reject("Invalid server instance identity") end
+            or (schema < 4 and #fields ~= 6) then return Reject("Invalid server instance identity") end
         local learning, learnCount
         if #fields == 11 then
             learnCount = tonumber(fields[10])
@@ -113,8 +113,16 @@ local function Accept(message, now, currentRevision, currentGeneration)
             local part = pending.parts[index]
             if not part or not part.A or not part.P or not part.R then return Reject("Incomplete snapshot") end
             local ability = part.A
-            if pending.schemaVersion == 4 then
+            if pending.schemaVersion >= 4 then
                 if not part.T or not part.C then return Reject("Missing ability rules or cap") end
+                if pending.schemaVersion == 5 then
+                    if part.V == nil then return Reject("Missing shared ability count") end
+                    ability.sharedAbilities = {}
+                    for ordinal = 1, part.V do
+                        if not part.W or not part.W[ordinal] then return Reject("Incomplete shared abilities") end
+                        ability.sharedAbilities[ordinal] = part.W[ordinal]
+                    end
+                end
                 ability.kind = part.T.kind
                 ability.session = part.T.session
                 ability.route = part.T.route
@@ -147,7 +155,7 @@ local function Accept(message, now, currentRevision, currentGeneration)
     end
     if kind == "H" then
         local count = tonumber(fields[4])
-        if pending.schemaVersion ~= 4 or pending.mastery or #fields ~= 5 or not count or count > 32
+        if pending.schemaVersion < 4 or pending.mastery or #fields ~= 5 or not count or count > 32
             or (fields[3] ~= "0" and fields[3] ~= "1") then return Reject("Invalid mastery history header") end
         pending.mastery = { available = fields[3] == "1", total = fields[5], events = {} }
         pending.masteryCount = count
@@ -155,7 +163,7 @@ local function Accept(message, now, currentRevision, currentGeneration)
     end
     if kind == "O" then
         local index = tonumber(fields[3])
-        if pending.schemaVersion ~= 4 or not pending.mastery or (#fields ~= 8 and #fields ~= 9)
+        if pending.schemaVersion < 4 or not pending.mastery or (#fields ~= 8 and #fields ~= 9)
             or (#fields == 9 and fields[9] ~= "2") or not index
             or index < 1 or index > pending.masteryCount or pending.mastery.events[index] then
             return Reject("Invalid mastery history event")
@@ -168,7 +176,7 @@ local function Accept(message, now, currentRevision, currentGeneration)
     end
     if kind == "N" then
         local index = tonumber(fields[3])
-        if pending.schemaVersion ~= 4 or not pending.learning or #fields ~= 8 or not index
+        if pending.schemaVersion < 4 or not pending.learning or #fields ~= 8 or not index
             or index < 1 or index > pending.learnCount or pending.learning.events[index] then
             return Reject("Invalid session learning event")
         end
@@ -187,16 +195,40 @@ local function Accept(message, now, currentRevision, currentGeneration)
     if not index or index < 1 or index > pending.count then return Reject("Invalid ability index") end
     local part = pending.parts[index] or {}
     pending.parts[index] = part
+    if kind == "V" then
+        local count = tonumber(fields[4])
+        if pending.schemaVersion ~= 5 or part.V ~= nil or #fields ~= 4 or not count or count > 8 then
+            return Reject("Invalid shared ability count")
+        end
+        if part.W then
+            for ordinal in pairs(part.W) do
+                if ordinal > count then return Reject("Invalid shared ability ordinal") end
+            end
+        end
+        part.V = count
+        return nil
+    end
+    if kind == "W" then
+        local ordinal = tonumber(fields[4])
+        if pending.schemaVersion ~= 5 or #fields ~= 11 or not ordinal or ordinal < 1 or ordinal > 8
+            or (part.V and ordinal > part.V) then return Reject("Invalid shared ability") end
+        part.W = part.W or {}
+        if part.W[ordinal] then return Reject("Duplicate shared ability") end
+        part.W[ordinal] = { spellId = tonumber(fields[5]), equivalentSpellId = tonumber(fields[6]),
+            characterLevel = tonumber(fields[7]), proficiency = tonumber(fields[8]), state = tonumber(fields[9]),
+            practice = { status = tonumber(fields[10]), uses = fields[11] } }
+        return nil
+    end
     if kind == "Q" then
         local state = tonumber(fields[4])
-        if pending.schemaVersion ~= 4 or part.Q or #fields ~= 4 or not state
+        if pending.schemaVersion < 4 or part.Q or #fields ~= 4 or not state
             or state < 1 or state > 5 or state % 1 ~= 0 then return Reject("Invalid buff practice state") end
         part.Q = state
         return nil
     end
     if kind == "J" then
         local replacement = tonumber(fields[4])
-        if pending.schemaVersion ~= 4 or part.J or #fields ~= 4 or not replacement
+        if pending.schemaVersion < 4 or part.J or #fields ~= 4 or not replacement
             or replacement < 1 or replacement > 4294967295 or replacement % 1 ~= 0 then
             return Reject("Invalid native ability replacement")
         end
@@ -204,7 +236,7 @@ local function Accept(message, now, currentRevision, currentGeneration)
         return nil
     end
     if kind == "G" then
-        if pending.schemaVersion ~= 4 or part.G or #fields ~= 8
+        if pending.schemaVersion < 4 or part.G or #fields ~= 8
             or (fields[8] ~= "0" and fields[8] ~= "1") then return Reject("Invalid catch-up policy") end
         part.G = { gap = tonumber(fields[4]), multiplier = tonumber(fields[5]),
             basePointsPerUse = tonumber(fields[6]), effectivePointsPerUse = tonumber(fields[7]),
@@ -212,7 +244,7 @@ local function Accept(message, now, currentRevision, currentGeneration)
         return nil
     end
     if kind == "C" then
-        if pending.schemaVersion ~= 4 or part.C then return Reject("Invalid training cap update") end
+        if pending.schemaVersion < 4 or part.C then return Reject("Invalid training cap update") end
         if #fields == 4 and fields[4] == "0" then part.C = true
         elseif #fields == 6 and fields[4] == "1" then
             part.C = { characterLevel = tonumber(fields[5]), proficiency = tonumber(fields[6]) }
@@ -223,7 +255,7 @@ local function Accept(message, now, currentRevision, currentGeneration)
         local abilityKind = tonumber(fields[4])
         local rewardCount = tonumber(fields[10])
         local acquisitionSource = fields[11] and tonumber(fields[11]) or nil
-        if pending.schemaVersion ~= 4 or part.T or (#fields ~= 10 and #fields ~= 11) or not abilityKind
+        if pending.schemaVersion < 4 or part.T or (#fields ~= 10 and #fields ~= 11) or not abilityKind
             or not rewardCount or rewardCount > 8
             or (acquisitionSource and (acquisitionSource < 1 or acquisitionSource > 5))
             or (acquisitionSource == 5 and abilityKind ~= 3)
@@ -245,7 +277,7 @@ local function Accept(message, now, currentRevision, currentGeneration)
     end
     if kind == "M" then
         local ordinal = tonumber(fields[4])
-        if pending.schemaVersion ~= 4 or (#fields ~= 10 and #fields ~= 11)
+        if pending.schemaVersion < 4 or (#fields ~= 10 and #fields ~= 11)
             or (#fields == 11 and fields[11] ~= "2") or not ordinal or ordinal < 1 or ordinal > 8
             or (part.T and ordinal > part.T.rewardCount) then return Reject("Invalid mastery roadmap entry") end
         part.M = part.M or {}
@@ -310,11 +342,11 @@ local function AcceptPacked(message, now, currentRevision, currentGeneration)
     if not revisionText or #revisionText > 10 or string.sub(revisionText, 1, 1) == "0"
         or tonumber(revisionText) > 4294967295 then return Reject("Invalid packed progress revision") end
     if not pending then return nil, "No snapshot in progress" end
-    if pending.schemaVersion ~= 4 then return Reject("Packed progress requires typed snapshot") end
+    if pending.schemaVersion < 4 then return Reject("Packed progress requires typed snapshot") end
     if tonumber(revisionText) ~= pending.revision then return nil, "Unrelated packed progress message" end
     local parts = {}
     for part in string.gmatch(body .. ";", "([^;]*);") do
-        local kind, fields = string.match(part, "^([ACPRTKLMNGOJQ])|(.+)$")
+        local kind, fields = string.match(part, "^([ACPRTKLMNGOJQVW])|(.+)$")
         if not kind or #parts >= 32 then return Reject("Invalid packed progress part") end
         parts[#parts + 1] = kind .. "|" .. revisionText .. "|" .. fields
     end

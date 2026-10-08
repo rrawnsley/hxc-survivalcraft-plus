@@ -32,6 +32,10 @@ def check_client(wire_path):
                  Path(str(wire_path) + '.typed').read_text().strip().split('\n\n')]
     runtime.globals().EncodedTypedPracticeSnapshots = runtime.table_from(snapshots)
     runtime.execute((HERE / 'client_typed_rank_cases.lua').read_text(encoding='utf-8'))
+    shared = [runtime.table_from(block.splitlines()) for block in
+              Path(str(wire_path) + '.shared').read_text().strip().split('\n\n')]
+    runtime.globals().EncodedSharedPracticeSnapshots = runtime.table_from(shared)
+    runtime.execute((HERE / 'client_shared_cases.lua').read_text(encoding='utf-8'))
     runtime.execute((client / 'Transport.lua').read_text(encoding='utf-8'))
     runtime.execute((HERE / 'client_transport_cases.lua').read_text(encoding='utf-8'))
 
@@ -100,6 +104,21 @@ def check_inventory():
         'duplicate-raw-rank-number', 'missing-raw-first-rank', 'raw-rank-gap'}
     assert all('ambiguous-name-rank-candidate' in row['reviewFlags'] for row in ambiguous['spells'])
     check_catalog_candidates(inventory)
+    sys.path.insert(0, str(ROOT / 'modules/mod-ability-practice/tools'))
+    from coverage import declared_profiles, declared_shared_variants
+    variants = declared_shared_variants(ROOT, declared_profiles(ROOT))
+    assert len(variants) == 3
+    assert variants[(13, 712458)]['equivalentSpellId'] == 707676
+    assert variants[(13, 680872)]['proficiencyRequired'] == 40
+    assert variants[(13, 800195)]['parentKind'] == 'fixed'
+    declarations = declared_profiles(ROOT)
+    del declarations[(13, 707671)]
+    try:
+        declared_shared_variants(ROOT, declarations)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError('Shared variant with missing parent accepted')
     print('PASS: deterministic 21-class source inventory, provenance and malformed-source rejection')
 
 

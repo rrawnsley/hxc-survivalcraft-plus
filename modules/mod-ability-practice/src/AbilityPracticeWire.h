@@ -138,7 +138,7 @@ inline std::vector<std::string> PackTypedMessages(std::span<std::string const> l
     };
     for (std::string const& line : lines)
     {
-        if (line.empty() || std::string_view("ACPRTKLMNGOJQ").find(line.front()) == std::string_view::npos)
+        if (line.empty() || std::string_view("ACPRTKLMNGOJQVW").find(line.front()) == std::string_view::npos)
         {
             flush();
             packed.push_back(line);
@@ -193,9 +193,11 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
     std::optional<SessionPractice> session = std::nullopt, bool includeRoadmap = false, bool includeKinds = false,
     std::uint64_t generation = 0, std::optional<std::uint32_t> realmMaximumLevel = std::nullopt,
     std::optional<SessionLearningView> learning = std::nullopt,
-    std::optional<SessionMasteryView> mastery = std::nullopt)
+    std::optional<SessionMasteryView> mastery = std::nullopt, bool includeShared = false)
 {
     if (!classId || classId > 255 || !characterLevel || characterLevel > 255 || !revision || abilities.size() > 512)
+        return std::nullopt;
+    if (includeShared && !includeKinds)
         return std::nullopt;
     if ((includeRoadmap && !session) || (includeKinds && (!includeRoadmap || !generation)))
         return std::nullopt;
@@ -233,7 +235,7 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
         }
     std::vector<std::string> lines;
     lines.reserve(abilities.size() * (includeKinds ? 6 : includeRoadmap ? 4 : 3) + rankCount + rewardCount + 3);
-    lines.push_back(Detail::WireLine('B', includeKinds ? TypedMenuSchemaVersion :
+    lines.push_back(Detail::WireLine('B', includeShared ? SharedMenuSchemaVersion : includeKinds ? TypedMenuSchemaVersion :
         includeRoadmap ? RoadmapMenuSchemaVersion :
         session ? SessionMenuSchemaVersion : MenuSchemaVersion,
         revision, classId, characterLevel, abilities.size()));
@@ -356,6 +358,36 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
             }
             else
                 lines.push_back(Detail::WireLine('C', revision, index + 1, 0));
+        }
+        if (includeShared)
+        {
+            if (view.SharedAbilities.size() > 8)
+                return std::nullopt;
+            lines.push_back(Detail::WireLine('V', revision, index + 1, view.SharedAbilities.size()));
+            for (std::size_t ordinal = 0; ordinal < view.SharedAbilities.size(); ++ordinal)
+            {
+                auto const& shared = view.SharedAbilities[ordinal];
+                auto const& rank = shared.Rank;
+                auto const parent = std::find_if(view.Ranks.begin(), view.Ranks.end(),
+                    [&shared](RankView const& entry) { return entry.SpellId == shared.EquivalentSpellId; });
+                if (parent == view.Ranks.end() || !rank.SpellId || rank.SpellId == shared.EquivalentSpellId ||
+                    rank.Requirement.CharacterLevel < parent->Requirement.CharacterLevel ||
+                    rank.Requirement.CharacterLevel > 255 ||
+                    rank.Requirement.Proficiency != parent->Requirement.Proficiency ||
+                    rank.RankNumber != parent->RankNumber ||
+                    rank.Practice.Status != parent->Practice.Status || rank.Practice.Uses != parent->Practice.Uses ||
+                    rank.State < RankState::Learned || rank.State > RankState::Ready ||
+                    std::any_of(view.Ranks.begin(), view.Ranks.end(),
+                        [&rank](RankView const& entry) { return entry.SpellId == rank.SpellId; }))
+                    return std::nullopt;
+                for (std::size_t previous = 0; previous < ordinal; ++previous)
+                    if (view.SharedAbilities[previous].Rank.SpellId == rank.SpellId)
+                        return std::nullopt;
+                lines.push_back(Detail::WireLine('W', revision, index + 1, ordinal + 1, rank.SpellId,
+                    shared.EquivalentSpellId, rank.Requirement.CharacterLevel, rank.Requirement.Proficiency,
+                    static_cast<std::uint32_t>(rank.State), static_cast<std::uint32_t>(rank.Practice.Status),
+                    rank.Practice.Uses));
+            }
         }
         lines.push_back(Detail::WireLine('A', revision, index + 1, view.AbilityId, view.DisplaySpellId,
             view.LearnedRank, view.State.Proficiency, view.State.Points, view.Cap, view.PointsPerLevel,

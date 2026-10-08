@@ -83,6 +83,29 @@ def declared_profiles(root):
     return result
 
 
+def declared_shared_variants(root, declarations):
+    relative = 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentBuffVariants.h'
+    text = (root / relative).read_text(encoding='utf-8')
+    body = re.search(r'inline constexpr std::array Variants = \{(.*?)\};', text, re.DOTALL)
+    pattern = re.compile(r'Variant\s*\{\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+)\s*\}')
+    if not body or pattern.sub('', body[1]).replace(',', '').strip():
+        raise ValueError('Unsupported shared variant declarations')
+    result = {}
+    for match in pattern.finditer(body[1]):
+        class_id, spell_id, ability_id, equivalent_id, level = map(int, match.groups())
+        identity = (class_id, spell_id)
+        parent = declarations.get((class_id, ability_id))
+        equivalent = next((rank for rank in parent['authoredRanks'] if rank['spellId'] == equivalent_id),
+                          None) if parent else None
+        if (identity in result or identity in declarations or spell_id == ability_id or not equivalent or
+                not equivalent['characterLevel'] <= level <= 255):
+            raise ValueError('Invalid shared variant parent or native level')
+        result[identity] = {'source': relative, 'abilityId': ability_id, 'equivalentSpellId': equivalent_id,
+                            'characterLevel': level, 'proficiencyRequired': equivalent['proficiencyRequired'],
+                            'parentKind': parent['kind']}
+    return result
+
+
 def review_queues(draft):
     traits = draft.get('actionTraits')
     routes = draft.get('candidateOutcomeRoutes')
@@ -149,7 +172,8 @@ def validate_rank_agreement(draft, declaration):
         raise ValueError('Unsupported authored proficiency ladder: ' + str(identity))
 
 
-def build_coverage(drafts, declarations):
+def build_coverage(drafts, declarations, shared_variants=None):
+    shared_variants = shared_variants or {}
     if drafts.get('schemaVersion') != 1 or drafts.get('scope') != (
             'unapproved-definition-drafts-not-runtime-profiles') or drafts.get('productionApproved') is not False:
         raise ValueError('Expected unapproved source-consistent drafts')
@@ -162,6 +186,11 @@ def build_coverage(drafts, declarations):
             raise ValueError('Expected unapproved, unclassified source draft')
         seen.add(identity)
         declaration = declarations.get(identity)
+        shared = shared_variants.get(identity)
+        if shared and (declaration or len(draft['ranks']) != 1 or
+                       draft['ranks'][0]['spellId'] != identity[1] or
+                       draft['ranks'][0]['characterLevel'] != shared['characterLevel']):
+            raise ValueError('Shared variant and native source disagree')
         baseline = draft.get('nativeBaselineExclusion')
         if baseline and (declaration or identity[1] not in {
                 75, 81, 107, 674, 2764, 3018, 3124, 5019, 6603, 28875, 536213, 552011, 632621} or
@@ -174,7 +203,7 @@ def build_coverage(drafts, declarations):
         rows.append({'classId': identity[0], 'abilityId': identity[1],
                      'nameFromRawDbc': draft['ranks'][0].get('nameFromRawDbc'),
                      'sourceRankCount': len(draft['ranks']), 'declaredDevelopmentProfile': declaration,
-                     'nativeBaselineExclusion': baseline,
+                     'nativeBaselineExclusion': baseline, 'declaredSharedVariant': shared,
                      'rawCastProfiles': [{'spellId': rank['spellId'], **rank['rawCastProfile']}
                          for rank in draft['ranks'] if rank.get('rawCastProfile') is not None],
                      'rawChannelProfiles': [{'spellId': rank['spellId'], **rank['rawChannelProfile']}
@@ -185,24 +214,26 @@ def build_coverage(drafts, declarations):
                      'rawVisibilityReview': draft.get('rawVisibilityReview'),
                      'actionTraits': draft['actionTraits'], 'requiredReviews': draft['requiredReviews'],
                      'reviewFlags': draft['reviewFlags'],
-                     'pendingReviewQueues': [] if declaration or baseline else review_queues(draft),
+                     'pendingReviewQueues': [] if declaration or baseline or shared else review_queues(draft),
                      'qualificationReviewQueues': review_queues(draft),
                      'practiceDecision': ('excluded-native-passive-baseline' if identity[1] in {
                          28875, 536213, 552011, 632621} else
-                                          'excluded-native-combat-baseline') if baseline else 'unreviewed',
+                                          'excluded-native-combat-baseline') if baseline else
+                        'shared-ability-progress' if shared else 'unreviewed',
                      'productionApproved': False, 'runtimeQualified': False})
-    if set(declarations) - seen:
+    if (set(declarations) | set(shared_variants)) - seen:
         raise ValueError('Declared profile absent from source-consistent drafts')
     rows.sort(key=lambda row: (row['classId'], row['abilityId']))
     classes = sorted({row['classId'] for row in rows})
 
     def summarize(selected):
         pending = [row for row in selected if not row['declaredDevelopmentProfile'] and
-                   not row['nativeBaselineExclusion']]
+                   not row['nativeBaselineExclusion'] and not row['declaredSharedVariant']]
         declared = [row for row in selected if row['declaredDevelopmentProfile']]
         kinds = Counter(row['declaredDevelopmentProfile']['kind'] for row in selected
                         if row['declaredDevelopmentProfile'])
-        return {'sourceGroupCount': len(selected), 'declaredDevelopmentProfileCount': sum(kinds.values()),
+        return {'sharedAbilityVariantCount': sum(bool(row['declaredSharedVariant']) for row in selected),
+                'sourceGroupCount': len(selected), 'declaredDevelopmentProfileCount': sum(kinds.values()),
                 'profileDeclarationCount': sum(len(row['declaredDevelopmentProfile']['sources']) for row in selected
                                                if row['declaredDevelopmentProfile']),
                 'sharedDeclarationProfileCount': sum(bool(row['declaredDevelopmentProfile'] and
@@ -247,7 +278,8 @@ def main():
     root = args.root.resolve()
     drafts = json.loads(args.drafts.read_text(encoding='utf-8'))
     verify_provenance(drafts, root, args.dbc.resolve())
-    result = build_coverage(drafts, declared_profiles(root))
+    declarations = declared_profiles(root)
+    result = build_coverage(drafts, declarations, declared_shared_variants(root, declarations))
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2, sort_keys=True) + '\n', encoding='utf-8')
     print(json.dumps(result['summary'], sort_keys=True))

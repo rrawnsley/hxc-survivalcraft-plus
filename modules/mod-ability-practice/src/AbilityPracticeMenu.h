@@ -15,6 +15,7 @@ inline constexpr std::uint32_t MenuSchemaVersion = 1;
 inline constexpr std::uint32_t SessionMenuSchemaVersion = 2;
 inline constexpr std::uint32_t RoadmapMenuSchemaVersion = 3;
 inline constexpr std::uint32_t TypedMenuSchemaVersion = 4;
+inline constexpr std::uint32_t SharedMenuSchemaVersion = 5;
 inline constexpr std::uint32_t HumanPvEPeriodicRuleSet = 2;
 inline constexpr std::uint32_t HumanPvEScriptedHealRuleSet = 3;
 inline constexpr std::uint32_t HumanPvEScriptedDamageRuleSet = 7;
@@ -176,6 +177,12 @@ struct CatchupView
     bool Boosted;
 };
 
+struct SharedAbilityView
+{
+    RankView Rank;
+    std::uint32_t EquivalentSpellId = 0;
+};
+
 struct AbilityView
 {
     std::uint32_t SchemaVersion = MenuSchemaVersion;
@@ -191,6 +198,7 @@ struct AbilityView
     Forecast NextPoint;
     std::optional<RankView> NextRank;
     std::vector<RankView> Ranks;
+    std::vector<SharedAbilityView> SharedAbilities;
     std::vector<MasteryRewardView> Rewards;
     SessionPractice Session{ false, 0, 0 };
     PracticeRoute Route = PracticeRoute::Unknown;

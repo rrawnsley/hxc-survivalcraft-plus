@@ -7,6 +7,7 @@ local nextRequest = 0
 local deadline
 local nextPoll = 0
 local elapsed = 0
+local protocol = 5
 
 function API.Request()
     local now = GetTime()
@@ -17,7 +18,7 @@ function API.Request()
     deadline = now + 6
     nextPoll = now + 10
     API.SetSyncState("waiting")
-    SendAddonMessage(PREFIX, "HELLO|4", "WHISPER", player)
+    SendAddonMessage(PREFIX, "HELLO|" .. protocol, "WHISPER", player)
     return true
 end
 
@@ -34,6 +35,7 @@ listener:SetScript("OnEvent", function(_, event, prefix, message, channel, sende
         deadline = nil
         nextPoll = 0
         elapsed = 0
+        protocol = 5
         API.Request()
         return
     end
@@ -69,7 +71,10 @@ listener:SetScript("OnUpdate", function(_, delta)
     if deadline and now >= deadline then
         deadline = nil
         Wire.Reset()
-        API.SetSyncState("unavailable")
+        if protocol == 5 and revision == 0 then
+            protocol = 4
+            API.Request()
+        else API.SetSyncState("unavailable") end
     end
     if not deadline and API.IsShown() and now >= nextPoll then API.Request() end
 end)

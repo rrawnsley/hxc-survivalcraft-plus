@@ -175,9 +175,9 @@ local function Ability(value, schema, characterLevel)
         end
         if not matched then return nil end
     end
-    local session = schema == 4 and Session(value.session) or nil
+    local session = schema >= 4 and Session(value.session) or nil
     local rewards, catchup
-    if schema == 4 then
+    if schema >= 4 then
         if value.acquisitionSource ~= nil and not Integer(value.acquisitionSource, 1, 5) then return nil end
         if value.acquisitionSource == 5 and value.kind ~= 3 then return nil end
         if not session or not Integer(value.kind, 1, 3) or not Integer(value.route, 1, 13)
@@ -233,13 +233,51 @@ local function Ability(value, schema, characterLevel)
     elseif value.kind ~= nil or value.session ~= nil or value.route ~= nil or value.ruleSet ~= nil
         or value.nextTrainingCap ~= nil or value.rewards ~= nil or value.acquisitionSource ~= nil
         or value.catchup ~= nil or value.replacementSpellId ~= nil or value.buffState ~= nil then return nil end
+    local sharedAbilities
+    if schema == 5 then
+        if type(value.sharedAbilities) ~= "table" or #value.sharedAbilities > 8 then return nil end
+        sharedAbilities = {}
+        local count, seen = 0, {}
+        for key in pairs(value.sharedAbilities) do
+            if not Integer(key, 1, #value.sharedAbilities) then return nil end
+            count = count + 1
+        end
+        if count ~= #value.sharedAbilities then return nil end
+        for _, entry in ipairs(value.sharedAbilities) do
+            if type(entry) ~= "table" or not Integer(entry.spellId, 1, 4294967295)
+                or seen[entry.spellId] or not Integer(entry.characterLevel, 1, 255)
+                or not Integer(entry.state, 1, 7) then return nil end
+            local parent
+            for _, candidate in ipairs(ranks) do
+                if candidate.spellId == entry.spellId then return nil end
+                if candidate.spellId == entry.equivalentSpellId then parent = candidate end
+            end
+            local practice = Forecast(entry.practice)
+            if not parent or entry.characterLevel < parent.characterLevel or entry.proficiency ~= parent.proficiency
+                or not practice or practice.status ~= parent.practice.status
+                or practice.uses ~= parent.practice.uses then return nil end
+            if value.kind == 3 and entry.state ~= 1 and entry.state ~= 2 and entry.state ~= 3
+                and entry.state ~= 5 then return nil end
+            local levelMet, practiceMet = characterLevel >= entry.characterLevel,
+                value.proficiency >= entry.proficiency
+            if entry.state == 4 and (not levelMet or practiceMet)
+                or entry.state == 5 and (levelMet or (value.kind ~= 3 and not practiceMet))
+                or entry.state == 6 and (levelMet or practiceMet)
+                or entry.state == 7 and (not levelMet or not practiceMet) then return nil end
+            sharedAbilities[#sharedAbilities + 1] = { spellId = entry.spellId,
+                equivalentSpellId = entry.equivalentSpellId, rankNumber = parent.rankNumber,
+                characterLevel = entry.characterLevel, proficiency = entry.proficiency,
+                state = entry.state, practice = practice }
+            seen[entry.spellId] = true
+        end
+    elseif value.sharedAbilities ~= nil then return nil end
     local cap = value.nextTrainingCap
     return { nextTrainingCap = cap and { characterLevel = cap.characterLevel, proficiency = cap.proficiency } or nil,
-        hasCapInfo = schema == 4, kind = value.kind, session = session,
+        hasCapInfo = schema >= 4, kind = value.kind, session = session,
         route = value.route, ruleSet = value.ruleSet, acquisitionSource = value.acquisitionSource,
         replacementSpellId = value.replacementSpellId,
         buffState = value.buffState,
-        ranks = ranks, rewards = rewards, catchup = catchup,
+        ranks = ranks, rewards = rewards, catchup = catchup, sharedAbilities = sharedAbilities,
         abilityId = value.abilityId, displaySpellId = value.displaySpellId,
         learnedRank = value.learnedRank,
         proficiency = value.proficiency, points = value.points, cap = value.cap, pointsPerLevel = value.pointsPerLevel,
@@ -316,20 +354,20 @@ end
 function Model.Validate(snapshot)
     if type(snapshot) ~= "table"
         or (snapshot.schemaVersion ~= 1 and snapshot.schemaVersion ~= 2 and snapshot.schemaVersion ~= 3
-            and snapshot.schemaVersion ~= 4)
+            and snapshot.schemaVersion ~= 4 and snapshot.schemaVersion ~= 5)
         or not Integer(snapshot.revision, 1, 4294967295) or not Integer(snapshot.classId, 1, 255)
         or not Integer(snapshot.characterLevel, 1, 255) or type(snapshot.abilities) ~= "table"
         or #snapshot.abilities > 512 then return nil, "Unsupported or incomplete progress update" end
-    if snapshot.schemaVersion == 4 and not Model.ValidGeneration(snapshot.generation) then
+    if snapshot.schemaVersion >= 4 and not Model.ValidGeneration(snapshot.generation) then
         return nil, "Missing server instance identity"
     end
-    if snapshot.realmMaximumLevel ~= nil and (snapshot.schemaVersion ~= 4
+    if snapshot.realmMaximumLevel ~= nil and (snapshot.schemaVersion < 4
         or not Integer(snapshot.realmMaximumLevel, 1, 255)) then return nil, "Invalid realm level cap" end
     local session = snapshot.schemaVersion >= 2 and Session(snapshot.session) or nil
     if snapshot.schemaVersion >= 2 and not session then return nil, "Incomplete session progress" end
     if snapshot.schemaVersion == 1 and snapshot.session ~= nil then return nil, "Unexpected session progress" end
     local result = { schemaVersion = snapshot.schemaVersion, session = session, revision = snapshot.revision,
-        classId = snapshot.classId, generation = snapshot.schemaVersion == 4 and snapshot.generation or nil,
+        classId = snapshot.classId, generation = snapshot.schemaVersion >= 4 and snapshot.generation or nil,
         characterLevel = snapshot.characterLevel, realmMaximumLevel = snapshot.realmMaximumLevel, abilities = {} }
     local seen = {}
     local rankCount = 0
@@ -351,12 +389,12 @@ function Model.Validate(snapshot)
         result.abilities[#result.abilities + 1] = ability
     end
     if snapshot.learning ~= nil then
-        if snapshot.schemaVersion ~= 4 then return nil, "Unexpected session learning history" end
+        if snapshot.schemaVersion < 4 then return nil, "Unexpected session learning history" end
         result.learning = Learning(snapshot.learning, result.abilities)
         if not result.learning then return nil, "Invalid session learning history" end
     end
     if snapshot.mastery ~= nil then
-        if snapshot.schemaVersion ~= 4 then return nil, "Unexpected mastery history" end
+        if snapshot.schemaVersion < 4 then return nil, "Unexpected mastery history" end
         result.mastery = MasteryHistory(snapshot.mastery, result.abilities)
         if not result.mastery then return nil, "Invalid mastery history" end
     end
@@ -412,7 +450,13 @@ function Model.NextMastery(ability)
     end
 end
 
-function Model.NextMilestone(ability) return ability.nextRank or Model.NextMastery(ability) end
+function Model.NextMilestone(ability)
+    local next = ability.nextRank or Model.NextMastery(ability)
+    for _, shared in ipairs(ability.sharedAbilities or {}) do
+        if shared.state ~= 1 and (not next or shared.characterLevel < next.characterLevel) then next = shared end
+    end
+    return next
+end
 
 local function HealingBonusText(basisPoints)
     local bonus = string.format("%.2f", basisPoints / 100):gsub("0+$", ""):gsub("%.$", "")
@@ -710,4 +754,10 @@ function Model.PracticeRules(ability, saved)
         .. "\n\nOnly your learned ability casts requested through your client can count."
         .. " Triggered casts, item casts, script-created spells and aura-triggered helpers do not count."
         .. " One award per original cast, regardless of targets, ticks or removals. Practice stops at your current cap."
+end
+
+function Model.SharedAbilityText(ability, shared, realmMaximumLevel, characterLevel)
+    return "Shares this ability's progress; no separate practice counter.\n"
+        .. Model.RankText(shared, Model.IsFixed(ability), realmMaximumLevel, characterLevel,
+            ability.acquisitionSource)
 end

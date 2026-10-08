@@ -1,6 +1,9 @@
 local methods = {}
+MockWidgets = {}
 local function Widget()
-    return setmetatable({ shown = true, scripts = {} }, { __index = methods })
+    local widget = setmetatable({ shown = true, scripts = {} }, { __index = methods })
+    MockWidgets[#MockWidgets + 1] = widget
+    return widget
 end
 function methods:CreateFontString() return Widget() end
 function methods:CreateTexture() return Widget() end

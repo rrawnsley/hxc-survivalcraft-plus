@@ -4283,3 +4283,50 @@ qualification remains. Greater Wuju spells at32/56/60 have no trainer prerequisi
 regular rank practice; their relationship to regular practice is a pending design question, not silently classified.
 Earlier Power Wuju menu wording corrected: the final ability-row field4 denotes practice availability,
 not definition version or rank count. Saved definition4 is separately verified by migration tests.
+
+
+## Greater Wuju shares matching regular practice
+
+The user selected shared progress for greater/group Wuju. Startup-only
+`AbilityPractice.AllowDevelopmentSharedBuffVariants` defaults to0 and requires the reviewed buff,
+rank, trainer-extension and one-upcoming-rank modes. Greater Power712458 at60 shares Power707671,
+matching regular rank6/707676/proficiency80 (232 melee and ranged AP), not rank7/707677 at68
+(306/232). Greater Spirit680872 at56 shares Spirit560294 rank4/561142/proficiency40 (Spirit40,
+magic resistance20). Greater Resourceful800195 at32 shares Fixed Resourceful578344 and preserves
+full native-5% mana reduction, native acquisition and no practice requirement. No separate saved rows.
+Native loaded effects, family flags, single lifecycle, class grant and exact trainer offers are guarded.
+A spell cannot also be registered as an independent profile. Known greater spells and their benefits
+are retained; current and readable old regular records seed the corresponding proficiency minimum
+without discarding partial points. Uniform points-per-level is required for this exact conversion.
+Regular and greater buffs retain the native mutually exclusive lifecycle and party effects.
+
+New addon0.4.58-development requests schema5, with schema4 fallback for an older server that does
+not respond. Schemas1-4 retain their existing messages. Schema5 adds bounded V counts and W shared
+spell entries, mandatory for atomic completeness. The server supplies native level, equivalent regular
+rank, proficiency, learned state and exact parent forecast. No client-side spell mapping or duplicate
+counter. Search, Upcoming, milestone roadmap and help expose shared variants; Fixed Resourceful
+shows native acquisition without practice. Failure messages remain compatible schema4.
+
+Initial real060258 failed Power's greater-buff award: native party232/232 and automatic boundary
+learning passed, but the generic award handler rejected the greater spell outside the regular rank
+list. The contribution adapter now supplies the canonical regular spell after validating the actual
+owned greater aura and origin. Corrected real061418 passed all five cases131.1s without retries:
+Power/Spirit practice gates and automatic greater acquisition, Power shared600points after boundary,
+party native effects, Resourceful utility/no counters, current/legacy Spirit marker0 exact8100points,
+Power retention, and schema5 menu exact one-use forecasts. Final062121 source9/105.5s, nativebuild46.7s,
+harness6.4s passed. Harness covers828 legacy typed snapshots plus9 shared snapshots, parent checks,
+malformed/incomplete/duplicate frames, schema fallback, Upcoming and actual mocked roadmap browsing.
+Prior061920 source run failed an unrelated batch-runner exit-result expectation (2 failures vs1);
+unchanged runner passed on062121. No runner source changed to mask it.
+Final062412 real184.7s passed ten cases with no failure/retry: all21 classes on schema4 and schema5,
+and four shared Wuju behavior/conversion cases after final startup collision guard.
+
+Coverage remains270 unique profiles/272 declarations,163ranked/9mastery/98Fixed,147 baselines,
+plus3 explicitly shared variants.430 source definitions remain pending (61ranked/369standalone).
+137 native source provenance paths. Aggregate850 drafts remain runtimeQualified:false and unapproved;
+individual scenario evidence does not promote the discovery report to approval.40 owned buff tracks
+span20classes. Defaults0; unpublished; no live process/config/database/client/launcher operations.
+Actual client pixels, ordinary-play pacing, friendly healing buff contributions and broader outcomes
+still require qualification. Next: Mark of Blaumeux17/707693 complete four ranks20/30/40/50;
+loaded Xoroth contract corrects raw secondary target0 to ally21. Spell power25/30/37/49 plus Shadow
+resistance15/30/45/60 must both remain native and effective. No partial ladder or raw-target rewrite.

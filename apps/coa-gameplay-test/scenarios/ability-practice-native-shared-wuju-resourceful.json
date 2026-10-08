@@ -1,0 +1,151 @@
+{
+  "schema": 1,
+  "name": "Ability practice: shared Wuju resourceful",
+  "contract": "Greater Wuju retains native party benefits and shares regular proficiency; no practice bypass or second progress record.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apshres",
+      "race": 1,
+      "class": 13,
+      "level": 32,
+      "spell_hit_rating": 10000,
+      "ranged_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "name": "Apshallyr",
+      "race": 1,
+      "class": 13,
+      "level": 32
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 578344
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800195
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.578344",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.578344",
+      "index": 1,
+      "value": 999
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.578344",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.578344",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.578344",
+      "index": 4,
+      "value": 101
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 807037
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_power_cost",
+      "spell": 807037,
+      "save_as": "basecost"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800195,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 800195,
+      "effect": 0,
+      "equals": -5
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 800195,
+      "effect": 0,
+      "equals": -5
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_power_cost",
+      "spell": 807037,
+      "ratio_to": "basecost",
+      "min": 0.9,
+      "max": 0.951
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.13.578344",
+      "index": 1,
+      "equals": 999
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.13.578344",
+      "index": 4,
+      "equals": 101
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.13.800195",
+      "index": 0,
+      "equals": 0
+    }
+  ]
+}

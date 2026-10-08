@@ -231,6 +231,11 @@ practiceHelp:SetScript("OnEnter", function(self)
                         "No additional practice beyond this proficiency in the current definition." or
                         "This is the highest defined training cap."), 1, 0.82, 0, true)
             end
+            for _, shared in ipairs(ability.sharedAbilities or {}) do
+                GameTooltip:AddLine(SpellName(shared.spellId), 1, 0.82, 0, true)
+                GameTooltip:AddLine(Model.SharedAbilityText(ability, shared, snapshot.realmMaximumLevel,
+                    snapshot.characterLevel), 1, 1, 1, true)
+            end
             if syncState ~= "current" then
                 GameTooltip:AddLine("Rules and uses remaining are from your last received view;"
                     .. " they may have changed since then. Refresh for current progress.", 1, 0.82, 0, true)
@@ -296,16 +301,32 @@ local function RenderDetail(ability)
     pointText:SetText(ability.replacementSpellId and Model.ReplacementText(ability, syncState ~= "current")
         or Model.PointText(ability, snapshot.realmMaximumLevel, snapshot.characterLevel))
     local nextRank = ability.nextRank
+    local milestone = Model.NextMilestone(ability)
+    if milestone and milestone.equivalentSpellId then nextRank = milestone end
     local nextReward = Model.NextMastery(ability)
-    nextTitle:SetText(nextRank and ((ability.learnedRank == 0 and "Upcoming ability: " or "Next rank: ")
-        .. SpellName(nextRank.spellId) .. (ShowsRankNumbers(ability) and (" (Rank " .. nextRank.rankNumber .. ")") or ""))
+    local nextPrefix = nextRank and nextRank.equivalentSpellId and "Shared ability: "
+        or ability.learnedRank == 0 and "Upcoming ability: " or "Next rank: "
+    nextTitle:SetText(nextRank and (nextPrefix .. SpellName(nextRank.spellId)
+        .. (not nextRank.equivalentSpellId and ShowsRankNumbers(ability)
+            and (" (Rank " .. nextRank.rankNumber .. ")") or ""))
         or (fixed and "Ability details" or mastery and "Mastery benefits" or "Rank progression"))
-    nextText:SetText(mastery and not nextRank and Model.MasteryText(nextReward, snapshot.realmMaximumLevel,
+    nextText:SetText(nextRank and nextRank.equivalentSpellId and
+        Model.SharedAbilityText(ability, nextRank, snapshot.realmMaximumLevel, snapshot.characterLevel)
+        or mastery and not nextRank and Model.MasteryText(nextReward, snapshot.realmMaximumLevel,
         snapshot.characterLevel, ability.acquisitionSource)
         or Model.RankText(nextRank, fixed, snapshot.realmMaximumLevel,
             snapshot.characterLevel, ability.acquisitionSource))
-    local ranks = mastery and ability.rewards or ability.ranks
-    roadmapButton:SetText(mastery and (showRoadmap and "Next benefit" or "All mastery")
+    local ranks = {}
+    for _, rank in ipairs((mastery and ability.rewards or ability.ranks) or {}) do ranks[#ranks + 1] = rank end
+    for _, shared in ipairs(ability.sharedAbilities or {}) do ranks[#ranks + 1] = shared end
+    table.sort(ranks, function(a, b)
+        if a.characterLevel ~= b.characterLevel then return a.characterLevel < b.characterLevel end
+        if (a.equivalentSpellId ~= nil) ~= (b.equivalentSpellId ~= nil) then return b.equivalentSpellId ~= nil end
+        return (a.rankNumber or a.proficiency) < (b.rankNumber or b.proficiency)
+    end)
+    roadmapButton:SetText(ability.sharedAbilities and #ability.sharedAbilities > 0
+        and (showRoadmap and "Next milestone" or "All milestones")
+        or mastery and (showRoadmap and "Next benefit" or "All mastery")
         or (showRoadmap and "Next rank" or "All ranks"))
     local hasRoadmap = ranks and (not fixed or #ranks > 1)
     if hasRoadmap then roadmapButton:Show() else roadmapButton:Hide() end
@@ -321,9 +342,12 @@ local function RenderDetail(ability)
         if rank then
             row:Show()
             row.title:SetText(mastery and ("Mastery " .. (index + rankOffset))
-                or ("Rank " .. rank.rankNumber .. " - " .. SpellName(rank.spellId)))
+                or ((rank.equivalentSpellId and "Shared - " or ("Rank " .. rank.rankNumber .. " - "))
+                    .. SpellName(rank.spellId)))
             row.info:SetText(mastery and Model.MasteryText(rank, snapshot.realmMaximumLevel,
                 snapshot.characterLevel, ability.acquisitionSource)
+                or rank.equivalentSpellId and Model.SharedAbilityText(ability, rank, snapshot.realmMaximumLevel,
+                    snapshot.characterLevel)
                 or Model.RankText(rank, fixed, snapshot.realmMaximumLevel,
                     snapshot.characterLevel, ability.acquisitionSource))
         else row:Hide() end
@@ -374,6 +398,9 @@ Refresh = function()
                         and (ability.session.uses ~= "0" or ability.session.proficiencyGained ~= "0"))))
             local matchesSearch = search == "" or string.find(string.lower(SpellName(ability.displaySpellId)),
                 search, 1, true)
+            for _, shared in ipairs(ability.sharedAbilities or {}) do
+                if string.find(string.lower(SpellName(shared.spellId)), search, 1, true) then matchesSearch = true end
+            end
             if matchesTab and matchesSearch then
                 for _, mode in ipairs(filterModes) do
                     if MatchesFilter(ability, mode) then filterCounts[mode] = filterCounts[mode] + 1 end
@@ -417,7 +444,7 @@ Refresh = function()
         if search ~= "" then emptyView = "No abilities match your search and filter in this view."
         elseif filterMode ~= "all" then emptyView = "No abilities match this filter. Select Filter: All to see more."
         elseif tab == "session" then
-            emptyView = (snapshot.schemaVersion ~= 4 or not session or not session.available)
+            emptyView = (snapshot.schemaVersion < 4 or not session or not session.available)
                 and "Per-ability session progress is unavailable in this snapshot."
                 or (snapshot.learning and snapshot.learning.available
                     and (syncState == "current" and "No practice, learning or mastery recorded this session."
@@ -472,7 +499,7 @@ Refresh = function()
                     or SessionMasteryText(ability) or SessionLearnText(ability)) or
                 tab == "upcoming" and rank and
                 ((ability.learnedRank == 0 and "New ability" or Model.IsMastery(ability) and "Next mastery benefit"
-                    or ("Next rank " .. rank.rankNumber))
+                    or rank.equivalentSpellId and SpellName(rank.spellId) or ("Next rank " .. rank.rankNumber))
                     .. " · " .. (Model.BeyondRealmLevel(rank.characterLevel, snapshot.realmMaximumLevel,
                         snapshot.characterLevel) and ("Above realm cap " .. snapshot.realmMaximumLevel)
                         or ("Req. level " .. rank.characterLevel))) or
@@ -561,6 +588,8 @@ for index = 1, 9 do
             local text = Model.IsMastery(ability) and not ability.nextRank
                 and Model.MasteryText(milestone, snapshot.realmMaximumLevel,
                     snapshot.characterLevel, ability.acquisitionSource)
+                or milestone.equivalentSpellId and Model.SharedAbilityText(ability, milestone,
+                    snapshot.realmMaximumLevel, snapshot.characterLevel)
                 or Model.RankText(milestone, Model.IsFixed(ability), snapshot.realmMaximumLevel,
                     snapshot.characterLevel, ability.acquisitionSource)
             GameTooltip:AddLine(text, 1, 1, 1, true)
