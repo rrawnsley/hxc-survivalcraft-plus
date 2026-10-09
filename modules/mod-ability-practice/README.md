@@ -6,8 +6,8 @@ The feature is not complete or approved for release.
 
 ## Latest isolated qualification (9 October 2026)
 
-- Development catalog: 285 unique profiles across all 21 classes, with 176 ranked, nine mastery,
-  100 Fixed and 33 shared variants. There are 385 remaining candidate groups awaiting definitions
+- Development catalog: 286 unique profiles across all 21 classes, with 177 ranked, nine mastery,
+  100 Fixed and 33 shared variants. There are 384 remaining candidate groups awaiting definitions
   and qualification; discovery exports remain unapproved.
 - Arcane Tattoo includes all six native ranks at 20/32/44/56/60/76. Resistance stays
   5/10/15/20/25/30, with native 20% harmful Magic and Curse duration reduction.
@@ -19,10 +19,17 @@ The feature is not complete or approved for release.
 - Source checks, native build and harness passed. Eight native Arcane cases passed with a simulated
   clock; nine progression/regression cases passed with a real clock. Both scoped runs report
   VERIFY ALL: PASSED. This does not qualify the full catalog or ordinary combat cadence.
-- Fire Tattoo and Whirlwind Aegis retain their qualified native benefits. Frost resistance works,
-  but its native proc decision returns zero for tested incoming/outgoing melee and magic events.
-  Frost practice remains pending; no native proc repair has been performed.
-- The addon is 0.4.79-development, protocol 5 with protocol 4 fallback. The harness passed 873 typed
+- Frost Tattoo includes six native resistance ranks at10/22/34/46/58/70. Owned effective resistance
+  earns practice through useful original combat. Native proc registration remains absent and its
+  slowing effect remains inactive; the menu states that limitation. No native repair was performed.
+  First/final boundaries, final cap, saves, replacement and menu forecasts passed on a real clock.
+  Seven native cases passed with a simulated clock, including all six native proc decisions.
+- The first real Frost batch had seven passing cases and one old fixture learn failure; it was
+  interrupted before retries and has no aggregate pass. The corrected existing tattoo fixture,
+  seeded with proficiency10 and the introductory Frost rank, reports VERIFY ALL: PASSED.
+  All15 selected final Frost/regression cases qualify across these scopes.
+- Fire Tattoo and Whirlwind Aegis retain their previously qualified native benefits.
+- The addon is 0.4.80-development, protocol 5 with protocol 4 fallback. The harness passed 876 typed
   snapshots and 99 shared-variant cases. These are not active-client pixel checks.
 - Production defaults remain disabled. Nothing has been deployed or installed in the active client.
   Ordinary combat cadence, remaining catalog behavior, client rendering and release remain pending.

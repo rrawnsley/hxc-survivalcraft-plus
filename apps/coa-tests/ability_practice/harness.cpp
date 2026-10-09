@@ -468,7 +468,7 @@ void CheckCurrentRankPolicies()
 {
     std::uint32_t forecasts = 0;
     std::array<bool, 21> classes{};
-    assert(DevelopmentPacing::Entries.size() == 176);
+    assert(DevelopmentPacing::Entries.size() == 177);
     for (auto const& entry : DevelopmentPacing::Entries)
     {
         classes.at(entry.ClassId - 12) = true;
@@ -773,7 +773,7 @@ void CheckMasteryFixedAndTrainerPolicies()
         invalid.CharacterLevel = 1;
         assert(!DevelopmentBuffVariants::EquivalentRank(*parent, invalid));
     }
-    assert(extensions == 17 && addedRanks == 29);
+    assert(extensions == 18 && addedRanks == 30);
     std::cout << "PASS: 9 mastery policies/rewards, 100 fixed declarations, " << extensions
         << " trainer extensions/" << addedRanks << " added ranks\n";
 }

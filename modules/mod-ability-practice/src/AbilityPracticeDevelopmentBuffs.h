@@ -9,6 +9,15 @@
 
 namespace AbilityPractice::DevelopmentBuffs
 {
+inline constexpr std::array FrostTattoo = {
+    AbilityRank{ 807834, 1, { 10, 1 } },
+    AbilityRank{ 807835, 2, { 22, 10 } },
+    AbilityRank{ 807836, 3, { 34, 20 } },
+    AbilityRank{ 807837, 4, { 46, 40 } },
+    AbilityRank{ 807838, 5, { 58, 60 } }
+};
+inline constexpr auto FrostTattooCaps = Development::RankCaps(FrostTattoo);
+
 inline constexpr std::array ArcaneTattoo = {
     AbilityRank{ 803748, 1, { 20, 1 } },
     AbilityRank{ 803759, 2, { 32, 10 } },
@@ -463,6 +472,9 @@ inline constexpr auto RiteOfPowerCaps = Development::RankCaps(RiteOfPower);
 
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 32, 807834, AbilityKind::Ranked, FrostTattoo, FrostTattooCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 32, 803748, AbilityKind::Ranked, ArcaneTattoo, ArcaneTattooCaps },
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -659,6 +671,7 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 32, 807834, 1, 16, 22 },
     Mechanic{ 32, 803748, 1, 64, 22 },
     Mechanic{ 32, 801106, 1, 4, 22 },
     Mechanic{ 16, 680282, 1, 1, 22 },
@@ -743,6 +756,12 @@ inline Mechanic const* SecondaryMechanicFor(AbilityProfile const& profile, std::
             mechanic.EffectIndex == effectIndex)
             return &mechanic;
     return nullptr;
+}
+
+inline bool IsFrostTattoo(AbilityProfile const& profile)
+{
+    return profile.Definition.ClassId == 32 && profile.Definition.AbilityId == 807834 &&
+        IsSupportedStatBuff(profile);
 }
 
 inline bool IsArcaneTattoo(AbilityProfile const& profile)

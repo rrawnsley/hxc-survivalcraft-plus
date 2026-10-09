@@ -747,6 +747,32 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
                 scripts.first != scripts.second || !HasExpectedEtchingGroup(561237, info->Id))
                 return false;
         }
+        if (Practice::DevelopmentBuffs::IsFrostTattoo(profile))
+        {
+            constexpr std::array<std::int32_t, 6> tattoos{ 801094, 801106, 801107, 802630, 803748, 807834 };
+            constexpr std::array spells{ 807834u, 807835u, 807836u, 807837u, 807838u, 807839u };
+            constexpr std::array levels{ 10u, 22u, 34u, 46u, 58u, 70u };
+            auto const rank = std::find(spells.begin(), spells.end(), info->Id);
+            auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+            auto const& proc = info->Effects[EFFECT_1];
+            if (rank == spells.end() || info->SpellFamilyName != 38 || info->SpellFamilyFlags[0] != 4 ||
+                info->SpellFamilyFlags[1] || info->SpellFamilyFlags[2] || scripts.first != scripts.second ||
+                info->GetDuration() != -1 || info->ProcFlags || info->ProcChance != 100 || info->ProcCharges ||
+                sSpellMgr->GetSpellProcEntry(info->Id) ||
+                !HasExactBuffGroup(info->Id, 111001, SPELL_GROUP_STACK_RULE_EXCLUSIVE, tattoos))
+                return false;
+            auto const index = static_cast<std::size_t>(rank - spells.begin());
+            if (info->SpellLevel != levels[index] || info->BaseLevel != levels[index] || info->MaxLevel ||
+                info->Effects[EFFECT_0].BasePoints != 4 + 5 * static_cast<std::int32_t>(index) ||
+                info->Effects[EFFECT_0].DieSides != 1 ||
+                proc.Effect != SPELL_EFFECT_APPLY_AURA || proc.ApplyAuraName != SPELL_AURA_PROC_TRIGGER_SPELL ||
+                proc.TargetA.GetTarget() != TARGET_UNIT_CASTER || proc.TargetB.GetTarget() ||
+                proc.TriggerSpell != 707731 || proc.BasePoints || proc.DieSides || proc.MiscValue)
+                return false;
+            for (auto const& effect : info->Effects)
+                if (effect.RealPointsPerLevel || effect.MiscValueB || effect.SpellClassMask)
+                    return false;
+        }
         if (Practice::DevelopmentBuffs::IsArcaneTattoo(profile))
         {
             constexpr std::array<std::int32_t, 6> tattoos{ 801094, 801106, 801107, 802630, 803748, 807834 };
@@ -982,6 +1008,8 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
         for (std::size_t index = 0; index < 3; ++index)
         {
             auto const& slot = info->Effects[index];
+            if (Practice::DevelopmentBuffs::IsFrostTattoo(profile) && index == EFFECT_1)
+                continue;
             auto const* secondary = Practice::DevelopmentBuffs::SecondaryMechanicFor(profile, index);
             if (secondary && index == secondary->EffectIndex)
             {

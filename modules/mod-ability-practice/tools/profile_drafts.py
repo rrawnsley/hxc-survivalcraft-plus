@@ -238,6 +238,7 @@ def reviewed_stat_buffs(root):
         effect_index = int(match[6]) if match[6] is not None else 0
         self_buff = (class_id, ability_id, target, stat, aura, effect_index) in {
             (16, 680282, 1, 1, 22, 0), (32, 801106, 1, 4, 22, 0), (32, 803748, 1, 64, 22, 0),
+            (32, 807834, 1, 16, 22, 0),
             (32, 801094, 1, 1, 22, 0), (32, 801107, 1, 0, 85, 0)}
         party_resistance = (class_id, ability_id, target, stat, aura, effect_index) == (25, 1119881, 1, 32, 143, 0)
         if (not 12 <= class_id <= 32 or not ability_id or
@@ -643,6 +644,10 @@ def build_drafts(candidates, root):
             primary_effect = 65 if (class_id, ability_id) == (25, 1119881) else 6
             expected[effect_index] = (primary_effect, mechanic['auraId'], mechanic['targetA'],
                                        0, 0, mechanic['statSelector'])
+            if (class_id, ability_id) == (32, 807834):
+                expected[1] = (6, 42, 1, 0, 707731, 0)
+                required.extend(['native-self-frost-resistance-and-complete-sixth-trainer-rank',
+                                 'native-dormant-proc-preserved-no-registration-or-helper-reward'])
             if (class_id, ability_id) == (32, 803748):
                 required.extend(['native-self-arcane-resistance-and-two-negative-duration-components',
                                  'native-nonstacking-duration-suppression-and-complete-sixth-trainer-rank'])

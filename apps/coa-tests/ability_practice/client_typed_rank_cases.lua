@@ -69,6 +69,11 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
         assert(string.find(Model.PracticeRules(ability), "Greater Power Module shares", 1, true))
         assert(string.find(Model.PracticeRules(ability), "Switching modules", 1, true))
     end
+    if ability.abilityId == 807834 and ability.route == 13 then
+        assert(string.find(Model.PracticeRules(ability), "slowing effect", 1, true))
+        assert(string.find(Model.PracticeRules(ability), "currently unavailable", 1, true))
+        assert(string.find(Model.PracticeRules(ability), "Switching tattoos pauses Frost practice", 1, true))
+    end
     if ability.abilityId == 803748 and ability.route == 13 then
         assert(string.find(Model.PracticeRules(ability), "both harmful-effect duration reductions", 1, true))
         assert(string.find(Model.PracticeRules(ability), "stronger duration effects", 1, true))
@@ -151,7 +156,7 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
     end
     count = count + 1
 end
-assert(count == 873)
-assert(kinds[1] == 528 and kinds[2] == 45 and kinds[3] == 300)
+assert(count == 876)
+assert(kinds[1] == 531 and kinds[2] == 45 and kinds[3] == 300)
 for classId = 12, 32 do assert(classes[classId]) end
-print("PASS: 873 typed snapshots across 21 classes: 528 ranked, 45 mastery, 300 fixed and menu rendering")
+print("PASS: 876 typed snapshots across 21 classes: 531 ranked, 45 mastery, 300 fixed and menu rendering")

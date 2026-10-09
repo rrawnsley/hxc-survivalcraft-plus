@@ -155,6 +155,44 @@ inline constexpr std::array TrainerRanksClass32Ability803748 = {
     TrainerRank{ 803763, 76, 900032, { 803762, 0, 0 } }
 };
 
+inline constexpr std::array PreviousRanksClass32Ability807834 = {
+    AbilityRank{ 807834, 1, { 10, 1 } },
+    AbilityRank{ 807835, 2, { 22, 10 } },
+    AbilityRank{ 807836, 3, { 34, 20 } },
+    AbilityRank{ 807837, 4, { 46, 40 } },
+    AbilityRank{ 807838, 5, { 58, 60 } }
+};
+
+inline constexpr std::array RanksClass32Ability807834 = {
+    AbilityRank{ 807834, 1, { 10, 1 } },
+    AbilityRank{ 807835, 2, { 22, 10 } },
+    AbilityRank{ 807836, 3, { 34, 20 } },
+    AbilityRank{ 807837, 4, { 46, 40 } },
+    AbilityRank{ 807838, 5, { 58, 60 } },
+    AbilityRank{ 807839, 6, { 70, 80 } }
+};
+
+inline constexpr std::array PreviousBandsClass32Ability807834 = {
+    TrainingBand{ 1, 16200, 270 },
+    TrainingBand{ 10, 16200, 300 },
+    TrainingBand{ 20, 16200, 600 },
+    TrainingBand{ 40, 16200, 600 }
+};
+
+inline constexpr std::array BandsClass32Ability807834 = {
+    TrainingBand{ 1, 16200, 270 },
+    TrainingBand{ 10, 16200, 300 },
+    TrainingBand{ 20, 16200, 600 },
+    TrainingBand{ 40, 16200, 600 },
+    TrainingBand{ 60, 16200, 600 }
+};
+
+inline constexpr auto PreviousCapsClass32Ability807834 = Development::RankCaps(PreviousRanksClass32Ability807834);
+inline constexpr auto CapsClass32Ability807834 = Development::RankCaps(RanksClass32Ability807834);
+inline constexpr std::array TrainerRanksClass32Ability807834 = {
+    TrainerRank{ 807839, 70, 900032, { 807838, 0, 0 } }
+};
+
 inline constexpr std::array Entries = {
     Entry{
         { DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -183,6 +221,13 @@ inline constexpr std::array Entries = {
             { BandsClass32Ability803748 }, OutcomeKind::Damage },
         PreviousRanksClass32Ability803748, PreviousCapsClass32Ability803748,
         { PreviousBandsClass32Ability803748 }, TrainerRanksClass32Ability803748
+    },
+    Entry{
+        { DefinitionVersion, AcquisitionSource::ClassGrant,
+            { 32, 807834, AbilityKind::Ranked, RanksClass32Ability807834, CapsClass32Ability807834 },
+            { BandsClass32Ability807834 }, OutcomeKind::Damage },
+        PreviousRanksClass32Ability807834, PreviousCapsClass32Ability807834,
+        { PreviousBandsClass32Ability807834 }, TrainerRanksClass32Ability807834
     }
 };
 }
