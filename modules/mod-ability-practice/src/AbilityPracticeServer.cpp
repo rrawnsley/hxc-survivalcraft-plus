@@ -1463,9 +1463,15 @@ bool MatchesSharedBuffVariants()
             auto const& expected = parent->Effects[index];
             bool const inactiveModuleSlot = Practice::DevelopmentBuffs::IsManaModule(*profile) && index == 2 &&
                 expected.Effect == 168 && expected.TargetA.GetTarget() == 1 && expected.MiscValue == 117151;
+            bool const dawnRangedSlot = variant.ClassId == 27 && variant.SpellId == 572390 &&
+                variant.AbilityId == 572384 && variant.EquivalentSpellId == 572389 &&
+                variant.CharacterLevel == 60 && index == EFFECT_1 && expected.Effect == SPELL_EFFECT_APPLY_AURA &&
+                expected.ApplyAuraName == SPELL_AURA_MOD_RANGED_ATTACK_POWER &&
+                expected.TargetA.GetTarget() == TARGET_UNIT_TARGET_ALLY;
             if (info->SpellFamilyFlags[index] != parent->SpellFamilyFlags[index] ||
                 slot.Effect != expected.Effect || slot.ApplyAuraName != expected.ApplyAuraName ||
-                slot.TargetA.GetTarget() != (inactiveModuleSlot ? 1u : expected.TargetA.GetTarget() ? 56u : 0u) ||
+                slot.TargetA.GetTarget() != (inactiveModuleSlot ? 1u : dawnRangedSlot ? 21u :
+                    expected.TargetA.GetTarget() ? 56u : 0u) ||
                 slot.TargetB.GetTarget() || slot.TriggerSpell != expected.TriggerSpell ||
                 slot.MiscValue != expected.MiscValue || slot.MiscValueB != expected.MiscValueB ||
                 slot.BasePoints != expected.BasePoints || slot.DieSides != expected.DieSides ||

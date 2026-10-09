@@ -19,6 +19,7 @@ struct Variant
 };
 
 inline constexpr std::array Variants = {
+    Variant{ 27, 572390, 572384, 572389, 60 },
     Variant{ 27, 575045, 575040, 575043, 58 },
     Variant{ 27, 681160, 800852, 300865, 60 },
     Variant{ 22, 572396, 572391, 572395, 58 },

@@ -442,6 +442,31 @@
       "source": "core.hxc.ability_practice.22.804418",
       "index": 4,
       "equals": 1080
+    },
+    {
+      "action": "whisper",
+      "actor": "caster",
+      "to": "Apbuffdotc",
+      "text": "HXAP\tHELLO|5",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "|801523|802829|4|40|600|60|16200|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "|802830|5|70|60|6|1|539",
+      "min": 1,
+      "within_ms": 10000
     }
   ]
 }
