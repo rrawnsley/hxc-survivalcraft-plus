@@ -1719,6 +1719,25 @@ private:
         if (metric == "spell_hit_chance")
             return unit->m_modSpellHitChance;
         uint32 spell = step.get<uint32>("spell", 0);
+        if (metric == "temporary_enchant_id" || metric == "temporary_enchant_duration_ms" ||
+            metric == "item_is_equipped" || metric == "item_slot" || metric == "aura_from_item")
+        {
+            Require(unit->IsPlayer(), "Item enchant observations need a player");
+            Item const* item = unit->ToPlayer()->GetItemByEntry(step.get<uint32>("item"));
+            Require(item != nullptr, "Item enchant observation needs an owned item");
+            if (metric == "item_is_equipped")
+                return item->IsEquipped() ? 1.0 : 0.0;
+            if (metric == "item_slot")
+                return item->GetSlot();
+            if (metric == "temporary_enchant_id")
+                return item->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT);
+            if (metric == "temporary_enchant_duration_ms")
+                return item->GetEnchantmentDuration(TEMP_ENCHANTMENT_SLOT);
+            for (auto const& entry : unit->GetAppliedAuras())
+                if (entry.first == spell && entry.second->GetBase()->GetCastItemGUID() == item->GetGUID())
+                    return 1.0;
+            return 0.0;
+        }
         if (metric == "victim")
             return unit->GetVictim() == GetUnit(step.get<std::string>("target")) ? 1.0 : 0.0;
         if (metric == "player_name")

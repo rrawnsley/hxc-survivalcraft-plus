@@ -491,6 +491,10 @@ XP-delta assertions must also keep the level stable, or crossing a level would w
 
 Every step accepts a descriptive `label`. Assertions optionally accept `within_ms`: poll until the expected
 state appears, failing at the deadline. This means "eventually", not "remains true throughout the window".
+`add_item` uses native best-slot placement and can equip an item immediately. A subsequent one-handed
+`equip` can swap main and off hands, leaving the previous weapon equipped. For full unequip assertions,
+use a compatible two-handed replacement and observe `item_is_equipped` or `item_slot`.
+
 Equipment changes obey combat restrictions. Prepare gear before starting combat, including combat caused
 by other nearby fixture actors. Rejected equipment actions include native inventory error codes in the result.
 
@@ -566,6 +570,13 @@ requires `school` (1..6); `armor`, `attack_power`, `ranged_attack_power`, the ha
 `hand`, 0..2) and `run_speed_rate` read the unit's current totals. `pet_attack_time_ms` uses the same hand
 selection for a player's current pet and requires that pet to exist. `aura_amplitude_ms` reads an aura effect's
 periodic interval.
+`temporary_enchant_id`, `temporary_enchant_duration_ms`, `item_is_equipped` and `item_slot` require a player
+and owned `item` entry. They read the item's temporary enchant ID, stored duration in milliseconds,
+equipment state and native slot. Enchantment duration can decrease after elapsed time and equipment
+updates; use an elapsed-time tolerance. `aura_from_item` additionally requires `spell` and reports whether
+an applied aura of that spell has the selected item's cast-item GUID. An equipped off-hand weapon can
+retain its enchant aura after a main-hand swap. Use unique fixture item entries to avoid ambiguous selection.
+
 `block_chance` reads the player's percentage field; `block_value` reads native shield block value;
 `critical_block_chance` reads the total modifier used by the native critical block roll.
 `moving` reads the unit's native movement state. `water_walk` reports whether the unit has a water-walking aura.

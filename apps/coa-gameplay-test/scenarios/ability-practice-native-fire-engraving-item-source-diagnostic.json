@@ -1,0 +1,299 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native Fire engraving unique weapon source diagnostic",
+  "contract": "Original item-target engraving grants a native equip aura and refresh retains it. A two-handed staff replacement fully unequips the engraved weapon, removing its equip aura; re-equipping the original restores it. One-handed swaps can keep the old weapon in the off hand and are not an unequip test. Item/equip behavior is qualified, not downstream combat proc tuning.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apengrare",
+      "race": 1,
+      "class": 32,
+      "level": 40
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "item_count",
+      "item": 25,
+      "save_as": "starting_shortswords"
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 227
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 1180
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 1936
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "item_count",
+      "item": 1936,
+      "equals": 1
+    },
+    {
+      "action": "equip",
+      "actor": "caster",
+      "item": 1936,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "item_is_equipped",
+      "item": 1936,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "item_slot",
+      "item": 1936,
+      "equals": 15
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 653022
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 653211,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "temporary_enchant_id",
+      "item": 1936,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 653022,
+      "target_item": 1936
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 653022,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 653211,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "temporary_enchant_id",
+      "item": 1936,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_from_item",
+      "item": 1936,
+      "spell": 653211,
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 653022,
+      "target_item": 1936
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 653022,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 653211,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "temporary_enchant_id",
+      "item": 1936,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_from_item",
+      "item": 1936,
+      "spell": 653211,
+      "equals": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 35
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "item_count",
+      "item": 35,
+      "equals": 1
+    },
+    {
+      "action": "equip",
+      "actor": "caster",
+      "item": 35,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "item_is_equipped",
+      "item": 35,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "item_slot",
+      "item": 35,
+      "equals": 15
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "item_slot",
+      "item": 1936,
+      "save_as": "old_weapon_slot"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "item_is_equipped",
+      "item": 1936,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "temporary_enchant_id",
+      "item": 35,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_from_item",
+      "item": 1936,
+      "spell": 653211,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 653211,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "equip",
+      "actor": "caster",
+      "item": 1936,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "item_is_equipped",
+      "item": 1936,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "item_slot",
+      "item": 1936,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 653211,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "temporary_enchant_id",
+      "item": 1936,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_from_item",
+      "item": 1936,
+      "spell": 653211,
+      "equals": 1
+    }
+  ]
+}

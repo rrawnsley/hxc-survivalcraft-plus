@@ -1,0 +1,295 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native air weapon engraving item and equip baseline",
+  "contract": "Original item-target engraving grants a native equip aura and refresh retains it. A two-handed staff replacement fully unequips the engraved weapon, removing its equip aura; re-equipping the original restores it. One-handed swaps can keep the old weapon in the off hand and are not an unequip test. Item/equip behavior is qualified, not downstream combat proc tuning.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apengdbase",
+      "race": 1,
+      "class": 32,
+      "level": 40
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 227
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 25
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "item_count",
+      "item": 25,
+      "equals": 1
+    },
+    {
+      "action": "equip",
+      "actor": "caster",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "item_is_equipped",
+      "item": 25,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "item_slot",
+      "item": 25,
+      "equals": 15
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 653222
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 653222,
+      "target_item": 25
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 653222,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 653223,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_from_item",
+      "item": 25,
+      "spell": 653223,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "temporary_enchant_id",
+      "item": 25,
+      "equals": 999
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "temporary_enchant_duration_ms",
+      "item": 25,
+      "min": 3590000,
+      "max": 3600000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 653222,
+      "target_item": 25
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 653222,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 653223,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_from_item",
+      "item": 25,
+      "spell": 653223,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "temporary_enchant_id",
+      "item": 25,
+      "equals": 999
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "temporary_enchant_duration_ms",
+      "item": 25,
+      "min": 3590000,
+      "max": 3600000
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 35
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "item_count",
+      "item": 35,
+      "equals": 1
+    },
+    {
+      "action": "equip",
+      "actor": "caster",
+      "item": 35,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "item_is_equipped",
+      "item": 35,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "item_slot",
+      "item": 35,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "item_is_equipped",
+      "item": 25,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "temporary_enchant_id",
+      "item": 35,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 653223,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_from_item",
+      "item": 25,
+      "spell": 653223,
+      "equals": 0
+    },
+    {
+      "action": "equip",
+      "actor": "caster",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "item_is_equipped",
+      "item": 25,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "item_slot",
+      "item": 25,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 653223,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_from_item",
+      "item": 25,
+      "spell": 653223,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "temporary_enchant_id",
+      "item": 25,
+      "equals": 999
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "temporary_enchant_duration_ms",
+      "item": 25,
+      "min": 3590000,
+      "max": 3600000
+    }
+  ]
+}

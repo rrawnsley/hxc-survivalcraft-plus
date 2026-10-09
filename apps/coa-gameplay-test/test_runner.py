@@ -15,6 +15,29 @@ import run
 
 
 class RunnerTests(unittest.TestCase):
+    def test_native_item_observation_metrics(self):
+        metrics = ('temporary_enchant_id', 'temporary_enchant_duration_ms', 'aura_from_item',
+                   'item_is_equipped', 'item_slot')
+        for metric in metrics:
+            step = {'action': 'assert', 'actor': 'caster', 'metric': metric, 'item': 1936, 'equals': 1}
+            if metric == 'aura_from_item':
+                step['spell'] = 653211
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append(step)
+            with self.subTest(metric=metric):
+                self.assertIs(run.validate(scenario), scenario)
+            for invalid in ({key: value for key, value in step.items() if key != 'item'},
+                            dict(step, actor='target'), dict(step, item=0), dict(step, item=True)):
+                scenario = copy.deepcopy(self.scenario)
+                scenario['steps'].append(invalid)
+                with self.subTest(metric=metric, invalid=invalid), self.assertRaises(ValueError):
+                    run.validate(scenario)
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': 'aura_from_item',
+                                  'item': 1936, 'equals': 1})
+        with self.assertRaises(ValueError):
+            run.validate(scenario)
+
     def test_explicit_combat_rating_fixture(self):
         for rating, value in ((0, 0), (5, 10000), (23, 10000), (24, 100000)):
             scenario = copy.deepcopy(self.scenario)

@@ -44,6 +44,8 @@ METRICS = {
     'knows_spell', 'spell_active', 'has_talent', 'talent_points', 'cooldown_ms', 'global_cooldown_ms', 'spell_charges',
     'action_button', 'action_button_packed', 'item_count', 'carried_item_count', 'carried_pool_item_count',
     'carried_variant_item_count', 'client_knows_spell',
+    'temporary_enchant_id', 'temporary_enchant_duration_ms', 'aura_from_item',
+    'item_is_equipped', 'item_slot',
     'pool_variant_count', 'pool_retired_item_count', 'pool_row_count', 'pool_item_present',
     'cache_token_count', 'cache_token_stage', 'cache_token_present',
     'free_inventory_slots', 'mail_count', 'mail_item_count', 'mail_has_item',
@@ -626,8 +628,15 @@ def validate(scenario):
                 number(step['hand'], f'{where}.hand', 0, maximum, True)
             if 'school' in step and metric == 'spell_crit_chance':
                 number(step['school'], f'{where}.school', 0, 6, True)
-            if metric in {'item_count', 'carried_item_level', 'carried_item_required_level'}:
+            if metric in {'item_count', 'carried_item_level', 'carried_item_required_level',
+                          'temporary_enchant_id', 'temporary_enchant_duration_ms', 'aura_from_item',
+                          'item_is_equipped', 'item_slot'}:
                 require('item' in step, f'{where}: metric needs item')
+            if metric in {'temporary_enchant_id', 'temporary_enchant_duration_ms', 'aura_from_item',
+                          'item_is_equipped', 'item_slot'}:
+                require(step['actor'] in player_ids, f'{where}: item observations need a player')
+            if metric == 'aura_from_item':
+                require('spell' in step, f'{where}: item aura metric needs spell')
             if metric == 'carried_pool_item_count':
                 require('cache' in step, f'{where}: metric needs the cache item it checks against')
             if metric == 'pool_variant_count':
