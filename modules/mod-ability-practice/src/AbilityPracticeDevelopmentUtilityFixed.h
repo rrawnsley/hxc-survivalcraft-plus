@@ -31,6 +31,8 @@ inline constexpr std::array Class32Ability520269 = { AbilityRank{ 520269, 1, { 2
 inline constexpr std::array Class32Ability800995 = { AbilityRank{ 800995, 1, { 18, 1 } } };
 inline constexpr std::array Class32Ability803679 = { AbilityRank{ 803679, 1, { 28, 1 } } };
 
+inline constexpr std::array Cinderwake = { AbilityRank{ 807828, 1, { 26, 1 } } };
+
 inline constexpr std::array Whisperwind = { AbilityRank{ 807823, 1, { 22, 1 } } };
 
 inline constexpr std::array ScryingOrb = { AbilityRank{ 804674, 1, { 22, 1 } } };
@@ -79,6 +81,8 @@ inline constexpr std::array MeltLock = { AbilityRank{ 804662, 1, { 16, 1 } } };
 inline constexpr std::array TinkerPickLock = { AbilityRank{ 804154, 1, { 14, 1 } } };
 
 inline constexpr std::array Profiles = {
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 32, 807828, AbilityKind::Fixed, Cinderwake, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 32, 807823, AbilityKind::Fixed, Whisperwind, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -212,6 +216,8 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 32, 807828, { 6, 0, 0 }, { 1, 0, 0 }, {}, { 23, 0, 0 }, { 808023, 0, 0 },
+        std::array<std::int32_t, 3>{ 0, 0, 0 }, std::array<std::int32_t, 3>{ -1, 0, 0 } },
     Mechanic{ 32, 807823, { 69, 6, 0 }, { 16, 16, 0 }, {}, { 0, 31, 0 }, {},
         std::array<std::int32_t, 3>{ 0, 0, 0 }, std::array<std::int32_t, 3>{ 9, 19, 0 } },
     Mechanic{ 32, 804674, { 28, 6, 6 }, { 87, 1, 1 }, {}, { 0, 4, 4 }, {},
@@ -328,6 +334,7 @@ struct HelperMechanic
 };
 
 inline constexpr std::array Helpers = {
+    HelperMechanic{ 808023, { 27, 27, 27 }, { 16, 16, 16 }, { 4, 41, 23 }, { 0, 0, 535213 } },
     HelperMechanic{ 704142, { 6, 6, 0 }, { 1, 1, 0 }, { 107, 23, 0 }, { 0, 520490, 0 } },
     HelperMechanic{ 802028, { 149, 6, 0 }, { 47, 1, 0 }, { 0, 23, 0 }, { 0, 802030, 0 } },
     HelperMechanic{ 572407, { 38, 0, 0 }, { 6, 0, 0 } },

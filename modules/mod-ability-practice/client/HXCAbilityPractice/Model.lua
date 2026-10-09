@@ -633,6 +633,12 @@ function Model.PracticeRules(ability, saved)
             .. " The original ability can resume practice when it is available again."
     end
     if Model.IsFixed(ability) then
+        if ability.abilityId == 807828 then
+            return "Cinderwake has one native rank and no practice levels. " .. LearnText(ability.acquisitionSource)
+                .. " In Runeshroud form, leave ground patches for ten seconds."
+                .. " Enemies within three yards are revealed and marked for sixty seconds."
+                .. " Casting it preserves your stealth and earns no practice."
+        end
         if ability.abilityId == 807823 then
             return "Whisperwind has one native rank and no practice levels. " .. LearnText(ability.acquisitionSource)
                 .. " In Runeshroud form, distract nearby unengaged enemies for ten seconds."

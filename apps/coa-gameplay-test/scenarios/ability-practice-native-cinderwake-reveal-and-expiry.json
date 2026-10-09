@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Ability practice: native Cinderwake ground revelation and mark expiry",
-  "contract": "Native class-grant807828 level26 in Runeshroud form30 creates808023 persistent3yard patches each second for10seconds. Enemy patch aura applies no damage and periodically casts535213 sixty-second Fire Mark. Friendly and outside-radius fixtures excluded. Native reveal, owner and lifetime must be observed before practice classification; no enrollment or native change. Server state only; minimap pixels remain unverified. Native initial run observed stealth1784 removed on hostile ground application. Verify hidden-before, detectable-after and owned MOD_STALKED mark; do not require concealment auras to remain. Invisibility aura removal itself is not asserted.",
+  "contract": "Native class-grant807828 level26 in Runeshroud form30 creates808023 persistent3yard patches each second for10seconds. Enemy patch aura applies no damage and periodically casts535213 sixty-second Fire Mark. Friendly and outside-radius fixtures excluded. Native reveal, owner and lifetime must be observed before practice classification; no enrollment or native change. Server state only; minimap pixels remain unverified. Native initial run observed stealth1784 removed on hostile ground application. Verify hidden-before, detectable-after and owned MOD_STALKED mark; do not require concealment auras to remain. Invisibility aura removal itself is not asserted. Fixed enrollment must preserve unsupported record1/999/1/100/101 unchanged; native utility casts and applications award no practice.",
   "timeout_ms": 140000,
   "location": {
     "map": 0,
@@ -56,6 +56,41 @@
     {
       "action": "wait",
       "ms": 3000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.807828",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.807828",
+      "index": 1,
+      "value": 999
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.807828",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.807828",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.807828",
+      "index": 4,
+      "value": 101
     },
     {
       "action": "learn",
@@ -211,6 +246,13 @@
     },
     {
       "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 500288,
+      "equals": 1
+    },
+    {
+      "action": "assert",
       "actor": "enemy",
       "metric": "aura_duration_ms",
       "spell": 535213,
@@ -318,6 +360,46 @@
       "metric": "aura",
       "spell": 535213,
       "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.807828",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.807828",
+      "index": 1,
+      "equals": 999
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.807828",
+      "index": 2,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.807828",
+      "index": 3,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.807828",
+      "index": 4,
+      "equals": 101
     }
   ]
 }

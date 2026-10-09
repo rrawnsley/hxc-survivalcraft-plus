@@ -1544,6 +1544,43 @@ bool MatchesUtilityFixedRankMechanic(std::uint32_t classId, std::uint32_t spellI
                     return false;
         }
     }
+    if (classId == 32 && spellId == 807828)
+    {
+        SpellInfo const* patch = sSpellMgr->GetSpellInfo(808023);
+        SpellInfo const* mark = sSpellMgr->GetSpellInfo(535213);
+        auto const scripts = sObjectMgr->GetSpellScriptsBounds(spellId);
+        auto const patchScripts = sObjectMgr->GetSpellScriptsBounds(808023);
+        auto const markScripts = sObjectMgr->GetSpellScriptsBounds(535213);
+        auto const groups = sSpellMgr->GetSpellSpellGroupMapBounds(spellId);
+        if (info->SpellFamilyName != 38 || info->SpellFamilyFlags[0] || info->SpellFamilyFlags[1] ||
+            info->SpellFamilyFlags[2] != 8192 || scripts.first != scripts.second ||
+            patchScripts.first != patchScripts.second || markScripts.first != markScripts.second ||
+            groups.first != groups.second || info->GetDuration() != 10000 ||
+            info->SpellLevel != 26 || info->BaseLevel != 26 || info->MaxLevel ||
+            info->Stances != 536870912 || info->StancesNot || info->AttributesEx != 134480928 ||
+            info->ProcFlags || info->ProcChance || info->ProcCharges || sSpellMgr->GetSpellProcEntry(spellId) ||
+            info->ManaCost || info->ManaCostPercentage != 9 || info->RecoveryTime != 20000 ||
+            info->CategoryRecoveryTime || info->Effects[EFFECT_0].Amplitude != 1000 ||
+            !patch || patch->GetDuration() != 10000 || patch->Effects[EFFECT_2].Amplitude != 2000 ||
+            !mark || mark->GetDuration() != 60000 ||
+            mark->Effects[EFFECT_0].Effect != SPELL_EFFECT_APPLY_AURA ||
+            mark->Effects[EFFECT_0].ApplyAuraName != SPELL_AURA_MOD_STALKED ||
+            mark->Effects[EFFECT_0].TargetA.GetTarget() != TARGET_UNIT_TARGET_ENEMY ||
+            mark->Effects[EFFECT_0].TargetB.GetTarget() || mark->Effects[EFFECT_0].TriggerSpell ||
+            mark->Effects[EFFECT_1].Effect || mark->Effects[EFFECT_2].Effect ||
+            patch->ProcFlags || patch->ProcChance || patch->ProcCharges ||
+            sSpellMgr->GetSpellProcEntry(808023) || sSpellMgr->GetSpellProcEntry(535213))
+            return false;
+        for (std::size_t index = 0; index < 3; ++index)
+            if (info->Effects[index].DieSides != (index == 0 ? 1 : 0) ||
+                info->Effects[index].RealPointsPerLevel || info->Effects[index].MiscValueB ||
+                info->Effects[index].SpellClassMask || patch->Effects[index].BasePoints ||
+                patch->Effects[index].DieSides || patch->Effects[index].RealPointsPerLevel ||
+                patch->Effects[index].MiscValue != (index == 1 ? 5 : 0) ||
+                patch->Effects[index].MiscValueB || patch->Effects[index].SpellClassMask ||
+                patch->Effects[index].CalcRadius() != 3.0f)
+                return false;
+    }
     if (classId == 32 && spellId == 807823)
     {
         auto const scripts = sObjectMgr->GetSpellScriptsBounds(spellId);
