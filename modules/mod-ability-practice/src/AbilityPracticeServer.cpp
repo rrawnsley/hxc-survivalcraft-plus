@@ -747,6 +747,25 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
                 scripts.first != scripts.second || !HasExpectedEtchingGroup(561237, info->Id))
                 return false;
         }
+        if (Practice::DevelopmentBuffs::IsVoidResilience(profile))
+        {
+            constexpr std::array spells{ 1119881u, 1119889u, 1119892u };
+            constexpr std::array levels{ 28u, 38u, 48u };
+            constexpr std::array amounts{ 29, 44, 59 };
+            auto const rank = std::find(spells.begin(), spells.end(), info->Id);
+            auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+            auto const groups = sSpellMgr->GetSpellSpellGroupMapBounds(info->Id);
+            if (rank == spells.end() || info->SpellFamilyName != 31 || info->SpellFamilyFlags[0] ||
+                info->SpellFamilyFlags[1] || info->SpellFamilyFlags[2] || scripts.first != scripts.second ||
+                groups.first != groups.second || info->GetDuration() != -1)
+                return false;
+            auto const index = static_cast<std::size_t>(rank - spells.begin());
+            if (info->SpellLevel != levels[index] || info->BaseLevel != levels[index] || info->MaxLevel ||
+                info->Effects[EFFECT_0].BasePoints != amounts[index] ||
+                info->Effects[EFFECT_0].DieSides != 1 || info->Effects[EFFECT_0].RealPointsPerLevel ||
+                info->Effects[EFFECT_0].MiscValueB)
+                return false;
+        }
         if (Practice::DevelopmentBuffs::IsWaterTattoo(profile))
         {
             constexpr std::array<std::int32_t, 6> tattoos{ 801094, 801106, 801107, 802630, 803748, 807834 };
@@ -921,7 +940,9 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
                     return false;
                 continue;
             }
-            if (slot.Effect != (index == effectIndex ? SPELL_EFFECT_APPLY_AURA : 0u) ||
+            auto const primaryEffect = Practice::DevelopmentBuffs::IsVoidResilience(profile) ?
+                SPELL_EFFECT_APPLY_AREA_AURA_RAID : SPELL_EFFECT_APPLY_AURA;
+            if (slot.Effect != (index == effectIndex ? primaryEffect : 0u) ||
                 slot.ApplyAuraName != (index == effectIndex ? Practice::DevelopmentBuffs::Aura(profile) : 0u) ||
                 slot.TargetA.GetTarget() != (index == effectIndex ? Practice::DevelopmentBuffs::Target(profile) : 0u) ||
                 slot.TargetB.GetTarget() || slot.TriggerSpell ||

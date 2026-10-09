@@ -237,8 +237,11 @@ def reviewed_stat_buffs(root):
         effect_index = int(match[6]) if match[6] is not None else 0
         self_tattoo = (class_id, ability_id, target, stat, aura, effect_index) in {
             (32, 801094, 1, 1, 22, 0), (32, 801107, 1, 0, 85, 0)}
-        if (not 12 <= class_id <= 32 or not ability_id or (target not in {21, 56} and not self_tattoo) or
-                not (self_tattoo or aura == 29 and stat in range(5) or aura == 345 and stat == 127 and target == 21 or
+        party_resistance = (class_id, ability_id, target, stat, aura, effect_index) == (25, 1119881, 1, 32, 143, 0)
+        if (not 12 <= class_id <= 32 or not ability_id or
+                (target not in {21, 56} and not self_tattoo and not party_resistance) or
+                not (self_tattoo or party_resistance or aura == 29 and stat in range(5) or
+                     aura == 345 and stat == 127 and target == 21 or
                      aura in {85, 99} and stat == 0 and target == 21 or
                      aura == 22 and stat == 1 and target == 21 and (class_id, ability_id) in {
                          (21, 523489), (14, 523478), (15, 523485), (29, 803651)} or
@@ -632,7 +635,12 @@ def build_drafts(candidates, root):
             mechanic = stat_buffs[(class_id, ability_id)]
             effect_index = mechanic['effectIndex']
             expected = [(0, 0, 0, 0, 0, 0)] * 3
-            expected[effect_index] = (6, mechanic['auraId'], mechanic['targetA'], 0, 0, mechanic['statSelector'])
+            primary_effect = 65 if (class_id, ability_id) == (25, 1119881) else 6
+            expected[effect_index] = (primary_effect, mechanic['auraId'], mechanic['targetA'],
+                                       0, 0, mechanic['statSelector'])
+            if (class_id, ability_id) == (25, 1119881):
+                required.extend(['native-party-shadow-resistance-aura-not-absorption',
+                                 'native-exclusive-resistance-maximum-and-original-owner-only'])
             secondary_components = mechanic.get('secondaryComponents', [])
             for secondary in secondary_components:
                 expected[secondary['effectIndex']] = (6, secondary['auraId'], secondary['targetA'],
