@@ -60,6 +60,7 @@
 #include "InstanceScript.h"
 #include "LFGMgr.h"
 #include "LiveClassResourcePolicy.h"
+#include "LocalLevelScaling.h"
 #include "Log.h"
 #include "LootItemStorage.h"
 #include "MapMgr.h"
@@ -6981,7 +6982,7 @@ void Player::_ApplyItemMods(Item* item, uint8 slot, bool apply)
     if (slot >= INVENTORY_SLOT_BAG_END || !item)
         return;
 
-    ItemTemplate const* proto = item->GetTemplate();
+    ItemTemplate const* proto = LocalLevelScaling::InstanceTemplateFor(item, item->GetTemplate());
 
     if (!proto)
         return;
@@ -8005,7 +8006,7 @@ void Player::_RemoveAllItemMods()
         {
             if (m_items[i]->IsBroken() || !CanUseAttackType(GetAttackBySlot(i)))
                 continue;
-            ItemTemplate const* proto = m_items[i]->GetTemplate();
+            ItemTemplate const* proto = LocalLevelScaling::InstanceTemplateFor(m_items[i], m_items[i]->GetTemplate());
             if (!proto)
                 continue;
 
@@ -8031,7 +8032,7 @@ void Player::_ApplyAllItemMods()
             if (m_items[i]->IsBroken() || !CanUseAttackType(GetAttackBySlot(i)))
                 continue;
 
-            ItemTemplate const* proto = m_items[i]->GetTemplate();
+            ItemTemplate const* proto = LocalLevelScaling::InstanceTemplateFor(m_items[i], m_items[i]->GetTemplate());
             if (!proto)
                 continue;
 

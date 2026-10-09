@@ -38,7 +38,7 @@ METRICS = {
     'point_distance_2d', 'cast_remaining_ms', 'cast_pushback_ms',
     'melee_damage_count', 'melee_damage_total',
     'pet_power', 'pet_max_power', 'spell_energize_count', 'spell_energize_total',
-    'xp', 'next_level_xp', 'skill_value', 'skill_maximum', 'lfg_dungeon_disabled', 'map_id',
+    'xp', 'next_level_xp', 'skill_value', 'skill_maximum', 'lfg_dungeon_disabled', 'lfg_state', 'map_id',
     'map_difficulty', 'nearby_creature_template', 'nearby_creature_max_health', 'loot_gear_item_level',
     'position_x', 'position_y', 'position_z',
     'view_level', 'sent_level', 'sent_max_health', 'creature_query_rank', 'quest_level', 'quest_xp',
@@ -81,7 +81,7 @@ METRICS = {
     'cast_speed_multiplier', 'spell_crit_chance', 'spell_power_cost', 'spell_damage_done', 'melee_damage_done',
     'who_count', 'who_class', 'player_name', 'name_lookup', 'loot_count', 'loot_entry', 'loot_received',
     'loot_gold', 'loot_bloodforged', 'loot_required_level', 'loot_item_level', 'loot_base_entry', 'loot_item_armor',
-    'carried_item_level', 'carried_item_required_level',
+    'carried_item_level', 'carried_item_required_level', 'carried_item_armor', 'carried_item_scaling_level',
     'nearby_gameobject_count', 'nearby_gameobject_quest_active', 'nearby_gameobject_state', 'nearby_creature_count',
     'carried_money',
     'channel_object_entry',
@@ -286,12 +286,14 @@ def read_json(path):
 
 def validate(scenario):
     keys(scenario, {'schema', 'name', 'players', 'steps'},
-         {'schema', 'name', 'players', 'creatures', 'steps', 'timeout_ms', 'location', 'contract', 'hour'}, 'scenario')
+         {'schema', 'name', 'players', 'creatures', 'steps', 'timeout_ms', 'location', 'contract', 'hour',
+          'creature_scaling'}, 'scenario')
     require(type(scenario['schema']) is int and scenario['schema'] == 1, 'Unsupported scenario schema')
     require(isinstance(scenario['name'], str) and scenario['name'].strip(), 'Scenario needs a name')
     number(scenario.get('timeout_ms', 90000), 'timeout_ms', 1, 600000, True)
     if 'hour' in scenario:
         number(scenario['hour'], 'hour', 0, HOURS_PER_DAY - 1, True)
+    require(type(scenario.get('creature_scaling', False)) is bool, 'creature_scaling must be boolean')
     players = scenario['players']
     creatures = scenario.get('creatures', [])
     require(isinstance(players, list) and 1 <= len(players) <= 8, 'Expected 1..8 players')
@@ -603,6 +605,8 @@ def validate(scenario):
                 require(step['actor'] in player_ids, f'{where}: dungeon/loot metric needs a player')
             if metric in {'nearby_creature_template', 'nearby_creature_max_health'}:
                 number(step.get('entry'), f'{where}.entry', 1, 2**32 - 1, True)
+            if metric == 'lfg_state':
+                require(step['actor'] in player_ids, f'{where}: LFG state metric needs a player')
             if metric == 'lfg_dungeon_disabled':
                 number(step.get('dungeon'), f'{where}.dungeon', 1, 2**24 - 1, True)
             if metric in {'quest_level', 'quest_xp', 'quest_log_sent_level', 'quest_log_sent_xp', 'quest_query_scaled',
@@ -702,7 +706,8 @@ def validate(scenario):
                 number(step['hand'], f'{where}.hand', 0, maximum, True)
             if 'school' in step and metric == 'spell_crit_chance':
                 number(step['school'], f'{where}.school', 0, 6, True)
-            if metric in {'item_count', 'carried_item_level', 'carried_item_required_level'}:
+            if metric in {'item_count', 'carried_item_level', 'carried_item_required_level', 'carried_item_armor',
+                          'carried_item_scaling_level'}:
                 require('item' in step, f'{where}: metric needs item')
             if metric == 'carried_pool_item_count':
                 require('cache' in step, f'{where}: metric needs the cache item it checks against')
@@ -847,7 +852,8 @@ def validate(scenario):
                           'loot_count', 'loot_entry', 'loot_required_level', 'loot_item_level', 'loot_received',
                           'quest_rewarded', 'has_achievement',
                           'loot_base_entry', 'loot_item_armor',
-                          'carried_item_level', 'carried_item_required_level',
+                          'carried_item_level', 'carried_item_required_level', 'carried_item_armor',
+                          'carried_item_scaling_level',
                           'has_title',
                           'quest_status', 'quest_takeable', 'quest_objective_count', 'dialog_status',
                           'ball_offer_count', 'ball_offers_quest',

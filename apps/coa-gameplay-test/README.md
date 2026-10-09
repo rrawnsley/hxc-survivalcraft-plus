@@ -353,7 +353,9 @@ maximum 10 minutes); execution counts in game time, which the simulated clock ad
 realm-local hour, for mechanics that read the time of day: the simulated clock, which otherwise starts at 10:00,
 jumps ahead to it, and the real clock runs the case in single mode with a fixed `TZ` offset
 ([realm-local time](../../docs/coa/verification.md#realm-local-time)). Every result records its start as
-`realm_local_start`.
+`realm_local_start`. Optional `creature_scaling: true` enables CoA creature scaling with its built-in multipliers
+for that case, whatever the module config says, and restores the configured state when the case ends; the batch
+runs such a case exclusively because the setting is process-global.
 The [talent and item scenario](scenarios/talent-and-items.json) exercises talent learning, passive removal,
 equipping a shirt and consuming a healing potion. It does not measure the talent's damage coefficient.
 The [Shadowblast scenario](scenarios/shadowblast-shadow-rage.json) reproduces a Shadow Rage pet-targeting crash
@@ -697,8 +699,10 @@ quantity reached inventory and records the item/count. It supports ordinary cont
 reports the inventory increase from its last successful `collect_loot`. Closed windows return zero slots/entry.
 The `loot_*` item metrics accept an optional `item` that keeps only the slots holding that item or a level-scaled
 copy of it (entries 4400001 and up). `loot_item_armor` reads the first such slot's armor, and `loot_base_entry`
-names the authored item a copy was made from. `carried_item_level` and `carried_item_required_level` require `item` and return the highest item
-level or required level among equipped and bagged items that are that item or a copy of it, or zero without one.
+names the authored item a copy was made from. `carried_item_level`, `carried_item_required_level` and `carried_item_armor`
+require `item` and return the highest item level, required level or armor among equipped and bagged items that are
+that item or a copy of it, read from the item's own scaled template, or zero without one. `carried_item_scaling_level`
+returns the highest per-item level that native item scaling stored for such an item, or zero when none was stored.
 `loot_slot` with `item` also picks up a copy of that item.
 `creature_loot_quality_rate` requires `entry` (a creature loot id), fills that template `rolls` times (default 10000)
 for the actor and reports the percentage of fills holding an item of at least `quality` (default 3, rare).
@@ -837,18 +841,19 @@ check aura presence separately when zero is a valid effect amount. Permanent aur
 
 `scenarios/destiny-weaver-scaling.json` checks deferred scaling choices, armor debuffs, creature values
 updates after level changes, fractional damage accumulation, and ordinary damage with scaling off.
-It requires `DestinyWeaver.Enable=1`, `DestinyWeaver.LevelScaling=1`, `DestinyWeaver.Scaling.Offset=3`,
+It requires `DestinyWeaver.Enable=1`, `DestinyWeaver.LevelScaling=1`, `DestinyWeaver.Scaling.Offset=4`,
 and `CoA.QuestLevelScaling=1`. Spell 705798 supplies one base damage without critical hits;
 Faerie Fire (770) supplies a 5% armor reduction. Spell 705798 uses melee hit resolution, so the fixture
 sets melee hit and expertise as well as spell hit. Template 1501 has HealthModifier 0.93: the level-1
-fixture's real pool remains 40 HP while its level-57 view has 2,590 HP. Ten one-damage hits cannot remove
+fixture's real pool remains 40 HP while its level-55 view has 2,432 HP. Ten one-damage hits cannot remove
 a whole real HP; 67 remove one.
 
 `scenarios/skinning-dungeon-scaled-view.json` and `scenarios/skinning-open-world-level-scaling.json` need the
 same settings: the skinning requirement follows a view that lowers a dungeon creature, never one that lifts it.
 
 `scenarios/destiny-weaver-quest-fallback.json` requires a separate run with `DestinyWeaver.Enable=0`
-and `CoA.QuestLevelScaling=1`. Quest 7 must still scale to the player's level and award XP.
+and `CoA.QuestLevelScaling=1`. Quest 7 must still follow its QuestTemplateScaling.dbc row to level 20 and
+award XP.
 
 The `level_scaling_packet` action takes a player `actor` and `value` (0 or 1). It sends the existing
 four-byte request through the early packet hook on a worker, verifies that player state has not changed
@@ -860,6 +865,8 @@ It tests dispatch and deferral, not a real socket, packet delivery, or every pos
 the socketless session. They return zero until the corresponding field has been observed; they do not
 force updates or inspect client rendering. `lfg_dungeon_disabled` takes an LFGDungeons.dbc `dungeon` id and
 returns 1 when the `disables` table locks that dungeon's map and difficulty out of Dungeon Finder, otherwise 0.
+`lfg_state` takes a player `actor` and returns its native Dungeon Finder state (0 none, 1 role check, 2 queued,
+3 proposal, 4 vote kick, 5 in dungeon, 6 finished dungeon, 7 raid browser).
 `creature_query_rank` takes a player `actor` and creature `entry` and returns the rank of the
 last creature query response delivered to that session, or -1 before one arrives.
 `quest_level` and `quest_xp` take a player `actor` and `quest`

@@ -7,6 +7,7 @@
 #include "AccountMgr.h"
 #include "AscensionCoATalentState.h"
 #include "AscensionItemScaling.h"
+#include "AscensionNativeItemScaling.h"
 #include "AscensionQuestLog.h"
 #include "AscensionSpecialization.h"
 #include "AscensionWisdomball.h"
@@ -18,6 +19,7 @@
 #include "CharmInfo.h"
 #include "Chat.h"
 #include "ClientDBC.h"
+#include "CoACreatureScaling.h"
 #include "Config.h"
 #include "Creature.h"
 #include "CreatureAI.h"
@@ -1123,6 +1125,8 @@ public:
         Require(_scenario.get<uint32>("schema") == 1, "Unsupported scenario schema");
         _timeout = _scenario.get<uint32>("timeout_ms", 90000);
         Require(_timeout > 0 && _timeout <= 600000, "Invalid scenario timeout");
+        if (_scenario.get<bool>("creature_scaling", false))
+            _creatureScaling.emplace();
         _report.put("schema", 1);
         _report.put("run_id", _runId);
         _report.put("scenario", _scenario.get<std::string>("name"));
@@ -2047,6 +2051,11 @@ private:
             lfg::LFGDungeonData const* dungeon = sLFGMgr->GetLFGDungeon(step.get<uint32>("dungeon"));
             Require(dungeon != nullptr, "LFG disable metric needs a known dungeon");
             return sLFGMgr->IsDungeonDisabled(dungeon->map, Difficulty(dungeon->difficulty)) ? 1 : 0;
+        }
+        if (metric == "lfg_state")
+        {
+            Require(unit->IsPlayer(), "LFG state needs a player");
+            return double(sLFGMgr->GetState(unit->GetGUID()));
         }
         if (metric == "view_level")
             return GetUnit(step.get<std::string>("target"))->getLevelForTarget(unit);
@@ -3570,7 +3579,8 @@ private:
                             countItem(item);
             return count;
         }
-        if (metric == "carried_item_level" || metric == "carried_item_required_level")
+        if (metric == "carried_item_level" || metric == "carried_item_required_level" ||
+            metric == "carried_item_armor" || metric == "carried_item_scaling_level")
         {
             uint32 const baseEntry = step.get<uint32>("item");
             Require(sObjectMgr->GetItemTemplate(baseEntry) != nullptr, "Unknown item in metric");
@@ -3579,8 +3589,15 @@ private:
             {
                 if (ItemScaling::BaseEntry(item->GetEntry()) != baseEntry)
                     return;
-                ItemTemplate const* proto = item->GetTemplate();
-                highest = std::max(highest, metric == "carried_item_level" ? proto->ItemLevel : proto->RequiredLevel);
+                ItemTemplate const* proto = LocalLevelScaling::InstanceTemplateFor(item, item->GetTemplate());
+                uint32 value = proto->ItemLevel;
+                if (metric == "carried_item_required_level")
+                    value = proto->RequiredLevel;
+                else if (metric == "carried_item_armor")
+                    value = proto->Armor;
+                else if (metric == "carried_item_scaling_level")
+                    value = NativeItemScaling::InstanceLevel(item);
+                highest = std::max(highest, value);
             };
             for (uint8 slot = EQUIPMENT_SLOT_START; slot < INVENTORY_SLOT_ITEM_END; ++slot)
                 if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
@@ -5216,6 +5233,7 @@ private:
     std::map<std::string, Target> _targets;
     std::map<std::string, double> _snapshots;
     QueryCallbackProcessor _queries;
+    std::optional<CreatureScaling::TestOverride> _creatureScaling;
 };
 
 enum class TeardownStage
