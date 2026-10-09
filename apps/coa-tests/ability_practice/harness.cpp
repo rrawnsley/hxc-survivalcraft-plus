@@ -26,6 +26,7 @@
 #include "AbilityPracticeDevelopmentControlFixed.h"
 #include "AbilityPracticeDevelopmentTrainerFixed.h"
 #include "AbilityPracticeNativeRankChain.h"
+#include "AbilityPracticeBuffReceipts.h"
 
 #include "../../../src/server/game/Spells/AbilityPracticeCastReceipt.h"
 
@@ -938,6 +939,71 @@ void WriteTypedRankCases(std::string const& filename)
     assert(output.good());
 }
 
+class Unit { };
+
+void CheckBuffReceipts()
+{
+    using CoAAbilityPractice::CastReceipt;
+    BuffCastLedger ledger;
+    auto origin = std::make_shared<CastReceipt>(1, 2, 22, 801523, 1, 0, 0);
+    auto replacement = std::make_shared<CastReceipt>(1, 2, 22, 801523, 1, 0, 0);
+    auto action = std::make_shared<CastReceipt>(1, 2, 22, 804418, 1, 0, 0);
+    assert(!ledger.Capture({}, { { 1, origin } }));
+    assert(!ledger.Capture(action, {}));
+    assert(ledger.Capture(action, { { 1, origin } }));
+    assert(!ledger.Capture(action, { { 2, origin } }));
+    assert(action.use_count() == 1 && origin.use_count() == 1);
+    auto* cast = ledger.Find(action);
+    assert(cast && cast->MatchesOrigin(1, origin));
+    assert(!cast->MatchesOrigin(1, replacement) && !cast->MatchesOrigin(2, origin));
+    assert(!cast->MatchesOrigin(1, {}));
+    cast->AwardedBits |= 1;
+    action->MarkConsumed();
+    assert(ledger.Find(action) == cast && cast->AwardedBits == 1);
+    assert(cast->ObservePeriodic() && !cast->ObservePeriodic());
+    assert(action->IsConsumed());
+    origin.reset();
+    assert(!cast->MatchesOrigin(1, replacement));
+    ledger.Clear();
+    assert(!ledger.Find(action));
+    std::vector<std::shared_ptr<CastReceipt>> active;
+    for (std::size_t index = 0; index < BuffCastLedger::MaximumCasts; ++index)
+    {
+        active.push_back(std::make_shared<CastReceipt>(1, 2, 22, 804418, 1, 0, 0));
+        assert(ledger.Capture(active.back(), { { 1, replacement } }));
+    }
+    assert(!ledger.Capture(action, { { 1, replacement } }));
+    active.front().reset();
+    assert(ledger.Capture(action, { { 1, replacement } }));
+    assert(ledger.Find(action) && ledger.Find(action)->ObservePeriodic());
+    active.clear();
+    ledger.Clear();
+    assert(!ledger.Find(action) && !ledger.Find({}));
+
+    static std::uint32_t observations = 0;
+    observations = 0;
+    auto const previous = CoAAbilityPractice::PeriodicOutcomeHandler.load();
+    CoAAbilityPractice::SetPeriodicOutcomeProvider([](Unit*, Unit*, std::uint32_t, std::uint32_t,
+        std::uint32_t, std::uint32_t, std::shared_ptr<CastReceipt> const& receipt)
+    {
+        assert(receipt && receipt->IsConsumed());
+        ++observations;
+    });
+    Unit caster;
+    Unit target;
+    CoAAbilityPractice::ReportPeriodicOutcome(&caster, &target, 804418, 3, 1, 0, action);
+    assert(observations == 1 && action->IsConsumed());
+    CoAAbilityPractice::ReportPeriodicOutcome(&caster, &target, 804418, 3, 1, 0, action);
+    assert(observations == 2);
+    CoAAbilityPractice::ReportAuraOutcome(&caster, &target, 804418, 3, 1, 0, action);
+    CoAAbilityPractice::ReportPeriodicOutcome(nullptr, &target, 804418, 3, 1, 0, action);
+    CoAAbilityPractice::ReportPeriodicOutcome(&caster, nullptr, 804418, 3, 1, 0, action);
+    CoAAbilityPractice::ReportPeriodicOutcome(&caster, &target, 804418, 3, 0, 0, action);
+    CoAAbilityPractice::ReportPeriodicOutcome(&caster, &target, 804418, 3, 1, 0, {});
+    assert(observations == 2);
+    CoAAbilityPractice::SetPeriodicOutcomeProvider(previous);
+}
+
 void CheckScriptedDamageReceipts()
 {
     using CoAAbilityPractice::CastReceipt;
@@ -1016,6 +1082,7 @@ int main(int argc, char** argv)
 {
     std::array const bands = { TrainingBand{ 1, 30, 2 }, TrainingBand{ 20, 30, 1 } };
     TrainingPolicy const policy{ bands };
+    CheckBuffReceipts();
     CheckScriptedDamageReceipts();
     CheckCatalog(policy);
     CheckActions();

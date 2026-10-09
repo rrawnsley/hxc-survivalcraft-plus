@@ -29,6 +29,7 @@
 #include "AbilityPracticeRankPolicy.h"
 #include "AbilityPracticeMasteryPolicy.h"
 #include "AbilityPracticeCastReceipt.h"
+#include "AbilityPracticeBuffReceipts.h"
 #include "AbilityPracticeOutcome.h"
 #include "AbilityPracticeNativeRankChain.h"
 #include "AbilityPracticeWire.h"
@@ -445,6 +446,7 @@ struct MenuSession
     std::uint32_t LastCustomSpecialization = 0;
     std::uint64_t ActionSession = 0;
     std::unordered_map<std::uint32_t, BuffPracticeSession> Buffs;
+    Practice::BuffCastLedger PeriodicBuffCasts;
     Clock::time_point NextBuffStateRefresh{};
     std::uint32_t OutgoingClass = 0;
     std::vector<std::string> Outgoing;
@@ -2567,6 +2569,38 @@ void BindBuffOrigin(Player* player, Spell* spell, Unit* target)
         session->second.Buffs[profile->Definition.AbilityId].Origin = receipt;
 }
 
+bool AwardOwnedBuffContribution(Player* player, MenuSession& session,
+    Practice::AbilityProfile const& profile, Clock::time_point now)
+{
+    auto const buff = session.Buffs.find(profile.Definition.AbilityId);
+    if (buff == session.Buffs.end())
+        return false;
+    auto const origin = buff->second.Origin;
+    if (!origin || !ReceiptOwnerMatches(player, session, *origin) || now < buff->second.NextContribution)
+        return false;
+    SpellInfo const* info = AcceptedBuffSpell(player, session, profile);
+    if (!info)
+        return false;
+    auto const effective = Practice::BuildCatchupPolicy(profile.Policy,
+        Practice::CapAtLevel(profile.Definition, player->GetLevel()), Catchup);
+    if (!effective)
+        return false;
+    CoAAbilityPractice::CastReceipt contribution(player->GetGUID().GetRawValue(), session.ActionSession,
+        player->getClass(), origin->SpellId, player->getRace(), player->GetActiveSpec(),
+        session.LastCustomSpecialization);
+    ReceiptCast cast{ player, sSpellMgr->GetSpellInfo(
+        SharedBuffRankSpellId(profile.Definition, info->Id)), contribution };
+    Practice::OutcomeContext const context{ true, true, true, true, player->GetLevel() };
+    auto const award = Practice::HandleOutcome(*player, cast, profile.Definition,
+        effective->View(), profile.DefinitionVersion, context);
+    bool const accepted = award.Status == Practice::OutcomeStatus::Awarded ||
+        award.Status == Practice::OutcomeStatus::Capped;
+    if (accepted)
+        buff->second.NextContribution = now + std::chrono::seconds(5);
+    RecordAward(player, session, profile, award, false);
+    return accepted;
+}
+
 void AwardBuffContribution(Player* player, Spell* spell, Unit* target, std::uint32_t damage, std::uint32_t healing)
 {
     if (!IsBuffObserver(player) || !spell || !spell->GetScriptValue(PracticeBuffEligibilityKey) ||
@@ -2583,6 +2617,7 @@ void AwardBuffContribution(Player* player, Spell* spell, Unit* target, std::uint
         !player->HasSpell(action->SpellId) || !player->IsSpellFitByClassAndRace(action->SpellId))
         return;
     auto& session = found->second;
+    auto* periodic = session.PeriodicBuffCasts.Find(action);
     auto const now = Clock::now();
     for (auto const* profile : ProfilesForClass(player->getClass()))
     {
@@ -2591,47 +2626,75 @@ void AwardBuffContribution(Player* player, Spell* spell, Unit* target, std::uint
             continue;
         std::uint64_t const bit = Practice::DevelopmentBuffs::ContributionBit(*profile);
         if (!bit || !(spell->GetScriptValue(PracticeBuffEligibilityKey) & bit) ||
-            (spell->GetScriptValue(PracticeBuffContributionKey) & bit))
+            (spell->GetScriptValue(PracticeBuffContributionKey) & bit) ||
+            (periodic && (periodic->AwardedBits & bit)))
             continue;
         auto const buff = session.Buffs.find(profile->Definition.AbilityId);
-        if (buff == session.Buffs.end())
+        if (periodic && (buff == session.Buffs.end() || !periodic->MatchesOrigin(bit, buff->second.Origin)))
             continue;
-        auto const origin = buff->second.Origin;
-        if (!origin || now < buff->second.NextContribution || !player->HasSpell(origin->SpellId) ||
-            !AcquisitionAllowed(player, profile->Definition, origin->SpellId))
-            continue;
-        SpellInfo const* info = AcceptedBuffSpell(player, session, *profile);
-        if (!info)
-            continue;
-        auto const effective = Practice::BuildCatchupPolicy(profile->Policy,
-            Practice::CapAtLevel(profile->Definition, player->GetLevel()), Catchup);
-        if (!effective)
-            continue;
-        CoAAbilityPractice::CastReceipt contribution(player->GetGUID().GetRawValue(), session.ActionSession,
-            player->getClass(), origin->SpellId, player->getRace(), player->GetActiveSpec(),
-            session.LastCustomSpecialization);
-        ReceiptCast cast{ player, sSpellMgr->GetSpellInfo(
-            SharedBuffRankSpellId(profile->Definition, info->Id)), contribution };
-        Practice::OutcomeContext const context{ true, true, true, true, player->GetLevel() };
-        auto const award = Practice::HandleOutcome(*player, cast, profile->Definition,
-            effective->View(), profile->DefinitionVersion, context);
-        if (award.Status == Practice::OutcomeStatus::Awarded || award.Status == Practice::OutcomeStatus::Capped)
+        if (AwardOwnedBuffContribution(player, session, *profile, now))
         {
             spell->SetScriptValue(PracticeBuffContributionKey,
                 spell->GetScriptValue(PracticeBuffContributionKey) | bit);
-            buff->second.NextContribution = now + std::chrono::seconds(5);
+            if (periodic)
+                periodic->AwardedBits |= bit;
         }
-        RecordAward(player, session, *profile, award, false);
+    }
+}
+
+void AwardPeriodicBuffContribution(Player* player, Unit* target, std::uint32_t auraSpellId,
+    std::uint32_t auraType, std::uint32_t damage, std::uint32_t healing,
+    std::shared_ptr<CoAAbilityPractice::CastReceipt> const& action)
+{
+    if (!PeriodicRequested || !IsBuffObserver(player) || auraSpellId != action->SpellId)
+        return;
+    auto const* info = sSpellMgr->GetSpellInfo(action->SpellId);
+    bool const periodicDamage = auraType == SPELL_AURA_PERIODIC_DAMAGE ||
+        auraType == SPELL_AURA_PERIODIC_DAMAGE_PERCENT || auraType == SPELL_AURA_PERIODIC_LEECH;
+    bool const periodicHealing = auraType == SPELL_AURA_PERIODIC_HEAL;
+    if (!info || (!periodicDamage && !periodicHealing) || !info->HasAura(static_cast<AuraType>(auraType)) ||
+        !QualifiesDevelopmentOutcome(periodicDamage ? Practice::OutcomeKind::Damage : Practice::OutcomeKind::Healing,
+            player, target, periodicDamage ? damage : 0, periodicHealing ? healing : 0))
+        return;
+    std::lock_guard lock(Mutex);
+    auto const found = Sessions.find(player->GetGUID().GetRawValue());
+    auto const* profile = FindProfile(player, action->SpellId);
+    if (!Affects(player) || player->isBeingLoaded() || found == Sessions.end() ||
+        !ReceiptOwnerMatches(player, found->second, *action) ||
+        !player->HasSpell(action->SpellId) || !player->IsSpellFitByClassAndRace(action->SpellId) ||
+        !AscensionAcquisition::CanLearnRacialSpell(player, action->SpellId) ||
+        (profile && !AcquisitionAllowed(player, profile->Definition, action->SpellId)))
+        return;
+    auto& session = found->second;
+    auto* periodic = session.PeriodicBuffCasts.Find(action);
+    if (!periodic || !periodic->ObservePeriodic())
+        return;
+    auto const now = Clock::now();
+    for (auto const* buffProfile : ProfilesForClass(player->getClass()))
+    {
+        std::uint64_t const bit = Practice::DevelopmentBuffs::ContributionBit(*buffProfile);
+        if (!bit || (periodic->AwardedBits & bit) ||
+            (Practice::DevelopmentBuffs::IsPairedAttackPower(*buffProfile) &&
+                (!periodicDamage || !IsMeleeOrRangedAbility(info))))
+            continue;
+        auto const buff = session.Buffs.find(buffProfile->Definition.AbilityId);
+        if (buff == session.Buffs.end() || !periodic->MatchesOrigin(bit, buff->second.Origin))
+            continue;
+        if (AwardOwnedBuffContribution(player, session, *buffProfile, now))
+            periodic->AwardedBits |= bit;
     }
 }
 
 void AwardPeriodicOutcome(Unit* caster, Unit* target, std::uint32_t auraSpellId, std::uint32_t auraType,
     std::uint32_t damage, std::uint32_t healing, std::shared_ptr<CoAAbilityPractice::CastReceipt> const& receipt)
 {
-    if (!Active.load() || !caster || !target || !receipt || receipt->IsConsumed())
+    if (!Active.load() || !caster || !target || !receipt)
         return;
     Player* player = caster->ToPlayer();
     if (!IsProfiledPlayer(player))
+        return;
+    AwardPeriodicBuffContribution(player, target, auraSpellId, auraType, damage, healing, receipt);
+    if (receipt->IsConsumed())
         return;
     auto const* profile = FindProfile(player, receipt->SpellId);
     bool const scripted = profile && HelpersRequested && Practice::DevelopmentHelpers::IsManafeed(*profile) &&
@@ -2822,6 +2885,7 @@ void RefreshOwnerState(Player* player, MenuSession& session, std::uint32_t custo
     session.LastCustomSpecialization = customSpecialization;
     session.ActionSession = NewActionSession();
     session.Buffs.clear();
+    session.PeriodicBuffCasts.Clear();
     session.Dirty = true;
     session.CheckRanks = true;
 }
@@ -2837,7 +2901,10 @@ void MarkDirty(Player* player, bool invalidateActions = false)
         ClearDelivery(found->second);
         found->second.NextRefresh = {};
         if (invalidateActions)
+        {
             found->second.ActionSession = NewActionSession();
+            found->second.PeriodicBuffCasts.Clear();
+        }
         found->second.Dirty = true;
         found->second.CheckRanks = true;
     }
@@ -2886,6 +2953,7 @@ public:
             ClearDelivery(entry->second);
             entry->second.ActionSession = NewActionSession();
             entry->second.Buffs.clear();
+            entry->second.PeriodicBuffCasts.Clear();
             entry->second.Dirty = true;
             entry->second.CheckRanks = true;
             ++entry;
@@ -3107,6 +3175,7 @@ public:
         session.LoginObserved = true;
         session.ActionSession = NewActionSession();
         session.Buffs.clear();
+        session.PeriodicBuffCasts.Clear();
     }
 
     void OnPlayerUpdate(Player* player, uint32) override
@@ -3369,6 +3438,20 @@ public:
                                 IsMeleeOrRangedAbility(spell->GetSpellInfo())))
                             eligible |= Practice::DevelopmentBuffs::ContributionBit(*buff);
                 spell->SetScriptValue(PracticeBuffEligibilityKey, eligible);
+                if (PeriodicRequested && eligible &&
+                    (HasSupportedPeriodicOutcome(spell->GetSpellInfo(), Practice::OutcomeKind::Damage) ||
+                        HasSupportedPeriodicOutcome(spell->GetSpellInfo(), Practice::OutcomeKind::Healing)))
+                {
+                    std::vector<Practice::CapturedBuffOrigin> origins;
+                    for (auto const* buff : ProfilesForClass(player->getClass()))
+                    {
+                        std::uint64_t const bit = Practice::DevelopmentBuffs::ContributionBit(*buff);
+                        auto const origin = session.Buffs.find(buff->Definition.AbilityId);
+                        if (bit && (eligible & bit) && origin != session.Buffs.end())
+                            origins.push_back({ bit, origin->second.Origin });
+                    }
+                    session.PeriodicBuffCasts.Capture(spell->GetPracticeCast(), std::move(origins));
+                }
             }
         }
         return true;

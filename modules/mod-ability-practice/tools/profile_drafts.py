@@ -30,6 +30,7 @@ def verify_provenance(candidates, root, dbc):
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentControlFixed.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentLeech.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentBuffs.h',
+                'modules/mod-ability-practice/src/AbilityPracticeBuffReceipts.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentBuffVariants.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentTrainerFixed.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentTrainerRanks.h',
