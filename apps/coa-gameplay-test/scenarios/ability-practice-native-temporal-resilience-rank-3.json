@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native Temporal Resilience rank 3 armor baseline",
+  "contract": "Original native acquired armor remains unchanged and cancellation removes it. This is an effect baseline at level80, not rank acquisition or practice qualification; secondary native proc decision has a separate case.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Aptemporc",
+      "race": 1,
+      "class": 22,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 536259
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "armor",
+      "save_as": "base_armor"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 536259
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 536259,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 536259,
+      "effect": 0,
+      "equals": 200
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "armor",
+      "relative_to": "base_armor",
+      "equals": 200
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 536259,
+      "min": 1795000,
+      "max": 1800000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 536265,
+      "equals": 0
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "caster",
+      "spell": 536259
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "armor",
+      "relative_to": "base_armor",
+      "equals": 0
+    }
+  ]
+}

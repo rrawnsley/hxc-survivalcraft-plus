@@ -4471,3 +4471,18 @@ saved records remain unchanged. Four trainer headers reproduce unchanged.
 18extensions30added ranks unchanged. Addon0.4.82-development/schema5fallback4,
 defaults0/unpublished. No live/client/launcher changes. Active client pixels,
 ordinary pacing and the remaining catalog are not complete.
+
+
+## Temporal Resilience native baseline
+
+Chronomancer22 Temporal Resilience680389 has seven native armor ranks50/110/200/270/
+360/470/760 at2/10/20/32/42/50/60. Effective trainer and native spell chain agree.
+Eight native scenarios qualified before enrollment: original level80 casts retain exact
+armor increases,30minute duration and cancellation restores armor. Full native proc
+decision returns0 for incoming/outgoing melee and negative magic synthetic events,
+1000trials per event/rank. No root proc flags or SQL registration; helper536265
+remains absent. Native secondary behavior is preserved without repair or claimed
+natural combat proc frequency.141258 VERIFY ALL PASSED source9/88.0s and eight
+simulated cases149.7s/15lanes/no reruns. No C++ change/build was needed beyond the
+passing140432 binary. Practice enrollment, acquisition boundaries, persistence and
+menu qualification remain pending; catalog/addon0.4.82 unchanged. No live actions.
