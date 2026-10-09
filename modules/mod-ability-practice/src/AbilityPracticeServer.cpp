@@ -1398,6 +1398,36 @@ bool MatchesUtilityFixedRankMechanic(std::uint32_t classId, std::uint32_t spellI
     SpellInfo const* info = sSpellMgr->GetSpellInfo(spellId);
     if (mechanic == mechanics.end() || !info || info->IsPassive())
         return false;
+    if (classId == 32)
+    {
+        auto const& enchants = Practice::DevelopmentUtilityFixed::TemporaryEnchants;
+        auto const native = std::find_if(enchants.begin(), enchants.end(),
+            [spellId](auto const& entry) { return entry.SpellId == spellId; });
+        if (native != enchants.end())
+        {
+            auto const scripts = sObjectMgr->GetSpellScriptsBounds(spellId);
+            SpellItemEnchantmentEntry const* enchant = sSpellItemEnchantmentStore.LookupEntry(native->EnchantmentId);
+            SpellInfo const* equip = sSpellMgr->GetSpellInfo(native->EquipSpellId);
+            if (info->SpellFamilyName != 38 || scripts.first != scripts.second ||
+                info->SpellLevel != native->CharacterLevel || info->BaseLevel != native->CharacterLevel ||
+                info->MaxLevel || info->GetDuration() || info->ManaCost || info->ManaCostPerlevel ||
+                info->ManaCostPercentage != 6 || info->EquippedItemClass != ITEM_CLASS_WEAPON ||
+                info->EquippedItemSubClassMask != 173555 || info->EquippedItemInventoryTypeMask ||
+                !enchant || enchant->charges || enchant->requiredSkill || enchant->requiredSkillValue ||
+                enchant->requiredLevel != 1 || enchant->EnchantmentCondition ||
+                !equip || !equip->IsPassive() || equip->IsDeprecatedForPlayers)
+                return false;
+            for (std::size_t index = 0; index < 3; ++index)
+                if (info->SpellFamilyFlags[index] != native->FamilyFlags[index] ||
+                    info->Effects[index].DieSides != (index == 0 ? native->PrimaryDieSides : index == 1 ? 1 : 0) ||
+                    info->Effects[index].RealPointsPerLevel || info->Effects[index].MiscValueB ||
+                    info->Effects[index].SpellClassMask ||
+                    enchant->type[index] != (index == 0 ? ITEM_ENCHANTMENT_TYPE_EQUIP_SPELL : 0u) ||
+                    enchant->amount[index] != (index == 0 ? 100u : 0u) ||
+                    enchant->spellid[index] != (index == 0 ? native->EquipSpellId : 0u))
+                    return false;
+        }
+    }
     if (classId == 32 && (spellId == 561236 || spellId == 560295))
     {
         auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);

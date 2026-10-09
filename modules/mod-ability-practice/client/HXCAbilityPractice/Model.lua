@@ -633,6 +633,13 @@ function Model.PracticeRules(ability, saved)
             .. " The original ability can resume practice when it is available again."
     end
     if Model.IsFixed(ability) then
+        if ability.abilityId == 653022 or ability.abilityId == 653264 or ability.abilityId == 653218
+            or ability.abilityId == 653222 or ability.abilityId == 653213 or ability.abilityId == 653265 then
+            return "This weapon engraving has one native rank and no practice levels. "
+                .. LearnText(ability.acquisitionSource)
+                .. " Its enchant lasts one hour; its equip effect requires the engraved weapon to be equipped."
+                .. " Refreshing the enchant earns no practice."
+        end
         if ability.abilityId == 561236 or ability.abilityId == 560295 then
             return "This etching has no practice levels. " .. LearnText(ability.acquisitionSource)
                 .. " Regular and greater versions retain the same native benefit."

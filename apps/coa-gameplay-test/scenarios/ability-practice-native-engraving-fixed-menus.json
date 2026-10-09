@@ -1,0 +1,327 @@
+{
+  "schema": 1,
+  "name": "Ability practice: six Fixed weapon engraving native unlock menus",
+  "contract": "Six native unranked weapon engravings show no practice requirement. Learned rank rows and level20 future rows preserve exact native unlock levels; menu requests do not teach unavailable abilities. Real-clock transport; active client pixels separate.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "learned",
+      "name": "Apengmenu",
+      "race": 1,
+      "class": 32,
+      "level": 40
+    },
+    {
+      "id": "future",
+      "name": "Apengfuture",
+      "race": 1,
+      "class": 32,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "learned",
+      "spell": 653022
+    },
+    {
+      "action": "learn",
+      "actor": "learned",
+      "spell": 653264
+    },
+    {
+      "action": "learn",
+      "actor": "learned",
+      "spell": 653218
+    },
+    {
+      "action": "learn",
+      "actor": "learned",
+      "spell": 653222
+    },
+    {
+      "action": "learn",
+      "actor": "learned",
+      "spell": 653213
+    },
+    {
+      "action": "learn",
+      "actor": "learned",
+      "spell": 653265
+    },
+    {
+      "action": "whisper",
+      "actor": "learned",
+      "to": "Apengmenu",
+      "text": "HXAP\tHELLO|5",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "whisper_contains",
+      "from": "learned",
+      "text": "HXAP\tB|5|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "whisper_contains",
+      "from": "learned",
+      "text": "|653022|653022|1|1|0|1|0|6",
+      "min": 1,
+      "within_ms": 10000,
+      "label": "fire engraving native level 1, no practice forecast"
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "knows_spell",
+      "spell": 653022,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "whisper_contains",
+      "from": "learned",
+      "text": "|653264|653264|1|1|0|1|0|6",
+      "min": 1,
+      "within_ms": 10000,
+      "label": "ice engraving native level 6, no practice forecast"
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "knows_spell",
+      "spell": 653264,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "whisper_contains",
+      "from": "learned",
+      "text": "|653218|653218|1|1|0|1|0|6",
+      "min": 1,
+      "within_ms": 10000,
+      "label": "earth engraving native level 14, no practice forecast"
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "knows_spell",
+      "spell": 653218,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "whisper_contains",
+      "from": "learned",
+      "text": "|653222|653222|1|1|0|1|0|6",
+      "min": 1,
+      "within_ms": 10000,
+      "label": "air engraving native level 24, no practice forecast"
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "knows_spell",
+      "spell": 653222,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "whisper_contains",
+      "from": "learned",
+      "text": "|653213|653213|1|1|0|1|0|6",
+      "min": 1,
+      "within_ms": 10000,
+      "label": "water engraving native level 26, no practice forecast"
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "knows_spell",
+      "spell": 653213,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "whisper_contains",
+      "from": "learned",
+      "text": "|653265|653265|1|1|0|1|0|6",
+      "min": 1,
+      "within_ms": 10000,
+      "label": "arcane engraving native level 40, no practice forecast"
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "knows_spell",
+      "spell": 653265,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "whisper_contains",
+      "from": "learned",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "learn",
+      "actor": "future",
+      "spell": 653022
+    },
+    {
+      "action": "learn",
+      "actor": "future",
+      "spell": 653264
+    },
+    {
+      "action": "learn",
+      "actor": "future",
+      "spell": 653218
+    },
+    {
+      "action": "whisper",
+      "actor": "future",
+      "to": "Apengfuture",
+      "text": "HXAP\tHELLO|5",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "whisper_contains",
+      "from": "future",
+      "text": "HXAP\tB|5|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "whisper_contains",
+      "from": "future",
+      "text": "|653022|653022|1|1|0|1|0|6",
+      "min": 1,
+      "within_ms": 10000,
+      "label": "fire engraving native level 1, no practice forecast"
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "knows_spell",
+      "spell": 653022,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "whisper_contains",
+      "from": "future",
+      "text": "|653264|653264|1|1|0|1|0|6",
+      "min": 1,
+      "within_ms": 10000,
+      "label": "ice engraving native level 6, no practice forecast"
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "knows_spell",
+      "spell": 653264,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "whisper_contains",
+      "from": "future",
+      "text": "|653218|653218|1|1|0|1|0|6",
+      "min": 1,
+      "within_ms": 10000,
+      "label": "earth engraving native level 14, no practice forecast"
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "knows_spell",
+      "spell": 653218,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "whisper_contains",
+      "from": "future",
+      "text": "|653222|1|24|1|5|0|0",
+      "min": 1,
+      "within_ms": 10000,
+      "label": "air engraving native level 24, no practice forecast"
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "knows_spell",
+      "spell": 653222,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "whisper_contains",
+      "from": "future",
+      "text": "|653213|1|26|1|5|0|0",
+      "min": 1,
+      "within_ms": 10000,
+      "label": "water engraving native level 26, no practice forecast"
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "knows_spell",
+      "spell": 653213,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "whisper_contains",
+      "from": "future",
+      "text": "|653265|1|40|1|5|0|0",
+      "min": 1,
+      "within_ms": 10000,
+      "label": "arcane engraving native level 40, no practice forecast"
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "knows_spell",
+      "spell": 653265,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "whisper_contains",
+      "from": "future",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 10000
+    }
+  ]
+}

@@ -31,6 +31,13 @@ inline constexpr std::array Class32Ability520269 = { AbilityRank{ 520269, 1, { 2
 inline constexpr std::array Class32Ability800995 = { AbilityRank{ 800995, 1, { 18, 1 } } };
 inline constexpr std::array Class32Ability803679 = { AbilityRank{ 803679, 1, { 28, 1 } } };
 
+inline constexpr std::array FireEngraving = { AbilityRank{ 653022, 1, { 1, 1 } } };
+inline constexpr std::array IceEngraving = { AbilityRank{ 653264, 1, { 6, 1 } } };
+inline constexpr std::array EarthEngraving = { AbilityRank{ 653218, 1, { 14, 1 } } };
+inline constexpr std::array AirEngraving = { AbilityRank{ 653222, 1, { 24, 1 } } };
+inline constexpr std::array WaterEngraving = { AbilityRank{ 653213, 1, { 26, 1 } } };
+inline constexpr std::array ArcaneEngraving = { AbilityRank{ 653265, 1, { 40, 1 } } };
+
 inline constexpr std::array LeylinesEtching = { AbilityRank{ 561236, 1, { 2, 1 } } };
 inline constexpr std::array MagiEtching = { AbilityRank{ 560295, 1, { 40, 1 } } };
 
@@ -64,6 +71,18 @@ inline constexpr std::array MeltLock = { AbilityRank{ 804662, 1, { 16, 1 } } };
 inline constexpr std::array TinkerPickLock = { AbilityRank{ 804154, 1, { 14, 1 } } };
 
 inline constexpr std::array Profiles = {
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 32, 653022, AbilityKind::Fixed, FireEngraving, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 32, 653264, AbilityKind::Fixed, IceEngraving, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 32, 653218, AbilityKind::Fixed, EarthEngraving, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 32, 653222, AbilityKind::Fixed, AirEngraving, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 32, 653213, AbilityKind::Fixed, WaterEngraving, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 32, 653265, AbilityKind::Fixed, ArcaneEngraving, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 32, 561236, AbilityKind::Fixed, LeylinesEtching, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -144,6 +163,25 @@ inline constexpr std::array Profiles = {
         { 28, 804154, AbilityKind::Fixed, TinkerPickLock, {} }, Development::Policy, OutcomeKind::None }
 };
 
+struct TemporaryEnchantMechanic
+{
+    std::uint32_t SpellId;
+    std::uint32_t CharacterLevel;
+    std::uint32_t EnchantmentId;
+    std::uint32_t EquipSpellId;
+    std::int32_t PrimaryDieSides;
+    std::array<std::uint32_t, 3> FamilyFlags;
+};
+
+inline constexpr std::array TemporaryEnchants = {
+    TemporaryEnchantMechanic{ 653022, 1, 1000, 653211, -1, { 0u, 0u, 0u } },
+    TemporaryEnchantMechanic{ 653264, 6, 1004, 653266, 180, { 0u, 0u, 0u } },
+    TemporaryEnchantMechanic{ 653218, 14, 1002, 653219, 180, { 0u, 0u, 0u } },
+    TemporaryEnchantMechanic{ 653222, 24, 999, 653223, 180, { 0u, 2147483648u, 0u } },
+    TemporaryEnchantMechanic{ 653213, 26, 1001, 653214, 180, { 128u, 0u, 0u } },
+    TemporaryEnchantMechanic{ 653265, 40, 1006, 653267, 180, { 0u, 0u, 0u } }
+};
+
 struct Mechanic
 {
     std::uint32_t ClassId;
@@ -158,6 +196,18 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 32, 653022, { 54, 0, 0 }, {}, {}, {}, {},
+        std::array<std::int32_t, 3>{ 1000, 0, 0 }, std::array<std::int32_t, 3>{ 1800, -1, 0 } },
+    Mechanic{ 32, 653264, { 54, 0, 0 }, {}, {}, {}, {},
+        std::array<std::int32_t, 3>{ 1004, 0, 0 }, std::array<std::int32_t, 3>{ 1800, -1, 0 } },
+    Mechanic{ 32, 653218, { 54, 0, 0 }, {}, {}, {}, {},
+        std::array<std::int32_t, 3>{ 1002, 0, 0 }, std::array<std::int32_t, 3>{ 1800, -1, 0 } },
+    Mechanic{ 32, 653222, { 54, 0, 0 }, {}, {}, {}, {},
+        std::array<std::int32_t, 3>{ 999, 0, 0 }, std::array<std::int32_t, 3>{ 1800, -1, 0 } },
+    Mechanic{ 32, 653213, { 54, 0, 0 }, {}, {}, {}, {},
+        std::array<std::int32_t, 3>{ 1001, 0, 0 }, std::array<std::int32_t, 3>{ 1800, -1, 0 } },
+    Mechanic{ 32, 653265, { 54, 0, 0 }, {}, {}, {}, {},
+        std::array<std::int32_t, 3>{ 1006, 0, 0 }, std::array<std::int32_t, 3>{ 1800, -1, 0 } },
     Mechanic{ 32, 561236, { 6, 0, 0 }, { 21, 0, 0 }, {}, { 137, 0, 0 }, {},
         std::array<std::int32_t, 3>{ -1, 0, 0 }, std::array<std::int32_t, 3>{ 9, -1, -1 } },
     Mechanic{ 32, 560295, { 0, 6, 0 }, { 0, 21, 0 }, {}, { 0, 72, 0 }, {},

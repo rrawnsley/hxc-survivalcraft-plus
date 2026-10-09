@@ -39,10 +39,20 @@
       "actor": "caster",
       "metric": "whisper_contains",
       "from": "caster",
-      "text": "HXAP\tB|4|1|24|46|",
+      "text": "HXAP\tB|4|",
       "min": 1,
       "within_ms": 10000,
       "label": "Current schema4 header"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "|24|46|",
+      "min": 1,
+      "within_ms": 10000,
+      "label": "Native utility menu class24 and character level46"
     },
     {
       "action": "assert",

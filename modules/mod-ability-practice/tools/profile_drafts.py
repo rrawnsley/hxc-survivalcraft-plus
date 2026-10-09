@@ -637,6 +637,19 @@ def build_drafts(candidates, root):
                         v.get('miscValue'), v.get('basePoints')) for v in details] != expected):
                 raise ValueError('Reviewed lock utility source/raw evidence changed')
             required.append('native-lock-requirements-and-existing-skill-progression-preserved')
+        engraving_levels = {653022: 1, 653264: 6, 653218: 14, 653222: 24, 653213: 26, 653265: 40}
+        engraving_ids = {653022: 1000, 653264: 1004, 653218: 1002, 653222: 999, 653213: 1001, 653265: 1006}
+        if class_id == 32 and ability_id in engraving_levels:
+            raw = members[ability_id].get('rawDbc', {})
+            details = raw.get('effectDetails', [])
+            expected = [(54, 0, 0, 0, 0, engraving_ids[ability_id], 1800),
+                        (0, 0, 0, 0, 0, 0, -1), (0, 0, 0, 0, 0, 0, 0)]
+            if (len(ranks) != 1 or ranks[0]['characterLevel'] != engraving_levels[ability_id] or
+                    raw.get('passive') is not False or raw.get('rankLabel') or len(details) != 3 or
+                    [(v.get('effectId'), v.get('auraId'), v.get('implicitTargetA'), v.get('implicitTargetB'),
+                      v.get('triggerSpellId'), v.get('miscValue'), v.get('basePoints')) for v in details] != expected):
+                raise ValueError('Reviewed native weapon engraving source/raw evidence changed')
+            required.append('native-temporary-weapon-enchant-equip-lifetime-no-artificial-practice')
         if (class_id, ability_id) in stat_buffs:
             mechanic = stat_buffs[(class_id, ability_id)]
             effect_index = mechanic['effectIndex']

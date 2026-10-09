@@ -4425,3 +4425,26 @@ passed. Use --fresh-databases for subsequent native runs to avoid the recurring 
 C++/Lua/server/config unchanged; prior063504 build and065809 harness remain applicable. Counts and
 addon0.4.59-development unchanged. Defaults0/unpublished/no live process/config/database/client or
 launcher changes. Client pixels, measured ordinary pacing and broader ability outcomes remain pending.
+
+
+## Native weapon engravings remain Fixed utilities
+
+Six Runemaster engravings retain their native unranked acquisition: Fire653022/1,
+Ice653264/6, Earth653218/14, Air653222/24, Water653213/26 and Arcane653265/40.
+Exact loaded temporary enchant/equip spell metadata and native effect shapes gate these
+menu definitions. Casting, refreshing, unequipping and re-equipping grant no practice;
+unsupported saved records remain unchanged. The native one-hour enchant and item-sourced
+equip aura lifetime are preserved. Menu text explains the equipment requirement.
+
+105521 VERIFY ALL PASSED: source9/89.0s, build27.9s, harness4.6s including894typed
+snapshots and99shared variants, allsix native simulated cases116.9s/15lanes.
+135105 real menu qualification: new engraving learned/future rows and existing shared
+etching menu passed; old utility fixture assumed global snapshot revision1 and failed.
+Interrupted before retries; no aggregate pass claimed. Corrected fixture asserts schema,
+class and character level independently of revision.135413 VERIFY ALL PASSED:
+source9/87.5s and corrected utility real123.5s. Allnine selected cases qualify across
+these scopes. Four generated trainer headers reproduce unchanged.292unique294declared,
+177ranked9mastery106Fixed33shared378pending;18extensions30added ranks unchanged.
+Addon0.4.81-development, schema5 fallback4, defaults0 and unpublished. Downstream
+combat proc tuning and active client pixels are outside these item/menu checks.
+No live server, production database/config, active client or launcher changes.
