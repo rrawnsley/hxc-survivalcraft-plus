@@ -638,6 +638,17 @@ def build_drafts(candidates, root):
                         v.get('miscValue'), v.get('basePoints')) for v in details] != expected):
                 raise ValueError('Reviewed lock utility source/raw evidence changed')
             required.append('native-lock-requirements-and-existing-skill-progression-preserved')
+        if (class_id, ability_id) == (32, 500288):
+            raw = members[ability_id].get('rawDbc', {})
+            details = raw.get('effectDetails', [])
+            expected = [(6, 36, 1, 0, 0, 30, -1), (6, 16, 1, 0, 0, 0, 4),
+                        (6, 23, 1, 0, 704142, 0, -1)]
+            if (len(ranks) != 1 or ranks[0]['characterLevel'] != 4 or
+                    raw.get('passive') is not False or raw.get('rankLabel') or len(details) != 3 or
+                    [(v.get('effectId'), v.get('auraId'), v.get('implicitTargetA'), v.get('implicitTargetB'),
+                      v.get('triggerSpellId'), v.get('miscValue'), v.get('basePoints')) for v in details] != expected):
+                raise ValueError('Reviewed native Runeshroud source/raw evidence changed')
+            required.append('native-stealth-linked-movement-penalty-and-palm-sigil-gate-preserved')
         if (class_id, ability_id) == (32, 802630):
             raw = members[ability_id].get('rawDbc', {})
             details = raw.get('effectDetails', [])

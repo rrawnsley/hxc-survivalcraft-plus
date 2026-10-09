@@ -633,6 +633,11 @@ function Model.PracticeRules(ability, saved)
             .. " The original ability can resume practice when it is available again."
     end
     if Model.IsFixed(ability) then
+        if ability.abilityId == 500288 then
+            return "Runeshroud has one native rank and no practice levels. " .. LearnText(ability.acquisitionSource)
+                .. " Its native stealth, movement penalty and Palm Sigil gate remain unchanged."
+                .. " Casting it earns no practice."
+        end
         if ability.abilityId == 802630 then
             return "Air Tattoo has one native rank and no practice levels. " .. LearnText(ability.acquisitionSource)
                 .. " It grants 20% movement speed and 20% resistance to roots and snares."

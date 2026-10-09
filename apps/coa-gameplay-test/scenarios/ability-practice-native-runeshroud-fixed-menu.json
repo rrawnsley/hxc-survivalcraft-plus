@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Fixed Runeshroud native level4 menu",
+  "contract": "Learned and future Runeshroud show a single native level4 rank without practice levels or early teaching. Exact native utility rules; actual client pixels separate.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "learned",
+      "name": "Apcloakmenu",
+      "race": 1,
+      "class": 32,
+      "level": 4
+    },
+    {
+      "id": "future",
+      "name": "Apcloaknext",
+      "race": 1,
+      "class": 32,
+      "level": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "learned",
+      "spell": 500288
+    },
+    {
+      "action": "whisper",
+      "actor": "learned",
+      "to": "Apcloakmenu",
+      "text": "HXAP\tHELLO|5",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "whisper_contains",
+      "from": "learned",
+      "text": "HXAP\tB|5|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "whisper_contains",
+      "from": "learned",
+      "text": "|500288|500288|1|1|0|1|0|6",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "whisper_contains",
+      "from": "learned",
+      "text": "|500288|1|4|1|1|0|0",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "whisper_contains",
+      "from": "learned",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "knows_spell",
+      "spell": 500288,
+      "equals": 1
+    },
+    {
+      "action": "whisper",
+      "actor": "future",
+      "to": "Apcloaknext",
+      "text": "HXAP\tHELLO|5",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "whisper_contains",
+      "from": "future",
+      "text": "HXAP\tB|5|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "whisper_contains",
+      "from": "future",
+      "text": "|500288|1|4|1|5|0|0",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "whisper_contains",
+      "from": "future",
+      "text": "|500288|1|4|1|5|0|0",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "whisper_contains",
+      "from": "future",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "knows_spell",
+      "spell": 500288,
+      "equals": 0
+    }
+  ]
+}

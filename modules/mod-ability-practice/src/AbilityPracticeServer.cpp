@@ -1492,6 +1492,30 @@ bool MatchesUtilityFixedRankMechanic(std::uint32_t classId, std::uint32_t spellI
                     return false;
         }
     }
+    if (classId == 32 && spellId == 500288)
+    {
+        auto const scripts = sObjectMgr->GetSpellScriptsBounds(spellId);
+        auto const groups = sSpellMgr->GetSpellSpellGroupMapBounds(spellId);
+        auto const* linked = sSpellMgr->GetSpellLinked(spellId + SPELL_LINK_AURA);
+        SpellInfo const* slow = sSpellMgr->GetSpellInfo(808090);
+        if (info->SpellFamilyName != 38 || info->SpellFamilyFlags[0] != 32768 ||
+            info->SpellFamilyFlags[1] || info->SpellFamilyFlags[2] != 134217728 ||
+            scripts.first != scripts.second || groups.first != groups.second ||
+            info->GetDuration() != -1 || info->SpellLevel != 4 || info->BaseLevel != 4 || info->MaxLevel != 60 ||
+            info->ProcFlags != 664232 || info->ProcChance != 100 || info->ProcCharges != 1 ||
+            info->ManaCostPercentage != 8 || info->RecoveryTime != 10000 || info->CategoryRecoveryTime ||
+            !linked || *linked != std::vector<std::int32_t>{ 808090 } || !slow ||
+            slow->GetDuration() != -1 || slow->Effects[EFFECT_0].Effect != SPELL_EFFECT_APPLY_AURA ||
+            slow->Effects[EFFECT_0].ApplyAuraName != SPELL_AURA_MOD_DECREASE_SPEED ||
+            slow->Effects[EFFECT_0].TargetA.GetTarget() != TARGET_UNIT_CASTER ||
+            slow->Effects[EFFECT_0].TargetB.GetTarget() || slow->Effects[EFFECT_0].BasePoints != -31 ||
+            slow->Effects[EFFECT_0].DieSides != 1 || slow->Effects[EFFECT_0].RealPointsPerLevel)
+            return false;
+        for (std::size_t index = 0; index < 3; ++index)
+            if (info->Effects[index].DieSides != 1 || info->Effects[index].MiscValueB ||
+                info->Effects[index].RealPointsPerLevel != (index == 1 ? 8.0f : 0.0f))
+                return false;
+    }
     if (classId == 32 && spellId == 802630)
     {
         constexpr std::array<std::int32_t, 6> tattoos{ 801094, 801106, 801107, 802630, 803748, 807834 };
