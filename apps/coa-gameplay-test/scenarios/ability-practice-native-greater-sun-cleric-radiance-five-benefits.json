@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native Sun Cleric radiance-five benefits",
+  "contract": "Native complete trainer acquisition, lifecycle binding, bounded existing mana and exact native party or higher-rank benefit before shared enrollment.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apsubradfc",
+      "race": 1,
+      "class": 27,
+      "level": 68
+    },
+    {
+      "id": "ally",
+      "name": "Apsubradfa",
+      "race": 1,
+      "class": 27,
+      "level": 68
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "ally"
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.27.575040",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.27.575040",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.27.575040",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.27.575040",
+      "index": 3,
+      "value": 120
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.27.575040",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 575040
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 575041
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 575042
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 575043
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 575044
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 575044,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 575044,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 575044,
+      "effect": 0,
+      "equals": 73
+    }
+  ]
+}

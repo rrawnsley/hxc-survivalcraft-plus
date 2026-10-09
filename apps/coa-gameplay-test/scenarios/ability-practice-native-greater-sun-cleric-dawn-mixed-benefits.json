@@ -1,0 +1,213 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native Greater Devotion of Dawn mixed target benefits",
+  "contract": "Native active slot0raid56 and slot1friendly21 are preserved: self-target gives232AP/RAP to caster and232AP with no RAP change to party ally. Baseline before any shared enrollment; no native data repair.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apsudawnc",
+      "race": 1,
+      "class": 27,
+      "level": 60
+    },
+    {
+      "id": "ally",
+      "name": "Apsudawna",
+      "race": 1,
+      "class": 27,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "ally"
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.27.572384",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.27.572384",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.27.572384",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.27.572384",
+      "index": 3,
+      "value": 80
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.27.572384",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 572384
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 572385
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 572386
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 572387
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 572388
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 572389
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 572390
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "attack_power",
+      "save_as": "caster_attack_power"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "ranged_attack_power",
+      "save_as": "caster_ranged_attack_power"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "attack_power",
+      "save_as": "ally_attack_power"
+    },
+    {
+      "action": "snapshot",
+      "actor": "ally",
+      "metric": "ranged_attack_power",
+      "save_as": "ally_ranged_attack_power"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 572390,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 572390,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 572390,
+      "effect": 0,
+      "equals": 232
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "attack_power",
+      "relative_to": "caster_attack_power",
+      "min": 231.9,
+      "max": 232.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "ranged_attack_power",
+      "relative_to": "caster_ranged_attack_power",
+      "min": 231.9,
+      "max": 232.1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 572390,
+      "effect": 0,
+      "equals": 232
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "attack_power",
+      "relative_to": "ally_attack_power",
+      "min": 231.9,
+      "max": 232.1
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "ranged_attack_power",
+      "relative_to": "ally_ranged_attack_power",
+      "min": -0.1,
+      "max": 0.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 572390,
+      "effect": 1,
+      "equals": 232
+    }
+  ]
+}
