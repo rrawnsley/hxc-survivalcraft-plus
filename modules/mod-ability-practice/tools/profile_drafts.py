@@ -638,6 +638,17 @@ def build_drafts(candidates, root):
                         v.get('miscValue'), v.get('basePoints')) for v in details] != expected):
                 raise ValueError('Reviewed lock utility source/raw evidence changed')
             required.append('native-lock-requirements-and-existing-skill-progression-preserved')
+        if (class_id, ability_id) == (32, 804674):
+            raw = members[ability_id].get('rawDbc', {})
+            details = raw.get('effectDetails', [])
+            expected = [(28, 0, 87, 0, 0, 50038, 4), (6, 4, 1, 0, 0, 0, 0),
+                        (6, 4, 1, 0, 0, 0, 99)]
+            if (len(ranks) != 1 or ranks[0]['characterLevel'] != 22 or
+                    raw.get('passive') is not False or raw.get('rankLabel') != 'Rank 1' or len(details) != 3 or
+                    [(v.get('effectId'), v.get('auraId'), v.get('implicitTargetA'), v.get('implicitTargetB'),
+                      v.get('triggerSpellId'), v.get('miscValue'), v.get('basePoints')) for v in details] != expected):
+                raise ValueError('Reviewed native Scrying Orb source/raw evidence changed')
+            required.append('native-puppet-channel-possession-expiry-and-cancellation-preserved')
         if (class_id, ability_id) == (32, 500288):
             raw = members[ability_id].get('rawDbc', {})
             details = raw.get('effectDetails', [])

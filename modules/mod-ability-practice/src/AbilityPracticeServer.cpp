@@ -1492,6 +1492,26 @@ bool MatchesUtilityFixedRankMechanic(std::uint32_t classId, std::uint32_t spellI
                     return false;
         }
     }
+    if (classId == 32 && spellId == 804674)
+    {
+        auto const scripts = sObjectMgr->GetSpellScriptsBounds(spellId);
+        auto const groups = sSpellMgr->GetSpellSpellGroupMapBounds(spellId);
+        SummonPropertiesEntry const* summon = sSummonPropertiesStore.LookupEntry(65);
+        CreatureTemplate const* orb = sObjectMgr->GetCreatureTemplate(50038);
+        if (info->SpellFamilyName != 38 || info->SpellFamilyFlags || !info->IsChanneled() ||
+            scripts.first != scripts.second || groups.first != groups.second ||
+            info->GetDuration() != 60000 || info->SpellLevel != 22 || info->BaseLevel != 22 || info->MaxLevel ||
+            info->ProcFlags || info->ProcChance != 101 || info->ProcCharges ||
+            info->ManaCostPercentage != 22 || info->RecoveryTime || info->CategoryRecoveryTime ||
+            !summon || summon->Category != SUMMON_CATEGORY_PUPPET || summon->Faction ||
+            summon->Type || summon->Slot || summon->Flags || !orb || orb->type != 1 || orb->unit_class != 1)
+            return false;
+        for (std::size_t index = 0; index < 3; ++index)
+            if (info->Effects[index].DieSides != (index == 1 ? 0 : 1) ||
+                info->Effects[index].RealPointsPerLevel || info->Effects[index].SpellClassMask ||
+                info->Effects[index].MiscValueB != (index == 0 ? 65 : 0))
+                return false;
+    }
     if (classId == 32 && spellId == 500288)
     {
         auto const scripts = sObjectMgr->GetSpellScriptsBounds(spellId);

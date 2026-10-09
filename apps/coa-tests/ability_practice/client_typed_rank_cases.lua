@@ -153,6 +153,10 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
         end
     end
     if ability.kind == 3 then
+        if ability.abilityId == 804674 then
+            assert(string.find(Model.PracticeRules(ability), "one native rank and no practice levels", 1, true))
+            assert(string.find(Model.PracticeRules(ability), "60-second scouting channel", 1, true))
+        end
         if ability.abilityId == 500288 then
             assert(string.find(Model.PracticeRules(ability), "one native rank and no practice levels", 1, true))
             assert(string.find(Model.PracticeRules(ability), "movement penalty", 1, true))
@@ -184,7 +188,7 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
     end
     count = count + 1
 end
-assert(count == 906)
-assert(kinds[1] == 537 and kinds[2] == 45 and kinds[3] == 324)
+assert(count == 909)
+assert(kinds[1] == 537 and kinds[2] == 45 and kinds[3] == 327)
 for classId = 12, 32 do assert(classes[classId]) end
-print("PASS: 906 typed snapshots across 21 classes: 537 ranked, 45 mastery, 324 fixed and menu rendering")
+print("PASS: 909 typed snapshots across 21 classes: 537 ranked, 45 mastery, 327 fixed and menu rendering")

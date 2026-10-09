@@ -633,6 +633,11 @@ function Model.PracticeRules(ability, saved)
             .. " The original ability can resume practice when it is available again."
     end
     if Model.IsFixed(ability) then
+        if ability.abilityId == 804674 then
+            return "Scrying Orb has one native rank and no practice levels. " .. LearnText(ability.acquisitionSource)
+                .. " Its 60-second scouting channel and orb control remain unchanged."
+                .. " Casting it earns no practice."
+        end
         if ability.abilityId == 500288 then
             return "Runeshroud has one native rank and no practice levels. " .. LearnText(ability.acquisitionSource)
                 .. " Its native stealth, movement penalty and Palm Sigil gate remain unchanged."

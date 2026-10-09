@@ -1,0 +1,186 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native Scrying Orb channel expiry",
+  "contract": "Original native level22 orb channel expires after native60second duration and restores ownership/mover/viewpoint/seer without repeated casts. Server possession state, not camera pixels; baseline before practice classification. Fixed utility enrollment adds no practice and leaves unsupported stored records unchanged.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "runemaster",
+      "race": 1,
+      "class": 32,
+      "level": 22,
+      "name": "Aporbexpiry"
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "runemaster",
+      "source": "core.hxc.ability_practice.32.804674",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "runemaster",
+      "source": "core.hxc.ability_practice.32.804674",
+      "index": 1,
+      "value": 999
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "runemaster",
+      "source": "core.hxc.ability_practice.32.804674",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "runemaster",
+      "source": "core.hxc.ability_practice.32.804674",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "runemaster",
+      "source": "core.hxc.ability_practice.32.804674",
+      "index": 4,
+      "value": 101
+    },
+    {
+      "action": "learn",
+      "actor": "runemaster",
+      "spell": 804674
+    },
+    {
+      "action": "cast",
+      "actor": "runemaster",
+      "spell": 804674
+    },
+    {
+      "action": "assert",
+      "label": "Scrying Orb is summoned",
+      "actor": "runemaster",
+      "metric": "owned_creature_count",
+      "entry": 50038,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "The Runemaster possesses the Scrying Orb",
+      "actor": "runemaster",
+      "metric": "charm_entry",
+      "equals": 50038
+    },
+    {
+      "action": "assert",
+      "label": "The native mover is the orb",
+      "actor": "runemaster",
+      "metric": "controls_self",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "viewpoint_entry",
+      "equals": 50038,
+      "label": "Possession uses the Orb as native viewpoint_entry"
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "seer_entry",
+      "equals": 50038,
+      "label": "Possession uses the Orb as native seer_entry"
+    },
+    {
+      "action": "wait",
+      "ms": 65000
+    },
+    {
+      "action": "assert",
+      "label": "Expiring the channel restores self-control",
+      "actor": "runemaster",
+      "metric": "controls_self",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "charm_entry",
+      "equals": 0,
+      "label": "The expired channel releases the charm"
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "owned_creature_count",
+      "entry": 50038,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The expired channel removes its Orb"
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "viewpoint_entry",
+      "equals": 0,
+      "label": "Expiry restores the player native viewpoint_entry"
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "seer_entry",
+      "equals": 0,
+      "label": "Expiry restores the player native seer_entry"
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.804674",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.804674",
+      "index": 1,
+      "equals": 999
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.804674",
+      "index": 2,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.804674",
+      "index": 3,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "runemaster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.804674",
+      "index": 4,
+      "equals": 101
+    }
+  ]
+}
