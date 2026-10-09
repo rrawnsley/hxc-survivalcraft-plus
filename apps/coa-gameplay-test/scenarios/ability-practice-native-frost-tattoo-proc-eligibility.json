@@ -1,0 +1,542 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native Frost Tattoo proc eligibility at all six ranks",
+  "contract": "Native Frost Tattoo has no DBC proc flags or SQL proc registration. Its native full proc decision returns zero for incoming/outgoing melee and negative magic synthetic damage events. No proc repair or practice enrollment is made.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Aptatproc",
+      "race": 1,
+      "class": 32,
+      "level": 76
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 76,
+      "health": 1000000,
+      "faction": 14,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 807834
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 807834,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 807834,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 807834,
+      "target": "enemy",
+      "type_mask": 4,
+      "incoming": false,
+      "trials": 1000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 807834,
+      "target": "enemy",
+      "type_mask": 8,
+      "incoming": true,
+      "trials": 1000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 807834,
+      "target": "enemy",
+      "type_mask": 65536,
+      "incoming": false,
+      "trials": 1000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 807834,
+      "target": "enemy",
+      "type_mask": 131072,
+      "incoming": true,
+      "trials": 1000,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 807834,
+      "stacks": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 807835
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 807835,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 807835,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 807835,
+      "target": "enemy",
+      "type_mask": 4,
+      "incoming": false,
+      "trials": 1000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 807835,
+      "target": "enemy",
+      "type_mask": 8,
+      "incoming": true,
+      "trials": 1000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 807835,
+      "target": "enemy",
+      "type_mask": 65536,
+      "incoming": false,
+      "trials": 1000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 807835,
+      "target": "enemy",
+      "type_mask": 131072,
+      "incoming": true,
+      "trials": 1000,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 807835,
+      "stacks": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 807836
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 807836,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 807836,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 807836,
+      "target": "enemy",
+      "type_mask": 4,
+      "incoming": false,
+      "trials": 1000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 807836,
+      "target": "enemy",
+      "type_mask": 8,
+      "incoming": true,
+      "trials": 1000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 807836,
+      "target": "enemy",
+      "type_mask": 65536,
+      "incoming": false,
+      "trials": 1000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 807836,
+      "target": "enemy",
+      "type_mask": 131072,
+      "incoming": true,
+      "trials": 1000,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 807836,
+      "stacks": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 807837
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 807837,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 807837,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 807837,
+      "target": "enemy",
+      "type_mask": 4,
+      "incoming": false,
+      "trials": 1000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 807837,
+      "target": "enemy",
+      "type_mask": 8,
+      "incoming": true,
+      "trials": 1000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 807837,
+      "target": "enemy",
+      "type_mask": 65536,
+      "incoming": false,
+      "trials": 1000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 807837,
+      "target": "enemy",
+      "type_mask": 131072,
+      "incoming": true,
+      "trials": 1000,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 807837,
+      "stacks": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 807838
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 807838,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 807838,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 807838,
+      "target": "enemy",
+      "type_mask": 4,
+      "incoming": false,
+      "trials": 1000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 807838,
+      "target": "enemy",
+      "type_mask": 8,
+      "incoming": true,
+      "trials": 1000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 807838,
+      "target": "enemy",
+      "type_mask": 65536,
+      "incoming": false,
+      "trials": 1000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 807838,
+      "target": "enemy",
+      "type_mask": 131072,
+      "incoming": true,
+      "trials": 1000,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 807838,
+      "stacks": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 807839
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 807839,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 807839,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 807839,
+      "target": "enemy",
+      "type_mask": 4,
+      "incoming": false,
+      "trials": 1000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 807839,
+      "target": "enemy",
+      "type_mask": 8,
+      "incoming": true,
+      "trials": 1000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 807839,
+      "target": "enemy",
+      "type_mask": 65536,
+      "incoming": false,
+      "trials": 1000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 807839,
+      "target": "enemy",
+      "type_mask": 131072,
+      "incoming": true,
+      "trials": 1000,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 807839,
+      "stacks": 0
+    }
+  ]
+}

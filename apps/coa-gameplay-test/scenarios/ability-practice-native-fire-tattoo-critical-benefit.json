@@ -1,0 +1,421 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native Fire Tattoo critical damage at all six ranks",
+  "contract": "The native fixed-base critical damage calculator returns1500 without and1725 with each Fire Tattoo rank; removal restores1500. This is calculation qualification, not an executed attack.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Aptatcrit",
+      "race": 1,
+      "class": 32,
+      "level": 76
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_critical_damage",
+      "spell": 800732,
+      "target": "caster",
+      "save_as": "critical_before"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_critical_damage",
+      "spell": 800732,
+      "target": "caster",
+      "equals": 1500
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 801106
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 801106,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 801106,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 801106,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_critical_damage",
+      "spell": 800732,
+      "target": "caster",
+      "equals": 1725
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 801106,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_critical_damage",
+      "spell": 800732,
+      "target": "caster",
+      "equals": 1500
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803749
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803749,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 803749,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803749,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_critical_damage",
+      "spell": 800732,
+      "target": "caster",
+      "equals": 1725
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 803749,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_critical_damage",
+      "spell": 800732,
+      "target": "caster",
+      "equals": 1500
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803750
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803750,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 803750,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803750,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_critical_damage",
+      "spell": 800732,
+      "target": "caster",
+      "equals": 1725
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 803750,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_critical_damage",
+      "spell": 800732,
+      "target": "caster",
+      "equals": 1500
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803751
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803751,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 803751,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803751,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_critical_damage",
+      "spell": 800732,
+      "target": "caster",
+      "equals": 1725
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 803751,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_critical_damage",
+      "spell": 800732,
+      "target": "caster",
+      "equals": 1500
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803752
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803752,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 803752,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803752,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_critical_damage",
+      "spell": 800732,
+      "target": "caster",
+      "equals": 1725
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 803752,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_critical_damage",
+      "spell": 800732,
+      "target": "caster",
+      "equals": 1500
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803753
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803753,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 803753,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803753,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_critical_damage",
+      "spell": 800732,
+      "target": "caster",
+      "equals": 1725
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 803753,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_critical_damage",
+      "spell": 800732,
+      "target": "caster",
+      "equals": 1500
+    }
+  ]
+}

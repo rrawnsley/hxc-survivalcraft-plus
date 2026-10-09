@@ -1,0 +1,1215 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native Arcane Tattoo magic and curse duration at all six ranks",
+  "contract": "Each acquired Arcane Tattoo rank reduces native negative Magic and Curse durations by20percent. Hostile creature-triggered Corruption and Curse of Agony apply through native aura duration calculation; removal restores baseline. This does not qualify original-cast practice.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Aptatarcan",
+      "race": 1,
+      "class": 32,
+      "level": 76
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "spell_hit_chance",
+      "equals": 100
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803748
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803748,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 803748,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803748,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 172,
+      "target": "caster",
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 172,
+      "min": 9300,
+      "max": 9600
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 172,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 980,
+      "target": "caster",
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 980,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 980,
+      "min": 18900,
+      "max": 19200
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 980,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 803748,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 172,
+      "target": "caster",
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 172,
+      "min": 11700,
+      "max": 12000
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 172,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 980,
+      "target": "caster",
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 980,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 980,
+      "min": 23700,
+      "max": 24000
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 980,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803759
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803759,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 803759,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803759,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 172,
+      "target": "caster",
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 172,
+      "min": 9300,
+      "max": 9600
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 172,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 980,
+      "target": "caster",
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 980,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 980,
+      "min": 18900,
+      "max": 19200
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 980,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 803759,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 172,
+      "target": "caster",
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 172,
+      "min": 11700,
+      "max": 12000
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 172,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 980,
+      "target": "caster",
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 980,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 980,
+      "min": 23700,
+      "max": 24000
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 980,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803760
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803760,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 803760,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803760,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 172,
+      "target": "caster",
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 172,
+      "min": 9300,
+      "max": 9600
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 172,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 980,
+      "target": "caster",
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 980,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 980,
+      "min": 18900,
+      "max": 19200
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 980,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 803760,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 172,
+      "target": "caster",
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 172,
+      "min": 11700,
+      "max": 12000
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 172,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 980,
+      "target": "caster",
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 980,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 980,
+      "min": 23700,
+      "max": 24000
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 980,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803761
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803761,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 803761,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803761,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 172,
+      "target": "caster",
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 172,
+      "min": 9300,
+      "max": 9600
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 172,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 980,
+      "target": "caster",
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 980,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 980,
+      "min": 18900,
+      "max": 19200
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 980,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 803761,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 172,
+      "target": "caster",
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 172,
+      "min": 11700,
+      "max": 12000
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 172,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 980,
+      "target": "caster",
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 980,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 980,
+      "min": 23700,
+      "max": 24000
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 980,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803762
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803762,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 803762,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803762,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 172,
+      "target": "caster",
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 172,
+      "min": 9300,
+      "max": 9600
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 172,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 980,
+      "target": "caster",
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 980,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 980,
+      "min": 18900,
+      "max": 19200
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 980,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 803762,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 172,
+      "target": "caster",
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 172,
+      "min": 11700,
+      "max": 12000
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 172,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 980,
+      "target": "caster",
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 980,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 980,
+      "min": 23700,
+      "max": 24000
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 980,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803763
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803763,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 803763,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803763,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 172,
+      "target": "caster",
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 172,
+      "min": 9300,
+      "max": 9600
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 172,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 980,
+      "target": "caster",
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 980,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 980,
+      "min": 18900,
+      "max": 19200
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 980,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 803763,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 172,
+      "target": "caster",
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 172,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 172,
+      "min": 11700,
+      "max": 12000
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 172,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 980,
+      "target": "caster",
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 980,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 980,
+      "min": 23700,
+      "max": 24000
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 980,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 76,
+      "health": 1000000,
+      "faction": 14,
+      "distance": 5,
+      "spell_hit_bonus": 100
+    }
+  ]
+}

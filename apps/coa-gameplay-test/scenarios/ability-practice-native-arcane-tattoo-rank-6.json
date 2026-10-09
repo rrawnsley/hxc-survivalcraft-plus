@@ -1,0 +1,121 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native Arcane Tattoo rank 6",
+  "contract": "Preserve native acquired resistance and secondary aura amounts before practice enrollment; secondary combat behavior requires separate qualification.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Aptataf",
+      "race": 1,
+      "class": 32,
+      "level": 76
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803748
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803759
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803760
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803761
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803762
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803763
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 6,
+      "save_as": "res_before"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803763,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 803763,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 803763,
+      "effect": 0,
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 6,
+      "relative_to": "res_before",
+      "equals": 30
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 803763,
+      "effect": 1,
+      "equals": -20
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 803763,
+      "effect": 2,
+      "equals": -20
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 803763,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 6,
+      "relative_to": "res_before",
+      "equals": 0
+    }
+  ]
+}

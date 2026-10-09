@@ -91,6 +91,11 @@
     {"action": "assert", "actor": "r", "metric": "run_speed_rate", "ratio_to": "base_speed",
       "min": 1.199, "max": 1.201},
 
+    {"action": "set_player_setting", "actor": "r", "source": "core.hxc.ability_practice.32.801094", "index": 0, "value": 1},
+    {"action": "set_player_setting", "actor": "r", "source": "core.hxc.ability_practice.32.801094", "index": 1, "value": 4},
+    {"action": "set_player_setting", "actor": "r", "source": "core.hxc.ability_practice.32.801094", "index": 2, "value": 1},
+    {"action": "set_player_setting", "actor": "r", "source": "core.hxc.ability_practice.32.801094", "index": 3, "value": 10},
+    {"action": "set_player_setting", "actor": "r", "source": "core.hxc.ability_practice.32.801094", "index": 4, "value": 0},
     {"action": "learn", "actor": "r", "spell": 803754, "label": "Keep PR4215 Earth rank supersession working"},
     {"action": "set_power", "actor": "r", "power": 0, "value": 2000},
     {"action": "cast", "actor": "r", "spell": 801094},

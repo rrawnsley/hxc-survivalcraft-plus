@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native Fire Tattoo rank 2",
+  "contract": "Preserve native acquired resistance and secondary aura amounts before practice enrollment; secondary combat behavior requires separate qualification.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Aptatfb",
+      "race": 1,
+      "class": 32,
+      "level": 36
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 801106
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803749
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 2,
+      "save_as": "res_before"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803749,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 803749,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 803749,
+      "effect": 0,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 2,
+      "relative_to": "res_before",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 803749,
+      "effect": 1,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 803749,
+      "effect": 2,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 803749,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "resistance",
+      "school": 2,
+      "relative_to": "res_before",
+      "equals": 0
+    }
+  ]
+}
