@@ -9,6 +9,14 @@
 
 namespace AbilityPractice::DevelopmentBuffs
 {
+inline constexpr std::array LeylineInscription = {
+    AbilityRank{ 561260, 1, { 16, 1 } },
+    AbilityRank{ 561261, 2, { 28, 10 } },
+    AbilityRank{ 561262, 3, { 40, 20 } },
+    AbilityRank{ 561263, 4, { 52, 40 } }
+};
+inline constexpr auto LeylineInscriptionCaps = Development::RankCaps(LeylineInscription);
+
 inline constexpr std::array TemporalResilience = {
     AbilityRank{ 680389, 1, { 2, 1 } },
     AbilityRank{ 536258, 2, { 10, 10 } },
@@ -483,6 +491,9 @@ inline constexpr auto RiteOfPowerCaps = Development::RankCaps(RiteOfPower);
 
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 32, 561260, AbilityKind::Ranked, LeylineInscription, LeylineInscriptionCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 22, 680389, AbilityKind::Ranked, TemporalResilience, TemporalResilienceCaps },
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -685,6 +696,7 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 32, 561260, 57, 126, 115, 1 },
     Mechanic{ 22, 680389, 1, 1, 22 },
     Mechanic{ 32, 807834, 1, 16, 22 },
     Mechanic{ 32, 803748, 1, 64, 22 },
@@ -771,6 +783,12 @@ inline Mechanic const* SecondaryMechanicFor(AbilityProfile const& profile, std::
             mechanic.EffectIndex == effectIndex)
             return &mechanic;
     return nullptr;
+}
+
+inline bool IsLeylineInscription(AbilityProfile const& profile)
+{
+    return profile.Definition.ClassId == 32 && profile.Definition.AbilityId == 561260 &&
+        IsSupportedStatBuff(profile);
 }
 
 inline bool IsTemporalResilience(AbilityProfile const& profile)

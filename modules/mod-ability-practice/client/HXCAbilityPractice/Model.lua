@@ -736,6 +736,11 @@ function Model.PracticeRules(ability, saved)
         rule = "Keep your own Fire Tattoo active and use a learned ability for useful damage or healing"
             .. " in a non-gray PvE encounter. Its Fire resistance and 15% critical damage bonus must remain effective."
             .. " Applying or refreshing a tattoo gives no practice. Switching tattoos pauses Fire practice."
+    elseif ability.abilityId == 561260 and ability.route == 13 then
+        rule = "Keep your own Leyline Inscription active and use a learned ability for useful damage or healing"
+            .. " in a non-gray PvE encounter. Its healing received bonus must remain effective."
+            .. " It also increases magic damage taken. Applying or refreshing it gives no practice;"
+            .. " removing it pauses practice. Buffing an ally alone does not train your skill."
     elseif ability.abilityId == 680389 and ability.route == 13 then
         rule = "Keep your own Temporal Resilience active and use a learned ability for useful damage or healing"
             .. " in a non-gray PvE encounter. Its armor must remain effective."

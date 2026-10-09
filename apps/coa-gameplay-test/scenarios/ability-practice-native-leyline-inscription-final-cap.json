@@ -1,0 +1,319 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Leyline Inscription final-cap",
+  "contract": "Prepare rank4 at40/proficiency40. No extra practice before52, then automatically learn final native75 magic vulnerability and80 healing received; final cap awards0.",
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apleycap",
+      "race": 1,
+      "class": 32,
+      "level": 40,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 3,
+      "value": 39
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 4,
+      "value": 15600
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 561260
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 561261
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 561262
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800732
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561262,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 561262,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800732,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 3,
+      "equals": 40
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 561263,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800732,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 3,
+      "equals": 40
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "actor": "caster",
+      "value": 52
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 561263,
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561263,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 561263,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 561263,
+      "effect": 0,
+      "equals": 75
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 561263,
+      "effect": 1,
+      "equals": 80
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800732,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 3,
+      "equals": 40
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 4,
+      "equals": 0
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 40,
+      "health": 1000000,
+      "faction": 14,
+      "distance": 3,
+      "stationary": true
+    }
+  ]
+}

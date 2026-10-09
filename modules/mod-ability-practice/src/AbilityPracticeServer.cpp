@@ -747,6 +747,37 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
                 scripts.first != scripts.second || !HasExpectedEtchingGroup(561237, info->Id))
                 return false;
         }
+        if (Practice::DevelopmentBuffs::IsLeylineInscription(profile))
+        {
+            constexpr std::array spells{ 561260u, 561261u, 561262u, 561263u };
+            constexpr std::array levels{ 16u, 28u, 40u, 52u };
+            constexpr std::array damageTaken{ 14, 29, 49, 74 };
+            constexpr std::array healingReceived{ 15, 31, 52, 79 };
+            auto const rank = std::find(spells.begin(), spells.end(), info->Id);
+            auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+            auto const groups = sSpellMgr->GetSpellSpellGroupMapBounds(info->Id);
+            auto const& vulnerability = info->Effects[EFFECT_0];
+            if (rank == spells.end() || info->SpellFamilyName != 38 || info->SpellFamilyFlags ||
+                scripts.first != scripts.second || groups.first != groups.second ||
+                info->GetDuration() != 1800000 || info->ProcFlags || info->ProcChance != 10 ||
+                info->ProcCharges || sSpellMgr->GetSpellProcEntry(info->Id) ||
+                info->ManaCostPercentage != 7 || info->EquippedItemClass != -1 ||
+                info->EquippedItemSubClassMask || info->EquippedItemInventoryTypeMask ||
+                vulnerability.Effect != SPELL_EFFECT_APPLY_AURA ||
+                vulnerability.ApplyAuraName != SPELL_AURA_MOD_DAMAGE_TAKEN ||
+                vulnerability.TargetA.GetTarget() != TARGET_UNIT_TARGET_RAID ||
+                vulnerability.TargetB.GetTarget() || vulnerability.TriggerSpell || vulnerability.MiscValue != 126)
+                return false;
+            auto const index = static_cast<std::size_t>(rank - spells.begin());
+            if (info->SpellLevel != levels[index] || info->BaseLevel != levels[index] || info->MaxLevel ||
+                vulnerability.BasePoints != damageTaken[index] ||
+                info->Effects[EFFECT_1].BasePoints != healingReceived[index] ||
+                info->Effects[EFFECT_2].BasePoints != -1)
+                return false;
+            for (auto const& effect : info->Effects)
+                if (effect.DieSides != 1 || effect.RealPointsPerLevel || effect.MiscValueB || effect.SpellClassMask)
+                    return false;
+        }
         if (Practice::DevelopmentBuffs::IsTemporalResilience(profile))
         {
             constexpr std::array spells{ 680389u, 536258u, 536259u, 536260u, 536261u, 536262u, 536263u };
@@ -1040,6 +1071,8 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
             auto const& slot = info->Effects[index];
             if ((Practice::DevelopmentBuffs::IsFrostTattoo(profile) ||
                 Practice::DevelopmentBuffs::IsTemporalResilience(profile)) && index == EFFECT_1)
+                continue;
+            if (Practice::DevelopmentBuffs::IsLeylineInscription(profile) && index == EFFECT_0)
                 continue;
             auto const* secondary = Practice::DevelopmentBuffs::SecondaryMechanicFor(profile, index);
             if (secondary && index == secondary->EffectIndex)
@@ -2114,7 +2147,7 @@ bool EffectiveBuffComponent(Player* player, AuraApplication const& application, 
             aura != SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE && aura != SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT &&
             aura != SPELL_AURA_MOD_ATTACK_POWER && aura != SPELL_AURA_MOD_RANGED_ATTACK_POWER &&
             aura != SPELL_AURA_HASTE_SPELLS && aura != SPELL_AURA_MOD_CRIT_DAMAGE_BONUS &&
-            aura != SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL) ||
+            aura != SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL && aura != SPELL_AURA_MOD_HEALING) ||
         !effect || effect->GetAuraType() != aura || effect->GetMiscValue() != selector ||
         (costReduction ? ((rankedCostReduction ? effect->GetAmount() >= 0 : effect->GetAmount() != -5) ||
             selector != 127) : durationReduction ?
@@ -2151,6 +2184,14 @@ bool EffectiveBuffApplication(Player* player, AuraApplication const& application
         Practice::DevelopmentBuffs::Aura(profile), Practice::DevelopmentBuffs::StatSelector(
             profile, application.GetBase()->GetSpellInfo()->Id)))
         return false;
+    if (Practice::DevelopmentBuffs::IsLeylineInscription(profile))
+    {
+        auto const* vulnerability = application.GetBase()->GetEffect(EFFECT_0);
+        if (!application.HasEffect(EFFECT_0) || !vulnerability ||
+            vulnerability->GetAuraType() != SPELL_AURA_MOD_DAMAGE_TAKEN ||
+            vulnerability->GetMiscValue() != 126 || vulnerability->GetAmount() <= 0)
+            return false;
+    }
     if (Practice::DevelopmentBuffs::IsPairedAttackPower(profile) &&
         !EffectiveBuffComponent(player, application, EFFECT_1, SPELL_AURA_MOD_RANGED_ATTACK_POWER, 0))
         return false;

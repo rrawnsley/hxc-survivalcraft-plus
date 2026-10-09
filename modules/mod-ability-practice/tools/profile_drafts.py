@@ -240,17 +240,18 @@ def reviewed_stat_buffs(root):
             (22, 680389, 1, 1, 22, 0), (16, 680282, 1, 1, 22, 0), (32, 801106, 1, 4, 22, 0), (32, 803748, 1, 64, 22, 0),
             (32, 807834, 1, 16, 22, 0),
             (32, 801094, 1, 1, 22, 0), (32, 801107, 1, 0, 85, 0)}
+        leyline = (class_id, ability_id, target, stat, aura, effect_index) == (32, 561260, 57, 126, 115, 1)
         party_resistance = (class_id, ability_id, target, stat, aura, effect_index) == (25, 1119881, 1, 32, 143, 0)
         if (not 12 <= class_id <= 32 or not ability_id or
-                (target not in {21, 56} and not self_buff and not party_resistance) or
-                not (self_buff or party_resistance or aura == 29 and stat in range(5) or
+                (target not in {21, 56} and not self_buff and not party_resistance and not leyline) or
+                not (self_buff or party_resistance or leyline or aura == 29 and stat in range(5) or
                      aura == 345 and stat == 127 and target == 21 or
                      aura in {85, 99} and stat == 0 and target == 21 or
                      aura == 22 and stat == 1 and target == 21 and (class_id, ability_id) in {
                          (21, 523489), (14, 523478), (15, 523485), (29, 803651)} or
                      aura == 143 and (stat in {4, 16, 64, 126} or
                          stat == 1 and (class_id, ability_id) == (31, 570752)) and target == 21) or
-                ((effect_index != 0 or aura == 143 and stat == 126) and not (
+                ((effect_index != 0 or aura == 143 and stat == 126) and not (leyline or
                     effect_index == 2 and aura == 143 and stat == 126 and
                     (class_id, ability_id) in {(16, 575843), (30, 575839)} or
                     effect_index == 1 and aura == 29 and stat == 0 and target == 21 and
@@ -667,6 +668,10 @@ def build_drafts(candidates, root):
             primary_effect = 65 if (class_id, ability_id) == (25, 1119881) else 6
             expected[effect_index] = (primary_effect, mechanic['auraId'], mechanic['targetA'],
                                        0, 0, mechanic['statSelector'])
+            if (class_id, ability_id) == (32, 561260):
+                expected[0] = (6, 14, 57, 0, 0, 126)
+                required.extend(['native-incoming-healing-and-magic-vulnerability-tradeoff',
+                                 'native-four-rank-raid-target-self-owned-practice'])
             if (class_id, ability_id) == (22, 680389):
                 expected[1] = (6, 42, 1, 0, 536265, 0)
                 required.extend(['native-self-armor-complete-seven-rank-ladder',

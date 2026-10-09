@@ -1,0 +1,171 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Leyline Inscription menu",
+  "contract": "Schema5 lists four native levels16/28/40/52 and proficiency1/10/20/40, cap20 and exact540 qualifying uses to rank2. Addon rules disclose incoming tradeoff and self-owned practice.",
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apleymenu",
+      "race": 1,
+      "class": 32,
+      "level": 28,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 3,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 561260
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561260,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 561260,
+      "equals": 0
+    },
+    {
+      "action": "whisper",
+      "actor": "caster",
+      "to": "Apleymenu",
+      "text": "HXAP\tHELLO|5",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "HXAP\tB|5|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "|561260|561260|1|1|0|20|16200|4",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "|561261|2|28|10|4|1|540",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "|561260|1|16|1|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "|561261|2|28|10|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "|561262|3|40|20|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "|561263|4|52|40|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 10000
+    }
+  ]
+}

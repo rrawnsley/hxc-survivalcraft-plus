@@ -1,0 +1,259 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Leyline Inscription ally-no-practice",
+  "contract": "Original selected ally retains native tradeoff. Ally-only cast and caster combat award0; original owned self inscription and useful combat resume270 points/use.",
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apleyshare",
+      "race": 1,
+      "class": 32,
+      "level": 28,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "name": "Apleyguest",
+      "race": 1,
+      "class": 32,
+      "level": 28
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 3,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 561260
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800732
+    },
+    {
+      "action": "group",
+      "actor": "caster",
+      "target": "ally"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561260,
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 561260,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 561260,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800732,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 3,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 561260,
+      "effect": 0,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "aura_amount",
+      "spell": 561260,
+      "effect": 1,
+      "equals": 16
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 561260,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 561260,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800732,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 800732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 800732,
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 3,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 4,
+      "equals": 270
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 28,
+      "health": 1000000,
+      "faction": 14,
+      "distance": 3,
+      "stationary": true
+    }
+  ]
+}

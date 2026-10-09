@@ -468,7 +468,7 @@ void CheckCurrentRankPolicies()
 {
     std::uint32_t forecasts = 0;
     std::array<bool, 21> classes{};
-    assert(DevelopmentPacing::Entries.size() == 178);
+    assert(DevelopmentPacing::Entries.size() == 179);
     for (auto const& entry : DevelopmentPacing::Entries)
     {
         classes.at(entry.ClassId - 12) = true;

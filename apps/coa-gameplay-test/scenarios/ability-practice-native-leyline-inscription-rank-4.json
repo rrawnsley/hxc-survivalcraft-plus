@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Ability practice: native Leyline Inscription rank4 incoming magic tradeoff",
-  "contract": "Native raid-target attunement increases magic damage taken and healing received, not outgoing spell power. Root Aura14/115 amounts and incoming calculators retain the authored tradeoff. Native SQL42833 direct coefficient1 and48071 coefficient0.8057, level78/80 against level80 recipient, predict exact incoming deltas. Normal school control stays unchanged; refresh does not stack and controlled native aura removal restores baseline. No practice classification/enrollment.",
+  "contract": "Native raid-target attunement increases magic damage taken and healing received, not outgoing spell power. Root Aura14/115 amounts and incoming calculators retain the authored tradeoff. Native SQL42833 direct coefficient1 and48071 coefficient0.8057, level78/80 against level80 recipient, predict exact incoming deltas. Normal school control stays unchanged; refresh does not stack and controlled native aura removal restores baseline. Practice enrollment retains native incoming effects; seeded qualification selects the original native rank.",
   "timeout_ms": 90000,
   "players": [
     {
@@ -16,6 +16,56 @@
     {
       "action": "wait",
       "ms": 3000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 3,
+      "value": 40
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.561260",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 561260
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 561261
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 561262
     },
     {
       "action": "learn",
