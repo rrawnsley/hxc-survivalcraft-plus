@@ -9416,7 +9416,7 @@ bool IsAscensionMaleOnlyRace(uint8 race)
 {
     switch (race)
     {
-        case 15: case 17: case 18: case 22: case 23: case 24: case 25: case 26:
+        case 15: case 17: case 18: case 22: case 23: case 24: case 25: case 26: case 32: case 50:
             return true;
         default:
             return false;

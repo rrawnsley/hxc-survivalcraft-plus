@@ -92,6 +92,16 @@ enum Races
     //RACE_ICE_TROLL      = 21
 };
 
+inline constexpr bool UsesExtendedAppearance(uint32 race)
+{
+    return race == 66 || race == 68 || race == 69;
+}
+
+inline constexpr bool UsesHaranirAppearance(uint32 race)
+{
+    return race == 70 || race == 71;
+}
+
 // DisplayRace values from CreatureDisplayInfoExtra.dbc
 enum class DisplayRace : uint8
 {
