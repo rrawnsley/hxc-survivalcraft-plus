@@ -1,0 +1,826 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Frost Palm partial and unsupported retention",
+  "contract": "Native learned rank1 retained. Current definition1 partial25/4050 retained with migration0 becoming1 or completed1 unchanged. Definitions2/3/4/999, storage2 and migration9 preserved without unsupported conversion. Menu and periodic observation do not discard records.",
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "fresh",
+      "name": "Apfrsavezero",
+      "race": 1,
+      "class": 32,
+      "level": 34
+    },
+    {
+      "id": "current",
+      "name": "Apfrsavegood",
+      "race": 1,
+      "class": 32,
+      "level": 34
+    },
+    {
+      "id": "two",
+      "name": "Apfrsavetwo",
+      "race": 1,
+      "class": 32,
+      "level": 34
+    },
+    {
+      "id": "three",
+      "name": "Apfrsavethre",
+      "race": 1,
+      "class": 32,
+      "level": 34
+    },
+    {
+      "id": "four",
+      "name": "Apfrsavefour",
+      "race": 1,
+      "class": 32,
+      "level": 34
+    },
+    {
+      "id": "unknown",
+      "name": "Apfrsavebad",
+      "race": 1,
+      "class": 32,
+      "level": 34
+    },
+    {
+      "id": "storage",
+      "name": "Apfrsavestor",
+      "race": 1,
+      "class": 32,
+      "level": 34
+    },
+    {
+      "id": "migration",
+      "name": "Apfrsavemigr",
+      "race": 1,
+      "class": 32,
+      "level": 34
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "fresh",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "fresh",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 1,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "fresh",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 2,
+      "value": 0
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "fresh",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 3,
+      "value": 25
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "fresh",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 4,
+      "value": 4050
+    },
+    {
+      "action": "learn",
+      "actor": "fresh",
+      "spell": 805381
+    },
+    {
+      "action": "whisper",
+      "actor": "fresh",
+      "to": "Apfrsavezero",
+      "text": "HXAP\tHELLO|5",
+      "language": 4294967295
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "current",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "current",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 1,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "current",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "current",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 3,
+      "value": 25
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "current",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 4,
+      "value": 4050
+    },
+    {
+      "action": "learn",
+      "actor": "current",
+      "spell": 805381
+    },
+    {
+      "action": "whisper",
+      "actor": "current",
+      "to": "Apfrsavegood",
+      "text": "HXAP\tHELLO|5",
+      "language": 4294967295
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "two",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "two",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 1,
+      "value": 2
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "two",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "two",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 3,
+      "value": 25
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "two",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 4,
+      "value": 4050
+    },
+    {
+      "action": "learn",
+      "actor": "two",
+      "spell": 805381
+    },
+    {
+      "action": "whisper",
+      "actor": "two",
+      "to": "Apfrsavetwo",
+      "text": "HXAP\tHELLO|5",
+      "language": 4294967295
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "three",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "three",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 1,
+      "value": 3
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "three",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "three",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 3,
+      "value": 25
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "three",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 4,
+      "value": 4050
+    },
+    {
+      "action": "learn",
+      "actor": "three",
+      "spell": 805381
+    },
+    {
+      "action": "whisper",
+      "actor": "three",
+      "to": "Apfrsavethre",
+      "text": "HXAP\tHELLO|5",
+      "language": 4294967295
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "four",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "four",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "four",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "four",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 3,
+      "value": 25
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "four",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 4,
+      "value": 4050
+    },
+    {
+      "action": "learn",
+      "actor": "four",
+      "spell": 805381
+    },
+    {
+      "action": "whisper",
+      "actor": "four",
+      "to": "Apfrsavefour",
+      "text": "HXAP\tHELLO|5",
+      "language": 4294967295
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "unknown",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "unknown",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 1,
+      "value": 999
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "unknown",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "unknown",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 3,
+      "value": 25
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "unknown",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 4,
+      "value": 4050
+    },
+    {
+      "action": "learn",
+      "actor": "unknown",
+      "spell": 805381
+    },
+    {
+      "action": "whisper",
+      "actor": "unknown",
+      "to": "Apfrsavebad",
+      "text": "HXAP\tHELLO|5",
+      "language": 4294967295
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "storage",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 0,
+      "value": 2
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "storage",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 1,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "storage",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "storage",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 3,
+      "value": 25
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "storage",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 4,
+      "value": 4050
+    },
+    {
+      "action": "learn",
+      "actor": "storage",
+      "spell": 805381
+    },
+    {
+      "action": "whisper",
+      "actor": "storage",
+      "to": "Apfrsavestor",
+      "text": "HXAP\tHELLO|5",
+      "language": 4294967295
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "migration",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "migration",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 1,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "migration",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 2,
+      "value": 9
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "migration",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 3,
+      "value": 25
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "migration",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 4,
+      "value": 4050
+    },
+    {
+      "action": "learn",
+      "actor": "migration",
+      "spell": 805381
+    },
+    {
+      "action": "whisper",
+      "actor": "migration",
+      "to": "Apfrsavemigr",
+      "text": "HXAP\tHELLO|5",
+      "language": 4294967295
+    },
+    {
+      "action": "wait",
+      "ms": 12000
+    },
+    {
+      "action": "assert",
+      "actor": "fresh",
+      "metric": "knows_spell",
+      "spell": 805381,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "fresh",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "fresh",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 1,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "fresh",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 2,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "fresh",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 3,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "actor": "fresh",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 4,
+      "equals": 4050
+    },
+    {
+      "action": "assert",
+      "actor": "current",
+      "metric": "knows_spell",
+      "spell": 805381,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "current",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "current",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 1,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "current",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 2,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "current",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 3,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "actor": "current",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 4,
+      "equals": 4050
+    },
+    {
+      "action": "assert",
+      "actor": "two",
+      "metric": "knows_spell",
+      "spell": 805381,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "two",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "two",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 1,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "two",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 2,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "two",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 3,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "actor": "two",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 4,
+      "equals": 4050
+    },
+    {
+      "action": "assert",
+      "actor": "three",
+      "metric": "knows_spell",
+      "spell": 805381,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "three",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "three",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 1,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "three",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 2,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "three",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 3,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "actor": "three",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 4,
+      "equals": 4050
+    },
+    {
+      "action": "assert",
+      "actor": "four",
+      "metric": "knows_spell",
+      "spell": 805381,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "four",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "four",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 1,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "actor": "four",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 2,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "four",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 3,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "actor": "four",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 4,
+      "equals": 4050
+    },
+    {
+      "action": "assert",
+      "actor": "unknown",
+      "metric": "knows_spell",
+      "spell": 805381,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "unknown",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "unknown",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 1,
+      "equals": 999
+    },
+    {
+      "action": "assert",
+      "actor": "unknown",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 2,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "unknown",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 3,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "actor": "unknown",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 4,
+      "equals": 4050
+    },
+    {
+      "action": "assert",
+      "actor": "storage",
+      "metric": "knows_spell",
+      "spell": 805381,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "storage",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 0,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "storage",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 1,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "storage",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 2,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "storage",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 3,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "actor": "storage",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 4,
+      "equals": 4050
+    },
+    {
+      "action": "assert",
+      "actor": "migration",
+      "metric": "knows_spell",
+      "spell": 805381,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "migration",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "migration",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 1,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "migration",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 2,
+      "equals": 9
+    },
+    {
+      "action": "assert",
+      "actor": "migration",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 3,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "actor": "migration",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 4,
+      "equals": 4050
+    }
+  ]
+}

@@ -632,6 +632,13 @@ function Model.PracticeRules(ability, saved)
         return Model.ReplacementText(ability) .. "\n\nUse the replacement from your spellbook."
             .. " The original ability can resume practice when it is available again."
     end
+    if ability.abilityId == 805381 then
+        return "Practice Frost Palm Sigil through useful bonus Frost hits from your original casts."
+            .. " Counted hits must be at least ten seconds apart; each sigil counts once."
+            .. " Arming, refreshing, expiry, injected auras and zero-damage hits earn no practice."
+            .. " Mastery improves only the bonus hit by up to 2%; its native slow stays unchanged."
+            .. " Prepare one upcoming mastery milestone. " .. LearnText(ability.acquisitionSource)
+    end
     if Model.IsFixed(ability) then
         if ability.abilityId == 807828 then
             return "Cinderwake has one native rank and no practice levels. " .. LearnText(ability.acquisitionSource)

@@ -449,6 +449,7 @@ struct MenuSession
     Practice::BuffCastLedger PeriodicBuffCasts;
     Clock::time_point NextBuffStateRefresh{};
     Clock::time_point NextFireSigilPractice{};
+    Clock::time_point NextFrostSigilPractice{};
     std::uint32_t OutgoingClass = 0;
     std::vector<std::string> Outgoing;
     std::size_t NextMessage = 0;
@@ -683,6 +684,65 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
         return false;
     if (HelpersRequested && MasteryRequested && Practice::DevelopmentMastery::IsFelBargain(profile))
         return info->Id == 807942 && profile.Outcome == Practice::OutcomeKind::Healing;
+    if (HelpersRequested && MasteryRequested && Practice::DevelopmentMastery::IsFrostSigil(profile))
+    {
+        auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+        auto entry = scripts.first;
+        auto const* proc = sSpellMgr->GetSpellProcEntry(info->Id);
+        auto const* helper = sSpellMgr->GetSpellInfo(807825);
+        auto const* slow = sSpellMgr->GetSpellInfo(808022);
+        if (info->Id != 805381 || entry == scripts.second || sObjectMgr->GetScriptName(entry->second) !=
+            "aura_ascension_damage_palm_sigil" || ++entry != scripts.second ||
+            info->SpellFamilyName != 38 || info->SpellFamilyFlags[0] != 67108864 ||
+            info->SpellFamilyFlags[1] || info->SpellFamilyFlags[2] != 8192 ||
+            info->SpellLevel != 34 || info->BaseLevel != 34 || info->MaxLevel ||
+            info->GetDuration() != 6000 || info->CasterAuraSpell != 808089 ||
+            info->ManaCost || info->ManaCostPercentage != 4 || info->RecoveryTime ||
+            info->CategoryRecoveryTime || info->ProcFlags || info->ProcChance != 100 || info->ProcCharges ||
+            !proc || proc->SchoolMask != SPELL_SCHOOL_MASK_MAGIC || proc->SpellFamilyName || proc->SpellFamilyMask ||
+            proc->ProcFlags != 69972 || proc->SpellTypeMask != 1 || proc->SpellPhaseMask != 2 ||
+            proc->HitMask != 3 || proc->AttributesMask != 2 || proc->DisableEffectsMask != 2 ||
+            proc->ProcsPerMinute || proc->Chance != 100 || proc->Cooldown.count() || proc->Charges != 1 ||
+            !helper || helper->DmgClass != SPELL_DAMAGE_CLASS_MAGIC ||
+            helper->SchoolMask != SPELL_SCHOOL_MASK_FROST || !helper->AscensionInheritsResolvedAmount ||
+            !helper->HasAttribute(SPELL_ATTR2_CANT_CRIT) ||
+            !helper->HasAttribute(SPELL_ATTR3_IGNORE_CASTER_MODIFIERS) ||
+            !helper->HasAttribute(SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS) ||
+            !slow || slow->GetDuration() != 8000 || slow->ProcFlags || slow->ProcChance || slow->ProcCharges ||
+            sSpellMgr->GetSpellProcEntry(807825) || sSpellMgr->GetSpellProcEntry(808022))
+            return false;
+        constexpr std::array rootEffects{ 6u, 6u, 0u };
+        constexpr std::array rootAuras{ 354u, 42u, 0u };
+        constexpr std::array rootTriggers{ 807825u, 808022u, 0u };
+        constexpr std::array rootAmounts{ 29, 0, -1 };
+        constexpr std::array damageEffects{ 2u, 64u, 0u };
+        for (std::size_t slot = 0; slot < 3; ++slot)
+        {
+            auto const& effect = info->Effects[slot];
+            auto const& damage = helper->Effects[slot];
+            auto const& debuff = slow->Effects[slot];
+            if (effect.Effect != rootEffects[slot] || effect.ApplyAuraName != rootAuras[slot] ||
+                effect.TargetA.GetTarget() != (slot < 2 ? TARGET_UNIT_CASTER : 0u) || effect.TargetB.GetTarget() ||
+                effect.TriggerSpell != rootTriggers[slot] || effect.BasePoints != rootAmounts[slot] ||
+                effect.DieSides != (slot == 1 ? 0 : 1) || effect.RealPointsPerLevel ||
+                effect.MiscValue || effect.MiscValueB || effect.SpellClassMask ||
+                damage.Effect != damageEffects[slot] || damage.ApplyAuraName ||
+                damage.TargetA.GetTarget() != (slot < 2 ? TARGET_UNIT_TARGET_ENEMY : 0u) ||
+                damage.TargetB.GetTarget() || damage.TriggerSpell != (slot == 1 ? 808022u : 0u) ||
+                damage.MiscValue != (slot == 1 ? 524287 : 0) || damage.MiscValueB || damage.RealPointsPerLevel ||
+                damage.BasePoints != (slot == 2 ? -1 : 0) || damage.DieSides != (slot == 1 ? 0 : 1) ||
+                damage.BonusMultiplier || damage.SpellClassMask ||
+                debuff.Effect != (slot == 0 ? SPELL_EFFECT_APPLY_AURA : 0u) ||
+                debuff.ApplyAuraName != (slot == 0 ? SPELL_AURA_MOD_DECREASE_SPEED : 0u) ||
+                debuff.TargetA.GetTarget() != (slot == 0 ? TARGET_UNIT_TARGET_ENEMY : 0u) ||
+                debuff.TargetB.GetTarget() || debuff.TriggerSpell || debuff.MiscValue || debuff.MiscValueB ||
+                debuff.RealPointsPerLevel || debuff.SpellClassMask ||
+                debuff.BasePoints != (slot == 0 ? -71 : slot == 2 ? -1 : 0) ||
+                debuff.DieSides != (slot == 1 ? 0 : 1))
+                return false;
+        }
+        return true;
+    }
     if (HelpersRequested && Practice::DevelopmentHelpers::IsFireSigil(profile))
     {
         constexpr std::array levels{ 4u, 26u, 34u, 42u, 50u };
@@ -2730,7 +2790,8 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
             view.ReplacementSpellId = NativeReplacement(player, ability);
             view.RuleSet = HelpersRequested && MasteryRequested &&
                 Practice::DevelopmentMastery::IsSoulCapture(profile) ? Practice::HumanPvECorpseRecoveryRuleSet :
-                HelpersRequested && MasteryRequested && Practice::DevelopmentMastery::IsBaneOfBetrayal(profile) ?
+                HelpersRequested && MasteryRequested && (Practice::DevelopmentMastery::IsBaneOfBetrayal(profile) ||
+                    Practice::DevelopmentMastery::IsFrostSigil(profile)) ?
                 Practice::HumanPvEScriptedDamageRuleSet :
                 HelpersRequested && Practice::DevelopmentHelpers::IsManafeed(profile) ?
                 Practice::HumanPvEScriptedHealRuleSet :
@@ -2903,13 +2964,20 @@ bool IsBaneDamage(Practice::AbilityProfile const* profile, std::uint32_t spellId
         Practice::DevelopmentMastery::IsBaneOfBetrayal(*profile) && spellId == 807554;
 }
 
+bool IsDamagePalmSigil(Practice::AbilityProfile const& profile, std::uint32_t originId, std::uint32_t helperId)
+{
+    return (Practice::DevelopmentHelpers::IsFireSigil(profile) &&
+        Practice::DevelopmentHelpers::IsFireSigilDamage(originId, helperId)) ||
+        (MasteryRequested && Practice::DevelopmentMastery::IsFrostSigil(profile) &&
+            originId == 805381 && helperId == 807825);
+}
+
 bool IsScriptedDamage(Practice::AbilityProfile const* profile, std::uint32_t originId, std::uint32_t helperId)
 {
     return IsBaneDamage(profile, helperId) || (HelpersRequested && profile &&
         ((Practice::DevelopmentHelpers::IsTwinSlice(*profile) &&
             Practice::DevelopmentHelpers::IsTwinDamage(originId, helperId)) ||
-            (Practice::DevelopmentHelpers::IsFireSigil(*profile) &&
-                Practice::DevelopmentHelpers::IsFireSigilDamage(originId, helperId))));
+            IsDamagePalmSigil(*profile, originId, helperId)));
 }
 
 struct ReceiptCast
@@ -2947,9 +3015,11 @@ void AwardScriptedDamage(Player* player, Spell* spell, Unit* target, std::uint32
         !ReceiptMatches(player, found->second, *receipt) ||
         !AcquisitionAllowed(player, profile->Definition, receipt->SpellId))
         return;
-    bool const fireSigil = Practice::DevelopmentHelpers::IsFireSigil(*profile);
+    auto* nextPractice = Practice::DevelopmentHelpers::IsFireSigil(*profile) ?
+        &found->second.NextFireSigilPractice : Practice::DevelopmentMastery::IsFrostSigil(*profile) ?
+        &found->second.NextFrostSigilPractice : nullptr;
     auto const now = Clock::now();
-    if (fireSigil && now < found->second.NextFireSigilPractice)
+    if (nextPractice && now < *nextPractice)
     {
         receipt->MarkConsumed();
         return;
@@ -2966,9 +3036,10 @@ void AwardScriptedDamage(Player* player, Spell* spell, Unit* target, std::uint32
         effective->View(), profile->DefinitionVersion, context);
     if (award.Status == Practice::OutcomeStatus::Capped)
         receipt->MarkConsumed();
-    if (fireSigil && award.Status == Practice::OutcomeStatus::Awarded)
-        found->second.NextFireSigilPractice = now +
-            std::chrono::seconds(Practice::DevelopmentHelpers::FirePracticeIntervalSeconds);
+    if (nextPractice && award.Status == Practice::OutcomeStatus::Awarded)
+        *nextPractice = now + std::chrono::seconds(Practice::DevelopmentHelpers::IsFireSigil(*profile) ?
+            Practice::DevelopmentHelpers::FirePracticeIntervalSeconds :
+            Practice::DevelopmentMastery::FrostPracticeIntervalSeconds);
     RecordAward(player, found->second, *profile, award);
 }
 
@@ -3766,7 +3837,9 @@ std::uint32_t ModifyMasteryDamage(Unit* caster, Unit* target, std::uint32_t spel
     if (!IsProfiledPlayer(player) || player->isBeingLoaded())
         return damage;
     auto const* profile = FindProfile(player, receipt->SpellId);
-    if (!profile || (receipt->SpellId != spellId && !IsBaneDamage(profile, spellId)) ||
+    if (!profile || (receipt->SpellId != spellId && !IsBaneDamage(profile, spellId) &&
+            !(HelpersRequested && Practice::DevelopmentMastery::IsFrostSigil(*profile) &&
+                receipt->SpellId == 805381 && spellId == 807825)) ||
         profile->Definition.Kind != Practice::AbilityKind::Mastery ||
         profile->Outcome != Practice::OutcomeKind::Damage ||
         !QualifiesDevelopmentOutcome(Practice::OutcomeKind::Damage, player, target, damage, 0))
@@ -3805,8 +3878,9 @@ public:
         bool const scriptedDamage = HelpersRequested && player->getClass() == 14 &&
             ((MasteryRequested && helperId == 807554) ||
                 Practice::DevelopmentHelpers::IsTwinDamageHelper(helperId));
-        bool const fireDamage = HelpersRequested && player->getClass() == 32 && helperId == 807012;
-        if (!profile && !IsBuffObserver(player) && !scriptedDamage && !fireDamage)
+        bool const palmDamage = HelpersRequested && player->getClass() == 32 &&
+            (helperId == 807012 || (MasteryRequested && helperId == 807825));
+        if (!profile && !IsBuffObserver(player) && !scriptedDamage && !palmDamage)
             return true;
         std::lock_guard lock(Mutex);
         spell->SetPracticeCast({});
@@ -3829,7 +3903,7 @@ public:
                 return true;
             }
         }
-        if (fireDamage && targets && spell->IsTriggered() && triggeredByAura && !spell->m_CastItem &&
+        if (palmDamage && targets && spell->IsTriggered() && triggeredByAura && !spell->m_CastItem &&
             spell->m_castItemGUID.IsEmpty() && spell->GetOriginalCasterGUID() == player->GetGUID() &&
             triggeredByAura->GetEffIndex() == EFFECT_0 && triggeredByAura->GetAuraType() == 354 &&
             triggeredByAura->GetSpellInfo()->Effects[EFFECT_0].TriggerSpell == helperId &&
@@ -3839,8 +3913,7 @@ public:
             auto const* origin = receipt ? FindProfile(player, receipt->SpellId) : nullptr;
             auto const session = Sessions.find(player->GetGUID().GetRawValue());
             if (receipt && !receipt->IsConsumed() && receipt->SpellId == triggeredByAura->GetId() &&
-                origin && Practice::DevelopmentHelpers::IsFireSigil(*origin) &&
-                Practice::DevelopmentHelpers::IsFireSigilDamage(receipt->SpellId, helperId) &&
+                origin && IsDamagePalmSigil(*origin, receipt->SpellId, helperId) &&
                 Affects(player) && !player->isBeingLoaded() && session != Sessions.end() &&
                 ReceiptMatches(player, session->second, *receipt) &&
                 AcquisitionAllowed(player, origin->Definition, receipt->SpellId))

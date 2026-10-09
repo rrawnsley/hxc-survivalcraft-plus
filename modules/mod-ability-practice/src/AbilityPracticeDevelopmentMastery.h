@@ -100,6 +100,20 @@ inline constexpr std::array FelBargainRewards = {
     MasteryReward{ { 38, 70 }, 100 },
     MasteryReward{ { 46, 100 }, 200 }
 };
+inline constexpr std::array FrostSigil = { AbilityRank{ 805381, 1, { 34, 1 } } };
+inline constexpr std::array FrostSigilCaps = {
+    ProficiencyCap{ 1, 1 }, ProficiencyCap{ 34, 40 }, ProficiencyCap{ 42, 70 }, ProficiencyCap{ 50, 100 }
+};
+inline constexpr std::array FrostSigilBands = {
+    TrainingBand{ 1, 8100, 1170 }, TrainingBand{ 40, 8100, 900 }
+};
+inline constexpr TrainingPolicy FrostSigilPolicy{ FrostSigilBands };
+inline constexpr std::array FrostSigilRewards = {
+    MasteryReward{ { 42, 40 }, 0, 50 },
+    MasteryReward{ { 50, 70 }, 0, 100 },
+    MasteryReward{ { 58, 100 }, 0, 200 }
+};
+inline constexpr std::uint32_t FrostPracticeIntervalSeconds = 10;
 inline constexpr std::array ScriptedProfiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 14, 807942, AbilityKind::Mastery, FelBargain, FelBargainCaps }, FelBargainPolicy, OutcomeKind::Healing,
@@ -109,8 +123,16 @@ inline constexpr std::array ScriptedProfiles = {
         SoulCaptureRewards },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 14, 712483, AbilityKind::Mastery, BaneOfBetrayal, Caps }, BaneOfBetrayalPolicy, OutcomeKind::Damage,
-        BaneOfBetrayalRewards }
+        BaneOfBetrayalRewards },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 32, 805381, AbilityKind::Mastery, FrostSigil, FrostSigilCaps }, FrostSigilPolicy, OutcomeKind::Damage,
+        FrostSigilRewards }
 };
+inline bool IsFrostSigil(AbilityProfile const& profile)
+{
+    return profile.Definition.ClassId == 32 && profile.Definition.AbilityId == 805381 &&
+        profile.Definition.Kind == AbilityKind::Mastery && profile.Outcome == OutcomeKind::Damage;
+}
 inline bool IsBaneOfBetrayal(AbilityProfile const& profile)
 {
     return profile.Definition.ClassId == 14 && profile.Definition.AbilityId == 712483 &&

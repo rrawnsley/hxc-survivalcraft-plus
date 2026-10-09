@@ -1,0 +1,420 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Frost Palm 200 basis-point damage-only reward",
+  "contract": "Native30percent bonus gains only 200 basis-point damage mastery from original authenticated cast; slow stays70percent/8seconds, no double damage modifiers, oneuse consumed. Native Burst with saved prior ranks unchanged.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "name": "Apfrosttwo"
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 1180
+    },
+    {
+      "action": "add_item",
+      "actor": "rm",
+      "item": 2092,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "rm",
+      "item": 2092,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "rm",
+      "skill": 173,
+      "value": 400,
+      "maximum": 400
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.802202",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.802202",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.802202",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.802202",
+      "index": 3,
+      "value": 200
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.802202",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 802202
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 502828
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 502829
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 502830
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 502831
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 502832
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 502833
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 502834
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 502835
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 502836
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 502837
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 502838
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 1,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 805381
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 807825,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 502838,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 502838,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 807825,
+      "equals": 0,
+      "label": "Without a sigil there is no extra Frost hit"
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 500469,
+      "stacks": 1,
+      "label": "Fixture: the alternative Waveforged window"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 808089,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "dummy",
+      "metric": "run_speed_rate",
+      "save_as": "native_speed"
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 805381
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 805381,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura_amount",
+      "spell": 805381,
+      "effect": 0,
+      "equals": 30
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 502838,
+      "target": "dummy",
+      "save_as": "before_hit"
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 502838,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 502838,
+      "target": "dummy",
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 807825,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 1500,
+      "label": "The next direct spell produces one Frost hit"
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 502838,
+      "target": "dummy",
+      "relative_to": "before_hit",
+      "save_as": "trigger_hit"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 502838,
+      "target": "dummy",
+      "relative_to": "before_hit",
+      "min": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 807825,
+      "target": "dummy",
+      "ratio_to": "trigger_hit",
+      "min": 0.3053,
+      "max": 0.3061,
+      "label": "The Frost hit copies 30% of the actual triggering damage"
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 808022,
+      "caster": "rm",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "aura_amount",
+      "spell": 808022,
+      "effect": 0,
+      "equals": -70
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "run_speed_rate",
+      "ratio_to": "native_speed",
+      "min": 0.2998,
+      "max": 0.3002
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 805381,
+      "equals": 0,
+      "label": "The one-use sigil is consumed"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 502838,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 502838,
+      "target": "dummy",
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 807825,
+      "equals": 1,
+      "label": "The following direct spell cannot reuse the consumed sigil"
+    },
+    {
+      "action": "wait",
+      "ms": 9000
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 808022,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "run_speed_rate",
+      "ratio_to": "native_speed",
+      "min": 0.9998,
+      "max": 1.0002
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "rm",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  }
+}

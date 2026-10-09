@@ -1,0 +1,275 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Frost Palm gray rejection",
+  "contract": "Native original sigil deals bonus damage to a genuinely gray hostile creature but earns no practice. This disposable fixture disables source world scaling and asserts effective target level1 before and after damage; production scaling is unchanged.",
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "rm",
+      "name": "Apfrostgray",
+      "race": 1,
+      "class": 32,
+      "level": 34,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "rm",
+      "value": 0
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "view_level",
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 1180
+    },
+    {
+      "action": "add_item",
+      "actor": "rm",
+      "item": 2092,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "rm",
+      "item": 2092,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "rm",
+      "skill": 173,
+      "value": 170,
+      "maximum": 170
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 1,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 3,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 805381
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 802202
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 500469,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 500
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 500469,
+      "stacks": 1,
+      "label": "Fixture: native Waveforged window for this original cast"
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 805381
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 805381,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 805381,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 3,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 500
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 500469,
+      "stacks": 1,
+      "label": "Fixture: native Waveforged window for this original cast"
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 805381
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 805381,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 805381,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 3,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 500
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 802202,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 807825,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "view_level",
+      "target": "dummy",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 3,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805381",
+      "index": 4,
+      "equals": 0
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "rm",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "faction": 14,
+      "distance": 3,
+      "stationary": true
+    }
+  ]
+}

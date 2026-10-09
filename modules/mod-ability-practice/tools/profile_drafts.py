@@ -467,6 +467,16 @@ def build_drafts(candidates, root):
         }
         if raw_graphs:
             required.append('trigger-reference-loaded-data-script-and-original-cast-attribution')
+        if (class_id, ability_id) == (32, 805381):
+            raw = members[ability_id].get('rawDbc', {})
+            details = raw.get('effectDetails', [])
+            expected = [(6, 354, 1, 0, 807825, 29), (6, 42, 1, 0, 808022, 0), (0, 0, 0, 0, 0, -1)]
+            if (len(ranks) != 1 or ranks[0]['characterLevel'] != 34 or
+                    raw.get('passive') is not False or raw.get('rankLabel') != 'Rank 1' or len(details) != 3 or
+                    [(v.get('effectId'), v.get('auraId'), v.get('implicitTargetA'), v.get('implicitTargetB'),
+                      v.get('triggerSpellId'), v.get('basePoints')) for v in details] != expected):
+                raise ValueError('Reviewed native Frost Palm source/raw evidence changed')
+            required.append('native-owned-single-use-frost-bonus-receipt-and-damage-only-mastery-slow-preserved')
         if (class_id, ability_id) == (32, 534803):
             expected_ids = [534803, 534804, 534805, 534806, 534807]
             expected_levels = [4, 26, 34, 42, 50]

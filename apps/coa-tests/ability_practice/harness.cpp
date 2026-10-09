@@ -597,6 +597,22 @@ void CheckMasteryFixedAndTrainerPolicies()
     assert(HealingMasteryBonus(bargain.Definition, bargain.Rewards, { 40, 0 }, 30, true, true) == 50);
     assert(HealingMasteryBonus(bargain.Definition, bargain.Rewards, { 70, 0 }, 38, true, true) == 100);
     assert(HealingMasteryBonus(bargain.Definition, bargain.Rewards, { 100, 0 }, 46, true, true) == 200);
+    auto const frost = std::find_if(DevelopmentMastery::ScriptedProfiles.begin(),
+        DevelopmentMastery::ScriptedProfiles.end(), DevelopmentMastery::IsFrostSigil);
+    assert(frost != DevelopmentMastery::ScriptedProfiles.end());
+    assert(CapAtLevel(frost->Definition, 33) == 1);
+    assert(CapAtLevel(frost->Definition, 34) == 40);
+    assert(CapAtLevel(frost->Definition, 41) == 40);
+    assert(CapAtLevel(frost->Definition, 42) == 70);
+    assert(CapAtLevel(frost->Definition, 49) == 70);
+    assert(CapAtLevel(frost->Definition, 50) == 100);
+    assert(UsesUntil(frost->Policy, { 1, 0 }, 40, 40).Uses == 270);
+    assert(UsesUntil(frost->Policy, { 40, 0 }, 70, 70).Uses == 270);
+    assert(UsesUntil(frost->Policy, { 70, 0 }, 100, 100).Uses == 270);
+    assert(DamageMasteryBonus(frost->Definition, frost->Rewards, { 40, 0 }, 41, true, true) == 0);
+    assert(DamageMasteryBonus(frost->Definition, frost->Rewards, { 40, 0 }, 42, true, true) == 50);
+    assert(DamageMasteryBonus(frost->Definition, frost->Rewards, { 70, 0 }, 50, true, true) == 100);
+    assert(DamageMasteryBonus(frost->Definition, frost->Rewards, { 100, 0 }, 58, true, true) == 200);
     for (auto const catalog : MasteryCatalogs())
     {
         for (auto const& authored : catalog)
@@ -777,7 +793,7 @@ void CheckMasteryFixedAndTrainerPolicies()
     std::size_t fixedDeclarations = 0;
     for (auto const catalog : FixedCatalogs())
         fixedDeclarations += catalog.size();
-    std::cout << "PASS: 9 mastery policies/rewards, " << fixedDeclarations << " fixed declarations, " << extensions
+    std::cout << "PASS: 10 mastery policies/rewards, " << fixedDeclarations << " fixed declarations, " << extensions
         << " trainer extensions/" << addedRanks << " added ranks\n";
 }
 
@@ -845,7 +861,7 @@ void WriteTypedMasteryAndFixedCases(std::ofstream& output, std::uint32_t& revisi
             profile.Outcome == OutcomeKind::Healing ? PracticeRoute::Healing : PracticeRoute::Damage;
         view.RuleSet = DevelopmentMastery::IsSoulCapture(profile) ?
             (catchup ? HumanPvECorpseRecoveryCatchupRuleSet : HumanPvECorpseRecoveryRuleSet) :
-            DevelopmentMastery::IsBaneOfBetrayal(profile) ?
+            (DevelopmentMastery::IsBaneOfBetrayal(profile) || DevelopmentMastery::IsFrostSigil(profile)) ?
             (catchup ? HumanPvEScriptedDamageCatchupRuleSet : HumanPvEScriptedDamageRuleSet) : 1;
         if (catchup)
         {
@@ -876,7 +892,8 @@ void WriteTypedMasteryAndFixedCases(std::ofstream& output, std::uint32_t& revisi
                 write(profile, profile.Definition.Ranks.front().Requirement.CharacterLevel, false, { 1, 0 });
             for (auto const& reward : profile.Rewards)
                 write(profile, reward.Requirement.CharacterLevel, true, { reward.Requirement.Proficiency, 0 });
-            if (DevelopmentMastery::IsBaneOfBetrayal(profile) || DevelopmentMastery::IsSoulCapture(profile))
+            if (DevelopmentMastery::IsBaneOfBetrayal(profile) || DevelopmentMastery::IsSoulCapture(profile) ||
+                DevelopmentMastery::IsFrostSigil(profile))
             {
                 write(profile, profile.Definition.Ranks.front().Requirement.CharacterLevel, true, { 1, 0 }, true);
                 for (auto const& reward : profile.Rewards)
