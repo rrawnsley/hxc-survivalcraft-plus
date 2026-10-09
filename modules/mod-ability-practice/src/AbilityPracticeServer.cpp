@@ -1428,6 +1428,20 @@ bool MatchesUtilityFixedRankMechanic(std::uint32_t classId, std::uint32_t spellI
                     return false;
         }
     }
+    if (classId == 32 && spellId == 802630)
+    {
+        constexpr std::array<std::int32_t, 6> tattoos{ 801094, 801106, 801107, 802630, 803748, 807834 };
+        auto const scripts = sObjectMgr->GetSpellScriptsBounds(spellId);
+        if (info->SpellFamilyName != 38 || info->SpellFamilyFlags[0] || info->SpellFamilyFlags[1] ||
+            info->SpellFamilyFlags[2] != 32 || scripts.first != scripts.second || info->GetDuration() != -1 ||
+            info->SpellLevel != 16 || info->BaseLevel != 16 || info->MaxLevel ||
+            info->ProcFlags != 20 || info->ProcChance != 100 || info->ProcCharges ||
+            !HasExactBuffGroup(spellId, 111001, SPELL_GROUP_STACK_RULE_EXCLUSIVE, tattoos))
+            return false;
+        for (auto const& effect : info->Effects)
+            if (effect.DieSides != 1 || effect.RealPointsPerLevel || effect.MiscValueB || effect.SpellClassMask)
+                return false;
+    }
     if (classId == 32 && (spellId == 561236 || spellId == 560295))
     {
         auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);

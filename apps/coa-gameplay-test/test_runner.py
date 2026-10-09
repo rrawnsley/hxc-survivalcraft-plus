@@ -15,6 +15,19 @@ import run
 
 
 class RunnerTests(unittest.TestCase):
+    def test_native_mechanic_resistance_requires_spell(self):
+        step = {'action': 'assert', 'actor': 'caster', 'metric': 'spell_mechanic_resist_chance',
+                'spell': 122, 'equals': 20}
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].append(step)
+        self.assertIs(run.validate(scenario), scenario)
+        for invalid in ({key: value for key, value in step.items() if key != 'spell'},
+                        dict(step, spell=0), dict(step, spell=True)):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append(invalid)
+            with self.subTest(invalid=invalid), self.assertRaises(ValueError):
+                run.validate(scenario)
+
     def test_native_item_observation_metrics(self):
         metrics = ('temporary_enchant_id', 'temporary_enchant_duration_ms', 'aura_from_item',
                    'item_is_equipped', 'item_slot')

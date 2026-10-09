@@ -1,0 +1,465 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native Air Tattoo speed and root/snare resistance baseline",
+  "contract": "Original Air Tattoo grants permanent 20percent run speed and native mechanic resistance20 to roots and snares. Fear and stun are controls with zero resistance. Refresh does not stack; another tattoo replaces all components, reapplication restores, cancellation removes. Native mechanic decision is observed directly rather than inferred from random resists. Fixed utility casting preserves unsupported saved records unchanged.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apairnative",
+      "race": 1,
+      "class": 32,
+      "level": 32
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.802630",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.802630",
+      "index": 1,
+      "value": 999
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.802630",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.802630",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.802630",
+      "index": 4,
+      "value": 101
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 802630
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 801094
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "run_speed_rate",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_mechanic_resist_chance",
+      "spell": 122,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_mechanic_resist_chance",
+      "spell": 1715,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_mechanic_resist_chance",
+      "spell": 5782,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_mechanic_resist_chance",
+      "spell": 853,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 802630
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 802630,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 802630,
+      "effect": 0,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 802630,
+      "effect": 1,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 802630,
+      "effect": 2,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 802630,
+      "equals": -1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "run_speed_rate",
+      "min": 1.199,
+      "max": 1.201
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_mechanic_resist_chance",
+      "spell": 122,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_mechanic_resist_chance",
+      "spell": 1715,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_mechanic_resist_chance",
+      "spell": 5782,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_mechanic_resist_chance",
+      "spell": 853,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 802630
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 802630,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "run_speed_rate",
+      "min": 1.199,
+      "max": 1.201
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_mechanic_resist_chance",
+      "spell": 122,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_mechanic_resist_chance",
+      "spell": 1715,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_mechanic_resist_chance",
+      "spell": 5782,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_mechanic_resist_chance",
+      "spell": 853,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 801094
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 801094,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 802630,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 801094,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "run_speed_rate",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_mechanic_resist_chance",
+      "spell": 122,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_mechanic_resist_chance",
+      "spell": 1715,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_mechanic_resist_chance",
+      "spell": 5782,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_mechanic_resist_chance",
+      "spell": 853,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 802630
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 802630,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 801094,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "run_speed_rate",
+      "min": 1.199,
+      "max": 1.201
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_mechanic_resist_chance",
+      "spell": 122,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_mechanic_resist_chance",
+      "spell": 1715,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_mechanic_resist_chance",
+      "spell": 5782,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_mechanic_resist_chance",
+      "spell": 853,
+      "equals": 0
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "caster",
+      "spell": 802630
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "run_speed_rate",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_mechanic_resist_chance",
+      "spell": 122,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_mechanic_resist_chance",
+      "spell": 1715,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_mechanic_resist_chance",
+      "spell": 5782,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_mechanic_resist_chance",
+      "spell": 853,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.802630",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.802630",
+      "index": 1,
+      "equals": 999
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.802630",
+      "index": 2,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.802630",
+      "index": 3,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.802630",
+      "index": 4,
+      "equals": 101
+    }
+  ]
+}

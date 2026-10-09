@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Fixed Air Tattoo native level32 menu",
+  "contract": "Learned and future Air Tattoo show a single native level32 rank without practice, no invented proficiency requirement or early teaching. Real-clock transport; client pixels separate.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "learned",
+      "name": "Apairmenu",
+      "race": 1,
+      "class": 32,
+      "level": 32
+    },
+    {
+      "id": "future",
+      "name": "Apairfuture",
+      "race": 1,
+      "class": 32,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "learned",
+      "spell": 802630
+    },
+    {
+      "action": "whisper",
+      "actor": "learned",
+      "to": "Apairmenu",
+      "text": "HXAP\tHELLO|5",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "whisper_contains",
+      "from": "learned",
+      "text": "HXAP\tB|5|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "whisper_contains",
+      "from": "learned",
+      "text": "|802630|802630|1|1|0|1|0|6",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "whisper_contains",
+      "from": "learned",
+      "text": "|802630|1|32|1|1|0|0",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "whisper_contains",
+      "from": "learned",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "knows_spell",
+      "spell": 802630,
+      "equals": 1
+    },
+    {
+      "action": "whisper",
+      "actor": "future",
+      "to": "Apairfuture",
+      "text": "HXAP\tHELLO|5",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "whisper_contains",
+      "from": "future",
+      "text": "HXAP\tB|5|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "whisper_contains",
+      "from": "future",
+      "text": "|802630|1|32|1|5|0|0",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "whisper_contains",
+      "from": "future",
+      "text": "|802630|1|32|1|5|0|0",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "whisper_contains",
+      "from": "future",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "knows_spell",
+      "spell": 802630,
+      "equals": 0
+    }
+  ]
+}

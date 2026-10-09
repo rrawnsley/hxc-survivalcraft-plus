@@ -1915,6 +1915,12 @@ private:
         }
         if (metric == "run_speed_rate")
             return unit->GetSpeedRate(MOVE_RUN);
+        if (metric == "spell_mechanic_resist_chance")
+        {
+            SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);
+            Require(info != nullptr, "Mechanic resistance needs a known spell");
+            return unit->GetMechanicResistChance(info);
+        }
         if (metric == "spell_hit_bonus_taken")
         {
             SpellInfo const* info = sSpellMgr->GetSpellInfo(spell);

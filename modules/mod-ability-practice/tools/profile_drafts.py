@@ -637,6 +637,16 @@ def build_drafts(candidates, root):
                         v.get('miscValue'), v.get('basePoints')) for v in details] != expected):
                 raise ValueError('Reviewed lock utility source/raw evidence changed')
             required.append('native-lock-requirements-and-existing-skill-progression-preserved')
+        if (class_id, ability_id) == (32, 802630):
+            raw = members[ability_id].get('rawDbc', {})
+            details = raw.get('effectDetails', [])
+            expected = [(6, 31, 1, 0, 0, 0, 19), (6, 117, 1, 0, 0, 7, 19), (6, 117, 1, 0, 0, 11, 19)]
+            if (len(ranks) != 1 or ranks[0]['characterLevel'] != 32 or
+                    raw.get('passive') is not False or raw.get('rankLabel') or len(details) != 3 or
+                    [(v.get('effectId'), v.get('auraId'), v.get('implicitTargetA'), v.get('implicitTargetB'),
+                      v.get('triggerSpellId'), v.get('miscValue'), v.get('basePoints')) for v in details] != expected):
+                raise ValueError('Reviewed native Air Tattoo source/raw evidence changed')
+            required.append('native-fixed-movement-and-root-snare-resistance-exclusive-tattoo')
         engraving_levels = {653022: 1, 653264: 6, 653218: 14, 653222: 24, 653213: 26, 653265: 40}
         engraving_ids = {653022: 1000, 653264: 1004, 653218: 1002, 653222: 999, 653213: 1001, 653265: 1006}
         if class_id == 32 and ability_id in engraving_levels:

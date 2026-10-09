@@ -4448,3 +4448,26 @@ these scopes. Four generated trainer headers reproduce unchanged.292unique294dec
 Addon0.4.81-development, schema5 fallback4, defaults0 and unpublished. Downstream
 combat proc tuning and active client pixels are outside these item/menu checks.
 No live server, production database/config, active client or launcher changes.
+
+
+## Air Tattoo retains one native utility rank
+
+Air Tattoo802630 is learned at native trainer level32 despite raw spell/base level16.
+Its native permanent effects are20percent run speed and20percent root/snare mechanic
+resistance. Fear/stun are zero-resistance controls. Original casting, refresh, replacement,
+reapplication and cancellation preserve these effects. It is Fixed, without practice,
+extra ranks or reward scaling. Exact family38 flags0/0/32, duration, native levels,
+proc metadata, tattoo group111001 and full three-effect shapes guard enrollment.
+Menu text accurately describes root/snare resistance and removal on tattoo switching.
+
+Added read-only spell_mechanic_resist_chance QA metric, selector regression and native
+calculation baseline.135929 build39.0s/native122.4s passed, source14passed1failed in
+unchanged generic test_batch fake-server exit; aggregate remains FAILED.140432
+VERIFY ALL PASSED: source15/104.6s,build27.1s,harness4.6s897typed99shared,
+two native simulated cases122.7s including existing tattoo exclusivity.140920
+VERIFY ALL PASSED: learned/future level32 real menu123.1s. Unsupported sentinel
+saved records remain unchanged. Four trainer headers reproduce unchanged.
+293unique295declarations177ranked9mastery107Fixed33shared377pending;
+18extensions30added ranks unchanged. Addon0.4.82-development/schema5fallback4,
+defaults0/unpublished. No live/client/launcher changes. Active client pixels,
+ordinary pacing and the remaining catalog are not complete.

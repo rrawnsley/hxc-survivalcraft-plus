@@ -142,6 +142,11 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
         end
     end
     if ability.kind == 3 then
+        if ability.abilityId == 802630 then
+            assert(#ability.ranks == 1 and ability.ranks[1].characterLevel == 32)
+            assert(string.find(Model.PracticeRules(ability), "roots and snares", 1, true))
+            assert(string.find(Model.PracticeRules(ability), "Refreshing it earns no practice", 1, true))
+        end
         if ability.abilityId == 653022 or ability.abilityId == 653264 or ability.abilityId == 653218
             or ability.abilityId == 653222 or ability.abilityId == 653213 or ability.abilityId == 653265 then
             assert(#ability.ranks == 1)
@@ -163,7 +168,7 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
     end
     count = count + 1
 end
-assert(count == 894)
-assert(kinds[1] == 531 and kinds[2] == 45 and kinds[3] == 318)
+assert(count == 897)
+assert(kinds[1] == 531 and kinds[2] == 45 and kinds[3] == 321)
 for classId = 12, 32 do assert(classes[classId]) end
-print("PASS: 894 typed snapshots across 21 classes: 531 ranked, 45 mastery, 318 fixed and menu rendering")
+print("PASS: 897 typed snapshots across 21 classes: 531 ranked, 45 mastery, 321 fixed and menu rendering")

@@ -31,6 +31,8 @@ inline constexpr std::array Class32Ability520269 = { AbilityRank{ 520269, 1, { 2
 inline constexpr std::array Class32Ability800995 = { AbilityRank{ 800995, 1, { 18, 1 } } };
 inline constexpr std::array Class32Ability803679 = { AbilityRank{ 803679, 1, { 28, 1 } } };
 
+inline constexpr std::array AirTattoo = { AbilityRank{ 802630, 1, { 32, 1 } } };
+
 inline constexpr std::array FireEngraving = { AbilityRank{ 653022, 1, { 1, 1 } } };
 inline constexpr std::array IceEngraving = { AbilityRank{ 653264, 1, { 6, 1 } } };
 inline constexpr std::array EarthEngraving = { AbilityRank{ 653218, 1, { 14, 1 } } };
@@ -71,6 +73,8 @@ inline constexpr std::array MeltLock = { AbilityRank{ 804662, 1, { 16, 1 } } };
 inline constexpr std::array TinkerPickLock = { AbilityRank{ 804154, 1, { 14, 1 } } };
 
 inline constexpr std::array Profiles = {
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 32, 802630, AbilityKind::Fixed, AirTattoo, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 32, 653022, AbilityKind::Fixed, FireEngraving, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -196,6 +200,8 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 32, 802630, { 6, 6, 6 }, { 1, 1, 1 }, {}, { 31, 117, 117 }, {},
+        std::array<std::int32_t, 3>{ 0, 7, 11 }, std::array<std::int32_t, 3>{ 19, 19, 19 } },
     Mechanic{ 32, 653022, { 54, 0, 0 }, {}, {}, {}, {},
         std::array<std::int32_t, 3>{ 1000, 0, 0 }, std::array<std::int32_t, 3>{ 1800, -1, 0 } },
     Mechanic{ 32, 653264, { 54, 0, 0 }, {}, {}, {}, {},

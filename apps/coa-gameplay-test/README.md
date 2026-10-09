@@ -872,3 +872,8 @@ with a base amount of 1000 and requires `spell`; `periodic: true` selects the na
 
 `stealth_detection` reads native general stealth detection. `can_detect` requires `target` and invokes
 the observer's native `CanSeeOrDetect` check; neither metric covers client rendering.
+
+
+`spell_mechanic_resist_chance` observes the native unit mechanic resistance decision for
+a required spell. It checks that spell's effective effect mechanics, including global
+mechanics; it is not a measured random resist frequency or total hit chance.
