@@ -237,7 +237,8 @@ def reviewed_stat_buffs(root):
         aura = int(match[5]) if match[5] is not None else 29
         effect_index = int(match[6]) if match[6] is not None else 0
         self_buff = (class_id, ability_id, target, stat, aura, effect_index) in {
-            (16, 680282, 1, 1, 22, 0), (32, 801094, 1, 1, 22, 0), (32, 801107, 1, 0, 85, 0)}
+            (16, 680282, 1, 1, 22, 0), (32, 801106, 1, 4, 22, 0),
+            (32, 801094, 1, 1, 22, 0), (32, 801107, 1, 0, 85, 0)}
         party_resistance = (class_id, ability_id, target, stat, aura, effect_index) == (25, 1119881, 1, 32, 143, 0)
         if (not 12 <= class_id <= 32 or not ability_id or
                 (target not in {21, 56} and not self_buff and not party_resistance) or
@@ -267,7 +268,7 @@ def reviewed_stat_buffs(root):
     secondary_matches = list(re.finditer(pattern, secondary_body[1]))
     if re.sub(pattern, '', secondary_body[1]).replace(',', '').strip():
         raise ValueError('Unsupported secondary buff mechanic declaration')
-    expected_secondary = {(16, 680282, 1): (1, 0, 216), (32, 801107, 1): (1, 127, 72),
+    expected_secondary = {(32, 801106, 1): (1, 127, 163), (16, 680282, 1): (1, 0, 216), (32, 801107, 1): (1, 127, 72),
                           (32, 801094, 1): (1, 8, 22), (14, 523478, 1): (21, -1, 29),
                           (15, 523485, 1): (21, -1, 29),
                           (29, 803651, 1): (21, -1, 29), (27, 800852, 1): (21, 127, 72), (21, 523489, 1): (21, -1, 29),
@@ -641,6 +642,10 @@ def build_drafts(candidates, root):
             primary_effect = 65 if (class_id, ability_id) == (25, 1119881) else 6
             expected[effect_index] = (primary_effect, mechanic['auraId'], mechanic['targetA'],
                                        0, 0, mechanic['statSelector'])
+            if (class_id, ability_id) == (32, 801106):
+                expected[2] = (6, 107, 1, 0, 0, 17)
+                required.extend(['native-self-fire-resistance-and-fifteen-percent-critical-damage',
+                                 'native-sixth-trainer-rank-and-exclusive-tattoo-replacement'])
             if (class_id, ability_id) == (16, 680282):
                 required.extend(['native-self-armor-and-three-percent-spell-haste',
                                  'native-same-caster-aegis-replacement-pauses-practice'])
@@ -703,7 +708,7 @@ def build_drafts(candidates, root):
                         raise ValueError('Reviewed secondary buff benefit changed')
                 if mechanic['auraId'] == 99 and details[1].get('basePoints') != details[0]['basePoints']:
                     raise ValueError('Paired attack-power rank amounts differ')
-                if (class_id, ability_id) == (32, 801107) and details[2].get('basePoints') != -1:
+                if (class_id, ability_id) in {(32, 801106), (32, 801107)} and details[2].get('basePoints') != -1:
                     raise ValueError('Reviewed Water Tattoo zero modifier changed')
                 amounts.append(details[effect_index]['basePoints'] + 1)
             if (class_id, ability_id) == (32, 801094):

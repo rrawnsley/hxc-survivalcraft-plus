@@ -6,17 +6,23 @@ The feature is not complete or approved for release.
 
 ## Latest isolated qualification (9 October 2026)
 
-- Development catalog: 283 unique profiles across all 21 classes, with 174 ranked, nine mastery,
-  100 Fixed and 33 shared variants. There are 387 remaining candidate groups awaiting definitions
+- Development catalog: 284 unique profiles across all 21 classes, with 175 ranked, nine mastery,
+  100 Fixed and 33 shared variants. There are 386 remaining candidate groups awaiting definitions
   and qualification; discovery exports remain unapproved.
-- Whirlwind Aegis preserves six native armor ranks and 3% spell haste. Effective original combat
-  awards practice; refreshing or replacing it does not. One-rank-ahead caps, automatic rank learning,
-  final-cap behavior, saved-progress conversion and exact menu forecasts have passed isolated checks.
-- The current addon is 0.4.77-development, protocol 5 with protocol 4 fallback. The harness passed
-  867 typed snapshots and 99 shared-variant cases. These are not active-client pixel checks.
-- Source checks and the native incremental build passed. The 14 selected final gameplay cases passed
-  across the 040140, 041023 and 041732 qualification scopes; initial fixture failures and interrupted
-  attempts are retained in the evidence. The final Aegis exclusivity rerun reports VERIFY ALL: PASSED.
+- Whirlwind Aegis preserves six native armor ranks and 3% spell haste. Its contribution, one-rank-ahead
+  caps, automatic ranks, saved progress and menu forecasts passed isolated qualification.
+- Fire Tattoo now includes its trainer-only sixth rank at level 76. Native Fire resistance stays
+  5/10/15/20/25/30 and critical damage stays +15%. Useful original combat earns practice; refreshing
+  and replacement do not. At level 60, proficiency 80 prepares rank 6 and practice pauses until 76.
+  Automatic unlocking, final cap, legacy/current saves and all six menu requirements passed.
+- Fire, Arcane and Frost each have six native trainer ranks. Arcane retains native 20% negative
+  Magic/Curse duration reduction. Frost resistance works, but its native proc decision returns zero
+  for tested incoming/outgoing melee and magic events. Arcane/Frost practice remains pending.
+- The addon is 0.4.78-development, protocol 5 with protocol 4 fallback. The harness passed 870 typed
+  snapshots and 99 shared-variant cases. These are not active-client pixel checks.
+- Source checks, native build and the 18 selected final Fire/regression cases passed across scoped
+  runs. Failed fixture attempts and environment failures remain recorded in the palace chronicle.
+  The final harness-only run reports VERIFY ALL: PASSED; no single combined pass is claimed.
 - Production defaults remain disabled. Nothing has been deployed or installed in the active client.
   Ordinary combat cadence, remaining catalog behavior, client rendering and release remain pending.
 

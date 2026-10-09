@@ -8,6 +8,15 @@
 
 namespace AbilityPractice::DevelopmentBuffs
 {
+inline constexpr std::array FireTattoo = {
+    AbilityRank{ 801106, 1, { 24, 1 } },
+    AbilityRank{ 803749, 2, { 36, 10 } },
+    AbilityRank{ 803750, 3, { 48, 20 } },
+    AbilityRank{ 803751, 4, { 58, 40 } },
+    AbilityRank{ 803752, 5, { 60, 60 } }
+};
+inline constexpr auto FireTattooCaps = Development::RankCaps(FireTattoo);
+
 inline constexpr std::array WhirlwindAegis = {
     AbilityRank{ 680282, 1, { 4, 1 } },
     AbilityRank{ 680590, 2, { 12, 10 } },
@@ -444,6 +453,9 @@ inline constexpr auto RiteOfPowerCaps = Development::RankCaps(RiteOfPower);
 
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 32, 801106, AbilityKind::Ranked, FireTattoo, FireTattooCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 16, 680282, AbilityKind::Ranked, WhirlwindAegis, WhirlwindAegisCaps },
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -634,6 +646,7 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 32, 801106, 1, 4, 22 },
     Mechanic{ 16, 680282, 1, 1, 22 },
     Mechanic{ 25, 1119881, 1, 32, 143 },
     Mechanic{ 28, 803658, 21, 0, 85 },
@@ -690,6 +703,7 @@ inline constexpr std::array Mechanics = {
 static_assert(Mechanics.size() == Profiles.size());
 
 inline constexpr std::array SecondaryMechanics = {
+    Mechanic{ 32, 801106, 1, 127, 163, 1 },
     Mechanic{ 16, 680282, 1, 0, 216, 1 },
     Mechanic{ 32, 801107, 1, 127, 72, 1 },
     Mechanic{ 32, 801094, 1, 8, 22, 1 },
@@ -713,6 +727,12 @@ inline Mechanic const* SecondaryMechanicFor(AbilityProfile const& profile, std::
             mechanic.EffectIndex == effectIndex)
             return &mechanic;
     return nullptr;
+}
+
+inline bool IsFireTattoo(AbilityProfile const& profile)
+{
+    return profile.Definition.ClassId == 32 && profile.Definition.AbilityId == 801106 &&
+        IsSupportedStatBuff(profile);
 }
 
 inline bool IsWhirlwindAegis(AbilityProfile const& profile)

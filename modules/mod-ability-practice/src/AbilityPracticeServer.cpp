@@ -747,6 +747,33 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
                 scripts.first != scripts.second || !HasExpectedEtchingGroup(561237, info->Id))
                 return false;
         }
+        if (Practice::DevelopmentBuffs::IsFireTattoo(profile))
+        {
+            constexpr std::array<std::int32_t, 6> tattoos{ 801094, 801106, 801107, 802630, 803748, 807834 };
+            constexpr std::array spells{ 801106u, 803749u, 803750u, 803751u, 803752u, 803753u };
+            constexpr std::array levels{ 24u, 36u, 48u, 58u, 60u, 76u };
+            auto const rank = std::find(spells.begin(), spells.end(), info->Id);
+            auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+            if (rank == spells.end() || info->SpellFamilyName != 38 || info->SpellFamilyFlags[0] != 4 ||
+                info->SpellFamilyFlags[1] || info->SpellFamilyFlags[2] || scripts.first != scripts.second ||
+                info->GetDuration() != -1 ||
+                !HasExactBuffGroup(info->Id, 111001, SPELL_GROUP_STACK_RULE_EXCLUSIVE, tattoos))
+                return false;
+            auto const index = static_cast<std::size_t>(rank - spells.begin());
+            if (info->SpellLevel != levels[index] || info->BaseLevel != levels[index] || info->MaxLevel ||
+                info->Effects[EFFECT_0].BasePoints != 4 + 5 * static_cast<std::int32_t>(index) ||
+                info->Effects[EFFECT_1].BasePoints != 14)
+                return false;
+            for (auto const& effect : info->Effects)
+                if (effect.DieSides != 1 || effect.RealPointsPerLevel || effect.MiscValueB)
+                    return false;
+            auto const& modifier = info->Effects[EFFECT_2];
+            if (modifier.Effect != SPELL_EFFECT_APPLY_AURA || modifier.ApplyAuraName != SPELL_AURA_ADD_FLAT_MODIFIER ||
+                modifier.TargetA.GetTarget() != 1 || modifier.TargetB.GetTarget() || modifier.TriggerSpell ||
+                modifier.MiscValue != 17 || modifier.BasePoints != -1 ||
+                modifier.SpellClassMask != flag96(0, 0, 65536))
+                return false;
+        }
         if (Practice::DevelopmentBuffs::IsWhirlwindAegis(profile))
         {
             constexpr std::array<std::int32_t, 3> aegis{ 680282, 680316, 680334 };
@@ -948,6 +975,7 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
                 continue;
             }
             if ((Practice::DevelopmentBuffs::IsWaterTattoo(profile) ||
+                Practice::DevelopmentBuffs::IsFireTattoo(profile) ||
                 Practice::DevelopmentBuffs::IsManaModule(profile)) && index == 2)
                 continue;
             if (Practice::DevelopmentBuffs::IsPairedAttackPower(profile) && index == 1)
@@ -1957,7 +1985,7 @@ bool EffectiveBuffComponent(Player* player, AuraApplication const& application, 
             aura != SPELL_AURA_MOD_POWER_REGEN && aura != SPELL_AURA_MOD_RESISTANCE &&
             aura != SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE && aura != SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT &&
             aura != SPELL_AURA_MOD_ATTACK_POWER && aura != SPELL_AURA_MOD_RANGED_ATTACK_POWER &&
-            aura != SPELL_AURA_HASTE_SPELLS) ||
+            aura != SPELL_AURA_HASTE_SPELLS && aura != SPELL_AURA_MOD_CRIT_DAMAGE_BONUS) ||
         !effect || effect->GetAuraType() != aura || effect->GetMiscValue() != selector ||
         (costReduction ? ((rankedCostReduction ? effect->GetAmount() >= 0 : effect->GetAmount() != -5) ||
             selector != 127) : effect->GetAmount() <= 0))

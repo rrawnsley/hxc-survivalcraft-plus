@@ -710,6 +710,10 @@ function Model.PracticeRules(ability, saved)
             .. " in a non-gray PvE encounter. Its Agility benefit must remain effective."
             .. " The greater version shares this practice. Switching etchings pauses Dextrous practice."
             .. " Applying or refreshing an etching gives no practice."
+    elseif ability.abilityId == 801106 and ability.route == 13 then
+        rule = "Keep your own Fire Tattoo active and use a learned ability for useful damage or healing"
+            .. " in a non-gray PvE encounter. Its Fire resistance and 15% critical damage bonus must remain effective."
+            .. " Applying or refreshing a tattoo gives no practice. Switching tattoos pauses Fire practice."
     elseif ability.abilityId == 680282 and ability.route == 13 then
         rule = "Keep your own Whirlwind Aegis active and use a learned ability for useful damage or healing"
             .. " in a non-gray PvE encounter. Its armor and 3% spell haste must both remain effective."
