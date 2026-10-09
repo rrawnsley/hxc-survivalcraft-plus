@@ -1,0 +1,151 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native Illidari Intuition 501334",
+  "contract": "Measure native Agility or the separate attack-power-versus aura at the source acquisition level before practice enrollment. Extra offers must be bought through the native trainer from an unlearned state. Aura amount alone does not prove damage against a creature type.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apillijc",
+      "race": 1,
+      "class": 14,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800212
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 501326
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 501327
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 501328
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 501329
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 501334,
+      "equals": 0
+    },
+    {
+      "action": "money",
+      "actor": "caster",
+      "copper": 1000000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 97930
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "caster"
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "caster",
+      "spell": 501334
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 501334,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 1,
+      "save_as": "caster_agility"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 3,
+      "equals": 100
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 501334,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 501334,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 501334,
+      "effect": 0,
+      "min": 552,
+      "max": 612
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 1,
+      "relative_to": "caster_agility",
+      "min": -0.1,
+      "max": 0.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.800212",
+      "index": 0,
+      "equals": 0
+    }
+  ]
+}

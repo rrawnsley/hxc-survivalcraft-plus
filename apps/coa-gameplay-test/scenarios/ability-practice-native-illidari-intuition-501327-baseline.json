@@ -1,0 +1,98 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native Illidari Intuition 501327",
+  "contract": "Measure native Agility or the separate attack-power-versus aura at the source acquisition level before practice enrollment. Extra offers must be bought through the native trainer from an unlearned state. Aura amount alone does not prove damage against a creature type.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apillicc",
+      "race": 1,
+      "class": 14,
+      "level": 42
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800212
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 501326
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 501327
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 1,
+      "save_as": "caster_agility"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 3,
+      "equals": 100
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 501327,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 501327,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 501327,
+      "effect": 0,
+      "equals": 36
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "stat",
+      "stat": 1,
+      "relative_to": "caster_agility",
+      "min": 35.9,
+      "max": 36.1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.800212",
+      "index": 0,
+      "equals": 0
+    }
+  ]
+}
