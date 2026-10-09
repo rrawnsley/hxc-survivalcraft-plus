@@ -477,7 +477,8 @@ bool GrantNourishment(Player* player, NourishmentProfile const& profile, bool by
         ? emptySlots : existing->second;
     // A recipe family represents one buff. Different food with the same effect cannot stack it.
     for (ActiveNourishment const& active : currentSlots)
-        if (active.profile.itemId && active.expiresAt > now && active.profile.family == profile.family)
+        if (active.profile.itemId && active.expiresAt > now && active.profile.family == profile.family &&
+            active.profile.itemId != profile.itemId)
             return false;
     std::array<NourishmentSlotEntry, kNourishmentSlotCount> selectionSlots{};
     for (std::size_t i = 0; i < currentSlots.size(); ++i)

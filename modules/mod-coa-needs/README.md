@@ -143,7 +143,7 @@ Woodcutting to harvest every eligible tier at any skill. Original difficulty val
 skill gains; lockpicking, corpse eligibility and tool requirements are unchanged. Refinement and crafting
 retain their skill requirements.
 
-Profession bonuses scale with trained skill / 450. Full benefits: Mining health/armor +4%; Blacksmithing
+Profession bonuses unlock at 75-point profession rank milestones and scale by rank, reaching full benefit at 450. Full benefits: Mining health/armor +4%; Blacksmithing
 AP +3%; Skinning physical/spell crit +2 percentage points; Inscription haste +2%; Tailoring spell/healing
 +20; Jewelcrafting attributes +2%; Enchanting mana +10/5sec; Leatherworking beast damage +5%; Herbalism
 vigor recovery +5%; Alchemy healing-potion recovery +15%; First Aid bandage recovery +20%; Fishing swim

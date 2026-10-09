@@ -29,7 +29,7 @@ inline NourishmentSlotDecision SelectNourishmentSlot(
 
     for (std::size_t i = 0; i < slots.size(); ++i)
         if (slots[i].itemId == itemId && slots[i].expiresAt > now)
-            return {};
+            return { i, true, false };
 
     for (std::size_t i = 0; i < slots.size(); ++i)
         if (!slots[i].itemId || slots[i].expiresAt <= now)

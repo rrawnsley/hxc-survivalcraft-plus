@@ -130,7 +130,7 @@ function HBN:AddItemTooltip(tooltip, profile)
     end
     local minutes = math.floor((profile.duration or 0) / 60)
     tooltip:AddLine("Eat or drink uninterrupted for " .. tostring(HBN.completionSeconds) .. " seconds. Lasts " .. minutes .. " minutes.", 0.65, 0.75, 0.9, true)
-    tooltip:AddLine("Finish eating or drinking for 10 seconds to earn a lasting effect. Three different effects fit; active effects cannot be refreshed or replaced.", 0.65, 0.75, 0.9, true)
+    tooltip:AddLine("Finish eating or drinking for 10 seconds to earn a lasting effect. Reuse the same item to refresh its timer; three different effects fit.", 0.65, 0.75, 0.9, true)
     tooltip:Show()
 end
 

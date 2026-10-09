@@ -187,7 +187,8 @@ void SetAura(Player* player, uint32 spell, bool active)
 
 float SkillScale(Player const* player, uint32 skill)
 {
-    return std::min(1.0f, player->GetPureSkillValue(skill) / 450.0f);
+    uint32 tier = std::min(6u, player->GetPureSkillValue(skill) / 75u);
+    return tier / 6.0f;
 }
 
 void RefreshProfessions(Player* player)
@@ -199,7 +200,7 @@ void RefreshProfessions(Player* player)
     for (uint32 index = 0; index < skills.size(); ++index)
     {
         float scale = SkillScale(player, skills[index]);
-        int32 amount = int32(std::lround(bonuses[index] * scale));
+        int32 amount = scale > 0.0f ? std::max(1, int32(std::lround(bonuses[index] * scale))) : 0;
         bool active = Config.professions && Affects(player) && player->IsAlive() && player->GetLevel() > 1 && amount != 0;
         uint32 spell = ProfessionAura + index;
         SetAura(player, spell, active);
@@ -1082,11 +1083,16 @@ public:
         if (!Config.professions || !Affects(player) || !info || !heal.GetHeal())
             return;
         float bonus = 0.0f;
-        if (BandageSpells.count(info->Id))
+        bool bandage = BandageSpells.count(info->Id) != 0;
+        if (bandage)
             bonus = 0.2f * SkillScale(player, SKILL_FIRST_AID);
         else if (PotionSpells.count(info->Id))
             bonus = 0.15f * SkillScale(player, SKILL_ALCHEMY);
-        heal.SetHeal(uint32(heal.GetHeal() * (1.0f + bonus)));
+        uint32 amount = heal.GetHeal();
+        uint32 improved = uint32(amount * (1.0f + bonus));
+        if (bandage && bonus > 0.0f && improved == amount)
+            ++improved;
+        heal.SetHeal(improved);
     }
 
     void OnAuraApply(Unit* unit, Aura* aura) override
