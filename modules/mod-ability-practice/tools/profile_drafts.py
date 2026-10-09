@@ -656,6 +656,16 @@ def build_drafts(candidates, root):
                         v.get('miscValue'), v.get('basePoints')) for v in details] != expected):
                 raise ValueError('Reviewed lock utility source/raw evidence changed')
             required.append('native-lock-requirements-and-existing-skill-progression-preserved')
+        if (class_id, ability_id) == (32, 807823):
+            raw = members[ability_id].get('rawDbc', {})
+            details = raw.get('effectDetails', [])
+            expected = [(69, 0, 16, 0, 0, 9), (6, 31, 16, 0, 0, 19), (0, 0, 0, 0, 0, 0)]
+            if (len(ranks) != 1 or ranks[0]['characterLevel'] != 22 or
+                    raw.get('passive') is not False or raw.get('rankLabel') or len(details) != 3 or
+                    [(v.get('effectId'), v.get('auraId'), v.get('implicitTargetA'), v.get('implicitTargetB'),
+                      v.get('triggerSpellId'), v.get('basePoints')) for v in details] != expected):
+                raise ValueError('Reviewed native Whisperwind source/raw evidence changed')
+            required.append('native-runeshroud-ground-distraction-speed-increase-radius-expiry-not-practice')
         if (class_id, ability_id) == (32, 804674):
             raw = members[ability_id].get('rawDbc', {})
             details = raw.get('effectDetails', [])

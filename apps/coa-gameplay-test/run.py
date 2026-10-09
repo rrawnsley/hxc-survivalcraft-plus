@@ -76,7 +76,7 @@ METRICS = {
     'carried_item_level', 'carried_item_required_level',
     'nearby_gameobject_count', 'nearby_creature_count', 'carried_money',
     'quest_rewarded', 'has_achievement', 'has_title', 'spell_damage_taken', 'melee_damage_taken', 'spell_healing_taken',
-    'spell_hit_bonus_taken', 'spell_mechanic_resist_chance', 'rooted', 'stunned', 'spell_cast_count', 'spell_go_count', 'cast_failure',
+    'spell_hit_bonus_taken', 'spell_mechanic_resist_chance', 'rooted', 'stunned', 'distracted', 'spell_cast_count', 'spell_go_count', 'cast_failure',
     'stealth_detection', 'can_detect',
     'quest_status', 'quest_takeable', 'quest_objective_count', 'dialog_status',
     'ball_offer_count', 'ball_offers_quest',

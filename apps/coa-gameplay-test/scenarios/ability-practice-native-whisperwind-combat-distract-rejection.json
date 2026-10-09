@@ -1,0 +1,292 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native Whisperwind combat-distract-rejection",
+  "contract": "Whisperwind requires native Runeshroud form30. A creature Fireball at a separate ally establishes enemy combat while preserving the distracting caster's form. Engaged enemies do not remain distracted; separate native20% movement increase still applies and expires after2 seconds. Movable NPC fixture; no native behavior change or practice enrollment. Fixed enrollment preserves all native effects and leaves unsupported saved-record sentinel1/999/1/100/101 unchanged; neither cast nor applied utility earns practice.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apwhispfight",
+      "race": 1,
+      "class": 32,
+      "level": 22,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "name": "Apwhisptank",
+      "race": 1,
+      "class": 32,
+      "level": 22
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 22,
+      "health": 1000000,
+      "faction": 14,
+      "distance": 3,
+      "stationary": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.807823",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.807823",
+      "index": 1,
+      "value": 999
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.807823",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.807823",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.807823",
+      "index": 4,
+      "value": 101
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 807823
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "run_speed_rate",
+      "save_as": "enemy_speed"
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 500288
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 500
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 500288
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 500288,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 133,
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "ally",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "distracted",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 500
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 807823,
+      "destination": {
+        "x": -8946.95,
+        "y": -129.493,
+        "z": 83.5312
+      }
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 807823,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cooldown_ms",
+      "spell": 807823,
+      "min": 4500,
+      "max": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 807823,
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_amount",
+      "spell": 807823,
+      "effect": 1,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "run_speed_rate",
+      "ratio_to": "enemy_speed",
+      "min": 1.1998,
+      "max": 1.2002
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "distracted",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 807823,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "run_speed_rate",
+      "ratio_to": "enemy_speed",
+      "min": 0.9998,
+      "max": 1.0002
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "distracted",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.807823",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.807823",
+      "index": 1,
+      "equals": 999
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.807823",
+      "index": 2,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.807823",
+      "index": 3,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.807823",
+      "index": 4,
+      "equals": 101
+    }
+  ]
+}

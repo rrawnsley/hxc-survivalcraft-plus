@@ -1544,6 +1544,26 @@ bool MatchesUtilityFixedRankMechanic(std::uint32_t classId, std::uint32_t spellI
                     return false;
         }
     }
+    if (classId == 32 && spellId == 807823)
+    {
+        auto const scripts = sObjectMgr->GetSpellScriptsBounds(spellId);
+        auto const groups = sSpellMgr->GetSpellSpellGroupMapBounds(spellId);
+        if (info->SpellFamilyName != 38 || info->SpellFamilyFlags[0] || info->SpellFamilyFlags[1] ||
+            info->SpellFamilyFlags[2] != 8192 || scripts.first != scripts.second ||
+            groups.first != groups.second || info->GetDuration() != 2000 ||
+            info->SpellLevel != 18 || info->BaseLevel != 18 || info->MaxLevel ||
+            info->Stances != 536870912 || info->StancesNot || info->AttributesEx != 1056 ||
+            info->ProcFlags || info->ProcChance != 101 || info->ProcCharges ||
+            sSpellMgr->GetSpellProcEntry(spellId) || info->ManaCost || info->ManaCostPercentage != 5 ||
+            info->RecoveryTime != 6000 || info->CategoryRecoveryTime != 6000)
+            return false;
+        for (std::size_t index = 0; index < 3; ++index)
+            if (info->Effects[index].DieSides != (index < 2 ? 1 : 0) ||
+                info->Effects[index].RealPointsPerLevel || info->Effects[index].MiscValueB ||
+                info->Effects[index].SpellClassMask ||
+                (index < 2 && info->Effects[index].CalcRadius() != 10.0f))
+                return false;
+    }
     if (classId == 32 && spellId == 804674)
     {
         auto const scripts = sObjectMgr->GetSpellScriptsBounds(spellId);

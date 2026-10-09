@@ -337,6 +337,13 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(actor=actor):
                 self.assertIs(run.validate(scenario), scenario)
 
+    def test_distracted_observation_accepts_units(self):
+        for actor in ('caster', 'target'):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({'action': 'assert', 'actor': actor, 'metric': 'distracted', 'equals': 0})
+            with self.subTest(actor=actor):
+                self.assertIs(run.validate(scenario), scenario)
+
     def test_pet_spell_calculations(self):
         for metric in ('spell_effect_value', 'spell_damage_done'):
             with self.subTest(metric=metric):
