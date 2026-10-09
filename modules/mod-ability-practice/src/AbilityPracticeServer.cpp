@@ -747,6 +747,29 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
                 scripts.first != scripts.second || !HasExpectedEtchingGroup(561237, info->Id))
                 return false;
         }
+        if (Practice::DevelopmentBuffs::IsWhirlwindAegis(profile))
+        {
+            constexpr std::array<std::int32_t, 3> aegis{ 680282, 680316, 680334 };
+            constexpr std::array spells{ 680282u, 680590u, 680591u, 680592u, 680593u, 680594u };
+            constexpr std::array levels{ 4u, 12u, 22u, 32u, 42u, 52u };
+            constexpr std::array maximumLevels{ 12u, 22u, 32u, 42u, 52u, 60u };
+            constexpr std::array armor{ 59, 129, 224, 329, 444, 559 };
+            auto const rank = std::find(spells.begin(), spells.end(), info->Id);
+            auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+            if (rank == spells.end() || info->SpellFamilyName != 22 || info->SpellFamilyFlags[0] != 8 ||
+                info->SpellFamilyFlags[1] || info->SpellFamilyFlags[2] || scripts.first != scripts.second ||
+                info->GetDuration() != 1800000 ||
+                !HasExactBuffGroup(info->Id, 111010, SPELL_GROUP_STACK_RULE_EXCLUSIVE_FROM_SAME_CASTER, aegis))
+                return false;
+            auto const index = static_cast<std::size_t>(rank - spells.begin());
+            if (info->SpellLevel != levels[index] || info->BaseLevel != levels[index] ||
+                info->MaxLevel != maximumLevels[index] || info->Effects[EFFECT_0].BasePoints != armor[index] ||
+                info->Effects[EFFECT_1].BasePoints != 2)
+                return false;
+            for (auto const& effect : info->Effects)
+                if (effect.DieSides != 1 || effect.RealPointsPerLevel || effect.MiscValueB)
+                    return false;
+        }
         if (Practice::DevelopmentBuffs::IsVoidResilience(profile))
         {
             constexpr std::array spells{ 1119881u, 1119889u, 1119892u };
@@ -1933,7 +1956,8 @@ bool EffectiveBuffComponent(Player* player, AuraApplication const& application, 
     if ((aura != SPELL_AURA_MOD_STAT && aura != SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT &&
             aura != SPELL_AURA_MOD_POWER_REGEN && aura != SPELL_AURA_MOD_RESISTANCE &&
             aura != SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE && aura != SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT &&
-            aura != SPELL_AURA_MOD_ATTACK_POWER && aura != SPELL_AURA_MOD_RANGED_ATTACK_POWER) ||
+            aura != SPELL_AURA_MOD_ATTACK_POWER && aura != SPELL_AURA_MOD_RANGED_ATTACK_POWER &&
+            aura != SPELL_AURA_HASTE_SPELLS) ||
         !effect || effect->GetAuraType() != aura || effect->GetMiscValue() != selector ||
         (costReduction ? ((rankedCostReduction ? effect->GetAmount() >= 0 : effect->GetAmount() != -5) ||
             selector != 127) : effect->GetAmount() <= 0))
@@ -1952,7 +1976,8 @@ bool EffectiveBuffComponent(Player* player, AuraApplication const& application, 
     std::int64_t const competing = player->GetHighestExclusiveSameEffectSpellGroupValue(
         effect, effect->GetAuraType(),
         aura != SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT && aura != SPELL_AURA_MOD_ATTACK_POWER &&
-            aura != SPELL_AURA_MOD_RANGED_ATTACK_POWER, effect->GetMiscValue());
+            aura != SPELL_AURA_MOD_RANGED_ATTACK_POWER && aura != SPELL_AURA_HASTE_SPELLS,
+        effect->GetMiscValue());
     std::int64_t const magnitude = competing < 0 ? -competing : competing;
     return magnitude <= effect->GetAmount();
 }

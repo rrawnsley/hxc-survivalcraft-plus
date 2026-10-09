@@ -710,6 +710,10 @@ function Model.PracticeRules(ability, saved)
             .. " in a non-gray PvE encounter. Its Agility benefit must remain effective."
             .. " The greater version shares this practice. Switching etchings pauses Dextrous practice."
             .. " Applying or refreshing an etching gives no practice."
+    elseif ability.abilityId == 680282 and ability.route == 13 then
+        rule = "Keep your own Whirlwind Aegis active and use a learned ability for useful damage or healing"
+            .. " in a non-gray PvE encounter. Its armor and 3% spell haste must both remain effective."
+            .. " Applying or refreshing an Aegis gives no practice. Switching Aegis pauses Whirlwind practice."
     elseif ability.abilityId == 1119881 and ability.route == 13 then
         rule = "Keep your own Void Resilience active and use a learned ability for useful damage or healing"
             .. " in a non-gray PvE encounter. Its Shadow resistance must remain effective."

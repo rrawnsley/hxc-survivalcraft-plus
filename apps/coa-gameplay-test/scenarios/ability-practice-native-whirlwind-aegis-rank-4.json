@@ -1,0 +1,136 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native Whirlwind Aegis rank 4",
+  "contract": "Preserve native armor and three-percent spell haste at original acquisition levels before practice enrollment.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apwhirld",
+      "race": 1,
+      "class": 16,
+      "level": 32
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.16.680282",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.16.680282",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.16.680282",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.16.680282",
+      "index": 3,
+      "value": 40
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.16.680282",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 680282
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 680590
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 680591
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 680592
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "armor",
+      "save_as": "armor_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "cast_speed_multiplier",
+      "save_as": "cast_before"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 680592,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 680592,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 680592,
+      "effect": 0,
+      "equals": 330
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 680592,
+      "effect": 1,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "armor",
+      "relative_to": "armor_before",
+      "equals": 330
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_speed_multiplier",
+      "ratio_to": "cast_before",
+      "min": 0.9708,
+      "max": 0.9709
+    }
+  ]
+}

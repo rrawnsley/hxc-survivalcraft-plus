@@ -4,6 +4,22 @@ Development continues on `codex/ability-practice-catalog` in
 `C:/Azerothcore-CoA/worktrees/ability-practice-catalog`. Production remains unchanged.
 The feature is not complete or approved for release.
 
+## Latest isolated qualification (9 October 2026)
+
+- Development catalog: 283 unique profiles across all 21 classes, with 174 ranked, nine mastery,
+  100 Fixed and 33 shared variants. There are 387 remaining candidate groups awaiting definitions
+  and qualification; discovery exports remain unapproved.
+- Whirlwind Aegis preserves six native armor ranks and 3% spell haste. Effective original combat
+  awards practice; refreshing or replacing it does not. One-rank-ahead caps, automatic rank learning,
+  final-cap behavior, saved-progress conversion and exact menu forecasts have passed isolated checks.
+- The current addon is 0.4.77-development, protocol 5 with protocol 4 fallback. The harness passed
+  867 typed snapshots and 99 shared-variant cases. These are not active-client pixel checks.
+- Source checks and the native incremental build passed. The 14 selected final gameplay cases passed
+  across the 040140, 041023 and 041732 qualification scopes; initial fixture failures and interrupted
+  attempts are retained in the evidence. The final Aegis exclusivity rerun reports VERIFY ALL: PASSED.
+- Production defaults remain disabled. Nothing has been deployed or installed in the active client.
+  Ordinary combat cadence, remaining catalog behavior, client rendering and release remain pending.
+
 ## Current state â€” 6 October 2026
 
 - Per-ability deterministic meaningful-use practice, automatic ranks, preserved learned ranks and saved

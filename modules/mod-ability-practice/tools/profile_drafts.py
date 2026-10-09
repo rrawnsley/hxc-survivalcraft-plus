@@ -140,6 +140,7 @@ def verify_provenance(candidates, root, dbc):
                      'src/server/coa/AscensionCultist.cpp', 'src/server/coa/AscensionCultist.h',
                      'src/server/coa/AscensionCultistData.h', 'src/server/coa/AscensionCultistContracts.cpp',
                      'data/sql/updates/pending_db_world/rev_20260909_12_cultist_completion.sql',
+                     'data/sql/updates/pending_db_world/rev_1790205511509246133.sql',
                      'data/sql/updates/pending_db_world/rev_20260916_61_rite_buffs_exclusive.sql'})
     if not isinstance(native_sources, list) or len(native_sources) != len(expected) or {
             source.get('path') for source in native_sources} != expected:
@@ -235,12 +236,12 @@ def reviewed_stat_buffs(root):
         class_id, ability_id, target, stat = map(int, match.groups()[:4])
         aura = int(match[5]) if match[5] is not None else 29
         effect_index = int(match[6]) if match[6] is not None else 0
-        self_tattoo = (class_id, ability_id, target, stat, aura, effect_index) in {
-            (32, 801094, 1, 1, 22, 0), (32, 801107, 1, 0, 85, 0)}
+        self_buff = (class_id, ability_id, target, stat, aura, effect_index) in {
+            (16, 680282, 1, 1, 22, 0), (32, 801094, 1, 1, 22, 0), (32, 801107, 1, 0, 85, 0)}
         party_resistance = (class_id, ability_id, target, stat, aura, effect_index) == (25, 1119881, 1, 32, 143, 0)
         if (not 12 <= class_id <= 32 or not ability_id or
-                (target not in {21, 56} and not self_tattoo and not party_resistance) or
-                not (self_tattoo or party_resistance or aura == 29 and stat in range(5) or
+                (target not in {21, 56} and not self_buff and not party_resistance) or
+                not (self_buff or party_resistance or aura == 29 and stat in range(5) or
                      aura == 345 and stat == 127 and target == 21 or
                      aura in {85, 99} and stat == 0 and target == 21 or
                      aura == 22 and stat == 1 and target == 21 and (class_id, ability_id) in {
@@ -266,7 +267,9 @@ def reviewed_stat_buffs(root):
     secondary_matches = list(re.finditer(pattern, secondary_body[1]))
     if re.sub(pattern, '', secondary_body[1]).replace(',', '').strip():
         raise ValueError('Unsupported secondary buff mechanic declaration')
-    expected_secondary = {(32, 801107, 1): (1, 127, 72), (32, 801094, 1): (1, 8, 22), (14, 523478, 1): (21, -1, 29), (15, 523485, 1): (21, -1, 29),
+    expected_secondary = {(16, 680282, 1): (1, 0, 216), (32, 801107, 1): (1, 127, 72),
+                          (32, 801094, 1): (1, 8, 22), (14, 523478, 1): (21, -1, 29),
+                          (15, 523485, 1): (21, -1, 29),
                           (29, 803651, 1): (21, -1, 29), (27, 800852, 1): (21, 127, 72), (21, 523489, 1): (21, -1, 29),
                           (17, 707693, 1): (21, 32, 143),
                           (13, 560294, 1): (21, 126, 143), (17, 706589, 1): (21, 0, 29),
@@ -638,6 +641,9 @@ def build_drafts(candidates, root):
             primary_effect = 65 if (class_id, ability_id) == (25, 1119881) else 6
             expected[effect_index] = (primary_effect, mechanic['auraId'], mechanic['targetA'],
                                        0, 0, mechanic['statSelector'])
+            if (class_id, ability_id) == (16, 680282):
+                required.extend(['native-self-armor-and-three-percent-spell-haste',
+                                 'native-same-caster-aegis-replacement-pauses-practice'])
             if (class_id, ability_id) == (25, 1119881):
                 required.extend(['native-party-shadow-resistance-aura-not-absorption',
                                  'native-exclusive-resistance-maximum-and-original-owner-only'])
