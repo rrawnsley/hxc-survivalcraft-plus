@@ -468,7 +468,7 @@ void CheckCurrentRankPolicies()
 {
     std::uint32_t forecasts = 0;
     std::array<bool, 21> classes{};
-    assert(DevelopmentPacing::Entries.size() == 179);
+    assert(DevelopmentPacing::Entries.size() == 180);
     for (auto const& entry : DevelopmentPacing::Entries)
     {
         classes.at(entry.ClassId - 12) = true;
@@ -1049,6 +1049,13 @@ void CheckScriptedDamageReceipts()
         Scope consumed(twin, 3, pair[1]);
         assert(!Scope::Take(1, 3, pair[1]));
     }
+    for (auto const& rank : DevelopmentHelpers::FireSigil)
+    {
+        assert(DevelopmentHelpers::IsFireSigilDamage(rank.SpellId, 807012));
+        assert(!DevelopmentHelpers::IsFireSigilDamage(rank.SpellId, 807825));
+    }
+    assert(!DevelopmentHelpers::IsFireSigilDamage(802202, 807012));
+    assert(DevelopmentHelpers::FirePracticeIntervalSeconds == 10);
     auto original = std::make_shared<CastReceipt>(1, 2, 14, 712483, 1, 0, 0);
     assert(!original->BindCapturedCorpse(0, true));
     assert(original->BindCapturedCorpse(4, true));

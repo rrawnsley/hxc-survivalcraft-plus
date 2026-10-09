@@ -7,7 +7,7 @@
     "Normal Elemental Burst casts provide the measured triggering hit. Normal Palm casts use the authored Waveforged alternative gate; its aura is explicit fixture setup.",
     "One Fire hit must copy the measured damage, consume the aura, and never recur on a following spell. The rank-5 value exceeds 100% and must not be clamped to 100%.",
     "Original Fire helper 807012 uses melee damage class. A skilled equipped dagger, hit rating and expertise remove its independent avoidance roll from this copied-amount test; no auto attack is started.",
-    "Isolated practice qualification seeds Elemental Burst proficiency200 and its native prior ranks before learning native rank12; Fire Sigil remains unenrolled during this baseline."
+    "Isolated qualification seeds native Elemental Burst and Fire Sigil proficiency with prior ranks before learning each tested native rank. Native damage and charge consumption remain the baseline."
   ],
   "timeout_ms": 120000,
   "players": [
@@ -144,6 +144,61 @@
       "action": "learn",
       "actor": "rm",
       "spell": 502838
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.534803",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.534803",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.534803",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.534803",
+      "index": 3,
+      "value": 60
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.534803",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 534803
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 534804
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 534805
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 534806
     },
     {
       "action": "learn",

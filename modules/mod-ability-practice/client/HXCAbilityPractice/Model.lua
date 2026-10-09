@@ -826,6 +826,11 @@ function Model.PracticeRules(ability, saved)
         rule = "Restore your missing health with Fel Bargain during an eligible PvE fight."
             .. " Energy spent without actual healing earns no practice."
             .. " One original cast earns at most one award; the native Energy cost and cooldown remain."
+    elseif ability.abilityId == 534803 and ability.route == 1 then
+        rule = "Arm your own Fire Sigil and land its bonus Fire hit on a level-appropriate PvE opponent."
+            .. " One original sigil cast earns one use, with at least ten seconds between counted uses."
+            .. " Arming, refreshing, expiry, misses and bonus hits that deal no damage earn no practice."
+            .. " Native Runeshroud or Waveforged requirements and all five damage bonuses remain."
     elseif ability.abilityId == 801901 and ability.route == 1 then
         rule = "Land a Twin Slice weapon hit on a level-appropriate PvE opponent."
             .. " The two weapon hits share one practice award for your original cast."

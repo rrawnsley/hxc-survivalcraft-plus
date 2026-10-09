@@ -1,0 +1,237 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Fire Palm Sigil menu",
+  "contract": "Schema5 native levels4/26/34/42/50, proficiency1/10/20/40/60, cap20 and exact270 qualifying uses to rank2. Arming gives zero practice; rules describe counted bonus cadence.",
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "rm",
+      "name": "Apsigilmenu",
+      "race": 1,
+      "class": 32,
+      "level": 26,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 1180
+    },
+    {
+      "action": "add_item",
+      "actor": "rm",
+      "item": 2092,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "rm",
+      "item": 2092,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "rm",
+      "skill": 173,
+      "value": 130,
+      "maximum": 130
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.534803",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.534803",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.534803",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.534803",
+      "index": 3,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.534803",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 534803
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 802202
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 500469,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "power": 0,
+      "value": 500
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 500469,
+      "stacks": 1,
+      "label": "Fixture: restore the native Waveforged window before this ordinary sigil cast"
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 534803
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cast_failure",
+      "spell": 534803,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 534803,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.534803",
+      "index": 3,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.534803",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "whisper",
+      "actor": "rm",
+      "to": "Apsigilmenu",
+      "text": "HXAP\tHELLO|5",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "whisper_contains",
+      "from": "rm",
+      "text": "HXAP\tB|5|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "whisper_contains",
+      "from": "rm",
+      "text": "|534803|534803|1|1|0|20|16200|4",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "whisper_contains",
+      "from": "rm",
+      "text": "|534804|2|26|10|4|1|270",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "whisper_contains",
+      "from": "rm",
+      "text": "|534803|1|4|1|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "whisper_contains",
+      "from": "rm",
+      "text": "|534804|2|26|10|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "whisper_contains",
+      "from": "rm",
+      "text": "|534805|3|34|20|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "whisper_contains",
+      "from": "rm",
+      "text": "|534806|4|42|40|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "whisper_contains",
+      "from": "rm",
+      "text": "|534807|5|50|60|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "whisper_contains",
+      "from": "rm",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 10000
+    }
+  ]
+}

@@ -448,6 +448,7 @@ struct MenuSession
     std::unordered_map<std::uint32_t, BuffPracticeSession> Buffs;
     Practice::BuffCastLedger PeriodicBuffCasts;
     Clock::time_point NextBuffStateRefresh{};
+    Clock::time_point NextFireSigilPractice{};
     std::uint32_t OutgoingClass = 0;
     std::vector<std::string> Outgoing;
     std::size_t NextMessage = 0;
@@ -682,6 +683,57 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
         return false;
     if (HelpersRequested && MasteryRequested && Practice::DevelopmentMastery::IsFelBargain(profile))
         return info->Id == 807942 && profile.Outcome == Practice::OutcomeKind::Healing;
+    if (HelpersRequested && Practice::DevelopmentHelpers::IsFireSigil(profile))
+    {
+        constexpr std::array levels{ 4u, 26u, 34u, 42u, 50u };
+        constexpr std::array amounts{ 69, 79, 89, 99, 119 };
+        auto const& ranks = Practice::DevelopmentHelpers::FireSigil;
+        auto const rank = std::find_if(ranks.begin(), ranks.end(), [info](Practice::AbilityRank const& value)
+        {
+            return value.SpellId == info->Id;
+        });
+        if (rank == ranks.end())
+            return false;
+        auto const index = static_cast<std::size_t>(rank - ranks.begin());
+        auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+        auto entry = scripts.first;
+        auto const* proc = sSpellMgr->GetSpellProcEntry(info->Id);
+        auto const* helper = sSpellMgr->GetSpellInfo(807012);
+        if (entry == scripts.second || sObjectMgr->GetScriptName(entry->second) !=
+            "aura_ascension_damage_palm_sigil" || ++entry != scripts.second ||
+            info->SpellFamilyName != 38 || info->SpellFamilyFlags[0] != 67108864 ||
+            info->SpellFamilyFlags[1] || info->SpellFamilyFlags[2] != 8192 ||
+            info->SpellLevel != levels[index] || info->BaseLevel != levels[index] || info->MaxLevel ||
+            info->GetDuration() != 6000 || info->CasterAuraSpell != 808089 ||
+            info->ManaCost != 15 || info->ManaCostPercentage != 15 || info->RecoveryTime ||
+            info->CategoryRecoveryTime || info->ProcFlags || info->ProcChance != 100 || info->ProcCharges ||
+            !proc || proc->SchoolMask || proc->SpellFamilyName || proc->SpellFamilyMask ||
+            proc->ProcFlags != 69972 || proc->SpellTypeMask != 1 || proc->SpellPhaseMask != 2 ||
+            proc->HitMask != 3 || proc->AttributesMask != 2 || proc->DisableEffectsMask ||
+            proc->ProcsPerMinute || proc->Chance != 100 || proc->Cooldown.count() || proc->Charges != 1 ||
+            !helper || helper->DmgClass != SPELL_DAMAGE_CLASS_MELEE || helper->SchoolMask != SPELL_SCHOOL_MASK_FIRE ||
+            !helper->AscensionInheritsResolvedAmount || !helper->HasAttribute(SPELL_ATTR2_CANT_CRIT) ||
+            !helper->HasAttribute(SPELL_ATTR3_IGNORE_CASTER_MODIFIERS) ||
+            !helper->HasAttribute(SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS))
+            return false;
+        for (std::size_t slot = 0; slot < 3; ++slot)
+        {
+            auto const& effect = info->Effects[slot];
+            auto const& damage = helper->Effects[slot];
+            if (effect.Effect != (slot ? 0u : SPELL_EFFECT_APPLY_AURA) ||
+                effect.ApplyAuraName != (slot ? 0u : 354u) ||
+                effect.TargetA.GetTarget() != (slot ? 0u : TARGET_UNIT_CASTER) || effect.TargetB.GetTarget() ||
+                effect.TriggerSpell != (slot ? 0u : 807012u) ||
+                effect.BasePoints != (slot ? 0 : amounts[index]) || effect.DieSides != (slot ? 0 : 1) ||
+                effect.RealPointsPerLevel || effect.MiscValue || effect.MiscValueB ||
+                damage.Effect != (slot ? 0u : SPELL_EFFECT_SCHOOL_DAMAGE) || damage.ApplyAuraName ||
+                damage.TargetA.GetTarget() != (slot ? 0u : TARGET_UNIT_TARGET_ENEMY) ||
+                damage.TargetB.GetTarget() || damage.TriggerSpell || damage.RealPointsPerLevel ||
+                damage.MiscValue || damage.MiscValueB || damage.BonusMultiplier)
+                return false;
+        }
+        return true;
+    }
     if (HelpersRequested && Practice::DevelopmentHelpers::IsTwinSlice(profile))
     {
         auto const rank = std::find_if(Practice::DevelopmentHelpers::TwinSlice.begin(),
@@ -2797,8 +2849,10 @@ bool IsBaneDamage(Practice::AbilityProfile const* profile, std::uint32_t spellId
 bool IsScriptedDamage(Practice::AbilityProfile const* profile, std::uint32_t originId, std::uint32_t helperId)
 {
     return IsBaneDamage(profile, helperId) || (HelpersRequested && profile &&
-        Practice::DevelopmentHelpers::IsTwinSlice(*profile) &&
-        Practice::DevelopmentHelpers::IsTwinDamage(originId, helperId));
+        ((Practice::DevelopmentHelpers::IsTwinSlice(*profile) &&
+            Practice::DevelopmentHelpers::IsTwinDamage(originId, helperId)) ||
+            (Practice::DevelopmentHelpers::IsFireSigil(*profile) &&
+                Practice::DevelopmentHelpers::IsFireSigilDamage(originId, helperId))));
 }
 
 struct ReceiptCast
@@ -2836,6 +2890,13 @@ void AwardScriptedDamage(Player* player, Spell* spell, Unit* target, std::uint32
         !ReceiptMatches(player, found->second, *receipt) ||
         !AcquisitionAllowed(player, profile->Definition, receipt->SpellId))
         return;
+    bool const fireSigil = Practice::DevelopmentHelpers::IsFireSigil(*profile);
+    auto const now = Clock::now();
+    if (fireSigil && now < found->second.NextFireSigilPractice)
+    {
+        receipt->MarkConsumed();
+        return;
+    }
     auto const effective = Practice::BuildCatchupPolicy(profile->Policy,
         Practice::CapAtLevel(profile->Definition, player->GetLevel()), Catchup);
     if (!effective)
@@ -2848,6 +2909,9 @@ void AwardScriptedDamage(Player* player, Spell* spell, Unit* target, std::uint32
         effective->View(), profile->DefinitionVersion, context);
     if (award.Status == Practice::OutcomeStatus::Capped)
         receipt->MarkConsumed();
+    if (fireSigil && award.Status == Practice::OutcomeStatus::Awarded)
+        found->second.NextFireSigilPractice = now +
+            std::chrono::seconds(Practice::DevelopmentHelpers::FirePracticeIntervalSeconds);
     RecordAward(player, found->second, *profile, award);
 }
 
@@ -3684,7 +3748,8 @@ public:
         bool const scriptedDamage = HelpersRequested && player->getClass() == 14 &&
             ((MasteryRequested && helperId == 807554) ||
                 Practice::DevelopmentHelpers::IsTwinDamageHelper(helperId));
-        if (!profile && !IsBuffObserver(player) && !scriptedDamage)
+        bool const fireDamage = HelpersRequested && player->getClass() == 32 && helperId == 807012;
+        if (!profile && !IsBuffObserver(player) && !scriptedDamage && !fireDamage)
             return true;
         std::lock_guard lock(Mutex);
         spell->SetPracticeCast({});
@@ -3699,6 +3764,28 @@ public:
             if (receipt && IsScriptedDamage(origin, receipt->SpellId, helperId) &&
                 Affects(player) && !player->isBeingLoaded() &&
                 session != Sessions.end() && ReceiptMatches(player, session->second, *receipt) &&
+                AcquisitionAllowed(player, origin->Definition, receipt->SpellId))
+            {
+                spell->SetPracticeCast(receipt);
+                spell->SetScriptValue(PracticeCastSourceKey,
+                    (static_cast<std::uint64_t>(receipt->ClassId) << 32) | receipt->SpellId);
+                return true;
+            }
+        }
+        if (fireDamage && targets && spell->IsTriggered() && triggeredByAura && !spell->m_CastItem &&
+            spell->m_castItemGUID.IsEmpty() && spell->GetOriginalCasterGUID() == player->GetGUID() &&
+            triggeredByAura->GetEffIndex() == EFFECT_0 && triggeredByAura->GetAuraType() == 354 &&
+            triggeredByAura->GetSpellInfo()->Effects[EFFECT_0].TriggerSpell == helperId &&
+            triggeredByAura->GetCasterGUID() == player->GetGUID() && !triggeredByAura->GetBase()->IsRemoved())
+        {
+            auto const receipt = triggeredByAura->GetBase()->GetPracticeCast();
+            auto const* origin = receipt ? FindProfile(player, receipt->SpellId) : nullptr;
+            auto const session = Sessions.find(player->GetGUID().GetRawValue());
+            if (receipt && !receipt->IsConsumed() && receipt->SpellId == triggeredByAura->GetId() &&
+                origin && Practice::DevelopmentHelpers::IsFireSigil(*origin) &&
+                Practice::DevelopmentHelpers::IsFireSigilDamage(receipt->SpellId, helperId) &&
+                Affects(player) && !player->isBeingLoaded() && session != Sessions.end() &&
+                ReceiptMatches(player, session->second, *receipt) &&
                 AcquisitionAllowed(player, origin->Definition, receipt->SpellId))
             {
                 spell->SetPracticeCast(receipt);

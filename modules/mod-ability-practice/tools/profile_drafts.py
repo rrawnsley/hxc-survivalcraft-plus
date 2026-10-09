@@ -467,6 +467,24 @@ def build_drafts(candidates, root):
         }
         if raw_graphs:
             required.append('trigger-reference-loaded-data-script-and-original-cast-attribution')
+        if (class_id, ability_id) == (32, 534803):
+            expected_ids = [534803, 534804, 534805, 534806, 534807]
+            expected_levels = [4, 26, 34, 42, 50]
+            if ([rank['spellId'] for rank in ranks] != expected_ids or
+                    [rank['characterLevel'] for rank in ranks] != expected_levels):
+                raise ValueError('Reviewed Fire Palm Sigil native rank ladder changed')
+            for index, spell_id in enumerate(expected_ids):
+                raw = members[spell_id].get('rawDbc', {})
+                details = raw.get('effectDetails', [])
+                expected = [(6, 354, 1, 0, 807012, [69, 79, 89, 99, 119][index]),
+                            (0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, 0)]
+                if (raw.get('passive') is not False or len(details) != 3 or
+                        [(v.get('effectId'), v.get('auraId'), v.get('implicitTargetA'),
+                          v.get('implicitTargetB'), v.get('triggerSpellId'),
+                          v.get('basePoints')) for v in details] != expected):
+                    raise ValueError('Reviewed Fire Palm Sigil parent/helper raw shape changed')
+            required.extend(['fire-sigil-native-one-charge-resolved-copy-without-double-dipping-or-clamp',
+                             'fire-sigil-owned-original-aura-helper-receipt-and-ten-second-practice-interval'])
         if (class_id, ability_id) == (14, 801901):
             expected_ids = [801901, 501257, 501258, 501259, 501260, 501261, 547210, 547211]
             expected_levels = [1, 6, 14, 24, 34, 44, 52, 60]

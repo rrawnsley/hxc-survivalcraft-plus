@@ -32,11 +32,22 @@ inline constexpr std::array TwinDamageHelpers = {
     std::array{ 803462u, 520243u }, std::array{ 803462u, 520243u },
     std::array{ 803462u, 520243u }, std::array{ 803462u, 520243u }
 };
+inline constexpr std::array FireSigil = {
+    AbilityRank{ 534803, 1, { 4, 1 } },
+    AbilityRank{ 534804, 2, { 26, 10 } },
+    AbilityRank{ 534805, 3, { 34, 20 } },
+    AbilityRank{ 534806, 4, { 42, 40 } },
+    AbilityRank{ 534807, 5, { 50, 60 } }
+};
+inline constexpr auto FireCaps = Development::RankCaps(FireSigil);
+inline constexpr std::uint32_t FirePracticeIntervalSeconds = 10;
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 14, 801901, AbilityKind::Ranked, TwinSlice, TwinCaps }, Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
-        { 14, 552210, AbilityKind::Ranked, Manafeed, Caps }, Development::Policy, OutcomeKind::Healing }
+        { 14, 552210, AbilityKind::Ranked, Manafeed, Caps }, Development::Policy, OutcomeKind::Healing },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 32, 534803, AbilityKind::Ranked, FireSigil, FireCaps }, Development::Policy, OutcomeKind::Damage }
 };
 
 inline bool IsTwinSlice(AbilityProfile const& profile)
@@ -57,6 +68,22 @@ inline bool IsTwinDamageHelper(std::uint32_t helperId)
 {
     for (auto const& pair : TwinDamageHelpers)
         if (pair[0] == helperId || pair[1] == helperId)
+            return true;
+    return false;
+}
+
+inline bool IsFireSigil(AbilityProfile const& profile)
+{
+    return profile.Definition.ClassId == 32 && profile.Definition.AbilityId == 534803 &&
+        profile.Definition.Kind == AbilityKind::Ranked && profile.Outcome == OutcomeKind::Damage;
+}
+
+inline bool IsFireSigilDamage(std::uint32_t originId, std::uint32_t helperId)
+{
+    if (helperId != 807012)
+        return false;
+    for (auto const& rank : FireSigil)
+        if (rank.SpellId == originId)
             return true;
     return false;
 }

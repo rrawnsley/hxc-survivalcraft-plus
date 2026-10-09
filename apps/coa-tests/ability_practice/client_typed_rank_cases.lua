@@ -87,6 +87,12 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
         assert(string.find(Model.PracticeRules(ability), "increases magic damage taken", 1, true))
         assert(string.find(Model.PracticeRules(ability), "Buffing an ally alone", 1, true))
     end
+    if ability.abilityId == 534803 then
+        assert(ability.route == 1 and ability.kind == 1)
+        assert(string.find(Model.PracticeRules(ability), "bonus Fire hit", 1, true))
+        assert(string.find(Model.PracticeRules(ability), "ten seconds", 1, true))
+        assert(string.find(Model.PracticeRules(ability), "Arming, refreshing, expiry", 1, true))
+    end
     if ability.abilityId == 680389 and ability.route == 13 then
         assert(ability.route == 13)
         assert(string.find(Model.PracticeRules(ability), "armor must remain effective", 1, true))
@@ -188,7 +194,7 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
     end
     count = count + 1
 end
-assert(count == 909)
-assert(kinds[1] == 537 and kinds[2] == 45 and kinds[3] == 327)
+assert(count == 912)
+assert(kinds[1] == 540 and kinds[2] == 45 and kinds[3] == 327)
 for classId = 12, 32 do assert(classes[classId]) end
-print("PASS: 909 typed snapshots across 21 classes: 537 ranked, 45 mastery, 327 fixed and menu rendering")
+print("PASS: 912 typed snapshots across 21 classes: 540 ranked, 45 mastery, 327 fixed and menu rendering")
