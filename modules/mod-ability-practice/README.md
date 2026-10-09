@@ -4521,3 +4521,25 @@ trainer headers passed.294unique296decl178ranked9mastery107Fixed33shared376pendi
 18extensions30added ranks unchanged. Addon0.4.83-development/schema5fallback4/defaults0/
 unpublished. Ordinary sustained cadence and active client pixels remain unqualified.
 No production server/config/database/client/launcher changes.
+
+
+## Leyline Inscription native tradeoff baseline
+
+Runemaster32 roots561260..263 have four native trainer ranks at16/28/40/52.
+Target57 is a selected raid ally, not an item. Aura14 grants magic damage taken
+15/30/50/75 and Aura115 grants healing received16/32/53/80. The native tooltip
+explicitly describes this tradeoff; there is no outgoing spell-power/healing bonus.
+Original normal casts preserve both effects and refresh does not stack them. Native
+incoming damage calculator42833 uses effective SQL coefficient1 and shows exactly
+15/30/50/75 additional damage on1000base. Incoming heal48071 uses coefficient0.8057
+and shows12/25/42/64 additional healing on1000base. Both receivers are level80,
+matching native spell-level penalty1. Normal-school78 damage control stays1000.
+Controlled native aura removal restores both calculators. Selected grouped ally
+receives the rank1 effects while caster remains unaffected. These are calculator
+checks plus real original buff casts, not actual incoming-hit/heal event tests.
+
+150032 VERIFY ALL PASSED source9/88.3s and five simulated native cases118.6s/15lanes,
+no reruns. No new C++/build required beyond passing142350 binary. Native effect/
+acquisition data and this baseline precede practice classification. Catalog294unique/
+178ranked9mastery107Fixed376pending, addon0.4.83 remain unchanged; defaults0/unpublished.
+No production server/config/database/client/launcher changes.
