@@ -710,6 +710,11 @@ function Model.PracticeRules(ability, saved)
             .. " in a non-gray PvE encounter. Its Agility benefit must remain effective."
             .. " The greater version shares this practice. Switching etchings pauses Dextrous practice."
             .. " Applying or refreshing an etching gives no practice."
+    elseif ability.abilityId == 803748 and ability.route == 13 then
+        rule = "Keep your own Arcane Tattoo active and use a learned ability for useful damage or healing"
+            .. " in a non-gray PvE encounter. Its Arcane resistance and both harmful-effect duration reductions"
+            .. " must remain effective; stronger duration effects can pause practice. Applying or refreshing"
+            .. " a tattoo gives no practice. Switching tattoos pauses Arcane practice."
     elseif ability.abilityId == 801106 and ability.route == 13 then
         rule = "Keep your own Fire Tattoo active and use a learned ability for useful damage or healing"
             .. " in a non-gray PvE encounter. Its Fire resistance and 15% critical damage bonus must remain effective."

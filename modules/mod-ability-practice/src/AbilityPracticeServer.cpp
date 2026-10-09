@@ -747,6 +747,27 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
                 scripts.first != scripts.second || !HasExpectedEtchingGroup(561237, info->Id))
                 return false;
         }
+        if (Practice::DevelopmentBuffs::IsArcaneTattoo(profile))
+        {
+            constexpr std::array<std::int32_t, 6> tattoos{ 801094, 801106, 801107, 802630, 803748, 807834 };
+            constexpr std::array spells{ 803748u, 803759u, 803760u, 803761u, 803762u, 803763u };
+            constexpr std::array levels{ 20u, 32u, 44u, 56u, 60u, 76u };
+            auto const rank = std::find(spells.begin(), spells.end(), info->Id);
+            auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+            if (rank == spells.end() || info->SpellFamilyName != 38 || info->SpellFamilyFlags[0] != 4 ||
+                info->SpellFamilyFlags[1] || info->SpellFamilyFlags[2] || scripts.first != scripts.second ||
+                info->GetDuration() != -1 ||
+                !HasExactBuffGroup(info->Id, 111001, SPELL_GROUP_STACK_RULE_EXCLUSIVE, tattoos))
+                return false;
+            auto const index = static_cast<std::size_t>(rank - spells.begin());
+            if (info->SpellLevel != levels[index] || info->BaseLevel != levels[index] || info->MaxLevel ||
+                info->Effects[EFFECT_0].BasePoints != 4 + 5 * static_cast<std::int32_t>(index) ||
+                info->Effects[EFFECT_1].BasePoints != -21 || info->Effects[EFFECT_2].BasePoints != -21)
+                return false;
+            for (auto const& effect : info->Effects)
+                if (effect.DieSides != 1 || effect.RealPointsPerLevel || effect.MiscValueB || effect.SpellClassMask)
+                    return false;
+        }
         if (Practice::DevelopmentBuffs::IsFireTattoo(profile))
         {
             constexpr std::array<std::int32_t, 6> tattoos{ 801094, 801106, 801107, 802630, 803748, 807834 };
@@ -966,11 +987,14 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
             {
                 bool const graceCost = Practice::DevelopmentBuffs::IsDevotionOfGrace(profile) && index == 1;
                 bool const waterCost = Practice::DevelopmentBuffs::IsWaterTattoo(profile) && index == 1;
+                bool const arcaneDuration = Practice::DevelopmentBuffs::IsArcaneTattoo(profile) &&
+                    (index == 1 || index == 2);
                 if (slot.Effect != SPELL_EFFECT_APPLY_AURA || slot.ApplyAuraName != secondary->Aura ||
                     slot.TargetA.GetTarget() != secondary->TargetA || slot.TargetB.GetTarget() ||
                     slot.TriggerSpell || slot.MiscValue != secondary->Stat || slot.MiscValueB ||
                     (graceCost ? (slot.BasePoints != -6 || slot.DieSides != 1) :
-                        waterCost ? (slot.BasePoints >= -1 || slot.DieSides != 1) : slot.BasePoints < 0))
+                        waterCost ? (slot.BasePoints >= -1 || slot.DieSides != 1) :
+                            arcaneDuration ? (slot.BasePoints != -21 || slot.DieSides != 1) : slot.BasePoints < 0))
                     return false;
                 continue;
             }
@@ -1981,17 +2005,24 @@ bool EffectiveBuffComponent(Player* player, AuraApplication const& application, 
         return false;
     AuraEffect const* effect = application.GetBase()->GetEffect(effectIndex);
     bool const costReduction = aura == SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT;
+    bool const durationReduction = aura == SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL;
     if ((aura != SPELL_AURA_MOD_STAT && aura != SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT &&
             aura != SPELL_AURA_MOD_POWER_REGEN && aura != SPELL_AURA_MOD_RESISTANCE &&
             aura != SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE && aura != SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT &&
             aura != SPELL_AURA_MOD_ATTACK_POWER && aura != SPELL_AURA_MOD_RANGED_ATTACK_POWER &&
-            aura != SPELL_AURA_HASTE_SPELLS && aura != SPELL_AURA_MOD_CRIT_DAMAGE_BONUS) ||
+            aura != SPELL_AURA_HASTE_SPELLS && aura != SPELL_AURA_MOD_CRIT_DAMAGE_BONUS &&
+            aura != SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL) ||
         !effect || effect->GetAuraType() != aura || effect->GetMiscValue() != selector ||
         (costReduction ? ((rankedCostReduction ? effect->GetAmount() >= 0 : effect->GetAmount() != -5) ||
-            selector != 127) : effect->GetAmount() <= 0))
+            selector != 127) : durationReduction ?
+                (effect->GetAmount() != -20 || (selector != 1 && selector != 2)) : effect->GetAmount() <= 0))
         return false;
     if (costReduction)
         return true;
+    if (durationReduction)
+        return Practice::DevelopmentBuffs::ArcaneDurationContributes(effect->GetAmount(),
+            player->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL, selector),
+            player->GetMaxNegativeAuraModifierByMiscValue(SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL_NOT_STACK, selector));
     if (aura == SPELL_AURA_MOD_POWER_REGEN && (player->getPowerType() != POWER_MANA ||
         !player->GetMaxPower(POWER_MANA) ||
         player->HasAuraTypeWithMiscvalue(SPELL_AURA_PREVENT_REGENERATE_POWER, POWER_MANA + 1) ||

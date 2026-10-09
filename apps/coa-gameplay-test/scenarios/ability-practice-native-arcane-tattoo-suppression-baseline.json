@@ -1,0 +1,241 @@
+{
+  "schema": 1,
+  "name": "Ability practice: native Arcane Tattoo nonstacking curse suppression baseline",
+  "contract": "A native passive Pure of Heart31823 supplies stronger30percent nonstacking Curse duration reduction. Native Arcane20percent then contributes no additional Curse reduction; removal restores19.2seconds from16.8. This qualifies native mechanics, not talent acquisition or practice.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Aparcsupp",
+      "race": 1,
+      "class": 32,
+      "level": 76
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 76,
+      "health": 1000000,
+      "faction": 14,
+      "distance": 5,
+      "spell_hit_bonus": 100
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.803748",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.803748",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.803748",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.803748",
+      "index": 3,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.32.803748",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803748
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 2000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803748,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803748,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 980,
+      "target": "caster",
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 980,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 980,
+      "min": 18900,
+      "max": 19200
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 980,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 31823,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 31823,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 31823,
+      "effect": 0,
+      "equals": -30
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 980,
+      "target": "caster",
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 980,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 980,
+      "min": 16500,
+      "max": 16800
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 980,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 31823,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "actor": "enemy",
+      "spell": 980,
+      "target": "caster",
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 980,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 980,
+      "min": 18900,
+      "max": 19200
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 980,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    }
+  ]
+}

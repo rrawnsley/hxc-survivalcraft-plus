@@ -468,7 +468,7 @@ void CheckCurrentRankPolicies()
 {
     std::uint32_t forecasts = 0;
     std::array<bool, 21> classes{};
-    assert(DevelopmentPacing::Entries.size() == 175);
+    assert(DevelopmentPacing::Entries.size() == 176);
     for (auto const& entry : DevelopmentPacing::Entries)
     {
         classes.at(entry.ClassId - 12) = true;
@@ -549,7 +549,8 @@ void CheckCurrentRankPolicies()
         }
     }
     assert(std::all_of(classes.begin(), classes.end(), [](bool present) { return present; }));
-    std::cout << "PASS: 155 current rank policies, 21 classes, one-rank-ahead caps, exact rebases and "
+    std::cout << "PASS: " << DevelopmentPacing::Entries.size()
+        << " current rank policies, 21 classes, one-rank-ahead caps, exact rebases and "
         << forecasts << " current forecast/award comparisons\n";
 }
 
@@ -772,8 +773,9 @@ void CheckMasteryFixedAndTrainerPolicies()
         invalid.CharacterLevel = 1;
         assert(!DevelopmentBuffVariants::EquivalentRank(*parent, invalid));
     }
-    assert(extensions == 16 && addedRanks == 28);
-    std::cout << "PASS: 9 mastery policies/rewards, 100 fixed declarations, 15 trainer extensions/27 added ranks\n";
+    assert(extensions == 17 && addedRanks == 29);
+    std::cout << "PASS: 9 mastery policies/rewards, 100 fixed declarations, " << extensions
+        << " trainer extensions/" << addedRanks << " added ranks\n";
 }
 
 void WriteSharedCases(std::string const& filename)
@@ -944,6 +946,14 @@ class Unit { };
 
 void CheckBuffReceipts()
 {
+    assert(DevelopmentBuffs::ArcaneDurationContributes(-20, -20, 0));
+    assert(!DevelopmentBuffs::ArcaneDurationContributes(-20, -20, -30));
+    assert(DevelopmentBuffs::ArcaneDurationContributes(-20, -40, -30));
+    assert(!DevelopmentBuffs::ArcaneDurationContributes(-20, 0, 0));
+    assert(!DevelopmentBuffs::ArcaneDurationContributes(-20, -120, 0));
+    assert(DevelopmentBuffs::ArcaneDurationContributes(-20, -100, 0));
+    assert(!DevelopmentBuffs::ArcaneDurationContributes(-10, -10, 0));
+    assert(!DevelopmentBuffs::ArcaneDurationContributes(20, 20, 0));
     using CoAAbilityPractice::CastReceipt;
     BuffCastLedger ledger;
     auto origin = std::make_shared<CastReceipt>(1, 2, 22, 801523, 1, 0, 0);

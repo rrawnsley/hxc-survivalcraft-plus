@@ -237,7 +237,7 @@ def reviewed_stat_buffs(root):
         aura = int(match[5]) if match[5] is not None else 29
         effect_index = int(match[6]) if match[6] is not None else 0
         self_buff = (class_id, ability_id, target, stat, aura, effect_index) in {
-            (16, 680282, 1, 1, 22, 0), (32, 801106, 1, 4, 22, 0),
+            (16, 680282, 1, 1, 22, 0), (32, 801106, 1, 4, 22, 0), (32, 803748, 1, 64, 22, 0),
             (32, 801094, 1, 1, 22, 0), (32, 801107, 1, 0, 85, 0)}
         party_resistance = (class_id, ability_id, target, stat, aura, effect_index) == (25, 1119881, 1, 32, 143, 0)
         if (not 12 <= class_id <= 32 or not ability_id or
@@ -268,7 +268,8 @@ def reviewed_stat_buffs(root):
     secondary_matches = list(re.finditer(pattern, secondary_body[1]))
     if re.sub(pattern, '', secondary_body[1]).replace(',', '').strip():
         raise ValueError('Unsupported secondary buff mechanic declaration')
-    expected_secondary = {(32, 801106, 1): (1, 127, 163), (16, 680282, 1): (1, 0, 216), (32, 801107, 1): (1, 127, 72),
+    expected_secondary = {(32, 803748, 1): (1, 1, 245), (32, 803748, 2): (1, 2, 245),
+                          (32, 801106, 1): (1, 127, 163), (16, 680282, 1): (1, 0, 216), (32, 801107, 1): (1, 127, 72),
                           (32, 801094, 1): (1, 8, 22), (14, 523478, 1): (21, -1, 29),
                           (15, 523485, 1): (21, -1, 29),
                           (29, 803651, 1): (21, -1, 29), (27, 800852, 1): (21, 127, 72), (21, 523489, 1): (21, -1, 29),
@@ -642,6 +643,9 @@ def build_drafts(candidates, root):
             primary_effect = 65 if (class_id, ability_id) == (25, 1119881) else 6
             expected[effect_index] = (primary_effect, mechanic['auraId'], mechanic['targetA'],
                                        0, 0, mechanic['statSelector'])
+            if (class_id, ability_id) == (32, 803748):
+                required.extend(['native-self-arcane-resistance-and-two-negative-duration-components',
+                                 'native-nonstacking-duration-suppression-and-complete-sixth-trainer-rank'])
             if (class_id, ability_id) == (32, 801106):
                 expected[2] = (6, 107, 1, 0, 0, 17)
                 required.extend(['native-self-fire-resistance-and-fifteen-percent-critical-damage',
@@ -699,10 +703,12 @@ def build_drafts(candidates, root):
                     value = details[component['effectIndex']]
                     grace_cost = (class_id, ability_id, component['effectIndex']) == (27, 800852, 1)
                     water_cost = (class_id, ability_id, component['effectIndex']) == (32, 801107, 1)
+                    arcane_duration = (class_id, ability_id) == (32, 803748) and component['effectIndex'] in {1, 2}
                     water_points = {801107: -6, 803783: -11, 803784: -16, 803785: -21}
                     valid_amount = type(value.get('basePoints')) is int and (
                         value['basePoints'] == -6 if grace_cost else
                         value['basePoints'] == water_points.get(rank['spellId']) if water_cost else
+                        value['basePoints'] == -21 if arcane_duration else
                         value['basePoints'] >= 0)
                     if not valid_amount:
                         raise ValueError('Reviewed secondary buff benefit changed')

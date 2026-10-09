@@ -5,9 +5,19 @@
 
 #include "AbilityPracticeDevelopment.h"
 #include "AbilityPracticeProfiles.h"
+#include <algorithm>
 
 namespace AbilityPractice::DevelopmentBuffs
 {
+inline constexpr std::array ArcaneTattoo = {
+    AbilityRank{ 803748, 1, { 20, 1 } },
+    AbilityRank{ 803759, 2, { 32, 10 } },
+    AbilityRank{ 803760, 3, { 44, 20 } },
+    AbilityRank{ 803761, 4, { 56, 40 } },
+    AbilityRank{ 803762, 5, { 60, 60 } }
+};
+inline constexpr auto ArcaneTattooCaps = Development::RankCaps(ArcaneTattoo);
+
 inline constexpr std::array FireTattoo = {
     AbilityRank{ 801106, 1, { 24, 1 } },
     AbilityRank{ 803749, 2, { 36, 10 } },
@@ -453,6 +463,9 @@ inline constexpr auto RiteOfPowerCaps = Development::RankCaps(RiteOfPower);
 
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 32, 803748, AbilityKind::Ranked, ArcaneTattoo, ArcaneTattooCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 32, 801106, AbilityKind::Ranked, FireTattoo, FireTattooCaps },
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -646,6 +659,7 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 32, 803748, 1, 64, 22 },
     Mechanic{ 32, 801106, 1, 4, 22 },
     Mechanic{ 16, 680282, 1, 1, 22 },
     Mechanic{ 25, 1119881, 1, 32, 143 },
@@ -703,6 +717,8 @@ inline constexpr std::array Mechanics = {
 static_assert(Mechanics.size() == Profiles.size());
 
 inline constexpr std::array SecondaryMechanics = {
+    Mechanic{ 32, 803748, 1, 1, 245, 1 },
+    Mechanic{ 32, 803748, 1, 2, 245, 2 },
     Mechanic{ 32, 801106, 1, 127, 163, 1 },
     Mechanic{ 16, 680282, 1, 0, 216, 1 },
     Mechanic{ 32, 801107, 1, 127, 72, 1 },
@@ -727,6 +743,21 @@ inline Mechanic const* SecondaryMechanicFor(AbilityProfile const& profile, std::
             mechanic.EffectIndex == effectIndex)
             return &mechanic;
     return nullptr;
+}
+
+inline bool IsArcaneTattoo(AbilityProfile const& profile)
+{
+    return profile.Definition.ClassId == 32 && profile.Definition.AbilityId == 803748 &&
+        IsSupportedStatBuff(profile);
+}
+
+inline bool ArcaneDurationContributes(std::int32_t amount, std::int32_t stackingTotal,
+    std::int32_t strongestNonstacking)
+{
+    std::int64_t const with = std::min<std::int64_t>(stackingTotal, strongestNonstacking);
+    std::int64_t const without = std::min<std::int64_t>(
+        static_cast<std::int64_t>(stackingTotal) - amount, strongestNonstacking);
+    return amount == -20 && with >= -100 && with < 0 && with < without;
 }
 
 inline bool IsFireTattoo(AbilityProfile const& profile)

@@ -6,23 +6,24 @@ The feature is not complete or approved for release.
 
 ## Latest isolated qualification (9 October 2026)
 
-- Development catalog: 284 unique profiles across all 21 classes, with 175 ranked, nine mastery,
-  100 Fixed and 33 shared variants. There are 386 remaining candidate groups awaiting definitions
+- Development catalog: 285 unique profiles across all 21 classes, with 176 ranked, nine mastery,
+  100 Fixed and 33 shared variants. There are 385 remaining candidate groups awaiting definitions
   and qualification; discovery exports remain unapproved.
-- Whirlwind Aegis preserves six native armor ranks and 3% spell haste. Its contribution, one-rank-ahead
-  caps, automatic ranks, saved progress and menu forecasts passed isolated qualification.
-- Fire Tattoo now includes its trainer-only sixth rank at level 76. Native Fire resistance stays
-  5/10/15/20/25/30 and critical damage stays +15%. Useful original combat earns practice; refreshing
-  and replacement do not. At level 60, proficiency 80 prepares rank 6 and practice pauses until 76.
-  Automatic unlocking, final cap, legacy/current saves and all six menu requirements passed.
-- Fire, Arcane and Frost each have six native trainer ranks. Arcane retains native 20% negative
-  Magic/Curse duration reduction. Frost resistance works, but its native proc decision returns zero
-  for tested incoming/outgoing melee and magic events. Arcane/Frost practice remains pending.
-- The addon is 0.4.78-development, protocol 5 with protocol 4 fallback. The harness passed 870 typed
+- Arcane Tattoo includes all six native ranks at 20/32/44/56/60/76. Resistance stays
+  5/10/15/20/25/30, with native 20% harmful Magic and Curse duration reduction.
+  Practice requires owned effective resistance and both reductions. A stronger native nonstacking
+  reduction pauses practice while it suppresses Arcane; removing it restores progress.
+- Useful original combat advances practice; application, refresh and replacement earn zero.
+  One upcoming rank, automatic first/final unlocks, final caps, current/legacy saved fractions,
+  and exact six-rank menu forecasts passed. Existing Fire and tattoo exclusivity regressions passed.
+- Source checks, native build and harness passed. Eight native Arcane cases passed with a simulated
+  clock; nine progression/regression cases passed with a real clock. Both scoped runs report
+  VERIFY ALL: PASSED. This does not qualify the full catalog or ordinary combat cadence.
+- Fire Tattoo and Whirlwind Aegis retain their qualified native benefits. Frost resistance works,
+  but its native proc decision returns zero for tested incoming/outgoing melee and magic events.
+  Frost practice remains pending; no native proc repair has been performed.
+- The addon is 0.4.79-development, protocol 5 with protocol 4 fallback. The harness passed 873 typed
   snapshots and 99 shared-variant cases. These are not active-client pixel checks.
-- Source checks, native build and the 18 selected final Fire/regression cases passed across scoped
-  runs. Failed fixture attempts and environment failures remain recorded in the palace chronicle.
-  The final harness-only run reports VERIFY ALL: PASSED; no single combined pass is claimed.
 - Production defaults remain disabled. Nothing has been deployed or installed in the active client.
   Ordinary combat cadence, remaining catalog behavior, client rendering and release remain pending.
 
