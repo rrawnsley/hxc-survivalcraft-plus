@@ -4486,3 +4486,38 @@ natural combat proc frequency.141258 VERIFY ALL PASSED source9/88.0s and eight
 simulated cases149.7s/15lanes/no reruns. No C++ change/build was needed beyond the
 passing140432 binary. Practice enrollment, acquisition boundaries, persistence and
 menu qualification remain pending; catalog/addon0.4.82 unchanged. No live actions.
+
+
+## Temporal Resilience complete practice ladder
+
+All seven native armor ranks are enrolled, with proficiencies1/10/20/40/60/80/100
+and native levels2/10/20/32/42/50/60. Owned effective armor and original useful
+combat earn practice; application/refresh/cancellation do not. Native dormant
+secondary proc remains unchanged and the menu discloses it. Exact loaded family,
+levels, armor, duration, cost, empty bindings/groups and zero proc registration guard
+this definition. Existing177pacing curves and all18trainer extensions remain unchanged.
+
+Original Discordance at10 gives270 points/use while armor is active, pauses without
+armor and resumes after reapplication. First boundary9/15930->10/0 automatically
+learns native rank2/armor110; only rank3 prepares and pauses at20 until character20.
+Final99/15600->100/0 prepares rank7 at50, pauses until60 then automatically learns
+native armor760. Further original useful casts add0. Exact540-use rank2 forecast,
+cap20 and all seven native menu levels passed. First conversion current/legacy1/2
+seeds known rank4 floor40 and keeps partial8100. Completed migration counters9/8100
+remain stable across pacing/cap upgrades. Undefined3/7/999 and unsupported storage/
+migration fields remain untouched. This profile has no version3 trainer extension.
+
+142350 build30.3s/harness4.8s900typed99shared/native8sim119.3s pass; source8pass1
+unchanged generic test_batch fake-server exit failure; aggregateFAILED.142816 source9/
+90s and menu pass, four fixture failures; interrupted before retries/no aggregatepass.
+Three repeated-use fixtures did not respect native Discordance category cooldown10s.
+Changed intervals to13s without changing gameplay. Retention had borrowed extension
+minimum/version3 assumptions; matched first-conversion versus completed-migration
+and undefined-version semantics.143701 source9/85.8s and corrected contribution,
+first/final boundaries pass; undefined3 assertion still failed, interrupted/noaggregate.
+144637 VERIFY ALL PASSED source9/88.2s and final retention real126.5s. All13 final
+selected cases qualify across scopes, not one combined pass. Style/whitespace and four
+trainer headers passed.294unique296decl178ranked9mastery107Fixed33shared376pending;
+18extensions30added ranks unchanged. Addon0.4.83-development/schema5fallback4/defaults0/
+unpublished. Ordinary sustained cadence and active client pixels remain unqualified.
+No production server/config/database/client/launcher changes.

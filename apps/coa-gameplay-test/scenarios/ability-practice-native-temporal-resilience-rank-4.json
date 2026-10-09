@@ -18,6 +18,56 @@
       "ms": 3000
     },
     {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.22.680389",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.22.680389",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.22.680389",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.22.680389",
+      "index": 3,
+      "value": 40
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.22.680389",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 680389
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 536258
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 536259
+    },
+    {
       "action": "learn",
       "actor": "caster",
       "spell": 536260

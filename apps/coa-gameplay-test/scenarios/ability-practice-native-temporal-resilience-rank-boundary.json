@@ -1,0 +1,381 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Temporal Resilience rank-boundary",
+  "contract": "Native rank2 unlocks at10/proficiency10. Only rank3 prepares; practice pauses at20 until native level20 then automatically learns rank3 with armor200. Native Discordance category cooldown10seconds is respected with13second cast intervals.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Aptempbound",
+      "race": 1,
+      "class": 22,
+      "level": 10,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "max_power",
+      "power": 0,
+      "min": 500
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.22.680389",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.22.680389",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.22.680389",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.22.680389",
+      "index": 3,
+      "value": 9
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.22.680389",
+      "index": 4,
+      "value": 15930
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 680389
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 503875
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 500
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 680389,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 13000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 680389,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 500
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 503875,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 13000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 503875,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 503875,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.22.680389",
+      "index": 3,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.22.680389",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 536258,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 536259,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 500
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 536258,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 13000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 536258,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 536258,
+      "effect": 0,
+      "equals": 110
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.22.680389",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.22.680389",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.22.680389",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.22.680389",
+      "index": 3,
+      "value": 19
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.22.680389",
+      "index": 4,
+      "value": 15900
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 500
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 503875,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 13000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 503875,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 503875,
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.22.680389",
+      "index": 3,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.22.680389",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 536259,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 500
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 503875,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 13000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 503875,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 503875,
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.22.680389",
+      "index": 3,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.22.680389",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "actor": "caster",
+      "value": 20
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 536259,
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "value": 500
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 536259,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 13000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 536259,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 536259,
+      "effect": 0,
+      "equals": 200
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 10,
+      "health": 1000000,
+      "faction": 14,
+      "distance": 20,
+      "stationary": true
+    }
+  ]
+}
