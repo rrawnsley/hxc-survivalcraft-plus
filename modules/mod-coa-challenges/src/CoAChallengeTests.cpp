@@ -1504,7 +1504,11 @@ namespace CoAChallenges
             sScriptMgr->OnPlayerUpdateGatheringSkill(p, SKILL_HERBALISM, 1, 101, 51, 26, gatherStep);
             uint32 professionXp = 1000;
             sScriptMgr->OnPlayerGiveXP(p, professionXp, nullptr, XPSOURCE_PROFESSION);
-            return craftStep == 1 && gatherStep == 1 && professionXp == 0; });
+            uint32 skillXp = 1000;
+            sScriptMgr->OnPlayerGiveXP(p, skillXp, nullptr, XPSOURCE_PROFESSION_SKILL);
+            uint32 amtSkill = 1000; sScriptMgr->OnPlayerGiveXP(p, amtSkill, nullptr, XPSOURCE_PROFESSION_SKILL);
+            uint32 amtKill = 1000; sScriptMgr->OnPlayerGiveXP(p, amtKill, nullptr, XPSOURCE_KILL);
+            return craftStep == 1 && gatherStep == 1 && professionXp == 0 && skillXp == 0 && amtSkill == 0 && amtKill == 1000; });
         RUN("CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_QUESTS", [](Player* p) {
             uint32 amt = 1000; sScriptMgr->OnPlayerGiveXP(p, amt, nullptr, XPSOURCE_KILL); return amt == 0; });
         RUN("CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_CREATURES", [](Player* p) {
