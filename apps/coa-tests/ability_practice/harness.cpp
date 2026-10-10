@@ -469,7 +469,7 @@ void CheckCurrentRankPolicies()
 {
     std::uint32_t forecasts = 0;
     std::array<bool, 21> classes{};
-    assert(DevelopmentPacing::Entries.size() == 182);
+    assert(DevelopmentPacing::Entries.size() == 183);
     for (auto const& entry : DevelopmentPacing::Entries)
     {
         classes.at(entry.ClassId - 12) = true;
@@ -1209,6 +1209,15 @@ void CheckScriptedDamageReceipts()
     }
     assert(!DevelopmentHelpers::IsFireSigilDamage(802202, 807012));
     assert(DevelopmentHelpers::FirePracticeIntervalSeconds == 10);
+    assert(DevelopmentHelpers::GeodeBarrage.size() == 10);
+    assert(DevelopmentHelpers::GeodePracticeIntervalSeconds == 5);
+    for (auto const& rank : DevelopmentHelpers::GeodeBarrage)
+    {
+        assert(DevelopmentHelpers::IsGeodeDamage(rank.SpellId, 803138));
+        assert(!DevelopmentHelpers::IsGeodeDamage(rank.SpellId, 802885));
+        assert(!DevelopmentHelpers::IsGeodeDamage(rank.SpellId, 804002));
+    }
+    assert(!DevelopmentHelpers::IsGeodeDamage(803138, 803138));
     for (auto const& rank : DevelopmentHelpers::ArcaneSigil)
     {
         assert(DevelopmentHelpers::IsArcaneSigilDamage(rank.SpellId, 807819));

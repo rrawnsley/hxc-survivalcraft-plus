@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "name": "Ability practice: menu",
+  "contract": "Actual schema6 menu delivers all10 native ranks, next rank2 at6/proficiency10 and exact540 qualifying uses. Future rank3 native level14 remains.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apgeodemenu",
+      "race": 1,
+      "class": 31,
+      "level": 6,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.500402",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.500402",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.500402",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.500402",
+      "index": 3,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.500402",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 500402
+    },
+    {
+      "action": "whisper",
+      "actor": "caster",
+      "to": "Apgeodemenu",
+      "text": "HXAP\tHELLO|6",
+      "language": 4294967295
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "text": "HXAP\tB|6|",
+      "min": 1,
+      "within_ms": 10000,
+      "from": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "text": "|500402|500402|1|1|0|20|16200|4",
+      "min": 1,
+      "within_ms": 10000,
+      "from": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "text": "|502769|2|6|10|4|1|540",
+      "min": 1,
+      "within_ms": 10000,
+      "from": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "text": "|502770|3|14|20|",
+      "min": 1,
+      "within_ms": 10000,
+      "from": "caster"
+    }
+  ]
+}

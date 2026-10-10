@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Ability practice native: Geode Barrage rank10 three stones",
-  "contract": "Ordinary native parent creates exactly three803138 physical stones, each generating one802885 Rage event;90..240 internal Rage total. Unknown saved progress retained; practice not yet enrolled. Existing coefficient regression runs alongside these endpoints.",
+  "contract": "Ordinary native parent creates exactly three803138 physical stones, each generating one802885 Rage event;90..240 internal Rage total. Unknown saved progress retained; current ranked practice seeded before casting; unsupported row inserted afterwards. Existing coefficient regression runs alongside these endpoints.",
   "timeout_ms": 90000,
   "players": [
     {
@@ -31,11 +31,6 @@
       "ms": 5000
     },
     {
-      "action": "learn",
-      "actor": "caster",
-      "spell": 502777
-    },
-    {
       "action": "set_player_setting",
       "actor": "caster",
       "source": "core.hxc.ability_practice.31.500402",
@@ -47,7 +42,7 @@
       "actor": "caster",
       "source": "core.hxc.ability_practice.31.500402",
       "index": 1,
-      "value": 999
+      "value": 4
     },
     {
       "action": "set_player_setting",
@@ -61,14 +56,64 @@
       "actor": "caster",
       "source": "core.hxc.ability_practice.31.500402",
       "index": 3,
-      "value": 100
+      "value": 160
     },
     {
       "action": "set_player_setting",
       "actor": "caster",
       "source": "core.hxc.ability_practice.31.500402",
       "index": 4,
-      "value": 101
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 500402
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 502769
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 502770
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 502771
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 502772
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 502773
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 502774
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 502775
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 502776
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 502777
     },
     {
       "action": "set_power",
@@ -125,6 +170,45 @@
       "power": 1,
       "min": 90,
       "max": 240
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.500402",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.500402",
+      "index": 1,
+      "value": 999
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.500402",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.500402",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.500402",
+      "index": 4,
+      "value": 101
+    },
+    {
+      "action": "wait",
+      "ms": 1000
     },
     {
       "action": "assert",

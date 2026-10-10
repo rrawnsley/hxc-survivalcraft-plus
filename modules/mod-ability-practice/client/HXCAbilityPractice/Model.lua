@@ -890,6 +890,12 @@ function Model.PracticeRules(ability, saved)
         rule = "Restore your missing health with Fel Bargain during an eligible PvE fight."
             .. " Energy spent without actual healing earns no practice."
             .. " One original cast earns at most one award; the native Energy cost and cooldown remain."
+    elseif ability.abilityId == 500402 and ability.route == 1 then
+        rule = "Cast Geode Barrage at a level-appropriate PvE opponent and land useful stone damage."
+            .. " The first useful stone earns one use; all three stones share your original cast."
+            .. " Counted uses must be at least five seconds apart."
+            .. " Misses, fully absorbed damage, injected auras and independently cast helpers earn no practice."
+            .. " Native stone damage, Rage generation and all ten ranks remain; practice prepares one upcoming rank."
     elseif ability.abilityId == 805380 and ability.route == 1 then
         rule = "Arm your own Arcane Sigil and deal useful periodic Arcane damage to a level-appropriate PvE opponent."
             .. " Only the first useful tick counts; later ticks and additional charges share one original cast."

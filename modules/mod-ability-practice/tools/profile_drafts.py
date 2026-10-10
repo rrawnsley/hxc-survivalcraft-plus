@@ -523,6 +523,22 @@ def build_drafts(candidates, root):
                     raise ValueError('Reviewed Fire Palm Sigil parent/helper raw shape changed')
             required.extend(['fire-sigil-native-one-charge-resolved-copy-without-double-dipping-or-clamp',
                              'fire-sigil-owned-original-aura-helper-receipt-and-ten-second-practice-interval'])
+        if (class_id, ability_id) == (31, 500402):
+            expected_ids = [500402, 502769, 502770, 502771, 502772, 502773, 502774, 502775, 502776, 502777]
+            if ([rank['spellId'] for rank in ranks] != expected_ids or
+                    [rank['characterLevel'] for rank in ranks] != [1, 6, 14, 22, 30, 38, 46, 54, 60, 68]):
+                raise ValueError('Reviewed Geode Barrage native rank ladder changed')
+            for index, spell_id in enumerate(expected_ids):
+                raw = members[spell_id].get('rawDbc', {})
+                details = raw.get('effectDetails', [])
+                expected = [(6, 227, 6, 0, 803138), (0, 0, 0, 0, 0), (0, 0, 0, 0, 0)]
+                if (raw.get('passive') is not False or len(details) != 3 or
+                        [(v.get('effectId'), v.get('auraId'), v.get('implicitTargetA'),
+                          v.get('implicitTargetB'), v.get('triggerSpellId')) for v in details] != expected or
+                        details[0].get('basePoints') != [12, 20, 36, 64, 101, 133, 165, 204, 264, 370][index]):
+                    raise ValueError('Reviewed Geode Barrage original aura/helper raw shape changed')
+            required.extend(['geode-first-useful-stone-shares-original-aura-cast-receipt',
+                             'geode-three-native-stones-and-rage-preserved-five-second-practice-interval'])
         if (class_id, ability_id) == (14, 801901):
             expected_ids = [801901, 501257, 501258, 501259, 501260, 501261, 547210, 547211]
             expected_levels = [1, 6, 14, 24, 34, 44, 52, 60]

@@ -48,6 +48,15 @@ inline constexpr std::array ArcaneSigil = {
 };
 inline constexpr auto ArcaneCaps = Development::RankCaps(ArcaneSigil);
 inline constexpr std::uint32_t ArcanePracticeIntervalSeconds = 10;
+inline constexpr std::array GeodeBarrage = {
+    AbilityRank{ 500402, 1, { 1, 1 } }, AbilityRank{ 502769, 2, { 6, 10 } },
+    AbilityRank{ 502770, 3, { 14, 20 } }, AbilityRank{ 502771, 4, { 22, 40 } },
+    AbilityRank{ 502772, 5, { 30, 60 } }, AbilityRank{ 502773, 6, { 38, 80 } },
+    AbilityRank{ 502774, 7, { 46, 100 } }, AbilityRank{ 502775, 8, { 54, 120 } },
+    AbilityRank{ 502776, 9, { 60, 140 } }, AbilityRank{ 502777, 10, { 68, 160 } }
+};
+inline constexpr auto GeodeCaps = Development::RankCaps(GeodeBarrage);
+inline constexpr std::uint32_t GeodePracticeIntervalSeconds = 5;
 inline constexpr std::array ArcaneProfiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 32, 805380, AbilityKind::Ranked, ArcaneSigil, ArcaneCaps }, Development::Policy, OutcomeKind::Damage }
@@ -58,8 +67,26 @@ inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 14, 552210, AbilityKind::Ranked, Manafeed, Caps }, Development::Policy, OutcomeKind::Healing },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
-        { 32, 534803, AbilityKind::Ranked, FireSigil, FireCaps }, Development::Policy, OutcomeKind::Damage }
+        { 32, 534803, AbilityKind::Ranked, FireSigil, FireCaps }, Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 31, 500402, AbilityKind::Ranked, GeodeBarrage, GeodeCaps }, Development::Policy, OutcomeKind::Damage }
 };
+
+inline bool IsGeodeBarrage(AbilityProfile const& profile)
+{
+    return profile.Definition.ClassId == 31 && profile.Definition.AbilityId == 500402 &&
+        profile.Definition.Kind == AbilityKind::Ranked && profile.Outcome == OutcomeKind::Damage;
+}
+
+inline bool IsGeodeDamage(std::uint32_t originId, std::uint32_t helperId)
+{
+    if (helperId != 803138)
+        return false;
+    for (auto const& rank : GeodeBarrage)
+        if (rank.SpellId == originId)
+            return true;
+    return false;
+}
 
 inline bool IsTwinSlice(AbilityProfile const& profile)
 {

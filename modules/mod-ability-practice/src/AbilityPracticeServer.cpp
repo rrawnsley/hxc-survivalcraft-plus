@@ -453,6 +453,7 @@ struct MenuSession
     Clock::time_point NextFrostSigilPractice{};
     Clock::time_point NextWaterSigilPractice{};
     Clock::time_point NextArcaneSigilPractice{};
+    Clock::time_point NextGeodePractice{};
     std::uint32_t OutgoingClass = 0;
     std::vector<std::string> Outgoing;
     std::size_t NextMessage = 0;
@@ -920,6 +921,59 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
                 damage.TargetA.GetTarget() != (slot ? 0u : TARGET_UNIT_TARGET_ENEMY) ||
                 damage.TargetB.GetTarget() || damage.TriggerSpell || damage.RealPointsPerLevel ||
                 damage.MiscValue || damage.MiscValueB || damage.BonusMultiplier)
+                return false;
+        }
+        return true;
+    }
+    if (HelpersRequested && Practice::DevelopmentHelpers::IsGeodeBarrage(profile))
+    {
+        auto const& ranks = Practice::DevelopmentHelpers::GeodeBarrage;
+        auto const rank = std::find_if(ranks.begin(), ranks.end(), [info](Practice::AbilityRank const& value)
+        {
+            return value.SpellId == info->Id;
+        });
+        if (rank == ranks.end())
+            return false;
+        auto const index = static_cast<std::size_t>(rank - ranks.begin());
+        constexpr std::array maximum{ 4u, 12u, 20u, 28u, 36u, 44u, 52u, 58u, 66u, 80u };
+        constexpr std::array amounts{ 12, 20, 36, 64, 101, 133, 165, 204, 264, 370 };
+        constexpr std::array rolls{ 3, 4, 3, 5, 8, 10, 14, 19, 31, 63 };
+        constexpr std::array scaling{ 0.389562f, 0.1584f, 0.674851f, 0.841948f, 1.12159f,
+            1.33137f, 1.1256f, 1.11393f, 0.981321f, 0.961737f };
+        auto const* helper = sSpellMgr->GetSpellInfo(803138);
+        auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+        auto const helperScripts = sObjectMgr->GetSpellScriptsBounds(803138);
+        if (!helper || scripts.first != scripts.second || helperScripts.first != helperScripts.second ||
+            info->SpellFamilyName != 37 || info->SpellFamilyFlags[0] != 2048 ||
+            info->SpellFamilyFlags[1] || info->SpellFamilyFlags[2] || info->Attributes != 2359296 ||
+            info->AttributesEx != 268435456 || info->SpellLevel != rank->Requirement.CharacterLevel ||
+            info->PowerType != POWER_MANA || info->DmgClass != SPELL_DAMAGE_CLASS_MAGIC ||
+            info->SchoolMask != SPELL_SCHOOL_MASK_NORMAL ||
+            info->BaseLevel != info->SpellLevel || info->MaxLevel != maximum[index] ||
+            info->GetDuration() != 1000 || info->ManaCost || info->ManaCostPercentage != 12 ||
+            info->RecoveryTime || info->CategoryRecoveryTime || info->ProcFlags || info->ProcChance != 101 ||
+            info->ProcCharges || sSpellMgr->GetSpellProcEntry(info->Id) ||
+            helper->SpellFamilyName != 37 || helper->SpellFamilyFlags[0] != 4096 ||
+            helper->SpellFamilyFlags[1] || helper->SpellFamilyFlags[2] ||
+            helper->DmgClass != SPELL_DAMAGE_CLASS_MAGIC || helper->SchoolMask != SPELL_SCHOOL_MASK_NORMAL ||
+            helper->RecoveryTime || helper->CategoryRecoveryTime || helper->IsPassive())
+            return false;
+        for (std::size_t slot = 0; slot < 3; ++slot)
+        {
+            auto const& effect = info->Effects[slot];
+            auto const& damage = helper->Effects[slot];
+            if (effect.Effect != (slot ? 0u : SPELL_EFFECT_APPLY_AURA) ||
+                effect.ApplyAuraName != (slot ? 0u : SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE) ||
+                effect.TargetA.GetTarget() != (slot ? 0u : TARGET_UNIT_TARGET_ENEMY) ||
+                effect.TargetB.GetTarget() || effect.TriggerSpell != (slot ? 0u : 803138u) ||
+                effect.Amplitude != (slot ? 0u : 500u) ||
+                effect.BasePoints != (slot == 0 ? amounts[index] : slot == 1 ? 0 : -1) ||
+                effect.DieSides != (slot ? 1 : rolls[index]) ||
+                effect.RealPointsPerLevel != (slot ? 0.0f : scaling[index]) ||
+                effect.MiscValue != (slot == 1 ? 1 : 0) ||
+                effect.MiscValueB || damage.Effect != (slot ? 0u : SPELL_EFFECT_SCHOOL_DAMAGE) ||
+                damage.ApplyAuraName || damage.TargetA.GetTarget() != (slot ? 0u : TARGET_UNIT_TARGET_ENEMY) ||
+                damage.TargetB.GetTarget() || damage.TriggerSpell)
                 return false;
         }
         return true;
@@ -3239,6 +3293,8 @@ bool IsScriptedDamage(Practice::AbilityProfile const* profile, std::uint32_t ori
     return IsBaneDamage(profile, helperId) || (HelpersRequested && profile &&
         ((Practice::DevelopmentHelpers::IsTwinSlice(*profile) &&
             Practice::DevelopmentHelpers::IsTwinDamage(originId, helperId)) ||
+            (Practice::DevelopmentHelpers::IsGeodeBarrage(*profile) &&
+                Practice::DevelopmentHelpers::IsGeodeDamage(originId, helperId)) ||
             IsDamagePalmSigil(*profile, originId, helperId)));
 }
 
@@ -3279,7 +3335,8 @@ void AwardScriptedDamage(Player* player, Spell* spell, Unit* target, std::uint32
         return;
     auto* nextPractice = Practice::DevelopmentHelpers::IsFireSigil(*profile) ?
         &found->second.NextFireSigilPractice : Practice::DevelopmentMastery::IsFrostSigil(*profile) ?
-        &found->second.NextFrostSigilPractice : nullptr;
+        &found->second.NextFrostSigilPractice : Practice::DevelopmentHelpers::IsGeodeBarrage(*profile) ?
+        &found->second.NextGeodePractice : nullptr;
     auto const now = Clock::now();
     if (nextPractice && now < *nextPractice)
     {
@@ -3301,6 +3358,8 @@ void AwardScriptedDamage(Player* player, Spell* spell, Unit* target, std::uint32
     if (nextPractice && award.Status == Practice::OutcomeStatus::Awarded)
         *nextPractice = now + std::chrono::seconds(Practice::DevelopmentHelpers::IsFireSigil(*profile) ?
             Practice::DevelopmentHelpers::FirePracticeIntervalSeconds :
+            Practice::DevelopmentHelpers::IsGeodeBarrage(*profile) ?
+            Practice::DevelopmentHelpers::GeodePracticeIntervalSeconds :
             Practice::DevelopmentMastery::FrostPracticeIntervalSeconds);
     RecordAward(player, found->second, *profile, award);
 }
@@ -4225,7 +4284,8 @@ public:
         bool const palmHelper = HelpersRequested && player->getClass() == 32 &&
             (helperId == 807012 || (PeriodicRequested && helperId == 807819) ||
                 (MasteryRequested && (helperId == 807825 || helperId == 807818)));
-        if (!profile && !IsBuffObserver(player) && !scriptedDamage && !palmHelper)
+        bool const geodeHelper = HelpersRequested && player->getClass() == 31 && helperId == 803138;
+        if (!profile && !IsBuffObserver(player) && !scriptedDamage && !palmHelper && !geodeHelper)
             return true;
         std::lock_guard lock(Mutex);
         spell->SetPracticeCast({});
@@ -4248,9 +4308,10 @@ public:
                 return true;
             }
         }
-        if (palmHelper && targets && spell->IsTriggered() && triggeredByAura && !spell->m_CastItem &&
+        if ((palmHelper || geodeHelper) && targets && spell->IsTriggered() && triggeredByAura && !spell->m_CastItem &&
             spell->m_castItemGUID.IsEmpty() && spell->GetOriginalCasterGUID() == player->GetGUID() &&
-            triggeredByAura->GetEffIndex() == EFFECT_0 && triggeredByAura->GetAuraType() == 354 &&
+            triggeredByAura->GetEffIndex() == EFFECT_0 &&
+            triggeredByAura->GetAuraType() == (geodeHelper ? SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE : 354u) &&
             triggeredByAura->GetSpellInfo()->Effects[EFFECT_0].TriggerSpell == helperId &&
             triggeredByAura->GetCasterGUID() == player->GetGUID() && !triggeredByAura->GetBase()->IsRemoved())
         {
@@ -4260,6 +4321,10 @@ public:
             bool const water = origin && receipt && IsWaterPalmSigil(*origin, receipt->SpellId, helperId);
             if (receipt && (water || !receipt->IsConsumed()) && receipt->SpellId == triggeredByAura->GetId() &&
                 origin && (IsDamagePalmSigil(*origin, receipt->SpellId, helperId) || water ||
+                    (geodeHelper && Practice::DevelopmentHelpers::IsGeodeBarrage(*origin) &&
+                        Practice::DevelopmentHelpers::IsGeodeDamage(receipt->SpellId, helperId) &&
+                        triggeredByAura->GetBase()->GetUnitOwner() &&
+                        targets->GetUnitTargetGUID() == triggeredByAura->GetBase()->GetUnitOwner()->GetGUID()) ||
                     (PeriodicRequested && Practice::DevelopmentHelpers::IsArcaneSigil(*origin) &&
                         Practice::DevelopmentHelpers::IsArcaneSigilDamage(receipt->SpellId, helperId))) &&
                 Affects(player) && !player->isBeingLoaded() && session != Sessions.end() &&
