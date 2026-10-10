@@ -30,7 +30,8 @@ enum class OutcomeKind
     None,
     DamageOrInterrupt,
     DamageOrDispel,
-    Fear
+    Fear,
+    ResourceDrain
 };
 
 struct AbilityProfile
@@ -59,14 +60,18 @@ inline bool ValidateProfiles(std::span<AbilityProfile const> profiles)
             ability.ClassId > 255 ||
             ValidateDefinition(ability) != CatalogError::None || !ValidateMasteryRewards(ability, profile.Rewards) ||
             (ability.Kind == AbilityKind::Mastery &&
-                ((profile.Outcome != OutcomeKind::Healing && profile.Outcome != OutcomeKind::Damage) ||
-                    !ValidMasteryEffect(profile.Rewards.front(), profile.Outcome == OutcomeKind::Healing))) ||
+                ((profile.Outcome != OutcomeKind::Healing && profile.Outcome != OutcomeKind::Damage &&
+                    profile.Outcome != OutcomeKind::ResourceDrain) ||
+                    !ValidMasteryEffect(profile.Rewards.front(), profile.Outcome == OutcomeKind::Healing ?
+                        MasteryEffect::Healing : profile.Outcome == OutcomeKind::Damage ? MasteryEffect::Damage :
+                        MasteryEffect::ResourceDrain))) ||
             !ValidPolicy(profile.Policy) ||
             (ability.Kind == AbilityKind::Fixed ? profile.Outcome != OutcomeKind::None :
                 profile.Outcome != OutcomeKind::Damage && profile.Outcome != OutcomeKind::Healing &&
                     profile.Outcome != OutcomeKind::Interrupt && profile.Outcome != OutcomeKind::Dispel &&
                     profile.Outcome != OutcomeKind::Steal && profile.Outcome != OutcomeKind::DamageOrInterrupt &&
-                    profile.Outcome != OutcomeKind::DamageOrDispel && profile.Outcome != OutcomeKind::Fear) ||
+                    profile.Outcome != OutcomeKind::DamageOrDispel && profile.Outcome != OutcomeKind::Fear &&
+                    profile.Outcome != OutcomeKind::ResourceDrain) ||
             ability.Ranks.size() > 64 ||
             std::any_of(ability.Ranks.begin(), ability.Ranks.end(),
                 [](AbilityRank const& rank) { return IsNativeBaselineSpell(rank.SpellId); }))

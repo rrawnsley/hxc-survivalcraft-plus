@@ -613,6 +613,41 @@ void CheckMasteryFixedAndTrainerPolicies()
     assert(DamageMasteryBonus(frost->Definition, frost->Rewards, { 40, 0 }, 42, true, true) == 50);
     assert(DamageMasteryBonus(frost->Definition, frost->Rewards, { 70, 0 }, 50, true, true) == 100);
     assert(DamageMasteryBonus(frost->Definition, frost->Rewards, { 100, 0 }, 58, true, true) == 200);
+    std::array resourceRewards = {
+        MasteryReward{ { 42, 40 }, 0, 0, 50 },
+        MasteryReward{ { 50, 70 }, 0, 0, 100 },
+        MasteryReward{ { 58, 100 }, 0, 0, 200 }
+    };
+    auto resourcePrototype = *frost;
+    resourcePrototype.Outcome = OutcomeKind::ResourceDrain;
+    resourcePrototype.Rewards = resourceRewards;
+    assert(ValidateProfiles(std::span(&resourcePrototype, 1)));
+    assert(ResourceDrainMasteryBonus(resourcePrototype.Definition, resourceRewards, { 40, 0 }, 41,
+        true, true) == 0);
+    for (auto const& reward : resourceRewards)
+    {
+        Progress const progress{ reward.Requirement.Proficiency, 0 };
+        auto const level = reward.Requirement.CharacterLevel;
+        assert(ResourceDrainMasteryBonus(resourcePrototype.Definition, resourceRewards, progress, level,
+            true, true) == reward.ResourceDrainBonusBasisPoints);
+        assert(ResourceDrainMasteryBonus(resourcePrototype.Definition, resourceRewards, progress, level,
+            false, true) == 0);
+        assert(ResourceDrainMasteryBonus(resourcePrototype.Definition, resourceRewards, progress, level,
+            true, false) == 0);
+        assert(DamageMasteryBonus(resourcePrototype.Definition, resourceRewards, progress, level,
+            true, true) == 0);
+        assert(HealingMasteryBonus(resourcePrototype.Definition, resourceRewards, progress, level,
+            true, true) == 0);
+    }
+    resourcePrototype.Outcome = OutcomeKind::Damage;
+    assert(!ValidateProfiles(std::span(&resourcePrototype, 1)));
+    resourcePrototype.Outcome = OutcomeKind::ResourceDrain;
+    resourceRewards[0].DamageBonusBasisPoints = 50;
+    assert(!ValidateProfiles(std::span(&resourcePrototype, 1)));
+    resourceRewards[0].DamageBonusBasisPoints = 0;
+    resourceRewards[2].ResourceDrainBonusBasisPoints = 201;
+    assert(!ValidateProfiles(std::span(&resourcePrototype, 1)));
+
     for (auto const catalog : MasteryCatalogs())
     {
         for (auto const& authored : catalog)

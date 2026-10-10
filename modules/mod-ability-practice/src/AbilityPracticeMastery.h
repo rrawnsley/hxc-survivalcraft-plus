@@ -21,17 +21,41 @@ struct MasteryReward
     Milestone Requirement;
     std::uint32_t HealingBonusBasisPoints;
     std::uint32_t DamageBonusBasisPoints = 0;
+    std::uint32_t ResourceDrainBonusBasisPoints = 0;
 };
+
+enum class MasteryEffect
+{
+    Invalid,
+    Healing,
+    Damage,
+    ResourceDrain
+};
+
+inline MasteryEffect MasteryEffectOf(MasteryReward const& reward)
+{
+    if (static_cast<unsigned>(reward.HealingBonusBasisPoints != 0) +
+        static_cast<unsigned>(reward.DamageBonusBasisPoints != 0) +
+        static_cast<unsigned>(reward.ResourceDrainBonusBasisPoints != 0) != 1)
+        return MasteryEffect::Invalid;
+    return reward.HealingBonusBasisPoints ? MasteryEffect::Healing : reward.DamageBonusBasisPoints ?
+        MasteryEffect::Damage : MasteryEffect::ResourceDrain;
+}
 
 inline std::uint32_t MasteryBonusAmount(MasteryReward const& reward)
 {
-    return std::max(reward.HealingBonusBasisPoints, reward.DamageBonusBasisPoints);
+    return std::max({ reward.HealingBonusBasisPoints, reward.DamageBonusBasisPoints,
+        reward.ResourceDrainBonusBasisPoints });
+}
+
+inline bool ValidMasteryEffect(MasteryReward const& reward, MasteryEffect effect)
+{
+    return effect != MasteryEffect::Invalid && MasteryEffectOf(reward) == effect;
 }
 
 inline bool ValidMasteryEffect(MasteryReward const& reward, bool healing)
 {
-    return healing ? reward.HealingBonusBasisPoints && !reward.DamageBonusBasisPoints :
-        reward.DamageBonusBasisPoints && !reward.HealingBonusBasisPoints;
+    return ValidMasteryEffect(reward, healing ? MasteryEffect::Healing : MasteryEffect::Damage);
 }
 
 struct MasteryRewardView
@@ -50,11 +74,11 @@ inline bool ValidateMasteryRewards(AbilityDefinition const& ability, std::span<M
     std::uint32_t previousLevel = ability.Ranks.front().Requirement.CharacterLevel;
     std::uint32_t previousProficiency = 1;
     std::uint32_t previousBonus = 0;
-    bool const healing = rewards.front().HealingBonusBasisPoints != 0;
+    MasteryEffect const effect = MasteryEffectOf(rewards.front());
     for (MasteryReward const& reward : rewards)
     {
         if (reward.Requirement.CharacterLevel < previousLevel || reward.Requirement.CharacterLevel > 255 ||
-            reward.Requirement.Proficiency <= previousProficiency || !ValidMasteryEffect(reward, healing) ||
+            reward.Requirement.Proficiency <= previousProficiency || !ValidMasteryEffect(reward, effect) ||
             MasteryBonusAmount(reward) <= previousBonus || MasteryBonusAmount(reward) > MaximumMasteryBasisPoints)
             return false;
         previousLevel = reward.Requirement.CharacterLevel;
@@ -90,7 +114,8 @@ inline std::vector<MasteryRewardView> DescribeMasteryRewards(AbilityDefinition c
 }
 
 inline std::uint32_t MasteryBonus(AbilityDefinition const& ability, std::span<MasteryReward const> rewards,
-    Progress progress, std::uint32_t characterLevel, bool learned, bool acquisitionPrerequisitesMet, bool healing)
+    Progress progress, std::uint32_t characterLevel, bool learned, bool acquisitionPrerequisitesMet,
+    MasteryEffect effect)
 {
     if (!learned || !acquisitionPrerequisitesMet || !ValidateMasteryRewards(ability, rewards) ||
         ability.Kind != AbilityKind::Mastery || !progress.Proficiency || !characterLevel)
@@ -99,8 +124,25 @@ inline std::uint32_t MasteryBonus(AbilityDefinition const& ability, std::span<Ma
     for (MasteryReward const& reward : rewards)
         if (progress.Proficiency >= reward.Requirement.Proficiency &&
             characterLevel >= reward.Requirement.CharacterLevel)
-            bonus = healing ? reward.HealingBonusBasisPoints : reward.DamageBonusBasisPoints;
+            bonus = effect == MasteryEffect::Healing ? reward.HealingBonusBasisPoints :
+                effect == MasteryEffect::Damage ? reward.DamageBonusBasisPoints :
+                effect == MasteryEffect::ResourceDrain ? reward.ResourceDrainBonusBasisPoints : 0;
     return bonus;
+}
+
+inline std::uint32_t MasteryBonus(AbilityDefinition const& ability, std::span<MasteryReward const> rewards,
+    Progress progress, std::uint32_t characterLevel, bool learned, bool acquisitionPrerequisitesMet, bool healing)
+{
+    return MasteryBonus(ability, rewards, progress, characterLevel, learned, acquisitionPrerequisitesMet,
+        healing ? MasteryEffect::Healing : MasteryEffect::Damage);
+}
+
+inline std::uint32_t ResourceDrainMasteryBonus(AbilityDefinition const& ability,
+    std::span<MasteryReward const> rewards, Progress progress, std::uint32_t characterLevel,
+    bool learned, bool acquisitionPrerequisitesMet)
+{
+    return MasteryBonus(ability, rewards, progress, characterLevel, learned, acquisitionPrerequisitesMet,
+        MasteryEffect::ResourceDrain);
 }
 
 inline std::uint32_t HealingMasteryBonus(AbilityDefinition const& ability, std::span<MasteryReward const> rewards,

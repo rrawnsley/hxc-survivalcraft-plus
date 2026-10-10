@@ -154,7 +154,8 @@ enum class PracticeRoute
     Fear = 10,
     DamageOrStun = 11,
     DamageOrRoot = 12,
-    BuffCombat = 13
+    BuffCombat = 13,
+    ResourceDrain = 14
 };
 
 inline constexpr std::uint32_t HumanPvERuleSet = 1;

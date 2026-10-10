@@ -134,7 +134,8 @@ bool SameProfile(Practice::AbilityProfile const& left, Practice::AbilityProfile 
             {
                 return SameMilestone(lhs.Requirement, rhs.Requirement) &&
                     lhs.HealingBonusBasisPoints == rhs.HealingBonusBasisPoints &&
-                    lhs.DamageBonusBasisPoints == rhs.DamageBonusBasisPoints;
+                    lhs.DamageBonusBasisPoints == rhs.DamageBonusBasisPoints &&
+                    lhs.ResourceDrainBonusBasisPoints == rhs.ResourceDrainBonusBasisPoints;
             });
 }
 
@@ -472,6 +473,7 @@ Practice::PracticeRoute RouteFor(Practice::OutcomeKind outcome)
         case Practice::OutcomeKind::DamageOrInterrupt: return Practice::PracticeRoute::DamageOrInterrupt;
         case Practice::OutcomeKind::DamageOrDispel: return Practice::PracticeRoute::DamageOrDispel;
         case Practice::OutcomeKind::Fear: return Practice::PracticeRoute::Fear;
+        case Practice::OutcomeKind::ResourceDrain: return Practice::PracticeRoute::ResourceDrain;
     }
     return Practice::PracticeRoute::Unknown;
 }
