@@ -1,0 +1,263 @@
+{
+  "schema": 1,
+  "name": "Ability practice development native: Arcane Palm Sigil 807323 applies one 10% periodic copy and silence (#5786)",
+  "contract": [
+    "Original 807323 specifies the next direct Magic hit adds 10% of the damage each Arcane tick and silences its victim.",
+    "The current main spell_proc row gives the Arcane chain one base charge. This is a control for the already implemented sigil and must preserve Elements of Fury additional charges.",
+    "QA-only Fire Blast20623 supplies the direct magical hit without bypassing practice-gated Fire Burst acquisition. Native Arcane amounts, ticks, silence and charges remain asserted.",
+    "Current authored practice proficiency permits this tested native rank; native damage ratio still supplies the independent expectation."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805380",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805380",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805380",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805380",
+      "index": 3,
+      "value": 20
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805380",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 20623
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 805380
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 807323
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807819,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 20623,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 20623,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807819,
+      "equals": 0,
+      "label": "Without a sigil there is no extra Arcane hit"
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 500469,
+      "stacks": 1,
+      "label": "Fixture: the alternative Waveforged window"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 808089,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 807323
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 807323,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura_amount",
+      "spell": 807323,
+      "effect": 0,
+      "equals": 10
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 20623,
+      "target": "dummy",
+      "save_as": "before_hit"
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 20623,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 20623,
+      "target": "dummy",
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807819,
+      "equals": 1,
+      "within_ms": 1500,
+      "label": "The next direct spell produces one Arcane hit"
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 20623,
+      "target": "dummy",
+      "relative_to": "before_hit",
+      "save_as": "trigger_hit"
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "aura_amount",
+      "spell": 807819,
+      "ratio_to": "trigger_hit",
+      "min": 0.097,
+      "max": 0.10010000000000001,
+      "label": "The Arcane hit copies 10% of the actual triggering damage",
+      "caster": "rm",
+      "effect": 0
+    },
+    {
+      "action": "assert",
+      "label": "The next magic hit silences its victim",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 808020,
+      "caster": "rm",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 807323,
+      "equals": 0,
+      "label": "The one-use sigil is consumed"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 20623,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 20623,
+      "target": "dummy",
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807819,
+      "equals": 1,
+      "label": "The following direct spell cannot reuse the consumed sigil"
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "rm",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  }
+}

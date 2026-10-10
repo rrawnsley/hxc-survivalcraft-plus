@@ -488,6 +488,21 @@ def build_drafts(candidates, root):
                       v.get('triggerSpellId'), v.get('basePoints')) for v in details] != expected):
                 raise ValueError('Reviewed native Frost Palm source/raw evidence changed')
             required.append('native-owned-single-use-frost-bonus-receipt-and-damage-only-mastery-slow-preserved')
+        if (class_id, ability_id) == (32, 805380):
+            expected_ids = [805380, 807322, 807323]
+            if ([rank['spellId'] for rank in ranks] != expected_ids or
+                    [rank['characterLevel'] for rank in ranks] != [20, 34, 50]):
+                raise ValueError('Reviewed Arcane Palm native rank ladder changed')
+            for index, spell_id in enumerate(expected_ids):
+                details = members[spell_id].get('rawDbc', {}).get('effectDetails', [])
+                expected = [(6, 354, 1, 0, 807819, [4, 7, 9][index]),
+                            (6, 290, 1, 0, 0, -1), (6, 108, 1, 0, 0, -1)]
+                if (len(details) != 3 or
+                        [(v.get('effectId'), v.get('auraId'), v.get('implicitTargetA'),
+                          v.get('implicitTargetB'), v.get('triggerSpellId'),
+                          v.get('basePoints')) for v in details] != expected):
+                    raise ValueError('Reviewed Arcane Palm original/helper raw shape changed')
+            required.append('arcane-sigil-original-owned-helper-first-useful-tick-once-per-cast-ten-second-interval')
         if (class_id, ability_id) == (32, 534803):
             expected_ids = [534803, 534804, 534805, 534806, 534807]
             expected_levels = [4, 26, 34, 42, 50]

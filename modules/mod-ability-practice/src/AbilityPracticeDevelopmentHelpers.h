@@ -41,6 +41,17 @@ inline constexpr std::array FireSigil = {
 };
 inline constexpr auto FireCaps = Development::RankCaps(FireSigil);
 inline constexpr std::uint32_t FirePracticeIntervalSeconds = 10;
+inline constexpr std::array ArcaneSigil = {
+    AbilityRank{ 805380, 1, { 20, 1 } },
+    AbilityRank{ 807322, 2, { 34, 10 } },
+    AbilityRank{ 807323, 3, { 50, 20 } }
+};
+inline constexpr auto ArcaneCaps = Development::RankCaps(ArcaneSigil);
+inline constexpr std::uint32_t ArcanePracticeIntervalSeconds = 10;
+inline constexpr std::array ArcaneProfiles = {
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 32, 805380, AbilityKind::Ranked, ArcaneSigil, ArcaneCaps }, Development::Policy, OutcomeKind::Damage }
+};
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 14, 801901, AbilityKind::Ranked, TwinSlice, TwinCaps }, Development::Policy, OutcomeKind::Damage },
@@ -83,6 +94,22 @@ inline bool IsFireSigilDamage(std::uint32_t originId, std::uint32_t helperId)
     if (helperId != 807012)
         return false;
     for (auto const& rank : FireSigil)
+        if (rank.SpellId == originId)
+            return true;
+    return false;
+}
+
+inline bool IsArcaneSigil(AbilityProfile const& profile)
+{
+    return profile.Definition.ClassId == 32 && profile.Definition.AbilityId == 805380 &&
+        profile.Definition.Kind == AbilityKind::Ranked && profile.Outcome == OutcomeKind::Damage;
+}
+
+inline bool IsArcaneSigilDamage(std::uint32_t originId, std::uint32_t helperId)
+{
+    if (helperId != 807819)
+        return false;
+    for (auto const& rank : ArcaneSigil)
         if (rank.SpellId == originId)
             return true;
     return false;

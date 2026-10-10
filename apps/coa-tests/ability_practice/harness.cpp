@@ -469,7 +469,7 @@ void CheckCurrentRankPolicies()
 {
     std::uint32_t forecasts = 0;
     std::array<bool, 21> classes{};
-    assert(DevelopmentPacing::Entries.size() == 180);
+    assert(DevelopmentPacing::Entries.size() == 181);
     for (auto const& entry : DevelopmentPacing::Entries)
     {
         classes.at(entry.ClassId - 12) = true;
@@ -1209,6 +1209,30 @@ void CheckScriptedDamageReceipts()
     }
     assert(!DevelopmentHelpers::IsFireSigilDamage(802202, 807012));
     assert(DevelopmentHelpers::FirePracticeIntervalSeconds == 10);
+    for (auto const& rank : DevelopmentHelpers::ArcaneSigil)
+    {
+        assert(DevelopmentHelpers::IsArcaneSigilDamage(rank.SpellId, 807819));
+        assert(!DevelopmentHelpers::IsArcaneSigilDamage(rank.SpellId, 807012));
+        assert(!DevelopmentHelpers::IsArcaneSigilDamage(rank.SpellId, 808020));
+    }
+    assert(!DevelopmentHelpers::IsArcaneSigilDamage(805381, 807819));
+    assert(DevelopmentHelpers::ArcanePracticeIntervalSeconds == 10);
+    auto const& arcane = DevelopmentHelpers::ArcaneProfiles.front();
+    assert(DevelopmentHelpers::IsArcaneSigil(arcane));
+    auto pacedArcane = arcane;
+    pacedArcane.DefinitionVersion = DevelopmentPacing::DefinitionVersion;
+    pacedArcane.Policy = { DevelopmentPacing::BandsClass32Ability805380 };
+    auto const arcaneCaps = DevelopmentRankCaps::Build(pacedArcane);
+    assert(arcaneCaps);
+    auto arcaneDefinition = arcane.Definition;
+    arcaneDefinition.Caps = arcaneCaps->Caps;
+    assert(CapAtLevel(arcaneDefinition, 20) == 10);
+    assert(CapAtLevel(arcaneDefinition, 33) == 10);
+    assert(CapAtLevel(arcaneDefinition, 34) == 20);
+    assert(CapAtLevel(arcaneDefinition, 50) == 20);
+    TrainingPolicy const arcanePolicy{ DevelopmentPacing::BandsClass32Ability805380 };
+    assert(UsesUntil(arcanePolicy, { 1, 0 }, 10, 10).Uses == 270);
+    assert(UsesUntil(arcanePolicy, { 10, 0 }, 20, 20).Uses == 270);
     auto original = std::make_shared<CastReceipt>(1, 2, 14, 712483, 1, 0, 0);
     assert(!original->BindCapturedCorpse(0, true));
     assert(original->BindCapturedCorpse(4, true));

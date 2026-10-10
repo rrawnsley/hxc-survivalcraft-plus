@@ -1,0 +1,208 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Arcane Palm native menu",
+  "contract": [
+    "Schema6 reports native introduction20, ranks34/50, proficiency1/10/20, cap10 and270 uses to rank2. Arming alone awards zero."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 20,
+      "spell_hit_rating": 10000,
+      "name": "Aparcmenu"
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805380",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805380",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805380",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805380",
+      "index": 3,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805380",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 20623
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 805380
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807819,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 20623,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 20623,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807819,
+      "equals": 0,
+      "label": "Without a sigil there is no extra Arcane hit"
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 500469,
+      "stacks": 1,
+      "label": "Fixture: the alternative Waveforged window"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 808089,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 805380
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805380",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "whisper",
+      "actor": "rm",
+      "to": "Aparcmenu",
+      "text": "HXAP\tHELLO|6",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "whisper_contains",
+      "from": "rm",
+      "text": "HXAP\tB|6|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "whisper_contains",
+      "from": "rm",
+      "text": "|805380|805380|1|1|0|10|16200|4",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "whisper_contains",
+      "from": "rm",
+      "text": "|807322|2|34|10|6|1|270",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "whisper_contains",
+      "from": "rm",
+      "text": "|805380|1|20|1|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "whisper_contains",
+      "from": "rm",
+      "text": "|807323|3|50|20|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "whisper_contains",
+      "from": "rm",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "rm",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  }
+}

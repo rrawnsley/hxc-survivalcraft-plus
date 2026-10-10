@@ -1,0 +1,306 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Arcane Palm rank-boundary",
+  "contract": [
+    "Actual original rank1 sigil periodic damage earns the final qualifying use. Native rank2 automatically learns at level34. Proficiency20 can prepare rank3 but level50 remains required; repeated ticks cannot train further."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 34,
+      "spell_hit_rating": 10000,
+      "name": "Aparcrankbou"
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805380",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805380",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805380",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805380",
+      "index": 3,
+      "value": 9
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805380",
+      "index": 4,
+      "value": 15660
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 20623
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 805380
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807819,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 20623,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 20623,
+      "target": "dummy",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807819,
+      "equals": 0,
+      "label": "Without a sigil there is no extra Arcane hit"
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 500469,
+      "stacks": 1,
+      "label": "Fixture: the alternative Waveforged window"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 808089,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 805380
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805380",
+      "index": 4,
+      "equals": 15660
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 805380,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura_amount",
+      "spell": 805380,
+      "effect": 0,
+      "equals": 5
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 20623,
+      "target": "dummy",
+      "save_as": "before_hit"
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 20623,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 20623,
+      "target": "dummy",
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807819,
+      "equals": 1,
+      "within_ms": 1500,
+      "label": "The next direct spell produces one Arcane hit"
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 20623,
+      "target": "dummy",
+      "relative_to": "before_hit",
+      "save_as": "trigger_hit"
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "aura_amount",
+      "spell": 807819,
+      "ratio_to": "trigger_hit",
+      "min": 0.047,
+      "max": 0.050100000000000006,
+      "label": "The Arcane hit copies 5% of the actual triggering damage",
+      "caster": "rm",
+      "effect": 0
+    },
+    {
+      "action": "assert",
+      "label": "The next magic hit silences its victim",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 808020,
+      "caster": "rm",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 805380,
+      "equals": 0,
+      "label": "The one-use sigil is consumed"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 20623,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 20623,
+      "target": "dummy",
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807819,
+      "equals": 1,
+      "label": "The following direct spell cannot reuse the consumed sigil"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 807819,
+      "target": "dummy",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805380",
+      "index": 3,
+      "equals": 10,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805380",
+      "index": 4,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "knows_spell",
+      "spell": 807322,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "knows_spell",
+      "spell": 807323,
+      "equals": 0
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "rm",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  }
+}

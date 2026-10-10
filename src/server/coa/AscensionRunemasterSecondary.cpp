@@ -225,7 +225,7 @@ class aura_ascension_arcane_palm_sigil : public AuraScript
         uint64 amount = uint64(event.GetDamageInfo()->GetDamage()) * std::clamp(effect->GetAmount(), 0, 100) / 100;
         player->CastCustomSpell(SPELL_ARCANE_SIGIL_DOT, SPELLVALUE_BASE_POINT0,
             int32(std::min<uint64>(amount, std::numeric_limits<int32>::max())),
-            event.GetActionTarget(), TRIGGERED_FULL_MASK);
+            event.GetActionTarget(), TRIGGERED_FULL_MASK, nullptr, effect);
         player->CastSpell(event.GetActionTarget(), SPELL_ARCANE_SIGIL_SILENCE, true);
     }
 

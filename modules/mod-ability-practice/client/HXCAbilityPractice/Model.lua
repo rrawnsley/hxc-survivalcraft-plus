@@ -861,6 +861,12 @@ function Model.PracticeRules(ability, saved)
         rule = "Restore your missing health with Fel Bargain during an eligible PvE fight."
             .. " Energy spent without actual healing earns no practice."
             .. " One original cast earns at most one award; the native Energy cost and cooldown remain."
+    elseif ability.abilityId == 805380 and ability.route == 1 then
+        rule = "Arm your own Arcane Sigil and deal useful periodic Arcane damage to a level-appropriate PvE opponent."
+            .. " Only the first useful tick counts; later ticks and additional charges share one original cast."
+            .. " Counted uses must be at least ten seconds apart."
+            .. " Arming, refreshing, expiry, injected auras and fully absorbed ticks earn no practice."
+            .. " Practice prepares one upcoming rank; native levels 20, 34 and 50 and silence duration remain."
     elseif ability.abilityId == 534803 and ability.route == 1 then
         rule = "Arm your own Fire Sigil and land its bonus Fire hit on a level-appropriate PvE opponent."
             .. " One original sigil cast earns one use, with at least ten seconds between counted uses."

@@ -1,0 +1,273 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Arcane Palm native additional charges",
+  "contract": [
+    "Native SQL -805380 gives one base charge; Elements of Fury gives two. Both direct magic hits produce copied periodic helpers and consume two native charges. Both helper applications share the original sigil receipt and collectively award only one540point use. QA-only20623 provides both direct magical probes."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "name": "Aparcfury"
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "rm",
+      "entry": 36,
+      "level": 80,
+      "health": 10000000,
+      "distance": 5
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805380",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805380",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805380",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805380",
+      "index": 3,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.805380",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 805380
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 20623
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 707413
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Elements of Fury passive is active",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 707413,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "label": "Runeshroud opens the Palm Sigil gate",
+      "actor": "rm",
+      "spell": 500288,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Palm Sigil gate is open",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 808089,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 805380
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Palm Sigil: Arcane is active",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 805380,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "Leave Runeshroud before attacking",
+      "actor": "rm",
+      "spell": 500288,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Elements of Fury gives the sigil two instances",
+      "actor": "rm",
+      "metric": "aura_charges",
+      "spell": 805380,
+      "equals": 2
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807819,
+      "save_as": "sigil_dots"
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 1200
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "rm",
+      "spell": 20623
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 20623,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Fire Blast hits the target",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 20623,
+      "target": "dummy",
+      "min": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the first hit triggers Palm Sigil: Arcane",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807819,
+      "relative_to": "sigil_dots",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the sigil survives the first instance",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 805380,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the global cooldown end",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "rm",
+      "spell": 20623
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 20623,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Ice Lance hits the target",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 20623,
+      "target": "dummy",
+      "min": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the second hit triggers Palm Sigil: Arcane again",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807819,
+      "relative_to": "sigil_dots",
+      "equals": 2,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the second instance consumes the sigil",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 805380,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 807819,
+      "target": "dummy",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805380",
+      "index": 4,
+      "equals": 540,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 6500
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.805380",
+      "index": 4,
+      "equals": 540,
+      "within_ms": 2000
+    }
+  ]
+}

@@ -452,6 +452,7 @@ struct MenuSession
     Clock::time_point NextFireSigilPractice{};
     Clock::time_point NextFrostSigilPractice{};
     Clock::time_point NextWaterSigilPractice{};
+    Clock::time_point NextArcaneSigilPractice{};
     std::uint32_t OutgoingClass = 0;
     std::vector<std::string> Outgoing;
     std::size_t NextMessage = 0;
@@ -811,6 +812,56 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
                 debuff.RealPointsPerLevel || debuff.SpellClassMask ||
                 debuff.BasePoints != (slot == 0 ? -71 : slot == 2 ? -1 : 0) ||
                 debuff.DieSides != (slot == 1 ? 0 : 1))
+                return false;
+        }
+        return true;
+    }
+    if (HelpersRequested && PeriodicRequested && Practice::DevelopmentHelpers::IsArcaneSigil(profile))
+    {
+        constexpr std::array levels{ 20u, 34u, 50u };
+        constexpr std::array amounts{ 4, 7, 9 };
+        auto const& ranks = Practice::DevelopmentHelpers::ArcaneSigil;
+        auto const rank = std::find_if(ranks.begin(), ranks.end(), [info](auto const& value)
+        {
+            return value.SpellId == info->Id;
+        });
+        if (rank == ranks.end())
+            return false;
+        auto const index = static_cast<std::size_t>(rank - ranks.begin());
+        auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+        auto entry = scripts.first;
+        auto const* proc = sSpellMgr->GetSpellProcEntry(info->Id);
+        auto const* helper = sSpellMgr->GetSpellInfo(807819);
+        auto const* silence = sSpellMgr->GetSpellInfo(808020);
+        if (entry == scripts.second || sObjectMgr->GetScriptName(entry->second) !=
+            "aura_ascension_arcane_palm_sigil" || ++entry != scripts.second ||
+            info->SpellFamilyName != 38 || info->SpellFamilyFlags != flag96(536870912, 16777216, 8192) ||
+            info->SpellLevel != levels[index] || info->BaseLevel != levels[index] || info->MaxLevel ||
+            info->GetDuration() != 6000 || info->CasterAuraSpell != 808089 ||
+            info->ManaCost || info->ManaCostPercentage != 4 || info->RecoveryTime || info->CategoryRecoveryTime ||
+            !proc || proc->SchoolMask != SPELL_SCHOOL_MASK_MAGIC || proc->SpellFamilyName || proc->SpellFamilyMask ||
+            proc->ProcFlags != 332116 || proc->SpellTypeMask != 1 || proc->SpellPhaseMask != 2 ||
+            proc->HitMask != 3 || proc->AttributesMask != 2 || proc->DisableEffectsMask != 6 ||
+            proc->ProcsPerMinute || proc->Chance != 100 || proc->Cooldown.count() || proc->Charges != 1 ||
+            !helper || helper->SpellFamilyName != 38 || helper->SchoolMask != SPELL_SCHOOL_MASK_ARCANE ||
+            !helper->AscensionInheritsResolvedAmount || !helper->HasAttribute(SPELL_ATTR2_CANT_CRIT) ||
+            !helper->HasAttribute(SPELL_ATTR3_IGNORE_CASTER_MODIFIERS) ||
+            !helper->HasAttribute(SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS) ||
+            !silence || !silence->HasAura(SPELL_AURA_MOD_SILENCE))
+            return false;
+        constexpr std::array auras{ 354u, 290u, 108u };
+        for (std::size_t slot = 0; slot < 3; ++slot)
+        {
+            auto const& root = info->Effects[slot];
+            auto const& tick = helper->Effects[slot];
+            if (root.Effect != SPELL_EFFECT_APPLY_AURA || root.ApplyAuraName != auras[slot] ||
+                root.TargetA.GetTarget() != TARGET_UNIT_CASTER || root.TargetB.GetTarget() ||
+                root.TriggerSpell != (slot ? 0u : 807819u) || root.BasePoints != (slot ? -1 : amounts[index]) ||
+                root.DieSides != 1 || tick.Effect != (slot ? 0u : SPELL_EFFECT_APPLY_AURA) ||
+                tick.ApplyAuraName != (slot ? 0u : SPELL_AURA_PERIODIC_DAMAGE) ||
+                tick.TargetA.GetTarget() != (slot ? 0u : TARGET_UNIT_TARGET_ENEMY) || tick.TargetB.GetTarget() ||
+                tick.TriggerSpell || tick.BonusMultiplier || tick.RealPointsPerLevel ||
+                tick.Amplitude != (slot ? 0u : 3000u))
                 return false;
         }
         return true;
@@ -2875,7 +2926,8 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
                 Practice::HumanPvEScriptedDamageRuleSet :
                 HelpersRequested && Practice::DevelopmentHelpers::IsManafeed(profile) ?
                 Practice::HumanPvEScriptedHealRuleSet :
-                PeriodicPracticeAbilities.contains(ProfileKey(ability)) ?
+                (PeriodicPracticeAbilities.contains(ProfileKey(ability)) ||
+                    (HelpersRequested && PeriodicRequested && Practice::DevelopmentHelpers::IsArcaneSigil(profile))) ?
                     Practice::HumanPvEPeriodicRuleSet : Practice::HumanPvERuleSet;
             if (Catchup.Enabled && ability.Kind != Practice::AbilityKind::Fixed)
             {
@@ -3329,14 +3381,17 @@ void AwardPeriodicOutcome(Unit* caster, Unit* target, std::uint32_t auraSpellId,
     auto const* profile = FindProfile(player, receipt->SpellId);
     bool const scripted = profile && HelpersRequested && Practice::DevelopmentHelpers::IsManafeed(*profile) &&
         auraType == SPELL_AURA_PERIODIC_DUMMY;
+    bool const arcane = profile && HelpersRequested && PeriodicRequested &&
+        Practice::DevelopmentHelpers::IsArcaneSigil(*profile) && auraType == SPELL_AURA_PERIODIC_DAMAGE &&
+        Practice::DevelopmentHelpers::IsArcaneSigilDamage(receipt->SpellId, auraSpellId);
     bool const absorption = profile && AbsorptionRequested &&
         Practice::DevelopmentAbsorption::IsEmeraldVeil(*profile) && auraType == SPELL_AURA_SCHOOL_ABSORB;
     if (!profile || (!scripted && !absorption && (profile->Outcome == Practice::OutcomeKind::Damage ?
             auraType != SPELL_AURA_PERIODIC_DAMAGE && auraType != SPELL_AURA_PERIODIC_DAMAGE_PERCENT &&
                 auraType != SPELL_AURA_PERIODIC_LEECH :
             profile->Outcome != Practice::OutcomeKind::Healing || auraType != SPELL_AURA_PERIODIC_HEAL)) ||
-        std::none_of(profile->Definition.Ranks.begin(), profile->Definition.Ranks.end(),
-            [auraSpellId](Practice::AbilityRank const& rank) { return rank.SpellId == auraSpellId; }) ||
+        (!arcane && std::none_of(profile->Definition.Ranks.begin(), profile->Definition.Ranks.end(),
+            [auraSpellId](Practice::AbilityRank const& rank) { return rank.SpellId == auraSpellId; })) ||
         (absorption ? !damage || !IsDevelopmentOpponent(player, target) :
             scripted ? !healing || !target->IsAlive() || !IsDevelopmentOpponent(player, target) ||
             !HasDevelopmentEncounter(player, player) :
@@ -3350,6 +3405,12 @@ void AwardPeriodicOutcome(Unit* caster, Unit* target, std::uint32_t auraSpellId,
         !ReceiptMatches(player, found->second, *receipt) ||
         !AcquisitionAllowed(player, profile->Definition, receipt->SpellId))
         return;
+    auto const now = Clock::now();
+    if (arcane && now < found->second.NextArcaneSigilPractice)
+    {
+        receipt->MarkConsumed();
+        return;
+    }
     ReceiptCast cast{ player, sSpellMgr->GetSpellInfo(receipt->SpellId), *receipt };
     Practice::OutcomeContext const context{ true, true, true, true, player->GetLevel() };
     auto const effective = Practice::BuildCatchupPolicy(profile->Policy,
@@ -3358,6 +3419,11 @@ void AwardPeriodicOutcome(Unit* caster, Unit* target, std::uint32_t auraSpellId,
         return;
     auto const award = Practice::HandleOutcome(*player, cast, profile->Definition,
         effective->View(), profile->DefinitionVersion, context);
+    if (arcane && award.Status == Practice::OutcomeStatus::Capped)
+        receipt->MarkConsumed();
+    if (arcane && award.Status == Practice::OutcomeStatus::Awarded)
+        found->second.NextArcaneSigilPractice = now +
+            std::chrono::seconds(Practice::DevelopmentHelpers::ArcanePracticeIntervalSeconds);
     RecordAward(player, found->second, *profile, award);
 }
 
@@ -3665,7 +3731,8 @@ public:
         bool const scriptedMasteryValid = !HelpersRequested || !MasteryRequested ||
             AppendProfiles(RuntimeProfiles, Practice::DevelopmentMastery::ScriptedProfiles);
         bool const helpersValid = !HelpersRequested ||
-            AppendProfiles(RuntimeProfiles, Practice::DevelopmentHelpers::Profiles);
+            (AppendProfiles(RuntimeProfiles, Practice::DevelopmentHelpers::Profiles) &&
+                (!PeriodicRequested || AppendProfiles(RuntimeProfiles, Practice::DevelopmentHelpers::ArcaneProfiles)));
         bool const directLeechValid = !DirectLeechRequested ||
             AppendProfiles(RuntimeProfiles, Practice::DevelopmentLeech::Profiles);
         bool const buffValid = !BuffContributionRequested ||
@@ -4048,7 +4115,8 @@ public:
             ((MasteryRequested && helperId == 807554) ||
                 Practice::DevelopmentHelpers::IsTwinDamageHelper(helperId));
         bool const palmHelper = HelpersRequested && player->getClass() == 32 &&
-            (helperId == 807012 || (MasteryRequested && (helperId == 807825 || helperId == 807818)));
+            (helperId == 807012 || (PeriodicRequested && helperId == 807819) ||
+                (MasteryRequested && (helperId == 807825 || helperId == 807818)));
         if (!profile && !IsBuffObserver(player) && !scriptedDamage && !palmHelper)
             return true;
         std::lock_guard lock(Mutex);
@@ -4083,7 +4151,9 @@ public:
             auto const session = Sessions.find(player->GetGUID().GetRawValue());
             bool const water = origin && receipt && IsWaterPalmSigil(*origin, receipt->SpellId, helperId);
             if (receipt && (water || !receipt->IsConsumed()) && receipt->SpellId == triggeredByAura->GetId() &&
-                origin && (IsDamagePalmSigil(*origin, receipt->SpellId, helperId) || water) &&
+                origin && (IsDamagePalmSigil(*origin, receipt->SpellId, helperId) || water ||
+                    (PeriodicRequested && Practice::DevelopmentHelpers::IsArcaneSigil(*origin) &&
+                        Practice::DevelopmentHelpers::IsArcaneSigilDamage(receipt->SpellId, helperId))) &&
                 Affects(player) && !player->isBeingLoaded() && session != Sessions.end() &&
                 (water ? ReceiptOwnerMatches(player, session->second, *receipt) :
                     ReceiptMatches(player, session->second, *receipt)) &&
