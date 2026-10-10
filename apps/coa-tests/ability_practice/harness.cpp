@@ -1101,6 +1101,45 @@ void WriteTypedRankCases(std::string const& filename)
 
 class Unit { };
 
+void CheckAttackPowerReductionReceipts()
+{
+    using CoAAbilityPractice::CastReceipt;
+    Unit caster;
+    Unit target;
+    auto receipt = std::make_shared<CastReceipt>(1, 2, 31, 704101, 1, 0, 0);
+    auto const previous = CoAAbilityPractice::AttackPowerReductionHandler.load();
+    static std::uint32_t observations = 0;
+    observations = 0;
+    CoAAbilityPractice::SetAttackPowerReductionProvider([](Unit* source, Unit* victim, std::uint32_t spellId,
+        float reduction, std::shared_ptr<CastReceipt> const& original)
+    {
+        assert(source && victim && spellId == 704101 && reduction == 32.0f);
+        assert(original && original->SpellId == spellId && !original->IsConsumed());
+        ++observations;
+        original->MarkConsumed();
+    });
+    for (auto const& values : std::array{ std::pair{ 0.0f, 0.0f }, std::pair{ 642.0f, 642.0f },
+        std::pair{ 610.0f, 642.0f }, std::pair{ 642.0f, -1.0f },
+        std::pair{ std::numeric_limits<float>::infinity(), 610.0f },
+        std::pair{ 642.0f, std::numeric_limits<float>::quiet_NaN() } })
+        CoAAbilityPractice::ReportAttackPowerReduction(&caster, &target, 704101,
+            values.first, values.second, receipt);
+    CoAAbilityPractice::ReportAttackPowerReduction(nullptr, &target, 704101, 642.0f, 610.0f, receipt);
+    CoAAbilityPractice::ReportAttackPowerReduction(&caster, nullptr, 704101, 642.0f, 610.0f, receipt);
+    CoAAbilityPractice::ReportAttackPowerReduction(&caster, &target, 0, 642.0f, 610.0f, receipt);
+    CoAAbilityPractice::ReportAttackPowerReduction(&caster, &target, 704101, 642.0f, 610.0f, {});
+    assert(observations == 0 && !receipt->IsConsumed());
+    CoAAbilityPractice::ReportAttackPowerReduction(&caster, &target, 704101, 642.0f, 610.0f, receipt);
+    assert(observations == 1 && receipt->IsConsumed());
+    CoAAbilityPractice::ReportAttackPowerReduction(&caster, &target, 704101, 642.0f, 610.0f, receipt);
+    assert(observations == 1);
+    CoAAbilityPractice::SetAttackPowerReductionProvider(nullptr);
+    auto unobserved = std::make_shared<CastReceipt>(1, 2, 31, 704101, 1, 0, 0);
+    CoAAbilityPractice::ReportAttackPowerReduction(&caster, &target, 704101, 642.0f, 610.0f, unobserved);
+    assert(observations == 1 && !unobserved->IsConsumed());
+    CoAAbilityPractice::SetAttackPowerReductionProvider(previous);
+}
+
 void CheckBuffReceipts()
 {
     assert(DevelopmentBuffs::ArcaneDurationContributes(-20, -20, 0));
@@ -1293,6 +1332,7 @@ int main(int argc, char** argv)
     std::array const bands = { TrainingBand{ 1, 30, 2 }, TrainingBand{ 20, 30, 1 } };
     TrainingPolicy const policy{ bands };
     CheckBuffReceipts();
+    CheckAttackPowerReductionReceipts();
     CheckScriptedDamageReceipts();
     CheckCatalog(policy);
     CheckActions();

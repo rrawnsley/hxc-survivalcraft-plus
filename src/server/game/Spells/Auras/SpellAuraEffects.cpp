@@ -5107,8 +5107,14 @@ void AuraEffect::HandleAuraModAttackPower(AuraApplication const* aurApp, uint8 m
         return;
 
     Unit* target = aurApp->GetTarget();
-
+    auto const receipt = GetBase()->GetPracticeCast();
+    bool const observe = apply && (mode & AURA_EFFECT_HANDLE_REAL) && GetAmount() < 0 &&
+        receipt && !receipt->IsConsumed() && CoAAbilityPractice::AttackPowerReductionHandler.load();
+    float const before = observe ? target->GetTotalAttackPowerValue(BASE_ATTACK) : 0.0f;
     target->HandleStatFlatModifier(UNIT_MOD_ATTACK_POWER, TOTAL_VALUE, float(GetAmount()), apply);
+    if (observe)
+        CoAAbilityPractice::ReportAttackPowerReduction(GetCaster(), target, GetId(), before,
+            target->GetTotalAttackPowerValue(BASE_ATTACK), receipt);
 }
 
 void AuraEffect::HandleAscensionModAttackPowerFlat(AuraApplication const* aurApp, uint8 mode, bool apply) const

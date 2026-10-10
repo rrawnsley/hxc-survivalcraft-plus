@@ -4,6 +4,7 @@
 #define COA_ABILITY_PRACTICE_CAST_RECEIPT_H
 
 #include <atomic>
+#include <cmath>
 #include <cstdint>
 #include <memory>
 #include <utility>
@@ -117,6 +118,26 @@ inline std::atomic<ControlOutcomeProvider> ControlOutcomeHandler = nullptr;
 inline void SetControlOutcomeProvider(ControlOutcomeProvider provider)
 {
     ControlOutcomeHandler.store(provider);
+}
+
+using AttackPowerReductionProvider = void (*)(Unit*, Unit*, std::uint32_t, float,
+    std::shared_ptr<CastReceipt> const&);
+inline std::atomic<AttackPowerReductionProvider> AttackPowerReductionHandler = nullptr;
+
+inline void SetAttackPowerReductionProvider(AttackPowerReductionProvider provider)
+{
+    AttackPowerReductionHandler.store(provider);
+}
+
+inline void ReportAttackPowerReduction(Unit* caster, Unit* target, std::uint32_t spellId,
+    float before, float after, std::shared_ptr<CastReceipt> const& receipt)
+{
+    if (!caster || !target || !spellId || !receipt || receipt->IsConsumed() ||
+        !std::isfinite(before) || !std::isfinite(after) || after < 0.0f || before <= after)
+        return;
+    auto const provider = AttackPowerReductionHandler.load();
+    if (provider)
+        provider(caster, target, spellId, before - after, receipt);
 }
 
 inline void ReportControlOutcome(Unit* caster, Unit* target, std::uint32_t spellId, std::uint32_t auraType,
