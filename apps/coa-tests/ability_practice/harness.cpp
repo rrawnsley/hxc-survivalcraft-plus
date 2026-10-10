@@ -733,7 +733,7 @@ void CheckMasteryFixedAndTrainerPolicies()
             assert(!view.NextTrainingCap && view.Rewards.empty());
         }
     }
-    assert(fixedCount == 116);
+    assert(fixedCount == 117);
     for (auto const& profile : DevelopmentUtilityFixed::Profiles)
         for (auto const& rank : profile.Definition.Ranks)
         {

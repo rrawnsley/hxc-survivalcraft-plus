@@ -2430,6 +2430,24 @@ bool MatchesControlFixedMechanic(Practice::AbilityProfile const& profile)
     SpellInfo const* info = sSpellMgr->GetSpellInfo(profile.Definition.AbilityId);
     if (mechanic == mechanics.end() || !info || info->IsPassive())
         return false;
+    if (profile.Definition.AbilityId == 807432)
+    {
+        auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+        if (info->SpellLevel != 12 || info->GetDuration() != 10000 || info->RecoveryTime != 8000 ||
+            info->CategoryRecoveryTime != 8000 || info->ManaCost || info->ManaCostPerlevel ||
+            info->ManaCostPercentage != 18 || info->PowerType != POWER_MANA || info->SpellFamilyName != 37 ||
+            info->ProcFlags || info->ProcChance != 100 || info->ProcCharges ||
+            sSpellMgr->GetSpellProcEntry(info->Id) || scripts.first != scripts.second)
+            return false;
+        for (std::size_t index = 0; index < 3; ++index)
+        {
+            auto const& effect = info->Effects[index];
+            if (effect.BasePoints != (index == 0 ? -51 : index == 1 ? -1 : 0) ||
+                effect.DieSides != (index == 2 ? 0 : 1) || effect.RealPointsPerLevel ||
+                effect.MiscValue != (index == 1 ? MECHANIC_MOUNT : 0) || effect.MiscValueB)
+                return false;
+        }
+    }
     if (profile.Definition.AbilityId == 805919)
     {
         SpellInfo const* helper = sSpellMgr->GetSpellInfo(572908);

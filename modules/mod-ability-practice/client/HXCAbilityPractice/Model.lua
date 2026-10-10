@@ -667,6 +667,13 @@ function Model.PracticeRules(ability, saved)
             .. " Prepare one upcoming mastery milestone. " .. LearnText(ability.acquisitionSource)
     end
     if Model.IsFixed(ability) then
+        if ability.abilityId == 807432 then
+            return "Seismic Grasp has one native rank, learned at character level 8, and no practice levels. "
+                .. LearnText(ability.acquisitionSource)
+                .. " Reduces the enemy's movement speed by 50% for ten seconds."
+                .. " Its eight-second cooldown and native Earthshaping interaction stay unchanged."
+                .. " Using it earns no practice."
+        end
         if ability.abilityId == 805919 then
             return "Gaze of Theradras has one native rank, learned at character level 12, and no practice levels. "
                 .. LearnText(ability.acquisitionSource)
