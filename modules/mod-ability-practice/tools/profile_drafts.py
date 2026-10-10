@@ -467,6 +467,16 @@ def build_drafts(candidates, root):
         }
         if raw_graphs:
             required.append('trigger-reference-loaded-data-script-and-original-cast-attribution')
+        if (class_id, ability_id) == (32, 500639):
+            raw = members[ability_id].get('rawDbc', {})
+            details = raw.get('effectDetails', [])
+            expected = [(6, 354, 1, 0, 807818, 49), (0, 0, 0, 0, 0, 0), (0, 0, 0, 0, 0, -1)]
+            if (len(ranks) != 1 or ranks[0]['characterLevel'] != 32 or
+                    raw.get('passive') is not False or len(details) != 3 or
+                    [(v.get('effectId'), v.get('auraId'), v.get('implicitTargetA'), v.get('implicitTargetB'),
+                      v.get('triggerSpellId'), v.get('basePoints')) for v in details] != expected):
+                raise ValueError('Reviewed native Water Palm source/raw evidence changed')
+            required.append('native-owned-water-positive-mana-drain-receipt-and-resource-only-mastery')
         if (class_id, ability_id) == (32, 805381):
             raw = members[ability_id].get('rawDbc', {})
             details = raw.get('effectDetails', [])

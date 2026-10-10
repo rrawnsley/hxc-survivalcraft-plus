@@ -1,0 +1,333 @@
+{
+  "schema": 1,
+  "name": "Ability practice: water palm additional charge practice",
+  "contract": "Development Water Palm uses original owned Aura354 receipt. Actual positive hostile PvE mana drain alone qualifies; caster restoration is not required. Native costs, six-second duration, transfer multiplier and charge rules remain. QA-only Fire Blast20623 supplies a direct magical probe. Resource-only 50 basis-point mastery must be distinguishable from unmodified50percent drain. Both native charges receive earned resource mastery; only one award for the original receipt.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 40,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false,
+      "name": "Apwatcharges"
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.500639",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.500639",
+      "index": 1,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.500639",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.500639",
+      "index": 3,
+      "value": 40
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.500639",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 500639
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 20623
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "value": 1000
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 500469,
+      "stacks": 1,
+      "label": "Fixture: Waveforged opens the Palm casting gate"
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 707413
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 707413,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 500639
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 500639,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura_amount",
+      "spell": 500639,
+      "effect": 0,
+      "equals": 50
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "power",
+      "power": 0,
+      "save_as": "mana_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 20623,
+      "target": "enemy",
+      "save_as": "damage_before"
+    },
+    {
+      "action": "set_power",
+      "actor": "rm",
+      "full": true
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "max_power",
+      "save_as": "caster_maximum"
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 20623,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 20623,
+      "target": "enemy",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_cast_count",
+      "spell": 807818,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 20623,
+      "target": "enemy",
+      "relative_to": "damage_before",
+      "save_as": "trigger_hit"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 500639,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_power_drain_count",
+      "spell": 807818,
+      "target": "enemy",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_power_drain_total",
+      "spell": 807818,
+      "target": "enemy",
+      "ratio_to": "trigger_hit",
+      "min": 0.501,
+      "max": 0.5025999999999999
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_power_restored_total",
+      "spell": 807818,
+      "target": "enemy",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "power",
+      "ratio_to": "caster_maximum",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_energize_total",
+      "spell": 807818,
+      "min": 100
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.500639",
+      "index": 4,
+      "equals": 900,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura_charges",
+      "spell": 500639,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_power_drain_total",
+      "spell": 807818,
+      "target": "enemy",
+      "save_as": "first_drain"
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 20623,
+      "target": "enemy",
+      "save_as": "first_hit"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "rm",
+      "spell": 20623
+    },
+    {
+      "action": "set_power",
+      "actor": "enemy",
+      "full": true
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 20623,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_power_drain_count",
+      "spell": 807818,
+      "target": "enemy",
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 20623,
+      "target": "enemy",
+      "relative_to": "first_hit",
+      "save_as": "second_hit"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_power_drain_total",
+      "spell": 807818,
+      "target": "enemy",
+      "relative_to": "first_drain",
+      "ratio_to": "second_hit",
+      "min": 0.501,
+      "max": 0.5026
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.500639",
+      "index": 4,
+      "equals": 900,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 500639,
+      "equals": 0
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "rm",
+      "entry": 27747,
+      "level": 40,
+      "health": 1000000,
+      "distance": 3
+    }
+  ]
+}

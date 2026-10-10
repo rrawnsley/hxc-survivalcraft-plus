@@ -686,15 +686,15 @@ void CheckMasteryFixedAndTrainerPolicies()
         {
             auto const profile = CurrentMasteryProfile(authored);
             assert(ValidateProfiles(std::span(&profile, 1)));
-            bool const healing = profile.Outcome == OutcomeKind::Healing;
+            auto const effect = MasteryEffectOf(profile.Rewards.front());
             for (auto const& reward : profile.Rewards)
             {
                 auto const level = reward.Requirement.CharacterLevel;
                 Progress const progress{ reward.Requirement.Proficiency, 0 };
-                auto const bonus = MasteryBonus(profile.Definition, profile.Rewards, progress, level, true, true, healing);
+                auto const bonus = MasteryBonus(profile.Definition, profile.Rewards, progress, level, true, true, effect);
                 assert(bonus == MasteryBonusAmount(reward));
-                assert(MasteryBonus(profile.Definition, profile.Rewards, progress, level, false, true, healing) == 0);
-                assert(MasteryBonus(profile.Definition, profile.Rewards, progress, level, true, false, healing) == 0);
+                assert(MasteryBonus(profile.Definition, profile.Rewards, progress, level, false, true, effect) == 0);
+                assert(MasteryBonus(profile.Definition, profile.Rewards, progress, level, true, false, effect) == 0);
                 auto const waiting = DescribeMasteryRewards(profile.Definition, profile.Rewards, profile.Policy,
                     progress, level - 1, true, true);
                 auto const index = static_cast<std::size_t>(&reward - profile.Rewards.data());
@@ -860,7 +860,7 @@ void CheckMasteryFixedAndTrainerPolicies()
     std::size_t fixedDeclarations = 0;
     for (auto const catalog : FixedCatalogs())
         fixedDeclarations += catalog.size();
-    std::cout << "PASS: 10 mastery policies/rewards, " << fixedDeclarations << " fixed declarations, " << extensions
+    std::cout << "PASS: 11 mastery policies/rewards, " << fixedDeclarations << " fixed declarations, " << extensions
         << " trainer extensions/" << addedRanks << " added ranks\n";
 }
 
@@ -954,6 +954,8 @@ void WriteTypedMasteryAndFixedCases(std::ofstream& output, std::uint32_t& revisi
         for (auto const& authored : catalog)
         {
             auto const profile = CurrentMasteryProfile(authored);
+            if (profile.Outcome == OutcomeKind::ResourceDrain)
+                continue;
             write(profile, profile.Definition.Ranks.front().Requirement.CharacterLevel, true, { 1, 0 });
             if (DevelopmentMastery::IsFelBargain(profile))
                 write(profile, profile.Definition.Ranks.front().Requirement.CharacterLevel, false, { 1, 0 });
@@ -981,13 +983,22 @@ void WriteTypedMasteryAndFixedCases(std::ofstream& output, std::uint32_t& revisi
 void WriteResourceCases(std::string const& filename)
 {
     std::ofstream output(filename);
-    std::array const ranks = { AbilityRank{ 500639, 1, { 32, 1 } } };
-    std::array const caps = { ProficiencyCap{ 1, 1 }, ProficiencyCap{ 32, 40 },
-        ProficiencyCap{ 40, 70 }, ProficiencyCap{ 48, 100 } };
-    std::array const rewards = { MasteryReward{ { 40, 40 }, 0, 0, 50 },
-        MasteryReward{ { 48, 70 }, 0, 0, 100 }, MasteryReward{ { 56, 100 }, 0, 0, 200 } };
-    AbilityDefinition const definition{ 32, 500639, AbilityKind::Mastery, ranks, caps };
-    auto const policy = DevelopmentMastery::FrostSigilPolicy;
+    auto const water = std::find_if(DevelopmentMastery::ScriptedProfiles.begin(),
+        DevelopmentMastery::ScriptedProfiles.end(), DevelopmentMastery::IsWaterSigil);
+    assert(water != DevelopmentMastery::ScriptedProfiles.end());
+    assert(ValidateProfiles(std::span(&*water, 1)));
+    auto const& definition = water->Definition;
+    auto const rewards = water->Rewards;
+    auto const policy = water->Policy;
+    assert(CapAtLevel(definition, 31) == 1);
+    assert(CapAtLevel(definition, 32) == 40);
+    assert(CapAtLevel(definition, 39) == 40);
+    assert(CapAtLevel(definition, 40) == 70);
+    assert(CapAtLevel(definition, 47) == 70);
+    assert(CapAtLevel(definition, 48) == 100);
+    assert(UsesUntil(policy, { 1, 0 }, 40, 40).Uses == 270);
+    assert(UsesUntil(policy, { 40, 0 }, 70, 70).Uses == 270);
+    assert(UsesUntil(policy, { 70, 0 }, 100, 100).Uses == 270);
     std::uint32_t revision = 2000;
     auto write = [&](std::uint32_t level, bool learned, Progress progress, bool catchup)
     {

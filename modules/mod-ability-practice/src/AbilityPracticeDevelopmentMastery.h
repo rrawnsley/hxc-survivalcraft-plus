@@ -114,6 +114,20 @@ inline constexpr std::array FrostSigilRewards = {
     MasteryReward{ { 58, 100 }, 0, 200 }
 };
 inline constexpr std::uint32_t FrostPracticeIntervalSeconds = 10;
+inline constexpr std::array WaterSigil = { AbilityRank{ 500639, 1, { 32, 1 } } };
+inline constexpr std::array WaterSigilCaps = {
+    ProficiencyCap{ 1, 1 }, ProficiencyCap{ 32, 40 }, ProficiencyCap{ 40, 70 }, ProficiencyCap{ 48, 100 }
+};
+inline constexpr std::array WaterSigilBands = {
+    TrainingBand{ 1, 8100, 1170 }, TrainingBand{ 40, 8100, 900 }
+};
+inline constexpr TrainingPolicy WaterSigilPolicy{ WaterSigilBands };
+inline constexpr std::array WaterSigilRewards = {
+    MasteryReward{ { 40, 40 }, 0, 0, 50 },
+    MasteryReward{ { 48, 70 }, 0, 0, 100 },
+    MasteryReward{ { 56, 100 }, 0, 0, 200 }
+};
+inline constexpr std::uint32_t WaterPracticeIntervalSeconds = 10;
 inline constexpr std::array ScriptedProfiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 14, 807942, AbilityKind::Mastery, FelBargain, FelBargainCaps }, FelBargainPolicy, OutcomeKind::Healing,
@@ -126,8 +140,16 @@ inline constexpr std::array ScriptedProfiles = {
         BaneOfBetrayalRewards },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 32, 805381, AbilityKind::Mastery, FrostSigil, FrostSigilCaps }, FrostSigilPolicy, OutcomeKind::Damage,
-        FrostSigilRewards }
+        FrostSigilRewards },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 32, 500639, AbilityKind::Mastery, WaterSigil, WaterSigilCaps }, WaterSigilPolicy, OutcomeKind::ResourceDrain,
+        WaterSigilRewards }
 };
+inline bool IsWaterSigil(AbilityProfile const& profile)
+{
+    return profile.Definition.ClassId == 32 && profile.Definition.AbilityId == 500639 &&
+        profile.Definition.Kind == AbilityKind::Mastery && profile.Outcome == OutcomeKind::ResourceDrain;
+}
 inline bool IsFrostSigil(AbilityProfile const& profile)
 {
     return profile.Definition.ClassId == 32 && profile.Definition.AbilityId == 805381 &&
