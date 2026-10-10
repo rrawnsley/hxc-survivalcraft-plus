@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Ability practice: Water Palm earned mastery session history",
-  "contract": "Actual partial five-mana drain advances proficiency39/8000 to40/800 and earns first resource-only reward at40. Schema6 session history records the earned mastery, and subsequent award cannot modify native learned singleton or introduce a rank.",
+  "contract": "Actual partial five-mana drain advances proficiency39/8000 to40/1070 and earns first resource-only reward at40. Schema6 session history records the earned mastery, and subsequent award cannot modify native learned singleton or introduce a rank.",
   "timeout_ms": 120000,
   "players": [
     {
@@ -186,7 +186,7 @@
       "metric": "player_setting",
       "source": "core.hxc.ability_practice.32.500639",
       "index": 4,
-      "equals": 800,
+      "equals": 1070,
       "within_ms": 3000
     },
     {

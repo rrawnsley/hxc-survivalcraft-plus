@@ -73,8 +73,22 @@
       "action": "set_aura",
       "actor": "rm",
       "spell": 500469,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 500469,
       "stacks": 1,
       "label": "Fixture: Waveforged opens the Palm casting gate"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 808089,
+      "equals": 1,
+      "within_ms": 2000
     },
     {
       "action": "cast",
@@ -216,6 +230,27 @@
       "full": true
     },
     {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 500469,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 500469,
+      "stacks": 1,
+      "label": "Refresh native Waveforged gate for this original cast"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 808089,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
       "action": "cast",
       "actor": "rm",
       "spell": 500639
@@ -259,6 +294,27 @@
       "full": true
     },
     {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 500469,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 500469,
+      "stacks": 1,
+      "label": "Refresh native Waveforged gate for this original cast"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 808089,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
       "action": "cast",
       "actor": "rm",
       "spell": 500639
@@ -281,6 +337,14 @@
       "index": 4,
       "equals": 2340,
       "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_power_drain_count",
+      "spell": 807818,
+      "target": "enemy",
+      "equals": 3
     }
   ],
   "location": {

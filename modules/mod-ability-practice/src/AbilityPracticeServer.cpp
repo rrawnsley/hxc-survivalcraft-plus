@@ -585,6 +585,20 @@ bool HasExactBuffGroup(std::uint32_t spellId, std::uint32_t groupId, SpellGroupS
     return std::equal(members.begin(), members.end(), expected.begin());
 }
 
+bool HasExpectedSunClericSharedGroup(std::uint32_t abilityId, std::uint32_t spellId)
+{
+    auto const groups = sSpellMgr->GetSpellSpellGroupMapBounds(spellId);
+    auto group = groups.first;
+    if (group == groups.second)
+        return true;
+    if (abilityId != 572384 || group->second != static_cast<SpellGroup>(2110003) || ++group != groups.second)
+        return false;
+    constexpr std::array<std::int32_t, 11> attackPower{
+        572384, 572390, 680294, 680310, 680315, 706742, 707671, 707677, 712458, 800197, 800266
+    };
+    return HasExactBuffGroup(spellId, 2110003, SPELL_GROUP_STACK_RULE_EXCLUSIVE, attackPower);
+}
+
 bool HasExpectedStormbornSharedGroup(std::uint32_t abilityId, std::uint32_t spellId)
 {
     auto const groups = sSpellMgr->GetSpellSpellGroupMapBounds(spellId);
@@ -616,7 +630,15 @@ bool HasExpectedGeomancerGroup(std::uint32_t abilityId, std::uint32_t spellId)
     if (abilityId == 570752)
     {
         auto const groups = sSpellMgr->GetSpellSpellGroupMapBounds(spellId);
-        return groups.first == groups.second;
+        auto group = groups.first;
+        if (group == groups.second)
+            return true;
+        if (group->second != static_cast<SpellGroup>(2110004) || ++group != groups.second)
+            return false;
+        constexpr std::array<std::int32_t, 12> armorAndAttributes{
+            523478, 523484, 523485, 523489, 523494, 523510, 523513, 570752, 570756, 803651, 803656, 803657
+        };
+        return HasExactBuffGroup(spellId, 2110004, SPELL_GROUP_STACK_RULE_EXCLUSIVE, armorAndAttributes);
     }
     if (abilityId != 572810 && abilityId != 800197)
         return false;
@@ -1992,11 +2014,15 @@ bool MatchesSharedBuffVariants()
         }
         else if (variant.ClassId == 27)
         {
-            auto const groups = sSpellMgr->GetSpellSpellGroupMapBounds(info->Id);
-            if (info->SpellFamilyName != 33 || groups.first != groups.second || entry == scripts.second ||
+            if (info->SpellFamilyName != 33 ||
+                !HasExpectedSunClericSharedGroup(variant.AbilityId, info->Id) || entry == scripts.second ||
                 sObjectMgr->GetScriptName(entry->second) != "aura_ascension_sun_cleric_lifecycle" ||
                 ++entry != scripts.second)
+            {
+                LOG_ERROR("module.ability_practice", "Rejected shared Sun Cleric buff: ability={}, spell={}",
+                    variant.AbilityId, variant.SpellId);
                 return false;
+            }
         }
         else if (variant.ClassId == 22)
         {
@@ -2898,6 +2924,16 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
         }
     auto const progress = !supported ? Practice::SessionPractice{ false, 0, 0 } :
         currentProgress == session.Progress.end() ? Practice::SessionPractice{} : currentProgress->second.Totals;
+    auto learning = !supported ? Practice::SessionLearningView{ false, 0, {} } :
+        currentProgress == session.Progress.end() ? Practice::SessionLearningView{ true, 0, {} } :
+        currentProgress->second.Learning.View();
+    if (session.Protocol < Practice::ResourceMenuSchemaVersion &&
+        std::any_of(learning.Events.begin(), learning.Events.end(), [player](auto const& event)
+        {
+            auto const* profile = FindProfile(player, event.Rank.SpellId);
+            return profile && profile->Outcome == Practice::OutcomeKind::ResourceDrain;
+        }))
+        learning = { false, 0, {} };
     auto mastery = !supported ? Practice::SessionMasteryView{ false, 0, {} } :
         currentProgress == session.Progress.end() ? Practice::SessionMasteryView{ true, 0, {} } :
         currentProgress->second.Mastery.View();
@@ -2911,9 +2947,7 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
         session.Protocol >= Practice::RoadmapMenuSchemaVersion, session.Protocol >= Practice::TypedMenuSchemaVersion,
         ServerGeneration, sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL),
         session.Protocol >= Practice::TypedMenuSchemaVersion
-            ? std::optional<Practice::SessionLearningView>(!supported
-                ? Practice::SessionLearningView{ false, 0, {} } : currentProgress == session.Progress.end()
-                    ? Practice::SessionLearningView{ true, 0, {} } : currentProgress->second.Learning.View())
+            ? std::optional<Practice::SessionLearningView>(learning)
             : std::nullopt,
         session.Protocol >= Practice::TypedMenuSchemaVersion
             ? std::optional<Practice::SessionMasteryView>(mastery)

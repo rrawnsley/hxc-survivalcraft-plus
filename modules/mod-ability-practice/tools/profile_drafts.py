@@ -14,6 +14,7 @@ def verify_provenance(candidates, root, dbc):
     expected = {'modules/mod-ability-practice/src/AbilityPracticeServer.cpp',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopment.h',
                          'modules/mod-ability-practice/src/AbilityPracticeCatchup.h',
+                         'data/sql/updates/pending_db_world/rev_20261009_50_coa_class_buff_categories.sql',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentSamples.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentPeriodic.h',
                 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentRanked.h',

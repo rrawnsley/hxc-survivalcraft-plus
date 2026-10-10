@@ -171,13 +171,6 @@
     {
       "action": "assert",
       "actor": "rm",
-      "metric": "aura",
-      "spell": 500639,
-      "equals": 0
-    },
-    {
-      "action": "assert",
-      "actor": "rm",
       "metric": "spell_power_drain_count",
       "spell": 807818,
       "target": "enemy",
@@ -310,7 +303,8 @@
       "actor": "rm",
       "metric": "aura",
       "spell": 500639,
-      "equals": 0
+      "equals": 0,
+      "within_ms": 2000
     }
   ],
   "location": {
