@@ -3214,7 +3214,8 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
         session.Protocol >= Practice::TypedMenuSchemaVersion
             ? std::optional<Practice::SessionMasteryView>(mastery)
             : std::nullopt, session.Protocol >= Practice::SharedMenuSchemaVersion,
-        session.Protocol >= Practice::ResourceMenuSchemaVersion);
+        session.Protocol >= Practice::ResourceMenuSchemaVersion,
+        session.Protocol >= Practice::DebuffMenuSchemaVersion);
     if (!messages || messages->size() > MaxQueuedMessages)
         return false;
     if (session.Protocol >= Practice::TypedMenuSchemaVersion)
@@ -4185,7 +4186,7 @@ public:
             return true;
         if (receiver != player || (message != "HXAP\tHELLO|1" && message != "HXAP\tHELLO|2" &&
             message != "HXAP\tHELLO|3" && message != "HXAP\tHELLO|4" && message != "HXAP\tHELLO|5" &&
-            message != "HXAP\tHELLO|6"))
+            message != "HXAP\tHELLO|6" && message != "HXAP\tHELLO|7"))
             return false;
         auto const now = Clock::now();
         auto& session = Sessions[player->GetGUID().GetRawValue()];
@@ -4193,7 +4194,8 @@ public:
             return false;
         session.LastRequest = now;
         session.InterestedUntil = now + InterestDuration;
-        std::uint32_t const protocol = message == "HXAP\tHELLO|6" ? Practice::ResourceMenuSchemaVersion :
+        std::uint32_t const protocol = message == "HXAP\tHELLO|7" ? Practice::DebuffMenuSchemaVersion :
+            message == "HXAP\tHELLO|6" ? Practice::ResourceMenuSchemaVersion :
             message == "HXAP\tHELLO|5" ? Practice::SharedMenuSchemaVersion :
             message == "HXAP\tHELLO|4" ? Practice::TypedMenuSchemaVersion :
             message == "HXAP\tHELLO|3" ? Practice::RoadmapMenuSchemaVersion :

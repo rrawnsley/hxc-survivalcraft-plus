@@ -1099,6 +1099,47 @@ void WriteTypedRankCases(std::string const& filename)
     assert(output.good());
 }
 
+void WriteDebuffCases(std::string const& path)
+{
+    std::ofstream output(path);
+    std::array const ranks{ AbilityRank{ 704101, 1, { 20, 1 } }, AbilityRank{ 707732, 2, { 26, 10 } },
+        AbilityRank{ 707733, 3, { 32, 20 } }, AbilityRank{ 707734, 4, { 40, 40 } },
+        AbilityRank{ 707735, 5, { 48, 60 } } };
+    auto const caps = Development::RankCaps(ranks);
+    AbilityDefinition const definition{ 31, 704101, AbilityKind::Ranked, ranks, caps };
+    std::array const bands{ TrainingBand{ 1, 8100, 810 }, TrainingBand{ 10, 8100, 900 },
+        TrainingBand{ 20, 8100, 1800 } };
+    TrainingPolicy const policy{ bands };
+    std::uint32_t revision = 3000;
+    auto write = [&](std::uint32_t level, std::vector<std::uint32_t> const& known, Progress progress)
+    {
+        auto view = BuildAbilityView(definition, policy, progress, level, known, true);
+        view.Route = PracticeRoute::AttackPowerReduction;
+        view.RuleSet = 1;
+        view.AcquisitionSourceId = 1;
+        std::array views{ view };
+        assert(!EncodeMenuSnapshot(31, level, revision, views, SessionPractice{}, true, true, 781, 80,
+            std::nullopt, std::nullopt, true, true));
+        assert(!EncodeMenuSnapshot(31, level, revision, views, SessionPractice{}, true, true, 781, 80,
+            std::nullopt, std::nullopt, true, false, true));
+        auto const encoded = EncodeMenuSnapshot(31, level, ++revision, views, SessionPractice{}, true, true, 781,
+            80, std::nullopt, std::nullopt, true, true, true);
+        assert(encoded && encoded->front().starts_with("B|7|"));
+        for (auto const& line : *encoded)
+            output << line << '\n';
+        output << '\n';
+        views[0].RuleSet = HumanPvEResourceDrainRuleSet;
+        assert(!EncodeMenuSnapshot(31, level, revision, views, SessionPractice{}, true, true, 781, 80,
+            std::nullopt, std::nullopt, true, true, true));
+    };
+    write(19, {}, { 1, 0 });
+    write(20, { 704101 }, { 1, 0 });
+    write(26, { 704101 }, { 9, 7290 });
+    write(26, { 704101 }, { 10, 0 });
+    write(48, { 704101, 707732, 707733, 707734, 707735 }, { 60, 0 });
+    assert(output.good());
+}
+
 class Unit { };
 
 void CheckAttackPowerReductionReceipts()
@@ -1356,6 +1397,7 @@ int main(int argc, char** argv)
         WriteTypedRankCases(std::string(argv[1]) + ".typed");
         WriteSharedCases(std::string(argv[1]) + ".shared");
         WriteResourceCases(std::string(argv[1]) + ".resources");
+        WriteDebuffCases(std::string(argv[1]) + ".debuffs");
         std::array const ranks = { AbilityRank{ 101, 1, { 4, 1 } }, AbilityRank{ 102, 2, { 16, 20 } },
             AbilityRank{ 103, 3, { 24, 40 } } };
         std::array const caps = { ProficiencyCap{ 1, 10 }, ProficiencyCap{ 16, 30 }, ProficiencyCap{ 24, 60 } };

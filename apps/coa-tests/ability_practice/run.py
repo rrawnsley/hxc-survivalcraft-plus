@@ -40,6 +40,10 @@ def check_client(wire_path):
                  Path(str(wire_path) + '.resources').read_text().strip().split('\n\n')]
     runtime.globals().EncodedResourcePracticeSnapshots = runtime.table_from(resources)
     runtime.execute((HERE / 'client_resource_cases.lua').read_text(encoding='utf-8'))
+    debuffs = [runtime.table_from(block.splitlines()) for block in
+               Path(str(wire_path) + '.debuffs').read_text().strip().split('\n\n')]
+    runtime.globals().EncodedDebuffPracticeSnapshots = runtime.table_from(debuffs)
+    runtime.execute((HERE / 'client_debuff_cases.lua').read_text(encoding='utf-8'))
     runtime.execute((client / 'Transport.lua').read_text(encoding='utf-8'))
     runtime.execute((HERE / 'client_transport_cases.lua').read_text(encoding='utf-8'))
 

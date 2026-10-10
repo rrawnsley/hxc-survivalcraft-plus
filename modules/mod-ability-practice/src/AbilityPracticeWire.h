@@ -196,11 +196,11 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
     std::uint64_t generation = 0, std::optional<std::uint32_t> realmMaximumLevel = std::nullopt,
     std::optional<SessionLearningView> learning = std::nullopt,
     std::optional<SessionMasteryView> mastery = std::nullopt, bool includeShared = false,
-    bool includeResources = false)
+    bool includeResources = false, bool includeDebuffs = false)
 {
     if (!classId || classId > 255 || !characterLevel || characterLevel > 255 || !revision || abilities.size() > 512)
         return std::nullopt;
-    if (includeResources && !includeShared)
+    if ((includeDebuffs && !includeResources) || (includeResources && !includeShared))
         return std::nullopt;
     if (includeShared && !includeKinds)
         return std::nullopt;
@@ -240,7 +240,8 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
         }
     std::vector<std::string> lines;
     lines.reserve(abilities.size() * (includeKinds ? 6 : includeRoadmap ? 4 : 3) + rankCount + rewardCount + 3);
-    lines.push_back(Detail::WireLine('B', includeResources ? ResourceMenuSchemaVersion :
+    lines.push_back(Detail::WireLine('B', includeDebuffs ? DebuffMenuSchemaVersion :
+        includeResources ? ResourceMenuSchemaVersion :
         includeShared ? SharedMenuSchemaVersion : includeKinds ? TypedMenuSchemaVersion :
         includeRoadmap ? RoadmapMenuSchemaVersion :
         session ? SessionMenuSchemaVersion : MenuSchemaVersion,
@@ -281,7 +282,10 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
                 ((view.RuleSet == 9 || view.RuleSet == 10) &&
                     (view.Route != PracticeRoute::Healing || view.Kind != AbilityKind::Mastery)) ||
                 view.Route < PracticeRoute::Damage ||
-                view.Route > (includeResources ? PracticeRoute::ResourceDrain : PracticeRoute::BuffCombat) ||
+                view.Route > (includeDebuffs ? PracticeRoute::AttackPowerReduction :
+                    includeResources ? PracticeRoute::ResourceDrain : PracticeRoute::BuffCombat) ||
+                (view.Route == PracticeRoute::AttackPowerReduction &&
+                    (view.Kind != AbilityKind::Ranked || (view.RuleSet != 1 && view.RuleSet != 4))) ||
                 (view.Route == PracticeRoute::ResourceDrain &&
                     (view.Kind != AbilityKind::Mastery || (view.RuleSet != HumanPvEResourceDrainRuleSet &&
                         view.RuleSet != HumanPvEResourceDrainCatchupRuleSet))) ||

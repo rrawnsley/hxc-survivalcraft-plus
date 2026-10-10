@@ -7,7 +7,7 @@ local nextRequest = 0
 local deadline
 local nextPoll = 0
 local elapsed = 0
-local protocol = 6
+local protocol = 7
 
 function API.Request()
     local now = GetTime()
@@ -35,7 +35,7 @@ listener:SetScript("OnEvent", function(_, event, prefix, message, channel, sende
         deadline = nil
         nextPoll = 0
         elapsed = 0
-        protocol = 6
+        protocol = 7
         API.Request()
         return
     end

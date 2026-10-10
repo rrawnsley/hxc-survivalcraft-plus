@@ -183,7 +183,8 @@ local function Ability(value, schema, characterLevel)
     if schema >= 4 then
         if value.acquisitionSource ~= nil and not Integer(value.acquisitionSource, 1, 5) then return nil end
         if value.acquisitionSource == 5 and value.kind ~= 3 then return nil end
-        if not session or not Integer(value.kind, 1, 3) or not Integer(value.route, 1, schema >= 6 and 14 or 13)
+        if not session or not Integer(value.kind, 1, 3)
+            or not Integer(value.route, 1, schema >= 7 and 15 or schema >= 6 and 14 or 13)
             or not Integer(value.ruleSet, 1, schema >= 6 and 12 or 10)
             or ((value.ruleSet == 3 or value.ruleSet == 6) and (value.kind ~= 1 or value.route ~= 2))
             or ((value.ruleSet == 7 or value.ruleSet == 8) and (value.kind ~= 2 or value.route ~= 1))
@@ -191,6 +192,7 @@ local function Ability(value, schema, characterLevel)
             or ((value.ruleSet == 11 or value.ruleSet == 12) and (value.kind ~= 2 or value.route ~= 14))
             or (value.route == 14 and (value.ruleSet ~= 11 and value.ruleSet ~= 12))
             or (value.route == 13 and (value.kind ~= 1 or (value.ruleSet ~= 1 and value.ruleSet ~= 4)))
+            or (value.route == 15 and (value.kind ~= 1 or (value.ruleSet ~= 1 and value.ruleSet ~= 4)))
             or ((value.kind == 3) ~= (value.route == 6)) then return nil end
         if value.route == 13 then
             if not Integer(value.buffState, 1, 5) then return nil end
@@ -364,7 +366,8 @@ end
 function Model.Validate(snapshot)
     if type(snapshot) ~= "table"
         or (snapshot.schemaVersion ~= 1 and snapshot.schemaVersion ~= 2 and snapshot.schemaVersion ~= 3
-            and snapshot.schemaVersion ~= 4 and snapshot.schemaVersion ~= 5 and snapshot.schemaVersion ~= 6)
+            and snapshot.schemaVersion ~= 4 and snapshot.schemaVersion ~= 5 and snapshot.schemaVersion ~= 6
+            and snapshot.schemaVersion ~= 7)
         or not Integer(snapshot.revision, 1, 4294967295) or not Integer(snapshot.classId, 1, 255)
         or not Integer(snapshot.characterLevel, 1, 255) or type(snapshot.abilities) ~= "table"
         or #snapshot.abilities > 512 then return nil, "Unsupported or incomplete progress update" end
@@ -640,6 +643,13 @@ function Model.PracticeRules(ability, saved)
     if ability.replacementSpellId then
         return Model.ReplacementText(ability) .. "\n\nUse the replacement from your spellbook."
             .. " The original ability can resume practice when it is available again."
+    end
+    if ability.route == 15 then
+        return "Practice by reducing the actual attack power of level-appropriate hostile PvE opponents."
+            .. " Each original cast counts once across all affected targets."
+            .. " Refreshes without an additional reduction, suppressed effects and gray targets earn no practice."
+            .. " Native strength, duration, range and resource cost stay unchanged."
+            .. " Prepare one upcoming rank. " .. LearnText(ability.acquisitionSource)
     end
     if ability.route == 14 then
         return "Practice through actual mana drained from level-appropriate hostile PvE opponents by your original cast."

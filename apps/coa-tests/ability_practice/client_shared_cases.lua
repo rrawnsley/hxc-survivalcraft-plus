@@ -54,7 +54,7 @@ for _, lines in ipairs(EncodedSharedPracticeSnapshots) do
     shared.proficiency = proficiency
     assert(Model.Validate(result))
     Wire.Reset()
-    local _, reason = Wire.Accept("B|7|1|13|60|0|779|80", 0, 0)
+    local _, reason = Wire.Accept("B|8|1|13|60|0|779|80", 0, 0)
     assert(reason == "Unsupported snapshot header")
     local expanded = {}
     for _, line in ipairs(lines) do
