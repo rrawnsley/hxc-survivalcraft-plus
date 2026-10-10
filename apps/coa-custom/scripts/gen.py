@@ -104,7 +104,7 @@ for s,om in owners.items():
         nr=[slaid,mainskill[c],s,0,om,0,0,0,0,0,0,0,0,0]; slaid+=1
         newsla.append(nr); bysp[s].append(nr); ensure_srci(nr[1],om)
 # ---- 3. verify
-allsla={r[0]:r for r in sla}; allsla.update(edit)
+allsla={r[0]:r for r in sla}; allsla.update(edit);
 for r in newsla: allsla[r[0]]=r
 b2=collections.defaultdict(list)
 for r in allsla.values(): b2[r[2]].append(r)

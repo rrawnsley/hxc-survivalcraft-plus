@@ -12644,7 +12644,9 @@ void Player::LearnDefaultSkill(uint32 skillId, uint16 rank)
         {
             uint16 skillValue = 1;
             uint16 maxValue = GetMaxSkillValueForLevel();
-            if (sWorld->getBoolConfig(CONFIG_ALWAYS_MAXSKILL) && !IsProfessionOrRidingSkill(skillId))
+            SkillLineEntry const* maxLine = sSkillLineStore.LookupEntry(skillId);
+            if (sWorld->getBoolConfig(CONFIG_ALWAYS_MAXSKILL) && !IsProfessionOrRidingSkill(skillId) &&
+                (skillId == SKILL_DEFENSE || (maxLine && maxLine->categoryId == SKILL_CATEGORY_WEAPON)))
             {
                 skillValue = maxValue;
             }
