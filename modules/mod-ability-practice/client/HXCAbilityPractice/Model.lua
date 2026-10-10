@@ -656,6 +656,17 @@ function Model.PracticeRules(ability, saved)
             .. " Prepare one upcoming mastery milestone. " .. LearnText(ability.acquisitionSource)
     end
     if Model.IsFixed(ability) then
+        if ability.abilityId == 805382 then
+            return "Earth Palm Sigil has one native rank and no practice levels. " .. LearnText(ability.acquisitionSource)
+                .. " Its next direct Magic hit triggers a four-second enemy stun."
+                .. " Native charges and the Palm Sigil gate remain unchanged; it earns no practice."
+        end
+        if ability.abilityId == 807013 then
+            return "Wind Palm Sigil has one native rank, learned at character level 40, and no practice levels. "
+                .. LearnText(ability.acquisitionSource)
+                .. " Its next direct Magic hit grants you root/snare immunity and 20% movement speed for six seconds."
+                .. " Native charges and the Palm Sigil gate remain unchanged; it earns no practice."
+        end
         if ability.abilityId == 807828 then
             return "Cinderwake has one native rank and no practice levels. " .. LearnText(ability.acquisitionSource)
                 .. " In Runeshroud form, leave ground patches for ten seconds."

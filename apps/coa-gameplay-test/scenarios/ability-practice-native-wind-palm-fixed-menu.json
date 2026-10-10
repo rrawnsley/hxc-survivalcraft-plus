@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Fixed Wind Palm native level40 menu",
+  "contract": "Native class-grant level40, one native rank, no practice cost or early teaching. Native behavior checked separately; client pixels separate.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "learned",
+      "name": "Apwindmenu",
+      "race": 1,
+      "class": 32,
+      "level": 40
+    },
+    {
+      "id": "future",
+      "name": "Apwindnext",
+      "race": 1,
+      "class": 32,
+      "level": 39
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "learned",
+      "spell": 807013
+    },
+    {
+      "action": "whisper",
+      "actor": "learned",
+      "to": "Apwindmenu",
+      "text": "HXAP\tHELLO|6",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "whisper_contains",
+      "from": "learned",
+      "text": "HXAP\tB|6|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "whisper_contains",
+      "from": "learned",
+      "text": "|807013|807013|1|1|0|1|0|6",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "whisper_contains",
+      "from": "learned",
+      "text": "|807013|1|40|1|1|0|0",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "whisper_contains",
+      "from": "learned",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "knows_spell",
+      "spell": 807013,
+      "equals": 1
+    },
+    {
+      "action": "whisper",
+      "actor": "future",
+      "to": "Apwindnext",
+      "text": "HXAP\tHELLO|6",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "whisper_contains",
+      "from": "future",
+      "text": "HXAP\tB|6|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "whisper_contains",
+      "from": "future",
+      "text": "|807013|1|40|1|5|0|0",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "whisper_contains",
+      "from": "future",
+      "text": "|807013|1|40|1|5|0|0",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "whisper_contains",
+      "from": "future",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "knows_spell",
+      "spell": 807013,
+      "equals": 0
+    }
+  ]
+}

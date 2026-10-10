@@ -31,6 +31,9 @@ inline constexpr std::array Class32Ability520269 = { AbilityRank{ 520269, 1, { 2
 inline constexpr std::array Class32Ability800995 = { AbilityRank{ 800995, 1, { 18, 1 } } };
 inline constexpr std::array Class32Ability803679 = { AbilityRank{ 803679, 1, { 28, 1 } } };
 
+inline constexpr std::array EarthPalm = { AbilityRank{ 805382, 1, { 8, 1 } } };
+inline constexpr std::array WindPalm = { AbilityRank{ 807013, 1, { 40, 1 } } };
+
 inline constexpr std::array Cinderwake = { AbilityRank{ 807828, 1, { 26, 1 } } };
 
 inline constexpr std::array Whisperwind = { AbilityRank{ 807823, 1, { 22, 1 } } };
@@ -81,6 +84,10 @@ inline constexpr std::array MeltLock = { AbilityRank{ 804662, 1, { 16, 1 } } };
 inline constexpr std::array TinkerPickLock = { AbilityRank{ 804154, 1, { 14, 1 } } };
 
 inline constexpr std::array Profiles = {
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 32, 805382, AbilityKind::Fixed, EarthPalm, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 32, 807013, AbilityKind::Fixed, WindPalm, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 32, 807828, AbilityKind::Fixed, Cinderwake, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -216,6 +223,10 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 32, 805382, { 6, 0, 0 }, { 1, 0, 0 }, {}, { 42, 0, 0 }, { 807824, 0, 0 },
+        std::array<std::int32_t, 3>{ 0, 0, 0 }, std::array<std::int32_t, 3>{ 0, 0, 0 } },
+    Mechanic{ 32, 807013, { 6, 0, 0 }, { 1, 0, 0 }, {}, { 42, 0, 0 }, { 807826, 0, 0 },
+        std::array<std::int32_t, 3>{ 0, 0, 0 }, std::array<std::int32_t, 3>{ 0, 0, 0 } },
     Mechanic{ 32, 807828, { 6, 0, 0 }, { 1, 0, 0 }, {}, { 23, 0, 0 }, { 808023, 0, 0 },
         std::array<std::int32_t, 3>{ 0, 0, 0 }, std::array<std::int32_t, 3>{ -1, 0, 0 } },
     Mechanic{ 32, 807823, { 69, 6, 0 }, { 16, 16, 0 }, {}, { 0, 31, 0 }, {},
@@ -334,6 +345,8 @@ struct HelperMechanic
 };
 
 inline constexpr std::array Helpers = {
+    HelperMechanic{ 807824, { 6, 0, 0 }, { 6, 0, 0 }, { 12, 0, 0 } },
+    HelperMechanic{ 807826, { 6, 6, 6 }, { 1, 1, 1 }, { 147, 147, 31 } },
     HelperMechanic{ 808023, { 27, 27, 27 }, { 16, 16, 16 }, { 4, 41, 23 }, { 0, 0, 535213 } },
     HelperMechanic{ 704142, { 6, 6, 0 }, { 1, 1, 0 }, { 107, 23, 0 }, { 0, 520490, 0 } },
     HelperMechanic{ 802028, { 149, 6, 0 }, { 47, 1, 0 }, { 0, 23, 0 }, { 0, 802030, 0 } },

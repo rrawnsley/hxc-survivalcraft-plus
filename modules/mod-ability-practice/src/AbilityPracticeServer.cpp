@@ -1727,6 +1727,47 @@ bool MatchesUtilityFixedRankMechanic(std::uint32_t classId, std::uint32_t spellI
                     return false;
         }
     }
+    if (classId == 32 && (spellId == 805382 || spellId == 807013))
+    {
+        bool const wind = spellId == 807013;
+        std::uint32_t const helperId = wind ? 807826 : 807824;
+        SpellInfo const* helper = sSpellMgr->GetSpellInfo(helperId);
+        auto const scripts = sObjectMgr->GetSpellScriptsBounds(spellId);
+        auto const helperScripts = sObjectMgr->GetSpellScriptsBounds(helperId);
+        auto const* proc = sSpellMgr->GetSpellProcEntry(spellId);
+        if (info->SpellFamilyName != 38 || info->SpellFamilyFlags[0] != 67108864 ||
+            info->SpellFamilyFlags[1] || info->SpellFamilyFlags[2] != 8192 ||
+            scripts.first != scripts.second || helperScripts.first != helperScripts.second ||
+            info->GetDuration() != 6000 || info->CasterAuraSpell != 808089 ||
+            info->SpellLevel != (wind ? 18u : 8u) || info->BaseLevel != (wind ? 18u : 8u) ||
+            info->MaxLevel || info->Stances || info->StancesNot || info->AttributesEx != 1056 ||
+            info->ManaCost || info->ManaCostPercentage != (wind ? 4u : 12u) ||
+            info->RecoveryTime || info->CategoryRecoveryTime ||
+            info->ProcFlags || info->ProcChance != 100 || info->ProcCharges ||
+            !proc || proc->SchoolMask != SPELL_SCHOOL_MASK_MAGIC || proc->SpellFamilyName || proc->SpellFamilyMask ||
+            proc->ProcFlags != 69972 || proc->SpellTypeMask != 1 || proc->SpellPhaseMask != 2 ||
+            proc->HitMask != 3 || proc->AttributesMask != 2 || proc->DisableEffectsMask ||
+            proc->ProcsPerMinute || proc->Chance != 100 || proc->Cooldown.count() || proc->Charges != 1 ||
+            !helper || helper->SpellFamilyName != 38 || helper->SpellLevel || helper->BaseLevel || helper->MaxLevel ||
+            helper->GetDuration() != (wind ? 6000 : 4000) || helper->CasterAuraSpell ||
+            helper->SpellFamilyFlags[0] != (wind ? 67108864u : 128u) || helper->SpellFamilyFlags[1] ||
+            helper->SpellFamilyFlags[2] != (wind ? 8192u : 0u) || helper->AttributesEx != (wind ? 1056u : 1024u) ||
+            helper->ManaCost || helper->ManaCostPercentage != 4 || helper->RecoveryTime ||
+            helper->CategoryRecoveryTime || helper->ProcFlags || helper->ProcChance != 101 ||
+            helper->ProcCharges || sSpellMgr->GetSpellProcEntry(helperId))
+            return false;
+        for (std::size_t index = 0; index < 3; ++index)
+        {
+            auto const& effect = info->Effects[index];
+            auto const& slot = helper->Effects[index];
+            std::int32_t const misc = wind ? (index == 0 ? 1 : index == 1 ? 64 : 0) : 0;
+            if (effect.DieSides || effect.RealPointsPerLevel || effect.MiscValueB || effect.SpellClassMask ||
+                slot.BasePoints != (wind && index == 2 ? 19 : 0) ||
+                slot.DieSides != (wind && index == 2 ? 1 : 0) || slot.MiscValue != misc ||
+                slot.RealPointsPerLevel || slot.MiscValueB || slot.SpellClassMask)
+                return false;
+        }
+    }
     if (classId == 32 && spellId == 807828)
     {
         SpellInfo const* patch = sSpellMgr->GetSpellInfo(808023);
