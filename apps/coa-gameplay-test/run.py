@@ -60,8 +60,8 @@ METRICS = {
     'taxi_node', 'in_flight', 'taxi_destination', 'stabled_pet_count', 'stable_result', 'pet_rows', 'instance_binds_listed', 'pet_entry', 'pet_aura_stacks', 'pet_aura_duration_ms', 'pet_is_banker', 'pet_display',
     'pet_native_display', 'race', 'pet_scale', 'pet_knows_spell', 'pet_distance', 'pet_casting', 'pet_loading',
     'pet_spell_bar_count',
-    'owned_creature_count', 'owned_creature_weapon_damage_min',
-    'owned_creature_spell_hit_chance', 'owned_creature_attackable',
+    'owned_creature_count', 'owned_creature_spacing', 'owned_creature_weapon_damage_min',
+    'owned_creature_spell_hit_chance', 'owned_creature_attackable', 'owned_creature_victim',
     'charm_entry', 'charm_aura_stacks', 'controls_self', 'viewpoint_entry', 'seer_entry', 'private_instance',
     'dynamic_object', 'dynamic_object_duration_ms', 'gossip_options', 'gossip_option_text',
     'owned_gameobject_count', 'gameobject_remaining_ms', 'gameobject_display', 'gameobject_scale', 'at_homebind',
@@ -150,7 +150,7 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'type_mask', 'hit_mask', 'spell_type_mask',
                  'phase_mask', 'trigger_spell', 'trials', 'incoming', 'heal', 'quality',
                  'row', 'offset', 'skip_strings', 'from_end', 'x', 'y', 'min_required_level', 'max_required_level',
-                 'flat_coefficient_modifier'}
+                 'flat_coefficient_modifier', 'dominant_stat', 'off_stat'}
 ACTIONS = {
     'stop_attack': ({'actor'}, {'actor'}),
     'set_moving': ({'actor', 'enabled'}, {'actor', 'enabled'}),
@@ -197,7 +197,8 @@ ACTIONS = {
     'gossip_hello': ({'actor'}, {'actor', 'target'}),
     'banker_activate': ({'actor'}, {'actor', 'target', 'owner', 'entry'}),
     'personal_bank_open': ({'actor', 'entry'}, {'actor', 'entry'}),
-    'personal_bank_swap': ({'actor', 'entry', 'direction'}, {'actor', 'entry', 'direction', 'item', 'slot'}),
+    'personal_bank_swap': ({'actor', 'entry', 'direction'},
+                           {'actor', 'entry', 'direction', 'item', 'slot', 'count', 'inventory_slot'}),
     'binder_activate': ({'actor', 'target'}, {'actor', 'target'}),
     'destroy_item': ({'actor', 'item'}, {'actor', 'item'}),
     'start_challenge': ({'actor', 'challenge', 'level'}, {'actor', 'challenge', 'level'}),
@@ -225,7 +226,7 @@ ACTIONS = {
     'restore_quest_spells': ({'actor'}, {'actor'}),
     'login_hooks': ({'actor'}, {'actor'}),
     'relog': ({'actor'}, {'actor', 'race'}),
-    'talent': ({'actor', 'talent', 'rank'}, {'actor', 'talent', 'rank'}),
+    'talent': ({'actor', 'talent', 'rank'}, {'actor', 'talent', 'rank', 'command'}),
     'reset_talents': ({'actor'}, {'actor'}),
     'add_item': ({'actor', 'item'}, {'actor', 'item', 'count'}),
     'fill_bags': ({'actor'}, {'actor', 'slots'}),
@@ -304,10 +305,13 @@ def validate(scenario):
         keys(player, {'id', 'race', 'class'},
              {'id', 'race', 'class', 'level', 'bot', 'spell_hit_rating', 'spell_crit_rating',
               'melee_crit_rating', 'ranged_crit_rating', 'ranged_hit_rating', 'melee_hit_rating',
-              'expertise_rating', 'allow_regeneration', 'name', 'expansion', 'ascension_client'}, 'player')
+              'expertise_rating', 'allow_regeneration', 'name', 'expansion', 'ascension_client', 'account_of'}, 'player')
         identity = player['id']
         require(isinstance(identity, str) and ACTOR_ID.fullmatch(identity), 'Invalid player id')
         require(identity not in actor_ids, 'Duplicate actor id')
+        if 'account_of' in player:
+            require(isinstance(player['account_of'], str) and player['account_of'] in player_ids,
+                    'account_of must reference an earlier player')
         actor_ids.add(identity)
         player_ids.add(identity)
         if 'name' in player:
@@ -436,6 +440,8 @@ def validate(scenario):
             require(type(step['enabled']) is bool, f'{where}: enabled must be boolean')
         if 'all_specs' in step:
             require(type(step['all_specs']) is bool, f'{where}: all_specs must be boolean')
+        if action == 'talent' and 'command' in step:
+            require(type(step['command']) is bool, f'{where}: command must be boolean')
         for key in ('race_mask', 'class_mask'):
             if key in step:
                 number(step[key], f'{where}.{key}', 0, 2**32 - 1, True)
@@ -516,6 +522,15 @@ def validate(scenario):
         if action == 'mapless_loot_hook':
             require(step['actor'] in player_ids, f'{where}: mapless loot needs a player')
             require(step.get('store') in {'mail', 'gameobject'}, f'{where}: unsupported mapless loot store')
+        if action == 'personal_bank_swap':
+            require(step['direction'] in {'deposit', 'withdraw'}, f'{where}: invalid bank direction')
+            number(step.get('slot', 0), f'{where}.slot', 0, 97, True)
+            number(step.get('count', 0), f'{where}.count', 0, 2**31 - 1, True)
+            if step['direction'] == 'deposit':
+                number(step.get('item'), f'{where}.item', 1, 2**32 - 1, True)
+            if 'inventory_slot' in step:
+                require(step['direction'] == 'withdraw', f'{where}: inventory_slot needs withdrawal')
+                number(step['inventory_slot'], f'{where}.inventory_slot', 23, 38, True)
         if action in {'summon_gameobject', 'loot_gameobject'}:
             require(step['actor'] in player_ids, f'{where}: {action} needs a player')
             number(step['entry'], f'{where}.entry', 1, 2**32 - 1, True)
@@ -540,14 +555,14 @@ def validate(scenario):
                 require(isinstance(field, dict) and len(field) == 1, f'{where}.fields[{index}]: expected one typed value')
                 (kind, value), = field.items()
                 require(kind in {'u8', 'u32', 'u64', 'string', 'buyback_guid', 'actor_guid', 'packed_actor_guid',
-                                 'pet_guid', 'stabled_pet',
+                                 'pet_guid', 'stabled_pet', 'duel_arbiter',
                                  'wildcard_entry', 'wildcard_pending_cards', 'wildcard_lowest_card'},
                         f'{where}.fields[{index}]: unknown field type')
                 if kind == 'string':
                     require(isinstance(value, str), f'{where}.fields[{index}]: expected a string')
                 elif kind in {'actor_guid', 'packed_actor_guid'}:
                     require(value in actor_ids, f'{where}.fields[{index}]: expected a player or creature id')
-                elif kind == 'pet_guid':
+                elif kind in {'pet_guid', 'duel_arbiter'}:
                     require(value in player_ids, f'{where}.fields[{index}]: expected a player id')
                 else:
                     maximum = {'u8': 255, 'u32': 2**32 - 1, 'u64': 2**64 - 1, 'buyback_guid': 2**31 - 1,
@@ -711,6 +726,9 @@ def validate(scenario):
                 require('item' in step, f'{where}: metric needs item')
             if metric == 'carried_pool_item_count':
                 require('cache' in step, f'{where}: metric needs the cache item it checks against')
+                for option in ('dominant_stat', 'off_stat'):
+                    if option in step:
+                        number(step[option], f'{where}.{option}', 3, 6, True)
             if metric == 'pool_variant_count':
                 require('cache' in step, f'{where}: metric needs the cache item it checks against')
             if metric == 'pool_retired_item_count':
@@ -745,11 +763,13 @@ def validate(scenario):
                 if 'ranged_weapon_subclass' in step:
                     number(step['ranged_weapon_subclass'], f'{where}.ranged_weapon_subclass', 0, 20, True)
             if metric in {'owned_creature_scale', 'owned_creature_visible', 'owned_creature_display',
-                          'owned_creature_weapon_damage_min',
-                          'owned_creature_spell_hit_chance', 'owned_creature_attackable'}:
+                          'owned_creature_spacing', 'owned_creature_weapon_damage_min',
+                          'owned_creature_spell_hit_chance', 'owned_creature_attackable', 'owned_creature_victim'}:
                 require('entry' in step, f'{where}: metric needs creature entry')
             if metric == 'owned_creature_attackable':
                 require(step.get('target') in actor_ids, f'{where}: metric needs the attacking unit')
+            if metric == 'owned_creature_victim':
+                require(step.get('target') in actor_ids, f'{where}: metric needs the expected victim')
             if metric == 'system_message_contains':
                 require(isinstance(step.get('text'), str) and step['text'].strip(),
                         f'{where}: metric needs the text to look for')
@@ -821,10 +841,10 @@ def validate(scenario):
                           'bank_shows', 'system_messages', 'system_message_contains', 'whispers_received',
                           'challenge_start_responses', 'challenge_start_code', 'owned_creature_scale', 'cast_failure',
                           'owned_creature_weapon_damage_min', 'owned_creature_spell_hit_chance',
-                          'owned_creature_attackable',
+                          'owned_creature_attackable', 'owned_creature_victim',
                           'pet_entry', 'pet_aura_stacks', 'pet_is_banker', 'pet_display', 'pet_native_display', 'pet_scale',
                           'pet_knows_spell', 'pet_distance', 'pet_casting', 'pet_loading',
-                          'owned_creature_count', 'charm_entry',
+                          'owned_creature_count', 'owned_creature_spacing', 'charm_entry',
                           'charm_aura_stacks', 'controls_self', 'private_instance',
                           'dynamic_object', 'dynamic_object_duration_ms', 'gossip_options', 'gossip_option_text',
                           'owned_gameobject_count', 'gameobject_remaining_ms', 'gameobject_display', 'gameobject_scale',

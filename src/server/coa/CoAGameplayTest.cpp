@@ -627,7 +627,9 @@ void ObserveExtensionPacket(Actor& actor, WorldPacket const& packet)
         packet.GetOpcode() != SMSG_MOVE_UNSET_CAN_FLY && packet.GetOpcode() != SMSG_CONVERT_RUNE &&
         packet.GetOpcode() != SMSG_ADD_RUNE_POWER && packet.GetOpcode() != SMSG_LEARNED_SPELL &&
         packet.GetOpcode() != SMSG_SUPERCEDED_SPELL && packet.GetOpcode() != SMSG_REMOVED_SPELL &&
-        packet.GetOpcode() != SMSG_ITEM_QUERY_SINGLE_RESPONSE && packet.GetOpcode() != SMSG_MOVE_KNOCK_BACK)
+        packet.GetOpcode() != SMSG_ITEM_QUERY_SINGLE_RESPONSE && packet.GetOpcode() != SMSG_MOVE_KNOCK_BACK &&
+        packet.GetOpcode() != SMSG_DUEL_REQUESTED && packet.GetOpcode() != SMSG_DUEL_COUNTDOWN &&
+        packet.GetOpcode() != SMSG_DUEL_COMPLETE)
         return;
 
     ++actor.extensionPackets[packet.GetOpcode()];
@@ -1151,14 +1153,26 @@ public:
                     if (auto row = step.second.get_optional<uint32>("row"))
                         actor.selectedPacketRows.try_emplace(
                             std::pair{ uint16(step.second.get<uint32>("opcode")), *row });
-            actor.account = "CT" + _runId + std::to_string(index);
+            auto const accountOf = entry.second.get_optional<std::string>("account_of");
+            if (accountOf)
+            {
+                auto const owner = _actors.find(*accountOf);
+                Require(owner != _actors.end() && owner->first != id && !owner->second.account.empty(),
+                    "account_of must reference an earlier player");
+                actor.account = owner->second.account;
+            }
+            else
+                actor.account = "CT" + _runId + std::to_string(index);
             actor.name = FixtureName(entry.second, index++);
             actor.generatedName = _names && !entry.second.get_optional<std::string>("name");
             Require(normalizePlayerName(actor.name), "Invalid fixture character name");
             for (auto const& [otherId, other] : _actors)
                 Require(otherId == id || other.name != actor.name, "Duplicate fixture character name");
-            Require(AccountMgr::GetId(actor.account) == 0, "Test account already exists");
-            Require(sAccountMgr->CreateAccount(actor.account, _runId) == AOR_OK, "Account creation failed");
+            if (!accountOf)
+            {
+                Require(AccountMgr::GetId(actor.account) == 0, "Test account already exists");
+                Require(sAccountMgr->CreateAccount(actor.account, _runId) == AOR_OK, "Account creation failed");
+            }
             LookUpAccount(id);
         }
     }
@@ -1693,6 +1707,14 @@ private:
         Creature* creature = map ? map->GetCreature(itr->second.guid) : nullptr;
         Require(creature != nullptr, "Creature disappeared: " + id);
         return creature;
+    }
+
+    static bool IsLivingSummonOf(Player* player, Creature* creature)
+    {
+        ObjectGuid const owner = player->GetGUID();
+        return creature->IsAlive() && (creature->GetOwnerGUID() == owner || creature->GetCreatorGUID() == owner ||
+                (creature->ToTempSummon() && creature->ToTempSummon()->GetSummonerGUID() == owner))
+            && player->InSamePhase(creature);
     }
 
     Creature* GetOwnedCreature(Player* player, uint32 entry)
@@ -3093,13 +3115,25 @@ private:
                     if (!weapon || weapon->Class != ITEM_CLASS_WEAPON || weapon->SubClass != *rangedWeaponSubclass)
                         return false;
                 }
-                return creature->IsAlive() && (creature->GetOwnerGUID() == player->GetGUID() ||
-                        creature->GetCreatorGUID() == player->GetGUID() ||
-                        (creature->ToTempSummon() && creature->ToTempSummon()->GetSummonerGUID() == player->GetGUID()))
-                    && player->InSamePhase(creature) && (!spell || creature->GetAura(spell, caster))
+                return IsLivingSummonOf(player, creature) && (!spell || creature->GetAura(spell, caster))
                     && player->GetExactDist2d(creature) >= minDistance
                     && (!ownerDisplay || creature->GetDisplayId() == player->GetDisplayId());
             });
+        }
+        if (metric == "owned_creature_spacing")
+        {
+            uint32 entry = step.get<uint32>("entry");
+            Require(sObjectMgr->GetCreatureTemplate(entry) != nullptr, "Unknown creature entry in metric");
+            std::list<Creature*> creatures;
+            player->GetCreatureListWithEntryInGrid(creatures, entry, 100.0f);
+            creatures.remove_if([player](Creature* creature) { return !IsLivingSummonOf(player, creature); });
+            if (creatures.size() < 2)
+                return 0.0;
+            float spacing = std::numeric_limits<float>::max();
+            for (auto first = creatures.begin(); first != creatures.end(); ++first)
+                for (auto second = std::next(first); second != creatures.end(); ++second)
+                    spacing = std::min(spacing, (*first)->GetExactDist2d(*second));
+            return spacing;
         }
         if (metric == "owned_creature_scale" || metric == "owned_creature_visible" ||
             metric == "owned_creature_display")
@@ -3126,6 +3160,12 @@ private:
             Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
             Require(creature != nullptr, "Attack observation needs a present owned creature");
             return GetUnit(step.get<std::string>("target"))->IsValidAttackTarget(creature);
+        }
+        if (metric == "owned_creature_victim")
+        {
+            Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
+            Require(creature != nullptr, "Victim observation needs a present owned creature");
+            return creature->GetVictim() == GetUnit(step.get<std::string>("target"));
         }
         if (metric == "owned_creature_weapon_damage_min")
         {
@@ -3558,13 +3598,38 @@ private:
             auto excluded = step.get_optional<uint32>("exclude");
             uint32 const minRequiredLevel = step.get<uint32>("min_required_level", 0);
             uint32 const maxRequiredLevel = step.get<uint32>("max_required_level", STRONG_MAX_LEVEL);
+            auto dominantStat = step.get_optional<uint32>("dominant_stat");
+            auto offStat = step.get_optional<uint32>("off_stat");
+            auto strongestAttributes = [](ItemTemplate const* proto)
+            {
+                std::array<int32, ITEM_MOD_SPIRIT + 1> attributes{};
+                for (uint32 index = 0; index < proto->StatsCount && index < MAX_ITEM_PROTO_STATS; ++index)
+                {
+                    uint32 const type = proto->ItemStat[index].ItemStatType;
+                    if (type >= ITEM_MOD_AGILITY && type <= ITEM_MOD_SPIRIT && proto->ItemStat[index].ItemStatValue > 0)
+                        attributes[type] += proto->ItemStat[index].ItemStatValue;
+                }
+                int32 const strongest = *std::max_element(attributes.begin(), attributes.end());
+                std::unordered_set<uint32> stats;
+                for (uint32 type = ITEM_MOD_AGILITY; strongest > 0 && type <= ITEM_MOD_SPIRIT; ++type)
+                    if (attributes[type] == strongest)
+                        stats.insert(type);
+                return stats;
+            };
             uint32 count = 0;
-            auto countItem = [pool, &count, &excluded, minRequiredLevel, maxRequiredLevel](Item* item)
+            auto countItem = [pool, &count, &excluded, minRequiredLevel, maxRequiredLevel, &dominantStat, &offStat,
+                &strongestAttributes](Item* item)
             {
                 if (excluded && item->GetEntry() == *excluded)
                     return;
                 uint32 const requiredLevel = item->GetTemplate()->RequiredLevel;
                 if (requiredLevel < minRequiredLevel || requiredLevel > maxRequiredLevel)
+                    return;
+                ItemTemplate const* base = sObjectMgr->GetItemTemplate(ItemScaling::BaseEntry(item->GetEntry()));
+                std::unordered_set<uint32> const strongest = strongestAttributes(base ? base : item->GetTemplate());
+                if (dominantStat && !strongest.count(*dominantStat))
+                    return;
+                if (offStat && (strongest.empty() || strongest.count(*offStat)))
                     return;
                 if (!pool || pool->count(ItemScaling::BaseEntry(item->GetEntry())))
                     count += item->GetCount();
@@ -3863,6 +3928,13 @@ private:
                             request << StabledPetNumber(player, value.get_value<uint32>());
                         else if (kind == "actor_guid")
                             request << GetUnit(value.get_value<std::string>())->GetGUID().GetRawValue();
+                        else if (kind == "duel_arbiter")
+                        {
+                            ObjectGuid const arbiter = GetPlayer(value.get_value<std::string>())
+                                ->GetGuidValue(PLAYER_DUEL_ARBITER);
+                            Require(!arbiter.IsEmpty(), "Packet duel arbiter requires a pending duel");
+                            request << arbiter.GetRawValue();
+                        }
                         else if (kind == "pet_guid")
                         {
                             Pet* pet = GetPlayer(value.get_value<std::string>())->GetPet();
@@ -4532,6 +4604,7 @@ private:
             else
             {
                 uint8 const bankSlot = uint8(step.get<uint32>("slot", 0));
+                int32 const count = step.get<int32>("count", 0);
                 std::string const direction = step.get<std::string>("direction");
                 Require(direction == "deposit" || direction == "withdraw",
                         "Personal bank swap direction must be deposit or withdraw");
@@ -4542,10 +4615,13 @@ private:
                     Item* item = player->GetItemByEntry(step.get<uint32>("item"));
                     Require(item != nullptr, "The player carries no item of that entry");
                     packet << uint32(item->GetEntry()) << uint8(0) << uint8(item->GetBagSlot())
-                           << uint8(item->GetSlot()) << uint8(0) << int32(0);
+                           << uint8(item->GetSlot()) << uint8(0) << count;
                 }
+                else if (auto inventorySlot = step.get_optional<uint8>("inventory_slot"))
+                    packet << uint32(0) << uint8(0) << uint8(INVENTORY_SLOT_BAG_0)
+                           << *inventorySlot << uint8(1) << count;
                 else
-                    packet << uint32(0) << uint8(1) << int32(0) << uint8(0) << int32(0);
+                    packet << uint32(0) << uint8(1) << int32(0) << uint8(0) << count;
                 sScriptMgr->CanPacketReceive(player->GetSession(), packet);
             }
             record.put("result", "submitted; verify the answer with assertions");
@@ -4762,7 +4838,7 @@ private:
             uint32 rank = step.get<uint32>("rank");
             auto* talent = sTalentStore.LookupEntry(step.get<uint32>("talent"));
             Require(talent && rank < MAX_TALENT_RANK && talent->RankID[rank], "Invalid talent/rank");
-            player->LearnTalent(talent->TalentID, rank);
+            player->LearnTalent(talent->TalentID, rank, step.get<bool>("command", false));
             Require(player->HasTalent(talent->RankID[rank], player->GetActiveSpec()), "Talent learning rejected");
         }
         else if (action == "reset_talents")
