@@ -523,6 +523,22 @@ def build_drafts(candidates, root):
                     raise ValueError('Reviewed Fire Palm Sigil parent/helper raw shape changed')
             required.extend(['fire-sigil-native-one-charge-resolved-copy-without-double-dipping-or-clamp',
                              'fire-sigil-owned-original-aura-helper-receipt-and-ten-second-practice-interval'])
+        if (class_id, ability_id) == (31, 520412):
+            expected_ids = [520412, 520741, 520742, 520743, 520744, 520745]
+            if ([rank['spellId'] for rank in ranks] != expected_ids or
+                    [rank['characterLevel'] for rank in ranks] != [16, 24, 32, 40, 48, 56]):
+                raise ValueError('Reviewed Earthquake native rank ladder changed')
+            for index, spell_id in enumerate(expected_ids):
+                raw = members[spell_id].get('rawDbc', {})
+                details = raw.get('effectDetails', [])
+                expected = [(27, 3, 28, 0, 0), (27, 23, 28, 0, 520696), (0, 0, 0, 0, 0)]
+                if (raw.get('passive') is not False or len(details) != 3 or
+                        [(v.get('effectId'), v.get('auraId'), v.get('implicitTargetA'),
+                          v.get('implicitTargetB'), v.get('triggerSpellId')) for v in details] != expected or
+                        details[0].get('basePoints') != [63, 117, 166, 223, 291, 366][index]):
+                    raise ValueError('Reviewed Earthquake original persistent area shape changed')
+            required.extend(['earthquake-first-useful-tick-shares-original-ground-cast-across-targets',
+                             'earthquake-four-native-ticks-slow-rage-cost-ten-second-practice-interval'])
         if (class_id, ability_id) == (31, 500402):
             expected_ids = [500402, 502769, 502770, 502771, 502772, 502773, 502774, 502775, 502776, 502777]
             if ([rank['spellId'] for rank in ranks] != expected_ids or

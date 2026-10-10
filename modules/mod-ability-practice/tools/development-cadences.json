@@ -15,6 +15,12 @@
       "reason": "Draft interval between new fear opportunities; qualifying frequency needs play measurement."
     },
     {
+      "classId": 31,
+      "abilityId": 520412,
+      "assumedUseIntervalMilliseconds": 10000,
+      "reason": "Earthquake original ground-cast practice has a ten-second award gate; its native area lasts nine seconds. Ordinary qualifying frequency remains unmeasured."
+    },
+    {
       "classId": 32,
       "abilityId": 534803,
       "assumedUseIntervalMilliseconds": 10000,

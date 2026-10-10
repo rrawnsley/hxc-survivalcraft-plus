@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Ability practice native: Earthquake rank6 ground damage and expiry",
-  "contract": "Unenrolled native Earthquake creates a nine-second persistent area. Its extra initial period produces four positive damage ticks at application and three-second intervals, with native slow520696. Once expired, no additional damage or slow remains. Unknown saved progress is preserved.",
+  "contract": "Enrolled native Earthquake creates a nine-second persistent area. Its extra initial period produces four positive damage ticks at application and three-second intervals, with native slow520696. Once expired, no additional damage or slow remains. Unknown saved progress is preserved.",
   "timeout_ms": 90000,
   "location": {
     "map": 0,
@@ -36,6 +36,66 @@
     {
       "action": "wait",
       "ms": 5000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.520412",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.520412",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.520412",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.520412",
+      "index": 3,
+      "value": 80
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.520412",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 520412
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 520741
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 520742
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 520743
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 520744
     },
     {
       "action": "learn",

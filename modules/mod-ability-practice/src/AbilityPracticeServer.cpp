@@ -454,6 +454,7 @@ struct MenuSession
     Clock::time_point NextWaterSigilPractice{};
     Clock::time_point NextArcaneSigilPractice{};
     Clock::time_point NextGeodePractice{};
+    Clock::time_point NextEarthquakePractice{};
     std::uint32_t OutgoingClass = 0;
     std::vector<std::string> Outgoing;
     std::size_t NextMessage = 0;
@@ -710,6 +711,53 @@ bool IsArmorOrEdictProfile(Practice::AbilityProfile const& profile)
         (profile.Definition.ClassId == 29 && profile.Definition.AbilityId == 803651) ||
         (profile.Definition.ClassId == 15 && (profile.Definition.AbilityId == 523485 ||
             profile.Definition.AbilityId == 706741 || profile.Definition.AbilityId == 707684));
+}
+
+bool MatchesEarthquakeMechanic(SpellInfo const* info, Practice::AbilityProfile const& profile)
+{
+    if (!Practice::DevelopmentPeriodic::IsEarthquake(profile))
+        return true;
+    if (!info)
+        return false;
+    auto const& ranks = Practice::DevelopmentPeriodic::Earthquake;
+    auto const rank = std::find_if(ranks.begin(), ranks.end(), [info](Practice::AbilityRank const& value)
+    {
+        return value.SpellId == info->Id;
+    });
+    if (rank == ranks.end())
+        return false;
+    auto const index = static_cast<std::size_t>(rank - ranks.begin());
+    constexpr std::array maximum{ 22u, 30u, 38u, 46u, 54u, 66u };
+    constexpr std::array amounts{ 63, 117, 166, 223, 291, 366 };
+    constexpr std::array scaling{ 2.0f, 1.32167f, 1.3f, 1.47333f, 1.5f, 1.2f };
+    auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+    if (scripts.first != scripts.second || info->SpellFamilyName != 37 || info->SpellFamilyFlags[0] ||
+        info->SpellFamilyFlags[1] || info->SpellFamilyFlags[2] != 268435456 ||
+        info->Attributes || info->AttributesEx || info->AttributesEx5 != 512 ||
+        info->SpellLevel != rank->Requirement.CharacterLevel || info->BaseLevel != info->SpellLevel ||
+        info->MaxLevel != maximum[index] || info->GetDuration() != 9000 ||
+        info->PowerType != POWER_RAGE || info->ManaCost != 250 || info->ManaCostPercentage ||
+        info->RecoveryTime || info->CategoryRecoveryTime || info->ProcFlags || info->ProcChance ||
+        info->ProcCharges || sSpellMgr->GetSpellProcEntry(info->Id) ||
+        info->DmgClass != SPELL_DAMAGE_CLASS_MAGIC || info->SchoolMask != SPELL_SCHOOL_MASK_NATURE ||
+        info->HasAttribute(SPELL_ATTR0_CU_BINARY_SPELL))
+        return false;
+    for (std::size_t slot = 0; slot < 3; ++slot)
+    {
+        auto const& effect = info->Effects[slot];
+        if (effect.Effect != (slot == 2 ? 0u : SPELL_EFFECT_PERSISTENT_AREA_AURA) ||
+            effect.ApplyAuraName != (slot == 0 ? SPELL_AURA_PERIODIC_DAMAGE :
+                slot == 1 ? SPELL_AURA_PERIODIC_TRIGGER_SPELL : 0u) ||
+            effect.TargetA.GetTarget() != (slot == 2 ? 0u : TARGET_DEST_DYNOBJ_ENEMY) ||
+            effect.TargetB.GetTarget() || effect.TriggerSpell != (slot == 1 ? 520696u : 0u) ||
+            effect.Amplitude != (slot == 2 ? 0u : 3000u) ||
+            effect.BasePoints != (slot == 0 ? amounts[index] : -1) || effect.DieSides != (slot ? 1 : 0) ||
+            effect.RealPointsPerLevel != (slot ? 0.0f : scaling[index]) ||
+            effect.MiscValue != (slot == 1 ? 524287 : 0) || effect.MiscValueB ||
+            (slot != 2 && (!effect.RadiusEntry || effect.RadiusEntry->ID != 14)))
+            return false;
+    }
+    return sSpellMgr->GetSpellInfo(520696) != nullptr;
 }
 
 bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProfile const& profile)
@@ -3573,7 +3621,10 @@ void AwardPeriodicOutcome(Unit* caster, Unit* target, std::uint32_t auraSpellId,
         !AcquisitionAllowed(player, profile->Definition, receipt->SpellId))
         return;
     auto const now = Clock::now();
-    if (arcane && now < found->second.NextArcaneSigilPractice)
+    bool const earthquake = Practice::DevelopmentPeriodic::IsEarthquake(*profile);
+    auto* nextPractice = arcane ? &found->second.NextArcaneSigilPractice :
+        earthquake ? &found->second.NextEarthquakePractice : nullptr;
+    if (nextPractice && now < *nextPractice)
     {
         receipt->MarkConsumed();
         return;
@@ -3586,11 +3637,12 @@ void AwardPeriodicOutcome(Unit* caster, Unit* target, std::uint32_t auraSpellId,
         return;
     auto const award = Practice::HandleOutcome(*player, cast, profile->Definition,
         effective->View(), profile->DefinitionVersion, context);
-    if (arcane && award.Status == Practice::OutcomeStatus::Capped)
+    if (nextPractice && award.Status == Practice::OutcomeStatus::Capped)
         receipt->MarkConsumed();
-    if (arcane && award.Status == Practice::OutcomeStatus::Awarded)
-        found->second.NextArcaneSigilPractice = now +
-            std::chrono::seconds(Practice::DevelopmentHelpers::ArcanePracticeIntervalSeconds);
+    if (nextPractice && award.Status == Practice::OutcomeStatus::Awarded)
+        *nextPractice = now + std::chrono::seconds(arcane ?
+            Practice::DevelopmentHelpers::ArcanePracticeIntervalSeconds :
+            Practice::DevelopmentPeriodic::EarthquakePracticeIntervalSeconds);
     RecordAward(player, found->second, *profile, award);
 }
 
@@ -3984,6 +4036,7 @@ public:
                             (info && info->HasAura(SPELL_AURA_MOD_ROOT))));
                 if (!info || info->IsDeprecatedForPlayers || (!fixed && info->IsPassive()) ||
                     !expectedOutcome || !expectedAbsorption || !expectedControl ||
+                    !MatchesEarthquakeMechanic(info, profile) ||
                     !MatchesAdditionalMasteryMechanic(info, profile))
                 {
                     Ready = false;

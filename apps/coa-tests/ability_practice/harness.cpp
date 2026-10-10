@@ -20,6 +20,7 @@
 #include "AbilityPracticeDevelopmentSpellPowerBuffTrainerRanks.h"
 #include "AbilityPracticeDevelopmentFixed.h"
 #include "AbilityPracticeDevelopmentHelpers.h"
+#include "AbilityPracticeDevelopmentPeriodic.h"
 #include "AbilityPracticeDevelopmentConjureFixed.h"
 #include "AbilityPracticeDevelopmentPassiveFixed.h"
 #include "AbilityPracticeDevelopmentUtilityFixed.h"
@@ -469,7 +470,7 @@ void CheckCurrentRankPolicies()
 {
     std::uint32_t forecasts = 0;
     std::array<bool, 21> classes{};
-    assert(DevelopmentPacing::Entries.size() == 183);
+    assert(DevelopmentPacing::Entries.size() == 184);
     for (auto const& entry : DevelopmentPacing::Entries)
     {
         classes.at(entry.ClassId - 12) = true;
@@ -1209,6 +1210,8 @@ void CheckScriptedDamageReceipts()
     }
     assert(!DevelopmentHelpers::IsFireSigilDamage(802202, 807012));
     assert(DevelopmentHelpers::FirePracticeIntervalSeconds == 10);
+    assert(DevelopmentPeriodic::Earthquake.size() == 6);
+    assert(DevelopmentPeriodic::EarthquakePracticeIntervalSeconds == 10);
     assert(DevelopmentHelpers::GeodeBarrage.size() == 10);
     assert(DevelopmentHelpers::GeodePracticeIntervalSeconds == 5);
     for (auto const& rank : DevelopmentHelpers::GeodeBarrage)

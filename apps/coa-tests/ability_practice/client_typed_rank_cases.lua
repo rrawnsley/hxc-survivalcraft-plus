@@ -19,6 +19,12 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
     local ability = result.abilities[1]
     kinds[ability.kind] = kinds[ability.kind] + 1
     if ability.kind == 1 then assert(ability.catchup) end
+    if ability.abilityId == 520412 then
+        assert(#ability.ranks == 6 and ability.route == 1)
+        assert(string.find(Model.PracticeRules(ability), "all ticks and targets share your original ground cast", 1, true))
+        assert(string.find(Model.PracticeRules(ability), "at least ten seconds apart", 1, true))
+        assert(string.find(Model.PracticeRules(ability), "Rage cost", 1, true))
+    end
     if ability.abilityId == 500402 then
         assert(#ability.ranks == 10 and ability.route == 1)
         assert(string.find(Model.PracticeRules(ability), "all three stones share your original cast", 1, true))
@@ -263,7 +269,7 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
     end
     count = count + 1
 end
-assert(count == 947)
-assert(kinds[1] == 549 and kinds[2] == 53 and kinds[3] == 345)
+assert(count == 950)
+assert(kinds[1] == 552 and kinds[2] == 53 and kinds[3] == 345)
 for classId = 12, 32 do assert(classes[classId]) end
-print("PASS: 947 typed snapshots across 21 classes: 549 ranked, 53 mastery, 345 fixed and menu rendering")
+print("PASS: 950 typed snapshots across 21 classes: 552 ranked, 53 mastery, 345 fixed and menu rendering")

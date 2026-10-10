@@ -890,6 +890,12 @@ function Model.PracticeRules(ability, saved)
         rule = "Restore your missing health with Fel Bargain during an eligible PvE fight."
             .. " Energy spent without actual healing earns no practice."
             .. " One original cast earns at most one award; the native Energy cost and cooldown remain."
+    elseif ability.abilityId == 520412 and ability.route == 1 then
+        rule = "Place Earthquake under level-appropriate PvE opponents and deal useful periodic damage."
+            .. " The first useful tick earns one use; all ticks and targets share your original ground cast."
+            .. " Counted uses must be at least ten seconds apart."
+            .. " Empty areas, gray targets, fully absorbed ticks and the slow helper earn no practice."
+            .. " Native damage, slow, Rage cost and all six ranks remain; practice prepares one upcoming rank."
     elseif ability.abilityId == 500402 and ability.route == 1 then
         rule = "Cast Geode Barrage at a level-appropriate PvE opponent and land useful stone damage."
             .. " The first useful stone earns one use; all three stones share your original cast."

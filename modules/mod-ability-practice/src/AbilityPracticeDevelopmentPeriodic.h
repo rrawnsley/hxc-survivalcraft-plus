@@ -150,7 +150,24 @@ inline constexpr std::array Unmake = {
 };
 inline constexpr auto UnmakeCaps = Development::RankCaps(Unmake);
 
+inline constexpr std::array Earthquake = {
+    AbilityRank{ 520412, 1, { 16, 1 } }, AbilityRank{ 520741, 2, { 24, 10 } },
+    AbilityRank{ 520742, 3, { 32, 20 } }, AbilityRank{ 520743, 4, { 40, 40 } },
+    AbilityRank{ 520744, 5, { 48, 60 } }, AbilityRank{ 520745, 6, { 56, 80 } }
+};
+inline constexpr auto EarthquakeCaps = Development::RankCaps(Earthquake);
+inline constexpr std::uint32_t EarthquakePracticeIntervalSeconds = 10;
+
+inline bool IsEarthquake(AbilityProfile const& profile)
+{
+    return profile.Definition.ClassId == 31 && profile.Definition.AbilityId == 520412 &&
+        profile.Definition.Kind == AbilityKind::Ranked && profile.Outcome == OutcomeKind::Damage;
+}
+
 inline constexpr std::array Profiles = {
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 31, 520412, AbilityKind::Ranked, Earthquake, EarthquakeCaps },
+        Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 24, 805476, AbilityKind::Ranked, Cindergrip, CindergripCaps },
         Development::Policy, OutcomeKind::Damage },
