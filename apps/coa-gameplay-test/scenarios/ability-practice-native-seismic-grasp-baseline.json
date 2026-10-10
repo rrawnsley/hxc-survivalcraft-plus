@@ -1,0 +1,225 @@
+{
+  "schema": 1,
+  "name": "Ability practice native: Seismic Grasp slow and Earthshaping gain",
+  "contract": "Single native Seismic Grasp 807432 introduced at class/trainer level 8 despite raw spell level 12. Native ten-second 50 percent movement slow, eight-second cooldown, mana cost and one Earthshaping gain with native marker 92149. Unknown saved progress remains retained; no practice profile is declared by this baseline.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apgraspbase",
+      "race": 1,
+      "class": 31,
+      "level": 8,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 8,
+      "health": 1000000,
+      "faction": 14,
+      "distance": 15,
+      "stationary": true,
+      "reaction": 0
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 807432
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 92149,
+      "stacks": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.807432",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.807432",
+      "index": 1,
+      "value": 999
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.807432",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.807432",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.807432",
+      "index": 4,
+      "value": 101
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "run_speed_rate",
+      "save_as": "native_run"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "save_as": "native_earthshaping"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "power",
+      "save_as": "native_mana",
+      "power": 0
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 807432,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 807432,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura_amount",
+      "spell": 807432,
+      "effect": 0,
+      "equals": -50
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "run_speed_rate",
+      "ratio_to": "native_run",
+      "min": 0.499,
+      "max": 0.501
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cooldown_ms",
+      "spell": 807432,
+      "min": 7000,
+      "max": 8000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "power",
+      "relative_to": "native_mana",
+      "max": -1,
+      "power": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_stacks",
+      "spell": 680441,
+      "relative_to": "native_earthshaping",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 11000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 807432,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "run_speed_rate",
+      "ratio_to": "native_run",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.31.807432",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.31.807432",
+      "index": 1,
+      "equals": 999
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.31.807432",
+      "index": 2,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.31.807432",
+      "index": 3,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.31.807432",
+      "index": 4,
+      "equals": 101
+    }
+  ]
+}
