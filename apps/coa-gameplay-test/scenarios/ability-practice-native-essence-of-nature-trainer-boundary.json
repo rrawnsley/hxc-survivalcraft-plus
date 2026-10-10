@@ -1,0 +1,163 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Essence of Nature real trainer cannot bypass practice",
+  "contract": "Actual Primalist trainer50290/900031 teaches the introductory rank44; rank60 and prerequisite-free greater offer are rejected while proficiency1. Existing boundary scenario proves final practice automatically learns both.",
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apnaturebuy",
+      "race": 1,
+      "class": 31,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "money",
+      "actor": "caster",
+      "copper": 1000000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "caster",
+      "target": "trainer"
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "caster",
+      "spell": 581314,
+      "target": "trainer"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 581314,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "carried_money",
+      "max": 999999
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "carried_money",
+      "save_as": "after_intro"
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.581314",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.581314",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.581314",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.581314",
+      "index": 3,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.581314",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "caster",
+      "spell": 581315,
+      "target": "trainer"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 581315,
+      "equals": 0
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "caster",
+      "spell": 582261,
+      "target": "trainer"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 582261,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.31.581314",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.31.581314",
+      "index": 3,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "carried_money",
+      "relative_to": "after_intro",
+      "equals": 0
+    }
+  ],
+  "creatures": [
+    {
+      "id": "trainer",
+      "owner": "caster",
+      "entry": 50290,
+      "distance": 3,
+      "stationary": true,
+      "faction": 35
+    }
+  ]
+}
