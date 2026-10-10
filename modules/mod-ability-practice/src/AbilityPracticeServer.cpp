@@ -455,6 +455,7 @@ struct MenuSession
     Clock::time_point NextArcaneSigilPractice{};
     Clock::time_point NextGeodePractice{};
     Clock::time_point NextEarthquakePractice{};
+    Clock::time_point NextBellowPractice{};
     std::uint32_t OutgoingClass = 0;
     std::vector<std::string> Outgoing;
     std::size_t NextMessage = 0;
@@ -478,6 +479,7 @@ Practice::PracticeRoute RouteFor(Practice::OutcomeKind outcome)
         case Practice::OutcomeKind::DamageOrDispel: return Practice::PracticeRoute::DamageOrDispel;
         case Practice::OutcomeKind::Fear: return Practice::PracticeRoute::Fear;
         case Practice::OutcomeKind::ResourceDrain: return Practice::PracticeRoute::ResourceDrain;
+        case Practice::OutcomeKind::AttackPowerReduction: return Practice::PracticeRoute::AttackPowerReduction;
     }
     return Practice::PracticeRoute::Unknown;
 }
@@ -521,6 +523,8 @@ bool HasSupportedOutcome(SpellInfo const* info, Practice::OutcomeKind outcome)
         return info->HasEffect(SPELL_EFFECT_STEAL_BENEFICIAL_BUFF);
     if (outcome == Practice::OutcomeKind::Fear)
         return ControlRequested && info->HasAura(SPELL_AURA_MOD_FEAR);
+    if (outcome == Practice::OutcomeKind::AttackPowerReduction)
+        return ControlRequested && info->HasAura(SPELL_AURA_MOD_ATTACK_POWER);
     return false;
 }
 
@@ -711,6 +715,47 @@ bool IsArmorOrEdictProfile(Practice::AbilityProfile const& profile)
         (profile.Definition.ClassId == 29 && profile.Definition.AbilityId == 803651) ||
         (profile.Definition.ClassId == 15 && (profile.Definition.AbilityId == 523485 ||
             profile.Definition.AbilityId == 706741 || profile.Definition.AbilityId == 707684));
+}
+
+bool MatchesBellowMechanic(SpellInfo const* info, Practice::AbilityProfile const& profile)
+{
+    if (!Practice::DevelopmentControl::IsUrsocBellow(profile))
+        return true;
+    if (!info)
+        return false;
+    auto const& ranks = Practice::DevelopmentControl::UrsocBellow;
+    auto const rank = std::find_if(ranks.begin(), ranks.end(), [info](Practice::AbilityRank const& value)
+    {
+        return value.SpellId == info->Id;
+    });
+    if (rank == ranks.end())
+        return false;
+    auto const index = static_cast<std::size_t>(rank - ranks.begin());
+    constexpr std::array maximum{ 20u, 30u, 42u, 52u, 62u };
+    constexpr std::array amounts{ -33, -53, -71, -106, -141 };
+    auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+    if (scripts.first != scripts.second || info->SpellFamilyName != 37 ||
+        info->SpellFamilyFlags != flag96(0, 8388608, 0) || info->Attributes != 16 || info->AttributesEx ||
+        info->SpellLevel != rank->Requirement.CharacterLevel || info->BaseLevel != info->SpellLevel ||
+        info->MaxLevel != maximum[index] || info->GetDuration() != 30000 ||
+        info->PowerType != POWER_RAGE || info->ManaCost != 150 || info->ManaCostPercentage ||
+        info->RecoveryTime || info->CategoryRecoveryTime || info->ProcFlags || info->ProcChance != 100 ||
+        info->ProcCharges || sSpellMgr->GetSpellProcEntry(info->Id) ||
+        info->DmgClass != SPELL_DAMAGE_CLASS_MAGIC || info->SchoolMask != SPELL_SCHOOL_MASK_NORMAL)
+        return false;
+    for (std::size_t slot = 0; slot < 3; ++slot)
+    {
+        auto const& effect = info->Effects[slot];
+        if (effect.Effect != (slot ? 0u : SPELL_EFFECT_APPLY_AURA) ||
+            effect.ApplyAuraName != (slot ? 0u : SPELL_AURA_MOD_ATTACK_POWER) ||
+            effect.TargetA.GetTarget() != (slot ? 0u : 22u) ||
+            effect.TargetB.GetTarget() != (slot ? 0u : 15u) || effect.TriggerSpell ||
+            effect.BasePoints != (slot ? 0 : amounts[index]) || effect.DieSides != (slot ? 0 : 1) ||
+            effect.RealPointsPerLevel != (slot ? 0.0f : -1.0f) || effect.MiscValue || effect.MiscValueB ||
+            (!slot && (!effect.RadiusEntry || effect.RadiusEntry->ID != 13)))
+            return false;
+    }
+    return true;
 }
 
 bool MatchesEarthquakeMechanic(SpellInfo const* info, Practice::AbilityProfile const& profile)
@@ -3079,6 +3124,9 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
             if (profile.Outcome == Practice::OutcomeKind::ResourceDrain &&
                 session.Protocol < Practice::ResourceMenuSchemaVersion)
                 continue;
+            if (profile.Outcome == Practice::OutcomeKind::AttackPowerReduction &&
+                session.Protocol < Practice::DebuffMenuSchemaVersion)
+                continue;
             auto const learned = Learned(player, ability, false);
             Practice::Progress state;
             if (ability.Kind != Practice::AbilityKind::Fixed)
@@ -3189,11 +3237,13 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
     auto learning = !supported ? Practice::SessionLearningView{ false, 0, {} } :
         currentProgress == session.Progress.end() ? Practice::SessionLearningView{ true, 0, {} } :
         currentProgress->second.Learning.View();
-    if (session.Protocol < Practice::ResourceMenuSchemaVersion &&
-        std::any_of(learning.Events.begin(), learning.Events.end(), [player](auto const& event)
+    if (session.Protocol < Practice::DebuffMenuSchemaVersion &&
+        std::any_of(learning.Events.begin(), learning.Events.end(), [player, &session](auto const& event)
         {
             auto const* profile = FindProfile(player, event.Rank.SpellId);
-            return profile && profile->Outcome == Practice::OutcomeKind::ResourceDrain;
+            return profile && ((profile->Outcome == Practice::OutcomeKind::ResourceDrain &&
+                session.Protocol < Practice::ResourceMenuSchemaVersion) ||
+                profile->Outcome == Practice::OutcomeKind::AttackPowerReduction);
         }))
         learning = { false, 0, {} };
     auto mastery = !supported ? Practice::SessionMasteryView{ false, 0, {} } :
@@ -3647,6 +3697,47 @@ void AwardPeriodicOutcome(Unit* caster, Unit* target, std::uint32_t auraSpellId,
     RecordAward(player, found->second, *profile, award);
 }
 
+void AwardAttackPowerReduction(Unit* caster, Unit* target, std::uint32_t auraSpellId, float reduction,
+    std::shared_ptr<CoAAbilityPractice::CastReceipt> const& receipt)
+{
+    if (!Active.load() || !ControlRequested || !caster || !target || !target->IsAlive() ||
+        !std::isfinite(reduction) || reduction <= 0.0f || !receipt || receipt->IsConsumed() ||
+        auraSpellId != receipt->SpellId)
+        return;
+    Player* player = caster->ToPlayer();
+    if (!IsProfiledPlayer(player) || !IsDevelopmentOpponent(player, target))
+        return;
+    auto const* profile = FindProfile(player, receipt->SpellId);
+    if (!profile || !Practice::DevelopmentControl::IsUrsocBellow(*profile))
+        return;
+    std::lock_guard lock(Mutex);
+    auto const found = Sessions.find(player->GetGUID().GetRawValue());
+    if (!Affects(player) || player->isBeingLoaded() || found == Sessions.end() ||
+        !ReceiptMatches(player, found->second, *receipt) ||
+        !AcquisitionAllowed(player, profile->Definition, receipt->SpellId))
+        return;
+    auto const now = Clock::now();
+    if (now < found->second.NextBellowPractice)
+    {
+        receipt->MarkConsumed();
+        return;
+    }
+    ReceiptCast cast{ player, sSpellMgr->GetSpellInfo(receipt->SpellId), *receipt };
+    Practice::OutcomeContext const context{ true, true, true, true, player->GetLevel() };
+    auto const effective = Practice::BuildCatchupPolicy(profile->Policy,
+        Practice::CapAtLevel(profile->Definition, player->GetLevel()), Catchup);
+    if (!effective)
+        return;
+    auto const award = Practice::HandleOutcome(*player, cast, profile->Definition,
+        effective->View(), profile->DefinitionVersion, context);
+    if (award.Status == Practice::OutcomeStatus::Capped)
+        receipt->MarkConsumed();
+    if (award.Status == Practice::OutcomeStatus::Awarded)
+        found->second.NextBellowPractice = now +
+            std::chrono::seconds(Practice::DevelopmentControl::BellowPracticeIntervalSeconds);
+    RecordAward(player, found->second, *profile, award);
+}
+
 void AwardControlOutcome(Unit* caster, Unit* target, std::uint32_t auraSpellId, std::uint32_t auraType,
     std::shared_ptr<CoAAbilityPractice::CastReceipt> const& receipt)
 {
@@ -4037,7 +4128,7 @@ public:
                             (info && info->HasAura(SPELL_AURA_MOD_ROOT))));
                 if (!info || info->IsDeprecatedForPlayers || (!fixed && info->IsPassive()) ||
                     !expectedOutcome || !expectedAbsorption || !expectedControl ||
-                    !MatchesEarthquakeMechanic(info, profile) ||
+                    !MatchesEarthquakeMechanic(info, profile) || !MatchesBellowMechanic(info, profile) ||
                     !MatchesAdditionalMasteryMechanic(info, profile))
                 {
                     Ready = false;
@@ -4518,6 +4609,7 @@ void AddSC_ability_practice()
     CoAAbilityPractice::SetReplacementChangedProvider(ReplacementChanged);
     CoAAbilityPractice::SetPeriodicOutcomeProvider(AwardPeriodicOutcome);
     CoAAbilityPractice::SetControlOutcomeProvider(AwardControlOutcome);
+    CoAAbilityPractice::SetAttackPowerReductionProvider(AwardAttackPowerReduction);
     CoAAbilityPractice::SetHealingMasteryProvider(ModifyMasteryHealing);
     CoAAbilityPractice::SetDamageMasteryProvider(ModifyMasteryDamage);
     CoAAbilityPractice::SetResourceDrainMasteryProvider(ModifyMasteryResourceDrain);

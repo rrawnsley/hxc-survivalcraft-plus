@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Ability practice native: Ursoc Bellow rank5 attack-power reduction",
-  "contract": "Native rank5 at48 applies-140 attack power for30seconds within10yards, costing15rage. No practice definition yet; unsupported saved record is retained. Intro case checks natural expiry and restoration.",
+  "contract": "Native rank5 at48 applies-140 attack power for30seconds within10yards, costing15rage. Enrolled native rank preserves its effects; an unknown saved definition injected after the effects is retained. Intro case checks natural expiry and restoration.",
   "timeout_ms": 90000,
   "players": [
     {
@@ -31,11 +31,6 @@
       "ms": 5000
     },
     {
-      "action": "learn",
-      "actor": "caster",
-      "spell": 707735
-    },
-    {
       "action": "set_player_setting",
       "actor": "caster",
       "source": "core.hxc.ability_practice.31.704101",
@@ -47,7 +42,7 @@
       "actor": "caster",
       "source": "core.hxc.ability_practice.31.704101",
       "index": 1,
-      "value": 999
+      "value": 4
     },
     {
       "action": "set_player_setting",
@@ -61,14 +56,39 @@
       "actor": "caster",
       "source": "core.hxc.ability_practice.31.704101",
       "index": 3,
-      "value": 100
+      "value": 60
     },
     {
       "action": "set_player_setting",
       "actor": "caster",
       "source": "core.hxc.ability_practice.31.704101",
       "index": 4,
-      "value": 101
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 704101
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707732
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707733
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707734
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 707735
     },
     {
       "action": "snapshot",
@@ -118,6 +138,41 @@
       "metric": "attack_power",
       "relative_to": "native_ap",
       "equals": -140
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.704101",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.704101",
+      "index": 1,
+      "value": 999
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.704101",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.704101",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.704101",
+      "index": 4,
+      "value": 101
     },
     {
       "action": "assert",

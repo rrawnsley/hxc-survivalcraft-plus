@@ -523,6 +523,22 @@ def build_drafts(candidates, root):
                     raise ValueError('Reviewed Fire Palm Sigil parent/helper raw shape changed')
             required.extend(['fire-sigil-native-one-charge-resolved-copy-without-double-dipping-or-clamp',
                              'fire-sigil-owned-original-aura-helper-receipt-and-ten-second-practice-interval'])
+        if (class_id, ability_id) == (31, 704101):
+            expected_ids = [704101, 707732, 707733, 707734, 707735]
+            if ([rank['spellId'] for rank in ranks] != expected_ids or
+                    [rank['characterLevel'] for rank in ranks] != [20, 26, 32, 40, 48]):
+                raise ValueError('Reviewed Ursoc Bellow native rank ladder changed')
+            for index, spell_id in enumerate(expected_ids):
+                raw = members[spell_id].get('rawDbc', {})
+                details = raw.get('effectDetails', [])
+                expected = [(6, 99, 22, 15, 0), (0, 0, 0, 0, 0), (0, 0, 0, 0, 0)]
+                if (raw.get('passive') is not False or len(details) != 3 or
+                        [(v.get('effectId'), v.get('auraId'), v.get('implicitTargetA'),
+                          v.get('implicitTargetB'), v.get('triggerSpellId')) for v in details] != expected or
+                        details[0].get('basePoints') != [-33, -53, -71, -106, -141][index]):
+                    raise ValueError('Reviewed Ursoc Bellow native attack-power shape changed')
+            required.extend(['bellow-actual-new-attack-power-reduction-original-cast-across-targets',
+                             'bellow-native-five-ranks-strength-duration-rage-thirty-second-interval'])
         if (class_id, ability_id) == (31, 520412):
             expected_ids = [520412, 520741, 520742, 520743, 520744, 520745]
             if ([rank['spellId'] for rank in ranks] != expected_ids or

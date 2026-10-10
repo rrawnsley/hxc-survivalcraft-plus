@@ -1,0 +1,214 @@
+{
+  "schema": 1,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apbellmulti",
+      "race": 1,
+      "class": 31,
+      "level": 20,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 17055,
+      "level": 80,
+      "health": 1000000,
+      "faction": 14,
+      "distance": 5,
+      "stationary": true
+    },
+    {
+      "id": "second",
+      "owner": "caster",
+      "entry": 17055,
+      "level": 80,
+      "health": 1000000,
+      "faction": 14,
+      "distance": 7,
+      "stationary": true
+    },
+    {
+      "id": "third",
+      "owner": "caster",
+      "entry": 17055,
+      "level": 80,
+      "health": 1000000,
+      "faction": 14,
+      "distance": 30,
+      "stationary": true
+    }
+  ],
+  "timeout_ms": 90000,
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.704101",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.704101",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.704101",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.704101",
+      "index": 3,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.704101",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 704101
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 704101
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.31.704101",
+      "index": 4,
+      "equals": 270
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 704101
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.31.704101",
+      "index": 4,
+      "equals": 270
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "teleport",
+      "actor": "caster",
+      "map": 0,
+      "x": -9592.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "distance",
+      "target": "third",
+      "max": 9
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 704101
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.31.704101",
+      "index": 4,
+      "equals": 270
+    },
+    {
+      "action": "wait",
+      "ms": 31000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 704101
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.31.704101",
+      "index": 4,
+      "equals": 540
+    }
+  ],
+  "name": "Ability practice: Ursoc Bellow contribution",
+  "contract": "Original native Bellow earns one practice use for an actual eligible attack-power reduction, across all targets, with a thirty-second interval and one upcoming rank.",
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  }
+}

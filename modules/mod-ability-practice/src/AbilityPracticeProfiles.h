@@ -31,7 +31,8 @@ enum class OutcomeKind
     DamageOrInterrupt,
     DamageOrDispel,
     Fear,
-    ResourceDrain
+    ResourceDrain,
+    AttackPowerReduction
 };
 
 struct AbilityProfile
@@ -71,7 +72,8 @@ inline bool ValidateProfiles(std::span<AbilityProfile const> profiles)
                     profile.Outcome != OutcomeKind::Interrupt && profile.Outcome != OutcomeKind::Dispel &&
                     profile.Outcome != OutcomeKind::Steal && profile.Outcome != OutcomeKind::DamageOrInterrupt &&
                     profile.Outcome != OutcomeKind::DamageOrDispel && profile.Outcome != OutcomeKind::Fear &&
-                    profile.Outcome != OutcomeKind::ResourceDrain) ||
+                    profile.Outcome != OutcomeKind::ResourceDrain &&
+                    profile.Outcome != OutcomeKind::AttackPowerReduction) ||
             ability.Ranks.size() > 64 ||
             std::any_of(ability.Ranks.begin(), ability.Ranks.end(),
                 [](AbilityRank const& rank) { return IsNativeBaselineSpell(rank.SpellId); }))

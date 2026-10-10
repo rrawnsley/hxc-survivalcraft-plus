@@ -21,6 +21,12 @@
       "reason": "Earthquake original ground-cast practice has a ten-second award gate; its native area lasts nine seconds. Ordinary qualifying frequency remains unmeasured."
     },
     {
+      "classId": 31,
+      "abilityId": 704101,
+      "assumedUseIntervalMilliseconds": 30000,
+      "reason": "Ursoc Bellow counts actual new attack-power reductions with a thirty-second award gate matching native duration. Refreshes without benefit do not qualify; ordinary frequency remains unmeasured."
+    },
+    {
       "classId": 32,
       "abilityId": 534803,
       "assumedUseIntervalMilliseconds": 10000,

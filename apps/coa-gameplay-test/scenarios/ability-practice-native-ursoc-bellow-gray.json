@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apbellgray",
+      "race": 1,
+      "class": 31,
+      "level": 40,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "faction": 14,
+      "distance": 5,
+      "stationary": true
+    }
+  ],
+  "timeout_ms": 90000,
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.704101",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.704101",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.704101",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.704101",
+      "index": 3,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.704101",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 704101
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "caster",
+      "value": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "view_level",
+      "target": "enemy",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 704101
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.31.704101",
+      "index": 4,
+      "equals": 0
+    }
+  ],
+  "name": "Ability practice: Ursoc Bellow gray",
+  "contract": "Original native Bellow earns one practice use for an actual eligible attack-power reduction, across all targets, with a thirty-second interval and one upcoming rank."
+}

@@ -21,6 +21,7 @@
 #include "AbilityPracticeDevelopmentFixed.h"
 #include "AbilityPracticeDevelopmentHelpers.h"
 #include "AbilityPracticeDevelopmentPeriodic.h"
+#include "AbilityPracticeDevelopmentControl.h"
 #include "AbilityPracticeDevelopmentConjureFixed.h"
 #include "AbilityPracticeDevelopmentPassiveFixed.h"
 #include "AbilityPracticeDevelopmentUtilityFixed.h"
@@ -470,7 +471,7 @@ void CheckCurrentRankPolicies()
 {
     std::uint32_t forecasts = 0;
     std::array<bool, 21> classes{};
-    assert(DevelopmentPacing::Entries.size() == 184);
+    assert(DevelopmentPacing::Entries.size() == 185);
     for (auto const& entry : DevelopmentPacing::Entries)
     {
         classes.at(entry.ClassId - 12) = true;
@@ -1054,6 +1055,8 @@ void WriteTypedRankCases(std::string const& filename)
     std::uint32_t revision = 100;
     for (auto const& entry : DevelopmentPacing::Entries)
     {
+        if (entry.ClassId == 31 && entry.AbilityId == 704101)
+            continue;
         std::array<ProficiencyCap, 80> caps{};
         for (std::size_t index = 0; index < caps.size(); ++index)
             caps[index] = { static_cast<std::uint32_t>(index + 1),
@@ -1102,14 +1105,17 @@ void WriteTypedRankCases(std::string const& filename)
 void WriteDebuffCases(std::string const& path)
 {
     std::ofstream output(path);
-    std::array const ranks{ AbilityRank{ 704101, 1, { 20, 1 } }, AbilityRank{ 707732, 2, { 26, 10 } },
-        AbilityRank{ 707733, 3, { 32, 20 } }, AbilityRank{ 707734, 4, { 40, 40 } },
-        AbilityRank{ 707735, 5, { 48, 60 } } };
-    auto const caps = Development::RankCaps(ranks);
-    AbilityDefinition const definition{ 31, 704101, AbilityKind::Ranked, ranks, caps };
-    std::array const bands{ TrainingBand{ 1, 8100, 810 }, TrainingBand{ 10, 8100, 900 },
-        TrainingBand{ 20, 8100, 1800 } };
-    TrainingPolicy const policy{ bands };
+    auto profile = DevelopmentControl::Profiles.front();
+    auto const entry = std::find_if(DevelopmentPacing::Entries.begin(), DevelopmentPacing::Entries.end(),
+        [](auto const& value) { return value.ClassId == 31 && value.AbilityId == 704101; });
+    assert(entry != DevelopmentPacing::Entries.end() && DevelopmentControl::IsUrsocBellow(profile));
+    profile.Policy = entry->Policy;
+    profile.DefinitionVersion = DevelopmentPacing::DefinitionVersion;
+    auto revised = DevelopmentRankCaps::Build(profile);
+    assert(revised);
+    profile.Definition.Caps = revised->Caps;
+    auto const& definition = profile.Definition;
+    auto const policy = profile.Policy;
     std::uint32_t revision = 3000;
     auto write = [&](std::uint32_t level, std::vector<std::uint32_t> const& known, Progress progress)
     {
@@ -1134,7 +1140,7 @@ void WriteDebuffCases(std::string const& path)
     };
     write(19, {}, { 1, 0 });
     write(20, { 704101 }, { 1, 0 });
-    write(26, { 704101 }, { 9, 7290 });
+    write(26, { 704101 }, { 9, policy.Bands.front().PointsPerLevel - policy.Bands.front().PointsPerUse });
     write(26, { 704101 }, { 10, 0 });
     write(48, { 704101, 707732, 707733, 707734, 707735 }, { 60, 0 });
     assert(output.good());

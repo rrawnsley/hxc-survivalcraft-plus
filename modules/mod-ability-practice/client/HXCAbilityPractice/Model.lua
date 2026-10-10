@@ -647,6 +647,7 @@ function Model.PracticeRules(ability, saved)
     if ability.route == 15 then
         return "Practice by reducing the actual attack power of level-appropriate hostile PvE opponents."
             .. " Each original cast counts once across all affected targets."
+            .. " Counted uses must be at least thirty seconds apart."
             .. " Refreshes without an additional reduction, suppressed effects and gray targets earn no practice."
             .. " Native strength, duration, range and resource cost stay unchanged."
             .. " Prepare one upcoming rank. " .. LearnText(ability.acquisitionSource)
