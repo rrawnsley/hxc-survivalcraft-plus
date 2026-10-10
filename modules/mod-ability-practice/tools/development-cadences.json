@@ -13,6 +13,18 @@
       "abilityId": 707044,
       "assumedUseIntervalMilliseconds": 15000,
       "reason": "Draft interval between new fear opportunities; qualifying frequency needs play measurement."
+    },
+    {
+      "classId": 32,
+      "abilityId": 534803,
+      "assumedUseIntervalMilliseconds": 10000,
+      "reason": "Fire Palm original sigil practice has a ten-second award gate; reviewed rank curves use this interval. Ordinary qualifying frequency remains unmeasured."
+    },
+    {
+      "classId": 32,
+      "abilityId": 805380,
+      "assumedUseIntervalMilliseconds": 10000,
+      "reason": "Arcane Palm original sigil practice has a ten-second award gate; reviewed rank curves use this interval. Ordinary qualifying frequency remains unmeasured."
     }
   ]
 }

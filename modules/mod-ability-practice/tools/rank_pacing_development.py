@@ -8,7 +8,14 @@ from pacing_drafts import build_pacing, load_cadences, load_cast_times, load_dur
 from profile_drafts import verify_provenance
 
 
-def render_header(proposals, root, next_version, expected_profile_count=118):
+def checked_band_fields(band):
+    fields = [band[key] for key in ('firstProficiency', 'pointsPerLevel', 'pointsPerUse')]
+    if any(type(number) is not int or not 1 <= number <= 4294967295 for number in fields) or fields[1] % 30:
+        raise ValueError('Invalid or incompatible pacing band')
+    return fields
+
+
+def render_header(proposals, root, next_version, expected_profile_count=118, previous_header=None):
     if type(next_version) is not int or not 2 <= next_version <= 4294967295:
         raise ValueError('Invalid next development definition version')
     text = (root / 'modules/mod-ability-practice/src/AbilityPracticeDevelopment.h').read_text(encoding='utf-8')
@@ -25,6 +32,24 @@ def render_header(proposals, root, next_version, expected_profile_count=118):
             len(selected) != expected_profile_count or
             {value['classId'] for value in selected} != set(range(12, 33))):
         raise ValueError('Expected reviewed development rank declarations across21 classes')
+    by_id = {(value['classId'], value['abilityId']): value for value in selected}
+    if len(by_id) != len(selected):
+        raise ValueError('Duplicate pacing profile declarations')
+    entry_order = list(by_id)
+    if previous_header is not None:
+        ranks_order = [tuple(map(int, match)) for match in re.findall(
+            r'inline constexpr std::array RanksClass(\d+)Ability(\d+) = \{', previous_header)]
+        bands_order = [tuple(map(int, match)) for match in re.findall(
+            r'inline constexpr std::array BandsClass(\d+)Ability(\d+) = \{', previous_header)]
+        old_entries = [tuple(map(int, match)) for match in re.findall(
+            r'    Entry\{ (\d+), (\d+), RanksClass\1Ability\2, \{ BandsClass\1Ability\2 \} \}', previous_header)]
+        if (len(ranks_order) < 118 or len(set(ranks_order)) != len(ranks_order) or
+                bands_order != ranks_order or len(set(old_entries)) != len(old_entries) or
+                set(old_entries) != set(ranks_order) or not set(ranks_order) <= set(by_id)):
+            raise ValueError('Unsupported existing pacing declaration layout')
+        added = [key for key in by_id if key not in set(ranks_order)]
+        selected = [by_id[key] for key in ranks_order + added]
+        entry_order = old_entries + added
     lines = ['// SPDX-License-Identifier: GPL-2.0-or-later', '',
              '#ifndef ABILITY_PRACTICE_DEVELOPMENT_PACING_H', '#define ABILITY_PRACTICE_DEVELOPMENT_PACING_H', '',
              '#include "AbilityPracticeProfiles.h"', '', 'namespace AbilityPractice::DevelopmentPacing', '{',
@@ -34,12 +59,26 @@ def render_header(proposals, root, next_version, expected_profile_count=118):
              'inline constexpr TrainingPolicy PreviousPolicy{ PreviousBands };', '', 'struct Entry', '{',
              '    std::uint32_t ClassId;', '    std::uint32_t AbilityId;',
              '    std::span<AbilityRank const> ExpectedRanks;', '    TrainingPolicy Policy;', '};', '']
-    entries = []
+    entries = {}
     for value in selected:
         class_id, ability_id = value['classId'], value['abilityId']
         name = 'Class' + str(class_id) + 'Ability' + str(ability_id)
         ranks = value['existingDevelopmentDeclaration']['authoredRanks']
         policy = value['proposedTrainingBands']
+        for band in policy:
+            checked_band_fields(band)
+        if previous_header is not None:
+            prior = re.search(r'inline constexpr std::array Bands' + name + r' = \{(.*?)\};',
+                              previous_header, re.DOTALL)
+            if prior:
+                stored = [dict(zip(('firstProficiency', 'pointsPerLevel', 'pointsPerUse'), map(int, values)))
+                          for values in re.findall(r'TrainingBand\{ (\d+), (\d+), (\d+) \}', prior[1])]
+                if len(stored) == len(policy) and all(
+                        old['firstProficiency'] == new['firstProficiency'] and
+                        old['pointsPerLevel'] * new['pointsPerUse'] ==
+                        new['pointsPerLevel'] * old['pointsPerUse']
+                        for old, new in zip(stored, policy)):
+                    policy = stored
         if len(policy) != len(ranks) - 1 or len(policy) > 64:
             raise ValueError('Invalid pacing band count')
         lines.append('inline constexpr std::array Ranks' + name + ' = {')
@@ -49,17 +88,15 @@ def render_header(proposals, root, next_version, expected_profile_count=118):
                          (',' if index + 1 < len(ranks) else ''))
         lines.extend(['};', 'inline constexpr std::array Bands' + name + ' = {'])
         for index, band in enumerate(policy):
-            fields = [band[key] for key in ('firstProficiency', 'pointsPerLevel', 'pointsPerUse')]
-            if any(type(number) is not int or not 1 <= number <= 4294967295 for number in fields) or (
-                    fields[1] % 30):
-                raise ValueError('Invalid or incompatible pacing band')
+            fields = checked_band_fields(band)
             lines.append('    TrainingBand{ ' + ', '.join(map(str, fields)) + ' }' +
                          (',' if index + 1 < len(policy) else ''))
         lines.extend(['};', ''])
-        entries.append('    Entry{ ' + str(class_id) + ', ' + str(ability_id) + ', Ranks' + name +
-                       ', { Bands' + name + ' } }')
+        entries[(class_id, ability_id)] = ('    Entry{ ' + str(class_id) + ', ' + str(ability_id) + ', Ranks' + name +
+                                         ', { Bands' + name + ' } }')
     lines.append('inline constexpr std::array Entries = {')
-    lines.extend(entry + (',' if index + 1 < len(entries) else '') for index, entry in enumerate(entries))
+    lines.extend(entries[key] + (',' if index + 1 < len(entries) else '')
+                 for index, key in enumerate(entry_order))
     lines.extend(['};', '}', '', '#endif', ''])
     return '\n'.join(lines), {'scope': 'unapproved-isolated-rank-pacing-not-production',
                               'profileCount': len(selected), 'definitionVersion': next_version,
@@ -80,7 +117,7 @@ def validate_profile_additions(proposals, root, definition_version, previous_hea
         raise ValueError('Additive expansion requires new profiles and retains every existing profile')
     previous_proposals = {**proposals, 'proposals': [value for value in proposals['proposals']
         if (value['classId'], value['abilityId']) in previous_ids]}
-    reproduced, _ = render_header(previous_proposals, root, definition_version, len(previous_ids))
+    reproduced, _ = render_header(previous_proposals, root, definition_version, len(previous_ids), previous_header)
     if reproduced != previous_header:
         raise ValueError('Additive expansion cannot change existing ranks, rates, versions or header structure')
     return len(next_ids - previous_ids)
@@ -119,7 +156,7 @@ def main():
         raise ValueError('Additive expansion preserves the existing definition version')
     previous_count = len(re.findall(r'\bEntry\{', previous_header)) if previous_header is not None else 118
     expected_count = len(declared) if args.allow_profile_additions else previous_count
-    header, summary = render_header(proposals, root, args.definition_version, expected_count)
+    header, summary = render_header(proposals, root, args.definition_version, expected_count, previous_header)
     summary['addedProfileCount'] = 0
     if previous_header is not None and header != previous_header:
         if args.allow_profile_additions:

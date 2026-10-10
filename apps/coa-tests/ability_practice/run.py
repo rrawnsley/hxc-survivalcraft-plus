@@ -222,8 +222,73 @@ def check_catalog_candidates(inventory):
     print('PASS: all-class source grouping preserves acquisition references, conflicts and pending review')
 
 
+def check_pacing_generation():
+    sys.path.insert(0, str(ROOT / 'modules/mod-ability-practice/tools'))
+    from rank_pacing_development import render_header, validate_profile_additions
+    text = (ROOT / 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentPacing.h').read_text(encoding='utf-8')
+    proposals = []
+    for match in re.finditer(r'inline constexpr std::array RanksClass(\d+)Ability(\d+) = \{(.*?)\};',
+                            text, re.DOTALL):
+        class_id, ability_id = int(match[1]), int(match[2])
+        ranks = [dict(zip(('spellId', 'rankNumber', 'characterLevel', 'proficiencyRequired'), map(int, values)))
+                 for values in re.findall(r'AbilityRank\{ (\d+), (\d+), \{ (\d+), (\d+) \} \}', match[3])]
+        bands = re.search(r'inline constexpr std::array BandsClass' + match[1] + 'Ability' + match[2] +
+                          r' = \{(.*?)\};', text, re.DOTALL)
+        policy = [dict(zip(('firstProficiency', 'pointsPerLevel', 'pointsPerUse'), map(int, values)))
+                  for values in re.findall(r'TrainingBand\{ (\d+), (\d+), (\d+) \}', bands[1])]
+        proposals.append({'classId': class_id, 'abilityId': ability_id,
+                          'existingDevelopmentDeclaration': {'authoredRanks': ranks}, 'proposedTrainingBands': policy})
+    before = copy.deepcopy(proposals)
+    reproduced, _ = render_header({'proposals': list(reversed(proposals))}, ROOT, 2, len(proposals), text)
+    assert reproduced == text and proposals == before
+    scaled = copy.deepcopy(proposals)
+    for value in scaled:
+        for band in value['proposedTrainingBands']:
+            band['pointsPerLevel'] *= 2
+            band['pointsPerUse'] *= 2
+    reproduced, _ = render_header({'proposals': scaled}, ROOT, 2, len(proposals), text)
+    assert reproduced == text
+    invalid = copy.deepcopy(scaled)
+    invalid[0]['proposedTrainingBands'][0]['pointsPerLevel'] = 0
+    invalid[0]['proposedTrainingBands'][0]['pointsPerUse'] = 0
+    try:
+        render_header({'proposals': invalid}, ROOT, 2, len(proposals), text)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError('Equivalent-scale preservation accepted an invalid zero-rate proposal')
+    added = {'classId': 31, 'abilityId': 9000001,
+             'existingDevelopmentDeclaration': {'authoredRanks': [
+                 {'spellId': 9000001, 'rankNumber': 1, 'characterLevel': 44, 'proficiencyRequired': 1},
+                 {'spellId': 9000002, 'rankNumber': 2, 'characterLevel': 60, 'proficiencyRequired': 10}]},
+             'proposedTrainingBands': [{'firstProficiency': 1, 'pointsPerLevel': 16200, 'pointsPerUse': 270}]}
+    expanded = {'proposals': [added, *reversed(proposals)]}
+    assert validate_profile_additions(expanded, ROOT, 2, text) == 1
+    generated, summary = render_header(expanded, ROOT, 2, len(proposals) + 1, text)
+    assert summary['profileCount'] == len(proposals) + 1 and 'RanksClass31Ability9000001' in generated
+    for field in ('pointsPerUse', 'pointsPerLevel'):
+        changed = copy.deepcopy(expanded)
+        changed['proposals'][1]['proposedTrainingBands'][0][field] += 30
+        try:
+            validate_profile_additions(changed, ROOT, 2, text)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError('Additive expansion changed existing pacing: ' + field)
+    changed = copy.deepcopy(expanded)
+    changed['proposals'][1]['existingDevelopmentDeclaration']['authoredRanks'][0]['characterLevel'] += 1
+    try:
+        validate_profile_additions(changed, ROOT, 2, text)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError('Additive expansion changed existing ranks')
+    print('PASS: pacing generator preserves independent declaration/entry order and rejects changed prior curves')
+
+
 def main():
     check_inventory()
+    check_pacing_generation()
     compiler = shutil.which(os.environ.get('CXX', 'cl.exe' if os.name == 'nt' else 'c++'))
     if not compiler:
         raise RuntimeError('Enable a C++20 compiler for the isolated ability practice harness.')
