@@ -471,7 +471,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `gather_skill` | `actor`, gathering `skill`, `required`: native gathering XP and skill-up attempt. |
 | `set_xp_enabled` | `actor`, boolean `enabled`: fixture the native XP-lock flag. |
 | `set_level` | `actor`, `value` (1..80): fixture level change through native `GiveLevel`, including level-change hooks. |
-| `set_health`, `set_power` | `actor`, `value` within native maximums; `set_power` accepts `power` (default 0). Optional `pet: true` selects the player's current pet. |
+| `set_health`, `set_power` | `actor`, `value` within native maximums; `set_power` accepts a player or creature, `power` (default 0), and `full: true` instead of `value` to fill native maximum power. Optional `pet: true` selects the player's current pet. |
 | `reset_cooldown` | Player `actor`, `spell`: reset that native spell cooldown between independent cases. |
 | `restore_charges` | Player `actor`, `spell`: restore the native charge pool between independent cases. Separate from ordinary cooldowns. |
 | `wait` | `ms`: let the world continue updating for that much game time. |
@@ -878,3 +878,8 @@ the observer's native `CanSeeOrDetect` check; neither metric covers client rende
 `spell_mechanic_resist_chance` observes the native unit mechanic resistance decision for
 a required spell. It checks that spell's effective effect mechanics, including global
 mechanics; it is not a measured random resist frequency or total hit chance.
+
+Native `spell_power_drain_count`, `spell_power_drain_total` and `spell_power_restored_total` metrics require
+`actor`, `spell`, `target` and optional `power` (default mana). They observe completed POWER_DRAIN effects,
+actual target depletion and actual caster restoration after clamping. A full caster can have positive drain
+and zero restoration; energize packet amounts can describe a larger attempted gain.

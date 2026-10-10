@@ -46,6 +46,7 @@ enum AllSpellHook
     ALLSPELLHOOK_ON_CRIT_CHANCE,
     ALLSPELLHOOK_ON_INTERRUPT_DURATION,
     ALLSPELLHOOK_ON_SUCCESSFUL_DISPEL,
+    ALLSPELLHOOK_ON_POWER_DRAIN,
     ALLSPELLHOOK_END
 };
 
@@ -148,6 +149,8 @@ public:
 
     // After caster critical chance, before target resistance and the single native roll.
     virtual void OnSpellCritChance(Spell* /*spell*/, Unit* /*target*/, float& /*chance*/) { }
+
+    virtual void OnSpellPowerDrain(Spell*, Unit*, SpellEffIndex, uint8, uint32, uint32) { }
 };
 
 // Compatibility for old scripts

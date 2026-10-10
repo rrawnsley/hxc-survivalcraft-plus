@@ -114,6 +114,13 @@ void ScriptMgr::OnSpellHitResult(Spell* spell, Unit* target, uint8 missInfo,
         script->OnSpellHitResult(spell, target, missInfo, damage, healing, critical));
 }
 
+void ScriptMgr::OnSpellPowerDrain(Spell* spell, Unit* target, SpellEffIndex effect, uint8 power,
+    uint32 drained, uint32 restored)
+{
+    CALL_ENABLED_HOOKS(AllSpellScript, ALLSPELLHOOK_ON_POWER_DRAIN,
+        script->OnSpellPowerDrain(spell, target, effect, power, drained, restored));
+}
+
 void ScriptMgr::OnSpellSuccessfulInterrupt(Spell* spell, Unit* target)
 {
     CALL_ENABLED_HOOKS(AllSpellScript, ALLSPELLHOOK_ON_SUCCESSFUL_INTERRUPT,

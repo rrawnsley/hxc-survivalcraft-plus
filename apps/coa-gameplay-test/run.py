@@ -35,6 +35,7 @@ METRICS = {
     'cast_remaining_ms', 'cast_pushback_ms',
     'melee_damage_count', 'melee_damage_total',
     'pet_power', 'pet_max_power', 'spell_energize_count', 'spell_energize_total',
+    'spell_power_drain_count', 'spell_power_drain_total', 'spell_power_restored_total',
     'xp', 'next_level_xp', 'skill_value', 'skill_maximum', 'lfg_dungeon_disabled', 'map_id',
     'position_x', 'position_y', 'position_z',
     'view_level', 'sent_level', 'sent_max_health', 'creature_query_rank', 'quest_level', 'quest_xp',
@@ -214,7 +215,7 @@ ACTIONS = {
     'set_health': ({'actor', 'value'}, {'actor', 'value', 'pet', 'maximum'}),
     'reset_cooldown': ({'actor', 'spell'}, {'actor', 'spell'}),
     'restore_charges': ({'actor', 'spell'}, {'actor', 'spell'}),
-    'set_power': ({'actor', 'value'}, {'actor', 'value', 'power', 'pet'}),
+    'set_power': ({'actor'}, {'actor', 'value', 'power', 'pet', 'full'}),
     'teleport': ({'actor', 'map', 'x', 'y', 'z'}, {'actor', 'map', 'x', 'y', 'z', 'o'}),
     'quest_accept': ({'actor', 'quest'}, {'actor', 'quest', 'entry', 'gameobject'}),
     'quest_open': ({'actor', 'quest', 'entry'}, {'actor', 'quest', 'entry'}),
@@ -345,7 +346,7 @@ def validate(scenario):
                 number(step['language'], f'{where}.language', 0, 2**32 - 1, True)
         if 'actor' in step:
             require(step['actor'] in actor_ids, f'{where}: unknown actor')
-            require(action in {'snapshot', 'assert', 'set_health', 'cast', 'attack_owned_creature'}
+            require(action in {'snapshot', 'assert', 'set_health', 'set_power', 'cast', 'attack_owned_creature'}
                     or step['actor'] in player_ids,
                     f'{where}: action needs a player')
             if action == 'cast' and 'creature_triggered' in step:
@@ -515,12 +516,17 @@ def validate(scenario):
             require(isinstance(step['source'], str) and step['source'].strip(), f'{where}: setting needs a source')
             number(step['index'], f'{where}.index', 0, 255, True)
             number(step['value'], f'{where}.value', 0, 2**32 - 1, True)
+        if action == 'set_power':
+            require(type(step.get('full', False)) is bool, f'{where}: full must be boolean')
+            require(('value' in step) != step.get('full', False), f'{where}: choose value or full power')
         if action == 'set_health' and 'maximum' in step:
             require(step['actor'] in player_ids, f'{where}: maximum health fixture needs a player or their pet')
             number(step['maximum'], f'{where}.maximum', 1, 2**31 - 1, True)
             require(step['value'] <= step['maximum'], f'{where}: health exceeds fixture maximum')
         if action in {'snapshot', 'assert'}:
             metric = step['metric']
+            if metric in {'spell_power_drain_count', 'spell_power_drain_total', 'spell_power_restored_total'}:
+                require('spell' in step and 'target' in step, f'{where}: resource metric needs spell and target')
             if metric == 'victim':
                 require('target' in step, f'{where}: victim metric requires a target')
             if 'periodic' in step:

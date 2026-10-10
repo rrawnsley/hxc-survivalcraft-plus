@@ -15,6 +15,35 @@ import run
 
 
 class RunnerTests(unittest.TestCase):
+    def test_power_fixture_value_or_full_for_players_and_creatures(self):
+        for actor in ('caster', 'target'):
+            for option in ({'value': 0}, {'value': 10}, {'full': True}):
+                scenario = copy.deepcopy(self.scenario)
+                scenario['steps'].append({'action': 'set_power', 'actor': actor, **option})
+                self.assertIs(run.validate(scenario), scenario)
+        for option in ({}, {'full': False}, {'full': 1}, {'full': 'true'}, {'full': True, 'value': 0}):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append({'action': 'set_power', 'actor': 'caster', **option})
+            with self.subTest(option=option), self.assertRaises(ValueError):
+                run.validate(scenario)
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].append({'action': 'set_power', 'actor': 'target', 'value': 0, 'pet': True})
+        with self.assertRaises(ValueError):
+            run.validate(scenario)
+
+    def test_power_drain_observation_requires_spell_and_target(self):
+        for metric in ('spell_power_drain_count', 'spell_power_drain_total', 'spell_power_restored_total'):
+            step = {'action': 'assert', 'actor': 'caster', 'metric': metric,
+                    'spell': 807818, 'target': 'target', 'power': 0, 'equals': 0}
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append(step)
+            self.assertIs(run.validate(scenario), scenario)
+            for missing in ('spell', 'target'):
+                scenario = copy.deepcopy(self.scenario)
+                scenario['steps'].append({k: v for k, v in step.items() if k != missing})
+                with self.subTest(metric=metric, missing=missing), self.assertRaises(ValueError):
+                    run.validate(scenario)
+
     def test_native_mechanic_resistance_requires_spell(self):
         step = {'action': 'assert', 'actor': 'caster', 'metric': 'spell_mechanic_resist_chance',
                 'spell': 122, 'equals': 20}

@@ -1694,6 +1694,7 @@ void Spell::EffectPowerDrain(SpellEffIndex effIndex)
     int32 newDamage = -(unitTarget->ModifyPower(PowerType, -int32(power)));
 
     float gainMultiplier = 0.0f;
+    uint32 restored = 0;
 
     // Don`t restore from self drain
     if (m_caster != unitTarget)
@@ -1702,9 +1703,13 @@ void Spell::EffectPowerDrain(SpellEffIndex effIndex)
 
         int32 gain = int32(newDamage * gainMultiplier);
 
+        uint32 const before = m_caster->GetPower(PowerType);
         m_caster->EnergizeBySpell(m_caster, m_spellInfo->Id, gain, PowerType);
+        uint32 const after = m_caster->GetPower(PowerType);
+        restored = after > before ? after - before : 0;
     }
     ExecuteLogEffectTakeTargetPower(effIndex, unitTarget, PowerType, newDamage, gainMultiplier);
+    sScriptMgr->OnSpellPowerDrain(this, unitTarget, effIndex, uint8(PowerType), uint32(newDamage), restored);
 }
 
 void Spell::EffectSendEvent(SpellEffIndex effIndex)

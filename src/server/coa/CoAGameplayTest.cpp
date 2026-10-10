@@ -243,6 +243,14 @@ struct CaseOutcome
     CaseAccounts accounts;
 };
 
+struct PowerDrainEvent
+{
+    ObjectGuid Target;
+    uint32 Power;
+    uint32 Drained;
+    uint32 Restored;
+};
+
 class ProcCounter
 {
 public:
@@ -250,6 +258,7 @@ public:
     {
         _counts.clear();
         _casts.clear();
+        _drains.clear();
         _enabled = true;
     }
 
@@ -277,22 +286,45 @@ public:
         return itr == _casts.end() ? 0 : itr->second;
     }
 
+    static void RecordDrain(ObjectGuid caster, uint32 spell, PowerDrainEvent event)
+    {
+        if (_enabled)
+            _drains[{ caster, spell }].push_back(event);
+    }
+
+    static uint64 DrainTotal(ObjectGuid caster, ObjectGuid target, uint32 spell, uint32 power,
+        std::string const& metric)
+    {
+        auto const found = _drains.find({ caster, spell });
+        if (found == _drains.end())
+            return 0;
+        uint64 total = 0;
+        for (auto const& event : found->second)
+            if (event.Target == target && event.Power == power)
+                total += metric == "spell_power_drain_count" ? 1 :
+                    metric == "spell_power_drain_total" ? event.Drained : event.Restored;
+        return total;
+    }
+
     static void Forget(std::set<ObjectGuid> const& units)
     {
         auto const owned = [&units](auto const& entry) { return units.contains(entry.first.first); };
         std::erase_if(_counts, owned);
         std::erase_if(_casts, owned);
+        std::erase_if(_drains, owned);
     }
 
 private:
     static bool _enabled;
     static std::map<std::pair<ObjectGuid, uint32>, uint32> _counts;
     static std::map<std::pair<ObjectGuid, uint32>, uint32> _casts;
+    static std::map<std::pair<ObjectGuid, uint32>, std::vector<PowerDrainEvent>> _drains;
 };
 
 bool ProcCounter::_enabled = false;
 std::map<std::pair<ObjectGuid, uint32>, uint32> ProcCounter::_counts;
 std::map<std::pair<ObjectGuid, uint32>, uint32> ProcCounter::_casts;
+std::map<std::pair<ObjectGuid, uint32>, std::vector<PowerDrainEvent>> ProcCounter::_drains;
 
 enum class ActorStage
 {
@@ -1971,6 +2003,15 @@ private:
             Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown spell in metric");
             return ProcCounter::CastCount(unit->GetGUID(), spell);
         }
+        if (metric == "spell_power_drain_count" || metric == "spell_power_drain_total" ||
+            metric == "spell_power_restored_total")
+        {
+            Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown spell in resource metric");
+            uint32 const power = step.get<uint32>("power", POWER_MANA);
+            Require(power < MAX_POWERS, "Invalid resource power index");
+            return ProcCounter::DrainTotal(unit->GetGUID(), GetUnit(step.get<std::string>("target"))->GetGUID(),
+                spell, power, metric);
+        }
         if (metric == "spell_proc_count")
         {
             Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown spell in metric");
@@ -3618,6 +3659,23 @@ private:
             record.put("target_entry", creatures.front()->GetEntry());
             return;
         }
+        if (action == "set_power")
+        {
+            Unit* target = GetUnit(id);
+            if (step.get<bool>("pet", false))
+            {
+                Require(target->IsPlayer(), "Pet power fixture needs a player");
+                target = target->ToPlayer()->GetPet();
+                Require(target != nullptr, "Power fixture needs a current pet");
+            }
+            uint32 const power = step.get<uint32>("power", POWER_MANA);
+            Require(power < MAX_POWERS, "Invalid power index");
+            uint32 const value = step.get<bool>("full", false) ? target->GetMaxPower(Powers(power)) :
+                step.get<uint32>("value");
+            Require(value <= target->GetMaxPower(Powers(power)), "Power fixture exceeds maximum");
+            target->SetPower(Powers(power), value);
+            return;
+        }
         if (action == "set_health" && !_actors.count(id))
         {
             Unit* creature = GetUnit(id);
@@ -4422,20 +4480,6 @@ private:
             }
             Require(health > 0 && health <= target->GetMaxHealth(), "Health fixture outside valid range");
             target->SetHealth(health);
-        }
-        else if (action == "set_power")
-        {
-            Unit* target = player;
-            if (step.get<bool>("pet", false))
-            {
-                target = player->GetPet();
-                Require(target != nullptr, "Power fixture needs a current pet");
-            }
-            uint32 power = step.get<uint32>("power", POWER_MANA);
-            Require(power < MAX_POWERS, "Invalid power index");
-            uint32 value = step.get<uint32>("value");
-            Require(value <= target->GetMaxPower(Powers(power)), "Power fixture exceeds maximum");
-            target->SetPower(Powers(power), value);
         }
         else if (action == "teleport")
         {
@@ -5368,7 +5412,16 @@ private:
 class CoAGameplayTestProcCounter final : public AllSpellScript
 {
 public:
-    CoAGameplayTestProcCounter() : AllSpellScript("CoAGameplayTestProcCounter", { ALLSPELLHOOK_ON_CAST }) { }
+    CoAGameplayTestProcCounter() : AllSpellScript("CoAGameplayTestProcCounter",
+        { ALLSPELLHOOK_ON_CAST, ALLSPELLHOOK_ON_POWER_DRAIN }) { }
+
+    void OnSpellPowerDrain(Spell* spell, Unit* target, SpellEffIndex, uint8 power,
+        uint32 drained, uint32 restored) override
+    {
+        if (spell && spell->GetCaster() && target)
+            ProcCounter::RecordDrain(spell->GetCaster()->GetGUID(), spell->GetSpellInfo()->Id,
+                { target->GetGUID(), power, drained, restored });
+    }
 
     void OnSpellCast(Spell* spell, Unit* caster, SpellInfo const* info, bool) override
     {
