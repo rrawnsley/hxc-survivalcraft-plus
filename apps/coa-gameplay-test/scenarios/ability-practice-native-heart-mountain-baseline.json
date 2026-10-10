@@ -1,0 +1,341 @@
+{
+  "schema": 1,
+  "name": "Ability practice native: Heart of the Mountain threat multiplier and removal",
+  "contract": "Single native class/trainer level14 Heart of the Mountain807734 has raw spell level0. Native self aura adds150percent threat, yielding2.5 times actual damage plus Lightning Bolt403 native1point spell-level threat. Plain/restored casts yield1.0 times damage plus1point. Ratio bounds allow that independently grounded1point with at least10damage. Permanent duration, cancellation, zero damage-taken modifier and unknown saved progress checked; no practice profile.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apheartbase",
+      "race": 1,
+      "class": 31,
+      "level": 14,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "plain",
+      "owner": "caster",
+      "entry": 36,
+      "level": 14,
+      "health": 1000000,
+      "faction": 14,
+      "distance": 15,
+      "stationary": true,
+      "reaction": 0
+    },
+    {
+      "id": "boosted",
+      "owner": "caster",
+      "entry": 36,
+      "level": 14,
+      "health": 1000000,
+      "faction": 14,
+      "distance": 16,
+      "stationary": true,
+      "reaction": 0
+    },
+    {
+      "id": "restored",
+      "owner": "caster",
+      "entry": 36,
+      "level": 14,
+      "health": 1000000,
+      "faction": 14,
+      "distance": 17,
+      "stationary": true,
+      "reaction": 0
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 807734
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 403
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.807734",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.807734",
+      "index": 1,
+      "value": 999
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.807734",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.807734",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.807734",
+      "index": 4,
+      "value": 101
+    },
+    {
+      "action": "snapshot",
+      "actor": "plain",
+      "metric": "health",
+      "save_as": "plain_health"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 403,
+      "target": "plain"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 403,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "health",
+      "relative_to": "plain_health",
+      "max": -10
+    },
+    {
+      "action": "snapshot",
+      "actor": "plain",
+      "metric": "health",
+      "relative_to": "plain_health",
+      "save_as": "plain_damage"
+    },
+    {
+      "action": "assert",
+      "actor": "plain",
+      "metric": "threat_value",
+      "target": "caster",
+      "ratio_to": "plain_damage",
+      "min": -1.1,
+      "max": -1.0
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 807734,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 807734,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 807734,
+      "effect": 0,
+      "equals": 150
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_amount",
+      "spell": 807734,
+      "effect": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_duration_ms",
+      "spell": 807734,
+      "equals": -1
+    },
+    {
+      "action": "snapshot",
+      "actor": "boosted",
+      "metric": "health",
+      "save_as": "boosted_health"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 403,
+      "target": "boosted"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 403,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "boosted",
+      "metric": "health",
+      "relative_to": "boosted_health",
+      "max": -10
+    },
+    {
+      "action": "snapshot",
+      "actor": "boosted",
+      "metric": "health",
+      "relative_to": "boosted_health",
+      "save_as": "boosted_damage"
+    },
+    {
+      "action": "assert",
+      "actor": "boosted",
+      "metric": "threat_value",
+      "target": "caster",
+      "ratio_to": "boosted_damage",
+      "min": -2.6,
+      "max": -2.5
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "caster",
+      "spell": 807734
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 807734,
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "restored",
+      "metric": "health",
+      "save_as": "restored_health"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 403,
+      "target": "restored"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 403,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "restored",
+      "metric": "health",
+      "relative_to": "restored_health",
+      "max": -10
+    },
+    {
+      "action": "snapshot",
+      "actor": "restored",
+      "metric": "health",
+      "relative_to": "restored_health",
+      "save_as": "restored_damage"
+    },
+    {
+      "action": "assert",
+      "actor": "restored",
+      "metric": "threat_value",
+      "target": "caster",
+      "ratio_to": "restored_damage",
+      "min": -1.1,
+      "max": -1.0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.31.807734",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.31.807734",
+      "index": 1,
+      "equals": 999
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.31.807734",
+      "index": 2,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.31.807734",
+      "index": 3,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.31.807734",
+      "index": 4,
+      "equals": 101
+    }
+  ]
+}
