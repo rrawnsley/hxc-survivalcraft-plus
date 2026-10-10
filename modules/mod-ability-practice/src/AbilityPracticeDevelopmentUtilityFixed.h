@@ -31,6 +31,8 @@ inline constexpr std::array Class32Ability520269 = { AbilityRank{ 520269, 1, { 2
 inline constexpr std::array Class32Ability800995 = { AbilityRank{ 800995, 1, { 18, 1 } } };
 inline constexpr std::array Class32Ability803679 = { AbilityRank{ 803679, 1, { 28, 1 } } };
 
+inline constexpr std::array LeylineAdjustment = { AbilityRank{ 561265, 1, { 60, 1 } } };
+
 inline constexpr std::array EarthPalm = { AbilityRank{ 805382, 1, { 8, 1 } } };
 inline constexpr std::array WindPalm = { AbilityRank{ 807013, 1, { 40, 1 } } };
 
@@ -84,6 +86,8 @@ inline constexpr std::array MeltLock = { AbilityRank{ 804662, 1, { 16, 1 } } };
 inline constexpr std::array TinkerPickLock = { AbilityRank{ 804154, 1, { 14, 1 } } };
 
 inline constexpr std::array Profiles = {
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 32, 561265, AbilityKind::Fixed, LeylineAdjustment, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 32, 805382, AbilityKind::Fixed, EarthPalm, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -223,6 +227,8 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 32, 561265, { 130, 6, 0 }, { 57, 1, 0 }, {}, { 0, 4, 0 }, {},
+        std::array<std::int32_t, 3>{ 0, 0, 0 }, std::array<std::int32_t, 3>{ 99, 0, -1 } },
     Mechanic{ 32, 805382, { 6, 0, 0 }, { 1, 0, 0 }, {}, { 42, 0, 0 }, { 807824, 0, 0 },
         std::array<std::int32_t, 3>{ 0, 0, 0 }, std::array<std::int32_t, 3>{ 0, 0, 0 } },
     Mechanic{ 32, 807013, { 6, 0, 0 }, { 1, 0, 0 }, {}, { 42, 0, 0 }, { 807826, 0, 0 },

@@ -688,7 +688,10 @@ def reachable_sources(name, source, root):
 
 
 def compiler_problem(source, environment):
-    if 'VCToolsInstallDir' not in source or environment.get('VCToolsInstallDir'):
+    msvc_directory = environment.get('VCToolsInstallDir')
+    if WINDOWS:
+        msvc_directory = msvc_directory or environment.get('VCTOOLSINSTALLDIR')
+    if 'VCToolsInstallDir' not in source or msvc_directory:
         return None
     fallback = MSVC_LOOKUP if WINDOWS else PORTABLE_COMPILER
     if MSVC_REQUIREMENT.search(source) and not fallback.search(source):

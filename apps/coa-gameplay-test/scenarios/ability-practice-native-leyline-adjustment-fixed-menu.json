@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Fixed Leyline Adjustment native level60 menu",
+  "contract": "One native class-grant level60 rank, no practice cost or early teaching. Native30second threat redirect and cleanup checked separately; actual client pixels separate.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "learned",
+      "name": "Apleymenu",
+      "race": 1,
+      "class": 32,
+      "level": 60
+    },
+    {
+      "id": "future",
+      "name": "Apleynext",
+      "race": 1,
+      "class": 32,
+      "level": 59
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "learned",
+      "spell": 561265
+    },
+    {
+      "action": "whisper",
+      "actor": "learned",
+      "to": "Apleymenu",
+      "text": "HXAP\tHELLO|6",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "whisper_contains",
+      "from": "learned",
+      "text": "HXAP\tB|6|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "whisper_contains",
+      "from": "learned",
+      "text": "|561265|561265|1|1|0|1|0|6",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "whisper_contains",
+      "from": "learned",
+      "text": "|561265|1|60|1|1|0|0",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "whisper_contains",
+      "from": "learned",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "learned",
+      "metric": "knows_spell",
+      "spell": 561265,
+      "equals": 1
+    },
+    {
+      "action": "whisper",
+      "actor": "future",
+      "to": "Apleynext",
+      "text": "HXAP\tHELLO|6",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "whisper_contains",
+      "from": "future",
+      "text": "HXAP\tB|6|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "whisper_contains",
+      "from": "future",
+      "text": "|561265|1|60|1|5|0|0",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "whisper_contains",
+      "from": "future",
+      "text": "|561265|1|60|1|5|0|0",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "whisper_contains",
+      "from": "future",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "future",
+      "metric": "knows_spell",
+      "spell": 561265,
+      "equals": 0
+    }
+  ]
+}

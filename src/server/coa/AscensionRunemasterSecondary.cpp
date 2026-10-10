@@ -7,6 +7,7 @@
 #include "SpellAuras.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
+#include "ThreatManager.h"
 #include <algorithm>
 #include <limits>
 
@@ -14,6 +15,7 @@ namespace
 {
 enum RunemasterSecondarySpells : uint32
 {
+    SPELL_LEYLINE_ADJUSTMENT = 561265,
     SPELL_RUNEBLADE = 707141,
     SPELL_FISTS_OF_POWER = 92153,
     SPELL_FISTS_AMOUNT = 500462,
@@ -104,6 +106,8 @@ public:
             SyncUnleashed(player);
         if (aura->GetCasterGUID() != player->GetGUID())
             return;
+        if (root == SPELL_LEYLINE_ADJUSTMENT)
+            player->GetThreatMgr().UnregisterRedirectThreat(SPELL_LEYLINE_ADJUSTMENT);
         if (root == SPELL_RIFTBLADE)
             player->RemoveAurasDueToSpell(SPELL_RIFTBLADE_COUNTER, player->GetGUID());
         if (root == SPELL_SPELLFIRE_RUNES)

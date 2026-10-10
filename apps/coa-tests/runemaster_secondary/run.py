@@ -21,7 +21,7 @@ def fixture():
                                          'enum SpellCustomAttributes') + ';')
     code = code.replace('struct Unit;', '''
 using AuraType=uint32;
-constexpr uint32 CLASS_SPIRIT_MAGE=32, EFFECT_2=2, UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE=7,
+constexpr uint32 CLASS_SPIRIT_MAGE=32, EFFECT_1=1, EFFECT_2=2, UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE=7,
     BASE_ATTACK=0, OFF_ATTACK=1, SPELLVALUE_MELEE_ATTACK_TYPE=10, SPELL_DIRECT_DAMAGE=1,
     SPELL_SCHOOL_MASK_MAGIC=126, SPELL_ATTR2_CANT_CRIT=1,
     SPELL_ATTR3_IGNORE_CASTER_MODIFIERS=2, SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS=4,
@@ -42,7 +42,7 @@ struct Unit;''', 1)
     int32 duration=3000;
     int32 GetDuration() const { return duration; }
     void SetDuration(int32 value) { duration=value; }
-    bool ModStackAmount(int32 num) { stacks+=num; duration=3000; return false; }
+    bool ModStackAmount(int32 num) { stacks=uint8(int32(stacks)+num); duration=3000; return false; }
     uint8 stacks=1;''')
     code = code.replace('struct AuraEffect {};', '''struct AuraEffect
     {
@@ -61,7 +61,20 @@ struct CustomSpellValues
 };
 struct Unit
 {''')
-    code = code.replace('uint32 guid=1;', '''float attackPower=1000;
+    code = code.replace('uint32 guid=1;', '''
+    struct FixtureThreat
+    {
+        std::map<uint32,uint32> redirects;
+        void UnregisterRedirectThreat(uint32 spell) { redirects.erase(spell); }
+    } threat;
+    auto& GetThreatMgr() { return threat; }
+    std::map<std::pair<std::pair<uint32,uint32>,uint8>,AuraEffect> effects;
+    AuraEffect const* GetAuraEffect(uint32 spell,uint8 index,uint32 owner)
+    {
+        auto it=effects.find({{spell,owner},index});
+        return GetAura(spell,owner) && it!=effects.end()?&it->second:nullptr;
+    }
+    float attackPower=1000;
     float GetTotalAttackPowerValue(uint32) const { return attackPower; }
     std::map<uint32,AuraApplication> appStore;
     std::map<uint32,AuraApplication*> applications;
@@ -145,6 +158,19 @@ int main()
     manager.rows[712298].Id=712298;
     manager.rows[802645].Effects[2].value=20;
     runemaster_secondary_auras auras;
+    player.threat.redirects={{561265,100},{34477,50}};
+    Aura redirect; redirect.id=561265; redirect.caster=other.guid;
+    AuraApplication redirectApplication{&redirect};
+    auras.OnAuraRemove(&player,&redirectApplication,1);
+    assert(player.threat.redirects.size()==2);
+    redirect.caster=player.guid; player.cls=30;
+    auras.OnAuraRemove(&player,&redirectApplication,1);
+    assert(player.threat.redirects.size()==2);
+    player.cls=32; auras.OnAuraRemove(&player,&redirectApplication,1);
+    assert(!player.threat.redirects.contains(561265) && player.threat.redirects.at(34477)==50);
+    auras.OnAuraRemove(&player,&redirectApplication,1);
+    assert(player.threat.redirects.size()==1);
+
     auto* passive=player.AddAura(804561,&player); auras.OnAuraApply(&player,passive);
     assert(!player.HasAura(807377,1));
     auto* tattoo=player.AddAura(803749,&player); auras.OnAuraApply(&player,tattoo);
@@ -156,6 +182,14 @@ int main()
     auras.ModifySpellEffectBaseValue(&player,&mana,0,value); assert(value==480);
     player.RemoveAurasDueToSpell(807839,1); value=100;
     auras.ModifySpellEffectBaseValue(&player,&mana,0,value); assert(value==400);
+    SpellInfo leystone; leystone.Id=520866;
+    player.AddAura(300581,&player); player.effects[{{300581,player.guid},1}].amount=25;
+    value=100; auras.ModifySpellEffectBaseValue(&player,&leystone,0,value); assert(value==100);
+    player.AddAura(807839,&player);
+    value=100; auras.ModifySpellEffectBaseValue(&player,&leystone,0,value); assert(value==125);
+    player.RemoveAurasDueToSpell(300581,player.guid);
+    value=100; auras.ModifySpellEffectBaseValue(&player,&leystone,0,value); assert(value==100);
+    player.RemoveAurasDueToSpell(807839,player.guid);
     player.AddAura(92154,&player); player.AddAura(801511,&player);
     runemaster_secondary_casts casts;
     Spell spell; spell.caster=&player; spell.info.Id=707148;
@@ -234,7 +268,7 @@ int main()
     assert rows[807819][95] == 3 and rows[807819][98] == 3000 and rows[808020][95] == 27
     assert rows[653211][35] == 30 and rows[653211][95] == 42 and rows[653211][116] == 653210
     assert rows[653210][95] == 3 and rows[653212][71] == 2
-    print('PASS: offhand copies, charge restoration, third-cast mana, Water scaling, Spellfire consumption, tattoo ownership, Sigil, Fire Engraving')
+    print('PASS: offhand copies, charge restoration, third-cast mana, Water scaling, Spellfire consumption, tattoo ownership, Sigil, Fire Engraving, Leyline ownership and redirect cleanup')
 
 
 if __name__ == '__main__':

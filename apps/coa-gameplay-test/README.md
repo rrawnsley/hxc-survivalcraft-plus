@@ -530,6 +530,9 @@ optional `table`), `pool_variant_count`, `pool_retired_item_count`, `pool_row_co
 tier tokens a cache may pay, the highest tier among them, and whether one named token is among them.
 Boolean metrics use 0/1. Spell/aura metrics require `spell`; `item_count` requires `item`.
 `spell_family_flags` reads one word of the effective server spell's family flags; `index` is 0..2 (default 0).
+`has_threat_redirects` reads whether the actor has registered native threat redirects.
+`threat_value` requires `target` and reads that target's current threat on the actor's threat list.
+Both metrics observe native state without executing combat or changing threat.
 `stunned` reads the unit's native stun state, including changes caused by aura removal.
 `carried_item_count` sums the stack counts of equipped items (bags included), the backpack and the bags' contents.
 `aura_positive` reads the applied aura's beneficial flag; check `aura` separately to distinguish absence from a debuff.

@@ -55,6 +55,7 @@
 #include "SpellMgr.h"
 #include "StringFormat.h"
 #include "TemporarySummon.h"
+#include "ThreatManager.h"
 #include "Timer.h"
 #include "TypeContainerVisitor.h"
 #include "UpdateData.h"
@@ -1945,6 +1946,10 @@ private:
             Require(hand < MAX_ATTACK, "Invalid attack hand");
             return unit->GetFloatValue(static_cast<uint16>(UNIT_FIELD_BASEATTACKTIME) + hand);
         }
+        if (metric == "has_threat_redirects")
+            return unit->GetThreatMgr().HasRedirects();
+        if (metric == "threat_value")
+            return unit->GetThreatMgr().GetThreat(GetUnit(step.get<std::string>("target")));
         if (metric == "run_speed_rate")
             return unit->GetSpeedRate(MOVE_RUN);
         if (metric == "spell_mechanic_resist_chance")

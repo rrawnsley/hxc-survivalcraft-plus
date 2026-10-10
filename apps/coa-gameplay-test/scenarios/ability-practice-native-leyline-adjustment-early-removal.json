@@ -1,0 +1,257 @@
+{
+  "schema": 1,
+  "name": "Ability practice native: Leyline Adjustment stops redirecting after early aura removal",
+  "contract": [
+    "Native561265 description redirects generated threat to a targeted party member for $d; DBC duration9 is30000ms and effect130 has100percent. Native base/intro60 and self dummy aura retained.",
+    "Normal QA direct Magic20623 damage creates threat only on the selected grouped ally during the aura. Redirect must clear on expiration/removal; later damage generates threat for the original caster. Native30seconds/100percent retained; Fixed utility classification preserves native function and grants no practice.",
+    "Unsupported saved record1/999/1/100/101 is retained exactly after native casts, damage and cleanup."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "rm",
+      "name": "Apleycancel",
+      "race": 1,
+      "class": 32,
+      "level": 80,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "ally",
+      "name": "Apleycally",
+      "race": 1,
+      "class": 32,
+      "level": 80
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "rm",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.561265",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.561265",
+      "index": 1,
+      "value": 999
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.561265",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.561265",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.561265",
+      "index": 4,
+      "value": 101
+    },
+    {
+      "action": "group",
+      "actor": "rm",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 20623
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 561265
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "has_threat_redirects",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 561265,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 561265,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "has_threat_redirects",
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 20623,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_total",
+      "spell": 20623,
+      "target": "dummy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "threat_value",
+      "target": "ally",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "threat_value",
+      "target": "rm",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "dummy",
+      "metric": "threat_value",
+      "target": "ally",
+      "save_as": "ally_threat"
+    },
+    {
+      "action": "set_aura",
+      "actor": "rm",
+      "spell": 561265,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "aura",
+      "spell": 561265,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "has_threat_redirects",
+      "equals": 0,
+      "label": "Early removal clears only this native redirect"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "rm",
+      "spell": 20623
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 20623,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "spell_damage_count",
+      "spell": 20623,
+      "target": "dummy",
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "threat_value",
+      "target": "rm",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "dummy",
+      "metric": "threat_value",
+      "target": "ally",
+      "relative_to": "ally_threat",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.561265",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.561265",
+      "index": 1,
+      "equals": 999
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.561265",
+      "index": 2,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.561265",
+      "index": 3,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.561265",
+      "index": 4,
+      "equals": 101
+    }
+  ]
+}

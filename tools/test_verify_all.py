@@ -394,6 +394,16 @@ class HarnessClassificationTests(WorkspaceTest):
         self.assertIn('MSVC', entry['reason'])
         self.assertEqual(self.classify(workspace, source, environment={'VCToolsInstallDir': 'C:/VC'})['status'], 'run')
 
+    def test_windows_uppercase_msvc_environment_is_available(self):
+        workspace = self.workspace()
+        source = "import os\ncompiler = os.environ['VCToolsInstallDir'] + '/cl.exe'\n"
+        with patch.object(verify_all, 'WINDOWS', True):
+            entry = self.classify(workspace, source, environment={'VCTOOLSINSTALLDIR': 'C:/VC'})
+        self.assertEqual(entry['status'], 'run')
+        with patch.object(verify_all, 'WINDOWS', False):
+            entry = self.classify(workspace, source, environment={'VCTOOLSINSTALLDIR': 'C:/VC'})
+        self.assertEqual(entry['status'], 'unavailable')
+
     def test_scripts_that_load_an_msvc_only_sibling_harness_are_unavailable_too(self):
         workspace = self.workspace()
         write(workspace.root / 'apps/coa-tests/helper/run.py', "import os\nos.environ['VCToolsInstallDir']\n")

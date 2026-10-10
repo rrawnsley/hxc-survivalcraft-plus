@@ -97,7 +97,7 @@ METRICS = {
     'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total',
     'pet_aura_amount', 'pet_aura_amplitude_ms', 'pet_max_health', 'pet_attack_power', 'pet_run_speed_rate',
     'distance', 'spell_proc_count', 'spell_proc_chance', 'aura_proc_rate', 'temporary_spell_replacement',
-    'spell_family_flags',
+    'spell_family_flags', 'has_threat_redirects', 'threat_value',
     'creature_loot_quality_rate', 'equipped_gear_loot_rate',
     'quest_menu_items', 'quest_menu_has', 'player_setting', 'server_packets', 'server_packet_u32', 'server_packet_contains',
     'player_class', 'cached_class', 'at_login_flag', 'wildcard_starter_spells_known', 'action_bar_unknown_spells',
@@ -611,7 +611,7 @@ def validate(scenario):
                 for key in ('incoming', 'heal'):
                     if key in step:
                         require(type(step[key]) is bool, f'{where}: {key} must be boolean')
-            if metric == 'distance':
+            if metric in {'distance', 'threat_value'}:
                 require('target' in step, f'{where}: {metric} metric needs target')
             if metric == 'stat':
                 number(step.get('stat'), f'{where}.stat', 0, 4, True)

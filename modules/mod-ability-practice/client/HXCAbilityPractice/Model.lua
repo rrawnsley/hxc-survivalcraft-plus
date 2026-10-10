@@ -656,6 +656,12 @@ function Model.PracticeRules(ability, saved)
             .. " Prepare one upcoming mastery milestone. " .. LearnText(ability.acquisitionSource)
     end
     if Model.IsFixed(ability) then
+        if ability.abilityId == 561265 then
+            return "Leyline Adjustment has one native rank, learned at character level 60, and no practice levels. "
+                .. LearnText(ability.acquisitionSource)
+                .. " Redirect 100% of the threat you generate to your targeted party member for thirty seconds."
+                .. " Expiration or early removal ends the redirect; using it earns no practice."
+        end
         if ability.abilityId == 805382 then
             return "Earth Palm Sigil has one native rank and no practice levels. " .. LearnText(ability.acquisitionSource)
                 .. " Its next direct Magic hit triggers a four-second enemy stun."

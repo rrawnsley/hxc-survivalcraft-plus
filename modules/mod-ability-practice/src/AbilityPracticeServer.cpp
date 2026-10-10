@@ -1727,6 +1727,24 @@ bool MatchesUtilityFixedRankMechanic(std::uint32_t classId, std::uint32_t spellI
                     return false;
         }
     }
+    if (classId == 32 && spellId == 561265)
+    {
+        auto const scripts = sObjectMgr->GetSpellScriptsBounds(spellId);
+        if (info->SpellFamilyName != 38 || info->SpellFamilyFlags || scripts.first != scripts.second ||
+            info->SpellLevel != 60 || info->BaseLevel != 60 || info->MaxLevel ||
+            info->GetDuration() != 30000 || info->CasterAuraSpell || info->Stances || info->StancesNot ||
+            info->AttributesEx != 67634208 || info->ManaCost || info->ManaCostPercentage != 9 ||
+            info->RecoveryTime != 30000 || info->CategoryRecoveryTime ||
+            info->ProcFlags != 2167124 || info->ProcChance != 100 || info->ProcCharges)
+            return false;
+        for (std::size_t index = 0; index < 3; ++index)
+        {
+            auto const& effect = info->Effects[index];
+            if (effect.DieSides != (index == 1 ? 0 : 1) || effect.RealPointsPerLevel ||
+                effect.MiscValueB || effect.SpellClassMask)
+                return false;
+        }
+    }
     if (classId == 32 && (spellId == 805382 || spellId == 807013))
     {
         bool const wind = spellId == 807013;
