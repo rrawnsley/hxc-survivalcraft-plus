@@ -60,7 +60,7 @@ local function Accept(message, now, currentRevision, currentGeneration)
         end
         local schema, revision, classId, level, count = tonumber(fields[2]), tonumber(fields[3]),
             tonumber(fields[4]), tonumber(fields[5]), tonumber(fields[6])
-        if (schema ~= 1 and schema ~= 2 and schema ~= 3 and schema ~= 4 and schema ~= 5)
+        if (schema ~= 1 and schema ~= 2 and schema ~= 3 and schema ~= 4 and schema ~= 5 and schema ~= 6)
             or revision < 1 or revision > 4294967295 or classId < 1 or classId > 255
             or level < 1 or level > 255 or count > 512 then return Reject("Unsupported snapshot header") end
         local generation = schema >= 4 and fields[7] or nil
@@ -115,7 +115,7 @@ local function Accept(message, now, currentRevision, currentGeneration)
             local ability = part.A
             if pending.schemaVersion >= 4 then
                 if not part.T or not part.C then return Reject("Missing ability rules or cap") end
-                if pending.schemaVersion == 5 then
+                if pending.schemaVersion >= 5 then
                     if part.V == nil then return Reject("Missing shared ability count") end
                     ability.sharedAbilities = {}
                     for ordinal = 1, part.V do
@@ -164,14 +164,16 @@ local function Accept(message, now, currentRevision, currentGeneration)
     if kind == "O" then
         local index = tonumber(fields[3])
         if pending.schemaVersion < 4 or not pending.mastery or (#fields ~= 8 and #fields ~= 9)
-            or (#fields == 9 and fields[9] ~= "2") or not index
+            or (#fields == 9 and fields[9] ~= "2" and
+                (fields[9] ~= "3" or pending.schemaVersion < 6)) or not index
             or index < 1 or index > pending.masteryCount or pending.mastery.events[index] then
             return Reject("Invalid mastery history event")
         end
         pending.mastery.events[index] = { abilityId = tonumber(fields[4]), ordinal = tonumber(fields[5]),
             characterLevel = tonumber(fields[6]), proficiency = tonumber(fields[7]),
             healingBonusBasisPoints = #fields == 8 and tonumber(fields[8]) or 0,
-            damageBonusBasisPoints = #fields == 9 and tonumber(fields[8]) or 0 }
+            damageBonusBasisPoints = #fields == 9 and fields[9] == "2" and tonumber(fields[8]) or 0,
+            resourceDrainBonusBasisPoints = #fields == 9 and fields[9] == "3" and tonumber(fields[8]) or 0 }
         return nil
     end
     if kind == "N" then
@@ -197,7 +199,7 @@ local function Accept(message, now, currentRevision, currentGeneration)
     pending.parts[index] = part
     if kind == "V" then
         local count = tonumber(fields[4])
-        if pending.schemaVersion ~= 5 or part.V ~= nil or #fields ~= 4 or not count or count > 8 then
+        if pending.schemaVersion < 5 or part.V ~= nil or #fields ~= 4 or not count or count > 8 then
             return Reject("Invalid shared ability count")
         end
         if part.W then
@@ -210,7 +212,7 @@ local function Accept(message, now, currentRevision, currentGeneration)
     end
     if kind == "W" then
         local ordinal = tonumber(fields[4])
-        if pending.schemaVersion ~= 5 or #fields ~= 11 or not ordinal or ordinal < 1 or ordinal > 8
+        if pending.schemaVersion < 5 or #fields ~= 11 or not ordinal or ordinal < 1 or ordinal > 8
             or (part.V and ordinal > part.V) then return Reject("Invalid shared ability") end
         part.W = part.W or {}
         if part.W[ordinal] then return Reject("Duplicate shared ability") end
@@ -278,7 +280,8 @@ local function Accept(message, now, currentRevision, currentGeneration)
     if kind == "M" then
         local ordinal = tonumber(fields[4])
         if pending.schemaVersion < 4 or (#fields ~= 10 and #fields ~= 11)
-            or (#fields == 11 and fields[11] ~= "2") or not ordinal or ordinal < 1 or ordinal > 8
+            or (#fields == 11 and fields[11] ~= "2" and
+                (fields[11] ~= "3" or pending.schemaVersion < 6)) or not ordinal or ordinal < 1 or ordinal > 8
             or (part.T and ordinal > part.T.rewardCount) then return Reject("Invalid mastery roadmap entry") end
         part.M = part.M or {}
         if part.M[ordinal] then return Reject("Duplicate mastery roadmap entry") end
@@ -286,7 +289,9 @@ local function Accept(message, now, currentRevision, currentGeneration)
         if pending.receivedRewards > 512 then return Reject("Mastery roadmap is too large") end
         part.M[ordinal] = { characterLevel = tonumber(fields[5]), proficiency = tonumber(fields[6]),
             healingBonusBasisPoints = #fields == 10 and tonumber(fields[7]) or 0,
-            damageBonusBasisPoints = #fields == 11 and tonumber(fields[7]) or 0, state = tonumber(fields[8]),
+            damageBonusBasisPoints = #fields == 11 and fields[11] == "2" and tonumber(fields[7]) or 0,
+            resourceDrainBonusBasisPoints = #fields == 11 and fields[11] == "3" and tonumber(fields[7]) or 0,
+            state = tonumber(fields[8]),
             practice = { status = tonumber(fields[9]), uses = fields[10] } }
         return nil
     end

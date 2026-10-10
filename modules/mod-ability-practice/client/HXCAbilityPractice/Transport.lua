@@ -7,7 +7,7 @@ local nextRequest = 0
 local deadline
 local nextPoll = 0
 local elapsed = 0
-local protocol = 5
+local protocol = 6
 
 function API.Request()
     local now = GetTime()
@@ -35,7 +35,7 @@ listener:SetScript("OnEvent", function(_, event, prefix, message, channel, sende
         deadline = nil
         nextPoll = 0
         elapsed = 0
-        protocol = 5
+        protocol = 6
         API.Request()
         return
     end
@@ -71,8 +71,8 @@ listener:SetScript("OnUpdate", function(_, delta)
     if deadline and now >= deadline then
         deadline = nil
         Wire.Reset()
-        if protocol == 5 and revision == 0 then
-            protocol = 4
+        if protocol > 4 and revision == 0 then
+            protocol = protocol - 1
             API.Request()
         else API.SetSyncState("unavailable") end
     end

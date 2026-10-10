@@ -2741,6 +2741,9 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
                 (ability.Kind == Practice::AbilityKind::Mastery ||
                     Practice::DevelopmentBuffs::IsSupportedStatBuff(profile)))
                 continue;
+            if (profile.Outcome == Practice::OutcomeKind::ResourceDrain &&
+                session.Protocol < Practice::ResourceMenuSchemaVersion)
+                continue;
             auto const learned = Learned(player, ability, false);
             Practice::Progress state;
             if (ability.Kind != Practice::AbilityKind::Fixed)
@@ -2844,6 +2847,13 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
         }
     auto const progress = !supported ? Practice::SessionPractice{ false, 0, 0 } :
         currentProgress == session.Progress.end() ? Practice::SessionPractice{} : currentProgress->second.Totals;
+    auto mastery = !supported ? Practice::SessionMasteryView{ false, 0, {} } :
+        currentProgress == session.Progress.end() ? Practice::SessionMasteryView{ true, 0, {} } :
+        currentProgress->second.Mastery.View();
+    if (session.Protocol < Practice::ResourceMenuSchemaVersion &&
+        std::any_of(mastery.Events.begin(), mastery.Events.end(), [](auto const& event)
+        { return event.Reward.ResourceDrainBonusBasisPoints != 0; }))
+        mastery = { false, 0, {} };
     auto messages = Practice::EncodeMenuSnapshot(player->getClass(), player->GetLevel(), ++Revision, views,
         session.Protocol >= Practice::SessionMenuSchemaVersion
             ? std::optional<Practice::SessionPractice>(progress) : std::nullopt,
@@ -2855,10 +2865,9 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
                     ? Practice::SessionLearningView{ true, 0, {} } : currentProgress->second.Learning.View())
             : std::nullopt,
         session.Protocol >= Practice::TypedMenuSchemaVersion
-            ? std::optional<Practice::SessionMasteryView>(!supported
-                ? Practice::SessionMasteryView{ false, 0, {} } : currentProgress == session.Progress.end()
-                    ? Practice::SessionMasteryView{ true, 0, {} } : currentProgress->second.Mastery.View())
-            : std::nullopt, session.Protocol >= Practice::SharedMenuSchemaVersion);
+            ? std::optional<Practice::SessionMasteryView>(mastery)
+            : std::nullopt, session.Protocol >= Practice::SharedMenuSchemaVersion,
+        session.Protocol >= Practice::ResourceMenuSchemaVersion);
     if (!messages || messages->size() > MaxQueuedMessages)
         return false;
     if (session.Protocol >= Practice::TypedMenuSchemaVersion)
@@ -3760,7 +3769,8 @@ public:
         if (!Requested || !DevelopmentAllowed || !Ready || !IsDevelopmentPlayer(player))
             return true;
         if (receiver != player || (message != "HXAP\tHELLO|1" && message != "HXAP\tHELLO|2" &&
-            message != "HXAP\tHELLO|3" && message != "HXAP\tHELLO|4" && message != "HXAP\tHELLO|5"))
+            message != "HXAP\tHELLO|3" && message != "HXAP\tHELLO|4" && message != "HXAP\tHELLO|5" &&
+            message != "HXAP\tHELLO|6"))
             return false;
         auto const now = Clock::now();
         auto& session = Sessions[player->GetGUID().GetRawValue()];
@@ -3768,7 +3778,8 @@ public:
             return false;
         session.LastRequest = now;
         session.InterestedUntil = now + InterestDuration;
-        std::uint32_t const protocol = message == "HXAP\tHELLO|5" ? Practice::SharedMenuSchemaVersion :
+        std::uint32_t const protocol = message == "HXAP\tHELLO|6" ? Practice::ResourceMenuSchemaVersion :
+            message == "HXAP\tHELLO|5" ? Practice::SharedMenuSchemaVersion :
             message == "HXAP\tHELLO|4" ? Practice::TypedMenuSchemaVersion :
             message == "HXAP\tHELLO|3" ? Practice::RoadmapMenuSchemaVersion :
             message == "HXAP\tHELLO|2" ? Practice::SessionMenuSchemaVersion : Practice::MenuSchemaVersion;

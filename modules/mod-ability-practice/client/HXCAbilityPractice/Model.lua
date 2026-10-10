@@ -118,13 +118,16 @@ local function Rewards(value, ability, ranks, characterLevel)
         count = count + 1
     end
     if count ~= #value or (ability.kind ~= 2 and count ~= 0)
-        or (ability.kind == 2 and (count == 0 or (ability.route ~= 1 and ability.route ~= 2))) then return nil end
+        or (ability.kind == 2 and (count == 0 or (ability.route ~= 1 and ability.route ~= 2 and ability.route ~= 14))) then return nil end
     local result, previousLevel, previousProficiency, previousBonus = {}, ranks[1].characterLevel, 1, 0
     for _, entry in ipairs(value) do
         if type(entry) ~= "table" then return nil end
-        local healing, damage = entry.healingBonusBasisPoints or 0, entry.damageBonusBasisPoints or 0
-        local bonus = ability.route == 2 and healing or damage
-        if (ability.route == 2 and damage ~= 0) or (ability.route == 1 and healing ~= 0)
+        local healing, damage, resource = entry.healingBonusBasisPoints or 0, entry.damageBonusBasisPoints or 0,
+            entry.resourceDrainBonusBasisPoints or 0
+        local bonus = ability.route == 2 and healing or ability.route == 14 and resource or damage
+        if (ability.route == 2 and (damage ~= 0 or resource ~= 0))
+            or (ability.route == 1 and (healing ~= 0 or resource ~= 0))
+            or (ability.route == 14 and (healing ~= 0 or damage ~= 0))
             or not Integer(entry.characterLevel, previousLevel, 255)
             or not Integer(entry.proficiency, previousProficiency + 1, 4294967295)
             or not Integer(bonus, previousBonus + 1, 200) then return nil end
@@ -137,7 +140,7 @@ local function Rewards(value, ability, ranks, characterLevel)
         local forecast = practiceMet and 2 or entry.proficiency > ability.cap and 3 or 1
         if entry.state ~= state or practice.status ~= forecast then return nil end
         result[#result + 1] = { characterLevel = entry.characterLevel, proficiency = entry.proficiency,
-            healingBonusBasisPoints = healing, damageBonusBasisPoints = damage,
+            healingBonusBasisPoints = healing, damageBonusBasisPoints = damage, resourceDrainBonusBasisPoints = resource,
             state = entry.state, practice = practice }
         previousLevel, previousProficiency, previousBonus = entry.characterLevel, entry.proficiency, bonus
     end
@@ -180,11 +183,13 @@ local function Ability(value, schema, characterLevel)
     if schema >= 4 then
         if value.acquisitionSource ~= nil and not Integer(value.acquisitionSource, 1, 5) then return nil end
         if value.acquisitionSource == 5 and value.kind ~= 3 then return nil end
-        if not session or not Integer(value.kind, 1, 3) or not Integer(value.route, 1, 13)
-            or not Integer(value.ruleSet, 1, 10)
+        if not session or not Integer(value.kind, 1, 3) or not Integer(value.route, 1, schema >= 6 and 14 or 13)
+            or not Integer(value.ruleSet, 1, schema >= 6 and 12 or 10)
             or ((value.ruleSet == 3 or value.ruleSet == 6) and (value.kind ~= 1 or value.route ~= 2))
             or ((value.ruleSet == 7 or value.ruleSet == 8) and (value.kind ~= 2 or value.route ~= 1))
             or ((value.ruleSet == 9 or value.ruleSet == 10) and (value.kind ~= 2 or value.route ~= 2))
+            or ((value.ruleSet == 11 or value.ruleSet == 12) and (value.kind ~= 2 or value.route ~= 14))
+            or (value.route == 14 and (value.ruleSet ~= 11 and value.ruleSet ~= 12))
             or (value.route == 13 and (value.kind ~= 1 or (value.ruleSet ~= 1 and value.ruleSet ~= 4)))
             or ((value.kind == 3) ~= (value.route == 6)) then return nil end
         if value.route == 13 then
@@ -196,7 +201,7 @@ local function Ability(value, schema, characterLevel)
                 if entry.spellId == value.replacementSpellId then return nil end
             end
         end
-        if ((value.ruleSet >= 4 and value.ruleSet <= 6) or value.ruleSet == 8 or value.ruleSet == 10)
+        if ((value.ruleSet >= 4 and value.ruleSet <= 6) or value.ruleSet == 8 or value.ruleSet == 10 or value.ruleSet == 12)
             ~= (value.catchup ~= nil) then return nil end
         if value.catchup then
             local policy = value.catchup
@@ -234,7 +239,7 @@ local function Ability(value, schema, characterLevel)
         or value.nextTrainingCap ~= nil or value.rewards ~= nil or value.acquisitionSource ~= nil
         or value.catchup ~= nil or value.replacementSpellId ~= nil or value.buffState ~= nil then return nil end
     local sharedAbilities
-    if schema == 5 then
+    if schema >= 5 then
         if type(value.sharedAbilities) ~= "table" or #value.sharedAbilities > 8 then return nil end
         sharedAbilities = {}
         local count, seen = 0, {}
@@ -345,11 +350,13 @@ local function MasteryHistory(value, abilities)
         local reward = ability and ability.kind == 2 and ability.rewards[event.ordinal]
         if not reward or event.characterLevel ~= reward.characterLevel or event.proficiency ~= reward.proficiency
             or (event.healingBonusBasisPoints or 0) ~= reward.healingBonusBasisPoints
-            or (event.damageBonusBasisPoints or 0) ~= reward.damageBonusBasisPoints then return nil end
+            or (event.damageBonusBasisPoints or 0) ~= reward.damageBonusBasisPoints
+            or (event.resourceDrainBonusBasisPoints or 0) ~= reward.resourceDrainBonusBasisPoints then return nil end
         events[#events + 1] = { abilityId = event.abilityId, ordinal = event.ordinal,
             characterLevel = event.characterLevel, proficiency = event.proficiency,
             healingBonusBasisPoints = event.healingBonusBasisPoints or 0,
-            damageBonusBasisPoints = event.damageBonusBasisPoints or 0 }
+            damageBonusBasisPoints = event.damageBonusBasisPoints or 0,
+            resourceDrainBonusBasisPoints = event.resourceDrainBonusBasisPoints or 0 }
     end
     return { available = value.available, total = value.total, events = events }
 end
@@ -357,7 +364,7 @@ end
 function Model.Validate(snapshot)
     if type(snapshot) ~= "table"
         or (snapshot.schemaVersion ~= 1 and snapshot.schemaVersion ~= 2 and snapshot.schemaVersion ~= 3
-            and snapshot.schemaVersion ~= 4 and snapshot.schemaVersion ~= 5)
+            and snapshot.schemaVersion ~= 4 and snapshot.schemaVersion ~= 5 and snapshot.schemaVersion ~= 6)
         or not Integer(snapshot.revision, 1, 4294967295) or not Integer(snapshot.classId, 1, 255)
         or not Integer(snapshot.characterLevel, 1, 255) or type(snapshot.abilities) ~= "table"
         or #snapshot.abilities > 512 then return nil, "Unsupported or incomplete progress update" end
@@ -467,11 +474,13 @@ local function HealingBonusText(basisPoints)
 end
 
 function Model.MasteryBonusAmount(reward)
-    return math.max(reward.healingBonusBasisPoints or 0, reward.damageBonusBasisPoints or 0)
+    return math.max(reward.healingBonusBasisPoints or 0, reward.damageBonusBasisPoints or 0,
+        reward.resourceDrainBonusBasisPoints or 0)
 end
 
 function Model.MasteryEffectText(reward)
-    return (reward.damageBonusBasisPoints or 0) > 0 and "damage" or "healing"
+    return (reward.resourceDrainBonusBasisPoints or 0) > 0 and "mana drain"
+        or (reward.damageBonusBasisPoints or 0) > 0 and "damage" or "healing"
 end
 
 function Model.CurrentMasteryText(ability, saved)
@@ -631,6 +640,13 @@ function Model.PracticeRules(ability, saved)
     if ability.replacementSpellId then
         return Model.ReplacementText(ability) .. "\n\nUse the replacement from your spellbook."
             .. " The original ability can resume practice when it is available again."
+    end
+    if ability.route == 14 then
+        return "Practice through actual mana drained from level-appropriate hostile PvE opponents by your original cast."
+            .. " A full mana pool still permits useful enemy mana denial; zero mana drained earns no practice."
+            .. " Each original cast counts once, with at least ten seconds between counted uses."
+            .. " Mastery improves mana drained by up to 2% relative to its native amount."
+            .. " Prepare one upcoming mastery milestone. " .. LearnText(ability.acquisitionSource)
     end
     if ability.abilityId == 805381 then
         return "Practice Frost Palm Sigil through useful bonus Frost hits from your original casts."

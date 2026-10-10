@@ -946,6 +946,64 @@ void WriteTypedMasteryAndFixedCases(std::ofstream& output, std::uint32_t& revisi
         }
 }
 
+void WriteResourceCases(std::string const& filename)
+{
+    std::ofstream output(filename);
+    std::array const ranks = { AbilityRank{ 500639, 1, { 32, 1 } } };
+    std::array const caps = { ProficiencyCap{ 1, 1 }, ProficiencyCap{ 32, 40 },
+        ProficiencyCap{ 40, 70 }, ProficiencyCap{ 48, 100 } };
+    std::array const rewards = { MasteryReward{ { 40, 40 }, 0, 0, 50 },
+        MasteryReward{ { 48, 70 }, 0, 0, 100 }, MasteryReward{ { 56, 100 }, 0, 0, 200 } };
+    AbilityDefinition const definition{ 32, 500639, AbilityKind::Mastery, ranks, caps };
+    auto const policy = DevelopmentMastery::FrostSigilPolicy;
+    std::uint32_t revision = 2000;
+    auto write = [&](std::uint32_t level, bool learned, Progress progress, bool catchup)
+    {
+        std::vector<std::uint32_t> known;
+        if (learned)
+            known.push_back(500639);
+        auto const effective = BuildCatchupPolicy(policy, CapAtLevel(definition, level), { catchup, 40, 2 });
+        assert(effective);
+        auto view = BuildAbilityView(definition, effective->View(), progress, level, known, true);
+        view.Route = PracticeRoute::ResourceDrain;
+        view.RuleSet = catchup ? HumanPvEResourceDrainCatchupRuleSet : HumanPvEResourceDrainRuleSet;
+        view.AcquisitionSourceId = 1;
+        view.Rewards = DescribeMasteryRewards(definition, rewards, effective->View(), progress, level, learned, true);
+        if (catchup)
+        {
+            auto const base = policy.Bands[Detail::BandIndex(policy, progress.Proficiency)];
+            auto const rate = effective->View().Bands[Detail::BandIndex(effective->View(), progress.Proficiency)];
+            view.Catchup = CatchupView{ 40, 2, base.PointsPerUse, rate.PointsPerUse,
+                view.Cap > progress.Proficiency && view.Cap - progress.Proficiency >= 40 };
+        }
+        SessionMastery history;
+        for (std::size_t index = 0; index < view.Rewards.size(); ++index)
+            if (view.Rewards[index].State == RankState::Learned)
+                history.Record(definition.AbilityId, static_cast<std::uint32_t>(index + 1), rewards[index]);
+        std::array views{ view };
+        assert(!EncodeMenuSnapshot(32, level, revision, views, SessionPractice{}, true, true, 780, 80,
+            std::nullopt, history.View(), true));
+        auto encoded = EncodeMenuSnapshot(32, level, ++revision, views, SessionPractice{}, true, true, 780, 80,
+            std::nullopt, history.View(), true, true);
+        assert(encoded);
+        for (auto const& line : *encoded)
+            output << line << '\n';
+        output << '\n';
+        views[0].Rewards[0].Reward.DamageBonusBasisPoints = 1;
+        assert(!EncodeMenuSnapshot(32, level, revision, views, SessionPractice{}, true, true, 780, 80,
+            std::nullopt, history.View(), true, true));
+    };
+    write(31, false, { 1, 0 }, false);
+    write(32, true, { 1, 0 }, false);
+    write(32, true, { 40, 0 }, false);
+    write(40, true, { 40, 0 }, false);
+    write(48, true, { 70, 0 }, false);
+    write(56, true, { 100, 0 }, false);
+    write(56, true, { 1, 0 }, true);
+    write(56, true, { 40, 0 }, true);
+    assert(output.good());
+}
+
 void WriteTypedRankCases(std::string const& filename)
 {
     std::ofstream output(filename);
@@ -1178,6 +1236,7 @@ int main(int argc, char** argv)
     {
         WriteTypedRankCases(std::string(argv[1]) + ".typed");
         WriteSharedCases(std::string(argv[1]) + ".shared");
+        WriteResourceCases(std::string(argv[1]) + ".resources");
         std::array const ranks = { AbilityRank{ 101, 1, { 4, 1 } }, AbilityRank{ 102, 2, { 16, 20 } },
             AbilityRank{ 103, 3, { 24, 40 } } };
         std::array const caps = { ProficiencyCap{ 1, 10 }, ProficiencyCap{ 16, 30 }, ProficiencyCap{ 24, 60 } };
