@@ -849,8 +849,7 @@ public:
                     if (state.vigor <= 15.0f)
                         Exhaust(player, state);
                 }
-                else if (state.vigor > 25.0f && state.displayFood > 5.0f && state.exhaustedUntil <= now &&
-                    !player->InBattleground() && !player->InArena())
+                else if (state.vigor > 25.0f && state.displayFood > 5.0f && state.exhaustedUntil <= now)
                 {
                     state.vigor -= 10.0f;
                     state.sprint = true;
@@ -979,7 +978,7 @@ public:
             state.water = Clamp(state.water - waterDrain * seconds / 60.0f);
         }
         UpdateNeeds(player, state);
-        if (!alive || player->IsMounted() || player->IsInFlight() || player->IsSitState() || pvp ||
+        if (!alive || player->IsMounted() || player->IsInFlight() || player->IsSitState() ||
             state.displayFood <= 5.0f || player->HasUnitState(UNIT_STATE_CONTROLLED))
             StopSprint(player, state);
         if (state.exhaustedUntil > now && player->IsInWater())
