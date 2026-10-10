@@ -10,6 +10,7 @@
 
 namespace AbilityPractice::DevelopmentUtilityFixed
 {
+inline constexpr std::array HeartOfTheMountain = { AbilityRank{ 807734, 1, { 14, 1 } } };
 inline constexpr std::array Class13Ability806240 = { AbilityRank{ 806240, 1, { 16, 1 } } };
 inline constexpr std::array Class14Ability800353 = { AbilityRank{ 800353, 1, { 22, 1 } } };
 inline constexpr std::array Class14Ability804052 = { AbilityRank{ 804052, 1, { 16, 1 } } };
@@ -87,6 +88,8 @@ inline constexpr std::array MeltLock = { AbilityRank{ 804662, 1, { 16, 1 } } };
 inline constexpr std::array TinkerPickLock = { AbilityRank{ 804154, 1, { 14, 1 } } };
 
 inline constexpr std::array Profiles = {
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 31, 807734, AbilityKind::Fixed, HeartOfTheMountain, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 32, 560316, AbilityKind::Fixed, HomeboundRunestone, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
@@ -230,6 +233,8 @@ struct Mechanic
 };
 
 inline constexpr std::array Mechanics = {
+    Mechanic{ 31, 807734, { 6, 6, 0 }, { 1, 1, 0 }, {}, { 10, 87, 0 }, {},
+        std::array<std::int32_t, 3>{ 127, 127, 0 }, std::array<std::int32_t, 3>{ 149, -1, 0 } },
     Mechanic{ 32, 560316, { 28, 0, 0 }, { 47, 0, 0 }, {}, {}, {},
         std::array<std::int32_t, 3>{ 50058, 0, 0 }, std::array<std::int32_t, 3>{ 0, -1, -1 } },
     Mechanic{ 32, 561265, { 130, 6, 0 }, { 57, 1, 0 }, {}, { 0, 4, 0 }, {},

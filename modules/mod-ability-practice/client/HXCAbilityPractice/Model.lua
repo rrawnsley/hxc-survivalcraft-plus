@@ -667,6 +667,12 @@ function Model.PracticeRules(ability, saved)
             .. " Prepare one upcoming mastery milestone. " .. LearnText(ability.acquisitionSource)
     end
     if Model.IsFixed(ability) then
+        if ability.abilityId == 807734 then
+            return "Heart of the Mountain has one native rank, learned at character level 14, and no practice levels. "
+                .. LearnText(ability.acquisitionSource)
+                .. " Adds 150% threat from damage while active, for 250% of normal damage threat."
+                .. " Its native buff lasts until removed; casting it earns no practice."
+        end
         if ability.abilityId == 807432 then
             return "Seismic Grasp has one native rank, learned at character level 8, and no practice levels. "
                 .. LearnText(ability.acquisitionSource)

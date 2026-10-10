@@ -1868,6 +1868,21 @@ bool MatchesUtilityFixedRankMechanic(std::uint32_t classId, std::uint32_t spellI
     SpellInfo const* info = sSpellMgr->GetSpellInfo(spellId);
     if (mechanic == mechanics.end() || !info || info->IsPassive())
         return false;
+    if (classId == 31 && spellId == 807734)
+    {
+        auto const scripts = sObjectMgr->GetSpellScriptsBounds(spellId);
+        if (info->SpellFamilyName != 37 || info->SpellLevel || info->GetDuration() != -1 ||
+            info->RecoveryTime || info->CategoryRecoveryTime || info->ManaCost || info->ManaCostPerlevel ||
+            info->ManaCostPercentage || info->PowerType != POWER_MANA || info->ProcFlags || info->ProcCharges ||
+            scripts.first != scripts.second || sSpellMgr->GetSpellProcEntry(spellId))
+            return false;
+        for (std::size_t index = 0; index < 3; ++index)
+        {
+            auto const& effect = info->Effects[index];
+            if (effect.DieSides != (index == 2 ? 0 : 1) || effect.RealPointsPerLevel || effect.MiscValueB)
+                return false;
+        }
+    }
     if (classId == 32)
     {
         auto const& enchants = Practice::DevelopmentUtilityFixed::TemporaryEnchants;
