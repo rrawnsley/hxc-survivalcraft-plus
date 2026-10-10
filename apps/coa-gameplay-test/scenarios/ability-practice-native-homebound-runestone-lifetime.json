@@ -1,0 +1,164 @@
+{
+  "schema": 1,
+  "name": "Ability practice native: Homebound Runestone retains its two-minute summon lifetime",
+  "contract": [
+    "Native560316 level32 summons owned50058 through effect28/property61 for120000ms, mana10percent and cooldown1800000ms. Summon lifespan and saved-record retention are checked; hearth-setting interaction is not established by this case.",
+    "No practice definition is approved by this fixture. Unsupported saved record1/999/1/100/101 must survive exactly."
+  ],
+  "timeout_ms": 170000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "rm",
+      "race": 1,
+      "class": 32,
+      "level": 32,
+      "name": "Aphomebound"
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.560316",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.560316",
+      "index": 1,
+      "value": 999
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.560316",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.560316",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "rm",
+      "source": "core.hxc.ability_practice.32.560316",
+      "index": 4,
+      "value": 101
+    },
+    {
+      "action": "learn",
+      "actor": "rm",
+      "spell": 560316
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Homebound Runestone marker exists yet",
+      "actor": "rm",
+      "metric": "owned_creature_count",
+      "entry": 50058,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "rm",
+      "spell": 560316
+    },
+    {
+      "action": "assert",
+      "label": "Casting Homebound Runestone summons creature 50058 near the caster",
+      "actor": "rm",
+      "metric": "owned_creature_count",
+      "entry": 50058,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "cooldown_ms",
+      "spell": 560316,
+      "min": 1790000,
+      "max": 1800000
+    },
+    {
+      "action": "wait",
+      "ms": 115000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "owned_creature_count",
+      "entry": 50058,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "owned_creature_count",
+      "entry": 50058,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.560316",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.560316",
+      "index": 1,
+      "equals": 999
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.560316",
+      "index": 2,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.560316",
+      "index": 3,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "actor": "rm",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.32.560316",
+      "index": 4,
+      "equals": 101
+    }
+  ]
+}

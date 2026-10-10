@@ -94,6 +94,15 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
         assert(string.find(Model.PracticeRules(ability), "native slow stays unchanged", 1, true))
         assert(string.find(Model.PracticeRules(ability), "one upcoming mastery milestone", 1, true))
     end
+    if ability.abilityId == 560316 then
+        assert(ability.kind == 3)
+        assert(string.find(Model.PracticeRules(ability), "character level 32", 1, true))
+        assert(string.find(Model.PracticeRules(ability), "two minutes", 1, true))
+        assert(string.find(Model.PracticeRules(ability), "cannot be used in combat", 1, true))
+        assert(string.find(Model.PracticeRules(ability), "thirty-minute cooldown", 1, true))
+        assert(string.find(Model.PracticeRules(ability), "earns no practice", 1, true))
+        assert(not string.find(Model.PracticeRules(ability), "set your Hearthstone", 1, true))
+    end
     if ability.abilityId == 561265 then
         assert(ability.kind == 3)
         assert(string.find(Model.PracticeRules(ability), "character level 60", 1, true))
@@ -242,7 +251,7 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
     end
     count = count + 1
 end
-assert(count == 938)
-assert(kinds[1] == 543 and kinds[2] == 53 and kinds[3] == 342)
+assert(count == 941)
+assert(kinds[1] == 543 and kinds[2] == 53 and kinds[3] == 345)
 for classId = 12, 32 do assert(classes[classId]) end
-print("PASS: 938 typed snapshots across 21 classes: 543 ranked, 53 mastery, 342 fixed and menu rendering")
+print("PASS: 941 typed snapshots across 21 classes: 543 ranked, 53 mastery, 345 fixed and menu rendering")

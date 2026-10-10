@@ -656,6 +656,12 @@ function Model.PracticeRules(ability, saved)
             .. " Prepare one upcoming mastery milestone. " .. LearnText(ability.acquisitionSource)
     end
     if Model.IsFixed(ability) then
+        if ability.abilityId == 560316 then
+            return "Homebound Runestone has one native rank, learned at character level 32, and no practice levels. "
+                .. LearnText(ability.acquisitionSource)
+                .. " Summons your runestone marker for two minutes; it cannot be used in combat."
+                .. " Its thirty-minute cooldown stays unchanged; using it earns no practice."
+        end
         if ability.abilityId == 561265 then
             return "Leyline Adjustment has one native rank, learned at character level 60, and no practice levels. "
                 .. LearnText(ability.acquisitionSource)

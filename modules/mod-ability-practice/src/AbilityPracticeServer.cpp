@@ -1727,6 +1727,27 @@ bool MatchesUtilityFixedRankMechanic(std::uint32_t classId, std::uint32_t spellI
                     return false;
         }
     }
+    if (classId == 32 && spellId == 560316)
+    {
+        auto const scripts = sObjectMgr->GetSpellScriptsBounds(spellId);
+        CreatureTemplate const* marker = sObjectMgr->GetCreatureTemplate(50058);
+        if (!marker || marker->faction != 35 || marker->type != 11 ||
+            info->SpellFamilyName != 38 || info->SpellFamilyFlags || scripts.first != scripts.second ||
+            info->SpellLevel != 32 || info->BaseLevel != 32 || info->MaxLevel ||
+            info->GetDuration() != 120000 || info->CasterAuraSpell || info->Stances || info->StancesNot ||
+            info->Attributes != 268435456 || info->AttributesEx != 1024 ||
+            info->ManaCost || info->ManaCostPercentage != 10 ||
+            info->RecoveryTime != 1800000 || info->CategoryRecoveryTime ||
+            info->ProcFlags || info->ProcChance != 100 || info->ProcCharges)
+            return false;
+        for (std::size_t index = 0; index < 3; ++index)
+        {
+            auto const& effect = info->Effects[index];
+            if (effect.DieSides != 1 || effect.RealPointsPerLevel ||
+                effect.MiscValueB != (index == 0 ? 61 : 0) || effect.SpellClassMask)
+                return false;
+        }
+    }
     if (classId == 32 && spellId == 561265)
     {
         auto const scripts = sObjectMgr->GetSpellScriptsBounds(spellId);

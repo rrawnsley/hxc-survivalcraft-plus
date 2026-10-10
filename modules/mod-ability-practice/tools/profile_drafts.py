@@ -692,6 +692,19 @@ def build_drafts(candidates, root):
                         v.get('miscValue'), v.get('basePoints')) for v in details] != expected):
                 raise ValueError('Reviewed lock utility source/raw evidence changed')
             required.append('native-lock-requirements-and-existing-skill-progression-preserved')
+        if (class_id, ability_id) == (32, 560316):
+            raw = members[ability_id].get('rawDbc', {})
+            details = raw.get('effectDetails', [])
+            expected = [(28, 0, 47, 0, 0, 50058, 0),
+                        (0, 0, 0, 0, 0, 0, -1), (0, 0, 0, 0, 0, 0, -1)]
+            if (len(ranks) != 1 or ranks[0]['characterLevel'] != 32 or raw.get('spellLevel') != 32 or
+                    raw.get('passive') is not False or raw.get('rankLabel') or len(details) != 3 or
+                    [(v.get('effectId'), v.get('auraId'), v.get('implicitTargetA'), v.get('implicitTargetB'),
+                      v.get('triggerSpellId'), v.get('miscValue'), v.get('basePoints'))
+                     for v in details] != expected):
+                raise ValueError('Reviewed native Homebound Runestone source/raw evidence changed')
+            required.append('native-summon-lifetime-and-combat-restriction-not-practice')
+            required.append('hearth-setting-interaction-remains-unqualified')
         if (class_id, ability_id) == (32, 561265):
             raw = members[ability_id].get('rawDbc', {})
             details = raw.get('effectDetails', [])
