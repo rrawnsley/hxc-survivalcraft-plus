@@ -243,9 +243,11 @@ def reviewed_stat_buffs(root):
             (32, 801094, 1, 1, 22, 0), (32, 801107, 1, 0, 85, 0)}
         leyline = (class_id, ability_id, target, stat, aura, effect_index) == (32, 561260, 57, 126, 115, 1)
         party_resistance = (class_id, ability_id, target, stat, aura, effect_index) == (25, 1119881, 1, 32, 143, 0)
+        nature_resistance = (class_id, ability_id, target, stat, aura, effect_index) == (31, 581314, 57, 8, 143, 0)
         if (not 12 <= class_id <= 32 or not ability_id or
-                (target not in {21, 56} and not self_buff and not party_resistance and not leyline) or
-                not (self_buff or party_resistance or leyline or aura == 29 and stat in range(5) or
+                (target not in {21, 56} and not self_buff and not party_resistance and not leyline and
+                 not nature_resistance) or
+                not (self_buff or party_resistance or nature_resistance or leyline or aura == 29 and stat in range(5) or
                      aura == 345 and stat == 127 and target == 21 or
                      aura in {85, 99} and stat == 0 and target == 21 or
                      aura == 22 and stat == 1 and target == 21 and (class_id, ability_id) in {

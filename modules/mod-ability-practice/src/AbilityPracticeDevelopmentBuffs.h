@@ -489,6 +489,11 @@ inline constexpr std::array RiteOfPower = {
 };
 inline constexpr auto RiteOfPowerCaps = Development::RankCaps(RiteOfPower);
 
+inline constexpr std::array EssenceOfNature = {
+    AbilityRank{ 581314, 1, { 44, 1 } }, AbilityRank{ 581315, 2, { 60, 10 } }
+};
+inline constexpr auto EssenceOfNatureCaps = Development::RankCaps(EssenceOfNature);
+
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 32, 561260, AbilityKind::Ranked, LeylineInscription, LeylineInscriptionCaps },
@@ -657,6 +662,9 @@ inline constexpr std::array Profiles = {
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 30, 578126, AbilityKind::Ranked, RiteOfPower, RiteOfPowerCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 31, 581314, AbilityKind::Ranked, EssenceOfNature, EssenceOfNatureCaps },
         Development::Policy, OutcomeKind::Damage }
 };
 
@@ -751,7 +759,8 @@ inline constexpr std::array Mechanics = {
     Mechanic{ 16, 575843, 21, 126, 143, 2 },
     Mechanic{ 30, 575839, 21, 126, 143, 2 },
     Mechanic{ 18, 300856, 21, 0, 29, 1 },
-    Mechanic{ 30, 578126, 21, 0, 29, 1 }
+    Mechanic{ 30, 578126, 21, 0, 29, 1 },
+    Mechanic{ 31, 581314, 57, 8, 143 }
 };
 
 static_assert(Mechanics.size() == Profiles.size());

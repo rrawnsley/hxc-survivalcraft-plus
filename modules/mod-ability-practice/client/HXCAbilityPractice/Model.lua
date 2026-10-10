@@ -773,6 +773,12 @@ function Model.PracticeRules(ability, saved)
             .. " Post-combat recovery counts. Players, pets, training dummies and gray opponents do not count."
             .. " Capturing a corpse without healing or gaining a soul earns no practice."
             .. " Each original cast earns at most one award; the native once-per-corpse rule remains."
+    elseif ability.abilityId == 581314 and ability.route == 13 then
+        rule = "Keep your own Essence of Nature active on yourself and use a learned ability for useful damage"
+            .. " or healing in a qualifying PvE fight. Stronger competing Nature resistance pauses practice."
+            .. " Applying or refreshing the buff earns no practice; other players' actions do not count."
+            .. " One original cast earns one use, with at least five seconds between counted uses."
+            .. " Rank two requires character level 60 and practice; Greater Essence shares the same progress."
     elseif ability.abilityId == 570752 and ability.route == 13 then
         rule = "Keep your own Earthen Endurance active and use a learned ability for useful damage or healing"
             .. " in a qualifying PvE fight."

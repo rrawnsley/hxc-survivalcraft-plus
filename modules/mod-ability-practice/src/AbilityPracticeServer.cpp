@@ -628,6 +628,13 @@ bool HasExpectedStarcallerGroup(std::uint32_t abilityId, std::uint32_t spellId)
 
 bool HasExpectedGeomancerGroup(std::uint32_t abilityId, std::uint32_t spellId)
 {
+    if (abilityId == 581314)
+    {
+        if (spellId != 581314 && spellId != 581315 && spellId != 582261)
+            return false;
+        auto const groups = sSpellMgr->GetSpellSpellGroupMapBounds(spellId);
+        return groups.first == groups.second;
+    }
     if (abilityId == 570752)
     {
         auto const groups = sSpellMgr->GetSpellSpellGroupMapBounds(spellId);
@@ -957,6 +964,23 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
     }
     if (BuffContributionRequested && Practice::DevelopmentBuffs::IsSupportedStatBuff(profile))
     {
+        if (profile.Definition.ClassId == 31 && profile.Definition.AbilityId == 581314)
+        {
+            bool const stronger = info->Id == 581315;
+            auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+            auto const& effect = info->Effects[EFFECT_0];
+            if ((info->Id != 581314 && !stronger) || info->SpellFamilyName != 37 ||
+                info->SpellFamilyFlags[0] || info->SpellFamilyFlags[1] || info->SpellFamilyFlags[2] != 8 ||
+                scripts.first != scripts.second || !HasExpectedGeomancerGroup(581314, info->Id) ||
+                info->SpellLevel != (stronger ? 60 : 44) ||
+                info->BaseLevel != info->SpellLevel || info->MaxLevel || info->GetDuration() != 600000 ||
+                info->Attributes != 65536 || info->AttributesEx != 131072 ||
+                info->ManaCost || info->ManaCostPercentage != 20 || info->RecoveryTime ||
+                info->CategoryRecoveryTime || info->ProcFlags || info->ProcChance != 101 || info->ProcCharges ||
+                sSpellMgr->GetSpellProcEntry(info->Id) || effect.BasePoints != (stronger ? 59 : 44) ||
+                effect.DieSides != 1 || effect.RealPointsPerLevel || effect.MiscValueB)
+                return false;
+        }
         if (profile.Definition.ClassId == 30 && (profile.Definition.AbilityId == 575839 ||
             profile.Definition.AbilityId == 578126 || profile.Definition.AbilityId == 800198))
         {
@@ -2116,9 +2140,13 @@ bool MatchesSharedBuffVariants()
                 variant.CharacterLevel == 60 && index == EFFECT_1 && expected.Effect == SPELL_EFFECT_APPLY_AURA &&
                 expected.ApplyAuraName == SPELL_AURA_MOD_RANGED_ATTACK_POWER &&
                 expected.TargetA.GetTarget() == TARGET_UNIT_TARGET_ALLY;
+            bool const inactiveNatureSlot = variant.ClassId == 31 && variant.SpellId == 582261 &&
+                variant.AbilityId == 581314 && variant.EquivalentSpellId == 581315 &&
+                variant.CharacterLevel == 60 && index == EFFECT_1 && !expected.Effect &&
+                !expected.TargetA.GetTarget();
             if (info->SpellFamilyFlags[index] != parent->SpellFamilyFlags[index] ||
                 slot.Effect != expected.Effect || slot.ApplyAuraName != expected.ApplyAuraName ||
-                slot.TargetA.GetTarget() != (inactiveModuleSlot ? 1u : dawnRangedSlot ? 21u :
+                slot.TargetA.GetTarget() != (inactiveModuleSlot ? 1u : inactiveNatureSlot ? 36u : dawnRangedSlot ? 21u :
                     expected.TargetA.GetTarget() ? 56u : 0u) ||
                 slot.TargetB.GetTarget() || slot.TriggerSpell != expected.TriggerSpell ||
                 slot.MiscValue != expected.MiscValue || slot.MiscValueB != expected.MiscValueB ||

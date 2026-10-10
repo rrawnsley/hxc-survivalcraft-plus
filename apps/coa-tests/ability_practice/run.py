@@ -111,7 +111,9 @@ def check_inventory():
     sys.path.insert(0, str(ROOT / 'modules/mod-ability-practice/tools'))
     from coverage import declared_profiles, declared_shared_variants
     variants = declared_shared_variants(ROOT, declared_profiles(ROOT))
-    assert len(variants) == 33
+    assert len(variants) == 34
+    assert variants[(31, 582261)]['equivalentSpellId'] == 581315
+    assert variants[(31, 582261)]['proficiencyRequired'] == 10
     assert variants[(13, 712458)]['equivalentSpellId'] == 707676
     assert variants[(13, 680872)]['proficiencyRequired'] == 40
     assert variants[(13, 800195)]['parentKind'] == 'fixed'

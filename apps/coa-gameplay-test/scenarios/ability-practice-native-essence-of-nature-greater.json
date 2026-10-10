@@ -3,7 +3,7 @@
   "name": "Ability practice native: Essence of Nature greater retains Nature-only resistance",
   "contract": [
     "Native class31 source level60; spell582261 effect6/aura143 Nature mask8 retains60 resistance on selected grouped recipient, without changing Fire resistance.",
-    "Greater582261 matches regular581315 at level60 and must later share its practice rather than bypassing it. This fixture establishes native benefits only; no new practice definition. Unsupported parent record1/999/1/100/101 retained exactly."
+    "Current definition4/proficiency10 permits native rank benefits. Unsupported parent record1/999/1/100/101 is injected after the native aura is active and retained exactly. Greater582261 shares regular581315 practice and cannot bypass it."
   ],
   "timeout_ms": 60000,
   "players": [
@@ -39,7 +39,7 @@
       "actor": "caster",
       "source": "core.hxc.ability_practice.31.581314",
       "index": 1,
-      "value": 999
+      "value": 4
     },
     {
       "action": "set_player_setting",
@@ -53,14 +53,14 @@
       "actor": "caster",
       "source": "core.hxc.ability_practice.31.581314",
       "index": 3,
-      "value": 100
+      "value": 10
     },
     {
       "action": "set_player_setting",
       "actor": "caster",
       "source": "core.hxc.ability_practice.31.581314",
       "index": 4,
-      "value": 101
+      "value": 0
     },
     {
       "action": "group",
@@ -137,6 +137,45 @@
       "spell": 582261,
       "effect": 0,
       "equals": 60
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.581314",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.581314",
+      "index": 1,
+      "value": 999
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.581314",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.581314",
+      "index": 3,
+      "value": 100
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.31.581314",
+      "index": 4,
+      "value": 101
+    },
+    {
+      "action": "wait",
+      "ms": 1000
     },
     {
       "action": "assert",

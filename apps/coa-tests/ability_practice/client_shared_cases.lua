@@ -19,7 +19,7 @@ for _, lines in ipairs(EncodedSharedPracticeSnapshots) do
         or shared.spellId == 680303 or shared.spellId == 681442
         or shared.spellId == 572390 or shared.spellId == 575045 or shared.spellId == 681160
         or shared.spellId == 572396 or shared.spellId == 680307
-        or shared.spellId == 582536 or shared.spellId == 680280
+        or shared.spellId == 582536 or shared.spellId == 680280 or shared.spellId == 582261
         or shared.spellId == 575846 or shared.spellId == 578316 or shared.spellId == 680291
         or shared.spellId == 573348 or shared.spellId == 680301
         or shared.spellId == 575842 or shared.spellId == 578130 or shared.spellId == 680298
@@ -87,5 +87,5 @@ for _, lines in ipairs(EncodedSharedPracticeSnapshots) do
     end
     count = count + 1
 end
-assert(count == 99)
-print("PASS: 99 shared buff snapshots, exact parent forecasts, model rejection and menu rendering")
+assert(count == 102)
+print("PASS: 102 shared buff snapshots, exact parent forecasts, model rejection and menu rendering")

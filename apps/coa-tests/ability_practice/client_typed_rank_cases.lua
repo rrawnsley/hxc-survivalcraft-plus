@@ -94,6 +94,12 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
         assert(string.find(Model.PracticeRules(ability), "native slow stays unchanged", 1, true))
         assert(string.find(Model.PracticeRules(ability), "one upcoming mastery milestone", 1, true))
     end
+    if ability.abilityId == 581314 and ability.route == 13 then
+        assert(string.find(Model.PracticeRules(ability), "Stronger competing Nature resistance", 1, true))
+        assert(string.find(Model.PracticeRules(ability), "other players' actions do not count", 1, true))
+        assert(string.find(Model.PracticeRules(ability), "Greater Essence shares", 1, true))
+        assert(string.find(Model.PracticeRules(ability), "character level 60", 1, true))
+    end
     if ability.abilityId == 560316 then
         assert(ability.kind == 3)
         assert(string.find(Model.PracticeRules(ability), "character level 32", 1, true))
@@ -251,7 +257,7 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
     end
     count = count + 1
 end
-assert(count == 941)
-assert(kinds[1] == 543 and kinds[2] == 53 and kinds[3] == 345)
+assert(count == 944)
+assert(kinds[1] == 546 and kinds[2] == 53 and kinds[3] == 345)
 for classId = 12, 32 do assert(classes[classId]) end
-print("PASS: 941 typed snapshots across 21 classes: 543 ranked, 53 mastery, 345 fixed and menu rendering")
+print("PASS: 944 typed snapshots across 21 classes: 546 ranked, 53 mastery, 345 fixed and menu rendering")

@@ -51,7 +51,8 @@ inline constexpr std::array Variants = {
     Variant{ 13, 680872, 560294, 561142, 56 },
     Variant{ 13, 800195, 578344, 578344, 32 },
     Variant{ 21, 523513, 523489, 523493, 60 },
-    Variant{ 21, 680294, 800266, 803666, 60 }
+    Variant{ 21, 680294, 800266, 803666, 60 },
+    Variant{ 31, 582261, 581314, 581315, 60 }
 };
 
 inline Variant const* Find(std::uint32_t classId, std::uint32_t spellId)

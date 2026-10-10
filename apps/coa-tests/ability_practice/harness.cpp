@@ -469,7 +469,7 @@ void CheckCurrentRankPolicies()
 {
     std::uint32_t forecasts = 0;
     std::array<bool, 21> classes{};
-    assert(DevelopmentPacing::Entries.size() == 181);
+    assert(DevelopmentPacing::Entries.size() == 182);
     for (auto const& entry : DevelopmentPacing::Entries)
     {
         classes.at(entry.ClassId - 12) = true;
@@ -815,7 +815,7 @@ void CheckMasteryFixedAndTrainerPolicies()
                 { 3, 1, { entry.PreviousRanks.back().Requirement.Proficiency, 0 } });
             assert(converted && converted->State.Proficiency == entry.PreviousRanks.back().Requirement.Proficiency);
         }
-    assert(DevelopmentBuffVariants::Variants.size() == 33);
+    assert(DevelopmentBuffVariants::Variants.size() == 34);
     constexpr std::array expectedProficiencies = {
         std::pair{ 572390u, 80u },
         std::pair{ 575045u, 40u }, std::pair{ 681160u, 100u },
@@ -829,7 +829,7 @@ void CheckMasteryFixedAndTrainerPolicies()
         std::pair{ 681442u, 40u }, std::pair{ 570756u, 40u }, std::pair{ 578130u, 40u },
         std::pair{ 523513u, 60u }, std::pair{ 803657u, 60u }, std::pair{ 680301u, 60u },
         std::pair{ 575842u, 20u }, std::pair{ 573348u, 20u }, std::pair{ 561242u, 1u },
-        std::pair{ 561243u, 1u }, std::pair{ 800195u, 1u }
+        std::pair{ 561243u, 1u }, std::pair{ 800195u, 1u }, std::pair{ 582261u, 10u }
     };
     assert(expectedProficiencies.size() == DevelopmentBuffVariants::Variants.size());
     for (auto const& variant : DevelopmentBuffVariants::Variants)
