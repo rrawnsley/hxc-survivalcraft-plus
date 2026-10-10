@@ -166,6 +166,16 @@ inline std::uint32_t ApplyHealingMastery(std::uint32_t healing, std::uint32_t ba
         static_cast<std::uint64_t>(std::numeric_limits<std::uint32_t>::max())));
 }
 
+inline std::uint32_t ApplyResourceDrainMastery(std::uint32_t amount, std::uint32_t basisPoints)
+{
+    if (basisPoints > MaximumMasteryBasisPoints ||
+        amount > static_cast<std::uint32_t>(std::numeric_limits<std::int32_t>::max()))
+        return amount;
+    std::uint64_t const result = amount + static_cast<std::uint64_t>(amount) * basisPoints / 10000;
+    return static_cast<std::uint32_t>(std::min(result,
+        static_cast<std::uint64_t>(std::numeric_limits<std::int32_t>::max())));
+}
+
 inline std::uint32_t ApplyDamageMastery(std::uint32_t damage, std::uint32_t basisPoints)
 {
     if (basisPoints > MaximumMasteryBasisPoints ||

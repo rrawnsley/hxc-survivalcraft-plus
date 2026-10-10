@@ -29,6 +29,7 @@
 #include "AbilityPracticeBuffReceipts.h"
 
 #include "../../../src/server/game/Spells/AbilityPracticeCastReceipt.h"
+#include "../../../src/server/game/Spells/AbilityPracticeMasteryPolicy.h"
 
 #include <algorithm>
 #include <array>
@@ -639,6 +640,37 @@ void CheckMasteryFixedAndTrainerPolicies()
         assert(HealingMasteryBonus(resourcePrototype.Definition, resourceRewards, progress, level,
             true, true) == 0);
     }
+    assert(ApplyResourceDrainMastery(10000, 0) == 10000);
+    assert(ApplyResourceDrainMastery(10000, 50) == 10050);
+    assert(ApplyResourceDrainMastery(10000, 100) == 10100);
+    assert(ApplyResourceDrainMastery(10000, 200) == 10200);
+    assert(ApplyResourceDrainMastery(10000, 201) == 10000);
+    assert(ApplyResourceDrainMastery(5, 200) == 5);
+    assert(ApplyResourceDrainMastery(0, 200) == 0);
+    auto const signedMaximum = static_cast<std::uint32_t>(std::numeric_limits<std::int32_t>::max());
+    assert(ApplyResourceDrainMastery(signedMaximum, 200) == signedMaximum);
+    assert(ApplyResourceDrainMastery(signedMaximum + 1, 200) == signedMaximum + 1);
+    CoAAbilityPractice::CastReceipt resourceReceipt{ 1, 1, 32, 500639, 1, 0, 0 };
+    assert(CoAAbilityPractice::ModifyMasteryResourceDrain(nullptr, nullptr, 807818, 0, 10000,
+        &resourceReceipt) == 10000);
+    CoAAbilityPractice::SetResourceDrainMasteryProvider(
+        [](Unit*, Unit*, std::uint32_t spellId, std::uint8_t power, std::uint32_t amount,
+            CoAAbilityPractice::CastReceipt const* receipt)
+        {
+            return spellId == 807818 && power == 0 && receipt->SpellId == 500639 ?
+                ApplyResourceDrainMastery(amount, 200) : amount;
+        });
+    assert(CoAAbilityPractice::ModifyMasteryResourceDrain(nullptr, nullptr, 807818, 0, 10000,
+        &resourceReceipt) == 10200);
+    assert(CoAAbilityPractice::ModifyMasteryResourceDrain(nullptr, nullptr, 807818, 0, 10000,
+        nullptr) == 10000);
+    assert(CoAAbilityPractice::ModifyMasteryResourceDrain(nullptr, nullptr, 807818, 1, 10000,
+        &resourceReceipt) == 10000);
+    assert(CoAAbilityPractice::ModifyMasteryDamage(nullptr, nullptr, 807818, 10000,
+        &resourceReceipt) == 10000);
+    assert(CoAAbilityPractice::ModifyMasteryHealing(nullptr, nullptr, 807818, 10000,
+        &resourceReceipt) == 10000);
+    CoAAbilityPractice::SetResourceDrainMasteryProvider(nullptr);
     resourcePrototype.Outcome = OutcomeKind::Damage;
     assert(!ValidateProfiles(std::span(&resourcePrototype, 1)));
     resourcePrototype.Outcome = OutcomeKind::ResourceDrain;

@@ -15,6 +15,7 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "AbilityPracticeMasteryPolicy.h"
 #include "Battleground.h"
 #include "BattlegroundIC.h"
 #include "BattlegroundMgr.h"
@@ -1690,6 +1691,10 @@ void Spell::EffectPowerDrain(SpellEffIndex effIndex)
     int32 power = damage;
     if (PowerType == POWER_MANA)
         power -= unitTarget->GetSpellCritDamageReduction(power);
+
+    if (power > 0)
+        power = int32(CoAAbilityPractice::ModifyMasteryResourceDrain(m_caster, unitTarget, m_spellInfo->Id,
+            uint8(PowerType), uint32(power), GetPracticeCast().get()));
 
     int32 newDamage = -(unitTarget->ModifyPower(PowerType, -int32(power)));
 
