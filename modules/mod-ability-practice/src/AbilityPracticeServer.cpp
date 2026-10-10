@@ -2430,6 +2430,44 @@ bool MatchesControlFixedMechanic(Practice::AbilityProfile const& profile)
     SpellInfo const* info = sSpellMgr->GetSpellInfo(profile.Definition.AbilityId);
     if (mechanic == mechanics.end() || !info || info->IsPassive())
         return false;
+    if (profile.Definition.AbilityId == 805919)
+    {
+        SpellInfo const* helper = sSpellMgr->GetSpellInfo(572908);
+        auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+        auto entry = scripts.first;
+        auto const helperScripts = sObjectMgr->GetSpellScriptsBounds(572908);
+        auto const* slowProc = sSpellMgr->GetSpellProcEntry(572908);
+        if (info->SpellLevel != 10 || info->GetDuration() != 3000 || info->RecoveryTime ||
+            info->CategoryRecoveryTime != 8000 || info->ManaCost || info->ManaCostPercentage != 3 ||
+            info->PowerType != POWER_MANA || info->SpellFamilyName != 37 || info->ProcFlags ||
+            info->ProcCharges || sSpellMgr->GetSpellProcEntry(info->Id) ||
+            entry == scripts.second || sObjectMgr->GetScriptName(entry->second) !=
+                "spell_ascension_gaze_of_theradras" || ++entry != scripts.second ||
+            !helper || helper->IsPassive() || helper->IsDeprecatedForPlayers ||
+            helper->GetDuration() != 8000 || helper->RecoveryTime || helper->CategoryRecoveryTime ||
+            helper->ManaCost || helper->ManaCostPercentage || helper->ProcFlags || helper->ProcCharges != 1 ||
+            helperScripts.first != helperScripts.second || !slowProc || slowProc->SchoolMask ||
+            slowProc->SpellFamilyName || slowProc->SpellFamilyMask || slowProc->ProcFlags != 68 ||
+            slowProc->SpellTypeMask != 1 || slowProc->SpellPhaseMask != 2 || slowProc->HitMask != 12287 ||
+            slowProc->AttributesMask || slowProc->DisableEffectsMask || slowProc->ProcsPerMinute ||
+            slowProc->Chance != 100 || slowProc->Cooldown.count() || slowProc->Charges != 1 ||
+            !helper->HasAttribute(SPELL_ATTR0_CU_AURA_CANNOT_BE_SAVED))
+            return false;
+        for (std::size_t index = 0; index < 3; ++index)
+        {
+            auto const& effect = info->Effects[index];
+            auto const& slow = helper->Effects[index];
+            if (effect.BasePoints != (index == 2 ? -1 : 0) || effect.DieSides != 1 ||
+                effect.RealPointsPerLevel || effect.MiscValue || effect.MiscValueB ||
+                slow.Effect != (index == 0 ? SPELL_EFFECT_APPLY_AURA : 0u) ||
+                slow.ApplyAuraName != (index == 0 ? SPELL_AURA_MOD_MELEE_RANGED_HASTE : 0u) ||
+                slow.BasePoints != (index == 0 ? -51 : index == 2 ? -1 : 0) ||
+                slow.DieSides != (index == 1 ? 0 : 1) || slow.RealPointsPerLevel ||
+                slow.TargetA.GetTarget() != (index == 0 ? TARGET_UNIT_TARGET_ENEMY : 0u) ||
+                slow.TargetB.GetTarget() || slow.TriggerSpell || slow.MiscValue || slow.MiscValueB)
+                return false;
+        }
+    }
     if (profile.Definition.AbilityId == 954534 &&
         (info->SpellFamilyName != 20 || info->TargetCreatureType != 8 || info->GetDuration() != 40000 ||
             info->RecoveryTime || info->Effects[EFFECT_0].BasePoints != -1 ||

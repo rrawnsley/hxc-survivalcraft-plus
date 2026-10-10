@@ -742,6 +742,16 @@ def build_drafts(candidates, root):
                         v.get('miscValue'), v.get('basePoints')) for v in details] != expected):
                 raise ValueError('Reviewed lock utility source/raw evidence changed')
             required.append('native-lock-requirements-and-existing-skill-progression-preserved')
+        if (class_id, ability_id) == (31, 805919):
+            raw = members[ability_id].get('rawDbc', {})
+            details = raw.get('effectDetails', [])
+            expected = [(114, 0, 6, 0, 0, 0), (6, 11, 6, 0, 0, 0), (0, 0, 0, 0, 0, -1)]
+            if (len(ranks) != 1 or ranks[0]['characterLevel'] != 12 or raw.get('spellLevel') != 10 or
+                    raw.get('passive') is not False or raw.get('rankLabel') or len(details) != 3 or
+                    [(v.get('effectId'), v.get('auraId'), v.get('implicitTargetA'), v.get('implicitTargetB'),
+                      v.get('triggerSpellId'), v.get('basePoints')) for v in details] != expected):
+                raise ValueError('Reviewed native Gaze of Theradras source/raw evidence changed')
+            required.append('native-taunt-new-victim-conditional-attack-interval-slow-and-expiry-not-practice')
         if (class_id, ability_id) == (32, 560316):
             raw = members[ability_id].get('rawDbc', {})
             details = raw.get('effectDetails', [])

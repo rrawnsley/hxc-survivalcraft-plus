@@ -667,6 +667,14 @@ function Model.PracticeRules(ability, saved)
             .. " Prepare one upcoming mastery milestone. " .. LearnText(ability.acquisitionSource)
     end
     if Model.IsFixed(ability) then
+        if ability.abilityId == 805919 then
+            return "Gaze of Theradras has one native rank, learned at character level 12, and no practice levels. "
+                .. LearnText(ability.acquisitionSource)
+                .. " Taunts an enemy for three seconds. If its victim changes to you,"
+                .. " its melee and ranged attack intervals increase by 50% for up to eight seconds."
+                .. " The next qualifying melee or ranged auto-attack consumes the slow. "
+                .. " Its eight-second cooldown stays unchanged; using it earns no practice."
+        end
         if ability.abilityId == 560316 then
             return "Homebound Runestone has one native rank, learned at character level 32, and no practice levels. "
                 .. LearnText(ability.acquisitionSource)

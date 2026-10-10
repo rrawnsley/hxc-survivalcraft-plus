@@ -190,6 +190,15 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
         assert(string.find(Model.PracticeRules(ability), "armor and Nature resistance", 1, true))
         assert(string.find(Model.PracticeRules(ability), "Switching tattoos pauses Earth practice", 1, true))
     end
+    if ability.abilityId == 805919 then
+        assert(Model.IsFixed(ability) and #ability.ranks == 1)
+        assert(ability.ranks[1].characterLevel == 12)
+        local rules = Model.PracticeRules(ability)
+        assert(string.find(rules, "victim changes to you", 1, true))
+        assert(string.find(rules, "attack intervals increase by 50%", 1, true))
+        assert(string.find(rules, "auto-attack consumes the slow", 1, true))
+        assert(string.find(rules, "using it earns no practice", 1, true))
+    end
     if ability.kind == 2 then
         assert(Model.IsMastery(ability) and #ability.rewards == 3)
         if ability.abilityId == 712483 then
@@ -269,7 +278,7 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
     end
     count = count + 1
 end
-assert(count == 950)
-assert(kinds[1] == 552 and kinds[2] == 53 and kinds[3] == 345)
+assert(count == 953)
+assert(kinds[1] == 552 and kinds[2] == 53 and kinds[3] == 348)
 for classId = 12, 32 do assert(classes[classId]) end
-print("PASS: 950 typed snapshots across 21 classes: 552 ranked, 53 mastery, 345 fixed and menu rendering")
+print("PASS: 953 typed snapshots across 21 classes: 552 ranked, 53 mastery, 348 fixed and menu rendering")
