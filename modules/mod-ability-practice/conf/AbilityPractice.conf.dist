@@ -9,6 +9,13 @@ AbilityPractice.AllowDevelopmentObservation = 0
 # Reloadable. Removed characters keep their saved progress/learned ranks and return to native progression.
 AbilityPractice.DevelopmentCharacterGuids = ""
 
+# Automatically enroll new human characters from selected CoA classes (12 through 32).
+# Set the minimum GUID once to the next character ID before opening the pilot. Existing IDs stay native.
+# Reloadable; both fields must be configured together. Explicit character selection can coexist.
+# Malformed fields disable enrollment. Realm-wide enrollment cannot coexist with this selection.
+AbilityPractice.DevelopmentNewCharacterClassIds = ""
+AbilityPractice.DevelopmentNewCharacterMinimumGuid = "0"
+
 # Optional enrollment for all existing/future characters whose class has a loaded practice profile.
 # Startup-only, disabled by default; use only on an isolated server until runtime qualification.
 # Requires both enable flags, valid native data and an empty DevelopmentCharacterGuids setting.

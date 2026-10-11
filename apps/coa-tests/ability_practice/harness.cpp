@@ -1,3 +1,4 @@
+#include "AbilityPracticeEnrollment.h"
 #include "AbilityPracticeProgression.h"
 #include "AbilityPracticeCatalog.h"
 #include "AbilityPracticeActions.h"
@@ -1391,6 +1392,32 @@ void CheckScriptedDamageReceipts()
 
 int main(int argc, char** argv)
 {
+    auto const enrollment = ParseCharacterEnrollment("10", "13,16,24,27,29", "100");
+    assert(enrollment && !enrollment->empty() && enrollment->size() == 1);
+    assert(enrollment->Matches(10, 12));
+    assert(!enrollment->Matches(99, 24));
+    for (auto const classId : { 13U, 16U, 24U, 27U, 29U })
+    {
+        assert(enrollment->Matches(100, classId));
+        assert(enrollment->Matches(101, classId));
+    }
+    assert(!enrollment->Matches(100, 12));
+    assert(!enrollment->Matches(4294967296ULL, 24));
+    assert(ParseCharacterEnrollment("")->empty());
+    assert(!ParseCharacterEnrollment("1,1"));
+    assert(!ParseCharacterEnrollment("0"));
+    assert(!ParseCharacterEnrollment("4294967296"));
+    assert(!ParseCharacterEnrollment("1,"));
+    assert(!ParseCharacterEnrollment("", "24,24", "100"));
+    assert(!ParseCharacterEnrollment("", "11", "100"));
+    assert(!ParseCharacterEnrollment("", "33", "100"));
+    assert(!ParseCharacterEnrollment("", "24", "0"));
+    assert(!ParseCharacterEnrollment("", "", "100"));
+    assert(!ParseCharacterEnrollment("", "24", "-1"));
+    assert(!ParseCharacterEnrollment("", "24", "4294967296"));
+    assert(!ParseCharacterEnrollment("", "24", "100x"));
+    std::cout << "PASS: new-character class enrollment, existing-character exclusion and malformed rejection\n";
+
     std::array const bands = { TrainingBand{ 1, 30, 2 }, TrainingBand{ 20, 30, 1 } };
     TrainingPolicy const policy{ bands };
     CheckBuffReceipts();

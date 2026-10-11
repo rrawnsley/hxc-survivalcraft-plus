@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "AbilityPracticeDevelopment.h"
+#include "AbilityPracticeEnrollment.h"
 #include "AbilityPracticeCatchup.h"
 #include "AbilityPracticeDevelopmentSamples.h"
 #include "AbilityPracticeDevelopmentPeriodic.h"
@@ -344,7 +345,7 @@ bool Requested = false;
 bool DevelopmentAllowed = false;
 bool Ready = false;
 bool CharacterSelectionReady = false;
-using CharacterSelection = std::unordered_set<std::uint64_t>;
+using CharacterSelection = Practice::CharacterEnrollment;
 std::atomic<std::shared_ptr<CharacterSelection const>> SelectedCharacters;
 std::atomic<bool> RealmEnrollment{ false };
 bool RankRequested = false;
@@ -2855,32 +2856,9 @@ bool MatchesTrainerRankBoundary(Practice::AbilityDefinition const& ability)
 
 std::shared_ptr<CharacterSelection const> ParseSelectedCharacters(std::string_view setting)
 {
-    if (setting.size() > 4096)
-        return {};
-    auto selection = std::make_shared<CharacterSelection>();
-    if (setting.empty())
-        return selection;
-    while (!setting.empty())
-    {
-        std::size_t const delimiter = setting.find(',');
-        std::string_view token = setting.substr(0, delimiter);
-        std::size_t const first = token.find_first_not_of(" \t");
-        if (first == std::string_view::npos)
-            return {};
-        token = token.substr(first, token.find_last_not_of(" \t") - first + 1);
-        std::uint32_t characterId = 0;
-        auto const parsed = std::from_chars(token.data(), token.data() + token.size(), characterId);
-        if (parsed.ec != std::errc{} || parsed.ptr != token.data() + token.size() || !characterId ||
-            !selection->insert(ObjectGuid::Create<HighGuid::Player>(characterId).GetRawValue()).second ||
-            selection->size() > 128)
-            return {};
-        if (delimiter == std::string_view::npos)
-            break;
-        setting.remove_prefix(delimiter + 1);
-        if (setting.empty())
-            return {};
-    }
-    return selection;
+    return Practice::ParseCharacterEnrollment(setting,
+        sConfigMgr->GetOption<std::string>("AbilityPractice.DevelopmentNewCharacterClassIds", ""),
+        sConfigMgr->GetOption<std::string>("AbilityPractice.DevelopmentNewCharacterMinimumGuid", "0"));
 }
 
 bool IsDevelopmentPlayer(Player const* player)
@@ -2892,7 +2870,7 @@ bool IsDevelopmentPlayer(Player const* player)
         return false;
     if (RealmEnrollment.load())
         return selection->empty() && ProfileLookup && !ProfileLookup->ForClass(player->getClass()).empty();
-    return selection->contains(player->GetGUID().GetRawValue());
+    return selection->Matches(player->GetGUID().GetRawValue(), player->getClass());
 }
 
 Practice::AbilityProfile const* FindProfile(Player const* player, std::uint32_t spellId)
@@ -4220,11 +4198,14 @@ public:
             LOG_ERROR("module.ability_practice", "Rejected simultaneous realm and character enrollment; effects disabled");
         LOG_INFO("module.ability_practice", "Development character selection: valid={}, selected count={}",
             static_cast<bool>(selected), selected ? selected->size() : 0);
+        LOG_INFO("module.ability_practice", "New-character practice enrollment: classes={}, minimum GUID={}",
+            selected ? selected->NewCharacterClasses.size() : 0, selected ? selected->NewCharacterMinimumGuid : 0);
         Active.store(Requested && DevelopmentAllowed && Ready && CharacterSelectionReady);
         RankActive.store(Requested && DevelopmentAllowed && Ready && CharacterSelectionReady && RankRequested);
         for (auto entry = Sessions.begin(); entry != Sessions.end();)
         {
-            if (!selected || (realmEnrollment ? !selected->empty() : !selected->contains(entry->first)))
+            Player const* player = ObjectAccessor::FindPlayer(ObjectGuid(entry->first));
+            if (!CharacterSelectionReady || !player || !IsDevelopmentPlayer(player))
             {
                 entry = Sessions.erase(entry);
                 continue;
