@@ -1,23 +1,29 @@
 # Ability practice development and selected-character pilot
 
-## Current pilot release — 11 October 2026
+## Current normal-server pilot release — 11 October 2026
 
-The tested server candidate is installed on the normal CoA realm for a selected-character Pyromancer pilot.
-Realm-wide enrollment is disabled; the selection is empty until the user's new character is identified.
-The full addon 0.5.10-development is published through launcher 1.3.18 and installed in the normal client.
-The broader all-class feature remains incomplete, with 26 ranked groups pending.
+New human characters in Stormbringer16, Sun Cleric27, Venomancer29, Witch Doctor13 and Pyromancer24
+are automatically enrolled on the normal CoA realm. The fixed creation cutoff is character GUID66058.
+Older characters and other classes retain native progression. Explicit GUID enrollment remains supported;
+realm-wide enrollment is disabled. Create an allowed race/class through the regular launcher and use /practice.
+The full addon0.5.10-development is published through launcher1.3.18. No addon change was needed for class enrollment.
 
-Source 116c206af integrates current live core 0356c6e08 with practice while retaining playerbots21208444.
-Production executable SHA25665821fd045ce7e67f836fb21eabcee80092fd762c44cc6495938e1ea5187bfd8
-passed its build and three real-clock Pyromancer cases in20261011-205856. That aggregate failed solely on
-an absent Lua dependency, subsequently installed in the ignored verification cache.
-The corrected selected-character fixture87663e2b3 exercises a native spellbook purchase for the unselected
-Pyromancer.20261011-212258 VERIFY ALL: PASSED: source9, harness198policies/7164comparisons/998typed
-snapshots and one real-clock selected/unselected case. Build reused; unit stage skipped; no batch sensitivity.
-An earlier fixture incorrectly assumed native automatic learning; it failed and was corrected without gameplay changes.
+132a2c44a implements strict reloadable class/cutoff selection, published as an immutable enrollment snapshot.
+Missing paired settings, duplicates, out-of-range classes and invalid/overflowing cutoffs reject enrollment.
+Config reload removes excluded sessions and old receipts; learned ranks and saved progress are retained.
+The native automatic-enrollment fixture0b3807a93 accounts for the test runner's actor creation order.
+Its first version gave the intended new actor the old GUID and failed; the fixture was corrected without gameplay changes.
 
-Remaining player acceptance: initial client login, menu appearance, ordinary combat pacing and rank feedback.
-Historical qualification notes below describe their dated state, including earlier absence of production changes.
+20261011-220017 VERIFY ALL: PASSED: ability-practice harness and ten real-clock class/menu cases, including
+native rank boundaries and shared greater variants. 20261011-220621 source/build/harness passed but gameplay
+failed on the fixture's wrong GUID assumption. 20261011-221327 VERIFY ALL: PASSED: source9, harness with
+198policies/7164comparisons/998typed snapshots and the corrected real-clock new/old-character case.
+The44.9s production build is reused in the final run; unit stage skipped; no batch sensitivity.
+Live binary SHA25616cfcf93499116dd629306d1af7a08be34e22c4c29b7aa46217ee23cfc80bbd4.
+Public login/world and live enrollment classes5/minimum66058/dataReadytrue are confirmed.
+
+The broader all-class release still has26ranked groups pending. Player acceptance of menu pixels and ordinary
+combat pacing remains outstanding. Historical notes below describe their dated state.
 
 ## Latest isolated qualification (9 October 2026)
 
