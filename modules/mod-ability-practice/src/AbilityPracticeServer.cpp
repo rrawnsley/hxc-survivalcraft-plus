@@ -1377,6 +1377,27 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
                 info->Effects[EFFECT_0].MiscValueB)
                 return false;
         }
+        if (profile.Definition.ClassId == 15 && profile.Definition.AbilityId == 680535)
+        {
+            constexpr std::array spells{ 680535u, 680584u, 680585u };
+            constexpr std::array levels{ 44u, 52u, 60u };
+            constexpr std::array amounts{ 44, 49, 59 };
+            auto const rank = std::find(spells.begin(), spells.end(), info->Id);
+            auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+            auto const groups = sSpellMgr->GetSpellSpellGroupMapBounds(info->Id);
+            if (rank == spells.end() || info->SpellFamilyName != 21 || info->SpellFamilyFlags[0] ||
+                info->SpellFamilyFlags[1] || info->SpellFamilyFlags[2] || scripts.first != scripts.second ||
+                groups.first != groups.second || info->GetDuration() != -1)
+                return false;
+            auto const index = static_cast<std::size_t>(rank - spells.begin());
+            if (info->SpellLevel != levels[index] || info->BaseLevel != levels[index] || info->MaxLevel ||
+                info->Effects[EFFECT_0].BasePoints != amounts[index] || info->Effects[EFFECT_1].BasePoints != 4)
+                return false;
+            for (std::size_t slot = 0; slot < 2; ++slot)
+                if (info->Effects[slot].DieSides != 1 || info->Effects[slot].RealPointsPerLevel ||
+                    info->Effects[slot].MiscValueB)
+                    return false;
+        }
         if (Practice::DevelopmentBuffs::IsWaterTattoo(profile))
         {
             constexpr std::array<std::int32_t, 6> tattoos{ 801094, 801106, 801107, 802630, 803748, 807834 };
@@ -2860,7 +2881,8 @@ bool EffectiveBuffComponent(Player* player, AuraApplication const& application, 
             aura != SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE && aura != SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT &&
             aura != SPELL_AURA_MOD_ATTACK_POWER && aura != SPELL_AURA_MOD_RANGED_ATTACK_POWER &&
             aura != SPELL_AURA_HASTE_SPELLS && aura != SPELL_AURA_MOD_CRIT_DAMAGE_BONUS &&
-            aura != SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL && aura != SPELL_AURA_MOD_HEALING) ||
+            aura != SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL && aura != SPELL_AURA_MOD_HEALING &&
+            aura != SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE) ||
         !effect || effect->GetAuraType() != aura || effect->GetMiscValue() != selector ||
         (costReduction ? ((rankedCostReduction ? effect->GetAmount() >= 0 : effect->GetAmount() != -5) ||
             selector != 127) : durationReduction ?

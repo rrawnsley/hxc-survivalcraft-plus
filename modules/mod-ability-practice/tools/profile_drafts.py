@@ -244,7 +244,7 @@ def reviewed_stat_buffs(root):
         leyline = (class_id, ability_id, target, stat, aura, effect_index) in {
             (32, 561260, 57, 126, 115, 1), (20, 1108459, 57, 126, 115, 1), (22, 572633, 57, 126, 115, 1)}
         party_resistance = (class_id, ability_id, target, stat, aura, effect_index) in {
-            (25, 1119881, 1, 32, 143, 0), (24, 1119901, 1, 4, 143, 0)}
+            (25, 1119881, 1, 32, 143, 0), (24, 1119901, 1, 4, 143, 0), (15, 680535, 1, 32, 143, 0)}
         nature_resistance = (class_id, ability_id, target, stat, aura, effect_index) == (31, 581314, 57, 8, 143, 0)
         if (not 12 <= class_id <= 32 or not ability_id or
                 (target not in {21, 56} and not self_buff and not party_resistance and not leyline and
@@ -275,7 +275,7 @@ def reviewed_stat_buffs(root):
     secondary_matches = list(re.finditer(pattern, secondary_body[1]))
     if re.sub(pattern, '', secondary_body[1]).replace(',', '').strip():
         raise ValueError('Unsupported secondary buff mechanic declaration')
-    expected_secondary = {(32, 803748, 1): (1, 1, 245), (32, 803748, 2): (1, 2, 245),
+    expected_secondary = {(15, 680535, 1): (1, 2, 137), (32, 803748, 1): (1, 1, 245), (32, 803748, 2): (1, 2, 245),
                           (32, 801106, 1): (1, 127, 163), (16, 680282, 1): (1, 0, 216), (32, 801107, 1): (1, 127, 72),
                           (32, 801094, 1): (1, 8, 22), (14, 523478, 1): (21, -1, 29),
                           (15, 523485, 1): (21, -1, 29),
@@ -879,7 +879,7 @@ def build_drafts(candidates, root):
             mechanic = stat_buffs[(class_id, ability_id)]
             effect_index = mechanic['effectIndex']
             expected = [(0, 0, 0, 0, 0, 0)] * 3
-            primary_effect = 65 if (class_id, ability_id) in {(25, 1119881), (24, 1119901)} else 6
+            primary_effect = 65 if (class_id, ability_id) in {(25, 1119881), (24, 1119901), (15, 680535)} else 6
             expected[effect_index] = (primary_effect, mechanic['auraId'], mechanic['targetA'],
                                        0, 0, mechanic['statSelector'])
             if (class_id, ability_id) in {(32, 561260), (20, 1108459), (22, 572633)}:

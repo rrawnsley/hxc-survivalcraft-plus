@@ -515,6 +515,13 @@ inline constexpr std::array AscensionOfRagnaros = {
 };
 inline constexpr auto AscensionOfRagnarosCaps = Development::RankCaps(AscensionOfRagnaros);
 
+inline constexpr std::array DarkAura = {
+    AbilityRank{ 680535, 1, { 44, 1 } },
+    AbilityRank{ 680584, 2, { 52, 10 } },
+    AbilityRank{ 680585, 3, { 60, 20 } }
+};
+inline constexpr auto DarkAuraCaps = Development::RankCaps(DarkAura);
+
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 32, 561260, AbilityKind::Ranked, LeylineInscription, LeylineInscriptionCaps },
@@ -695,6 +702,9 @@ inline constexpr std::array Profiles = {
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 24, 1119901, AbilityKind::Ranked, AscensionOfRagnaros, AscensionOfRagnarosCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 15, 680535, AbilityKind::Ranked, DarkAura, DarkAuraCaps },
         Development::Policy, OutcomeKind::Damage }
 };
 
@@ -793,12 +803,14 @@ inline constexpr std::array Mechanics = {
     Mechanic{ 31, 581314, 57, 8, 143 },
     Mechanic{ 20, 1108459, 57, 126, 115, 1 },
     Mechanic{ 22, 572633, 57, 126, 115, 1 },
-    Mechanic{ 24, 1119901, 1, 4, 143 }
+    Mechanic{ 24, 1119901, 1, 4, 143 },
+    Mechanic{ 15, 680535, 1, 32, 143 }
 };
 
 static_assert(Mechanics.size() == Profiles.size());
 
 inline constexpr std::array SecondaryMechanics = {
+    Mechanic{ 15, 680535, 1, 2, 137, 1 },
     Mechanic{ 32, 803748, 1, 1, 245, 1 },
     Mechanic{ 32, 803748, 1, 2, 245, 2 },
     Mechanic{ 32, 801106, 1, 127, 163, 1 },
@@ -895,7 +907,8 @@ inline bool IsAscensionOfRagnaros(AbilityProfile const& profile)
 
 inline bool IsPartyResistance(AbilityProfile const& profile)
 {
-    return IsVoidResilience(profile) || IsAscensionOfRagnaros(profile);
+    return IsVoidResilience(profile) || IsAscensionOfRagnaros(profile) ||
+        (profile.Definition.ClassId == 15 && profile.Definition.AbilityId == 680535 && IsSupportedStatBuff(profile));
 }
 
 inline bool IsWaterTattoo(AbilityProfile const& profile)
