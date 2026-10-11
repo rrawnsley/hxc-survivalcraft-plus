@@ -5,14 +5,14 @@
   "timeout_ms": 90000,
   "players": [
     {
-      "id": "outsider",
+      "id": "existing",
       "race": 1,
       "class": 24,
       "level": 9,
       "spell_hit_rating": 10000
     },
     {
-      "id": "caster",
+      "id": "newcaster",
       "race": 1,
       "class": 24,
       "level": 9,
@@ -22,7 +22,7 @@
   "creatures": [
     {
       "id": "target",
-      "owner": "caster",
+      "owner": "newcaster",
       "entry": 36,
       "level": 9,
       "health": 100000,
@@ -32,7 +32,7 @@
   "steps": [
     {
       "action": "learn",
-      "actor": "outsider",
+      "actor": "existing",
       "spell": 803950
     },
     {
@@ -41,51 +41,51 @@
     },
     {
       "action": "learn",
-      "actor": "caster",
+      "actor": "newcaster",
       "spell": 803950
     },
     {
       "action": "set_player_setting",
-      "actor": "caster",
+      "actor": "newcaster",
       "source": "core.hxc.ability_practice.24.803950",
       "index": 0,
       "value": 1
     },
     {
       "action": "set_player_setting",
-      "actor": "caster",
+      "actor": "newcaster",
       "source": "core.hxc.ability_practice.24.803950",
       "index": 1,
       "value": 4
     },
     {
       "action": "set_player_setting",
-      "actor": "caster",
+      "actor": "newcaster",
       "source": "core.hxc.ability_practice.24.803950",
       "index": 2,
       "value": 1
     },
     {
       "action": "set_player_setting",
-      "actor": "caster",
+      "actor": "newcaster",
       "source": "core.hxc.ability_practice.24.803950",
       "index": 3,
       "value": 10
     },
     {
       "action": "set_player_setting",
-      "actor": "caster",
+      "actor": "newcaster",
       "source": "core.hxc.ability_practice.24.803950",
       "index": 4,
       "value": 0
     },
     {
       "action": "relog",
-      "actor": "caster"
+      "actor": "newcaster"
     },
     {
       "action": "cast",
-      "actor": "caster",
+      "actor": "newcaster",
       "spell": 803950,
       "target": "target"
     },
@@ -95,7 +95,7 @@
     },
     {
       "action": "assert",
-      "actor": "caster",
+      "actor": "newcaster",
       "metric": "player_setting",
       "source": "core.hxc.ability_practice.24.803950",
       "index": 3,
@@ -103,7 +103,7 @@
     },
     {
       "action": "assert",
-      "actor": "caster",
+      "actor": "newcaster",
       "metric": "player_setting",
       "source": "core.hxc.ability_practice.24.803950",
       "index": 4,
@@ -112,7 +112,7 @@
     },
     {
       "action": "assert",
-      "actor": "caster",
+      "actor": "newcaster",
       "metric": "knows_spell",
       "spell": 503231,
       "equals": 0
@@ -124,12 +124,12 @@
     },
     {
       "action": "set_level",
-      "actor": "caster",
+      "actor": "newcaster",
       "value": 10
     },
     {
       "action": "assert",
-      "actor": "caster",
+      "actor": "newcaster",
       "metric": "knows_spell",
       "spell": 503231,
       "equals": 1,
@@ -137,18 +137,18 @@
     },
     {
       "action": "reset_cooldown",
-      "actor": "caster",
+      "actor": "newcaster",
       "spell": 503231
     },
     {
       "action": "set_power",
-      "actor": "caster",
+      "actor": "newcaster",
       "power": 0,
       "value": 100
     },
     {
       "action": "cast",
-      "actor": "caster",
+      "actor": "newcaster",
       "spell": 503231,
       "target": "target"
     },
@@ -158,7 +158,7 @@
     },
     {
       "action": "assert",
-      "actor": "caster",
+      "actor": "newcaster",
       "metric": "cast_failure",
       "spell": 503231,
       "equals": 0,
@@ -166,7 +166,7 @@
     },
     {
       "action": "assert",
-      "actor": "caster",
+      "actor": "newcaster",
       "metric": "spell_damage_count",
       "spell": 503231,
       "target": "target",
@@ -175,7 +175,7 @@
     },
     {
       "action": "assert",
-      "actor": "caster",
+      "actor": "newcaster",
       "metric": "player_setting",
       "source": "core.hxc.ability_practice.24.803950",
       "index": 4,
@@ -184,27 +184,27 @@
     },
     {
       "action": "set_level",
-      "actor": "outsider",
+      "actor": "existing",
       "value": 10
     },
     {
       "action": "money",
-      "actor": "outsider",
+      "actor": "existing",
       "copper": 1000000
     },
     {
       "action": "learn",
-      "actor": "outsider",
+      "actor": "existing",
       "spell": 97930
     },
     {
       "action": "cast",
-      "actor": "outsider",
+      "actor": "existing",
       "spell": 97930
     },
     {
       "action": "assert",
-      "actor": "outsider",
+      "actor": "existing",
       "metric": "owned_creature_count",
       "entry": 75115,
       "equals": 1,
@@ -212,23 +212,23 @@
     },
     {
       "action": "gossip_hello",
-      "actor": "outsider"
+      "actor": "existing"
     },
     {
       "action": "assert",
-      "actor": "outsider",
+      "actor": "existing",
       "metric": "trainer_window_state",
       "spell": 503231,
       "equals": 0
     },
     {
       "action": "trainer_buy",
-      "actor": "outsider",
+      "actor": "existing",
       "spell": 503231
     },
     {
       "action": "assert",
-      "actor": "outsider",
+      "actor": "existing",
       "metric": "knows_spell",
       "spell": 503231,
       "equals": 1,
@@ -236,7 +236,7 @@
     },
     {
       "action": "assert",
-      "actor": "outsider",
+      "actor": "existing",
       "metric": "player_setting",
       "source": "core.hxc.ability_practice.24.803950",
       "index": 0,
