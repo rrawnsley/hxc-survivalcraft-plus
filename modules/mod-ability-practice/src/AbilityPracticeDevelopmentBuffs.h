@@ -522,6 +522,29 @@ inline constexpr std::array DarkAura = {
 };
 inline constexpr auto DarkAuraCaps = Development::RankCaps(DarkAura);
 
+inline constexpr std::array Bloodthorns = {
+    AbilityRank{ 802313, 1, { 14, 1 } },
+    AbilityRank{ 501662, 2, { 16, 10 } },
+    AbilityRank{ 501663, 3, { 26, 20 } },
+    AbilityRank{ 501664, 4, { 36, 40 } },
+    AbilityRank{ 501665, 5, { 46, 60 } },
+    AbilityRank{ 501666, 6, { 56, 80 } },
+    AbilityRank{ 501667, 7, { 60, 100 } },
+    AbilityRank{ 501668, 8, { 66, 120 } },
+    AbilityRank{ 501669, 9, { 76, 140 } },
+    AbilityRank{ 501670, 10, { 80, 160 } }
+};
+inline constexpr auto BloodthornsCaps = Development::RankCaps(Bloodthorns);
+
+inline constexpr std::array AscensionOfExecutus = {
+    AbilityRank{ 1119754, 1, { 18, 1 } },
+    AbilityRank{ 1119755, 2, { 26, 10 } },
+    AbilityRank{ 1119756, 3, { 34, 20 } },
+    AbilityRank{ 1119757, 4, { 44, 40 } },
+    AbilityRank{ 1119758, 5, { 54, 60 } }
+};
+inline constexpr auto AscensionOfExecutusCaps = Development::RankCaps(AscensionOfExecutus);
+
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 32, 561260, AbilityKind::Ranked, LeylineInscription, LeylineInscriptionCaps },
@@ -705,6 +728,12 @@ inline constexpr std::array Profiles = {
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 15, 680535, AbilityKind::Ranked, DarkAura, DarkAuraCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 20, 802313, AbilityKind::Ranked, Bloodthorns, BloodthornsCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 24, 1119754, AbilityKind::Ranked, AscensionOfExecutus, AscensionOfExecutusCaps },
         Development::Policy, OutcomeKind::Damage }
 };
 
@@ -804,7 +833,9 @@ inline constexpr std::array Mechanics = {
     Mechanic{ 20, 1108459, 57, 126, 115, 1 },
     Mechanic{ 22, 572633, 57, 126, 115, 1 },
     Mechanic{ 24, 1119901, 1, 4, 143 },
-    Mechanic{ 15, 680535, 1, 32, 143 }
+    Mechanic{ 15, 680535, 1, 32, 143 },
+    Mechanic{ 20, 802313, 21, 0, 15 },
+    Mechanic{ 24, 1119754, 1, 4, 15 }
 };
 
 static_assert(Mechanics.size() == Profiles.size());
@@ -905,9 +936,16 @@ inline bool IsAscensionOfRagnaros(AbilityProfile const& profile)
         IsSupportedStatBuff(profile);
 }
 
-inline bool IsPartyResistance(AbilityProfile const& profile)
+inline bool IsDamageShield(AbilityProfile const& profile)
+{
+    return ((profile.Definition.ClassId == 20 && profile.Definition.AbilityId == 802313) ||
+        (profile.Definition.ClassId == 24 && profile.Definition.AbilityId == 1119754)) && IsSupportedStatBuff(profile);
+}
+
+inline bool IsRaidBuff(AbilityProfile const& profile)
 {
     return IsVoidResilience(profile) || IsAscensionOfRagnaros(profile) ||
+        (profile.Definition.ClassId == 24 && profile.Definition.AbilityId == 1119754 && IsSupportedStatBuff(profile)) ||
         (profile.Definition.ClassId == 15 && profile.Definition.AbilityId == 680535 && IsSupportedStatBuff(profile));
 }
 

@@ -245,11 +245,13 @@ def reviewed_stat_buffs(root):
             (32, 561260, 57, 126, 115, 1), (20, 1108459, 57, 126, 115, 1), (22, 572633, 57, 126, 115, 1)}
         party_resistance = (class_id, ability_id, target, stat, aura, effect_index) in {
             (25, 1119881, 1, 32, 143, 0), (24, 1119901, 1, 4, 143, 0), (15, 680535, 1, 32, 143, 0)}
+        damage_shield = (class_id, ability_id, target, stat, aura, effect_index) in {
+            (20, 802313, 21, 0, 15, 0), (24, 1119754, 1, 4, 15, 0)}
         nature_resistance = (class_id, ability_id, target, stat, aura, effect_index) == (31, 581314, 57, 8, 143, 0)
         if (not 12 <= class_id <= 32 or not ability_id or
                 (target not in {21, 56} and not self_buff and not party_resistance and not leyline and
-                 not nature_resistance) or
-                not (self_buff or party_resistance or nature_resistance or leyline or aura == 29 and stat in range(5) or
+                 not nature_resistance and not damage_shield) or
+                not (self_buff or party_resistance or nature_resistance or leyline or damage_shield or aura == 29 and stat in range(5) or
                      aura == 345 and stat == 127 and target == 21 or
                      aura in {85, 99} and stat == 0 and target == 21 or
                      aura == 22 and stat == 1 and target == 21 and (class_id, ability_id) in {
@@ -879,7 +881,7 @@ def build_drafts(candidates, root):
             mechanic = stat_buffs[(class_id, ability_id)]
             effect_index = mechanic['effectIndex']
             expected = [(0, 0, 0, 0, 0, 0)] * 3
-            primary_effect = 65 if (class_id, ability_id) in {(25, 1119881), (24, 1119901), (15, 680535)} else 6
+            primary_effect = 65 if (class_id, ability_id) in {(25, 1119881), (24, 1119901), (15, 680535), (24, 1119754)} else 6
             expected[effect_index] = (primary_effect, mechanic['auraId'], mechanic['targetA'],
                                        0, 0, mechanic['statSelector'])
             if (class_id, ability_id) in {(32, 561260), (20, 1108459), (22, 572633)}:

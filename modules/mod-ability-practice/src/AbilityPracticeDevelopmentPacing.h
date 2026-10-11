@@ -3476,6 +3476,44 @@ inline constexpr std::array BandsClass15Ability680535 = {
     TrainingBand{ 10, 16200, 300 }
 };
 
+inline constexpr std::array RanksClass20Ability802313 = {
+    AbilityRank{ 802313, 1, { 14, 1 } },
+    AbilityRank{ 501662, 2, { 16, 10 } },
+    AbilityRank{ 501663, 3, { 26, 20 } },
+    AbilityRank{ 501664, 4, { 36, 40 } },
+    AbilityRank{ 501665, 5, { 46, 60 } },
+    AbilityRank{ 501666, 6, { 56, 80 } },
+    AbilityRank{ 501667, 7, { 60, 100 } },
+    AbilityRank{ 501668, 8, { 66, 120 } },
+    AbilityRank{ 501669, 9, { 76, 140 } },
+    AbilityRank{ 501670, 10, { 80, 160 } }
+};
+inline constexpr std::array BandsClass20Ability802313 = {
+    TrainingBand{ 1, 16200, 270 },
+    TrainingBand{ 10, 16200, 300 },
+    TrainingBand{ 20, 16200, 600 },
+    TrainingBand{ 40, 16200, 600 },
+    TrainingBand{ 60, 16200, 600 },
+    TrainingBand{ 80, 16200, 600 },
+    TrainingBand{ 100, 16200, 600 },
+    TrainingBand{ 120, 16200, 600 },
+    TrainingBand{ 140, 16200, 600 }
+};
+
+inline constexpr std::array RanksClass24Ability1119754 = {
+    AbilityRank{ 1119754, 1, { 18, 1 } },
+    AbilityRank{ 1119755, 2, { 26, 10 } },
+    AbilityRank{ 1119756, 3, { 34, 20 } },
+    AbilityRank{ 1119757, 4, { 44, 40 } },
+    AbilityRank{ 1119758, 5, { 54, 60 } }
+};
+inline constexpr std::array BandsClass24Ability1119754 = {
+    TrainingBand{ 1, 16200, 270 },
+    TrainingBand{ 10, 16200, 300 },
+    TrainingBand{ 20, 16200, 600 },
+    TrainingBand{ 40, 16200, 600 }
+};
+
 inline constexpr std::array Entries = {
     Entry{ 31, 581314, RanksClass31Ability581314, { BandsClass31Ability581314 } },
     Entry{ 32, 805380, RanksClass32Ability805380, { BandsClass32Ability805380 } },
@@ -3667,7 +3705,9 @@ inline constexpr std::array Entries = {
     Entry{ 20, 1108459, RanksClass20Ability1108459, { BandsClass20Ability1108459 } },
     Entry{ 22, 572633, RanksClass22Ability572633, { BandsClass22Ability572633 } },
     Entry{ 24, 1119901, RanksClass24Ability1119901, { BandsClass24Ability1119901 } },
-    Entry{ 15, 680535, RanksClass15Ability680535, { BandsClass15Ability680535 } }
+    Entry{ 15, 680535, RanksClass15Ability680535, { BandsClass15Ability680535 } },
+    Entry{ 20, 802313, RanksClass20Ability802313, { BandsClass20Ability802313 } },
+    Entry{ 24, 1119754, RanksClass24Ability1119754, { BandsClass24Ability1119754 } }
 };
 }
 

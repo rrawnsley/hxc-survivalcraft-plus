@@ -1398,6 +1398,25 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
                     info->Effects[slot].MiscValueB)
                     return false;
         }
+        if (Practice::DevelopmentBuffs::IsDamageShield(profile))
+        {
+            auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+            auto entry = scripts.first;
+            if (info->SpellFamilyName != profile.Definition.ClassId + 6)
+                return false;
+            if (profile.Definition.ClassId == 24)
+            {
+                if (entry == scripts.second ||
+                    sObjectMgr->GetScriptName(entry->second) != "aura_ascension_pyromancer_lifecycle" ||
+                    ++entry != scripts.second || info->GetDuration() != -1)
+                    return false;
+            }
+            else if (entry != scripts.second || info->GetDuration() != 1800000)
+                return false;
+            auto const& effect = info->Effects[EFFECT_0];
+            if (effect.BasePoints < 0 || effect.DieSides != 1 || effect.RealPointsPerLevel || effect.MiscValueB)
+                return false;
+        }
         if (Practice::DevelopmentBuffs::IsWaterTattoo(profile))
         {
             constexpr std::array<std::int32_t, 6> tattoos{ 801094, 801106, 801107, 802630, 803748, 807834 };
@@ -1581,7 +1600,7 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
                     return false;
                 continue;
             }
-            auto const primaryEffect = Practice::DevelopmentBuffs::IsPartyResistance(profile) ?
+            auto const primaryEffect = Practice::DevelopmentBuffs::IsRaidBuff(profile) ?
                 SPELL_EFFECT_APPLY_AREA_AURA_RAID : SPELL_EFFECT_APPLY_AURA;
             if (slot.Effect != (index == effectIndex ? primaryEffect : 0u) ||
                 slot.ApplyAuraName != (index == effectIndex ? Practice::DevelopmentBuffs::Aura(profile) : 0u) ||
@@ -2882,7 +2901,7 @@ bool EffectiveBuffComponent(Player* player, AuraApplication const& application, 
             aura != SPELL_AURA_MOD_ATTACK_POWER && aura != SPELL_AURA_MOD_RANGED_ATTACK_POWER &&
             aura != SPELL_AURA_HASTE_SPELLS && aura != SPELL_AURA_MOD_CRIT_DAMAGE_BONUS &&
             aura != SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL && aura != SPELL_AURA_MOD_HEALING &&
-            aura != SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE) ||
+            aura != SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE && aura != SPELL_AURA_DAMAGE_SHIELD) ||
         !effect || effect->GetAuraType() != aura || effect->GetMiscValue() != selector ||
         (costReduction ? ((rankedCostReduction ? effect->GetAmount() >= 0 : effect->GetAmount() != -5) ||
             selector != 127) : durationReduction ?
