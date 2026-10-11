@@ -56,7 +56,7 @@ def check_inventory():
     inventory = inventory_module.build_inventory(ROOT)
     assert inventory['summary']['classCount'] == 21
     assert len(inventory['sources']) == 6
-    assert [source['rows'] for source in inventory['sources']] == [847, 2709, 116, 27, 41, 3937]
+    assert [source['rows'] for source in inventory['sources']] == [847, 2710, 116, 27, 41, 3937]
     assert inventory == inventory_module.build_inventory(ROOT)
     development = (ROOT / 'modules/mod-ability-practice/src/AbilityPracticeDevelopment.h').read_text()
     defined = re.findall(r'AbilityRank\{\s*(\d+),\s*\d+,\s*\{\s*(\d+),\s*\d+\s*\}\s*\}', development)
