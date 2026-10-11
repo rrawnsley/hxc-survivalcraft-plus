@@ -471,11 +471,12 @@ void CheckCurrentRankPolicies()
 {
     std::uint32_t forecasts = 0;
     std::array<bool, 21> classes{};
-    assert(DevelopmentPacing::Entries.size() == 185);
+    assert(DevelopmentPacing::Entries.size() == 187);
     for (auto const& entry : DevelopmentPacing::Entries)
     {
         classes.at(entry.ClassId - 12) = true;
-        std::array<ProficiencyCap, 80> caps{};
+        std::vector<ProficiencyCap> caps(std::max<std::size_t>(
+            80, entry.ExpectedRanks.back().Requirement.CharacterLevel));
         for (std::size_t index = 0; index < caps.size(); ++index)
             caps[index] = { static_cast<std::uint32_t>(index + 1),
                 std::min(static_cast<std::uint32_t>((index + 1) * 5),
@@ -487,7 +488,7 @@ void CheckCurrentRankPolicies()
         assert(revised);
         profile.Definition.Caps = revised->Caps;
         profile.DefinitionVersion = 4;
-        for (std::uint32_t level = 1; level <= 80; ++level)
+        for (std::uint32_t level = 1; level <= caps.size(); ++level)
         {
             std::uint32_t permitted = entry.ExpectedRanks.back().Requirement.Proficiency;
             for (auto const& rank : entry.ExpectedRanks.subspan(1))
@@ -584,6 +585,19 @@ std::array<std::span<AbilityProfile const>, 2> MasteryCatalogs()
 
 void CheckMasteryFixedAndTrainerPolicies()
 {
+    assert(DevelopmentHelpers::Profiles.size() == 6);
+    for (auto const& profile : DevelopmentHelpers::Profiles)
+        if (auto const* mechanic = DevelopmentHelpers::TriggeredDamageFor(profile))
+        {
+            assert(DevelopmentHelpers::IsTriggeredDamageHelper(mechanic->ClassId, mechanic->HelperId));
+            assert(!DevelopmentHelpers::IsTriggeredDamageHelper(14, mechanic->HelperId));
+            for (auto const& rank : profile.Definition.Ranks)
+            {
+                assert(DevelopmentHelpers::IsTriggeredDamage(profile, rank.SpellId, mechanic->HelperId));
+                assert(!DevelopmentHelpers::IsTriggeredDamage(profile, rank.SpellId, 807554));
+            }
+            assert(!DevelopmentHelpers::IsTriggeredDamage(profile, mechanic->HelperId, mechanic->HelperId));
+        }
     assert(DevelopmentMastery::Profiles.size() == 6);
     auto const& bargain = DevelopmentMastery::ScriptedProfiles.front();
     assert(DevelopmentMastery::IsFelBargain(bargain));
@@ -1057,7 +1071,8 @@ void WriteTypedRankCases(std::string const& filename)
     {
         if (entry.ClassId == 31 && entry.AbilityId == 704101)
             continue;
-        std::array<ProficiencyCap, 80> caps{};
+        std::vector<ProficiencyCap> caps(std::max<std::size_t>(
+            80, entry.ExpectedRanks.back().Requirement.CharacterLevel));
         for (std::size_t index = 0; index < caps.size(); ++index)
             caps[index] = { static_cast<std::uint32_t>(index + 1),
                 std::min(static_cast<std::uint32_t>((index + 1) * 5),

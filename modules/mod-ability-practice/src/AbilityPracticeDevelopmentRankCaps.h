@@ -5,7 +5,7 @@
 
 #include "AbilityPracticeProfiles.h"
 
-#include <array>
+#include <vector>
 #include <optional>
 
 namespace AbilityPractice::DevelopmentRankCaps
@@ -15,7 +15,7 @@ inline constexpr std::uint32_t DefinitionVersion = 4;
 struct Entry
 {
     AbilityProfile Previous;
-    std::array<ProficiencyCap, 80> Caps;
+    std::vector<ProficiencyCap> Caps;
 };
 
 inline std::optional<Entry> Build(AbilityProfile const& profile)
@@ -23,9 +23,11 @@ inline std::optional<Entry> Build(AbilityProfile const& profile)
     auto const& ability = profile.Definition;
     if (ability.Kind != AbilityKind::Ranked || ability.Ranks.size() < 2 ||
         (profile.DefinitionVersion != 2 && profile.DefinitionVersion != 3) ||
-        ValidateDefinition(ability) != CatalogError::None || ability.Caps.size() != 80)
+        ValidateDefinition(ability) != CatalogError::None ||
+        ability.Caps.size() < 80 ||
+        ability.Caps.size() > 100)
         return std::nullopt;
-    Entry result{ profile, {} };
+    Entry result{ profile, std::vector<ProficiencyCap>(ability.Caps.size()) };
     for (std::size_t index = 0; index < result.Caps.size(); ++index)
     {
         std::uint32_t const level = static_cast<std::uint32_t>(index + 1);

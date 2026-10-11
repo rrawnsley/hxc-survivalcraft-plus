@@ -454,6 +454,7 @@ struct MenuSession
     Clock::time_point NextWaterSigilPractice{};
     Clock::time_point NextArcaneSigilPractice{};
     Clock::time_point NextGeodePractice{};
+    std::unordered_map<std::uint64_t, Clock::time_point> NextTriggeredDamagePractice;
     Clock::time_point NextEarthquakePractice{};
     Clock::time_point NextBellowPractice{};
     std::uint32_t OutgoingClass = 0;
@@ -809,6 +810,18 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
 {
     if (!info)
         return false;
+    if (HelpersRequested)
+        if (auto const* mechanic = Practice::DevelopmentHelpers::TriggeredDamageFor(profile))
+        {
+            auto const& effect = info->Effects[EFFECT_0];
+            SpellInfo const* helper = sSpellMgr->GetSpellInfo(mechanic->HelperId);
+            return effect.Effect == SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE && !effect.ApplyAuraName &&
+                effect.TriggerSpell == mechanic->HelperId && effect.TargetA.GetTarget() == mechanic->TargetA &&
+                effect.TargetB.GetTarget() == mechanic->TargetB && helper && !helper->IsPassive() &&
+                !helper->IsDeprecatedForPlayers && helper->Effects[EFFECT_0].Effect == SPELL_EFFECT_SCHOOL_DAMAGE &&
+                helper->Effects[EFFECT_0].TargetA.GetTarget() == TARGET_UNIT_TARGET_ENEMY &&
+                !helper->Effects[EFFECT_0].TargetB.GetTarget() && !helper->Effects[EFFECT_0].TriggerSpell;
+        }
     if (HelpersRequested && MasteryRequested && Practice::DevelopmentMastery::IsFelBargain(profile))
         return info->Id == 807942 && profile.Outcome == Practice::OutcomeKind::Healing;
     if (HelpersRequested && MasteryRequested && Practice::DevelopmentMastery::IsWaterSigil(profile))
@@ -3465,6 +3478,7 @@ bool IsScriptedDamage(Practice::AbilityProfile const* profile, std::uint32_t ori
             Practice::DevelopmentHelpers::IsTwinDamage(originId, helperId)) ||
             (Practice::DevelopmentHelpers::IsGeodeBarrage(*profile) &&
                 Practice::DevelopmentHelpers::IsGeodeDamage(originId, helperId)) ||
+            Practice::DevelopmentHelpers::IsTriggeredDamage(*profile, originId, helperId) ||
             IsDamagePalmSigil(*profile, originId, helperId)));
 }
 
@@ -3506,7 +3520,8 @@ void AwardScriptedDamage(Player* player, Spell* spell, Unit* target, std::uint32
     auto* nextPractice = Practice::DevelopmentHelpers::IsFireSigil(*profile) ?
         &found->second.NextFireSigilPractice : Practice::DevelopmentMastery::IsFrostSigil(*profile) ?
         &found->second.NextFrostSigilPractice : Practice::DevelopmentHelpers::IsGeodeBarrage(*profile) ?
-        &found->second.NextGeodePractice : nullptr;
+        &found->second.NextGeodePractice : Practice::DevelopmentHelpers::TriggeredDamageFor(*profile) ?
+        &found->second.NextTriggeredDamagePractice[ProfileKey(profile->Definition)] : nullptr;
     auto const now = Clock::now();
     if (nextPractice && now < *nextPractice)
     {
@@ -3530,6 +3545,8 @@ void AwardScriptedDamage(Player* player, Spell* spell, Unit* target, std::uint32
             Practice::DevelopmentHelpers::FirePracticeIntervalSeconds :
             Practice::DevelopmentHelpers::IsGeodeBarrage(*profile) ?
             Practice::DevelopmentHelpers::GeodePracticeIntervalSeconds :
+            Practice::DevelopmentHelpers::TriggeredDamageFor(*profile) ?
+            Practice::DevelopmentHelpers::TriggeredDamagePracticeIntervalSeconds :
             Practice::DevelopmentMastery::FrostPracticeIntervalSeconds);
     RecordAward(player, found->second, *profile, award);
 }
@@ -4502,12 +4519,16 @@ public:
             (helperId == 807012 || (PeriodicRequested && helperId == 807819) ||
                 (MasteryRequested && (helperId == 807825 || helperId == 807818)));
         bool const geodeHelper = HelpersRequested && player->getClass() == 31 && helperId == 803138;
-        if (!profile && !IsBuffObserver(player) && !scriptedDamage && !palmHelper && !geodeHelper)
+        bool const directTriggerHelper = HelpersRequested &&
+            Practice::DevelopmentHelpers::IsTriggeredDamageHelper(player->getClass(), helperId);
+        if (!profile && !IsBuffObserver(player) && !scriptedDamage && !palmHelper && !geodeHelper &&
+            !directTriggerHelper)
             return true;
         std::lock_guard lock(Mutex);
         spell->SetPracticeCast({});
         spell->SetScriptValue(PracticeBuffEligibilityKey, 0);
-        if (scriptedDamage && targets && spell->IsTriggered() && !triggeredByAura && !spell->m_CastItem &&
+        if ((scriptedDamage || directTriggerHelper) && targets && spell->IsTriggered() && !triggeredByAura &&
+            !spell->m_CastItem &&
             spell->m_castItemGUID.IsEmpty() && spell->GetOriginalCasterGUID() == player->GetGUID())
         {
             auto const receipt = CoAAbilityPractice::ScopedScriptedDamageCast::Take(

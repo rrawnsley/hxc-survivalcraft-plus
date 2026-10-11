@@ -57,6 +57,55 @@ inline constexpr std::array GeodeBarrage = {
 };
 inline constexpr auto GeodeCaps = Development::RankCaps(GeodeBarrage);
 inline constexpr std::uint32_t GeodePracticeIntervalSeconds = 5;
+inline constexpr std::array Shadowflare = {
+    AbilityRank{ 801669, 1, { 16, 1 } },
+    AbilityRank{ 501139, 2, { 22, 10 } },
+    AbilityRank{ 501140, 3, { 28, 20 } },
+    AbilityRank{ 501141, 4, { 34, 40 } },
+    AbilityRank{ 501142, 5, { 40, 60 } },
+    AbilityRank{ 501143, 6, { 46, 80 } },
+    AbilityRank{ 501144, 7, { 52, 100 } },
+    AbilityRank{ 501145, 8, { 58, 120 } },
+    AbilityRank{ 501146, 9, { 60, 140 } },
+    AbilityRank{ 501147, 10, { 76, 160 } },
+    AbilityRank{ 501148, 11, { 80, 180 } },
+    AbilityRank{ 501149, 12, { 84, 200 } },
+    AbilityRank{ 501150, 13, { 90, 220 } }
+};
+inline constexpr auto ShadowflareCaps = []
+{
+    std::array<ProficiencyCap, 90> result{};
+    for (std::uint32_t index = 0; index < result.size(); ++index)
+        result[index] = { index + 1, std::min((index + 1) * 5, Shadowflare.back().Requirement.Proficiency) };
+    return result;
+}();
+
+inline constexpr std::array SanguineRupture = {
+    AbilityRank{ 800774, 1, { 12, 1 } },
+    AbilityRank{ 802456, 2, { 24, 10 } },
+    AbilityRank{ 802457, 3, { 32, 20 } },
+    AbilityRank{ 802458, 4, { 38, 40 } },
+    AbilityRank{ 802459, 5, { 44, 60 } },
+    AbilityRank{ 802460, 6, { 52, 80 } },
+    AbilityRank{ 802461, 7, { 58, 100 } },
+    AbilityRank{ 572907, 8, { 60, 120 } }
+};
+inline constexpr auto SanguineRuptureCaps = Development::RankCaps(SanguineRupture);
+
+struct TriggeredDamageMechanic
+{
+    std::uint32_t ClassId;
+    std::uint32_t AbilityId;
+    std::uint32_t HelperId;
+    std::uint32_t TargetA;
+    std::uint32_t TargetB;
+};
+inline constexpr std::array TriggeredDamageMechanics = {
+    TriggeredDamageMechanic{ 13, 801669, 802704, 16, 0 },
+    TriggeredDamageMechanic{ 20, 800774, 800775, 22, 15 }
+};
+inline constexpr std::uint32_t TriggeredDamagePracticeIntervalSeconds = 5;
+
 inline constexpr std::array ArcaneProfiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 32, 805380, AbilityKind::Ranked, ArcaneSigil, ArcaneCaps }, Development::Policy, OutcomeKind::Damage }
@@ -69,8 +118,43 @@ inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 32, 534803, AbilityKind::Ranked, FireSigil, FireCaps }, Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
-        { 31, 500402, AbilityKind::Ranked, GeodeBarrage, GeodeCaps }, Development::Policy, OutcomeKind::Damage }
+        { 31, 500402, AbilityKind::Ranked, GeodeBarrage, GeodeCaps }, Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 13, 801669, AbilityKind::Ranked, Shadowflare, ShadowflareCaps }, Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 20, 800774, AbilityKind::Ranked, SanguineRupture, SanguineRuptureCaps },
+        Development::Policy, OutcomeKind::Damage }
 };
+
+inline TriggeredDamageMechanic const* TriggeredDamageFor(AbilityProfile const& profile)
+{
+    if (profile.Definition.Kind != AbilityKind::Ranked || profile.Outcome != OutcomeKind::Damage)
+        return nullptr;
+    for (auto const& mechanic : TriggeredDamageMechanics)
+        if (profile.Definition.ClassId == mechanic.ClassId && profile.Definition.AbilityId == mechanic.AbilityId)
+            return &mechanic;
+    return nullptr;
+}
+
+inline bool IsTriggeredDamageHelper(std::uint32_t classId, std::uint32_t helperId)
+{
+    for (auto const& mechanic : TriggeredDamageMechanics)
+        if (classId == mechanic.ClassId && helperId == mechanic.HelperId)
+            return true;
+    return false;
+}
+
+inline bool IsTriggeredDamage(AbilityProfile const& profile, std::uint32_t originId, std::uint32_t helperId)
+{
+    auto const* mechanic = TriggeredDamageFor(profile);
+    if (!mechanic || (helperId != mechanic->HelperId &&
+        !(mechanic->ClassId == 13 && helperId == originId)))
+        return false;
+    for (auto const& rank : profile.Definition.Ranks)
+        if (rank.SpellId == originId)
+            return true;
+    return false;
+}
 
 inline bool IsGeodeBarrage(AbilityProfile const& profile)
 {
