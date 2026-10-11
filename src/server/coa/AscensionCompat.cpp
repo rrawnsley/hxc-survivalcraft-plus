@@ -412,6 +412,11 @@ enum AscensionItems : uint32
     ITEM_HEARTWOOD_KEY = 1041710
 };
 
+constexpr std::array<uint32, 9> BUSHCRAFT_CRAFTED_ITEMS =
+{
+    10521, 10522, 10523, 10524, 10525, 10526, 10527, 10528, 1041704
+};
+
 enum AscensionRidingSpells : uint32
 {
     SPELL_RIDING_APPRENTICE = 33388,
@@ -869,7 +874,8 @@ public:
     {
         if (!automaticProgression || rank.ClassId != player->getClass() ||
             rank.RequiredLevel > player->GetLevel() ||
-            !player->HasSpell(rank.FirstSpellId) || player->HasSpell(rank.SpellId))
+            !player->HasSpell(rank.FirstSpellId) || player->HasSpell(rank.SpellId) ||
+            (rank.FirstSpellId == 800792 && player->HasAura(520937)))
             continue;
 
         if (sSpellMgr->GetSpellInfo(rank.SpellId))
@@ -3716,6 +3722,15 @@ public:
         _onDemandItemRows[player->GetGUID().GetCounter()].Add(sent);
     }
 
+    void SendLearnedRecipeItemRows(Player* player, uint32 spellId)
+    {
+        if (!player->IsInWorld())
+            return;
+
+        for (uint32 itemId : RegisteredCraftedItemIds(spellId))
+            SendItemRowOnDemand(player, itemId);
+    }
+
     void SendSpellNoticeRow(Player* player, uint32 spellId, bool hidden)
     {
         if (!IsAscensionCustomClass(player) || !ReceivesPatchRows(player) || !player->IsInWorld())
@@ -3843,7 +3858,9 @@ public:
     }
 
     std::vector<ItemPatchRow> itemRows;
-    for (uint32 itemId : CollectOwnedItemIds(player))
+    std::unordered_set<uint32> itemIds = CollectOwnedItemIds(player);
+    itemIds.merge(CollectKnownRecipeItemIds(player));
+    for (uint32 itemId : itemIds)
         if (std::optional<ItemPatchRow> const row = FindItemRow(rows, itemId))
             itemRows.push_back(*row);
 
@@ -4242,6 +4259,27 @@ private:
     addBagContents(BANK_SLOT_BAG_START, BANK_SLOT_BAG_END);
     return itemIds;
   }
+
+    static std::vector<uint32> RegisteredCraftedItemIds(uint32 spellId)
+    {
+        std::vector<uint32> itemIds;
+        if (SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(spellId))
+            for (SpellEffectInfo const& effect : spellInfo->Effects)
+                if (effect.Effect == SPELL_EFFECT_CREATE_ITEM &&
+                    Ascension::ClientItemPatches::Instance().Contains(effect.ItemType))
+                    itemIds.push_back(effect.ItemType);
+        return itemIds;
+    }
+
+    static std::unordered_set<uint32> CollectKnownRecipeItemIds(Player* player)
+    {
+        std::unordered_set<uint32> itemIds;
+        for (auto const& [spellId, spell] : player->GetSpellMap())
+            if (spell->State != PLAYERSPELL_REMOVED)
+                for (uint32 itemId : RegisteredCraftedItemIds(spellId))
+                    itemIds.insert(itemId);
+        return itemIds;
+    }
 
     static std::optional<ItemPatchRow> FindItemRow(PreparedPatchRows const& rows, uint32 itemId)
     {
@@ -5734,7 +5772,7 @@ public:
     void OnMailItemObtained(Player* player, uint32 itemId)
     {
         if (auto state = GetState(player))
-            CollectItem(player, *state, itemId, true);
+            CollectItem(player, *state, itemId, true, false);
     }
 
   void OnItemObtained(Player *player, Item *item) {
@@ -5745,7 +5783,7 @@ public:
     if (!state)
       return;
 
-    CollectItem(player, *state, item->GetEntry(), true);
+    CollectItem(player, *state, item->GetEntry(), true, item->IsSoulBound());
   }
 
     void OnQuestRewarded(Player* player, Quest const* quest)
@@ -6297,7 +6335,7 @@ private:
     for (uint8 slot = EQUIPMENT_SLOT_START; slot < INVENTORY_SLOT_ITEM_END;
          ++slot) {
       if (Item *item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
-        CollectItem(player, state, item->GetEntry(), false);
+        CollectItem(player, state, item->GetEntry(), false, item->IsSoulBound());
     }
 
     for (uint8 bagSlot = INVENTORY_SLOT_BAG_START;
@@ -6308,7 +6346,7 @@ private:
 
       for (uint32 slot = 0; slot < bag->GetBagSize(); ++slot) {
         if (Item *item = bag->GetItemByPos(slot))
-          CollectItem(player, state, item->GetEntry(), false);
+          CollectItem(player, state, item->GetEntry(), false, item->IsSoulBound());
       }
     }
   }
@@ -6352,13 +6390,13 @@ private:
     }
 
   void CollectItem(Player *player, PlayerCollectionState &state, uint32 itemId,
-                   bool notifyClient) {
+                   bool notifyClient, bool bound) {
     CollectItemAppearance(player, state, itemId, notifyClient);
 
-    if (_vanityItems.contains(itemId))
+    if (bound && _vanityItems.contains(itemId))
       sScriptMgr->OnPlayerCoAProgress(player, CoAProgressEvent::VanityCollected, itemId);
 
-    if ((!ascensionCompatConfig.GetConfigValue<bool>(
+    if (bound && (!ascensionCompatConfig.GetConfigValue<bool>(
             AscensionCompatConfig::UNLOCK_ALL_VANITY) ||
         std::binary_search(AscensionCollectibles::SigilVanityItems.begin(),
             AscensionCollectibles::SigilVanityItems.end(), itemId)) &&
@@ -7873,7 +7911,7 @@ public:
             "AscensionCompatPlayerScript",
             {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_SAVE,
              PLAYERHOOK_ON_AFTER_SET_VISIBLE_ITEM_SLOT, PLAYERHOOK_ON_EQUIP, PLAYERHOOK_ON_DELETE,
-             PLAYERHOOK_ON_TAKE_MAIL_ITEM,
+             PLAYERHOOK_ON_TAKE_MAIL_ITEM, PLAYERHOOK_CAN_CAST_ITEM_USE_SPELL,
              PLAYERHOOK_ON_STORE_NEW_ITEM, PLAYERHOOK_ON_CREATE_ITEM,
              PLAYERHOOK_ON_PLAYER_COMPLETE_QUEST,
              PLAYERHOOK_ON_PLAYER_IS_CLASS, PLAYERHOOK_ON_LEVEL_CHANGED,
@@ -8092,6 +8130,9 @@ public:
             AscensionCompatConfig::ENABLED) &&
         AscensionClassService::Instance().AffectsProficiencies(spellId))
       AscensionClassService::Instance().SynchronizeProficiencies(player);
+
+    if (ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED))
+      AscensionDisplayPatchService::Instance().SendLearnedRecipeItemRows(player, spellId);
   }
 
     void OnPlayerLearnTrainerSpell(Player* player, Creature*, uint32 spellId) override
@@ -8186,6 +8227,11 @@ public:
     AscensionCollectionService::Instance().OnItemObtained(player, item);
   }
 
+  bool OnPlayerCanCastItemUseSpell(Player *player, Item *item, SpellCastTargets const &, uint8, uint32) override {
+    AscensionCollectionService::Instance().OnItemObtained(player, item);
+    return true;
+  }
+
     void OnPlayerCompleteQuest(Player* player, Quest const* quest) override
     {
         if (ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED))
@@ -8201,8 +8247,7 @@ public:
                             uint32) override {
     AscensionCollectionService::Instance().OnItemObtained(player, item);
     SendObtainedItemPatchRow(player, item);
-    if (item && player->IsInWorld() && player->getClass() >= CLASS_BARBARIAN &&
-        player->getClass() <= CLASS_SPIRIT_MAGE &&
+    if (item && player->IsInWorld() &&
         ascensionCompatConfig.GetConfigValue<bool>(AscensionCompatConfig::ENABLED))
     {
         std::lock_guard<std::mutex> lock(_pendingEquipmentLock);
@@ -9805,6 +9850,8 @@ public:
 
 void AddAscensionCompatScripts() {
   Ascension::ClientItemPatches::Instance().Register(ITEM_HEARTWOOD_KEY);
+  for (uint32 itemId : BUSHCRAFT_CRAFTED_ITEMS)
+    Ascension::ClientItemPatches::Instance().Register(itemId);
   RegisterAscensionClientConfig([](AscensionClientConfig& config) {
     config.Booleans.emplace_back("CONFIG_CHARACTER_ADVANCEMENT_BUILD_INSPECT_ENABLED", true);
   });
