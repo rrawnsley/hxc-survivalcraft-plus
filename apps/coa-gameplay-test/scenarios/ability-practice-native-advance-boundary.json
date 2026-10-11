@@ -1,0 +1,346 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Advance boundary",
+  "contract": "Useful finishing damage automatically learns the next native rank. One later rank can be prepared before its required character level; further practice is capped until that level unlocks it.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apadvbound",
+      "race": 1,
+      "class": 18,
+      "level": 26,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 26,
+      "health": 1000000,
+      "faction": 14,
+      "distance": 3,
+      "stationary": true,
+      "reaction": 0
+    },
+    {
+      "id": "second",
+      "owner": "caster",
+      "entry": 36,
+      "level": 26,
+      "health": 1000000,
+      "faction": 14,
+      "distance": 4,
+      "stationary": true,
+      "reaction": 0
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803130
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803130,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803130,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 500170
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 3,
+      "value": 9
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 4,
+      "value": 630
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 500170,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 3,
+      "equals": 9
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 4,
+      "equals": 630
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 503344,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 500673,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 3,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 503344,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 503345,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cooldown_ms",
+      "spell": 500170,
+      "min": 83000,
+      "max": 90000
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 3,
+      "value": 19
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 4,
+      "value": 600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 503344
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 503344,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 500673,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 3,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 503345,
+      "equals": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 503344
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 503344,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 500673,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 3,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "set_level",
+      "actor": "caster",
+      "value": 32
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 503345,
+      "equals": 1
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  }
+}

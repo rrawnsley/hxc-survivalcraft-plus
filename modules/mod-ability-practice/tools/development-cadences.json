@@ -37,6 +37,24 @@
       "abilityId": 805380,
       "assumedUseIntervalMilliseconds": 10000,
       "reason": "Arcane Palm original sigil practice has a ten-second award gate; reviewed rank curves use this interval. Ordinary qualifying frequency remains unmeasured."
+    },
+    {
+      "classId": 13,
+      "abilityId": 806285,
+      "assumedUseIntervalMilliseconds": 30000,
+      "reason": "Actual new attack-power reductions count at most once per original cast, thirty seconds apart. Refreshes without added reduction do not qualify; ordinary frequency remains unmeasured."
+    },
+    {
+      "classId": 25,
+      "abilityId": 620610,
+      "assumedUseIntervalMilliseconds": 30000,
+      "reason": "Actual new attack-power reductions count at most once per original cast, thirty seconds apart. Refreshes without added reduction do not qualify; ordinary frequency remains unmeasured."
+    },
+    {
+      "classId": 26,
+      "abilityId": 570217,
+      "assumedUseIntervalMilliseconds": 30000,
+      "reason": "Actual new attack-power reductions count at most once per original cast, thirty seconds apart. Refreshes without added reduction do not qualify; ordinary frequency remains unmeasured."
     }
   ]
 }

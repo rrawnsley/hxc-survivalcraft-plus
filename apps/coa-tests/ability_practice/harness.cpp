@@ -471,7 +471,7 @@ void CheckCurrentRankPolicies()
 {
     std::uint32_t forecasts = 0;
     std::array<bool, 21> classes{};
-    assert(DevelopmentPacing::Entries.size() == 194);
+    assert(DevelopmentPacing::Entries.size() == 198);
     for (auto const& entry : DevelopmentPacing::Entries)
     {
         classes.at(entry.ClassId - 12) = true;
@@ -585,7 +585,7 @@ std::array<std::span<AbilityProfile const>, 2> MasteryCatalogs()
 
 void CheckMasteryFixedAndTrainerPolicies()
 {
-    assert(DevelopmentHelpers::Profiles.size() == 6);
+    assert(DevelopmentHelpers::Profiles.size() == 7);
     for (auto const& profile : DevelopmentHelpers::Profiles)
         if (auto const* mechanic = DevelopmentHelpers::TriggeredDamageFor(profile))
         {

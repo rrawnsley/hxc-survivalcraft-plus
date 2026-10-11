@@ -1,0 +1,237 @@
+{
+  "schema": 1,
+  "name": "Ability practice: Advance expiry",
+  "contract": "Native expiration triggers actual finishing damage and one original activation award across targets. An artificial aura has no original practice receipt and earns nothing.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apadvexpire",
+      "race": 1,
+      "class": 18,
+      "level": 26,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 26,
+      "health": 1000000,
+      "faction": 14,
+      "distance": 3,
+      "stationary": true,
+      "reaction": 0
+    },
+    {
+      "id": "second",
+      "owner": "caster",
+      "entry": 36,
+      "level": 26,
+      "health": 1000000,
+      "faction": 14,
+      "distance": 4,
+      "stationary": true,
+      "reaction": 0
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 803130
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 803130,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 803130,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 500170
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 3,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "health",
+      "save_as": "expiryenemy"
+    },
+    {
+      "action": "snapshot",
+      "actor": "second",
+      "metric": "health",
+      "save_as": "expirysecond"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 500170,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 3,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "health",
+      "relative_to": "expiryenemy",
+      "max": -1
+    },
+    {
+      "action": "assert",
+      "actor": "second",
+      "metric": "health",
+      "relative_to": "expirysecond",
+      "max": -1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 3,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 4,
+      "equals": 270
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 500170,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 801160,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cooldown_ms",
+      "spell": 500170,
+      "min": 79000,
+      "max": 85000
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 500170,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 3,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.18.500170",
+      "index": 4,
+      "equals": 270
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  }
+}

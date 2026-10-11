@@ -525,7 +525,8 @@ bool HasSupportedOutcome(SpellInfo const* info, Practice::OutcomeKind outcome)
     if (outcome == Practice::OutcomeKind::Fear)
         return ControlRequested && info->HasAura(SPELL_AURA_MOD_FEAR);
     if (outcome == Practice::OutcomeKind::AttackPowerReduction)
-        return ControlRequested && info->HasAura(SPELL_AURA_MOD_ATTACK_POWER);
+        return ControlRequested && (info->HasAura(SPELL_AURA_MOD_ATTACK_POWER) ||
+            info->HasAura(SPELL_AURA_ASCENSION_MOD_ATTACK_POWER_FLAT));
     return false;
 }
 
@@ -759,6 +760,56 @@ bool MatchesBellowMechanic(SpellInfo const* info, Practice::AbilityProfile const
     return true;
 }
 
+bool MatchesAscensionAttackPowerMechanic(SpellInfo const* info, Practice::AbilityProfile const& profile)
+{
+    if (!Practice::DevelopmentControl::IsAscensionAttackPowerReduction(profile))
+        return true;
+    if (!info)
+        return false;
+    auto const& ranks = profile.Definition.Ranks;
+    auto const rank = std::find_if(ranks.begin(), ranks.end(), [info](Practice::AbilityRank const& value)
+    {
+        return value.SpellId == info->Id;
+    });
+    if (rank == ranks.end())
+        return false;
+    auto const index = static_cast<std::size_t>(rank - ranks.begin());
+    bool const shrinking = profile.Definition.AbilityId == 806285;
+    bool const sermon = profile.Definition.AbilityId == 620610;
+    constexpr std::array shrinkingAmounts{ -22, -43, -66, -86, -126, -166 };
+    constexpr std::array sermonAmounts{ -36, -56, -71, -106, -141 };
+    constexpr std::array eclipseAmounts{ -36, -56, -76, -106, -141 };
+    constexpr std::array spellPowerAmounts{ -11, -21, -26, -41, -66, -86 };
+    auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+    auto entry = scripts.first;
+    if (shrinking ? (entry == scripts.second || sObjectMgr->GetScriptName(entry->second) !=
+            "aura_ascension_witch_doctor_lifecycle" || ++entry != scripts.second) : entry != scripts.second)
+        return false;
+    if (info->SpellFamilyName != (shrinking ? 19u : sermon ? 31u : 32u) ||
+        info->SpellFamilyFlags != (shrinking ? flag96(0, 0, 32) : sermon ?
+            flag96(0, 0, 268435456) : flag96(512, 0, 0)) ||
+        info->SpellLevel != rank->Requirement.CharacterLevel || info->GetDuration() != (shrinking ? 20000 : 30000) ||
+        info->RecoveryTime || info->CategoryRecoveryTime || info->IsPassive() || info->IsDeprecatedForPlayers)
+        return false;
+    for (std::size_t slot = 0; slot < 3; ++slot)
+    {
+        auto const& effect = info->Effects[slot];
+        bool const active = shrinking || slot == 0;
+        std::uint32_t const aura = slot == 0 ? SPELL_AURA_ASCENSION_MOD_ATTACK_POWER_FLAT :
+            slot == 1 ? SPELL_AURA_MOD_SCALE : SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT;
+        std::int32_t const amount = slot == 0 ? (shrinking ? shrinkingAmounts[index] :
+            sermon ? sermonAmounts[index] : eclipseAmounts[index]) : slot == 1 ? -16 : spellPowerAmounts[index];
+        if (effect.Effect != (active ? SPELL_EFFECT_APPLY_AURA : 0u) ||
+            effect.ApplyAuraName != (active ? aura : 0u) || effect.BasePoints != (active ? amount : 0) ||
+            effect.DieSides != (active ? 1 : 0) || effect.RealPointsPerLevel !=
+                (active && !shrinking ? -1.0f : 0.0f) || effect.TriggerSpell || effect.MiscValue || effect.MiscValueB ||
+            effect.TargetA.GetTarget() != (active ? (shrinking ? 6u : 22u) : 0u) ||
+            effect.TargetB.GetTarget() != (active && !shrinking ? 15u : 0u))
+            return false;
+    }
+    return true;
+}
+
 bool MatchesEarthquakeMechanic(SpellInfo const* info, Practice::AbilityProfile const& profile)
 {
     if (!Practice::DevelopmentPeriodic::IsEarthquake(profile))
@@ -815,12 +866,35 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
         {
             auto const& effect = info->Effects[EFFECT_0];
             SpellInfo const* helper = sSpellMgr->GetSpellInfo(mechanic->HelperId);
+            if (Practice::DevelopmentHelpers::IsAdvance(profile))
+            {
+                auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+                auto entry = scripts.first;
+                SpellInfo const* boost = sSpellMgr->GetSpellInfo(801160);
+                if (info->SpellFamilyName != 24 || !boost || boost->SpellFamilyName != 24 ||
+                    entry == scripts.second || sObjectMgr->GetScriptName(entry->second) !=
+                        "aura_ascension_guardian_advance" || ++entry != scripts.second ||
+                    boost->Effects[EFFECT_0].Effect != SPELL_EFFECT_APPLY_AURA ||
+                    boost->Effects[EFFECT_0].ApplyAuraName != SPELL_AURA_ADD_FLAT_MODIFIER ||
+                    boost->Effects[EFFECT_0].MiscValue != SPELLMOD_DAMAGE ||
+                    boost->Effects[EFFECT_0].TargetA.GetTarget() != 1 || boost->Effects[EFFECT_0].TargetB.GetTarget())
+                    return false;
+                for (std::size_t index = 1; index < 3; ++index)
+                {
+                    auto const& slot = info->Effects[index];
+                    if (slot.Effect != SPELL_EFFECT_APPLY_AURA || slot.ApplyAuraName !=
+                        (index == 1 ? SPELL_AURA_FORCE_MOVE_FORWARD : SPELL_AURA_MOD_INCREASE_SPEED) ||
+                        slot.TargetA.GetTarget() != 1 || slot.TargetB.GetTarget() || slot.TriggerSpell)
+                        return false;
+                }
+            }
             return effect.Effect == SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE && !effect.ApplyAuraName &&
-                effect.TriggerSpell == mechanic->HelperId && effect.TargetA.GetTarget() == mechanic->TargetA &&
+                effect.TriggerSpell == (mechanic->TriggerId ? mechanic->TriggerId : mechanic->HelperId) &&
+                effect.TargetA.GetTarget() == mechanic->TargetA &&
                 effect.TargetB.GetTarget() == mechanic->TargetB && helper && !helper->IsPassive() &&
                 !helper->IsDeprecatedForPlayers && helper->Effects[EFFECT_0].Effect == SPELL_EFFECT_SCHOOL_DAMAGE &&
-                helper->Effects[EFFECT_0].TargetA.GetTarget() == TARGET_UNIT_TARGET_ENEMY &&
-                !helper->Effects[EFFECT_0].TargetB.GetTarget() && !helper->Effects[EFFECT_0].TriggerSpell;
+                helper->Effects[EFFECT_0].TargetA.GetTarget() == mechanic->HelperTargetA &&
+                helper->Effects[EFFECT_0].TargetB.GetTarget() == mechanic->HelperTargetB && !helper->Effects[EFFECT_0].TriggerSpell;
         }
     if (HelpersRequested && MasteryRequested && Practice::DevelopmentMastery::IsFelBargain(profile))
         return info->Id == 807942 && profile.Outcome == Practice::OutcomeKind::Healing;
@@ -2872,6 +2946,8 @@ std::uint32_t NativeReplacement(Player const* player, Practice::AbilityDefinitio
     for (Practice::AbilityRank const& rank : ability.Ranks)
     {
         std::uint32_t const replacement = player->GetTemporarySpellReplacement(rank.SpellId);
+        if (ability.ClassId == 18 && ability.AbilityId == 500170 && replacement == 500673)
+            continue;
         if (replacement != rank.SpellId && std::none_of(ability.Ranks.begin(), ability.Ranks.end(),
                 [replacement](Practice::AbilityRank const& existing) { return existing.SpellId == replacement; }))
             return replacement;
@@ -3901,7 +3977,7 @@ void AwardAttackPowerReduction(Unit* caster, Unit* target, std::uint32_t auraSpe
     if (!IsProfiledPlayer(player) || !IsDevelopmentOpponent(player, target))
         return;
     auto const* profile = FindProfile(player, receipt->SpellId);
-    if (!profile || !Practice::DevelopmentControl::IsUrsocBellow(*profile))
+    if (!profile || !Practice::DevelopmentControl::IsAttackPowerReduction(*profile))
         return;
     std::lock_guard lock(Mutex);
     auto const found = Sessions.find(player->GetGUID().GetRawValue());
@@ -4115,7 +4191,10 @@ void ReplacementChanged(Player* player, std::uint32_t originalSpellId)
     if (!Active.load() || !IsProfiledPlayer(player) || player->isBeingLoaded() ||
         !FindProfile(player, originalSpellId))
         return;
-    MarkDirty(player, true);
+    auto const* profile = FindProfile(player, originalSpellId);
+    bool const advanceCompletion = Practice::DevelopmentHelpers::IsAdvance(*profile) &&
+        !NativeReplacement(player, profile->Definition);
+    MarkDirty(player, !advanceCompletion);
 }
 
 class PracticeWorld : public WorldScript
@@ -4322,6 +4401,7 @@ public:
                 if (!info || info->IsDeprecatedForPlayers || (!fixed && info->IsPassive()) ||
                     !expectedOutcome || !expectedAbsorption || !expectedControl ||
                     !MatchesEarthquakeMechanic(info, profile) || !MatchesBellowMechanic(info, profile) ||
+                    !MatchesAscensionAttackPowerMechanic(info, profile) ||
                     !MatchesAdditionalMasteryMechanic(info, profile))
                 {
                     Ready = false;
@@ -4632,6 +4712,36 @@ public:
         std::lock_guard lock(Mutex);
         spell->SetPracticeCast({});
         spell->SetScriptValue(PracticeBuffEligibilityKey, 0);
+        if (directTriggerHelper && player->getClass() == 18 && helperId == 500673 && !spell->m_CastItem &&
+            spell->m_castItemGUID.IsEmpty() && spell->GetOriginalCasterGUID() == player->GetGUID())
+        {
+            Aura const* activation = nullptr;
+            if (spell->IsTriggered() && triggeredByAura && triggeredByAura->GetEffIndex() == EFFECT_1)
+                activation = triggeredByAura->GetBase();
+            else if (!spell->IsTriggered() && !triggeredByAura)
+                for (auto const& rank : Practice::DevelopmentHelpers::Advance)
+                    if (Aura const* aura = player->GetAura(rank.SpellId, player->GetGUID()))
+                    {
+                        activation = aura;
+                        break;
+                    }
+            auto const receipt = activation ? activation->GetPracticeCast() : nullptr;
+            auto const* origin = receipt ? FindProfile(player, receipt->SpellId) : nullptr;
+            auto const session = Sessions.find(player->GetGUID().GetRawValue());
+            if (activation && Practice::DevelopmentHelpers::IsAdvanceRank(activation->GetId()) &&
+                activation->GetCasterGUID() == player->GetGUID() && activation->GetUnitOwner() == player &&
+                receipt && origin && Practice::DevelopmentHelpers::IsAdvance(*origin) &&
+                activation->GetId() == receipt->SpellId && !receipt->IsConsumed() &&
+                Affects(player) && !player->isBeingLoaded() && session != Sessions.end() &&
+                ReceiptMatches(player, session->second, *receipt) &&
+                AcquisitionAllowed(player, origin->Definition, receipt->SpellId))
+            {
+                spell->SetPracticeCast(receipt);
+                spell->SetScriptValue(PracticeCastSourceKey,
+                    (static_cast<std::uint64_t>(receipt->ClassId) << 32) | receipt->SpellId);
+            }
+            return true;
+        }
         if ((scriptedDamage || directTriggerHelper) && targets && spell->IsTriggered() && !triggeredByAura &&
             !spell->m_CastItem &&
             spell->m_castItemGUID.IsEmpty() && spell->GetOriginalCasterGUID() == player->GetGUID())

@@ -178,6 +178,10 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
         assert(string.find(Model.PracticeRules(ability), "3% spell haste", 1, true))
         assert(string.find(Model.PracticeRules(ability), "Switching Aegis pauses", 1, true))
     end
+    if ability.abilityId == 500170 and ability.route == 1 then
+        assert(string.find(Model.PracticeRules(ability), "Manual Stop Advance", 1, true))
+        assert(string.find(Model.PracticeRules(ability), "Activation without useful finishing damage", 1, true))
+    end
     if ability.abilityId == 800029 and ability.route == 13 then
         assert(string.find(Model.PracticeRules(ability), "Shadow resistance and retaliation", 1, true))
         assert(string.find(Model.PracticeRules(ability), "Switching Pacts pauses practice", 1, true))
@@ -314,7 +318,7 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
     end
     count = count + 1
 end
-assert(count == 986)
-assert(kinds[1] == 579 and kinds[2] == 53 and kinds[3] == 354)
+assert(count == 998)
+assert(kinds[1] == 591 and kinds[2] == 53 and kinds[3] == 354)
 for classId = 12, 32 do assert(classes[classId]) end
-print("PASS: 986 typed snapshots across 21 classes: 579 ranked, 53 mastery, 354 fixed and menu rendering")
+print("PASS: 998 typed snapshots across 21 classes: 591 ranked, 53 mastery, 354 fixed and menu rendering")

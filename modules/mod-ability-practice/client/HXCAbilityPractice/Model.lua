@@ -805,6 +805,11 @@ function Model.PracticeRules(ability, saved)
             .. " Post-combat recovery counts. Players, pets, training dummies and gray opponents do not count."
             .. " Capturing a corpse without healing or gaining a soul earns no practice."
             .. " Each original cast earns at most one award; the native once-per-corpse rule remains."
+    elseif ability.abilityId == 500170 and ability.route == 1 then
+        rule = "Activate Advance and land its finishing damage on a non-gray PvE enemy."
+            .. " Manual Stop Advance and the native expiry finish share the original activation's progress."
+            .. " One activation earns at most one use across all targets. Activation without useful finishing damage"
+            .. " earns no practice; independent helper casts earn no practice. Native movement, immunity and cooldown remain."
     elseif (ability.abilityId == 801669 or ability.abilityId == 800774) and ability.route == 1 then
         rule = "Use this ability for meaningful damage against a non-gray PvE enemy."
             .. " One original cast earns one use across all targets, with at least five seconds between counted uses."

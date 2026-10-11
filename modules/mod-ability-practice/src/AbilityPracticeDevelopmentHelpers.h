@@ -92,6 +92,15 @@ inline constexpr std::array SanguineRupture = {
 };
 inline constexpr auto SanguineRuptureCaps = Development::RankCaps(SanguineRupture);
 
+inline constexpr std::array Advance = {
+    AbilityRank{ 500170, 1, { 20, 1 } }, AbilityRank{ 503344, 2, { 26, 10 } },
+    AbilityRank{ 503345, 3, { 32, 20 } }, AbilityRank{ 503346, 4, { 38, 40 } },
+    AbilityRank{ 503347, 5, { 44, 60 } }, AbilityRank{ 503348, 6, { 50, 80 } },
+    AbilityRank{ 503349, 7, { 56, 100 } }, AbilityRank{ 503350, 8, { 60, 120 } },
+    AbilityRank{ 503351, 9, { 62, 140 } }
+};
+inline constexpr auto AdvanceCaps = Development::RankCaps(Advance);
+
 struct TriggeredDamageMechanic
 {
     std::uint32_t ClassId;
@@ -99,10 +108,14 @@ struct TriggeredDamageMechanic
     std::uint32_t HelperId;
     std::uint32_t TargetA;
     std::uint32_t TargetB;
+    std::uint32_t TriggerId = 0;
+    std::uint32_t HelperTargetA = 6;
+    std::uint32_t HelperTargetB = 0;
 };
 inline constexpr std::array TriggeredDamageMechanics = {
     TriggeredDamageMechanic{ 13, 801669, 802704, 16, 0 },
-    TriggeredDamageMechanic{ 20, 800774, 800775, 22, 15 }
+    TriggeredDamageMechanic{ 20, 800774, 800775, 22, 15 },
+    TriggeredDamageMechanic{ 18, 500170, 500673, 1, 0, 801160, 22, 15 }
 };
 inline constexpr std::uint32_t TriggeredDamagePracticeIntervalSeconds = 5;
 
@@ -123,8 +136,24 @@ inline constexpr std::array Profiles = {
         { 13, 801669, AbilityKind::Ranked, Shadowflare, ShadowflareCaps }, Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 20, 800774, AbilityKind::Ranked, SanguineRupture, SanguineRuptureCaps },
-        Development::Policy, OutcomeKind::Damage }
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 18, 500170, AbilityKind::Ranked, Advance, AdvanceCaps }, Development::Policy, OutcomeKind::Damage }
 };
+
+inline bool IsAdvance(AbilityProfile const& profile)
+{
+    return profile.Definition.ClassId == 18 && profile.Definition.AbilityId == 500170 &&
+        profile.Definition.Kind == AbilityKind::Ranked && profile.Outcome == OutcomeKind::Damage;
+}
+
+inline bool IsAdvanceRank(std::uint32_t spellId)
+{
+    for (auto const& rank : Advance)
+        if (rank.SpellId == spellId)
+            return true;
+    return false;
+}
 
 inline TriggeredDamageMechanic const* TriggeredDamageFor(AbilityProfile const& profile)
 {
