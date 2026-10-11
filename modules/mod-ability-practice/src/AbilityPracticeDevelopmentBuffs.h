@@ -508,6 +508,13 @@ inline constexpr std::array Accelerate = {
 };
 inline constexpr auto AccelerateCaps = Development::RankCaps(Accelerate);
 
+inline constexpr std::array AscensionOfRagnaros = {
+    AbilityRank{ 1119901, 1, { 36, 1 } },
+    AbilityRank{ 1119944, 2, { 46, 10 } },
+    AbilityRank{ 1119953, 3, { 56, 20 } }
+};
+inline constexpr auto AscensionOfRagnarosCaps = Development::RankCaps(AscensionOfRagnaros);
+
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 32, 561260, AbilityKind::Ranked, LeylineInscription, LeylineInscriptionCaps },
@@ -685,6 +692,9 @@ inline constexpr std::array Profiles = {
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 22, 572633, AbilityKind::Ranked, Accelerate, AccelerateCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 24, 1119901, AbilityKind::Ranked, AscensionOfRagnaros, AscensionOfRagnarosCaps },
         Development::Policy, OutcomeKind::Damage }
 };
 
@@ -782,7 +792,8 @@ inline constexpr std::array Mechanics = {
     Mechanic{ 30, 578126, 21, 0, 29, 1 },
     Mechanic{ 31, 581314, 57, 8, 143 },
     Mechanic{ 20, 1108459, 57, 126, 115, 1 },
-    Mechanic{ 22, 572633, 57, 126, 115, 1 }
+    Mechanic{ 22, 572633, 57, 126, 115, 1 },
+    Mechanic{ 24, 1119901, 1, 4, 143 }
 };
 
 static_assert(Mechanics.size() == Profiles.size());
@@ -874,6 +885,17 @@ inline bool IsVoidResilience(AbilityProfile const& profile)
 {
     return profile.Definition.ClassId == 25 && profile.Definition.AbilityId == 1119881 &&
         IsSupportedStatBuff(profile);
+}
+
+inline bool IsAscensionOfRagnaros(AbilityProfile const& profile)
+{
+    return profile.Definition.ClassId == 24 && profile.Definition.AbilityId == 1119901 &&
+        IsSupportedStatBuff(profile);
+}
+
+inline bool IsPartyResistance(AbilityProfile const& profile)
+{
+    return IsVoidResilience(profile) || IsAscensionOfRagnaros(profile);
 }
 
 inline bool IsWaterTattoo(AbilityProfile const& profile)

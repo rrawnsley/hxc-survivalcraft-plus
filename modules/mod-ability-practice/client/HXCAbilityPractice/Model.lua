@@ -865,6 +865,12 @@ function Model.PracticeRules(ability, saved)
         rule = "Keep your own Whirlwind Aegis active and use a learned ability for useful damage or healing"
             .. " in a non-gray PvE encounter. Its armor and 3% spell haste must both remain effective."
             .. " Applying or refreshing an Aegis gives no practice. Switching Aegis pauses Whirlwind practice."
+    elseif ability.abilityId == 1119901 and ability.route == 13 then
+        rule = "Keep your own Ascension of Ragnaros active and use a learned ability for useful damage or healing"
+            .. " in a non-gray PvE encounter. Its Fire resistance must remain effective."
+            .. " Applying or refreshing the raid aura earns no practice. Receiving another player's aura earns no practice."
+            .. " Switching Ascensions pauses practice. One original combat cast earns one use,"
+            .. " with at least five seconds between counted uses."
     elseif ability.abilityId == 1119881 and ability.route == 13 then
         rule = "Keep your own Void Resilience active and use a learned ability for useful damage or healing"
             .. " in a non-gray PvE encounter. Its Shadow resistance must remain effective."

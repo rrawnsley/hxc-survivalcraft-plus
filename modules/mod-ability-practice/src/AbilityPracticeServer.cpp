@@ -1356,6 +1356,27 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
                 info->Effects[EFFECT_0].MiscValueB)
                 return false;
         }
+        if (Practice::DevelopmentBuffs::IsAscensionOfRagnaros(profile))
+        {
+            constexpr std::array spells{ 1119901u, 1119944u, 1119953u };
+            constexpr std::array levels{ 36u, 46u, 56u };
+            constexpr std::array amounts{ 29, 44, 59 };
+            auto const rank = std::find(spells.begin(), spells.end(), info->Id);
+            auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+            auto entry = scripts.first;
+            auto const groups = sSpellMgr->GetSpellSpellGroupMapBounds(info->Id);
+            if (rank == spells.end() || info->SpellFamilyName != 30 || info->SpellFamilyFlags[0] ||
+                info->SpellFamilyFlags[1] || info->SpellFamilyFlags[2] || entry == scripts.second ||
+                sObjectMgr->GetScriptName(entry->second) != "aura_ascension_pyromancer_lifecycle" ||
+                ++entry != scripts.second || groups.first != groups.second || info->GetDuration() != -1)
+                return false;
+            auto const index = static_cast<std::size_t>(rank - spells.begin());
+            if (info->SpellLevel != levels[index] || info->BaseLevel != levels[index] || info->MaxLevel ||
+                info->Effects[EFFECT_0].BasePoints != amounts[index] ||
+                info->Effects[EFFECT_0].DieSides != 1 || info->Effects[EFFECT_0].RealPointsPerLevel ||
+                info->Effects[EFFECT_0].MiscValueB)
+                return false;
+        }
         if (Practice::DevelopmentBuffs::IsWaterTattoo(profile))
         {
             constexpr std::array<std::int32_t, 6> tattoos{ 801094, 801106, 801107, 802630, 803748, 807834 };
@@ -1539,7 +1560,7 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
                     return false;
                 continue;
             }
-            auto const primaryEffect = Practice::DevelopmentBuffs::IsVoidResilience(profile) ?
+            auto const primaryEffect = Practice::DevelopmentBuffs::IsPartyResistance(profile) ?
                 SPELL_EFFECT_APPLY_AREA_AURA_RAID : SPELL_EFFECT_APPLY_AURA;
             if (slot.Effect != (index == effectIndex ? primaryEffect : 0u) ||
                 slot.ApplyAuraName != (index == effectIndex ? Practice::DevelopmentBuffs::Aura(profile) : 0u) ||
