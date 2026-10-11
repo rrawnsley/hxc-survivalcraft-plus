@@ -775,7 +775,7 @@ public:
     void ReplaceAllNpcFlags(NPCFlags flags) { SetUInt32Value(UNIT_NPC_FLAGS, flags); }
 
     uint32 GetDynamicFlags() const override { return GetUInt32Value(UNIT_DYNAMIC_FLAGS); }
-    void ReplaceAllDynamicFlags(uint32 flag) override { SetUInt32Value(UNIT_DYNAMIC_FLAGS, flag); }
+    void ReplaceAllDynamicFlags(uint32 flag) override;
 
     // Movement flags
     void AddUnitMovementFlag(uint32 f) { m_movementInfo.flags |= f; }
@@ -844,7 +844,7 @@ public:
     // Race methods
     [[nodiscard]] uint8 getRace(bool original = false) const;
     void setRace(uint8 race);
-    [[nodiscard]] uint32 getRaceMask() const { return 1 << (getRace(true) - 1); }
+    [[nodiscard]] uint32 getRaceMask() const { return 1u << ((getRace(true) - 1) & 31); /* races above 32 share a mask bit (CoA Custom) */ }
     [[nodiscard]] DisplayRace GetDisplayRaceFromModelId(uint32 modelId) const;
     [[nodiscard]] DisplayRace GetDisplayRace() const { return GetDisplayRaceFromModelId(GetDisplayId()); };
 
@@ -1017,7 +1017,7 @@ public:
     void HandleProcExtraAttackFor(Unit* victim, uint32 count);
     void SetLastExtraAttackSpell(uint32 spellId) { _lastExtraAttackSpell = spellId; }
     [[nodiscard]] uint32 GetLastExtraAttackSpell() const { return _lastExtraAttackSpell; }
-    void AddExtraAttacks(uint32 count);
+    void AddExtraAttacks(uint32 count, ObjectGuid const& target = ObjectGuid::Empty);
 
     // Combot points system
     [[nodiscard]] uint8 GetComboPoints(Unit const* who = nullptr) const { return (who && m_comboTarget != who) ? 0 : m_comboPoints; }
@@ -1516,6 +1516,11 @@ public:
     }
 
     [[nodiscard]] bool HasAura(uint32 spellId, ObjectGuid casterGUID = ObjectGuid::Empty, ObjectGuid itemCasterGUID = ObjectGuid::Empty, uint8 reqEffMask = 0) const;
+    /// aura lookups that also match a stock spell's twins and namesakes (SpellMgr::GetSpellAndRelatives)
+    [[nodiscard]] bool HasAuraOrTwin(uint32 spellId, ObjectGuid casterGUID = ObjectGuid::Empty) const;
+    [[nodiscard]] Aura* GetAuraOfRankedSpellOrTwin(uint32 spellId, ObjectGuid casterGUID = ObjectGuid::Empty) const;
+    void RemoveAurasDueToSpellOrTwin(uint32 spellId);
+    [[nodiscard]] AuraEffect* GetAuraEffectOfRankedSpellOrTwin(uint32 spellId, uint8 effIndex, ObjectGuid casterGUID = ObjectGuid::Empty) const;
     [[nodiscard]] bool HasAuraType(AuraType auraType) const;
     [[nodiscard]] bool HasAuraTypeWithCaster(AuraType auratype, ObjectGuid caster) const;
     [[nodiscard]] bool HasAuraTypeWithMiscvalue(AuraType auratype, int32 miscvalue) const;

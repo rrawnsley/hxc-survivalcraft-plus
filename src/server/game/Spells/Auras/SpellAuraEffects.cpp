@@ -18,6 +18,7 @@
 #include "SpellAuraEffects.h"
 #include "AbilityPracticeCastReceipt.h"
 #include "MotionMaster.h"
+#include "AscensionIncarnation.h"
 #include "AreaDefines.h"
 #include "BattlefieldMgr.h"
 #include "Battleground.h"
@@ -26,6 +27,7 @@
 #include "Common.h"
 #include "GameTime.h"
 #include "GridNotifiers.h"
+#include "LocalLevelScaling.h"
 #include "Log.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
@@ -1601,7 +1603,9 @@ void AuraEffect::HandleShapeshiftBoosts(Unit* target, bool apply) const
             }
 
             // Leader of the Pack
-            if (player->HasTalent(17007, player->GetActiveSpec()))
+            std::vector<uint32> const leaderOfThePack = sSpellMgr->GetSpellAndRelatives(17007);
+            if (std::any_of(leaderOfThePack.begin(), leaderOfThePack.end(),
+                [player](uint32 spellId) { return player->HasTalent(spellId, player->GetActiveSpec()); }))
             {
                 SpellInfo const* spellInfo = sSpellMgr->GetSpellInfo(24932);
                 if (spellInfo && spellInfo->Stances & (1 << (GetMiscValue() - 1)))
@@ -2199,9 +2203,15 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
         if (PowerType != POWER_MANA)
         {
             uint32 oldPower = target->GetPower(PowerType);
+            bool const powerAlreadyActive = target->IsPlayer() &&
+                target->ToPlayer()->HasActivePowerType(PowerType);
             // reset power to default values only at power change
             if (target->getPowerType() != PowerType)
+            {
                 target->setPowerType(PowerType);
+                if (powerAlreadyActive)
+                    target->SetPower(PowerType, oldPower);
+            }
 
             switch (form)
             {
@@ -2218,6 +2228,8 @@ void AuraEffect::HandleAuraModShapeshift(AuraApplication const* aurApp, uint8 mo
                         {
                             case FORM_CAT:
                                 {
+                                    if (powerAlreadyActive)
+                                        break;
                                     int32 basePoints = int32(std::min(oldPower, FurorChance));
                                     target->SetPower(POWER_ENERGY, 0);
                                     target->CastCustomSpell(target, 17099, &basePoints, nullptr, nullptr, true, nullptr, this);
@@ -2406,7 +2418,10 @@ void AuraEffect::HandleAuraTransform(AuraApplication const* aurApp, uint8 mode, 
     if (apply)
     {
         // update active transform spell only when transform or shapeshift not set or not overwriting negative by positive case
-        if (GetSpellInfo()->HasAttribute(SPELL_ATTR0_NO_IMMUNITIES) || !target->GetModelForForm(target->GetShapeshiftForm(), GetId()) || !GetSpellInfo()->IsPositive())
+        // (AscensionIncarnation: GetModelForForm also answers for a transform spell's incarnation, so only ask it
+        //  about a real shapeshift form - otherwise a transform form with an incarnation was never applied)
+        if (GetSpellInfo()->HasAttribute(SPELL_ATTR0_NO_IMMUNITIES) || target->GetShapeshiftForm() == FORM_NONE ||
+            !target->GetModelForForm(target->GetShapeshiftForm(), GetId()) || !GetSpellInfo()->IsPositive())
         {
             // special case (spell specific functionality)
             if (GetMiscValue() == 0)
@@ -2935,7 +2950,10 @@ void AuraEffect::HandleAuraTransform(AuraApplication const* aurApp, uint8 mode, 
             else
             {
                 CreatureTemplate const* ci = sObjectMgr->GetCreatureTemplate(GetMiscValue());
-                if (!ci)
+                uint32 const incarnation = target->IsPlayer() ? GetAscensionIncarnationDisplay(target->ToPlayer(), FORM_NONE, GetId()) : 0;
+                if (!ci && incarnation)
+                    target->SetDisplayId(incarnation);   // AscensionIncarnation: form whose creature is missing
+                else if (!ci)
                 {
                     target->SetDisplayId(16358);              // pig pink ^_^
                     LOG_ERROR("spells.aura.effect", "Auras: unknown creature id = {} (only need its modelid) From Spell Aura Transform in Spell ID = {}", GetMiscValue(), GetId());
@@ -2946,6 +2964,11 @@ void AuraEffect::HandleAuraTransform(AuraApplication const* aurApp, uint8 mode, 
 
                     if (uint32 modelid = ObjectMgr::ChooseDisplayId(ci)->CreatureDisplayID)
                         model_id = modelid;                     // Will use the default model here
+
+                    // AscensionIncarnation: a form that is a transform wears its Wardrobe incarnation.
+                    if (Player* player = target->ToPlayer())
+                        if (uint32 incarnation = GetAscensionIncarnationDisplay(player, FORM_NONE, GetId()))
+                            model_id = incarnation;
 
                     // Polymorph (sheep)
                     if (GetSpellInfo()->SpellFamilyName == SPELLFAMILY_MAGE && GetSpellInfo()->SpellIconID == 82 && GetSpellInfo()->SpellVisual[0] == 12978)
@@ -3237,7 +3260,8 @@ void AuraEffect::HandleAuraModDisarm(AuraApplication const* aurApp, uint8 mode, 
             player->ApplyItemDependentAuras(pItem, !apply);
             if (attackType < MAX_ATTACK)
             {
-                player->_ApplyWeaponDamage(slot, pItem->GetTemplate(), nullptr, !apply);
+                ItemTemplate const* proto = LocalLevelScaling::InstanceTemplateFor(pItem, pItem->GetTemplate());
+                player->_ApplyWeaponDamage(slot, proto, nullptr, !apply);
                 if (!apply) // apply case already handled on item dependent aura removal (if any)
                     player->UpdateWeaponDependentAuras(attackType);
             }
@@ -5380,6 +5404,9 @@ void AuraEffect::HandleAuraDummy(AuraApplication const* aurApp, uint8 mode, bool
     if (target->IsPlayer() && GetSpellInfo()->Effects[GetEffIndex()].GetItemArmorSubclassMask())
         target->UpdateArmor();
 
+    if (GetId() == 84866 && target->IsPlayer() && (mode & AURA_EFFECT_HANDLE_REAL))
+        target->ToPlayer()->UpdateSpellDamageAndHealingBonus();
+
     Unit* caster = GetCaster();
 
     if (mode & AURA_EFFECT_HANDLE_REAL)
@@ -5937,8 +5964,8 @@ void AuraEffect::HandleAuraEmpathy(AuraApplication const* aurApp, uint8 mode, bo
             return;
     }
 
-    if (target->GetCreatureType() == CREATURE_TYPE_BEAST)
-        target->ApplyModUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_SPECIALINFO, apply);
+    // Ascension's Undead, Demon, Dragonkin and Elemental Lore name their creature type in TargetCreatureType.
+    target->ApplyModUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_SPECIALINFO, apply);
 }
 
 void AuraEffect::HandleAuraModFaction(AuraApplication const* aurApp, uint8 mode, bool apply) const
@@ -6641,7 +6668,7 @@ void AuraEffect::HandlePeriodicDamageAurasTick(Unit* target, Unit* caster) const
     if (damage)
         procVictim |= PROC_FLAG_TAKEN_DAMAGE;
 
-    int32 overkill = damage - target->GetHealth();
+    int32 overkill = damage - LocalLevelScaling::ShownHealthFor(caster, target);
     if (overkill < 0)
         overkill = 0;
 
@@ -7003,7 +7030,8 @@ void AuraEffect::HandlePeriodicManaLeechAuraTick(Unit* target, Unit* caster) con
     if (gainAmount)
     {
         gainedAmount = caster->ModifyPower(PowerType, gainAmount);
-        target->AddThreat(caster, float(gainedAmount) * 0.5f, GetSpellInfo()->GetSchoolMask(), GetSpellInfo());
+        float const threat = LocalLevelScaling::PoolThreatFor(caster, target, float(gainedAmount) * 0.5f);
+        target->AddThreat(caster, threat, GetSpellInfo()->GetSchoolMask(), GetSpellInfo());
     }
 
     // remove CC auras

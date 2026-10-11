@@ -121,7 +121,7 @@ It does not edit `item_template`, stock spells, or player inventories.
 Install the signed client update with the HXC launcher before testing native
 meal stacking. It supplies a separate Spell.dbc aura row for every recipe
 family and slot, preventing WoW's normal food/drink replacement rules from
-erasing another meal. The addon is optional for gameplay and provides exact
+erasing another meal. Reusing the same item refreshes its active timer. The addon is optional for gameplay and provides exact
 recipe tooltips plus the `/nourishment` status command.
 
 1. Download `HomebrewNourishment-1.1.0.zip` from the

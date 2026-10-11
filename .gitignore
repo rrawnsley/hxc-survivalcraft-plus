@@ -9,6 +9,7 @@
 !/modules/mod-coa-needs/
 !/modules/mod-ability-practice/
 !/modules/mod-coa-change-potions/
+!/modules/mod-coa-mythic-plus/
 !/modules/*.md
 !/modules/*.sh
 !/modules/CMakeLists.txt
@@ -146,6 +147,8 @@ __pycache__/
 !/modules/mod-battlehorn/
 !/modules/mod-scrolls-of-retreat/
 !/modules/mod-coa-prestige/
+!/modules/mod-coa-lottery/
 !/modules/mod-woodworking/
 !/modules/mod-portable-sawmill/
 !/modules/mod-coa-legendary-items/
+!/modules/mod-ethereal-bazaar/

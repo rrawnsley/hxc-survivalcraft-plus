@@ -92,6 +92,16 @@ enum Races
     //RACE_ICE_TROLL      = 21
 };
 
+inline constexpr bool UsesExtendedAppearance(uint32 race)
+{
+    return race == 66 || race == 68 || race == 69;
+}
+
+inline constexpr bool UsesHaranirAppearance(uint32 race)
+{
+    return race == 70 || race == 71;
+}
+
 // DisplayRace values from CreatureDisplayInfoExtra.dbc
 enum class DisplayRace : uint8
 {
@@ -1021,6 +1031,7 @@ enum SpellEffects
     SPELL_EFFECT_ASCENSION_FIRST                    = 165,
     SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN          = 165,
     SPELL_EFFECT_ASCENSION_RESTORE_BASE_MANA_PCT    = 166,
+    SPELL_EFFECT_ASCENSION_PLAY_SPELL_VISUAL_KIT    = 168,
     SPELL_EFFECT_ASCENSION_SPREAD_AURA              = 169,
     SPELL_EFFECT_ASCENSION_SPREAD_AURA_2            = 170,
     SPELL_EFFECT_ASCENSION_REFRESH_AURA             = 173,

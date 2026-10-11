@@ -67,6 +67,13 @@ struct OpenBank
 
 std::unordered_map<ObjectGuid::LowType, OpenBank> openBanks;
 
+[[nodiscard]] ObjectGuid BankItemOwner(OpenBank const& bank)
+{
+    return bank.OwnerKind == OWNER_CHARACTER
+               ? ObjectGuid::Create<HighGuid::Player>(ObjectGuid::LowType(bank.OwnerId))
+               : ObjectGuid::Empty;
+}
+
 void LoadBank(OpenBank& bank, ObjectGuid itemOwner)
 {
     QueryResult tabs = CharacterDatabase.Query(
@@ -176,7 +183,7 @@ void StoreSlot(CharacterDatabaseTransaction trans, OpenBank const& bank, uint8 t
                   bank.OwnerKind, bank.OwnerId, tab, slot, item->GetGUID().GetCounter());
 
     item->SetGuidValue(ITEM_FIELD_CONTAINED, ObjectGuid::Empty);
-    item->SetGuidValue(ITEM_FIELD_OWNER, ObjectGuid::Empty);
+    item->SetOwnerGUID(BankItemOwner(bank));
     item->FSetState(ITEM_NEW);
     item->SaveToDB(trans);
 }
@@ -458,6 +465,9 @@ void DepositToBank(Player* player, OpenBank& bank, uint8 bag, uint8 slot, uint8 
 
     if (split)
     {
+        if (CanMergeInto(dest, source))
+            split = std::min(split, dest->GetMaxStackCount() - dest->GetCount());
+
         Item* moved = source->CloneItem(split, player);
         if (!moved)
         {
@@ -561,12 +571,13 @@ void WithdrawToPlayer(Player* player, OpenBank& bank, uint8 tab, uint8 bankSlot,
     if (split == 0 || split >= source->GetCount())
         split = 0;
 
+    uint32 const movedAmount = split ? split : sourceCount;
     ItemPosCountVec destPos;
-    InventoryResult msg = player->CanStoreItem(bag, slot, destPos, source, false);
+    InventoryResult msg = player->CanStoreItem(bag, slot, destPos, sourceEntry, movedAmount, source, false);
     if (autoStore || msg != EQUIP_ERR_OK)
     {
         destPos.clear();
-        msg = player->CanStoreItem(NULL_BAG, NULL_SLOT, destPos, source, false);
+        msg = player->CanStoreItem(NULL_BAG, NULL_SLOT, destPos, sourceEntry, movedAmount, source, false);
     }
 
     if (msg != EQUIP_ERR_OK)
@@ -577,7 +588,6 @@ void WithdrawToPlayer(Player* player, OpenBank& bank, uint8 tab, uint8 bankSlot,
 
     CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
 
-    uint32 const movedAmount = split ? split : sourceCount;
     auto finish = [&]()
     {
         CharacterDatabase.CommitTransaction(trans);
@@ -1008,7 +1018,7 @@ void Opened(Player* player, uint8 kind, ObjectGuid vault)
     bank.OwnerKind = kind == REALM ? OWNER_REALM : OWNER_CHARACTER;
     bank.OwnerId = BankOwnerId(player, kind);
     bank.Vault = vault;
-    LoadBank(bank, bank.OwnerKind == OWNER_CHARACTER ? player->GetGUID() : ObjectGuid::Empty);
+    LoadBank(bank, BankItemOwner(bank));
 
     OpenBank const& stored = openBanks.emplace(guid, std::move(bank)).first->second;
 

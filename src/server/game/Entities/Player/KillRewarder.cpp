@@ -132,7 +132,7 @@ void KillRewarder::_InitXP(Player* player)
     // * on battlegrounds;
     // * otherwise, not in PvP;
     // * not if killer is on vehicle.
-    if (_victim && (_isBattleGround || (!_isPvP && !_killer->GetVehicle())))
+    if (_victim && (_isBattleGround || (!_killer->GetVehicle() && (!_isPvP || _victim->IsPlayer()))))
         _xp = Acore::XP::Gain(player, _victim, _isBattleGround);
 
     if (_xp && !_isBattleGround && _victim) // pussywizard: npcs with relatively low hp give lower exp
@@ -232,7 +232,7 @@ void KillRewarder::_RewardPlayer(Player* player, bool isDungeon)
             player->KilledPlayerCredit();
     }
 
-    // Give XP only in PvE or in battlegrounds.
+    // Give XP only in PvE, battlegrounds, or player-versus-player combat.
     // Give reputation and kill credit only in PvE.
     if (!_isPvP || _isBattleGround)
     {
@@ -250,6 +250,13 @@ void KillRewarder::_RewardPlayer(Player* player, bool isDungeon)
             _RewardReputation(player);
             _RewardKillCredit(player);
         }
+    }
+    else if (_victim->IsPlayer())
+    {
+        float xpRate = _group ? _groupRate * float(_GetPlayerLevel(player)) / _aliveSumLevel : 1.0f;
+        sScriptMgr->OnPlayerRewardKillRewarder(player, this, false, xpRate);
+        if (_xp)
+            _RewardXP(player, xpRate);
     }
 }
 

@@ -40,6 +40,7 @@
 #include "LFGMgr.h"
 #include "Language.h"
 #include "Log.h"
+#include "LocalLevelScaling.h"
 #include "LootItemStorage.h"
 #include "MailMgr.h"
 #include "MapMgr.h"
@@ -2339,7 +2340,7 @@ InventoryResult Player::CanUseItem(Item* pItem, bool not_loading) const
         //if (isStunned())
         //    return EQUIP_ERR_YOU_ARE_STUNNED;
 
-        ItemTemplate const* pProto = pItem->GetTemplate();
+        ItemTemplate const* pProto = LocalLevelScaling::InstanceTemplateFor(pItem, pItem->GetTemplate());
         if (pProto)
         {
             if (pItem->IsBindedNotWith(this))
@@ -3126,6 +3127,8 @@ void Player::MoveItemToInventory(ItemPosCountVec const& dest, Item* pItem, bool 
 
         if (pLastItem->IsBOPTradable())
             AddTradeableItem(pLastItem);
+
+        LocalLevelScaling::NotifyItemArrival(this, pLastItem);
     }
 }
 
@@ -4145,7 +4148,9 @@ void Player::SendEquipError(InventoryResult msg, Item* pItem, Item* pItem2, uint
             case EQUIP_ERR_CANT_EQUIP_LEVEL_I:
             case EQUIP_ERR_PURCHASE_LEVEL_TOO_LOW:
             {
-                ItemTemplate const* proto = pItem ? pItem->GetTemplate() : sObjectMgr->GetItemTemplate(itemid);
+                ItemTemplate const* proto = pItem ?
+                    LocalLevelScaling::InstanceTemplateFor(pItem, pItem->GetTemplate()) :
+                    sObjectMgr->GetItemTemplate(itemid);
                 data << uint32(proto ? proto->RequiredLevel : 0);
                 break;
             }
@@ -5137,6 +5142,13 @@ bool Player::LoadFromDB(ObjectGuid playerGuid, CharacterDatabaseQueryHolder cons
     SetByteValue(PLAYER_BYTES_2, 3, fields[15].Get<uint8>());
     SetByteValue(PLAYER_BYTES_3, 0, fields[5].Get<uint8>());
     SetByteValue(PLAYER_BYTES_3, 1, fields[54].Get<uint8>());
+    if (UsesExtendedAppearance(getRace(true)))
+        SetByteValue(UNIT_FIELD_PADDING, 0, uint8(fields[75].Get<uint64>()));
+    else if (UsesHaranirAppearance(getRace(true)))
+    {
+        SetUInt32Value(UNIT_FIELD_PADDING, uint32(fields[75].Get<uint64>()));
+        SetUInt32Value(OBJECT_FIELD_PADDING, uint32(fields[75].Get<uint64>() >> 32));
+    }
     ReplaceAllPlayerFlags((PlayerFlags)fields[16].Get<uint32>());
 
     RemovePlayerFlag(PLAYER_FLAGS_NO_PLAY_TIME);
@@ -7340,7 +7352,7 @@ void Player::_SaveActions(CharacterDatabaseTransaction trans)
     {
         uint32 action = itr->second.GetAction();
         if (itr->second.GetType() == ACTION_BUTTON_SPELL)
-            sScriptMgr->OnPlayerNormalizeActionButtonSpell(this, action, false);
+            action = GetSavedActionButtonSpell(action);
 
         switch (itr->second.uState)
         {

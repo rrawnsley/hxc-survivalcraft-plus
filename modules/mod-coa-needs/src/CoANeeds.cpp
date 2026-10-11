@@ -187,7 +187,8 @@ void SetAura(Player* player, uint32 spell, bool active)
 
 float SkillScale(Player const* player, uint32 skill)
 {
-    return std::min(1.0f, player->GetPureSkillValue(skill) / 450.0f);
+    uint32 tier = std::min(6u, player->GetPureSkillValue(skill) / 75u);
+    return tier / 6.0f;
 }
 
 void RefreshProfessions(Player* player)
@@ -199,12 +200,12 @@ void RefreshProfessions(Player* player)
     for (uint32 index = 0; index < skills.size(); ++index)
     {
         float scale = SkillScale(player, skills[index]);
-        bool active = Config.professions && Affects(player) && player->IsAlive() && scale > 0;
+        int32 amount = scale > 0.0f ? std::max(1, int32(std::lround(bonuses[index] * scale))) : 0;
+        bool active = Config.professions && Affects(player) && player->IsAlive() && player->GetLevel() > 1 && amount != 0;
         uint32 spell = ProfessionAura + index;
         SetAura(player, spell, active);
         if (!active)
             continue;
-        int32 amount = int32(std::lround(bonuses[index] * scale));
         for (uint8 effect = 0; effect < MAX_SPELL_EFFECTS; ++effect)
             if (AuraEffect* aura = player->GetAuraEffect(spell, effect))
                 if (aura->GetAmount() != amount)
@@ -653,10 +654,50 @@ public:
 class NeedsPlayer : public PlayerScript
 {
 public:
-    NeedsPlayer() : PlayerScript("CoANeedsPlayer", { PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_BEFORE_LOGOUT,
+    NeedsPlayer() : PlayerScript("CoANeedsPlayer", { PLAYERHOOK_ON_CREATE, PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_BEFORE_LOGOUT,
         PLAYERHOOK_ON_SAVE, PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_SPELL_CAST, PLAYERHOOK_ON_LEVEL_CHANGED,
         PLAYERHOOK_ON_PLAYER_ENTER_COMBAT, PLAYERHOOK_CAN_PLAYER_USE_PRIVATE_CHAT, PLAYERHOOK_ON_UPDATE_SKILL, PLAYERHOOK_ON_SET_SKILL }) { }
 
+    void OnPlayerCreate(Player* player) override
+    {
+        if (!player || (player->GetSession() && player->GetSession()->IsBot()))
+            return;
+
+        constexpr uint32 starterBag = 4496; // Small Brown Pouch (6 slots)
+        ItemTemplate const* bagTemplate = sObjectMgr->GetItemTemplate(starterBag);
+        if (!bagTemplate || bagTemplate->ContainerSlots != 6)
+        {
+            LOG_ERROR("module.coa_needs", "Starter bag {} is missing or does not have 6 slots", starterBag);
+            return;
+        }
+
+        uint32 bagCount = player->GetItemCount(starterBag, true);
+        bool changed = false;
+        while (bagCount < 2)
+        {
+            Item* bag = nullptr;
+            for (uint8 slot = INVENTORY_SLOT_BAG_START; slot < INVENTORY_SLOT_BAG_END; ++slot)
+            {
+                if (player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
+                    continue;
+                bag = player->EquipNewItem(slot, starterBag, true);
+                if (bag)
+                    break;
+            }
+
+            if (!bag && !player->AddItem(starterBag, 1))
+            {
+                LOG_ERROR("module.coa_needs", "Could not grant starter bag {} to new character {}", starterBag, player->GetName());
+                break;
+            }
+
+            ++bagCount;
+            changed = true;
+        }
+
+        if (changed)
+            player->SaveToDB(false, false);
+    }
     void OnPlayerLogin(Player* player) override
     {
         std::lock_guard<std::recursive_mutex> lock(Mutex);
@@ -695,6 +736,7 @@ public:
     void OnPlayerLevelChanged(Player* player, uint8) override
     {
         std::lock_guard<std::recursive_mutex> lock(Mutex);
+        RefreshProfessions(player);
         Unlock(player);
     }
 
@@ -807,8 +849,7 @@ public:
                     if (state.vigor <= 15.0f)
                         Exhaust(player, state);
                 }
-                else if (state.vigor > 25.0f && state.displayFood > 5.0f && state.exhaustedUntil <= now &&
-                    !player->InBattleground() && !player->InArena())
+                else if (state.vigor > 25.0f && state.displayFood > 5.0f && state.exhaustedUntil <= now)
                 {
                     state.vigor -= 10.0f;
                     state.sprint = true;
@@ -937,7 +978,7 @@ public:
             state.water = Clamp(state.water - waterDrain * seconds / 60.0f);
         }
         UpdateNeeds(player, state);
-        if (!alive || player->IsMounted() || player->IsInFlight() || player->IsSitState() || pvp ||
+        if (!alive || player->IsMounted() || player->IsInFlight() || player->IsSitState() ||
             state.displayFood <= 5.0f || player->HasUnitState(UNIT_STATE_CONTROLLED))
             StopSprint(player, state);
         if (state.exhaustedUntil > now && player->IsInWater())
@@ -1041,11 +1082,16 @@ public:
         if (!Config.professions || !Affects(player) || !info || !heal.GetHeal())
             return;
         float bonus = 0.0f;
-        if (BandageSpells.count(info->Id))
+        bool bandage = BandageSpells.count(info->Id) != 0;
+        if (bandage)
             bonus = 0.2f * SkillScale(player, SKILL_FIRST_AID);
         else if (PotionSpells.count(info->Id))
             bonus = 0.15f * SkillScale(player, SKILL_ALCHEMY);
-        heal.SetHeal(uint32(heal.GetHeal() * (1.0f + bonus)));
+        uint32 amount = heal.GetHeal();
+        uint32 improved = uint32(amount * (1.0f + bonus));
+        if (bandage && bonus > 0.0f && improved == amount)
+            ++improved;
+        heal.SetHeal(improved);
     }
 
     void OnAuraApply(Unit* unit, Aura* aura) override

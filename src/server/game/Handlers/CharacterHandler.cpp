@@ -36,6 +36,7 @@
 #include "InstanceSaveMgr.h"
 #include "Language.h"
 #include "Log.h"
+#include "MailMgr.h"
 #include "MapMgr.h"
 #include "Metric.h"
 #include "MotdMgr.h"
@@ -224,6 +225,10 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
     WorldPacket data(SMSG_CHAR_ENUM, 100);                  // we guess size
 
     uint8 num = 0;
+    ByteBuffer extraAppearances;
+    uint32 extraCount = 0;
+    ByteBuffer haranirAppearances;
+    uint32 haranirCount = 0;
 
     data << num;
 
@@ -238,11 +243,32 @@ void WorldSession::HandleCharEnum(PreparedQueryResult result)
             {
                 _legitCharacters.insert(guid);
                 ++num;
+                uint64 extra = (*result)[result->GetFieldCount() - 1].Get<uint64>();
+                if (UsesExtendedAppearance((*result)[2].Get<uint8>()))
+                {
+                    extraAppearances << guid.GetRawValue() << uint8(extra);
+                    ++extraCount;
+                }
+                else if (UsesHaranirAppearance((*result)[2].Get<uint8>()))
+                {
+                    haranirAppearances << guid.GetRawValue() << extra;
+                    ++haranirCount;
+                }
             }
         } while (result->NextRow());
     }
 
     data.put<uint8>(0, num);
+    if (extraCount)
+    {
+        data.append(extraAppearances);
+        data << extraCount << uint32(0x31455848);
+    }
+    if (haranirCount)
+    {
+        data.append(haranirAppearances);
+        data << haranirCount << uint32(0x32455848);
+    }
 
     SendPacket(&data);
 }
@@ -278,6 +304,18 @@ void WorldSession::HandleCharCreateOpcode(WorldPacket& recvData)
              >> createInfo->HairColor
              >> createInfo->FacialHair
              >> createInfo->OutfitId;
+
+    if (UsesHaranirAppearance(createInfo->Race))
+    {
+        uint32 magic = 0;
+        if (recvData.size() - recvData.rpos() == 12)
+            recvData >> createInfo->HaranirExtra >> magic;
+        if (magic != 0x31435248)
+        {
+            SendCharCreate(CHAR_CREATE_FAILED);
+            return;
+        }
+    }
 
     if (createInfo->Class == 10 && IsAscensionCompatEnabled() &&
         sConfigMgr->GetOption<bool>("CoA.MapClass10ToWarrior", false))
@@ -2043,6 +2081,7 @@ void WorldSession::HandleCharFactionOrRaceChange(WorldPacket& recvData)
 
     CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_CHAR_RACE_OR_FACTION_CHANGE_INFOS);
     stmt->SetData(0, factionChangeInfo->Guid.GetCounter());
+    stmt->SetData(1, factionChangeInfo->Guid.GetCounter());
 
     _queryProcessor.AddCallback(CharacterDatabase.AsyncQuery(stmt)
         .WithPreparedCallback(std::bind(&WorldSession::HandleCharFactionOrRaceChangeCallback, this, factionChangeInfo, std::placeholders::_1)));
@@ -2080,6 +2119,7 @@ void WorldSession::HandleCharFactionOrRaceChangeCallback(std::shared_ptr<Charact
     uint32 atLoginFlags = fields[0].Get<uint16>();
     std::string knownTitlesStr = fields[1].Get<std::string>();
     uint32 money = fields[2].Get<uint32>();
+    uint64 actionableMail = fields[3].Get<uint64>();
 
     uint32 usedLoginFlag = (factionChangeInfo->FactionChange ? AT_LOGIN_CHANGE_FACTION : AT_LOGIN_CHANGE_RACE);
     if (!(atLoginFlags & usedLoginFlag))
@@ -2105,8 +2145,11 @@ void WorldSession::HandleCharFactionOrRaceChangeCallback(std::shared_ptr<Charact
             return;
         }
 
-        // check mailbox
-        if (playerData->MailCount)
+        // check mailbox: recount first, the cached count can drift from the real mailbox, then
+        // gate on mails the player can actually see and delete (in transit and expired mails are
+        // hidden by the inbox but still counted as mail rows)
+        sMailMgr->RecountMailCount(factionChangeInfo->Guid.GetCounter());
+        if (actionableMail)
         {
             SendCharFactionChange(CHAR_CREATE_CHARACTER_DELETE_MAIL, factionChangeInfo.get());
             return;

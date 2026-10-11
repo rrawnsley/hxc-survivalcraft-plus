@@ -851,7 +851,7 @@ std::array<SpellEffectInfo::StaticData, TOTAL_SPELL_EFFECTS> SpellEffectInfo::_d
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 165 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN
     {EFFECT_IMPLICIT_TARGET_EXPLICIT, TARGET_OBJECT_TYPE_UNIT}, // 166 SPELL_EFFECT_ASCENSION_RESTORE_BASE_MANA_PCT
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 167 unknown Ascension effect
-    {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 168 unknown Ascension effect
+    {EFFECT_IMPLICIT_TARGET_CASTER,   TARGET_OBJECT_TYPE_UNIT}, // 168 SPELL_EFFECT_ASCENSION_PLAY_SPELL_VISUAL_KIT
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 169 SPELL_EFFECT_ASCENSION_SPREAD_AURA
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 170 SPELL_EFFECT_ASCENSION_SPREAD_AURA_2
     {EFFECT_IMPLICIT_TARGET_NONE,     TARGET_OBJECT_TYPE_NONE}, // 171 unknown Ascension effect
@@ -2665,6 +2665,7 @@ void SpellInfo::_LoadImmunityInfo()
                     case 34471: // The Beast Within
                     case 19574: // Bestial Wrath
                     case 42292: // PvP trinket
+                    case 1142292: // PvP Trinket (Ascension)
                     case 46227: // Medallion of Immunity
                     case 59752: // Every Man for Himself
                     case 53490: // Bullheaded
@@ -3007,7 +3008,15 @@ uint32 SpellInfo::CalcCastTime(Unit* caster, Spell* spell) const
 
     int32 castTime = serpent ? 1000 : CastTimeEntry->CastTime;
     // Ascension channels ranged-slot spells without a base cast time, such as Tinker's Gatling Gun, at once.
-    if (HasAttribute(SPELL_ATTR0_USES_RANGED_SLOT) && (!IsAutoRepeatRangedSpell()) && (castTime || !IsChanneled()))
+    bool const artificersWand = SpellFamilyName == 28 && (Id == 561284 || (Id >= 561354 && Id <= 561357));
+    bool tinkerShot = false;
+    if (SpellFamilyName == 34)
+    {
+        uint32 const firstRank = GetFirstRankSpell()->Id;
+        tinkerShot = firstRank == 500549 || firstRank == 500235;
+    }
+    if (HasAttribute(SPELL_ATTR0_USES_RANGED_SLOT) && !artificersWand && !tinkerShot &&
+        (!IsAutoRepeatRangedSpell()) && (castTime || !IsChanneled()))
         castTime += 500;
 
     if (caster)
