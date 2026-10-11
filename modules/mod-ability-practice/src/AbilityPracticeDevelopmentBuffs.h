@@ -545,6 +545,16 @@ inline constexpr std::array AscensionOfExecutus = {
 };
 inline constexpr auto AscensionOfExecutusCaps = Development::RankCaps(AscensionOfExecutus);
 
+inline constexpr std::array VengefulPact = {
+    AbilityRank{ 800029, 1, { 4, 1 } },
+    AbilityRank{ 803881, 2, { 18, 10 } },
+    AbilityRank{ 803882, 3, { 28, 20 } },
+    AbilityRank{ 803883, 4, { 38, 40 } },
+    AbilityRank{ 803884, 5, { 48, 60 } },
+    AbilityRank{ 803885, 6, { 58, 80 } }
+};
+inline constexpr auto VengefulPactCaps = Development::RankCaps(VengefulPact);
+
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 32, 561260, AbilityKind::Ranked, LeylineInscription, LeylineInscriptionCaps },
@@ -734,6 +744,9 @@ inline constexpr std::array Profiles = {
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 24, 1119754, AbilityKind::Ranked, AscensionOfExecutus, AscensionOfExecutusCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 14, 800029, AbilityKind::Ranked, VengefulPact, VengefulPactCaps },
         Development::Policy, OutcomeKind::Damage }
 };
 
@@ -835,12 +848,14 @@ inline constexpr std::array Mechanics = {
     Mechanic{ 24, 1119901, 1, 4, 143 },
     Mechanic{ 15, 680535, 1, 32, 143 },
     Mechanic{ 20, 802313, 21, 0, 15 },
-    Mechanic{ 24, 1119754, 1, 4, 15 }
+    Mechanic{ 24, 1119754, 1, 4, 15 },
+    Mechanic{ 14, 800029, 1, 32, 143 }
 };
 
 static_assert(Mechanics.size() == Profiles.size());
 
 inline constexpr std::array SecondaryMechanics = {
+    Mechanic{ 14, 800029, 1, 32, 15, 1 },
     Mechanic{ 15, 680535, 1, 2, 137, 1 },
     Mechanic{ 32, 803748, 1, 1, 245, 1 },
     Mechanic{ 32, 803748, 1, 2, 245, 2 },
@@ -942,9 +957,14 @@ inline bool IsDamageShield(AbilityProfile const& profile)
         (profile.Definition.ClassId == 24 && profile.Definition.AbilityId == 1119754)) && IsSupportedStatBuff(profile);
 }
 
+inline bool IsVengefulPact(AbilityProfile const& profile)
+{
+    return profile.Definition.ClassId == 14 && profile.Definition.AbilityId == 800029 && IsSupportedStatBuff(profile);
+}
+
 inline bool IsRaidBuff(AbilityProfile const& profile)
 {
-    return IsVoidResilience(profile) || IsAscensionOfRagnaros(profile) ||
+    return IsVoidResilience(profile) || IsAscensionOfRagnaros(profile) || IsVengefulPact(profile) ||
         (profile.Definition.ClassId == 24 && profile.Definition.AbilityId == 1119754 && IsSupportedStatBuff(profile)) ||
         (profile.Definition.ClassId == 15 && profile.Definition.AbilityId == 680535 && IsSupportedStatBuff(profile));
 }

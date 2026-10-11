@@ -1417,6 +1417,32 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
             if (effect.BasePoints < 0 || effect.DieSides != 1 || effect.RealPointsPerLevel || effect.MiscValueB)
                 return false;
         }
+        if (Practice::DevelopmentBuffs::IsVengefulPact(profile))
+        {
+            constexpr std::array spells{ 800029u, 803881u, 803882u, 803883u, 803884u, 803885u };
+            constexpr std::array levels{ 4u, 18u, 28u, 38u, 48u, 58u };
+            constexpr std::array resistance{ 4, 17, 29, 42, 54, 64 };
+            constexpr std::array retaliation{ 3, 11, 19, 28, 38, 50 };
+            auto const rank = std::find(spells.begin(), spells.end(), info->Id);
+            auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+            auto entry = scripts.first;
+            if (rank == spells.end() || info->SpellFamilyName != 20 || info->SpellFamilyFlags[0] ||
+                info->SpellFamilyFlags[1] || info->SpellFamilyFlags[2] != 256 || info->GetDuration() != -1 ||
+                entry == scripts.second || sObjectMgr->GetScriptName(entry->second) !=
+                    "aura_ascension_felsworn_lifecycle" || ++entry != scripts.second)
+                return false;
+            auto const index = static_cast<std::size_t>(rank - spells.begin());
+            if (info->SpellLevel != levels[index] || info->BaseLevel != levels[index] ||
+                info->Effects[EFFECT_0].BasePoints != resistance[index] ||
+                info->Effects[EFFECT_1].BasePoints != retaliation[index])
+                return false;
+            auto const& neutral = info->Effects[EFFECT_2];
+            if (neutral.Effect != SPELL_EFFECT_APPLY_AURA || neutral.ApplyAuraName != SPELL_AURA_NONE ||
+                neutral.TargetA.GetTarget() != 1 || neutral.TargetB.GetTarget() || neutral.TriggerSpell ||
+                neutral.MiscValue || neutral.MiscValueB || neutral.BasePoints || neutral.DieSides ||
+                neutral.RealPointsPerLevel)
+                return false;
+        }
         if (Practice::DevelopmentBuffs::IsWaterTattoo(profile))
         {
             constexpr std::array<std::int32_t, 6> tattoos{ 801094, 801106, 801107, 802630, 803748, 807834 };
@@ -1567,6 +1593,8 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
                 continue;
             if (Practice::DevelopmentBuffs::IsHealingTradeoffBuff(profile) && index == EFFECT_0)
                 continue;
+            if (Practice::DevelopmentBuffs::IsVengefulPact(profile) && index == EFFECT_2)
+                continue;
             auto const* secondary = Practice::DevelopmentBuffs::SecondaryMechanicFor(profile, index);
             if (secondary && index == secondary->EffectIndex)
             {
@@ -1574,7 +1602,9 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
                 bool const waterCost = Practice::DevelopmentBuffs::IsWaterTattoo(profile) && index == 1;
                 bool const arcaneDuration = Practice::DevelopmentBuffs::IsArcaneTattoo(profile) &&
                     (index == 1 || index == 2);
-                if (slot.Effect != SPELL_EFFECT_APPLY_AURA || slot.ApplyAuraName != secondary->Aura ||
+                auto const secondaryEffect = Practice::DevelopmentBuffs::IsVengefulPact(profile) ?
+                    SPELL_EFFECT_APPLY_AREA_AURA_RAID : SPELL_EFFECT_APPLY_AURA;
+                if (slot.Effect != secondaryEffect || slot.ApplyAuraName != secondary->Aura ||
                     slot.TargetA.GetTarget() != secondary->TargetA || slot.TargetB.GetTarget() ||
                     slot.TriggerSpell || slot.MiscValue != secondary->Stat || slot.MiscValueB ||
                     (graceCost ? (slot.BasePoints != -6 || slot.DieSides != 1) :
