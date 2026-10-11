@@ -1124,6 +1124,19 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
     }
     if (BuffContributionRequested && Practice::DevelopmentBuffs::IsSupportedStatBuff(profile))
     {
+        if (Practice::DevelopmentBuffs::IsHealingTradeoffBuff(profile) &&
+            !Practice::DevelopmentBuffs::IsLeylineInscription(profile))
+        {
+            auto const& vulnerability = info->Effects[EFFECT_0];
+            auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
+            if (info->SpellFamilyName != profile.Definition.ClassId + 6 || scripts.first != scripts.second ||
+                vulnerability.Effect != SPELL_EFFECT_APPLY_AURA ||
+                vulnerability.ApplyAuraName != SPELL_AURA_MOD_DAMAGE_TAKEN ||
+                vulnerability.TargetA.GetTarget() != TARGET_UNIT_TARGET_RAID ||
+                vulnerability.TargetB.GetTarget() || vulnerability.TriggerSpell || vulnerability.MiscValue != 126 ||
+                vulnerability.MiscValueB || vulnerability.BasePoints < 0)
+                return false;
+        }
         if (profile.Definition.ClassId == 31 && profile.Definition.AbilityId == 581314)
         {
             bool const stronger = info->Id == 581315;
@@ -1491,7 +1504,7 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
             if ((Practice::DevelopmentBuffs::IsFrostTattoo(profile) ||
                 Practice::DevelopmentBuffs::IsTemporalResilience(profile)) && index == EFFECT_1)
                 continue;
-            if (Practice::DevelopmentBuffs::IsLeylineInscription(profile) && index == EFFECT_0)
+            if (Practice::DevelopmentBuffs::IsHealingTradeoffBuff(profile) && index == EFFECT_0)
                 continue;
             auto const* secondary = Practice::DevelopmentBuffs::SecondaryMechanicFor(profile, index);
             if (secondary && index == secondary->EffectIndex)
@@ -2863,7 +2876,7 @@ bool EffectiveBuffApplication(Player* player, AuraApplication const& application
         Practice::DevelopmentBuffs::Aura(profile), Practice::DevelopmentBuffs::StatSelector(
             profile, application.GetBase()->GetSpellInfo()->Id)))
         return false;
-    if (Practice::DevelopmentBuffs::IsLeylineInscription(profile))
+    if (Practice::DevelopmentBuffs::IsHealingTradeoffBuff(profile))
     {
         auto const* vulnerability = application.GetBase()->GetEffect(EFFECT_0);
         if (!application.HasEffect(EFFECT_0) || !vulnerability ||

@@ -494,6 +494,20 @@ inline constexpr std::array EssenceOfNature = {
 };
 inline constexpr auto EssenceOfNatureCaps = Development::RankCaps(EssenceOfNature);
 
+inline constexpr std::array SlaughterhouseOffering = {
+    AbilityRank{ 1108459, 1, { 34, 1 } },
+    AbilityRank{ 1108463, 2, { 44, 10 } },
+    AbilityRank{ 1108493, 3, { 54, 20 } }
+};
+inline constexpr auto SlaughterhouseOfferingCaps = Development::RankCaps(SlaughterhouseOffering);
+
+inline constexpr std::array Accelerate = {
+    AbilityRank{ 572633, 1, { 30, 1 } },
+    AbilityRank{ 572634, 2, { 42, 10 } },
+    AbilityRank{ 572635, 3, { 54, 20 } }
+};
+inline constexpr auto AccelerateCaps = Development::RankCaps(Accelerate);
+
 inline constexpr std::array Profiles = {
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 32, 561260, AbilityKind::Ranked, LeylineInscription, LeylineInscriptionCaps },
@@ -665,6 +679,12 @@ inline constexpr std::array Profiles = {
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 31, 581314, AbilityKind::Ranked, EssenceOfNature, EssenceOfNatureCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 20, 1108459, AbilityKind::Ranked, SlaughterhouseOffering, SlaughterhouseOfferingCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 22, 572633, AbilityKind::Ranked, Accelerate, AccelerateCaps },
         Development::Policy, OutcomeKind::Damage }
 };
 
@@ -760,7 +780,9 @@ inline constexpr std::array Mechanics = {
     Mechanic{ 30, 575839, 21, 126, 143, 2 },
     Mechanic{ 18, 300856, 21, 0, 29, 1 },
     Mechanic{ 30, 578126, 21, 0, 29, 1 },
-    Mechanic{ 31, 581314, 57, 8, 143 }
+    Mechanic{ 31, 581314, 57, 8, 143 },
+    Mechanic{ 20, 1108459, 57, 126, 115, 1 },
+    Mechanic{ 22, 572633, 57, 126, 115, 1 }
 };
 
 static_assert(Mechanics.size() == Profiles.size());
@@ -792,6 +814,15 @@ inline Mechanic const* SecondaryMechanicFor(AbilityProfile const& profile, std::
             mechanic.EffectIndex == effectIndex)
             return &mechanic;
     return nullptr;
+}
+
+inline bool IsHealingTradeoffBuff(AbilityProfile const& profile)
+{
+    for (auto const& mechanic : Mechanics)
+        if (mechanic.ClassId == profile.Definition.ClassId && mechanic.AbilityId == profile.Definition.AbilityId)
+            return mechanic.Aura == 115 && mechanic.EffectIndex == 1 && mechanic.TargetA == 57 &&
+                mechanic.Stat == 126 && IsSupportedStatBuff(profile);
+    return false;
 }
 
 inline bool IsLeylineInscription(AbilityProfile const& profile)

@@ -290,9 +290,17 @@ for _, lines in ipairs(EncodedTypedPracticeSnapshots) do
     if ability.route == 13 and ability.availability == 4 and ability.buffState ~= 3 then
         assert(Model.PracticePaused(ability) and not Model.Practicing(ability))
     end
+    if ability.abilityId == 801669 or ability.abilityId == 800774 then
+        assert(string.find(Model.PracticeRules(ability), "five seconds between counted uses", 1, true))
+        assert(string.find(Model.PracticeRules(ability), "helper spell independently", 1, true))
+    end
+    if ability.abilityId == 1108459 or ability.abilityId == 572633 then
+        assert(string.find(Model.PracticeRules(ability), "healing received bonus", 1, true))
+        assert(string.find(Model.PracticeRules(ability), "increases magic damage taken", 1, true))
+    end
     count = count + 1
 end
-assert(count == 965)
-assert(kinds[1] == 558 and kinds[2] == 53 and kinds[3] == 354)
+assert(count == 971)
+assert(kinds[1] == 564 and kinds[2] == 53 and kinds[3] == 354)
 for classId = 12, 32 do assert(classes[classId]) end
-print("PASS: 965 typed snapshots across 21 classes: 558 ranked, 53 mastery, 354 fixed and menu rendering")
+print("PASS: 971 typed snapshots across 21 classes: 564 ranked, 53 mastery, 354 fixed and menu rendering")

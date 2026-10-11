@@ -805,6 +805,15 @@ function Model.PracticeRules(ability, saved)
             .. " Post-combat recovery counts. Players, pets, training dummies and gray opponents do not count."
             .. " Capturing a corpse without healing or gaining a soul earns no practice."
             .. " Each original cast earns at most one award; the native once-per-corpse rule remains."
+    elseif (ability.abilityId == 801669 or ability.abilityId == 800774) and ability.route == 1 then
+        rule = "Use this ability for meaningful damage against a non-gray PvE enemy."
+            .. " One original cast earns one use across all targets, with at least five seconds between counted uses."
+            .. " Casting a helper spell independently earns no practice."
+    elseif (ability.abilityId == 1108459 or ability.abilityId == 572633) and ability.route == 13 then
+        rule = "Keep this ability's buff active on yourself and use a learned ability for useful damage or healing"
+            .. " in a non-gray PvE encounter. Its healing received bonus must remain effective."
+            .. " It also increases magic damage taken. Applying or refreshing it earns no practice."
+            .. " One original combat cast earns one use, with at least five seconds between counted uses."
     elseif ability.abilityId == 581314 and ability.route == 13 then
         rule = "Keep your own Essence of Nature active on yourself and use a learned ability for useful damage"
             .. " or healing in a qualifying PvE fight. Stronger competing Nature resistance pauses practice."

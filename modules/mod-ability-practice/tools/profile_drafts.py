@@ -241,7 +241,8 @@ def reviewed_stat_buffs(root):
             (22, 680389, 1, 1, 22, 0), (16, 680282, 1, 1, 22, 0), (32, 801106, 1, 4, 22, 0), (32, 803748, 1, 64, 22, 0),
             (32, 807834, 1, 16, 22, 0),
             (32, 801094, 1, 1, 22, 0), (32, 801107, 1, 0, 85, 0)}
-        leyline = (class_id, ability_id, target, stat, aura, effect_index) == (32, 561260, 57, 126, 115, 1)
+        leyline = (class_id, ability_id, target, stat, aura, effect_index) in {
+            (32, 561260, 57, 126, 115, 1), (20, 1108459, 57, 126, 115, 1), (22, 572633, 57, 126, 115, 1)}
         party_resistance = (class_id, ability_id, target, stat, aura, effect_index) == (25, 1119881, 1, 32, 143, 0)
         nature_resistance = (class_id, ability_id, target, stat, aura, effect_index) == (31, 581314, 57, 8, 143, 0)
         if (not 12 <= class_id <= 32 or not ability_id or
@@ -880,10 +881,10 @@ def build_drafts(candidates, root):
             primary_effect = 65 if (class_id, ability_id) == (25, 1119881) else 6
             expected[effect_index] = (primary_effect, mechanic['auraId'], mechanic['targetA'],
                                        0, 0, mechanic['statSelector'])
-            if (class_id, ability_id) == (32, 561260):
+            if (class_id, ability_id) in {(32, 561260), (20, 1108459), (22, 572633)}:
                 expected[0] = (6, 14, 57, 0, 0, 126)
                 required.extend(['native-incoming-healing-and-magic-vulnerability-tradeoff',
-                                 'native-four-rank-raid-target-self-owned-practice'])
+                                 'native-ranked-raid-target-self-owned-practice'])
             if (class_id, ability_id) == (22, 680389):
                 expected[1] = (6, 42, 1, 0, 536265, 0)
                 required.extend(['native-self-armor-complete-seven-rank-ladder',
