@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Ability practice: selected Pyromancer and unselected native progression",
-  "contract": "In fresh disposable character storage only GUID1 is enrolled. Prepared selected Lava Shard rank2 unlocks at level10; another Pyromancer retains native level-based progression and receives no saved practice state.",
+  "contract": "In fresh disposable character storage only GUID1 is enrolled. Prepared selected Lava Shard rank2 unlocks at level10; an unselected Pyromancer buys that rank from its native spellbook and receives no saved practice state.",
   "timeout_ms": 90000,
   "players": [
     {
@@ -186,6 +186,45 @@
       "action": "set_level",
       "actor": "outsider",
       "value": 10
+    },
+    {
+      "action": "money",
+      "actor": "outsider",
+      "copper": 1000000
+    },
+    {
+      "action": "learn",
+      "actor": "outsider",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "outsider",
+      "spell": 97930
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "owned_creature_count",
+      "entry": 75115,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "outsider"
+    },
+    {
+      "action": "assert",
+      "actor": "outsider",
+      "metric": "trainer_window_state",
+      "spell": 503231,
+      "equals": 0
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "outsider",
+      "spell": 503231
     },
     {
       "action": "assert",
