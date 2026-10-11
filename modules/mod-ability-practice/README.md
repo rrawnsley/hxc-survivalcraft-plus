@@ -1,8 +1,23 @@
-# Ability practice â€” isolated development
+# Ability practice development and selected-character pilot
 
-Development continues on `codex/ability-practice-catalog` in
-`C:/Azerothcore-CoA/worktrees/ability-practice-catalog`. Production remains unchanged.
-The feature is not complete or approved for release.
+## Current pilot release — 11 October 2026
+
+The tested server candidate is installed on the normal CoA realm for a selected-character Pyromancer pilot.
+Realm-wide enrollment is disabled; the selection is empty until the user's new character is identified.
+The full addon 0.5.10-development is published through launcher 1.3.18 and installed in the normal client.
+The broader all-class feature remains incomplete, with 26 ranked groups pending.
+
+Source 116c206af integrates current live core 0356c6e08 with practice while retaining playerbots21208444.
+Production executable SHA25665821fd045ce7e67f836fb21eabcee80092fd762c44cc6495938e1ea5187bfd8
+passed its build and three real-clock Pyromancer cases in20261011-205856. That aggregate failed solely on
+an absent Lua dependency, subsequently installed in the ignored verification cache.
+The corrected selected-character fixture87663e2b3 exercises a native spellbook purchase for the unselected
+Pyromancer.20261011-212258 VERIFY ALL: PASSED: source9, harness198policies/7164comparisons/998typed
+snapshots and one real-clock selected/unselected case. Build reused; unit stage skipped; no batch sensitivity.
+An earlier fixture incorrectly assumed native automatic learning; it failed and was corrected without gameplay changes.
+
+Remaining player acceptance: initial client login, menu appearance, ordinary combat pacing and rank feedback.
+Historical qualification notes below describe their dated state, including earlier absence of production changes.
 
 ## Latest isolated qualification (9 October 2026)
 
