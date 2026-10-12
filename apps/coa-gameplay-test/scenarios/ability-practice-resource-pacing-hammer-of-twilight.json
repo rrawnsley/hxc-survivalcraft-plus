@@ -1,0 +1,201 @@
+{
+  "schema": 1,
+  "name": "Ability practice: hammer-of-twilight Insanity-spender pacing and retained progress",
+  "contract": "Definition4 proficiency9/points15120 migrates unchanged to5. Missing Insanity earns zero. One original40-Insanity cast awards1080 points and learns native rank2; consumption and level gates remain native.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 25,
+      "level": 14,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 14,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "caster",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 805116
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.25.805116",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.25.805116",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.25.805116",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.25.805116",
+      "index": 3,
+      "value": 9
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.25.805116",
+      "index": 4,
+      "value": 15120
+    },
+    {
+      "action": "relog",
+      "actor": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.25.805116",
+      "index": 1,
+      "equals": 5,
+      "label": "Prior definition4 converted to5"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.25.805116",
+      "index": 3,
+      "equals": 9,
+      "label": "Saved proficiency retained"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.25.805116",
+      "index": 4,
+      "equals": 15120,
+      "label": "Saved partial progress retained"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 806498,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 805116,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.25.805116",
+      "index": 4,
+      "equals": 15120,
+      "label": "No Insanity means no practice award"
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 500706,
+      "stacks": 40
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "full": true
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 805116
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 805116,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_stacks",
+      "spell": 500706,
+      "equals": 0,
+      "label": "Native Insanity consumption retained"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.25.805116",
+      "index": 3,
+      "equals": 10,
+      "label": "One useful use awards1080, reaching the rank boundary"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.25.805116",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 806498,
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

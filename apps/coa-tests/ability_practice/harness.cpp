@@ -502,14 +502,17 @@ void CheckResourcePacing()
             assert(converted && converted->State.Proficiency == old.FirstProficiency &&
                 converted->State.Points == old.PointsPerLevel / 2);
         }
-        assert(UsesUntil(entry.Policy, { 1, 0 }, 10, 10).Uses == 540);
-        assert(UsesUntil(revised, { 1, 0 }, 10, 10).Uses == 540 / DevelopmentResourcePacing::Multiplier(profile));
-        assert(UsesUntil(revised, { 1, 0 }, 2, 10).Uses == 60 / DevelopmentResourcePacing::Multiplier(profile));
+        auto const& firstBand = revised.Bands.front();
+        auto const rankPoints = firstBand.PointsPerLevel * 9;
+        assert(UsesUntil(revised, { 1, 0 }, 10, 10).Uses ==
+            (rankPoints + firstBand.PointsPerUse - 1) / firstBand.PointsPerUse);
+        assert(UsesUntil(revised, { 1, 0 }, 2, 10).Uses ==
+            (firstBand.PointsPerLevel + firstBand.PointsPerUse - 1) / firstBand.PointsPerUse);
         profile.DefinitionVersion = 2;
         assert(!DevelopmentResourcePacing::Build(profile));
     }
-    assert(count == 6);
-    std::cout << "PASS: six resource spenders, individual practice rates, exact forecasts and saved fractions\n";
+    assert(count == DevelopmentResourcePacing::Adjustments.size());
+    std::cout << "PASS: sixteen resource spenders, individual practice rates, exact forecasts and saved fractions\n";
 }
 
 void CheckCurrentRankPolicies()

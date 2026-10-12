@@ -24,7 +24,17 @@ inline constexpr std::array Adjustments = {
     Adjustment{ 24, 805500, 5 },
     Adjustment{ 16, 500038, 2 },
     Adjustment{ 16, 500040, 3 },
-    Adjustment{ 16, 800227, 3 }
+    Adjustment{ 16, 800227, 3 },
+    Adjustment{ 14, 802060, 2 },
+    Adjustment{ 17, 800168, 2 },
+    Adjustment{ 17, 801059, 2 },
+    Adjustment{ 19, 801448, 2 },
+    Adjustment{ 19, 803157, 2 },
+    Adjustment{ 21, 500073, 2 },
+    Adjustment{ 21, 802036, 2 },
+    Adjustment{ 30, 573316, 9 },
+    Adjustment{ 25, 804152, 4 },
+    Adjustment{ 25, 805116, 4 }
 };
 
 struct Entry

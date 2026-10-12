@@ -1,0 +1,190 @@
+{
+  "schema": 1,
+  "name": "Ability practice: skulltaker resource pacing and retained progress",
+  "contract": "Definition4 proficiency9/points15660 migrates unchanged to5. Missing resource earns zero. One meaningful original cast awards540, learns rank2 and retains native resource consumption.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 17,
+      "level": 8,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 8,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800168
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.17.800168",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.17.800168",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.17.800168",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.17.800168",
+      "index": 3,
+      "value": 9
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.17.800168",
+      "index": 4,
+      "value": 15660
+    },
+    {
+      "action": "relog",
+      "actor": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.17.800168",
+      "index": 1,
+      "equals": 5,
+      "label": "Prior definition4 converted to5"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.17.800168",
+      "index": 3,
+      "equals": 9,
+      "label": "Saved proficiency retained"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.17.800168",
+      "index": 4,
+      "equals": 15660,
+      "label": "Saved partial progress retained"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 802416,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800168,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.17.800168",
+      "index": 4,
+      "equals": 15660,
+      "label": "No resource means no practice award"
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 500906,
+      "stacks": 2
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "full": true
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 800168
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800168,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_stacks",
+      "spell": 500906,
+      "equals": 0,
+      "label": "Native resource consumption retained"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.17.800168",
+      "index": 3,
+      "equals": 10,
+      "label": "One useful use awards540, reaching the rank boundary"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.17.800168",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 802416,
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}
