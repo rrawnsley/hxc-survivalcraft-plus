@@ -3580,7 +3580,11 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
     if (!messages || messages->size() > MaxQueuedMessages)
         return false;
     if (OldSchoolRequired)
-        messages->push_back(supported ? "MODE|ACTIVE" : "MODE|OLD_SCHOOL_REQUIRED");
+    {
+        bool const ended = player->GetPlayerSetting(CoAChallenges::OldSchoolPracticeExitSource, 0).value != 0;
+        messages->push_back(supported ? "MODE|ACTIVE" : ended ? "MODE|OLD_SCHOOL_ENDED" :
+            "MODE|OLD_SCHOOL_REQUIRED");
+    }
     if (session.Protocol >= Practice::TypedMenuSchemaVersion)
     {
         QueueDelivery(session, player->getClass(), std::move(*messages), now);

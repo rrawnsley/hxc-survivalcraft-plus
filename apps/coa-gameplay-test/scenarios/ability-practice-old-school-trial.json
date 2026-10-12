@@ -314,7 +314,7 @@
       "actor": "regular",
       "metric": "whisper_contains",
       "from": "regular",
-      "text": "HXAP\tMODE|OLD_SCHOOL_REQUIRED",
+      "text": "HXAP\tMODE|OLD_SCHOOL_ENDED",
       "min": 1,
       "within_ms": 10000
     },

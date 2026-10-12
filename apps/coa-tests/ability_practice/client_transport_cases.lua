@@ -48,3 +48,12 @@ API.SetOldSchoolRequired(false)
 event(nil, "CHAT_MSG_ADDON", "HXAP", "MODE|OLD_SCHOOL_REQUIRED", "WHISPER", "TestPlayer")
 event(nil, "CHAT_MSG_ADDON", "HXAP", "MODE|ACTIVE", "WHISPER", "TestPlayer")
 print("PASS: Old School participation notices are accepted without changing snapshot protocol")
+
+event(nil, "CHAT_MSG_ADDON", "HXAP", "MODE|OLD_SCHOOL_ENDED", "WHISPER", "TestPlayer")
+local endedLabel = false
+for _, widget in ipairs(MockWidgets) do
+    if widget.text and string.find(widget.text, "Old School run ended", 1, true) then endedLabel = true end
+end
+assert(endedLabel)
+event(nil, "CHAT_MSG_ADDON", "HXAP", "MODE|ACTIVE", "WHISPER", "TestPlayer")
+print("PASS: ended trial displays retained progress and normal progression rather than a restart prompt")
