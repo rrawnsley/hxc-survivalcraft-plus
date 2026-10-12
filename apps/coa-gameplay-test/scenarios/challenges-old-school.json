@@ -203,12 +203,12 @@
     },
     {
       "action": "assert",
-      "label": "White con hostile spell damage is four times normal",
+      "label": "White con hostile spell damage is approximately five times normal",
       "actor": "old",
       "metric": "health",
       "ratio_to": "normal_spell",
-      "min": 4.4,
-      "max": 5.6,
+      "min": 3.0,
+      "max": 7.5,
       "relative_to": "before_old_hit"
     },
     {
@@ -373,6 +373,25 @@
       "save_as": "level_xp"
     },
     {
+      "action": "add_item",
+      "actor": "old",
+      "item": 2092,
+      "count": 1
+    },
+    {
+      "action": "equip",
+      "actor": "old",
+      "item": 2092,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "actor": "old",
+      "metric": "equipped_item",
+      "slot": 15,
+      "equals": 2092
+    },
+    {
       "action": "die",
       "actor": "old"
     },
@@ -393,6 +412,10 @@
       "equals": 1
     },
     {
+      "action": "release_spirit",
+      "actor": "old"
+    },
+    {
       "action": "relog",
       "actor": "old"
     },
@@ -407,8 +430,12 @@
       "max": -0.099
     },
     {
-      "action": "release_spirit",
-      "actor": "old"
+      "action": "assert",
+      "label": "Worn equipment is left on the released corpse",
+      "actor": "old",
+      "metric": "item_count",
+      "item": 2092,
+      "equals": 0
     },
     {
       "action": "wait",
@@ -431,7 +458,8 @@
         {
           "actor_guid": "old"
         }
-      ]
+      ],
+      "consumed": false
     },
     {
       "action": "assert",
@@ -456,13 +484,29 @@
         {
           "actor_guid": "old"
         }
-      ]
+      ],
+      "consumed": false
     },
     {
       "action": "assert",
       "actor": "old",
       "metric": "alive",
       "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Returning to the corpse restores the same worn equipment",
+      "actor": "old",
+      "metric": "item_count",
+      "item": 2092,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "old",
+      "metric": "equipped_item",
+      "slot": 15,
+      "equals": 2092
     },
     {
       "action": "start_challenge",

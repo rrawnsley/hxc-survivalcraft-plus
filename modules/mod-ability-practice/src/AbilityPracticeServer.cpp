@@ -4267,7 +4267,8 @@ public:
             sConfigMgr->GetOption<std::string>("AbilityPractice.DevelopmentCharacterGuids", ""));
         SelectedCharacters.store(selected);
         bool const realmEnrollment = RealmEnrollment.load();
-        CharacterSelectionReady = selected && (realmEnrollment ? selected->empty() : !selected->empty());
+        CharacterSelectionReady = selected && (OldSchoolRequired ? !selected->NewCharacterClasses.empty() :
+            (realmEnrollment ? selected->empty() : !selected->empty()));
         if (!selected)
             LOG_ERROR("module.ability_practice", "Rejected invalid development character selection; effects disabled");
         if (realmEnrollment && selected && !selected->empty())
@@ -4275,7 +4276,7 @@ public:
         LOG_INFO("module.ability_practice", "Development character selection: valid={}, selected count={}",
             static_cast<bool>(selected), selected ? selected->size() : 0);
         LOG_INFO("module.ability_practice", "Old School practice gate: required={}, supported classes={}",
-            OldSchoolRequired, selected ? selected->NewCharacterClasses.size() : 0);
+            OldSchoolRequired.load(), selected ? selected->NewCharacterClasses.size() : 0);
         LOG_INFO("module.ability_practice", "New-character practice enrollment: classes={}, minimum GUID={}",
             selected ? selected->NewCharacterClasses.size() : 0, selected ? selected->NewCharacterMinimumGuid : 0);
         Active.store(Requested && DevelopmentAllowed && Ready && CharacterSelectionReady);

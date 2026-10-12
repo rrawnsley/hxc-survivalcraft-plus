@@ -9,21 +9,24 @@
       "race": 1,
       "class": 24,
       "level": 6,
-      "spell_hit_rating": 10000
+      "spell_hit_rating": 10000,
+      "name": "Apoldcontrol"
     },
     {
       "id": "regular",
       "race": 1,
       "class": 24,
       "level": 6,
-      "spell_hit_rating": 10000
+      "spell_hit_rating": 10000,
+      "name": "Apoldregular"
     },
     {
       "id": "hard",
       "race": 1,
       "class": 24,
       "level": 6,
-      "spell_hit_rating": 10000
+      "spell_hit_rating": 10000,
+      "name": "Apoldhard"
     }
   ],
   "creatures": [
@@ -77,7 +80,7 @@
       "actor": "control",
       "text": "HXAP\tHELLO|7",
       "language": 4294967295,
-      "to": "control"
+      "to": "Apoldcontrol"
     },
     {
       "action": "assert",
@@ -218,7 +221,7 @@
       "actor": "regular",
       "text": "HXAP\tHELLO|7",
       "language": 4294967295,
-      "to": "regular"
+      "to": "Apoldregular"
     },
     {
       "action": "assert",
@@ -307,7 +310,7 @@
       "actor": "regular",
       "text": "HXAP\tHELLO|7",
       "language": 4294967295,
-      "to": "regular"
+      "to": "Apoldregular"
     },
     {
       "action": "assert",

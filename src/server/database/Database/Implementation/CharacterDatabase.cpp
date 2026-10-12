@@ -635,7 +635,7 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_SEL_COA_OLD_SCHOOL_CORPSE_ITEMS,
         "SELECT ii.creatorGuid, ii.giftCreatorGuid, ii.count, ii.duration, ii.charges, ii.flags, ii.enchantments, "
         "ii.randomPropertyId, ii.durability, ii.playedTime, ii.text, ci.item_guid, ii.itemEntry, ci.slot "
-        "FROM coa_old_school_corpse_item ci JOIN item_instance ii ON ii.guid = ci.item_guid "
+        "FROM coa_old_school_corpse_item ci LEFT JOIN item_instance ii ON ii.guid = ci.item_guid "
         "WHERE ci.guid = ? ORDER BY ci.slot", CONNECTION_SYNCH);
     PrepareStatement(CHAR_INS_COA_OLD_SCHOOL_CORPSE_ITEM,
         "REPLACE INTO coa_old_school_corpse_item (guid, item_guid, slot) VALUES (?, ?, ?)", CONNECTION_ASYNC);
