@@ -179,7 +179,7 @@ local trackerTitle = Text(tracker, "GameFontNormal", 14, -14, 195)
 trackerTitle:SetText("Tracked practice")
 local trackerStatus = Text(tracker, "GameFontHighlightSmall", 14, -36, 310)
 local trackerFooter = Text(tracker, "GameFontHighlightSmall", 14, -82, 310)
-local trackerRows, trackerOffset = {}, 0
+local trackerRows, trackerOffset, trackerSelectedId = {}, 0, nil
 local minimize = CreateFrame("Button", "HXCAbilityPracticeMinimize", panel, "UIPanelButtonTemplate")
 minimize:SetSize(88, 22)
 minimize:SetPoint("TOPRIGHT", -40, -20)
@@ -244,7 +244,7 @@ RefreshTracker = function()
         table.sort(abilities, function(a, b) return a.abilityId < b.abilityId end)
         if #abilities == 0 then
             for _, ability in ipairs(snapshot.abilities) do
-                if ability.abilityId == selectedId then abilities[1] = ability; break end
+                if ability.abilityId == (trackerSelectedId or selectedId) then abilities[1] = ability; break end
             end
         end
     end
@@ -258,7 +258,7 @@ RefreshTracker = function()
         or syncState == "waiting" and "Updating server progress..." or "Saved view - server unavailable")
     trackerFooter:ClearAllPoints()
     trackerFooter:SetPoint("TOPLEFT", 14, -64 - count * 82)
-    trackerFooter:SetText(#abilities == 0 and "Open the menu and select abilities to track."
+    trackerFooter:SetText(#abilities == 0 and "Open the menu to select tracked abilities."
         or #abilities > #trackerRows and (trackerOffset + 1 .. "-" .. trackerOffset + count .. " of "
             .. #abilities .. " tracked - scroll to browse") or "Drag to move - Open for details")
     for index, row in ipairs(trackerRows) do
@@ -920,6 +920,8 @@ end
 function API.Minimize()
     TrackedAbilities()
     HXCAbilityPracticePreferences.compactVisible = true
+    trackerSelectedId = selectedId
+    trackerOffset = 0
     panel:Hide()
     RefreshTracker()
     tracker:Show()
@@ -945,6 +947,8 @@ function API.Reset()
     receivedAt = nil
     syncState = "waiting"
     selectedId = nil
+    trackerSelectedId = nil
+    trackerOffset = 0
     offset = 0
     tab = "skills"
     showRoadmap = false

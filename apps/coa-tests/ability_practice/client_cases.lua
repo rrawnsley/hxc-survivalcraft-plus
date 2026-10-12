@@ -85,7 +85,7 @@ assert(HXCAbilityPracticeTrackerRow1.info.text == "Rank 2 - Proficiency 23/60")
 assert(HXCAbilityPracticeTrackerRow1.uses.text == "12 qualifying uses to next point")
 assert(HXCAbilityPracticeTrackerRow1.progress.value == 18/30)
 local trackerUpdate = Fixture()
-trackerUpdate.revision = 2
+trackerUpdate.revision = 3
 trackerUpdate.abilities[1].points = 19
 trackerUpdate.abilities[1].nextPoint.uses = "11"
 assert(API.ApplySnapshot(trackerUpdate))
@@ -104,6 +104,29 @@ API.CloseTracker()
 assert(not API.IsShown())
 API.Toggle()
 API.Toggle()
+API.Reset()
+assert(API.ApplySnapshot(Fixture()))
+local many = Fixture()
+API.Reset()
+HXCAbilityPracticePreferences["24"] = {}
+for id = 1002, 1006 do
+    many.abilities[#many.abilities + 1] = { abilityId = id, displaySpellId = id, learnedRank = 2,
+        proficiency = 23, points = 18, cap = 60, pointsPerLevel = 30, availability = 4,
+        nextPoint = { status = 1, uses = "9007199254740993" },
+        nextRank = { spellId = id + 100, rankNumber = 3, characterLevel = 24, proficiency = 40,
+            state = 4, practice = { status = 1, uses = "492" } } }
+    HXCAbilityPracticePreferences["24"][tostring(id)] = true
+end
+assert(API.ApplySnapshot(many))
+API.Minimize()
+assert(HXCAbilityPracticeTrackerRow1.ability.abilityId == 1002)
+assert(HXCAbilityPracticeTrackerRow1.uses.text == "9007199254740993 qualifying uses to next point")
+assert(HXCAbilityPracticeTrackerRow4.ability.abilityId == 1005)
+HXCAbilityPracticeTracker.scripts.OnMouseWheel(HXCAbilityPracticeTracker, -1)
+assert(HXCAbilityPracticeTrackerRow1.ability.abilityId == 1003)
+assert(HXCAbilityPracticeTrackerRow4.ability.abilityId == 1006)
+API.CloseTracker()
+HXCAbilityPracticePreferences["24"] = {}
 API.Reset()
 assert(API.ApplySnapshot(Fixture()))
 print("PASS: minimized tracker updates, exact counts, stale data, restoration and close")
