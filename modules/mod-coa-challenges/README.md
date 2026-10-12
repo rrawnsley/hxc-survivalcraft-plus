@@ -125,6 +125,14 @@ The client definitions are generated with `C:/Azerothcore/tools/build-coa-old-sc
 and shipped in CoA's existing `Data/patch-ZZ.MPQ`; the slash command is shipped in its
 Homebrew Nourishment addon. Neither trial grants completion items.
 
+Use `.coa camp claim` to mark a local mob camp while alive and out of combat. A camp needs
+at least two living, hostile, stationary database spawns nearby; moving patrols are not
+counted, and a claim is refused while those spawns are already being fought. `.coa camp`
+reports the nearby claim and `.coa camp release` clears your group's
+claim. A claim is a temporary social signal: it refreshes while a member of the trial group
+stays within 60 yards and expires two minutes after the group leaves. It does not reserve
+creatures, loot, or quest credit, and is held only in server memory.
+
 ## License
 
 GNU General Public License v2.0 — see [LICENSE](LICENSE).
