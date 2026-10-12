@@ -4361,6 +4361,23 @@ namespace CoAChallenges
             if (PlayerHasRule(pl, "CHALLENGE_RULES_TYPE_CAN_BE_CRITTED_BY_ANY_ABILITY"))
                 crit_chance = 10000;
         }
+
+        void ModifyMagicSpellLevelDifference(Unit const* caster, Unit const* target,
+            int32& levelDifference) override
+        {
+            Player* casterPlayer = caster ? caster->GetCharmerOrOwnerPlayerOrPlayerItself() : nullptr;
+            Creature const* targetCreature = target ? target->ToCreature() : nullptr;
+            if (casterPlayer && OldSchoolChallenge(casterPlayer) && OldSchoolCreature(targetCreature))
+            {
+                levelDifference = int32(OldSchoolThreatLevel(targetCreature)) - int32(casterPlayer->GetLevel());
+                return;
+            }
+
+            Player* targetPlayer = target ? target->GetCharmerOrOwnerPlayerOrPlayerItself() : nullptr;
+            Creature const* casterCreature = caster ? caster->ToCreature() : nullptr;
+            if (targetPlayer && OldSchoolChallenge(targetPlayer) && OldSchoolCreature(casterCreature))
+                levelDifference = int32(targetPlayer->GetLevel()) - int32(OldSchoolThreatLevel(casterCreature));
+        }
     };
 
     class CoAChallengesAccount : public AccountScript

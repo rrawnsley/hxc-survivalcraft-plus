@@ -101,7 +101,7 @@ Old School (9001) and Old School - Hardcore (9002) are mutually exclusive native
 Creature levels remain fixed internally and display as `??` while the trial is active. In the trial, their power and kill experience follow the
 participant's con. Ordinary persistent spawns have a stable hidden threat offset from -8 to +65 levels,
 so a zone can contain approachable prey and severe threats even when its native creature levels are
-clustered. `/consider`, health, damage, melee skill, and kill experience use that hidden threat rating;
+clustered. `/consider`, health, damage, melee skill, spell-hit level difference, and kill experience use that hidden threat rating;
 the rating is fixed per database spawn and never scales to the player. Native creature levels remain
 unchanged. Elites, bosses and temporary creatures keep their native level for con. Grey creatures have
 2x health, 1x damage and 1x kill XP before the threat-offset stat adjustment; green 3x/2x/2x;
