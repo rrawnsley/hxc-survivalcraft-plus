@@ -12,6 +12,7 @@ local visible = {}
 local rows = {}
 local search = ""
 local Refresh
+local RefreshTracker
 local searchBox
 local showRoadmap = false
 local rankOffset = 0
@@ -157,6 +158,138 @@ local function TrackedAbilities()
     if not key then return {} end
     if type(HXCAbilityPracticePreferences[key]) ~= "table" then HXCAbilityPracticePreferences[key] = {} end
     return HXCAbilityPracticePreferences[key]
+end
+
+
+local tracker = CreateFrame("Frame", "HXCAbilityPracticeTracker", UIParent)
+tracker:SetSize(340, 108)
+tracker:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -40, -180)
+tracker:SetFrameStrata("MEDIUM")
+tracker:SetMovable(true)
+tracker:SetClampedToScreen(true)
+tracker:EnableMouse(true)
+tracker:RegisterForDrag("LeftButton")
+tracker:SetScript("OnDragStart", tracker.StartMoving)
+tracker:SetScript("OnDragStop", tracker.StopMovingOrSizing)
+tracker:SetBackdrop({ bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+    edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border", tile = true, tileSize = 16, edgeSize = 16,
+    insets = { left = 4, right = 4, top = 4, bottom = 4 } })
+tracker:Hide()
+local trackerTitle = Text(tracker, "GameFontNormal", 14, -14, 195)
+trackerTitle:SetText("Tracked practice")
+local trackerStatus = Text(tracker, "GameFontHighlightSmall", 14, -36, 310)
+local trackerFooter = Text(tracker, "GameFontHighlightSmall", 14, -82, 310)
+local trackerRows, trackerOffset = {}, 0
+local minimize = CreateFrame("Button", "HXCAbilityPracticeMinimize", panel, "UIPanelButtonTemplate")
+minimize:SetSize(88, 22)
+minimize:SetPoint("TOPRIGHT", -40, -20)
+minimize:SetText("Minimize")
+minimize:SetScript("OnClick", function() API.Minimize() end)
+local expand = CreateFrame("Button", "HXCAbilityPracticeExpand", tracker, "UIPanelButtonTemplate")
+expand:SetSize(58, 20)
+expand:SetPoint("TOPRIGHT", -32, -10)
+expand:SetText("Open")
+expand:SetScript("OnClick", function() API.Restore() end)
+local trackerClose = CreateFrame("Button", "HXCAbilityPracticeTrackerClose", tracker, "UIPanelCloseButton")
+trackerClose:SetPoint("TOPRIGHT", 0, 0)
+trackerClose:SetScript("OnClick", function() API.CloseTracker() end)
+for index = 1, 4 do
+    local row = CreateFrame("Button", "HXCAbilityPracticeTrackerRow" .. index, tracker)
+    row:SetSize(312, 78)
+    row:SetPoint("TOPLEFT", 14, -58 - (index - 1) * 82)
+    row.icon = row:CreateTexture(nil, "ARTWORK")
+    row.icon:SetSize(24, 24)
+    row.icon:SetPoint("TOPLEFT", 0, 0)
+    row.label = Text(row, "GameFontNormal", 30, 0, 280)
+    row.info = Text(row, "GameFontHighlightSmall", 30, -17, 280)
+    row.progress = CreateFrame("StatusBar", nil, row)
+    row.progress:SetPoint("TOPLEFT", 30, -34)
+    row.progress:SetSize(280, 8)
+    row.progress:SetStatusBarTexture("Interface\\TargetingFrame\\UI-StatusBar")
+    row.progress:SetMinMaxValues(0, 1)
+    local background = row.progress:CreateTexture(nil, "BACKGROUND")
+    background:SetAllPoints()
+    background:SetTexture(0.12, 0.12, 0.12, 1)
+    row.uses = Text(row, "GameFontHighlightSmall", 30, -48, 280)
+    row.next = Text(row, "GameFontHighlightSmall", 30, -64, 280)
+    row:SetScript("OnClick", function() API.Restore() end)
+    row:SetScript("OnEnter", function(self)
+        if not self.ability or not snapshot or not GameTooltip then return end
+        GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+        GameTooltip:SetText(SpellName(self.ability.displaySpellId))
+        GameTooltip:AddLine(Model.PointText(self.ability, snapshot.realmMaximumLevel,
+            snapshot.characterLevel), 1, 1, 1, true)
+        GameTooltip:AddLine("Counts are qualifying uses. Click Open for rank details.", 1, 0.82, 0, true)
+        GameTooltip:Show()
+    end)
+    row:SetScript("OnLeave", function(self)
+        if GameTooltip and GameTooltip:IsOwned(self) then GameTooltip:Hide() end
+    end)
+    row:SetScript("OnHide", row:GetScript("OnLeave"))
+    row:Hide()
+    trackerRows[index] = row
+end
+tracker:EnableMouseWheel(true)
+tracker:SetScript("OnMouseWheel", function(_, delta)
+    trackerOffset = trackerOffset - delta
+    RefreshTracker()
+end)
+RefreshTracker = function()
+    local abilities = {}
+    if snapshot then
+        local tracked = TrackedAbilities()
+        for _, ability in ipairs(snapshot.abilities) do
+            if tracked[tostring(ability.abilityId)] == true then abilities[#abilities + 1] = ability end
+        end
+        table.sort(abilities, function(a, b) return a.abilityId < b.abilityId end)
+        if #abilities == 0 then
+            for _, ability in ipairs(snapshot.abilities) do
+                if ability.abilityId == selectedId then abilities[1] = ability; break end
+            end
+        end
+    end
+    trackerOffset = math.max(0, math.min(trackerOffset, math.max(0, #abilities - #trackerRows)))
+    local count = math.min(#abilities, #trackerRows)
+    tracker:SetSize(340, 88 + count * 82)
+    tracker:SetScale(math.min(1, math.max(1, UIParent:GetWidth() - 32) / 340,
+        math.max(1, UIParent:GetHeight() - 32) / (88 + count * 82)))
+    trackerStatus:SetText(serverFailure and "Saved progress needs attention" or syncState == "current"
+        and ("Updated " .. math.max(0, math.floor(GetTime() - (receivedAt or GetTime()))) .. "s ago")
+        or syncState == "waiting" and "Updating server progress..." or "Saved view - server unavailable")
+    trackerFooter:ClearAllPoints()
+    trackerFooter:SetPoint("TOPLEFT", 14, -64 - count * 82)
+    trackerFooter:SetText(#abilities == 0 and "Open the menu and select abilities to track."
+        or #abilities > #trackerRows and (trackerOffset + 1 .. "-" .. trackerOffset + count .. " of "
+            .. #abilities .. " tracked - scroll to browse") or "Drag to move - Open for details")
+    for index, row in ipairs(trackerRows) do
+        local ability = abilities[index + trackerOffset]
+        row.ability = ability
+        if ability then
+            row:Show()
+            local _, _, icon = GetSpellInfo(ability.displaySpellId)
+            row.icon:SetTexture(icon or "Interface\\Icons\\INV_Misc_QuestionMark")
+            row.label:SetText(SpellName(ability.displaySpellId))
+            local fixed = Model.IsFixed(ability)
+            row.info:SetText(ability.learnedRank == 0 and "Not learned" or fixed and "Native ability"
+                or "Rank " .. ability.learnedRank .. " - Proficiency " .. ability.proficiency .. "/" .. ability.cap)
+            local trains = not fixed and ability.learnedRank > 0 and ability.pointsPerLevel > 0
+            if trains then
+                row.progress:Show()
+                row.progress:SetValue(ability.proficiency >= ability.cap and 1
+                    or ability.points / ability.pointsPerLevel)
+                row.progress:SetStatusBarColor(Model.PracticePaused(ability) and 0.45 or 0.81,
+                    Model.PracticePaused(ability) and 0.45 or 0.62, Model.PracticePaused(ability) and 0.45 or 0.24)
+            else row.progress:Hide() end
+            row.uses:SetText(fixed and "No practice required" or ability.learnedRank == 0 and "Learn the ability first"
+                or Model.PracticePaused(ability) and "Practice paused"
+                or ability.availability == 5 and "At current proficiency cap"
+                or ability.nextPoint.status == 1 and (ability.nextPoint.uses .. " qualifying uses to next point")
+                or "Practice forecast unavailable")
+            local milestone = Model.NextMilestone(ability)
+            row.next:SetText(milestone and ("Next " .. (Model.IsMastery(ability) and "mastery" or "rank")
+                .. ": level " .. milestone.characterLevel) or "No further milestone")
+        else row:Hide() end
+    end
 end
 
 local function SortPreference()
@@ -512,6 +645,7 @@ Refresh = function()
                             .. ability.proficiency .. "/" .. ability.cap))))
         end
     end
+    RefreshTracker()
     if GameTooltip and GameTooltip:IsShown() then
         local owner = GameTooltip:GetOwner()
         if (owner == practiceHelp or owner == filterButton) and owner:IsShown() then
@@ -763,11 +897,12 @@ function API.ApplyServerFailure(value)
 end
 
 function API.IsShown()
-    return panel:IsShown()
+    return panel:IsShown() or tracker:IsShown()
 end
 
 function API.UpdateAge(now)
     if panel:IsShown() then UpdateSubtitle(now) end
+    if tracker:IsShown() then RefreshTracker() end
 end
 
 function API.SetSyncState(value)
@@ -776,12 +911,30 @@ function API.SetSyncState(value)
     return true
 end
 
+function API.CloseTracker()
+    TrackedAbilities()
+    HXCAbilityPracticePreferences.compactVisible = false
+    tracker:Hide()
+end
+
+function API.Minimize()
+    TrackedAbilities()
+    HXCAbilityPracticePreferences.compactVisible = true
+    panel:Hide()
+    RefreshTracker()
+    tracker:Show()
+    if API.Request then API.Request() end
+end
+
+function API.Restore()
+    API.CloseTracker()
+    Refresh()
+    panel:Show()
+    if API.Request then API.Request() end
+end
+
 function API.Toggle()
-    if panel:IsShown() then panel:Hide() else
-        Refresh()
-        panel:Show()
-        if API.Request then API.Request() end
-    end
+    if panel:IsShown() then panel:Hide() else API.Restore() end
 end
 
 function API.Reset()
@@ -799,6 +952,10 @@ function API.Reset()
     search = ""
     searchBox:SetText("")
     Refresh()
+    if type(HXCAbilityPracticePreferences) == "table" and HXCAbilityPracticePreferences.compactVisible then
+        panel:Hide()
+        tracker:Show()
+    else tracker:Hide() end
 end
 
 SLASH_HXCABILITYPRACTICE1 = "/practice"
