@@ -95,6 +95,28 @@ keys are appended automatically on deploy.
 - Some rules/objectives/conditions are still being mapped; the module applies
   the subset described in `conf/mod-coa-challenges.conf.dist`.
 
+## HXC Old School trials
+
+Old School (9001) and Old School - Hardcore (9002) are mutually exclusive native trials.
+Unowned creatures other than critters have triple health while fighting a participant,
+and deal double damage to the participant and their pets or playerbot companions.
+Kill experience is multiplied by four; quest experience is unchanged. Restricted tapping
+prevents players in another trial from assisting with the kill or claiming its rewards.
+
+Ordinary Old School deaths outside battlegrounds and arenas remove 10% of the current
+level's required experience, capped at the XP currently in the bar. Levels are preserved.
+Hardcore uses one life: death permanently fails the run, while resurrection remains
+available under CoA's existing Hardcore rules. Abandoning a progressed Hardcore run also
+fails it. Starting either trial requires being alive and outside combat; abandoning one
+during combat is refused, including through a custom trial bundle.
+
+Target a hostile creature and use `/consider` (or `.coa consider`). The response estimates
+danger from level difference, creature rank, projected health and the participant's maximum
+health. It discloses that abilities, gear, companions and adds can change the result.
+The client definitions are generated with `C:/Azerothcore/tools/build-coa-old-school.py`
+and shipped in CoA's existing `Data/patch-ZZ.MPQ`; the slash command is shipped in its
+Homebrew Nourishment addon. Neither trial grants completion items.
+
 ## License
 
 GNU General Public License v2.0 — see [LICENSE](LICENSE).

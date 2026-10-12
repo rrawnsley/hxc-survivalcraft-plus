@@ -1,0 +1,416 @@
+{
+  "schema": 1,
+  "name": "Old School increases creature danger and kill XP while death costs XP and Hardcore ends the run",
+  "contract": "Owned trial IDs 9001/9002. Native hostile creature hits scale health 3x and damage 2x, creature kill XP 4x, quest XP unchanged, normal death removes up to 10% of the current level bar, Hardcore death fails permanently, and combat prevents switching. Bots inherit their human leader's combat difficulty.",
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 1,
+      "level": 1,
+      "allow_regeneration": false
+    },
+    {
+      "id": "old",
+      "race": 1,
+      "class": 1,
+      "level": 1,
+      "allow_regeneration": false
+    },
+    {
+      "id": "hard",
+      "race": 1,
+      "class": 1,
+      "level": 1
+    },
+    {
+      "id": "bot",
+      "race": 1,
+      "class": 1,
+      "level": 1,
+      "bot": true
+    },
+    {
+      "id": "quester",
+      "race": 1,
+      "class": 1,
+      "level": 1
+    }
+  ],
+  "creatures": [
+    {
+      "id": "control_wolf",
+      "owner": "control",
+      "entry": 299,
+      "faction": 7,
+      "level": 1,
+      "health": 42,
+      "distance": 2
+    },
+    {
+      "id": "old_wolf",
+      "owner": "old",
+      "entry": 299,
+      "faction": 7,
+      "level": 1,
+      "health": 42,
+      "distance": 2
+    },
+    {
+      "id": "bot_wolf",
+      "owner": "bot",
+      "entry": 299,
+      "faction": 7,
+      "level": 1,
+      "health": 1000,
+      "distance": 2
+    },
+    {
+      "id": "caster_control",
+      "owner": "control",
+      "entry": 299,
+      "faction": 14,
+      "level": 1,
+      "health": 1000,
+      "distance": 5,
+      "spell_hit_bonus": 100
+    },
+    {
+      "id": "caster_old",
+      "owner": "old",
+      "entry": 299,
+      "faction": 14,
+      "level": 1,
+      "health": 1000,
+      "distance": 5,
+      "spell_hit_bonus": 100
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "start_challenge",
+      "actor": "old",
+      "challenge": 9001,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "old",
+      "metric": "challenge_start_code",
+      "equals": 0
+    },
+    {
+      "action": "start_challenge",
+      "actor": "hard",
+      "challenge": 9002,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hard",
+      "metric": "challenge_start_code",
+      "equals": 0
+    },
+    {
+      "action": "start_challenge",
+      "actor": "old",
+      "challenge": 9002,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "label": "Variants cannot stack",
+      "actor": "old",
+      "metric": "challenge_start_code",
+      "min": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "control",
+      "value": 10000,
+      "maximum": 10000
+    },
+    {
+      "action": "set_health",
+      "actor": "old",
+      "value": 10000,
+      "maximum": 10000
+    },
+    {
+      "action": "set_health",
+      "actor": "bot",
+      "value": 10000,
+      "maximum": 10000
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "health",
+      "save_as": "before_control_hit"
+    },
+    {
+      "action": "snapshot",
+      "actor": "old",
+      "metric": "health",
+      "save_as": "before_old_hit"
+    },
+    {
+      "action": "cast",
+      "actor": "caster_control",
+      "target": "control",
+      "spell": 116,
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "health",
+      "save_as": "normal_spell",
+      "relative_to": "before_control_hit"
+    },
+    {
+      "action": "cast",
+      "actor": "caster_old",
+      "target": "old",
+      "spell": 116,
+      "creature_triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Hostile spell damage doubles",
+      "actor": "old",
+      "metric": "health",
+      "ratio_to": "normal_spell",
+      "min": 1.79,
+      "max": 2.23,
+      "relative_to": "before_old_hit"
+    },
+    {
+      "action": "assert",
+      "label": "A creature initiating combat also gets triple health",
+      "actor": "caster_old",
+      "metric": "max_health",
+      "equals": 3000
+    },
+    {
+      "action": "stop_challenge",
+      "actor": "old",
+      "challenge": 9001
+    },
+    {
+      "action": "assert",
+      "label": "Cannot escape penalties by deactivating in combat",
+      "actor": "old",
+      "metric": "system_message_contains",
+      "text": "cannot be abandoned during combat",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "xp",
+      "save_as": "control_xp"
+    },
+    {
+      "action": "attack",
+      "actor": "control",
+      "target": "control_wolf"
+    },
+    {
+      "action": "assert",
+      "actor": "control_wolf",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 90000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "control"
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "xp",
+      "relative_to": "control_xp",
+      "save_as": "normal_kill"
+    },
+    {
+      "action": "snapshot",
+      "actor": "old",
+      "metric": "xp",
+      "save_as": "old_xp"
+    },
+    {
+      "action": "attack",
+      "actor": "old",
+      "target": "old_wolf"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Outgoing attacks trigger triple creature health",
+      "actor": "old_wolf",
+      "metric": "max_health",
+      "equals": 126
+    },
+    {
+      "action": "assert",
+      "actor": "old_wolf",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 90000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "old"
+    },
+    {
+      "action": "assert",
+      "label": "Creature kills grant four times XP",
+      "actor": "old",
+      "metric": "xp",
+      "relative_to": "old_xp",
+      "ratio_to": "normal_kill",
+      "min": 3.99,
+      "max": 4.01
+    },
+    {
+      "action": "group",
+      "actor": "old",
+      "target": "bot"
+    },
+    {
+      "action": "attack",
+      "actor": "bot",
+      "target": "bot_wolf"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Companion pulls inherit Old School difficulty",
+      "actor": "bot_wolf",
+      "metric": "max_health",
+      "equals": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "bot"
+    },
+    {
+      "action": "client_packet",
+      "actor": "old",
+      "opcode": 317,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "bot_wolf"
+        }
+      ]
+    },
+    {
+      "action": "command",
+      "actor": "old",
+      "command": ".coa consider"
+    },
+    {
+      "action": "assert",
+      "label": "Consider provides a danger estimate",
+      "actor": "old",
+      "metric": "system_message_contains",
+      "text": "Estimated health",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "old",
+      "metric": "xp",
+      "save_as": "before_death"
+    },
+    {
+      "action": "snapshot",
+      "actor": "old",
+      "metric": "next_level_xp",
+      "save_as": "level_xp"
+    },
+    {
+      "action": "die",
+      "actor": "old"
+    },
+    {
+      "action": "assert",
+      "label": "Death removes 10% of a level",
+      "actor": "old",
+      "metric": "xp",
+      "relative_to": "before_death",
+      "ratio_to": "level_xp",
+      "min": -0.101,
+      "max": -0.099
+    },
+    {
+      "action": "assert",
+      "actor": "old",
+      "metric": "level",
+      "equals": 1
+    },
+    {
+      "action": "relog",
+      "actor": "old"
+    },
+    {
+      "action": "assert",
+      "label": "XP loss survives reconnect",
+      "actor": "old",
+      "metric": "xp",
+      "relative_to": "before_death",
+      "ratio_to": "level_xp",
+      "min": -0.101,
+      "max": -0.099
+    },
+    {
+      "action": "die",
+      "actor": "hard"
+    },
+    {
+      "action": "relog",
+      "actor": "hard"
+    },
+    {
+      "action": "start_challenge",
+      "actor": "hard",
+      "challenge": 9002,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "label": "Hardcore cannot restart after death",
+      "actor": "hard",
+      "metric": "challenge_start_code",
+      "min": 1
+    }
+  ]
+}

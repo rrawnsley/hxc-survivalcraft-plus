@@ -790,6 +790,14 @@ namespace CoAChallenges
         if (trialID.empty())
             return;
 
+        std::set<uint32> const activeChallenges = ActiveChallenges(guid);
+        if (player->IsInCombat() && (activeChallenges.contains(9001) || activeChallenges.contains(9002)))
+        {
+            NotifyPlayer(player, "Old School cannot be abandoned during combat.");
+            SendTrialResult(player, SMSG_COA_TRIAL_DEACTIVATE_RESULT, trialID, "DEACTIVATE_CHALLENGE_IN_COMBAT");
+            return;
+        }
+
         uint32 ownerGuid = TrialOwnerGuid(trialID);
         std::string eTrialId = trialID;
         CharacterDatabase.EscapeString(eTrialId);

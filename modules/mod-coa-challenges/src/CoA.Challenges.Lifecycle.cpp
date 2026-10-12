@@ -385,6 +385,12 @@ namespace CoAChallenges
     {
         uint32 guid = player->GetGUID().GetCounter();
 
+        if ((challengeID == 9001 || challengeID == 9002) && (!player->IsAlive() || player->IsInCombat()))
+        {
+            NotifyPlayer(player, "Old School can only be started while alive and outside combat.");
+            return 8;
+        }
+
         if (!ChallengeExists(challengeID))                       // 1 NOT_FOUND
         {
             ChatHandler(player->GetSession()).PSendSysMessage("Challenge {} was not found.", challengeID);

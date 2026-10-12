@@ -1093,6 +1093,23 @@ namespace CoAChallenges
         return 0;
     }
 
+    uint32 OldSchoolChallenge(Player const* player)
+    {
+        if (!player || !ChallengesEnabled())
+            return 0;
+        Player const* participant = ChallengeParticipant(player);
+        for (auto const& [id, level] : CachedCharChallenges(participant->GetGUID().GetCounter()))
+            if (id == 9001 || id == 9002)
+                return id;
+        return 0;
+    }
+
+    bool OldSchoolCreature(Creature const* creature)
+    {
+        return creature && !creature->IsCharmedOwnedByPlayerOrPlayer()
+            && creature->GetCreatureTemplate()->type != CREATURE_TYPE_CRITTER;
+    }
+
     uint32 AdventureModeExtraHealthPct(uint32 tier)
     {
         if (tier >= 89)
@@ -1134,14 +1151,15 @@ namespace CoAChallenges
         if (creature->hasLootRecipient() && !creature->isTappedBy(attacker))
             return;
         uint32 const tier = AdventureModeTier(attacker);
-        if (!tier)
+        bool const oldSchool = OldSchoolChallenge(attacker) && OldSchoolCreature(creature);
+        if (!tier && !oldSchool)
             return;
 
         auto* state = new AdventureHealth();
-        uint32 const extraHealthPct = AdventureModeExtraHealthPct(tier);
+        uint32 const extraHealthPct = oldSchool ? 200 : AdventureModeExtraHealthPct(tier);
         float const baseHealth = float(creature->GetMaxHealth());
         float const extraHealth = float(CalculatePct(creature->GetMaxHealth(), extraHealthPct));
-        state->extra = (baseHealth + extraHealth) * 0.15f + extraHealth;
+        state->extra = oldSchool ? extraHealth : (baseHealth + extraHealth) * 0.15f + extraHealth;
         creature->CustomData.Set(AdventureHealthKey, state);
         ChangeMaxHealthKeepingPct(creature, state->extra, true);
     }
@@ -1338,6 +1356,14 @@ namespace CoAChallenges
 
         void OnPlayerJustDied(Player* player) override
         {
+            if (OldSchoolChallenge(player) == 9001 && !player->GetSession()->IsBot()
+                && !player->GetMap()->IsBattlegroundOrArena())
+            {
+                uint32 const xp = player->GetUInt32Value(PLAYER_XP);
+                uint32 const loss = std::min(xp, player->GetUInt32Value(PLAYER_NEXT_LEVEL_XP) / 10);
+                player->SetUInt32Value(PLAYER_XP, xp - loss);
+                NotifyPlayer(player, "Old School: death cost you {} experience. Levels are preserved.", loss);
+            }
             HandlePlayerDeath(player);
         }
 
@@ -1794,6 +1820,10 @@ namespace CoAChallenges
 
             if (amount && AdventureModeTier(player))
                 amount = static_cast<uint32>(std::min<uint64_t>(uint64_t(amount) * 2, 0xFFFFFFFFu));
+
+            if (amount && OldSchoolChallenge(player) && xpSource == XPSOURCE_KILL
+                && victim && OldSchoolCreature(victim->ToCreature()) && TappingAllowsRewards(player, victim->ToCreature()))
+                amount = uint32(std::min<uint64>(uint64(amount) * 4, UINT32_MAX));
 
             // NO_KILL_CREDIT_UNLESS_AT_DISADVANTAGE ("Punching Up" / Overwhelming
             // Odds): only monsters above the player's level grant kill credit.
@@ -2647,6 +2677,14 @@ namespace CoAChallenges
                                 guid, challengeID))
                             level = r->Fetch()[0].Get<uint32>();
 
+                        if ((challengeID == 9001 || challengeID == 9002) && player->IsInCombat())
+                        {
+                            NotifyPlayer(player, "Old School cannot be abandoned during combat.");
+                            SendChallengeResponse(player, SMSG_COA_CHALLENGE_STOP_RESPONSE,
+                                challengeID, level, 12, "CHALLENGE_STOP_IN_COMBAT");
+                            return false;
+                        }
+
                         // A challenge with lives (hardcore/Nightmare) is FAILED
                         // when abandoned — unless nothing has been done yet
                         // (pristine), in which case it's a free cancel so a
@@ -2781,6 +2819,7 @@ namespace CoAChallenges
             };
             static ChatCommandTable coaCommandTable =
             {
+                { "consider", HandleConsiderCommand, SEC_PLAYER, Console::No },
                 { "trial",     coaActionsTable },
                 { "challenge", coaActionsTable },
                 { "challenges", coaChallengesTable },
@@ -2808,6 +2847,35 @@ namespace CoAChallenges
                 { "coa", coaCommandTable }
             };
             return commandTable;
+        }
+
+        static bool HandleConsiderCommand(ChatHandler* handler)
+        {
+            Player* player = handler->GetSession()->GetPlayer();
+            Creature* target = handler->getSelectedCreature();
+            if (!OldSchoolCreature(target) || !target->IsAlive() || !player->IsValidAttackTarget(target))
+            {
+                handler->SendSysMessage("Consider: select a living hostile creature.");
+                return true;
+            }
+            bool const oldSchool = OldSchoolChallenge(player) != 0;
+            uint64 health = target->GetMaxHealth();
+            if (oldSchool && !target->CustomData.Get<AdventureHealth>(AdventureHealthKey))
+                health *= 3;
+            int32 const difference = int32(target->GetLevel()) - int32(player->GetLevel());
+            uint32 const rank = target->GetCreatureTemplate()->rank;
+            char const* danger = "Dangerous: fight carefully and prepare an escape.";
+            if (rank == CREATURE_ELITE_WORLDBOSS || difference >= 5)
+                danger = "Overwhelming: avoid this fight.";
+            else if (rank == CREATURE_ELITE_ELITE || rank == CREATURE_ELITE_RAREELITE || difference >= 2
+                || health > uint64(player->GetMaxHealth()) * 6)
+                danger = "Very dangerous: bring a group.";
+            else if (difference <= -4 && health < uint64(player->GetMaxHealth()) * 2)
+                danger = "Lower risk: watch for adds and special abilities.";
+            handler->PSendSysMessage("Consider {} (level {}): {} Estimated health: {}. Creature damage: {}x. "
+                "Estimate only; gear, abilities, companions and adds change the outcome.",
+                target->GetName(), target->GetLevel(), danger, health, oldSchool ? 2 : 1);
+            return true;
         }
 
         // .coa <trial|challenge> unlock <id> [player]
@@ -3851,6 +3919,13 @@ namespace CoAChallenges
         {
             if (!attacker || !victim || !damage)
                 return;
+            if (OldSchoolCreature(attacker->ToCreature()))
+                if (Player* defender = victim->GetCharmerOrOwnerPlayerOrPlayerItself())
+                    if (OldSchoolChallenge(defender))
+                    {
+                        ScaleAdventureHealth(defender, attacker);
+                        damage = uint32(std::min<uint64>(uint64(damage) * 2, UINT32_MAX));
+                    }
             // Resolve the controlling player: a pet/guardian must not be able to
             // bypass NO_DAMAGE / NO_KILL_* by dealing the damage itself.
             Player* pl = attacker->GetCharmerOrOwnerPlayerOrPlayerItself();
