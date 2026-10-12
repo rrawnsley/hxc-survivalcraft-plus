@@ -1124,12 +1124,14 @@ namespace CoAChallenges
 
     int32 OldSchoolThreatOffset(Creature const* creature)
     {
-        if (!creature || creature->GetCreatureTemplate()->rank != CREATURE_ELITE_NORMAL
-            || !creature->GetSpawnId())
+        if (!creature || creature->GetCreatureTemplate()->rank != CREATURE_ELITE_NORMAL)
             return 0;
 
         if (creature->GetZoneId() == AREA_MULGORE && creature->GetEntry() == 3058)
             return 4;
+
+        if (!creature->GetSpawnId())
+            return 0;
 
         uint32 seed = creature->GetSpawnId();
         seed ^= seed >> 16;
@@ -3216,7 +3218,11 @@ namespace CoAChallenges
                     "change the outcome.", target->GetName(), con, advice, health,
                     healthPercent / 100, damageMultiplier, experienceMultiplier);
                 if (target->GetZoneId() == AREA_MULGORE)
+                {
                     handler->SendSysMessage("Mulgore: nearby same-faction creatures within 35 yards may join the fight.");
+                    if (target->GetEntry() == 3058)
+                        handler->SendSysMessage("Named patrol: Arra'chea carries elevated hidden threat; use the con estimate before engaging.");
+                }
                 return true;
             }
 
