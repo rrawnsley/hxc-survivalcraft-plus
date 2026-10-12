@@ -1119,106 +1119,6 @@ namespace CoAChallenges
         uint32 experienceMultiplier;
     };
 
-    constexpr float OldSchoolCampSpawnRadius = 30.0f;
-    constexpr float OldSchoolCampPresenceRadius = 60.0f;
-    constexpr uint32 OldSchoolCampExpiryMs = 120000;
-    constexpr uint32 OldSchoolCampPresenceCheckMs = 5000;
-
-    struct OldSchoolCampClaim
-    {
-        uint32 mapId = 0;
-        uint32 instanceId = 0;
-        uint32 phaseMask = 0;
-        uint32 partyLeaderGuid = 0;
-        uint32 claimantGuid = 0;
-        uint32 lastPresenceMs = 0;
-        float x = 0.0f;
-        float y = 0.0f;
-        std::string claimantName;
-        uint32 spawnCount = 0;
-    };
-
-    struct OldSchoolCampPresence : DataMap::Base
-    {
-        uint32 elapsedMs = 0;
-    };
-
-    std::mutex OldSchoolCampMutex;
-    std::vector<OldSchoolCampClaim> OldSchoolCampClaims;
-
-    uint32 OldSchoolCampPartyLeader(Player const* player)
-    {
-        Group const* group = player ? player->GetGroup() : nullptr;
-        return group ? group->GetLeaderGUID().GetCounter() : 0;
-    }
-
-    bool OldSchoolCampClaimedBy(OldSchoolCampClaim const& claim, Player const* player)
-    {
-        uint32 const partyLeaderGuid = OldSchoolCampPartyLeader(player);
-        return claim.partyLeaderGuid
-            ? partyLeaderGuid == claim.partyLeaderGuid
-            : !partyLeaderGuid && player && player->GetGUID().GetCounter() == claim.claimantGuid;
-    }
-
-    uint32 CountOldSchoolCampSpawns(Player* player, bool* contested = nullptr)
-    {
-        uint32 count = 0;
-        player->DoForAllVisibleWorldObjects([&](WorldObject* object)
-        {
-            Creature* creature = object->ToCreature();
-            if (!creature || !creature->IsAlive() || !creature->GetSpawnId()
-                || creature->GetDefaultMovementType() != IDLE_MOTION_TYPE
-                || creature->GetCreatureTemplate()->rank != CREATURE_ELITE_NORMAL
-                || !OldSchoolCreature(creature) || !player->IsValidAttackTarget(creature)
-                || !player->IsWithinDistInMap(creature, OldSchoolCampSpawnRadius))
-                return;
-
-            if (creature->IsInCombat())
-            {
-                if (contested)
-                    *contested = true;
-                return;
-            }
-
-            ++count;
-        });
-        return count;
-    }
-
-    void UpdateOldSchoolCampPresence(Player* player, uint32 diff)
-    {
-        if (!player || !OldSchoolChallenge(player))
-            return;
-
-        OldSchoolCampPresence* presence = player->CustomData.GetDefault<OldSchoolCampPresence>(
-            "coa_challenges.old_school_camp_presence");
-        presence->elapsedMs += diff;
-        if (presence->elapsedMs < OldSchoolCampPresenceCheckMs)
-            return;
-        presence->elapsedMs = 0;
-
-        uint32 const now = getMSTime();
-        uint32 const partyLeaderGuid = OldSchoolCampPartyLeader(player);
-        std::lock_guard<std::mutex> lock(OldSchoolCampMutex);
-        for (auto it = OldSchoolCampClaims.begin(); it != OldSchoolCampClaims.end();)
-        {
-            if (getMSTimeDiff(it->lastPresenceMs, now) >= OldSchoolCampExpiryMs)
-            {
-                it = OldSchoolCampClaims.erase(it);
-                continue;
-            }
-
-            bool const sameGroup = it->partyLeaderGuid
-                ? partyLeaderGuid == it->partyLeaderGuid
-                : !partyLeaderGuid && player->GetGUID().GetCounter() == it->claimantGuid;
-            if (sameGroup && player->GetMapId() == it->mapId
-                && player->GetInstanceId() == it->instanceId && player->GetPhaseMask() == it->phaseMask
-                && player->GetDistance2d(it->x, it->y) <= OldSchoolCampPresenceRadius)
-                it->lastPresenceMs = now;
-            ++it;
-        }
-    }
-
     int32 OldSchoolThreatOffset(Creature const* creature)
     {
         if (!creature || creature->GetCreatureTemplate()->rank != CREATURE_ELITE_NORMAL
@@ -2176,7 +2076,8 @@ namespace CoAChallenges
         // ---- Rules: experience source / talents / items ----------------------
         bool OnPlayerHasNoBonusExperience(Player* player) override
         {
-            return PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_BONUS_EXPERIENCE");
+            return PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_BONUS_EXPERIENCE")
+                || OldSchoolChallenge(player) != 0;
         }
 
         void OnPlayerGiveXP(Player* player, uint32& amount, Unit* victim, uint8 xpSource) override
@@ -2224,6 +2125,10 @@ namespace CoAChallenges
                 uint32 const multiplier = scaling ? scaling->experienceMultiplier
                     : GetOldSchoolPowerProfile(player, creature).experienceMultiplier;
                 amount = uint32(std::min<uint64>(uint64(amount) * multiplier, UINT32_MAX));
+
+                if (CoANeeds::ReadOldSchoolRestedSeconds &&
+                    CoANeeds::ReadOldSchoolRestedSeconds(player->GetGUID().GetCounter()))
+                    amount = uint32(std::min<uint64>(uint64(amount) * 115 / 100, UINT32_MAX));
             }
 
             // NO_KILL_CREDIT_UNLESS_AT_DISADVANTAGE ("Punching Up" / Overwhelming
@@ -2721,7 +2626,6 @@ namespace CoAChallenges
 
         void OnPlayerUpdate(Player* player, uint32 diff) override
         {
-            UpdateOldSchoolCampPresence(player, diff);
             SpellbindProcessPending(player);
             HungerUpdate(player, diff);
             FatigueUpdate(player, diff);
@@ -3233,7 +3137,6 @@ namespace CoAChallenges
             static ChatCommandTable coaCommandTable =
             {
                 { "consider", HandleConsiderCommand, SEC_PLAYER, Console::No },
-                { "camp", HandleOldSchoolCampCommand, SEC_PLAYER, Console::No },
                 { "trial",     coaActionsTable },
                 { "challenge", coaActionsTable },
                 { "challenges", coaChallengesTable },
@@ -3307,141 +3210,6 @@ namespace CoAChallenges
             handler->PSendSysMessage("Consider {} (level {}): {} Estimated health: {}. Creature damage: 1x. "
                 "Estimate only; gear, abilities, companions and adds change the outcome.",
                 target->GetName(), target->GetLevel(), danger, health);
-            return true;
-        }
-
-        static bool HandleOldSchoolCampCommand(ChatHandler* handler, Optional<std::string> action)
-        {
-            Player* player = handler->GetSession()->GetPlayer();
-            if (!OldSchoolChallenge(player))
-            {
-                handler->SendSysMessage("Camp claims are available only during Old School trials.");
-                return true;
-            }
-            if (!player->GetMap() || player->GetMap()->IsBattlegroundOrArena())
-            {
-                handler->SendSysMessage("Mob camp claims are available in the world, not in battlegrounds or arenas.");
-                return true;
-            }
-
-            std::string const command = action ? *action : "status";
-            if (command != "claim" && command != "release" && command != "status")
-            {
-                handler->SendSysMessage("Use .coa camp [claim|status|release].");
-                return true;
-            }
-
-            uint32 const nearbySpawnCount = command == "status" ? CountOldSchoolCampSpawns(player) : 0;
-
-            if (command == "claim")
-            {
-                if (!player->IsAlive() || player->IsInCombat())
-                {
-                    handler->SendSysMessage("Leave combat and be alive before claiming a mob camp.");
-                    return true;
-                }
-
-                bool contested = false;
-                uint32 const spawnCount = CountOldSchoolCampSpawns(player, &contested);
-                if (contested)
-                {
-                    handler->SendSysMessage("Someone is already fighting at this camp. Wait for the pull to finish before claiming it.");
-                    return true;
-                }
-                if (spawnCount < 2)
-                {
-                    handler->SendSysMessage("No camp to claim here. Stand near at least two idle, hostile world spawns; roaming patrols do not count.");
-                    return true;
-                }
-
-                uint32 const now = getMSTime();
-                std::lock_guard<std::mutex> lock(OldSchoolCampMutex);
-                for (auto it = OldSchoolCampClaims.begin(); it != OldSchoolCampClaims.end();)
-                {
-                    if (getMSTimeDiff(it->lastPresenceMs, now) >= OldSchoolCampExpiryMs)
-                    {
-                        it = OldSchoolCampClaims.erase(it);
-                        continue;
-                    }
-
-                    if (it->mapId == player->GetMapId() && it->instanceId == player->GetInstanceId()
-                        && it->phaseMask == player->GetPhaseMask()
-                        && player->GetDistance2d(it->x, it->y) <= OldSchoolCampPresenceRadius)
-                    {
-                        if (OldSchoolCampClaimedBy(*it, player))
-                        {
-                            it->lastPresenceMs = now;
-                            handler->PSendSysMessage("Your group already holds this camp; the nearby claim is by {}. Spawns and loot remain public.",
-                                it->claimantName);
-                        }
-                        else
-                            handler->PSendSysMessage("This camp is active with {}. Wait until their group leaves; spawns and loot remain public.",
-                                it->claimantName);
-                        return true;
-                    }
-                    ++it;
-                }
-
-                OldSchoolCampClaim claim;
-                claim.mapId = player->GetMapId();
-                claim.instanceId = player->GetInstanceId();
-                claim.phaseMask = player->GetPhaseMask();
-                claim.partyLeaderGuid = OldSchoolCampPartyLeader(player);
-                claim.claimantGuid = player->GetGUID().GetCounter();
-                claim.lastPresenceMs = now;
-                claim.x = player->GetPositionX();
-                claim.y = player->GetPositionY();
-                claim.claimantName = player->GetName();
-                claim.spawnCount = spawnCount;
-                OldSchoolCampClaims.push_back(std::move(claim));
-                handler->PSendSysMessage("You claim this camp near {} idle spawns for your group. Stay within {} yards; the claim expires two minutes after your group leaves. Mobs and loot remain public.",
-                    spawnCount, uint32(OldSchoolCampPresenceRadius));
-                return true;
-            }
-
-            uint32 const now = getMSTime();
-            std::lock_guard<std::mutex> lock(OldSchoolCampMutex);
-            for (auto it = OldSchoolCampClaims.begin(); it != OldSchoolCampClaims.end();)
-            {
-                if (getMSTimeDiff(it->lastPresenceMs, now) >= OldSchoolCampExpiryMs)
-                {
-                    it = OldSchoolCampClaims.erase(it);
-                    continue;
-                }
-
-                if (it->mapId != player->GetMapId() || it->instanceId != player->GetInstanceId()
-                    || it->phaseMask != player->GetPhaseMask()
-                    || player->GetDistance2d(it->x, it->y) > OldSchoolCampPresenceRadius)
-                {
-                    ++it;
-                    continue;
-                }
-
-                if (command == "release")
-                {
-                    if (!OldSchoolCampClaimedBy(*it, player))
-                    {
-                        handler->PSendSysMessage("This nearby camp belongs socially to {}. Mobs and loot are still public.",
-                            it->claimantName);
-                        return true;
-                    }
-                    OldSchoolCampClaims.erase(it);
-                    handler->SendSysMessage("Your group released this camp.");
-                    return true;
-                }
-
-                if (OldSchoolCampClaimedBy(*it, player))
-                    it->lastPresenceMs = now;
-                handler->PSendSysMessage("An active camp is claimed by {} near {} idle spawns. Claims organize groups only; they do not reserve mobs or loot.",
-                    it->claimantName, it->spawnCount);
-                return true;
-            }
-
-            if (command == "release")
-                handler->SendSysMessage("Your group has no active camp nearby to release.");
-            else
-                handler->PSendSysMessage("No active camp nearby. {} idle hostile spawns are close; use .coa camp claim to mark this area.",
-                    nearbySpawnCount);
             return true;
         }
 

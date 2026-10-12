@@ -125,13 +125,15 @@ The client definitions are generated with `C:/Azerothcore/tools/build-coa-old-sc
 and shipped in CoA's existing `Data/patch-ZZ.MPQ`; the slash command is shipped in its
 Homebrew Nourishment addon. Neither trial grants completion items.
 
-Use `.coa camp claim` to mark a local mob camp while alive and out of combat. A camp needs
-at least two living, hostile, stationary database spawns nearby; moving patrols are not
-counted, and a claim is refused while those spawns are already being fought. `.coa camp`
-reports the nearby claim and `.coa camp release` clears your group's
-claim. A claim is a temporary social signal: it refreshes while a member of the trial group
-stays within 60 yards and expires two minutes after the group leaves. It does not reserve
-creatures, loot, or quest credit, and is held only in server memory.
+Build a real camp using the Campfire ability from the Survivalist spellbook or the needs panel;
+it consumes Simple Wood harvested through Woodcutting. Shelter and Hearthstead are higher-tier
+options. The placed fire is also a Cooking fire. Sit beside it outside combat to receive the
+existing camp recovery. In either Old School trial, staying near a live camp replenishes a rested
+timer up to 20 minutes; time away from camp spends it while you are online and alive. A creature kill
+receives 15% additional XP while the timer has time remaining. Quest XP is unchanged. Old School
+does not consume the standard WoW rested-XP pool while its trial bonus is active. Sitting remains
+necessary for the existing health/mana recovery and Fellowship benefits. The temporary `.coa camp`
+claim command was removed; a placed camp is the actual camp marker and benefit source.
 
 ## License
 
