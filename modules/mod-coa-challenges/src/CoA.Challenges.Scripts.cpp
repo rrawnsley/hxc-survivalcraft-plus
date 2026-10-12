@@ -1128,6 +1128,9 @@ namespace CoAChallenges
             || !creature->GetSpawnId())
             return 0;
 
+        if (creature->GetZoneId() == AREA_MULGORE && creature->GetEntry() == 3058)
+            return 4;
+
         uint32 seed = creature->GetSpawnId();
         seed ^= seed >> 16;
         seed *= 0x7feb352d;
