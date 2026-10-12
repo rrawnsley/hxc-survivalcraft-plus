@@ -7,6 +7,7 @@
 #include "AbilityPracticeDevelopmentPeriodic.h"
 #include "AbilityPracticeDevelopmentRanked.h"
 #include "AbilityPracticeDevelopmentPacing.h"
+#include "AbilityPracticeDevelopmentResourcePacing.h"
 #include "AbilityPracticeDevelopmentRankCaps.h"
 #include "AbilityPracticeDevelopmentMastery.h"
 #include "AbilityPracticeDevelopmentHelpers.h"
@@ -272,6 +273,43 @@ Practice::DevelopmentTrainerRanks::Entry const* TrainerRankExtensionForIdentity(
 
 std::unordered_map<std::uint64_t, Practice::DevelopmentRankCaps::Entry> RankCapEntries;
 
+std::unordered_map<std::uint64_t, Practice::DevelopmentResourcePacing::Entry> ResourcePacingEntries;
+bool ResourcePacingRequested = false;
+
+Practice::AbilityProfile const* PreviousResourcePacingProfile(Practice::AbilityProfile const& profile)
+{
+    if (profile.DefinitionVersion != Practice::DevelopmentResourcePacing::DefinitionVersion)
+        return nullptr;
+    std::uint64_t const key = (std::uint64_t(profile.Definition.ClassId) << 32) | profile.Definition.AbilityId;
+    auto const found = ResourcePacingEntries.find(key);
+    if (found == ResourcePacingEntries.end())
+        return nullptr;
+    Practice::AbilityProfile expected = found->second.Previous;
+    expected.DefinitionVersion = Practice::DevelopmentResourcePacing::DefinitionVersion;
+    expected.Policy = { found->second.Bands };
+    return SameProfile(profile, expected) ? &found->second.Previous : nullptr;
+}
+
+bool ApplyResourcePacing(std::vector<Practice::AbilityProfile>& profiles)
+{
+    ResourcePacingEntries.clear();
+    for (auto& profile : profiles)
+    {
+        if (!Practice::DevelopmentResourcePacing::Supports(profile))
+            continue;
+        auto entry = Practice::DevelopmentResourcePacing::Build(profile);
+        if (!entry)
+            return false;
+        std::uint64_t const key = (std::uint64_t(profile.Definition.ClassId) << 32) | profile.Definition.AbilityId;
+        auto const [position, inserted] = ResourcePacingEntries.emplace(key, std::move(*entry));
+        if (!inserted)
+            return false;
+        profile.Policy = { position->second.Bands };
+        profile.DefinitionVersion = Practice::DevelopmentResourcePacing::DefinitionVersion;
+    }
+    return ResourcePacingEntries.size() == Practice::DevelopmentResourcePacing::EmberSpenders.size();
+}
+
 Practice::AbilityProfile const* PreviousRankCapProfile(Practice::AbilityProfile const& profile)
 {
     if (profile.DefinitionVersion != Practice::DevelopmentRankCaps::DefinitionVersion ||
@@ -311,6 +349,8 @@ bool ApplyDevelopmentRankCaps(std::vector<Practice::AbilityProfile>& profiles)
 
 Practice::DevelopmentTrainerRanks::Entry const* TrainerRankExtensionEntry(Practice::AbilityProfile const& profile)
 {
+    if (auto const* previous = PreviousResourcePacingProfile(profile))
+        return TrainerRankExtensionEntry(*previous);
     if (auto const* previous = PreviousRankCapProfile(profile))
         return TrainerRankExtensionEntry(*previous);
     auto const* entry = TrainerRankExtensionForIdentity(profile.Definition.ClassId, profile.Definition.AbilityId);
@@ -369,8 +409,19 @@ struct PreviousPacing
     std::uint32_t DefinitionVersion;
 };
 
-std::array<std::optional<PreviousPacing>, 3> PreviousPacingFor(Practice::AbilityProfile const& profile)
+std::array<std::optional<PreviousPacing>, 4> PreviousPacingFor(Practice::AbilityProfile const& profile)
 {
+    if (ResourcePacingRequested)
+        if (auto const* previous = PreviousResourcePacingProfile(profile))
+        {
+            auto result = PreviousPacingFor(*previous);
+            auto const empty = std::find_if(result.begin(), result.end(),
+                [](std::optional<PreviousPacing> const& value) { return !value; });
+            if (empty == result.end())
+                return {};
+            *empty = PreviousPacing{ previous->Policy, previous->DefinitionVersion };
+            return result;
+        }
     if (RankCapsRequested)
         if (auto const* previous = PreviousRankCapProfile(profile))
         {
@@ -1880,6 +1931,8 @@ bool MatchesAdditionalMasteryMechanic(SpellInfo const* info, Practice::AbilityPr
 
 bool MatchesNativeClassGrant(Practice::AbilityProfile const& profile)
 {
+    if (auto const* previous = PreviousResourcePacingProfile(profile))
+        return MatchesNativeClassGrant(*previous);
     if (auto const* previous = PreviousRankCapProfile(profile))
         return MatchesNativeClassGrant(*previous);
     Practice::AbilityDefinition const& ability = profile.Definition;
@@ -4323,13 +4376,17 @@ public:
             (PacingRequested && pacingValid && ApplyDevelopmentTrainerRankExtensions(RuntimeProfiles));
         bool const rankCapsValid = !RankCapsRequested ||
             (PacingRequested && pacingValid && trainerRanksValid && ApplyDevelopmentRankCaps(RuntimeProfiles));
+        ResourcePacingRequested =
+            sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentResourcePacing", false);
+        bool const resourcePacingValid = !ResourcePacingRequested ||
+            (RankCapsRequested && rankCapsValid && ApplyResourcePacing(RuntimeProfiles));
         std::span<Practice::AbilityProfile const> const profiles(RuntimeProfiles);
         ProfileLookup.emplace(profiles);
         Ready = ProfileLookup->IsValid() && periodicValid && masteryValid && scriptedMasteryValid &&
             helpersValid && fixedValid &&
             absorptionValid && controlValid && pacingValid && masteryPacingValid && trainerFixedValid &&
             directLeechValid && conjureFixedValid && trainerRanksValid && passiveFixedValid && utilityFixedValid &&
-            controlFixedValid && buffValid && rankCapsValid && MatchesSharedBuffVariants() &&
+            controlFixedValid && buffValid && rankCapsValid && resourcePacingValid && MatchesSharedBuffVariants() &&
             Practice::ValidCatchupSettings(Catchup);
         for (Practice::AbilityProfile const& profile : profiles)
         {
@@ -4393,6 +4450,8 @@ public:
         }
         Active.store(Requested && DevelopmentAllowed && Ready && CharacterSelectionReady);
         RankActive.store(Requested && DevelopmentAllowed && Ready && CharacterSelectionReady && RankRequested);
+        LOG_INFO("module.ability_practice", "Resource practice pacing: enabled={}, valid={}, profiles={}",
+            ResourcePacingRequested, resourcePacingValid, ResourcePacingEntries.size());
         LOG_INFO("module.ability_practice", "Development observation: requested={}, allowed={}, data ready={}",
             Requested, DevelopmentAllowed, Ready);
         LOG_INFO("module.ability_practice", "Development realm enrollment: enabled={}, enrollment ready={}",

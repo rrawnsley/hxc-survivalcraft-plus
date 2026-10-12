@@ -234,6 +234,31 @@ tracker:SetScript("OnMouseWheel", function(_, delta)
     trackerOffset = trackerOffset - delta
     RefreshTracker()
 end)
+function API.SetTrackerScale(value)
+    if type(value) ~= "number" or value ~= value then return false end
+    TrackedAbilities()
+    HXCAbilityPracticePreferences.compactScale = math.max(0.5, math.min(1.25, value))
+    RefreshTracker()
+    return true
+end
+
+local function TrackerScale()
+    local value = type(HXCAbilityPracticePreferences) == "table" and HXCAbilityPracticePreferences.compactScale
+    return type(value) == "number" and value == value and math.max(0.5, math.min(1.25, value)) or 1
+end
+
+local smaller = CreateFrame("Button", "HXCAbilityPracticeTrackerSmaller", tracker, "UIPanelButtonTemplate")
+smaller:SetSize(22, 18)
+smaller:SetPoint("BOTTOMRIGHT", -32, 10)
+smaller:SetText("-")
+smaller:SetScript("OnClick", function() API.SetTrackerScale(TrackerScale() - 0.1) end)
+local bigger = CreateFrame("Button", "HXCAbilityPracticeTrackerBigger", tracker, "UIPanelButtonTemplate")
+bigger:SetSize(22, 18)
+bigger:SetPoint("BOTTOMRIGHT", -8, 10)
+bigger:SetText("+")
+bigger:SetScript("OnClick", function() API.SetTrackerScale(TrackerScale() + 0.1) end)
+trackerFooter:SetWidth(244)
+
 RefreshTracker = function()
     local abilities = {}
     if snapshot then
@@ -251,7 +276,7 @@ RefreshTracker = function()
     trackerOffset = math.max(0, math.min(trackerOffset, math.max(0, #abilities - #trackerRows)))
     local count = math.min(#abilities, #trackerRows)
     tracker:SetSize(340, 88 + count * 82)
-    tracker:SetScale(math.min(1, math.max(1, UIParent:GetWidth() - 32) / 340,
+    tracker:SetScale(math.min(TrackerScale(), math.max(1, UIParent:GetWidth() - 32) / 340,
         math.max(1, UIParent:GetHeight() - 32) / (88 + count * 82)))
     trackerStatus:SetText(serverFailure and "Saved progress needs attention" or syncState == "current"
         and ("Updated " .. math.max(0, math.floor(GetTime() - (receivedAt or GetTime()))) .. "s ago")
@@ -260,7 +285,7 @@ RefreshTracker = function()
     trackerFooter:SetPoint("TOPLEFT", 14, -64 - count * 82)
     trackerFooter:SetText(#abilities == 0 and "Open the menu to select tracked abilities."
         or #abilities > #trackerRows and (trackerOffset + 1 .. "-" .. trackerOffset + count .. " of "
-            .. #abilities .. " tracked - scroll to browse") or "Drag to move - Open for details")
+            .. #abilities .. " tracked - scroll to browse") or "Drag to move - +/- resize")
     for index, row in ipairs(trackerRows) do
         local ability = abilities[index + trackerOffset]
         row.ability = ability

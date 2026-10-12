@@ -22,6 +22,7 @@ local setters = { "ClearAllPoints", "SetSize", "SetWidth", "SetPoint", "SetScale
     "SetMinMaxValues", "SetAllPoints", "SetTexture", "SetHighlightTexture", "EnableMouseWheel",
     "StartMoving", "StopMovingOrSizing", "RegisterEvent", "SetAutoFocus", "SetMaxLetters", "ClearFocus" }
 for _, method in ipairs(setters) do methods[method] = function() end end
+function methods:SetScale(value) self.scale = value end
 function CreateFrame(_, name)
     local frame = Widget()
     if name then _G[name] = frame end

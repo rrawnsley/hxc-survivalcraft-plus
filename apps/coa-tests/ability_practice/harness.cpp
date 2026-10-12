@@ -1,3 +1,4 @@
+#include "AbilityPracticeDevelopmentResourcePacing.h"
 #include "AbilityPracticeEnrollment.h"
 #include "AbilityPracticeProgression.h"
 #include "AbilityPracticeCatalog.h"
@@ -466,6 +467,49 @@ void CheckCatalog(TrainingPolicy policy)
     brokenCaps = caps;
     brokenCaps[2].Proficiency = 20;
     assert(ValidateDefinition(changed) == CatalogError::InvalidCap);
+}
+
+void CheckResourcePacing()
+{
+    std::uint32_t count = 0;
+    for (auto const& entry : DevelopmentPacing::Entries)
+    {
+        std::array<ProficiencyCap, 80> caps{};
+        for (std::size_t index = 0; index < caps.size(); ++index)
+            caps[index] = { static_cast<std::uint32_t>(index + 1),
+                std::min(static_cast<std::uint32_t>((index + 1) * 5),
+                    entry.ExpectedRanks.back().Requirement.Proficiency) };
+        AbilityProfile profile{ 4, AcquisitionSource::ClassGrant,
+            { entry.ClassId, entry.AbilityId, AbilityKind::Ranked, entry.ExpectedRanks, caps },
+            entry.Policy, OutcomeKind::Damage };
+        auto adjusted = DevelopmentResourcePacing::Build(profile);
+        if (!DevelopmentResourcePacing::Supports(profile))
+        {
+            assert(!adjusted);
+            continue;
+        }
+        assert(adjusted);
+        ++count;
+        TrainingPolicy const revised{ adjusted->Bands };
+        for (std::size_t index = 0; index < entry.Policy.Bands.size(); ++index)
+        {
+            auto const& old = entry.Policy.Bands[index];
+            auto const& next = adjusted->Bands[index];
+            assert(old.FirstProficiency == next.FirstProficiency && old.PointsPerLevel == next.PointsPerLevel);
+            assert(next.PointsPerUse == old.PointsPerUse * 5);
+            auto const converted = RebaseStoredProgress(entry.Policy, revised, 5,
+                { 1, 4, { old.FirstProficiency, old.PointsPerLevel / 2 } });
+            assert(converted && converted->State.Proficiency == old.FirstProficiency &&
+                converted->State.Points == old.PointsPerLevel / 2);
+        }
+        assert(UsesUntil(entry.Policy, { 1, 0 }, 10, 10).Uses == 540);
+        assert(UsesUntil(revised, { 1, 0 }, 10, 10).Uses == 108);
+        assert(UsesUntil(revised, { 1, 0 }, 2, 10).Uses == 12);
+        profile.DefinitionVersion = 2;
+        assert(!DevelopmentResourcePacing::Build(profile));
+    }
+    assert(count == 3);
+    std::cout << "PASS: three Ember spenders, fivefold practice, exact forecasts and saved fractions\n";
 }
 
 void CheckCurrentRankPolicies()
@@ -1430,6 +1474,7 @@ int main(int argc, char** argv)
     CheckPersistence(policy);
     CheckOutcome(policy);
     CheckCurrentRankPolicies();
+    CheckResourcePacing();
     CheckMasteryFixedAndTrainerPolicies();
     assert(ValidateCatalog(Development::Abilities) == CatalogError::None);
     assert(Development::Find(503232)->AbilityId == 803950);
