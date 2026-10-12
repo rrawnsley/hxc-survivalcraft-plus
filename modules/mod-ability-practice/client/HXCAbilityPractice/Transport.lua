@@ -8,6 +8,7 @@ local deadline
 local nextPoll = 0
 local elapsed = 0
 local protocol = 7
+local oldSchoolActive
 
 function API.Request()
     local now = GetTime()
@@ -36,13 +37,17 @@ listener:SetScript("OnEvent", function(_, event, prefix, message, channel, sende
         nextPoll = 0
         elapsed = 0
         protocol = 7
+        oldSchoolActive = nil
         API.Request()
         return
     end
     if prefix ~= PREFIX or channel ~= "WHISPER" or sender ~= UnitName("player") then return end
     if message == "MODE|OLD_SCHOOL_REQUIRED" or message == "MODE|OLD_SCHOOL_ENDED"
         or message == "MODE|ACTIVE" then
+        local active = message == "MODE|ACTIVE"
         API.SetOldSchoolRequired(message == "MODE|OLD_SCHOOL_REQUIRED", message == "MODE|OLD_SCHOOL_ENDED")
+        if active and oldSchoolActive ~= true then API.OpenForOldSchool() end
+        oldSchoolActive = active
         return
     end
     local snapshot, reason, failure = Wire.Accept(message, GetTime(), revision, generation)
@@ -81,5 +86,5 @@ listener:SetScript("OnUpdate", function(_, delta)
             API.Request()
         else API.SetSyncState("unavailable") end
     end
-    if not deadline and API.IsShown() and now >= nextPoll then API.Request() end
+    if not deadline and now >= nextPoll then API.Request() end
 end)
