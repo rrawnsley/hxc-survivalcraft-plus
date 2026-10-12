@@ -1118,10 +1118,32 @@ namespace CoAChallenges
         uint32 experienceMultiplier;
     };
 
+    int32 OldSchoolThreatOffset(Creature const* creature)
+    {
+        if (!creature || creature->GetCreatureTemplate()->rank != CREATURE_ELITE_NORMAL
+            || !creature->GetSpawnId())
+            return 0;
+
+        uint32 seed = creature->GetSpawnId();
+        seed ^= seed >> 16;
+        seed *= 0x7feb352d;
+        seed ^= seed >> 15;
+        seed *= 0x846ca68b;
+        seed ^= seed >> 16;
+
+        static constexpr int32 threatOffsets[16] =
+        {
+            -6, -6, -4, -4, -2, -2, -2, -1,
+            -1,  0,  0,  0,  0,  1,  3,  5
+        };
+        return threatOffsets[seed & 0x0F];
+    }
+
     OldSchoolPowerProfile GetOldSchoolPowerProfile(Player const* player, Creature const* creature)
     {
         player = ChallengeParticipant(player);
-        int32 const levelDifference = int32(creature->GetLevel()) - int32(player->GetLevel());
+        int32 const levelDifference = int32(creature->GetLevel()) + OldSchoolThreatOffset(creature)
+            - int32(player->GetLevel());
         OldSchoolPowerProfile profile;
         if (levelDifference <= -6)
             profile = { "Grey", 200, 1, 1 };
