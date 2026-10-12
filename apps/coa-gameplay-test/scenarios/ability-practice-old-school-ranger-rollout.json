@@ -235,7 +235,8 @@
       "from": "caster",
       "text": "HXAP\tMODE|ACTIVE",
       "min": 1,
-      "within_ms": 10000
+      "within_ms": 10000,
+      "label": "Menu reports ACTIVE"
     },
     {
       "action": "assert",
@@ -271,6 +272,20 @@
       "challenge": 9001
     },
     {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.old_school_practice_exit",
+      "index": 0,
+      "equals": 1,
+      "within_ms": 5000,
+      "label": "Leaving is recorded before requesting the ended menu"
+    },
+    {
+      "action": "wait",
+      "ms": 11000
+    },
+    {
       "action": "whisper",
       "actor": "caster",
       "to": "Apranglive",
@@ -284,7 +299,8 @@
       "from": "caster",
       "text": "HXAP\tMODE|OLD_SCHOOL_ENDED",
       "min": 1,
-      "within_ms": 10000
+      "within_ms": 10000,
+      "label": "Menu reports OLD_SCHOOL_ENDED"
     },
     {
       "action": "set_aura",
