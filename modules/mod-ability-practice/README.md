@@ -1,4 +1,36 @@
-# Ability practice development and selected-character pilot
+# Ability practice development and live pilot
+
+## Tracker resizing and resource pacing —11October2026
+
+Addon0.5.12-development adds -/+ controls to the minimized tracker. Saved per-character scale ranges
+from0.5 to1.25, bounded by screen dimensions. Periodic/snapshot refresh and reset retain the chosen size.
+The existing minimized tracker, paging, exact count strings and main-menu controls remain available.
+
+Startup-only AllowDevelopmentResourcePacing requires the complete ranked catalog, rank pacing and
+one-rank-ahead caps. It applies authored definition5 overrides to six ranked resource spenders:
+Explode800792, Flames of Neltharion801915 and Blaze805500 award5x points; Invigorating Surge500038
+awards2x; Call Lightning500040 and Conjure Storm800227 award3x. Ember creation needs100Heat, with
+Flare Bolt granting20; Static builders grant20 while these spenders consume25or50. These are draft
+setup-compensation weights, not measured combat-time claims. Ordinary skill curves remain unchanged.
+Ranks, character-level requirements, damage/healing, resource costs and meaningful-outcome guards remain native.
+
+Version1/2/3/4 history is explicitly retained for reviewed profile rebasing. Prior proficiency, partial-point
+fractions and learned ranks survive. New definitions preserve point costs and change only points per use.
+A rollback to a binary without definition5 support should disable practice rather than reinterpret saved rows.
+
+621bc7fff is the compiled candidate,06cf6b1f9 corrects the healing fixture.20261012-012310 source9,
+build68.9s and harness8.6s passed; six real cases passed, with a faulty artificial-health Surge fixture failing.
+The fixture's health was clamped full by Static aura recalculation, so native overheal correctly earned nothing.
+Corrected it to native maximum health and real injury.20261012-013651 VERIFY ALL:PASSED: harness8.2s
+and corrected real Surge case176.8s, no retries or batch sensitivity; other stages skipped/reused.
+Earlier20261012-011135 built and passed four cases but failed a new harness fixture with reversed stored
+record version fields; corrected fixture to definition4/migration1. C++ style passed. Seven final gameplay
+contracts pass across the selected scopes; actual client layout and ordinary pacing remain player feedback.
+
+Live worldPID52288/start18:42:21Phoenix has binarySHA256
+2bdb0da31525ac4128b2ad1bac83cf1ebfe4c8d3d7aa5d261e7145ae4349e6c2.
+Resource pacing enabled/valid with six profiles and dataReadytrue. Auth retained; public login/world healthy.
+Signed catalog20261011.182918924/launcher1.3.18 passed10routes and1367CoApayload downloads.
 
 ## Compact tracker release —11October2026
 
@@ -18,7 +50,7 @@ New human characters in Stormbringer16, Sun Cleric27, Venomancer29, Witch Doctor
 are automatically enrolled on the normal CoA realm. The fixed creation cutoff is character GUID66058.
 Older characters and other classes retain native progression. Explicit GUID enrollment remains supported;
 realm-wide enrollment is disabled. Create an allowed race/class through the regular launcher and use /practice.
-The full addon0.5.11-development is published through launcher1.3.18. No addon change was needed for class enrollment.
+The full addon0.5.12-development is published through launcher1.3.18. No addon change was needed for class enrollment.
 
 132a2c44a implements strict reloadable class/cutoff selection, published as an immutable enrollment snapshot.
 Missing paired settings, duplicates, out-of-range classes and invalid/overflowing cutoffs reject enrollment.
