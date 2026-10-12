@@ -1,12 +1,24 @@
 # Ability practice development and selected-character pilot
 
+## Compact tracker release —11October2026
+
+Addon0.5.11-development adds Minimize/Open, four-row scrolling tracked ability progress and a draggable
+compact window. Tracked preferences apply independently of menu search/filter; without pinned abilities
+it follows the selected ability. Exact next-point use strings, proficiency bars and milestone levels update
+through the existing transport, whose visible-state check now includes the tracker. Minimized visibility
+persists per character. Saved/unavailable state remains labeled. No protocol or native server change.
+60380202c qualified through20261012-001721 VERIFY ALL:PASSED, harness5.8s, including new compact lifecycle,
+large exact counts and paging, plus998typed snapshots. Other stages skipped; actual game pixels unobserved.
+Signed catalog20261011.171850839/launcher1.3.18 publicly verified across10routes and1367CoApayload files.
+Regular client installed; /reload loads the change into an already open game. Live worldPID24680 unchanged.
+
 ## Current normal-server pilot release — 11 October 2026
 
 New human characters in Stormbringer16, Sun Cleric27, Venomancer29, Witch Doctor13 and Pyromancer24
 are automatically enrolled on the normal CoA realm. The fixed creation cutoff is character GUID66058.
 Older characters and other classes retain native progression. Explicit GUID enrollment remains supported;
 realm-wide enrollment is disabled. Create an allowed race/class through the regular launcher and use /practice.
-The full addon0.5.10-development is published through launcher1.3.18. No addon change was needed for class enrollment.
+The full addon0.5.11-development is published through launcher1.3.18. No addon change was needed for class enrollment.
 
 132a2c44a implements strict reloadable class/cutoff selection, published as an immutable enrollment snapshot.
 Missing paired settings, duplicates, out-of-range classes and invalid/overflowing cutoffs reject enrollment.
