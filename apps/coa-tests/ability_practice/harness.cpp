@@ -496,20 +496,20 @@ void CheckResourcePacing()
             auto const& old = entry.Policy.Bands[index];
             auto const& next = adjusted->Bands[index];
             assert(old.FirstProficiency == next.FirstProficiency && old.PointsPerLevel == next.PointsPerLevel);
-            assert(next.PointsPerUse == old.PointsPerUse * 5);
+            assert(next.PointsPerUse == old.PointsPerUse * DevelopmentResourcePacing::Multiplier(profile));
             auto const converted = RebaseStoredProgress(entry.Policy, revised, 5,
-                { 1, 4, { old.FirstProficiency, old.PointsPerLevel / 2 } });
+                { 4, 1, { old.FirstProficiency, old.PointsPerLevel / 2 } });
             assert(converted && converted->State.Proficiency == old.FirstProficiency &&
                 converted->State.Points == old.PointsPerLevel / 2);
         }
         assert(UsesUntil(entry.Policy, { 1, 0 }, 10, 10).Uses == 540);
-        assert(UsesUntil(revised, { 1, 0 }, 10, 10).Uses == 108);
-        assert(UsesUntil(revised, { 1, 0 }, 2, 10).Uses == 12);
+        assert(UsesUntil(revised, { 1, 0 }, 10, 10).Uses == 540 / DevelopmentResourcePacing::Multiplier(profile));
+        assert(UsesUntil(revised, { 1, 0 }, 2, 10).Uses == 60 / DevelopmentResourcePacing::Multiplier(profile));
         profile.DefinitionVersion = 2;
         assert(!DevelopmentResourcePacing::Build(profile));
     }
-    assert(count == 3);
-    std::cout << "PASS: three Ember spenders, fivefold practice, exact forecasts and saved fractions\n";
+    assert(count == 6);
+    std::cout << "PASS: six resource spenders, individual practice rates, exact forecasts and saved fractions\n";
 }
 
 void CheckCurrentRankPolicies()

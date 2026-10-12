@@ -121,6 +121,6 @@ AbilityPractice.AllowDevelopmentControlFixedCatalog = 0
 # Reviewed Greater Wuju and Ranger adaptations share their regular tracks. Startup-only; development mode.
 AbilityPractice.AllowDevelopmentSharedBuffVariants = 0
 
-# Ember-spending ranked abilities award five times the points per meaningful use.
+# Authored ranked Ember/Static spenders award additional points per meaningful use.
 # Requires rank pacing and one-rank-ahead caps. Startup-only; prior saved progress is retained.
 AbilityPractice.AllowDevelopmentResourcePacing = 0

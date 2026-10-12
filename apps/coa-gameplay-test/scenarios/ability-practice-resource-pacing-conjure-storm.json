@@ -1,0 +1,188 @@
+{
+  "schema": 1,
+  "name": "Ability practice: conjure-storm Static-spender pacing and retained progress",
+  "contract": "Prior definition4 progress migrates unchanged to5. No Static means no award. One meaningful original cast spends its native Static cost and earns 810 points to unlock native rank2.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 16,
+      "level": 18,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 18,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800227
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.16.800227",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.16.800227",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.16.800227",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.16.800227",
+      "index": 3,
+      "value": 9
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.16.800227",
+      "index": 4,
+      "value": 15390
+    },
+    {
+      "action": "relog",
+      "actor": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.16.800227",
+      "index": 1,
+      "equals": 5,
+      "label": "Prior definition4 converted to5"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.16.800227",
+      "index": 3,
+      "equals": 9,
+      "label": "Saved proficiency retained"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.16.800227",
+      "index": 4,
+      "equals": 15390,
+      "label": "Saved partial progress retained"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 501415,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800227,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.16.800227",
+      "index": 4,
+      "equals": 15390,
+      "label": "No Static means no practice award"
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 803102,
+      "stacks": 50
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "full": true
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 800227
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 800227,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_stacks",
+      "spell": 803102,
+      "equals": 0,
+      "label": "Native Static cost retained"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.16.800227",
+      "index": 3,
+      "equals": 10,
+      "label": "One useful use crosses rank boundary with setup-compensated credit"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.16.800227",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 501415,
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

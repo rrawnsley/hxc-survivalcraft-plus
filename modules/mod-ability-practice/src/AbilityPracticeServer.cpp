@@ -307,7 +307,7 @@ bool ApplyResourcePacing(std::vector<Practice::AbilityProfile>& profiles)
         profile.Policy = { position->second.Bands };
         profile.DefinitionVersion = Practice::DevelopmentResourcePacing::DefinitionVersion;
     }
-    return ResourcePacingEntries.size() == Practice::DevelopmentResourcePacing::EmberSpenders.size();
+    return ResourcePacingEntries.size() == Practice::DevelopmentResourcePacing::Adjustments.size();
 }
 
 Practice::AbilityProfile const* PreviousRankCapProfile(Practice::AbilityProfile const& profile)
