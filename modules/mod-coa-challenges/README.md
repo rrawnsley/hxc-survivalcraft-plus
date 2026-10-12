@@ -98,7 +98,7 @@ keys are appended automatically on deploy.
 ## HXC Old School trials
 
 Old School (9001) and Old School - Hardcore (9002) are mutually exclusive native trials.
-Creature levels remain fixed. In the trial, their power and kill experience follow the
+Creature levels remain fixed internally and display as `??` while the trial is active. In the trial, their power and kill experience follow the
 participant's con: grey creatures have 2x health, 1x damage and 1x kill XP; green 3x/2x/2x;
 blue 5x/3x/3x; white 8x/5x/4x; yellow 12x/7x/6x; red 16x/10x/8x; and purple 24x/14x/10x.
 Elites and bosses multiply those values further. Quest experience is unchanged. Critters and
@@ -107,8 +107,10 @@ assisting with the kill or claiming its rewards.
 
 Ordinary Old School deaths outside battlegrounds and arenas remove 10% of the experience
 needed for the current level; the loss can delevel the character. Resurrection requires
-returning to the character's corpse as a spirit. The standard corpse remains at its death
-location and displays the character's equipment during the run. Hardcore uses one life: death
+returning to the character's corpse as a spirit. Worn equipment is removed from the ghost and
+persisted on the corpse record; reaching and resurrecting at the body restores the same item
+instances, including after reconnect. The standard corpse remains at its death location and
+displays the character's equipment during the run. Hardcore uses one life: death
 permanently fails the run, while resurrection remains available under CoA's existing Hardcore
 rules. Abandoning a progressed Hardcore run also fails it. Starting either trial requires being
 alive and outside combat; Old School cannot be abandoned while dead or during combat.

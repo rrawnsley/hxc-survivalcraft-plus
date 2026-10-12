@@ -1162,6 +1162,166 @@ namespace CoAChallenges
         return profile;
     }
 
+    void MoveOldSchoolEquipmentToCorpse(Player* player)
+    {
+        if (!player || player->GetSession()->IsBot() || player->IsAlive()
+            || !player->GetMap() || player->GetMap()->IsBattlegroundOrArena())
+            return;
+
+        struct CorpseItem
+        {
+            uint8 slot;
+            Item* item;
+        };
+        std::vector<CorpseItem> items;
+        CharacterDatabasePreparedStatement* select = CharacterDatabase.GetPreparedStatement(CHAR_SEL_COA_OLD_SCHOOL_CORPSE_ITEMS);
+        select->SetData(0, player->GetGUID().GetCounter());
+        PreparedQueryResult result = CharacterDatabase.Query(select);
+        if (!result)
+            return;
+
+        do
+        {
+            Field* fields = result->Fetch();
+            uint8 const slot = fields[13].Get<uint8>();
+            Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+            if (item && item->GetGUID().GetCounter() == fields[11].Get<uint32>())
+                items.push_back({ slot, item });
+        }
+        while (result->NextRow());
+        if (items.empty())
+            return;
+
+        CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+        for (CorpseItem const& corpseItem : items)
+        {
+            corpseItem.item->SetState(ITEM_CHANGED, player);
+            corpseItem.item->SaveToDB(trans);
+
+            CharacterDatabasePreparedStatement* inventory = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_INVENTORY_BY_ITEM);
+            inventory->SetData(0, corpseItem.item->GetGUID().GetCounter());
+            trans->Append(inventory);
+
+            CharacterDatabasePreparedStatement* corpse = CharacterDatabase.GetPreparedStatement(CHAR_INS_COA_OLD_SCHOOL_CORPSE_ITEM);
+            corpse->SetData(0, player->GetGUID().GetCounter());
+            corpse->SetData(1, corpseItem.item->GetGUID().GetCounter());
+            corpse->SetData(2, corpseItem.slot);
+            trans->Append(corpse);
+        }
+        CharacterDatabase.CommitTransaction(trans);
+
+        for (CorpseItem const& corpseItem : items)
+        {
+            player->MoveItemFromInventory(INVENTORY_SLOT_BAG_0, corpseItem.slot, false);
+            delete corpseItem.item;
+        }
+        NotifyPlayer(player, "Old School: your worn equipment is on your corpse. Return to it as a spirit to recover it.");
+    }
+
+    void MarkOldSchoolEquipmentForCorpse(Player* player)
+    {
+        if (!player || player->GetSession()->IsBot())
+            return;
+        uint32 const challenge = OldSchoolChallenge(player);
+        if ((challenge != 9001 && challenge != 9002) || !player->GetMap()
+            || player->GetMap()->IsBattlegroundOrArena())
+            return;
+
+        uint32 const guid = player->GetGUID().GetCounter();
+        for (uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
+            if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
+                CharacterDatabase.DirectExecute(
+                    "REPLACE INTO coa_old_school_corpse_item (guid, item_guid, slot) VALUES ({}, {}, {})",
+                    guid, item->GetGUID().GetCounter(), slot);
+    }
+
+    void RecoverOldSchoolEquipment(Player* player)
+    {
+        if (!player || player->GetSession()->IsBot())
+            return;
+
+        CharacterDatabasePreparedStatement* select = CharacterDatabase.GetPreparedStatement(CHAR_SEL_COA_OLD_SCHOOL_CORPSE_ITEMS);
+        select->SetData(0, player->GetGUID().GetCounter());
+        PreparedQueryResult result = CharacterDatabase.Query(select);
+        if (!result)
+            return;
+
+        CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+        uint32 recovered = 0;
+        do
+        {
+            Field* fields = result->Fetch();
+            uint32 const itemGuid = fields[11].Get<uint32>();
+            uint32 const itemEntry = fields[12].Get<uint32>();
+            uint8 const slot = fields[13].Get<uint8>();
+
+            if (player->GetItemByGuid(ObjectGuid::Create<HighGuid::Item>(itemGuid)))
+            {
+                CharacterDatabasePreparedStatement* corpse = CharacterDatabase.GetPreparedStatement(CHAR_DEL_COA_OLD_SCHOOL_CORPSE_ITEM);
+                corpse->SetData(0, player->GetGUID().GetCounter());
+                corpse->SetData(1, itemGuid);
+                trans->Append(corpse);
+                ++recovered;
+                continue;
+            }
+
+            ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemEntry);
+            if (!proto)
+                continue;
+
+            Item* item = NewItemOrBag(proto);
+            if (!item->LoadFromDB(itemGuid, player->GetGUID(), fields, itemEntry))
+            {
+                delete item;
+                continue;
+            }
+
+            bool placed = false;
+            uint16 destination = 0;
+            if (!player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot)
+                && player->CanEquipItem(slot, destination, item, false, false) == EQUIP_ERR_OK)
+            {
+                player->EquipItem(destination, item, true);
+                placed = true;
+            }
+            else
+            {
+                ItemPosCountVec storage;
+                if (player->CanStoreItem(NULL_BAG, NULL_SLOT, storage, item, false) == EQUIP_ERR_OK)
+                {
+                    player->MoveItemToInventory(storage, item, true, true);
+                    placed = true;
+                }
+            }
+
+            if (!placed)
+            {
+                delete item;
+                continue;
+            }
+
+            CharacterDatabasePreparedStatement* inventory = CharacterDatabase.GetPreparedStatement(CHAR_REP_INVENTORY_ITEM);
+            inventory->SetData(0, player->GetGUID().GetCounter());
+            inventory->SetData(1, item->GetContainer() ? item->GetContainer()->GetGUID().GetCounter() : 0);
+            inventory->SetData(2, item->GetSlot());
+            inventory->SetData(3, itemGuid);
+            trans->Append(inventory);
+
+            CharacterDatabasePreparedStatement* corpse = CharacterDatabase.GetPreparedStatement(CHAR_DEL_COA_OLD_SCHOOL_CORPSE_ITEM);
+            corpse->SetData(0, player->GetGUID().GetCounter());
+            corpse->SetData(1, itemGuid);
+            trans->Append(corpse);
+            ++recovered;
+        }
+        while (result->NextRow());
+
+        if (recovered)
+        {
+            CharacterDatabase.CommitTransaction(trans);
+            NotifyPlayer(player, "Old School: you recovered {} item(s) from your corpse.", recovered);
+        }
+    }
+
     uint32 AdventureModeExtraHealthPct(uint32 tier)
     {
         if (tier >= 89)
@@ -1416,7 +1576,7 @@ namespace CoAChallenges
     class CoAChallengesPlayer : public PlayerScript
     {
     public:
-        CoAChallengesPlayer() : PlayerScript("CoAChallengesPlayer", { PLAYERHOOK_ON_SEND_INITIAL_PACKETS_BEFORE_ADD_TO_MAP, PLAYERHOOK_ON_PLAYER_JUST_DIED, PLAYERHOOK_ON_PLAYER_RESURRECT, PLAYERHOOK_CAN_RESURRECT, PLAYERHOOK_CAN_SEND_MAIL, PLAYERHOOK_CAN_JOIN_LFG, PLAYERHOOK_CAN_JOIN_IN_BATTLEGROUND_QUEUE, PLAYERHOOK_CAN_JOIN_IN_ARENA_QUEUE, PLAYERHOOK_CAN_INIT_TRADE, PLAYERHOOK_CAN_PLACE_AUCTION_BID, PLAYERHOOK_ON_BEFORE_SEND_LOOT, PLAYERHOOK_ON_LEVEL_CHANGED, PLAYERHOOK_ON_CREATURE_KILL, PLAYERHOOK_ON_CREATURE_KILLED_BY_PET, PLAYERHOOK_ON_PLAYER_KILLED_BY_CREATURE, PLAYERHOOK_ON_PVP_KILL, PLAYERHOOK_ON_LOOT_ITEM, PLAYERHOOK_ON_PLAYER_COMPLETE_QUEST, PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_CAN_GROUP_INVITE, PLAYERHOOK_CAN_GROUP_ACCEPT, PLAYERHOOK_ON_UPDATE_CRAFTING_SKILL, PLAYERHOOK_ON_UPDATE_GATHERING_SKILL, PLAYERHOOK_ON_BEFORE_QUEST_COMPLETE, PLAYERHOOK_ON_QUEST_COMPUTE_EXP, PLAYERHOOK_ON_GIVE_EXP, PLAYERHOOK_ON_GET_MAX_ALLOWED_LEVEL, PLAYERHOOK_ON_HAS_NO_BONUS_EXPERIENCE, PLAYERHOOK_CAN_LEARN_TALENT, PLAYERHOOK_CAN_USE_ITEM, PLAYERHOOK_CAN_ENTER_MAP, PLAYERHOOK_CAN_EQUIP_ITEM, PLAYERHOOK_CAN_ENTER_MANASTORM, PLAYERHOOK_ON_PLAYER_ENVIRONMENTAL_DAMAGE, PLAYERHOOK_ON_PLAYER_BREATH_INVERTED, PLAYERHOOK_ON_BEFORE_BUY_ITEM_FROM_VENDOR, PLAYERHOOK_CAN_SELL_ITEM, PLAYERHOOK_ON_CAN_UPDATE_SKILL, PLAYERHOOK_ON_UPDATE_SKILL, PLAYERHOOK_ON_PLAYER_PVP_FLAG_CHANGE, PLAYERHOOK_ON_CAN_REGENERATE, PLAYERHOOK_ON_CAN_ENERGIZE, PLAYERHOOK_ON_CAN_GIVE_LEVEL, PLAYERHOOK_ON_BEFORE_TELEPORT, PLAYERHOOK_ON_DELETE_FROM_DB, PLAYERHOOK_ON_BANK_WITHDRAW, PLAYERHOOK_ON_REWARD_KILL_REWARDER, PLAYERHOOK_ON_GIVE_REPUTATION, PLAYERHOOK_PASSED_QUEST_KILLED_MONSTER_CREDIT, PLAYERHOOK_ON_LOAD_FROM_DB, PLAYERHOOK_ON_GET_GAME_MODE_MASK }) { }
+        CoAChallengesPlayer() : PlayerScript("CoAChallengesPlayer", { PLAYERHOOK_ON_SEND_INITIAL_PACKETS_BEFORE_ADD_TO_MAP, PLAYERHOOK_ON_PLAYER_JUST_DIED, PLAYERHOOK_ON_PLAYER_RELEASED_GHOST, PLAYERHOOK_ON_PLAYER_RESURRECT, PLAYERHOOK_CAN_RESURRECT, PLAYERHOOK_CAN_SEND_MAIL, PLAYERHOOK_CAN_JOIN_LFG, PLAYERHOOK_CAN_JOIN_IN_BATTLEGROUND_QUEUE, PLAYERHOOK_CAN_JOIN_IN_ARENA_QUEUE, PLAYERHOOK_CAN_INIT_TRADE, PLAYERHOOK_CAN_PLACE_AUCTION_BID, PLAYERHOOK_ON_BEFORE_SEND_LOOT, PLAYERHOOK_ON_LEVEL_CHANGED, PLAYERHOOK_ON_CREATURE_KILL, PLAYERHOOK_ON_CREATURE_KILLED_BY_PET, PLAYERHOOK_ON_PLAYER_KILLED_BY_CREATURE, PLAYERHOOK_ON_PVP_KILL, PLAYERHOOK_ON_LOOT_ITEM, PLAYERHOOK_ON_PLAYER_COMPLETE_QUEST, PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_CAN_GROUP_INVITE, PLAYERHOOK_CAN_GROUP_ACCEPT, PLAYERHOOK_ON_UPDATE_CRAFTING_SKILL, PLAYERHOOK_ON_UPDATE_GATHERING_SKILL, PLAYERHOOK_ON_BEFORE_QUEST_COMPLETE, PLAYERHOOK_ON_QUEST_COMPUTE_EXP, PLAYERHOOK_ON_GIVE_EXP, PLAYERHOOK_ON_GET_MAX_ALLOWED_LEVEL, PLAYERHOOK_ON_HAS_NO_BONUS_EXPERIENCE, PLAYERHOOK_CAN_LEARN_TALENT, PLAYERHOOK_CAN_USE_ITEM, PLAYERHOOK_CAN_ENTER_MAP, PLAYERHOOK_CAN_EQUIP_ITEM, PLAYERHOOK_CAN_ENTER_MANASTORM, PLAYERHOOK_ON_PLAYER_ENVIRONMENTAL_DAMAGE, PLAYERHOOK_ON_PLAYER_BREATH_INVERTED, PLAYERHOOK_ON_BEFORE_BUY_ITEM_FROM_VENDOR, PLAYERHOOK_CAN_SELL_ITEM, PLAYERHOOK_ON_CAN_UPDATE_SKILL, PLAYERHOOK_ON_UPDATE_SKILL, PLAYERHOOK_ON_PLAYER_PVP_FLAG_CHANGE, PLAYERHOOK_ON_CAN_REGENERATE, PLAYERHOOK_ON_CAN_ENERGIZE, PLAYERHOOK_ON_CAN_GIVE_LEVEL, PLAYERHOOK_ON_BEFORE_TELEPORT, PLAYERHOOK_ON_DELETE_FROM_DB, PLAYERHOOK_ON_BANK_WITHDRAW, PLAYERHOOK_ON_REWARD_KILL_REWARDER, PLAYERHOOK_ON_GIVE_REPUTATION, PLAYERHOOK_PASSED_QUEST_KILLED_MONSTER_CREDIT, PLAYERHOOK_ON_LOAD_FROM_DB, PLAYERHOOK_ON_GET_GAME_MODE_MASK }) { }
 
         bool OnPlayerGetGameModeMask(Player const* player, uint32& mask) override
         {
@@ -1436,10 +1596,13 @@ namespace CoAChallenges
         void OnPlayerSendInitialPacketsBeforeAddToMap(Player* player, WorldPacket& /*data*/) override
         {
             PushLoginState(player);
+            if (player->IsAlive())
+                RecoverOldSchoolEquipment(player);
         }
 
         void OnPlayerJustDied(Player* player) override
         {
+            MarkOldSchoolEquipmentForCorpse(player);
             if (OldSchoolChallenge(player) == 9001 && !player->GetSession()->IsBot()
                 && !player->GetMap()->IsBattlegroundOrArena())
             {
@@ -1480,7 +1643,15 @@ namespace CoAChallenges
                 return true;
             if (HasPermaDeathFailure(player))
                 return false;
-            if (OldSchoolChallenge(player) == 9001 && !player->GetSession()->IsBot()
+            bool requiresCorpseRun = OldSchoolChallenge(player) == 9001;
+            if (!requiresCorpseRun && !player->GetSession()->IsBot() && player->IsInWorld()
+                && !player->IsAlive())
+            {
+                CharacterDatabasePreparedStatement* select = CharacterDatabase.GetPreparedStatement(CHAR_SEL_COA_OLD_SCHOOL_CORPSE_ITEMS);
+                select->SetData(0, player->GetGUID().GetCounter());
+                requiresCorpseRun = bool(CharacterDatabase.Query(select));
+            }
+            if (requiresCorpseRun && !player->GetSession()->IsBot()
                 && player->IsInWorld() && !player->IsAlive() && player->GetMap()
                 && !player->GetMap()->IsBattlegroundOrArena())
             {
@@ -2430,8 +2601,14 @@ namespace CoAChallenges
                 MarkObjectives(player, "CHALLENGE_REQUIREMENT_TYPE_COMPLETE_QUEST_BEFORE_LEVEL", quest->GetQuestId());
         }
 
+        void OnPlayerReleasedGhost(Player* player) override
+        {
+            MoveOldSchoolEquipmentToCorpse(player);
+        }
+
         void OnPlayerResurrect(Player* player, float /*restore_percent*/, bool& /*applySickness*/) override
         {
+            RecoverOldSchoolEquipment(player);
             {
                 std::lock_guard<std::mutex> lock(LastKillerMutex);
                 LastKiller.erase(player->GetGUID().GetCounter());
