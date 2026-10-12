@@ -229,9 +229,10 @@
       "actor": "caster",
       "metric": "whisper_contains",
       "from": "caster",
-      "text": "|802060|802060|",
+      "text": "|802060|501314|2|10|0|",
       "min": 1,
-      "within_ms": 10000
+      "within_ms": 10000,
+      "label": "Menu reports the promoted rank, proficiency and partial progress"
     },
     {
       "action": "assert",
