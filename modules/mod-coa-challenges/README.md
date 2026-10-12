@@ -112,10 +112,11 @@ assisting with the kill or claiming its rewards.
 
 In Mulgore only, when an Old School participant engages a persistent hostile creature, eligible nearby
 same-faction creatures can join the fight from 35 yards. `/consider` warns about this social response.
-Mulgore's existing Arra'chea waypoint patrol (entry 3058) also carries four additional hidden threat
-levels in Old School. `/consider` identifies the patrol and this threat feeds the normal con, combat and
-kill XP calculations without changing its native level, route or ordinary-mode behavior. Ordinary play
-and other zones keep their existing behavior.
+Mulgore's existing named waypoint roamers—Ghost Howl (3056), Arra'chea (3058), and The Rake (5807)—
+carry four additional hidden threat levels in Old School. `/consider` identifies each named roamer and
+this threat feeds the normal con, combat and kill XP calculations without changing native levels, routes,
+or ordinary-mode behavior. Their database spawns already roam on authored waypoint paths and retain
+their existing rare respawn timers. Ordinary play and other zones keep their existing behavior.
 
 Ordinary Old School deaths outside battlegrounds and arenas remove 10% of the experience
 needed for the current level; the loss can delevel the character. Resurrection requires

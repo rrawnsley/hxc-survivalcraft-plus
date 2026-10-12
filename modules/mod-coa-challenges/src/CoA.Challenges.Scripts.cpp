@@ -1124,11 +1124,15 @@ namespace CoAChallenges
 
     int32 OldSchoolThreatOffset(Creature const* creature)
     {
-        if (!creature || creature->GetCreatureTemplate()->rank != CREATURE_ELITE_NORMAL)
+        if (!creature)
             return 0;
 
-        if (creature->GetZoneId() == AREA_MULGORE && creature->GetEntry() == 3058)
+        if (creature->GetZoneId() == AREA_MULGORE
+            && (creature->GetEntry() == 3056 || creature->GetEntry() == 3058 || creature->GetEntry() == 5807))
             return 4;
+
+        if (creature->GetCreatureTemplate()->rank != CREATURE_ELITE_NORMAL)
+            return 0;
 
         if (!creature->GetSpawnId())
             return 0;
@@ -3220,8 +3224,23 @@ namespace CoAChallenges
                 if (target->GetZoneId() == AREA_MULGORE)
                 {
                     handler->SendSysMessage("Mulgore: nearby same-faction creatures within 35 yards may join the fight.");
-                    if (target->GetEntry() == 3058)
-                        handler->SendSysMessage("Named patrol: Arra'chea carries elevated hidden threat; use the con estimate before engaging.");
+                    switch (target->GetEntry())
+                    {
+                        case 3056:
+                            handler->SendSysMessage("Named roamer: Ghost Howl carries elevated hidden threat; "
+                                "use the con estimate before engaging.");
+                            break;
+                        case 3058:
+                            handler->SendSysMessage("Named patrol: Arra'chea carries elevated hidden threat; "
+                                "use the con estimate before engaging.");
+                            break;
+                        case 5807:
+                            handler->SendSysMessage("Named roamer: The Rake carries elevated hidden threat; "
+                                "use the con estimate before engaging.");
+                            break;
+                        default:
+                            break;
+                    }
                 }
                 return true;
             }
