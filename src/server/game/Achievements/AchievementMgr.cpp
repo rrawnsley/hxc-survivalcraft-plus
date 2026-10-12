@@ -2549,6 +2549,9 @@ AchievementGlobalMgr* AchievementGlobalMgr::instance()
 
 bool AchievementGlobalMgr::IsStatisticCriteria(AchievementCriteriaEntry const* achievementCriteria) const
 {
+    if (!achievementCriteria)
+        return false;
+
     return IsStatisticAchievement(sAchievementStore.LookupEntry(achievementCriteria->referredAchievement));
 }
 
