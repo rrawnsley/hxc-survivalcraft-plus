@@ -1169,7 +1169,11 @@ class Databases:
                     tables += ['active_arena_season']
                 self.copy(role, tables=tables)
                 if role == 'characters':
-                    self.copy(role, tables=SEEDED_BUILD_TABLES, where=SEEDED_BUILDS)
+                    source = self.connections[role].database
+                    present = self.sql(role, 'SELECT 1 FROM information_schema.tables '
+                                       f"WHERE table_schema='{source}' AND table_name='coa_build_creator';")
+                    if present:
+                        self.copy(role, tables=SEEDED_BUILD_TABLES, where=SEEDED_BUILDS)
 
     def cleanup(self):
         failures = []

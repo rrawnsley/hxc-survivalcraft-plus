@@ -906,6 +906,25 @@ class RunnerTests(unittest.TestCase):
             database.remove_credentials()
             self.assertFalse(any(Path(temporary).glob('*.cnf')))
 
+    def test_character_clone_skips_build_seeds_before_migration(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            database = self.database(Path(temporary))
+            with patch.object(database, 'sql', return_value=''), patch.object(database, 'copy') as copied:
+                database.prepare(('characters',))
+                self.assertEqual(copied.call_count, 2)
+                copied.assert_any_call('characters', schema_only=True)
+                copied.assert_called_with('characters', tables=['updates', 'updates_include', 'active_arena_season'])
+            database.remove_credentials()
+
+    def test_character_clone_preserves_available_system_build_seeds(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            database = self.database(Path(temporary))
+            with patch.object(database, 'sql', return_value='1'), patch.object(database, 'copy') as copied:
+                database.prepare(('characters',))
+                self.assertEqual(copied.call_count, 3)
+                copied.assert_called_with('characters', tables=run.SEEDED_BUILD_TABLES, where=run.SEEDED_BUILDS)
+            database.remove_credentials()
+
     def test_existing_database_is_never_adopted_or_dropped(self):
         with tempfile.TemporaryDirectory() as temporary:
             database = self.database(Path(temporary))
