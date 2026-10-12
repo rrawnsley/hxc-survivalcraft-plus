@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Ability practice: korthazzmenu",
-  "contract": "Complete native stat and resistance rank benefits and same-caster Mark exclusivity remain; practice requires original useful combat with both components active and effective.",
+  "contract": "Complete native stat and resistance rank benefits and same-caster Mark exclusivity remain; practice requires original useful combat with both components active and effective. Snapshot identity may vary across queued cases; the delivered class/level, ranks, costs and forecasts must remain exact.",
   "timeout_ms": 90000,
   "players": [
     {
@@ -80,9 +80,20 @@
       "actor": "caster",
       "metric": "whisper_contains",
       "from": "caster",
-      "text": "HXAP\tB|4|1|17|22|",
+      "text": "HXAP\tB|4|",
       "min": 1,
-      "within_ms": 10000
+      "within_ms": 10000,
+      "label": "Typed menu begins regardless of snapshot identity"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "|17|22|",
+      "min": 1,
+      "within_ms": 10000,
+      "label": "Menu reports Knight of Xoroth at level22"
     },
     {
       "action": "assert",
@@ -116,9 +127,10 @@
       "actor": "caster",
       "metric": "whisper_contains",
       "from": "caster",
-      "text": "HXAP\tE|1",
+      "text": "HXAP\tE|",
       "min": 1,
-      "within_ms": 10000
+      "within_ms": 10000,
+      "label": "Menu delivery completes"
     }
   ]
 }

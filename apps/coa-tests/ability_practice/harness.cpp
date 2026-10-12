@@ -1439,12 +1439,13 @@ void CheckScriptedDamageReceipts()
 
 int main(int argc, char** argv)
 {
-    auto const enrollment = ParseCharacterEnrollment("10", "13,16,24,27,29", "100");
+    auto const enrollment = ParseCharacterEnrollment("10", "13,16,17,24,27,29,31,32", "100");
     assert(enrollment && !enrollment->empty() && enrollment->size() == 1);
     assert(enrollment->Matches(10, 12));
     assert(!enrollment->Matches(99, 24));
-    for (auto const classId : { 13U, 16U, 24U, 27U, 29U })
+    for (auto const classId : { 13U, 16U, 17U, 24U, 27U, 29U, 31U, 32U })
     {
+        assert(!enrollment->Matches(99, classId));
         assert(enrollment->Matches(100, classId));
         assert(enrollment->Matches(101, classId));
     }
