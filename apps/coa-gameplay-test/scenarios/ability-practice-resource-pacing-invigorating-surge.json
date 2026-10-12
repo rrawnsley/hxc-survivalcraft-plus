@@ -113,8 +113,7 @@
     {
       "action": "set_health",
       "actor": "caster",
-      "maximum": 100000,
-      "value": 50000
+      "value": 1
     },
     {
       "action": "cast",
@@ -140,6 +139,11 @@
       "actor": "caster",
       "spell": 803102,
       "stacks": 25
+    },
+    {
+      "action": "set_health",
+      "actor": "caster",
+      "value": 1
     },
     {
       "action": "set_power",
