@@ -7,6 +7,7 @@
 #include "Random.h"
 #include "AllCreatureScript.h"
 #include "AccountScript.h"
+#include "AreaDefines.h"
 #include "Group.h"
 #include "LocalLevelScaling.h"
 
@@ -3211,6 +3212,8 @@ namespace CoAChallenges
                     "creature damage: {}x; kill XP: {}x. Estimate only; gear, abilities, companions and adds "
                     "change the outcome.", target->GetName(), con, advice, health,
                     healthPercent / 100, damageMultiplier, experienceMultiplier);
+                if (target->GetZoneId() == AREA_MULGORE)
+                    handler->SendSysMessage("Mulgore: nearby same-faction creatures within 18 yards may join the fight.");
                 return true;
             }
 
@@ -4377,6 +4380,15 @@ namespace CoAChallenges
             Creature const* casterCreature = caster ? caster->ToCreature() : nullptr;
             if (targetPlayer && OldSchoolChallenge(targetPlayer) && OldSchoolCreature(casterCreature))
                 levelDifference = int32(targetPlayer->GetLevel()) - int32(OldSchoolThreatLevel(casterCreature));
+        }
+
+        void OnUnitEnterCombat(Unit* unit, Unit* victim) override
+        {
+            Creature* creature = unit ? unit->ToCreature() : nullptr;
+            Player* participant = victim ? victim->GetCharmerOrOwnerPlayerOrPlayerItself() : nullptr;
+            if (creature && creature->GetSpawnId() && creature->GetZoneId() == AREA_MULGORE
+                && OldSchoolCreature(creature) && participant && OldSchoolChallenge(participant))
+                creature->CallForHelp(18.0f, victim);
         }
     };
 

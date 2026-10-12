@@ -110,6 +110,10 @@ Elites and bosses multiply those values further. Quest experience is unchanged. 
 player-owned units are excluded. Restricted tapping prevents players in another trial from
 assisting with the kill or claiming its rewards.
 
+In Mulgore only, when an Old School participant engages a persistent hostile creature, eligible nearby
+same-faction creatures can join the fight from 18 yards. `/consider` warns about this social response.
+Ordinary play and other zones keep their existing assistance behavior.
+
 Ordinary Old School deaths outside battlegrounds and arenas remove 10% of the experience
 needed for the current level; the loss can delevel the character. Resurrection requires
 returning to the character's corpse as a spirit. Worn equipment is removed from the ghost and
