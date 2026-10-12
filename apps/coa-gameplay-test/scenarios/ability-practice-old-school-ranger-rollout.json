@@ -1,0 +1,350 @@
+{
+  "schema": 1,
+  "name": "Old School ability practice rollout: Ranger",
+  "contract": "Challenge-only class allowlist enables existing ranked combat progression. Resource setup, partial conversion, rank promotion and saved progress stay correct. Menu reports active class and ability. Leaving keeps progress/ranks and stops credit while meaningful native casts remain usable.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 21,
+      "level": 24,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "name": "Apranglive"
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 24,
+      "health": 1000000,
+      "distance": 12
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "start_challenge",
+      "actor": "caster",
+      "challenge": 9001,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "challenge_start_code",
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 2504
+    },
+    {
+      "action": "equip",
+      "actor": "caster",
+      "item": 2504,
+      "slot": 17
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "caster",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 500073
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.500073",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.500073",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.500073",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.500073",
+      "index": 3,
+      "value": 9
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.21.500073",
+      "index": 4,
+      "value": 15660
+    },
+    {
+      "action": "relog",
+      "actor": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.21.500073",
+      "index": 1,
+      "equals": 5,
+      "label": "Prior definition4 converted to5"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.21.500073",
+      "index": 3,
+      "equals": 9,
+      "label": "Saved proficiency retained"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.21.500073",
+      "index": 4,
+      "equals": 15660,
+      "label": "Saved partial progress retained"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 501704,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 500073,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.21.500073",
+      "index": 4,
+      "equals": 15660,
+      "label": "No resource means no practice award"
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 804329,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 2,
+      "full": true
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 500073
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 500073,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_stacks",
+      "spell": 804329,
+      "equals": 0,
+      "label": "Native resource consumption retained"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.21.500073",
+      "index": 3,
+      "equals": 10,
+      "label": "One useful use awards540, reaching the rank boundary"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.21.500073",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 501704,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "whisper",
+      "actor": "caster",
+      "to": "Apranglive",
+      "text": "HXAP\tHELLO|7",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "HXAP\tMODE|ACTIVE",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "|21|24|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "|500073|500073|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "HXAP\tE|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_challenge",
+      "actor": "caster",
+      "challenge": 9001
+    },
+    {
+      "action": "whisper",
+      "actor": "caster",
+      "to": "Apranglive",
+      "text": "HXAP\tHELLO|7",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "HXAP\tMODE|OLD_SCHOOL_ENDED",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 804329,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 2,
+      "full": true
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 501704
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 501704,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura_stacks",
+      "spell": 804329,
+      "equals": 0,
+      "label": "Native resource spender still works after leaving"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.21.500073",
+      "index": 3,
+      "equals": 10,
+      "label": "Leaving preserves proficiency"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.21.500073",
+      "index": 4,
+      "equals": 0,
+      "label": "Meaningful native use outside challenge earns no practice"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 501704,
+      "equals": 1,
+      "label": "Leaving preserves learned rank"
+    }
+  ]
+}
