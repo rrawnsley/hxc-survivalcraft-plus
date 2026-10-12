@@ -111,7 +111,7 @@ player-owned units are excluded. Restricted tapping prevents players in another 
 assisting with the kill or claiming its rewards.
 
 In Mulgore only, when an Old School participant engages a persistent hostile creature, eligible nearby
-same-faction creatures can join the fight from 18 yards. `/consider` warns about this social response.
+same-faction creatures can join the fight from 35 yards. `/consider` warns about this social response.
 Ordinary play and other zones keep their existing assistance behavior.
 
 Ordinary Old School deaths outside battlegrounds and arenas remove 10% of the experience

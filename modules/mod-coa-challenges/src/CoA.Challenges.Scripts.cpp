@@ -3213,7 +3213,7 @@ namespace CoAChallenges
                     "change the outcome.", target->GetName(), con, advice, health,
                     healthPercent / 100, damageMultiplier, experienceMultiplier);
                 if (target->GetZoneId() == AREA_MULGORE)
-                    handler->SendSysMessage("Mulgore: nearby same-faction creatures within 18 yards may join the fight.");
+                    handler->SendSysMessage("Mulgore: nearby same-faction creatures within 35 yards may join the fight.");
                 return true;
             }
 
@@ -4388,7 +4388,7 @@ namespace CoAChallenges
             Player* participant = victim ? victim->GetCharmerOrOwnerPlayerOrPlayerItself() : nullptr;
             if (creature && creature->GetSpawnId() && creature->GetZoneId() == AREA_MULGORE
                 && OldSchoolCreature(creature) && participant && OldSchoolChallenge(participant))
-                creature->CallForHelp(18.0f, victim);
+                creature->CallForHelp(35.0f, victim);
         }
     };
 
