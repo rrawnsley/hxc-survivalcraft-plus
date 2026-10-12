@@ -267,6 +267,17 @@
       "within_ms": 10000
     },
     {
+      "action": "relog",
+      "actor": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "combat",
+      "equals": 0,
+      "label": "Reconnect ends combat before voluntary challenge exit"
+    },
+    {
       "action": "stop_challenge",
       "actor": "caster",
       "challenge": 9001
