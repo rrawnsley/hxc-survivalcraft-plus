@@ -10,6 +10,8 @@
 #include "Group.h"
 #include "LocalLevelScaling.h"
 
+#include <cmath>
+
 using namespace Acore::ChatCommands;
 
 namespace CoAChallenges
@@ -1132,19 +1134,25 @@ namespace CoAChallenges
         seed *= 0x846ca68b;
         seed ^= seed >> 16;
 
-        static constexpr int32 threatOffsets[16] =
+        static constexpr int32 threatOffsets[32] =
         {
-            -6, -6, -4, -4, -2, -2, -2, -1,
-            -1,  0,  0,  0,  0,  1,  3,  5
+            -8, -6, -5, -4, -3, -2, -2, -1,
+            -1,  0,  0,  0,  0,  1,  2,  3,
+             4,  5,  6,  7,  8, 10, 12, 15,
+            18, 22, 28, 35, 42, 50, 58, 65
         };
-        return threatOffsets[seed & 0x0F];
+        return threatOffsets[seed & 0x1F];
+    }
+
+    uint32 OldSchoolThreatLevel(Creature const* creature)
+    {
+        return std::max(1, int32(creature ? creature->GetLevel() : 1) + OldSchoolThreatOffset(creature));
     }
 
     OldSchoolPowerProfile GetOldSchoolPowerProfile(Player const* player, Creature const* creature)
     {
         player = ChallengeParticipant(player);
-        int32 const levelDifference = int32(creature->GetLevel()) + OldSchoolThreatOffset(creature)
-            - int32(player->GetLevel());
+        int32 const levelDifference = int32(OldSchoolThreatLevel(creature)) - int32(player->GetLevel());
         OldSchoolPowerProfile profile;
         if (levelDifference <= -6)
             profile = { "Grey", 200, 1, 1 };
@@ -1160,6 +1168,10 @@ namespace CoAChallenges
             profile = { "Red", 1600, 10, 8 };
         else
             profile = { "Purple", 2400, 14, 10 };
+
+        float const threatStatScale = std::exp2(float(OldSchoolThreatOffset(creature)) / 25.0f);
+        profile.healthPercent = std::max(1u, uint32(std::lround(profile.healthPercent * threatStatScale)));
+        profile.damageMultiplier = std::max(1u, uint32(std::lround(profile.damageMultiplier * threatStatScale)));
 
         switch (creature->GetCreatureTemplate()->rank)
         {
@@ -4313,12 +4325,30 @@ namespace CoAChallenges
                 AllowBandageHeal(healer->GetGUID().GetCounter());
         }
 
-        void OnBeforeRollMeleeOutcomeAgainst(Unit const* /*attacker*/, Unit const* victim,
-            WeaponAttackType /*attType*/, int32& /*attackerMaxSkillValueForLevel*/,
-            int32& /*victimMaxSkillValueForLevel*/, int32& /*attackerWeaponSkill*/,
-            int32& /*victimDefenseSkill*/, int32& crit_chance, int32& /*miss_chance*/,
+        void OnBeforeRollMeleeOutcomeAgainst(Unit const* attacker, Unit const* victim,
+            WeaponAttackType /*attType*/, int32& attackerMaxSkillValueForLevel,
+            int32& victimMaxSkillValueForLevel, int32& attackerWeaponSkill,
+            int32& victimDefenseSkill, int32& crit_chance, int32& /*miss_chance*/,
             int32& dodge_chance, int32& parry_chance, int32& block_chance) override
         {
+            Creature const* attackerCreature = attacker ? attacker->ToCreature() : nullptr;
+            Player* defender = victim ? victim->GetCharmerOrOwnerPlayerOrPlayerItself() : nullptr;
+            if (attackerCreature && defender && OldSchoolChallenge(defender) && OldSchoolCreature(attackerCreature))
+            {
+                int32 const skill = int32(OldSchoolThreatLevel(attackerCreature)) * 5;
+                attackerMaxSkillValueForLevel = skill;
+                attackerWeaponSkill = skill;
+            }
+
+            Creature const* victimCreature = victim ? victim->ToCreature() : nullptr;
+            Player* aggressor = attacker ? attacker->GetCharmerOrOwnerPlayerOrPlayerItself() : nullptr;
+            if (victimCreature && aggressor && OldSchoolChallenge(aggressor) && OldSchoolCreature(victimCreature))
+            {
+                int32 const skill = int32(OldSchoolThreatLevel(victimCreature)) * 5;
+                victimMaxSkillValueForLevel = skill;
+                victimDefenseSkill = skill;
+            }
+
             if (!victim || !victim->IsPlayer())
                 return;
             Player* pl = const_cast<Player*>(victim->ToPlayer());

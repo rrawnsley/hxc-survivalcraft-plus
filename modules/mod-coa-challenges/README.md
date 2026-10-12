@@ -99,10 +99,12 @@ keys are appended automatically on deploy.
 
 Old School (9001) and Old School - Hardcore (9002) are mutually exclusive native trials.
 Creature levels remain fixed internally and display as `??` while the trial is active. In the trial, their power and kill experience follow the
-participant's con. Ordinary persistent spawns have a stable hidden threat offset from -6 to +5 levels,
-so creatures of the same native level can present different cons within one area. `/consider`, combat
-scaling and kill experience use that same offset. Elites, bosses and temporary creatures keep their
-native level for con. Grey creatures have 2x health, 1x damage and 1x kill XP; green 3x/2x/2x;
+participant's con. Ordinary persistent spawns have a stable hidden threat offset from -8 to +65 levels,
+so a zone can contain approachable prey and severe threats even when its native creature levels are
+clustered. `/consider`, health, damage, melee skill, and kill experience use that hidden threat rating;
+the rating is fixed per database spawn and never scales to the player. Native creature levels remain
+unchanged. Elites, bosses and temporary creatures keep their native level for con. Grey creatures have
+2x health, 1x damage and 1x kill XP before the threat-offset stat adjustment; green 3x/2x/2x;
 blue 5x/3x/3x; white 8x/5x/4x; yellow 12x/7x/6x; red 16x/10x/8x; and purple 24x/14x/10x.
 Elites and bosses multiply those values further. Quest experience is unchanged. Critters and
 player-owned units are excluded. Restricted tapping prevents players in another trial from
