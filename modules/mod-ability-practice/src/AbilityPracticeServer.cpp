@@ -2,6 +2,7 @@
 
 #include "AbilityPracticeDevelopment.h"
 #include "AbilityPracticeEnrollment.h"
+#include "../../mod-coa-challenges/src/CoAChallengePractice.h"
 #include "AbilityPracticeCatchup.h"
 #include "AbilityPracticeDevelopmentSamples.h"
 #include "AbilityPracticeDevelopmentPeriodic.h"
@@ -385,6 +386,7 @@ bool Requested = false;
 bool DevelopmentAllowed = false;
 bool Ready = false;
 bool CharacterSelectionReady = false;
+std::atomic<bool> OldSchoolRequired{ false };
 using CharacterSelection = Practice::CharacterEnrollment;
 std::atomic<std::shared_ptr<CharacterSelection const>> SelectedCharacters;
 std::atomic<bool> RealmEnrollment{ false };
@@ -492,6 +494,7 @@ struct MenuSession
     bool CheckRanks = true;
     bool Initialized = false;
     bool LoginObserved = false;
+    bool WasParticipant = false;
     std::uint32_t Protocol = Practice::MenuSchemaVersion;
     std::uint32_t LastClass = 0;
     std::uint32_t LastRace = 0;
@@ -2921,9 +2924,21 @@ bool IsDevelopmentPlayer(Player const* player)
     auto const selection = SelectedCharacters.load();
     if (!selection)
         return false;
+    if (OldSchoolRequired)
+        return selection->NewCharacterClasses.contains(player->getClass()) &&
+            CoAChallenges::HasOldSchoolPracticeTrial(player);
     if (RealmEnrollment.load())
         return selection->empty() && ProfileLookup && !ProfileLookup->ForClass(player->getClass()).empty();
     return selection->Matches(player->GetGUID().GetRawValue(), player->getClass());
+}
+
+bool CanReceivePracticeMenu(Player const* player)
+{
+    if (!OldSchoolRequired)
+        return IsDevelopmentPlayer(player);
+    auto const selection = SelectedCharacters.load();
+    return player && player->GetSession() && !player->GetSession()->IsBot() && selection &&
+        selection->NewCharacterClasses.contains(player->getClass());
 }
 
 Practice::AbilityProfile const* FindProfile(Player const* player, std::uint32_t spellId)
@@ -3400,7 +3415,7 @@ void Deliver(Player* player, MenuSession& session, Clock::time_point now)
 
 bool Send(Player* player, MenuSession& session, Clock::time_point now)
 {
-    if (!Requested || !DevelopmentAllowed || !Ready || !IsDevelopmentPlayer(player) ||
+    if (!Requested || !DevelopmentAllowed || !Ready || !CanReceivePracticeMenu(player) ||
         Revision == std::numeric_limits<std::uint32_t>::max())
         return false;
     auto const currentProgress = session.Progress.find(player->getClass());
@@ -3564,6 +3579,8 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
         session.Protocol >= Practice::DebuffMenuSchemaVersion);
     if (!messages || messages->size() > MaxQueuedMessages)
         return false;
+    if (OldSchoolRequired)
+        messages->push_back(supported ? "MODE|ACTIVE" : "MODE|OLD_SCHOOL_REQUIRED");
     if (session.Protocol >= Practice::TypedMenuSchemaVersion)
     {
         QueueDelivery(session, player->getClass(), std::move(*messages), now);
@@ -4186,6 +4203,7 @@ void RefreshOwnerState(Player* player, MenuSession& session, std::uint32_t custo
     InitializeProgress(player);
     ObserveMastery(player, session, true);
     session.Initialized = true;
+    session.WasParticipant = true;
     session.LastClass = player->getClass();
     session.LastRace = player->getRace();
     session.LastSpec = player->GetActiveSpec();
@@ -4240,6 +4258,7 @@ public:
         Requested = sConfigMgr->GetOption<bool>("AbilityPractice.Enable", false);
         DevelopmentAllowed = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentObservation", false);
         RankRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentRankLearning", false);
+        OldSchoolRequired = sConfigMgr->GetOption<bool>("AbilityPractice.RequireOldSchoolTrial", false);
         auto const selected = ParseSelectedCharacters(
             sConfigMgr->GetOption<std::string>("AbilityPractice.DevelopmentCharacterGuids", ""));
         SelectedCharacters.store(selected);
@@ -4251,6 +4270,8 @@ public:
             LOG_ERROR("module.ability_practice", "Rejected simultaneous realm and character enrollment; effects disabled");
         LOG_INFO("module.ability_practice", "Development character selection: valid={}, selected count={}",
             static_cast<bool>(selected), selected ? selected->size() : 0);
+        LOG_INFO("module.ability_practice", "Old School practice gate: required={}, supported classes={}",
+            OldSchoolRequired, selected ? selected->NewCharacterClasses.size() : 0);
         LOG_INFO("module.ability_practice", "New-character practice enrollment: classes={}, minimum GUID={}",
             selected ? selected->NewCharacterClasses.size() : 0, selected ? selected->NewCharacterMinimumGuid : 0);
         Active.store(Requested && DevelopmentAllowed && Ready && CharacterSelectionReady);
@@ -4502,8 +4523,29 @@ public:
 
     void OnPlayerUpdate(Player* player, uint32) override
     {
-        if (!Active.load() || !IsDevelopmentPlayer(player) || player->isBeingLoaded())
+        if (!Active.load() || !CanReceivePracticeMenu(player) || player->isBeingLoaded())
             return;
+        if (!IsDevelopmentPlayer(player))
+        {
+            std::lock_guard lock(Mutex);
+            auto const found = Sessions.find(player->GetGUID().GetRawValue());
+            if (found == Sessions.end())
+                return;
+            auto& session = found->second;
+            if (session.WasParticipant)
+            {
+                ClearDelivery(session);
+                session.Initialized = false;
+                session.WasParticipant = false;
+                session.Buffs.clear();
+                session.PeriodicBuffCasts.Clear();
+                session.ActionSession = NewActionSession();
+                session.Dirty = true;
+                session.NextRefresh = {};
+            }
+            Refresh(player, session, Clock::now());
+            return;
+        }
         std::uint32_t const customSpecialization = CachedCustomSpecialization(player);
         bool checkRanks = false;
         {
@@ -4582,11 +4624,11 @@ public:
 
     bool OnPlayerCanUseChat(Player* player, uint32, uint32 language, std::string& message, Player* receiver) override
     {
-        if (!Active.load() || !IsDevelopmentPlayer(player) || language != LANG_ADDON ||
+        if (!Active.load() || !CanReceivePracticeMenu(player) || language != LANG_ADDON ||
             message.rfind("HXAP\t", 0) != 0)
             return true;
         std::lock_guard lock(Mutex);
-        if (!Requested || !DevelopmentAllowed || !Ready || !IsDevelopmentPlayer(player))
+        if (!Requested || !DevelopmentAllowed || !Ready || !CanReceivePracticeMenu(player))
             return true;
         if (receiver != player || (message != "HXAP\tHELLO|1" && message != "HXAP\tHELLO|2" &&
             message != "HXAP\tHELLO|3" && message != "HXAP\tHELLO|4" && message != "HXAP\tHELLO|5" &&
@@ -4596,6 +4638,14 @@ public:
         auto& session = Sessions[player->GetGUID().GetRawValue()];
         if (now - session.LastRequest < RefreshInterval)
             return false;
+        if (!IsDevelopmentPlayer(player))
+        {
+            ClearDelivery(session);
+            session.Initialized = false;
+            session.WasParticipant = false;
+            session.Dirty = true;
+            session.NextRefresh = {};
+        }
         session.LastRequest = now;
         session.InterestedUntil = now + InterestDuration;
         std::uint32_t const protocol = message == "HXAP\tHELLO|7" ? Practice::DebuffMenuSchemaVersion :

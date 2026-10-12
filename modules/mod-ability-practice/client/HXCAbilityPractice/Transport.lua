@@ -40,6 +40,10 @@ listener:SetScript("OnEvent", function(_, event, prefix, message, channel, sende
         return
     end
     if prefix ~= PREFIX or channel ~= "WHISPER" or sender ~= UnitName("player") then return end
+    if message == "MODE|OLD_SCHOOL_REQUIRED" or message == "MODE|ACTIVE" then
+        API.SetOldSchoolRequired(message == "MODE|OLD_SCHOOL_REQUIRED")
+        return
+    end
     local snapshot, reason, failure = Wire.Accept(message, GetTime(), revision, generation)
     local incoming = snapshot and snapshot.generation or failure and failure.generation
         or (not reason and Wire.GetGeneration())

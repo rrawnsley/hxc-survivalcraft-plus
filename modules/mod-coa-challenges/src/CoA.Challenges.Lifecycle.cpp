@@ -1,6 +1,7 @@
 // mod-coa-challenges (review split): CoA.Challenges.Lifecycle.cpp
 // Mechanical split of review-CoAChallenges.cpp; no logic changes.
 #include "CoA.Challenges.Review.h"
+#include "CoAChallengePractice.h"
 
 #include <atomic>
 #include <mutex>
@@ -9,6 +10,16 @@
 
 namespace CoAChallenges
 {
+
+    bool HasOldSchoolPracticeTrial(Player const* player)
+    {
+        if (!player || !player->GetSession() || player->GetSession()->IsBot() || !ChallengesEnabled())
+            return false;
+        for (auto const& [id, level] : CachedCharChallenges(player->GetGUID().GetCounter()))
+            if (id == 9001 || id == 9002)
+                return true;
+        return false;
+    }
 
     bool HasFailure(uint32 guid, uint32 challengeID)
     {
@@ -385,6 +396,14 @@ namespace CoAChallenges
     {
         uint32 guid = player->GetGUID().GetCounter();
 
+        if ((challengeID == 9001 || challengeID == 9002) &&
+            sConfigMgr->GetOption<bool>("AbilityPractice.RequireOldSchoolTrial", false) &&
+            player->GetPlayerSetting(OldSchoolPracticeExitSource, 0).value)
+        {
+            NotifyPlayer(player, "You left an Old School run. This character cannot re-enter either Old School trial.");
+            return 12;
+        }
+
         if ((challengeID == 9001 || challengeID == 9002) && (!player->IsAlive() || player->IsInCombat()))
         {
             NotifyPlayer(player, "Old School can only be started while alive and outside combat.");
@@ -589,6 +608,9 @@ namespace CoAChallenges
     void DeactivateChallenge(Player* player, uint32 challengeID)
     {
         uint32 guid = player->GetGUID().GetCounter();
+        if ((challengeID == 9001 || challengeID == 9002) && HasOldSchoolPracticeTrial(player) &&
+            sConfigMgr->GetOption<bool>("AbilityPractice.RequireOldSchoolTrial", false))
+            player->UpdatePlayerSetting(OldSchoolPracticeExitSource, 0, 1);
         CharacterDatabase.DirectExecute(
             "DELETE FROM coa_character_challenge WHERE guid = {} AND challengeId = {}",
             guid, challengeID);

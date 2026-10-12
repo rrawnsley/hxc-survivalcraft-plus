@@ -5,6 +5,7 @@ local snapshot, selectedId, receivedAt, serverFailure
 local serverRevision = 0
 local serverGeneration
 local syncState = "waiting"
+local oldSchoolRequired = false
 local tab = "skills"
 local tabLabels = { skills = "My Skills", upcoming = "Upcoming", tracked = "Tracked", session = "Session" }
 local offset = 0
@@ -107,7 +108,10 @@ local function UpdateSubtitle(now)
         status = serverFailure.issueCode == 2 and "Saved view - Progress version mismatch"
             or "Saved view - Skill progress needs attention"
     end
-    if #snapshot.abilities == 0 and syncState == "current" then status = "No practice catalog for this class" end
+    if #snapshot.abilities == 0 and syncState == "current" then
+        status = oldSchoolRequired and "Enable an Old School trial to practice abilities"
+            or "No practice catalog for this class"
+    end
     local age = type(now) == "number" and type(receivedAt) == "number" and now >= receivedAt
         and now < math.huge and math.floor(now - receivedAt) or nil
     local ageText = age and ((age < 60 and (age .. "s") or
@@ -278,12 +282,13 @@ RefreshTracker = function()
     tracker:SetSize(340, 88 + count * 82)
     tracker:SetScale(math.min(TrackerScale(), math.max(1, UIParent:GetWidth() - 32) / 340,
         math.max(1, UIParent:GetHeight() - 32) / (88 + count * 82)))
-    trackerStatus:SetText(serverFailure and "Saved progress needs attention" or syncState == "current"
+    trackerStatus:SetText(oldSchoolRequired and "Old School trial required" or serverFailure and "Saved progress needs attention" or syncState == "current"
         and ("Updated " .. math.max(0, math.floor(GetTime() - (receivedAt or GetTime()))) .. "s ago")
         or syncState == "waiting" and "Updating server progress..." or "Saved view - server unavailable")
     trackerFooter:ClearAllPoints()
     trackerFooter:SetPoint("TOPLEFT", 14, -64 - count * 82)
-    trackerFooter:SetText(#abilities == 0 and "Open the menu to select tracked abilities."
+    trackerFooter:SetText(oldSchoolRequired and "Enable Old School in Trials to practice abilities."
+        or #abilities == 0 and "Open the menu to select tracked abilities."
         or #abilities > #trackerRows and (trackerOffset + 1 .. "-" .. trackerOffset + count .. " of "
             .. #abilities .. " tracked - scroll to browse") or "Drag to move - +/- resize")
     for index, row in ipairs(trackerRows) do
@@ -593,7 +598,8 @@ Refresh = function()
         if not chosen or chosen.abilityId ~= selectedId then rankOffset = 0 end
         selectedId = chosen and chosen.abilityId or nil
         RenderDetail(chosen)
-        local emptyText = syncState == "current" and "The server has no practice abilities configured for this class."
+        local emptyText = oldSchoolRequired and "Enable Old School or Old School - Hardcore in Trials to use ability practice."
+            or syncState == "current" and "The server has no practice abilities configured for this class."
             or "This saved view contains no configured practice abilities."
         if filterButton then
             filterButton:SetText("Filter: " .. filterLabels[filterMode] .. " (" .. filterCounts[filterMode] .. ")")
@@ -964,8 +970,14 @@ function API.Toggle()
     if panel:IsShown() then panel:Hide() else API.Restore() end
 end
 
+function API.SetOldSchoolRequired(value)
+    oldSchoolRequired = value == true
+    Refresh()
+end
+
 function API.Reset()
     snapshot = nil
+    oldSchoolRequired = false
     serverFailure = nil
     serverRevision = 0
     serverGeneration = nil

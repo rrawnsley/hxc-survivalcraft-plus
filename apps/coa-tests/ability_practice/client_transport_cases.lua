@@ -42,3 +42,9 @@ MockTime = 27
 assert(API.Request())
 assert(MockMessages[#MockMessages][2] == "HELLO|4")
 print("PASS: schema 7 request falls back through schemas 6 and 5 to schema 4 when an older server does not respond")
+
+API.SetOldSchoolRequired(true)
+API.SetOldSchoolRequired(false)
+event(nil, "CHAT_MSG_ADDON", "HXAP", "MODE|OLD_SCHOOL_REQUIRED", "WHISPER", "TestPlayer")
+event(nil, "CHAT_MSG_ADDON", "HXAP", "MODE|ACTIVE", "WHISPER", "TestPlayer")
+print("PASS: Old School participation notices are accepted without changing snapshot protocol")

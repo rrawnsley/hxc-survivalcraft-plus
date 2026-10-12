@@ -124,3 +124,7 @@ AbilityPractice.AllowDevelopmentSharedBuffVariants = 0
 # Authored ranked resource/combo spenders award additional points per meaningful use.
 # Requires rank pacing and one-rank-ahead caps. Startup-only; prior saved progress is retained.
 AbilityPractice.AllowDevelopmentResourcePacing = 0
+
+# Use the configured class list only for participants of Old School9001 or Hardcore9002.
+# Character creation cutoff is ignored; leaving permanently blocks Old School re-entry.
+AbilityPractice.RequireOldSchoolTrial = 0

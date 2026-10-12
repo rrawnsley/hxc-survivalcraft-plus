@@ -1,0 +1,389 @@
+{
+  "schema": 1,
+  "name": "Old School trial controls ability practice and persists exit protection",
+  "contract": "Unenrolled human remains native. Both9001/9002 enable reviewed class practice independent of character GUID cutoff. Partial progress/rank promotion survives relog. Leaving preserves proficiency/learned rank, stops awards/menu, and persistently blocks both trial re-entry paths.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 24,
+      "level": 6,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "regular",
+      "race": 1,
+      "class": 24,
+      "level": 6,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "hard",
+      "race": 1,
+      "class": 24,
+      "level": 6,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "control_enemy",
+      "owner": "control",
+      "entry": 36,
+      "level": 6,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "regular_enemy",
+      "owner": "regular",
+      "entry": 36,
+      "level": 6,
+      "health": 1000000,
+      "distance": 3
+    },
+    {
+      "id": "hard_enemy",
+      "owner": "hard",
+      "entry": 36,
+      "level": 6,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 800790
+    },
+    {
+      "action": "learn",
+      "actor": "regular",
+      "spell": 800790
+    },
+    {
+      "action": "learn",
+      "actor": "hard",
+      "spell": 800790
+    },
+    {
+      "action": "whisper",
+      "actor": "control",
+      "text": "HXAP\tHELLO|7",
+      "language": 4294967295,
+      "to": "control"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "whisper_contains",
+      "from": "control",
+      "text": "HXAP\tMODE|OLD_SCHOOL_REQUIRED",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 800790,
+      "target": "control_enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.800790",
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "start_challenge",
+      "actor": "regular",
+      "challenge": 9001,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "regular",
+      "metric": "challenge_start_code",
+      "equals": 0
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "regular",
+      "source": "core.hxc.ability_practice.24.800790",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "regular",
+      "source": "core.hxc.ability_practice.24.800790",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "regular",
+      "source": "core.hxc.ability_practice.24.800790",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "regular",
+      "source": "core.hxc.ability_practice.24.800790",
+      "index": 3,
+      "value": 9
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "regular",
+      "source": "core.hxc.ability_practice.24.800790",
+      "index": 4,
+      "value": 15930
+    },
+    {
+      "action": "relog",
+      "actor": "regular"
+    },
+    {
+      "action": "assert",
+      "actor": "regular",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.800790",
+      "index": 3,
+      "equals": 9
+    },
+    {
+      "action": "assert",
+      "actor": "regular",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.800790",
+      "index": 4,
+      "equals": 15930
+    },
+    {
+      "action": "set_power",
+      "actor": "regular",
+      "power": 0,
+      "full": true
+    },
+    {
+      "action": "cast",
+      "actor": "regular",
+      "spell": 800790,
+      "target": "regular_enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "regular",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.800790",
+      "index": 3,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "regular",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.800790",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "regular",
+      "metric": "knows_spell",
+      "spell": 502011,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "whisper",
+      "actor": "regular",
+      "text": "HXAP\tHELLO|7",
+      "language": 4294967295,
+      "to": "regular"
+    },
+    {
+      "action": "assert",
+      "actor": "regular",
+      "metric": "whisper_contains",
+      "from": "regular",
+      "text": "HXAP\tMODE|ACTIVE",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "start_challenge",
+      "actor": "hard",
+      "challenge": 9002,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hard",
+      "metric": "challenge_start_code",
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "hard",
+      "power": 0,
+      "full": true
+    },
+    {
+      "action": "cast",
+      "actor": "hard",
+      "spell": 800790,
+      "target": "hard_enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "hard",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.800790",
+      "index": 4,
+      "equals": 270
+    },
+    {
+      "action": "relog",
+      "actor": "regular"
+    },
+    {
+      "action": "assert",
+      "actor": "regular",
+      "metric": "knows_spell",
+      "spell": 502011,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "regular",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.800790",
+      "index": 3,
+      "equals": 10
+    },
+    {
+      "action": "stop_challenge",
+      "actor": "regular",
+      "challenge": 9001
+    },
+    {
+      "action": "assert",
+      "actor": "regular",
+      "metric": "player_setting",
+      "source": "core.hxc.old_school_practice_exit",
+      "index": 0,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 11000
+    },
+    {
+      "action": "whisper",
+      "actor": "regular",
+      "text": "HXAP\tHELLO|7",
+      "language": 4294967295,
+      "to": "regular"
+    },
+    {
+      "action": "assert",
+      "actor": "regular",
+      "metric": "whisper_contains",
+      "from": "regular",
+      "text": "HXAP\tMODE|OLD_SCHOOL_REQUIRED",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "set_power",
+      "actor": "regular",
+      "power": 0,
+      "full": true
+    },
+    {
+      "action": "cast",
+      "actor": "regular",
+      "spell": 502011,
+      "target": "regular_enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "regular",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.800790",
+      "index": 3,
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "actor": "regular",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.24.800790",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "regular",
+      "metric": "knows_spell",
+      "spell": 502011,
+      "equals": 1
+    },
+    {
+      "action": "relog",
+      "actor": "regular"
+    },
+    {
+      "action": "start_challenge",
+      "actor": "regular",
+      "challenge": 9001,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "regular",
+      "metric": "challenge_start_code",
+      "equals": 12
+    },
+    {
+      "action": "start_challenge",
+      "actor": "regular",
+      "challenge": 9002,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "regular",
+      "metric": "challenge_start_code",
+      "equals": 12
+    }
+  ]
+}
