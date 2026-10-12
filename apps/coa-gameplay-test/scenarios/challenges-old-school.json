@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Old School increases creature danger and kill XP while death costs XP and Hardcore ends the run",
-  "contract": "Owned trial IDs 9001/9002. Native hostile creature hits scale health 3x and damage 2x, creature kill XP 4x, quest XP unchanged, normal death removes up to 10% of the current level bar, Hardcore death fails permanently, and combat prevents switching. Bots inherit their human leader's combat difficulty.",
+  "name": "Old School con tiers drive creature difficulty, rewards, death XP and corpse runs",
+  "contract": "Owned trial IDs 9001/9002. Creature con sets health, damage and kill XP multipliers; quests retain normal XP. Old School death removes 10% of a level's XP and can delevel. A spirit must return to its corpse to resurrect. Hardcore death fails the run. Bots inherit their human leader's con.",
   "timeout_ms": 180000,
   "location": {
     "map": 0,
@@ -42,6 +42,13 @@
       "race": 1,
       "class": 1,
       "level": 1
+    },
+    {
+      "id": "deleveler",
+      "race": 1,
+      "class": 1,
+      "level": 2,
+      "allow_regeneration": false
     }
   ],
   "creatures": [
@@ -196,20 +203,20 @@
     },
     {
       "action": "assert",
-      "label": "Hostile spell damage doubles",
+      "label": "White con hostile spell damage is four times normal",
       "actor": "old",
       "metric": "health",
       "ratio_to": "normal_spell",
-      "min": 1.79,
-      "max": 2.23,
+      "min": 4.79,
+      "max": 5.23,
       "relative_to": "before_old_hit"
     },
     {
       "action": "assert",
-      "label": "A creature initiating combat also gets triple health",
+      "label": "A creature initiating combat gets white con health",
       "actor": "caster_old",
       "metric": "max_health",
-      "equals": 3000
+      "equals": 8000
     },
     {
       "action": "stop_challenge",
@@ -270,10 +277,10 @@
     },
     {
       "action": "assert",
-      "label": "Outgoing attacks trigger triple creature health",
+      "label": "Outgoing attacks trigger white con creature health",
       "actor": "old_wolf",
       "metric": "max_health",
-      "equals": 126
+      "equals": 336
     },
     {
       "action": "assert",
@@ -312,10 +319,10 @@
     },
     {
       "action": "assert",
-      "label": "Companion pulls inherit Old School difficulty",
+      "label": "Companion pulls inherit white con Old School difficulty",
       "actor": "bot_wolf",
       "metric": "max_health",
-      "equals": 3000
+      "equals": 8000
     },
     {
       "action": "stop_attack",
@@ -343,6 +350,14 @@
       "actor": "old",
       "metric": "system_message_contains",
       "text": "Estimated health",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Consider reports the same white con combat and XP multipliers",
+      "actor": "old",
+      "metric": "system_message_contains",
+      "text": "White con",
       "equals": 1
     },
     {
@@ -390,6 +405,87 @@
       "ratio_to": "level_xp",
       "min": -0.101,
       "max": -0.099
+    },
+    {
+      "action": "release_spirit",
+      "actor": "old"
+    },
+    {
+      "action": "wait",
+      "ms": 31000
+    },
+    {
+      "action": "teleport",
+      "actor": "old",
+      "map": 0,
+      "x": -8800,
+      "y": -133,
+      "z": 80.6
+    },
+    {
+      "action": "client_packet",
+      "label": "A released spirit cannot reclaim the corpse from far away",
+      "actor": "old",
+      "opcode": 466,
+      "fields": [
+        {
+          "actor_guid": "old"
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "old",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "old",
+      "map": 0,
+      "x": -8914,
+      "y": -133,
+      "z": 80.6
+    },
+    {
+      "action": "client_packet",
+      "label": "Returning to the body allows the corpse run resurrection",
+      "actor": "old",
+      "opcode": 466,
+      "fields": [
+        {
+          "actor_guid": "old"
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "old",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "start_challenge",
+      "actor": "deleveler",
+      "challenge": 9001,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "deleveler",
+      "metric": "challenge_start_code",
+      "equals": 0
+    },
+    {
+      "action": "die",
+      "label": "A death penalty can cross a level boundary",
+      "actor": "deleveler"
+    },
+    {
+      "action": "assert",
+      "actor": "deleveler",
+      "metric": "level",
+      "equals": 1
     },
     {
       "action": "die",

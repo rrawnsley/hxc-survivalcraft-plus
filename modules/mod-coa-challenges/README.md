@@ -98,21 +98,24 @@ keys are appended automatically on deploy.
 ## HXC Old School trials
 
 Old School (9001) and Old School - Hardcore (9002) are mutually exclusive native trials.
-Unowned creatures other than critters have triple health while fighting a participant,
-and deal double damage to the participant and their pets or playerbot companions.
-Kill experience is multiplied by four; quest experience is unchanged. Restricted tapping
-prevents players in another trial from assisting with the kill or claiming its rewards.
+Creature levels remain fixed. In the trial, their power and kill experience follow the
+participant's con: grey creatures have 2x health, 1x damage and 1x kill XP; green 3x/2x/2x;
+blue 5x/3x/3x; white 8x/5x/4x; yellow 12x/7x/6x; red 16x/10x/8x; and purple 24x/14x/10x.
+Elites and bosses multiply those values further. Quest experience is unchanged. Critters and
+player-owned units are excluded. Restricted tapping prevents players in another trial from
+assisting with the kill or claiming its rewards.
 
-Ordinary Old School deaths outside battlegrounds and arenas remove 10% of the current
-level's required experience, capped at the XP currently in the bar. Levels are preserved.
-Hardcore uses one life: death permanently fails the run, while resurrection remains
-available under CoA's existing Hardcore rules. Abandoning a progressed Hardcore run also
-fails it. Starting either trial requires being alive and outside combat; abandoning one
-during combat is refused, including through a custom trial bundle.
+Ordinary Old School deaths outside battlegrounds and arenas remove 10% of the experience
+needed for the current level; the loss can delevel the character. Resurrection requires
+returning to the character's corpse as a spirit. The standard corpse remains at its death
+location and displays the character's equipment during the run. Hardcore uses one life: death
+permanently fails the run, while resurrection remains available under CoA's existing Hardcore
+rules. Abandoning a progressed Hardcore run also fails it. Starting either trial requires being
+alive and outside combat; Old School cannot be abandoned while dead or during combat.
 
-Target a hostile creature and use `/consider` (or `.coa consider`). The response estimates
-danger from level difference, creature rank, projected health and the participant's maximum
-health. It discloses that abilities, gear, companions and adds can change the result.
+Target a hostile creature and use `/consider` (or `.coa consider`). In Old School, the
+response reports its con and the same health, damage and kill XP multipliers used by that
+creature. It also warns that gear, abilities, companions and adds can change the outcome.
 The client definitions are generated with `C:/Azerothcore/tools/build-coa-old-school.py`
 and shipped in CoA's existing `Data/patch-ZZ.MPQ`; the slash command is shipped in its
 Homebrew Nourishment addon. Neither trial grants completion items.

@@ -1110,6 +1110,58 @@ namespace CoAChallenges
             && creature->GetCreatureTemplate()->type != CREATURE_TYPE_CRITTER;
     }
 
+    struct OldSchoolPowerProfile
+    {
+        char const* con;
+        uint32 healthPercent;
+        uint32 damageMultiplier;
+        uint32 experienceMultiplier;
+    };
+
+    OldSchoolPowerProfile GetOldSchoolPowerProfile(Player const* player, Creature const* creature)
+    {
+        player = ChallengeParticipant(player);
+        int32 const levelDifference = int32(creature->GetLevel()) - int32(player->GetLevel());
+        OldSchoolPowerProfile profile;
+        if (levelDifference <= -6)
+            profile = { "Grey", 200, 1, 1 };
+        else if (levelDifference <= -3)
+            profile = { "Green", 300, 2, 2 };
+        else if (levelDifference < 0)
+            profile = { "Blue", 500, 3, 3 };
+        else if (levelDifference == 0)
+            profile = { "White", 800, 5, 4 };
+        else if (levelDifference <= 2)
+            profile = { "Yellow", 1200, 7, 6 };
+        else if (levelDifference <= 4)
+            profile = { "Red", 1600, 10, 8 };
+        else
+            profile = { "Purple", 2400, 14, 10 };
+
+        switch (creature->GetCreatureTemplate()->rank)
+        {
+            case CREATURE_ELITE_ELITE:
+                profile.healthPercent = profile.healthPercent * 3 / 2;
+                profile.damageMultiplier = (profile.damageMultiplier * 3 + 1) / 2;
+                profile.experienceMultiplier = (profile.experienceMultiplier * 3 + 1) / 2;
+                break;
+            case CREATURE_ELITE_RAREELITE:
+                profile.healthPercent *= 2;
+                profile.damageMultiplier *= 2;
+                profile.experienceMultiplier *= 2;
+                break;
+            case CREATURE_ELITE_WORLDBOSS:
+                profile.con = "Purple boss";
+                profile.healthPercent *= 2;
+                profile.damageMultiplier *= 2;
+                profile.experienceMultiplier *= 2;
+                break;
+            default:
+                break;
+        }
+        return profile;
+    }
+
     uint32 AdventureModeExtraHealthPct(uint32 tier)
     {
         if (tier >= 89)
@@ -1126,10 +1178,20 @@ namespace CoAChallenges
     }
 
     constexpr char const* AdventureHealthKey = "coa_challenges.adventure_health";
+    constexpr char const* OldSchoolHealthKey = "coa_challenges.old_school_health";
 
     struct AdventureHealth : DataMap::Base
     {
         float extra = 0.0f;
+    };
+
+    struct OldSchoolHealth : DataMap::Base
+    {
+        float extra = 0.0f;
+        uint32 damageMultiplier = 1;
+        uint32 experienceMultiplier = 1;
+        uint32 healthPercent = 100;
+        char const* con = "White";
     };
 
     void ChangeMaxHealthKeepingPct(Creature* creature, float extra, bool apply)
@@ -1146,7 +1208,8 @@ namespace CoAChallenges
         Creature* creature = victim->ToCreature();
         if (!creature || creature->IsCharmedOwnedByPlayerOrPlayer() || !creature->IsAlive())
             return;
-        if (creature->CustomData.Get<AdventureHealth>(AdventureHealthKey))
+        if (creature->CustomData.Get<AdventureHealth>(AdventureHealthKey)
+            || creature->CustomData.Get<OldSchoolHealth>(OldSchoolHealthKey))
             return;
         if (creature->hasLootRecipient() && !creature->isTappedBy(attacker))
             return;
@@ -1155,11 +1218,25 @@ namespace CoAChallenges
         if (!tier && !oldSchool)
             return;
 
+        if (oldSchool)
+        {
+            OldSchoolPowerProfile const profile = GetOldSchoolPowerProfile(attacker, creature);
+            auto* state = new OldSchoolHealth();
+            state->extra = float(CalculatePct(creature->GetMaxHealth(), profile.healthPercent - 100));
+            state->damageMultiplier = profile.damageMultiplier;
+            state->experienceMultiplier = profile.experienceMultiplier;
+            state->healthPercent = profile.healthPercent;
+            state->con = profile.con;
+            creature->CustomData.Set(OldSchoolHealthKey, state);
+            ChangeMaxHealthKeepingPct(creature, state->extra, true);
+            return;
+        }
+
         auto* state = new AdventureHealth();
-        uint32 const extraHealthPct = oldSchool ? 200 : AdventureModeExtraHealthPct(tier);
+        uint32 const extraHealthPct = AdventureModeExtraHealthPct(tier);
         float const baseHealth = float(creature->GetMaxHealth());
         float const extraHealth = float(CalculatePct(creature->GetMaxHealth(), extraHealthPct));
-        state->extra = oldSchool ? extraHealth : (baseHealth + extraHealth) * 0.15f + extraHealth;
+        state->extra = (baseHealth + extraHealth) * 0.15f + extraHealth;
         creature->CustomData.Set(AdventureHealthKey, state);
         ChangeMaxHealthKeepingPct(creature, state->extra, true);
     }
@@ -1170,10 +1247,17 @@ namespace CoAChallenges
         if (!creature)
             return;
         AdventureHealth* state = creature->CustomData.Get<AdventureHealth>(AdventureHealthKey);
-        if (!state)
-            return;
-        ChangeMaxHealthKeepingPct(creature, state->extra, false);
-        creature->CustomData.Erase(AdventureHealthKey);
+        if (state)
+        {
+            ChangeMaxHealthKeepingPct(creature, state->extra, false);
+            creature->CustomData.Erase(AdventureHealthKey);
+        }
+        OldSchoolHealth* oldSchool = creature->CustomData.Get<OldSchoolHealth>(OldSchoolHealthKey);
+        if (oldSchool)
+        {
+            ChangeMaxHealthKeepingPct(creature, oldSchool->extra, false);
+            creature->CustomData.Erase(OldSchoolHealthKey);
+        }
     }
 
     // ---- STRICT_CHALLENGE_RESTRICTED_TAPPING -----------------------------------
@@ -1359,10 +1443,31 @@ namespace CoAChallenges
             if (OldSchoolChallenge(player) == 9001 && !player->GetSession()->IsBot()
                 && !player->GetMap()->IsBattlegroundOrArena())
             {
+                uint8 const startingLevel = player->GetLevel();
                 uint32 const xp = player->GetUInt32Value(PLAYER_XP);
-                uint32 const loss = std::min(xp, player->GetUInt32Value(PLAYER_NEXT_LEVEL_XP) / 10);
-                player->SetUInt32Value(PLAYER_XP, xp - loss);
-                NotifyPlayer(player, "Old School: death cost you {} experience. Levels are preserved.", loss);
+                uint64 loss = player->GetUInt32Value(PLAYER_NEXT_LEVEL_XP) / 10;
+                uint64 availableXP = xp;
+                for (uint8 level = 1; level < startingLevel; ++level)
+                    availableXP += sObjectMgr->GetXPForLevel(level);
+                loss = std::min(loss, availableXP);
+                uint64 remaining = loss;
+                uint32 currentXP = xp;
+                uint8 level = startingLevel;
+                while (remaining > currentXP && level > 1)
+                {
+                    remaining -= currentXP;
+                    --level;
+                    currentXP = sObjectMgr->GetXPForLevel(level);
+                    player->GiveLevel(level);
+                }
+                currentXP = currentXP > remaining ? currentXP - remaining : 0;
+                player->SetUInt32Value(PLAYER_XP, currentXP);
+                if (player->GetLevel() < startingLevel)
+                    NotifyPlayer(player, "Old School: death cost you {} experience and drained you to level {}. "
+                        "Return to your corpse as a spirit to resurrect.", loss, player->GetLevel());
+                else
+                    NotifyPlayer(player, "Old School: death cost you {} experience. Return to your corpse as a spirit "
+                        "to resurrect.", loss);
             }
             HandlePlayerDeath(player);
         }
@@ -1373,7 +1478,23 @@ namespace CoAChallenges
         {
             if (!ChallengesEnabled())
                 return true;
-            return !HasPermaDeathFailure(player);
+            if (HasPermaDeathFailure(player))
+                return false;
+            if (OldSchoolChallenge(player) == 9001 && !player->GetSession()->IsBot()
+                && player->IsInWorld() && !player->IsAlive() && player->GetMap()
+                && !player->GetMap()->IsBattlegroundOrArena())
+            {
+                WorldLocation corpseLocation = player->GetCorpseLocation();
+                bool const atCorpse = corpseLocation.GetMapId() == player->GetMapId()
+                    && player->GetDistance(corpseLocation.GetPositionX(), corpseLocation.GetPositionY(),
+                        corpseLocation.GetPositionZ()) <= 39.0f;
+                if (!atCorpse)
+                {
+                    NotifyPlayer(player, "Old School: return to your corpse as a spirit before you can resurrect.");
+                    return false;
+                }
+            }
+            return true;
         }
 
         // NO_MANASTORM: the Manastorm feature lives in CoA,
@@ -1823,7 +1944,13 @@ namespace CoAChallenges
 
             if (amount && OldSchoolChallenge(player) && xpSource == XPSOURCE_KILL
                 && victim && OldSchoolCreature(victim->ToCreature()) && TappingAllowsRewards(player, victim->ToCreature()))
-                amount = uint32(std::min<uint64>(uint64(amount) * 4, UINT32_MAX));
+            {
+                Creature* creature = victim->ToCreature();
+                OldSchoolHealth* scaling = creature->CustomData.Get<OldSchoolHealth>(OldSchoolHealthKey);
+                uint32 const multiplier = scaling ? scaling->experienceMultiplier
+                    : GetOldSchoolPowerProfile(player, creature).experienceMultiplier;
+                amount = uint32(std::min<uint64>(uint64(amount) * multiplier, UINT32_MAX));
+            }
 
             // NO_KILL_CREDIT_UNLESS_AT_DISADVANTAGE ("Punching Up" / Overwhelming
             // Odds): only monsters above the player's level grant kill credit.
@@ -2677,9 +2804,12 @@ namespace CoAChallenges
                                 guid, challengeID))
                             level = r->Fetch()[0].Get<uint32>();
 
-                        if ((challengeID == 9001 || challengeID == 9002) && player->IsInCombat())
+                        if ((challengeID == 9001 || challengeID == 9002)
+                            && (player->IsInCombat() || (challengeID == 9001 && !player->IsAlive())))
                         {
-                            NotifyPlayer(player, "Old School cannot be abandoned during combat.");
+                            NotifyPlayer(player, player->IsAlive()
+                                ? "Old School cannot be abandoned during combat."
+                                : "Return to your corpse before abandoning Old School.");
                             SendChallengeResponse(player, SMSG_COA_CHALLENGE_STOP_RESPONSE,
                                 challengeID, level, 12, "CHALLENGE_STOP_IN_COMBAT");
                             return false;
@@ -2860,21 +2990,39 @@ namespace CoAChallenges
             }
             bool const oldSchool = OldSchoolChallenge(player) != 0;
             uint64 health = target->GetMaxHealth();
-            if (oldSchool && !target->CustomData.Get<AdventureHealth>(AdventureHealthKey))
-                health *= 3;
+            if (oldSchool)
+            {
+                OldSchoolHealth* scaling = target->CustomData.Get<OldSchoolHealth>(OldSchoolHealthKey);
+                OldSchoolPowerProfile const profile = GetOldSchoolPowerProfile(player, target);
+                uint32 const healthPercent = scaling ? scaling->healthPercent : profile.healthPercent;
+                uint32 const damageMultiplier = scaling ? scaling->damageMultiplier : profile.damageMultiplier;
+                uint32 const experienceMultiplier = scaling ? scaling->experienceMultiplier : profile.experienceMultiplier;
+                char const* con = scaling ? scaling->con : profile.con;
+                if (!scaling)
+                    health = health * healthPercent / 100;
+
+                char const* advice = con == "Grey" || con == "Green"
+                    ? "Lower danger; watch for adds and abilities."
+                    : con == "Blue" || con == "White"
+                        ? "Dangerous; prepare carefully."
+                        : con == "Yellow"
+                            ? "Very dangerous; bring a group."
+                            : "Overwhelming; a group is strongly advised.";
+                handler->PSendSysMessage("Consider {}: {} con. {} Estimated health: {} ({}x); "
+                    "creature damage: {}x; kill XP: {}x. Estimate only; gear, abilities, companions and adds "
+                    "change the outcome.", target->GetName(), con, advice, health,
+                    healthPercent / 100, damageMultiplier, experienceMultiplier);
+                return true;
+            }
+
             int32 const difference = int32(target->GetLevel()) - int32(player->GetLevel());
-            uint32 const rank = target->GetCreatureTemplate()->rank;
-            char const* danger = "Dangerous: fight carefully and prepare an escape.";
-            if (rank == CREATURE_ELITE_WORLDBOSS || difference >= 5)
-                danger = "Overwhelming: avoid this fight.";
-            else if (rank == CREATURE_ELITE_ELITE || rank == CREATURE_ELITE_RAREELITE || difference >= 2
-                || health > uint64(player->GetMaxHealth()) * 6)
-                danger = "Very dangerous: bring a group.";
-            else if (difference <= -4 && health < uint64(player->GetMaxHealth()) * 2)
-                danger = "Lower risk: watch for adds and special abilities.";
-            handler->PSendSysMessage("Consider {} (level {}): {} Estimated health: {}. Creature damage: {}x. "
+            char const* danger = difference >= 5 ? "Overwhelming: avoid this fight."
+                : difference >= 2 ? "Very dangerous: bring a group."
+                : difference <= -4 ? "Lower risk: watch for adds and special abilities."
+                : "Dangerous: fight carefully and prepare an escape.";
+            handler->PSendSysMessage("Consider {} (level {}): {} Estimated health: {}. Creature damage: 1x. "
                 "Estimate only; gear, abilities, companions and adds change the outcome.",
-                target->GetName(), target->GetLevel(), danger, health, oldSchool ? 2 : 1);
+                target->GetName(), target->GetLevel(), danger, health);
             return true;
         }
 
@@ -3924,7 +4072,10 @@ namespace CoAChallenges
                     if (OldSchoolChallenge(defender))
                     {
                         ScaleAdventureHealth(defender, attacker);
-                        damage = uint32(std::min<uint64>(uint64(damage) * 2, UINT32_MAX));
+                        OldSchoolHealth* scaling = attacker->CustomData.Get<OldSchoolHealth>(OldSchoolHealthKey);
+                        uint32 const multiplier = scaling ? scaling->damageMultiplier
+                            : GetOldSchoolPowerProfile(defender, attacker->ToCreature()).damageMultiplier;
+                        damage = uint32(std::min<uint64>(uint64(damage) * multiplier, UINT32_MAX));
                     }
             // Resolve the controlling player: a pet/guardian must not be able to
             // bypass NO_DAMAGE / NO_KILL_* by dealing the damage itself.
