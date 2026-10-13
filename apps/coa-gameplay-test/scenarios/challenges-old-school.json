@@ -98,6 +98,26 @@
       "health": 1000,
       "distance": 5,
       "spell_hit_bonus": 100
+    },
+    {
+      "id": "consider_in_range",
+      "owner": "old",
+      "entry": 299,
+      "faction": 14,
+      "level": 1,
+      "health": 1000,
+      "distance": 39,
+      "stationary": true
+    },
+    {
+      "id": "consider_out_of_range",
+      "owner": "old",
+      "entry": 299,
+      "faction": 14,
+      "level": 1,
+      "health": 1000,
+      "distance": 41,
+      "stationary": true
     }
   ],
   "steps": [
@@ -358,6 +378,54 @@
       "actor": "old",
       "metric": "system_message_contains",
       "text": "White con",
+      "equals": 1
+    },
+    {
+      "action": "client_packet",
+      "actor": "old",
+      "opcode": 317,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "consider_in_range"
+        }
+      ]
+    },
+    {
+      "action": "command",
+      "actor": "old",
+      "command": ".coa consider"
+    },
+    {
+      "action": "assert",
+      "label": "Consider can inspect a hostile target at 39 yards",
+      "actor": "old",
+      "metric": "system_message_contains",
+      "text": "Estimated health",
+      "equals": 1
+    },
+    {
+      "action": "client_packet",
+      "actor": "old",
+      "opcode": 317,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "consider_out_of_range"
+        }
+      ]
+    },
+    {
+      "action": "command",
+      "actor": "old",
+      "command": ".coa consider"
+    },
+    {
+      "action": "assert",
+      "label": "Consider refuses a hostile target beyond 40 yards",
+      "actor": "old",
+      "metric": "system_message_contains",
+      "text": "outside your 40-yard range",
       "equals": 1
     },
     {

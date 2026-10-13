@@ -110,9 +110,7 @@ Elites and bosses multiply those values further. Quest experience is unchanged. 
 player-owned units are excluded. Restricted tapping prevents players in another trial from
 assisting with the kill or claiming its rewards.
 
-In Mulgore, the Barrens, and Stonetalon Mountains, when an Old School participant engages a persistent
-hostile creature, eligible nearby same-faction creatures can join the fight from 35 yards. `/consider` warns
-about this social response. Mulgore's named waypoint roamers - Ghost Howl (3056), Arra'chea (3058), and The
+Mulgore's named waypoint roamers - Ghost Howl (3056), Arra'chea (3058), and The
 Rake (5807) - and the Barrens threats Gesharahan (3398), Lakota'mani (3474), Humar the Pridelord (5828), Snort
 the Heckler (5829), Swiftmane (5831), Azzere the Skyblade (5834), Heggin Stonewhisker (5847), and Dishu
 (5865) carry four additional hidden threat levels in Old School. `/consider` identifies these threats, and the
@@ -124,7 +122,7 @@ The Stonetalon slice adds Pridewing Patriarch (4015), Sorrow Wing (5928), Sister
 Foreman Rigger (5931), and Taskmaster Whipfang (5932) to the same four-level named-threat rule.
 Both Old School trials use this rule only while the named creature is in Stonetalon Mountains.
 The existing native levels, random movement, Sorrow Wing waypoint route, spawn counts, loot,
-and respawn timers are preserved. Ordinary play and social response in other zones are unchanged.
+and respawn timers are preserved. Existing creature aggro and assistance behavior is unchanged.
 The next slices continue incrementally across Azeroth; live playtest tuning follows automated validation
 and does not gate further source development.
 
@@ -138,8 +136,8 @@ permanently fails the run, while resurrection remains available under CoA's exis
 rules. Abandoning a progressed Hardcore run also fails it. Starting either trial requires being
 alive and outside combat; Old School cannot be abandoned while dead or during combat.
 
-Target a hostile creature and use `/consider` (or `.coa consider`). In Old School, the
-response reports its con and the same health, damage and kill XP multipliers used by that
+During Old School, target a hostile creature within 40 yards and use `/consider` (or `.coa consider`).
+The response reports its con and the same health, damage and kill XP multipliers used by that
 creature. It also warns that gear, abilities, companions and adds can change the outcome.
 The client definitions are generated with `C:/Azerothcore/tools/build-coa-old-school.py`
 and shipped in CoA's existing `Data/patch-ZZ.MPQ`; the slash command is shipped in its

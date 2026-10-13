@@ -79,13 +79,6 @@
       "metric": "system_message_contains",
       "text": "kill XP: 16x.",
       "equals": 1
-    },
-    {
-      "action": "assert",
-      "actor": "old",
-      "metric": "system_message_contains",
-      "text": "within 35 yards",
-      "equals": 1
     }
   ]
 }

@@ -1108,6 +1108,8 @@ namespace CoAChallenges
         return 0;
     }
 
+    constexpr float OldSchoolConsiderRange = 40.0f;
+
     bool OldSchoolCreature(Creature const* creature)
     {
         return creature && !creature->IsCharmedOwnedByPlayerOrPlayer()
@@ -1141,21 +1143,6 @@ namespace CoAChallenges
                 return true;
             default:
                 return false;
-        }
-    }
-
-    char const* OldSchoolSocialZoneName(uint32 zone)
-    {
-        switch (zone)
-        {
-            case AREA_MULGORE:
-                return "Mulgore";
-            case AREA_THE_BARRENS:
-                return "The Barrens";
-            case AREA_STONETALON_MOUNTAINS:
-                return "Stonetalon Mountains";
-            default:
-                return nullptr;
         }
     }
 
@@ -3250,12 +3237,18 @@ namespace CoAChallenges
         {
             Player* player = handler->GetSession()->GetPlayer();
             Creature* target = handler->getSelectedCreature();
+            bool const oldSchool = OldSchoolChallenge(player) != 0;
             if (!OldSchoolCreature(target) || !target->IsAlive() || !player->IsValidAttackTarget(target))
             {
                 handler->SendSysMessage("Consider: select a living hostile creature.");
                 return true;
             }
-            bool const oldSchool = OldSchoolChallenge(player) != 0;
+            if (oldSchool && !player->IsWithinDistInMap(target, OldSchoolConsiderRange))
+            {
+                handler->PSendSysMessage("Consider: target is outside your {}-yard range.",
+                    uint32(OldSchoolConsiderRange));
+                return true;
+            }
             uint64 health = target->GetMaxHealth();
             if (oldSchool)
             {
@@ -3279,8 +3272,6 @@ namespace CoAChallenges
                     "creature damage: {}x; kill XP: {}x. Estimate only; gear, abilities, companions and adds "
                     "change the outcome.", target->GetName(), con, advice, health,
                     healthPercent / 100, damageMultiplier, experienceMultiplier);
-                if (char const* zone = OldSchoolSocialZoneName(target->GetZoneId()))
-                    handler->PSendSysMessage("{}: nearby same-faction creatures within 35 yards may join the fight.", zone);
                 if (target->GetZoneId() == AREA_MULGORE)
                 {
                     switch (target->GetEntry())
@@ -4472,15 +4463,6 @@ namespace CoAChallenges
                 levelDifference = int32(targetPlayer->GetLevel()) - int32(OldSchoolThreatLevel(casterCreature));
         }
 
-        void OnUnitEnterCombat(Unit* unit, Unit* victim) override
-        {
-            Creature* creature = unit ? unit->ToCreature() : nullptr;
-            Player* participant = victim ? victim->GetCharmerOrOwnerPlayerOrPlayerItself() : nullptr;
-            if (creature && creature->GetSpawnId()
-                && OldSchoolSocialZoneName(creature->GetZoneId())
-                && OldSchoolCreature(creature) && participant && OldSchoolChallenge(participant))
-                creature->CallForHelp(35.0f, victim);
-        }
     };
 
     class CoAChallengesAccount : public AccountScript
