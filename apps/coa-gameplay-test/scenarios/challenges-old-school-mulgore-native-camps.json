@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Old School Mulgore camp roles match native spawn rosters",
+  "contract": "The Old School Mulgore camp roles refer to real native spawn populations. The trial can identify Bristleback, Palemane, Venture Co., and Windfury camps without adding or replacing their creatures.",
+  "timeout_ms": 90000,
+  "location": {"map": 1, "x": -2944.71, "y": -1004.2, "z": 54.7164, "o": 0},
+  "players": [
+    {"id": "old", "race": 6, "class": 1, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 1000},
+    {"action": "start_challenge", "actor": "old", "challenge": 9001, "level": 1},
+    {"action": "assert", "actor": "old", "metric": "challenge_start_code", "equals": 0},
+    {"action": "set_phase", "actor": "old", "value": 1},
+    {"action": "wait", "ms": 1000},
+    {"action": "assert", "label": "Native Bristleback guards populate the camp", "actor": "old", "metric": "nearby_creature_count", "entry": 2952, "min": 1},
+    {"action": "assert", "label": "A Bristleback shaman is present with the guards", "actor": "old", "metric": "nearby_creature_count", "entry": 2953, "min": 1},
+    {"action": "assert", "label": "Battleboars are present with the Bristlebacks", "actor": "old", "metric": "nearby_creature_count", "entry": 2954, "min": 1},
+    {"action": "teleport", "actor": "old", "map": 1, "x": -2342.71, "y": 455.756, "z": 74.4501},
+    {"action": "wait", "ms": 1000},
+    {"action": "assert", "label": "Palemane tanners populate the camp", "actor": "old", "metric": "nearby_creature_count", "entry": 2949, "min": 1},
+    {"action": "assert", "label": "Palemane skinners populate the camp", "actor": "old", "metric": "nearby_creature_count", "entry": 2950, "min": 1},
+    {"action": "assert", "label": "Palemane poachers populate the camp", "actor": "old", "metric": "nearby_creature_count", "entry": 2951, "min": 1},
+    {"action": "teleport", "actor": "old", "map": 1, "x": -1590.94, "y": -1147.02, "z": 104.211},
+    {"action": "wait", "ms": 1000},
+    {"action": "assert", "label": "Venture Co. workers populate the camp", "actor": "old", "metric": "nearby_creature_count", "entry": 2978, "min": 1},
+    {"action": "assert", "label": "Venture Co. supervisors watch the workers", "actor": "old", "metric": "nearby_creature_count", "entry": 2979, "min": 1},
+    {"action": "teleport", "actor": "old", "map": 1, "x": -595, "y": 40, "z": 12.34},
+    {"action": "wait", "ms": 1000},
+    {"action": "assert", "label": "Windfury sorceresses populate the southern roost", "actor": "old", "metric": "nearby_creature_count", "entry": 2964, "min": 1},
+    {"action": "assert", "label": "A Windfury matriarch guards the southern roost", "actor": "old", "metric": "nearby_creature_count", "entry": 2965, "min": 1},
+    {"action": "teleport", "actor": "old", "map": 1, "x": -2706.77, "y": -1393.05, "z": 34.39},
+    {"action": "wait", "ms": 1000},
+    {"action": "assert", "label": "Windfury harpies populate the western roost", "actor": "old", "metric": "nearby_creature_count", "entry": 2962, "min": 1},
+    {"action": "assert", "label": "Wind witches populate the western roost", "actor": "old", "metric": "nearby_creature_count", "entry": 2963, "min": 1}
+  ]
+}
