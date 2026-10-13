@@ -1154,6 +1154,7 @@ namespace CoAChallenges
     bool IsOldSchoolSilverpineNamedThreat(Creature const* creature);
     bool IsOldSchoolHillsbradNamedThreat(Creature const* creature);
     bool IsOldSchoolArathiNamedThreat(Creature const* creature);
+    bool IsOldSchoolHinterlandsNamedThreat(Creature const* creature);
 
     bool IsOldSchoolGearLoot(Creature const* creature, Player const* player)
     {
@@ -1170,7 +1171,8 @@ namespace CoAChallenges
             || IsOldSchoolBarrensNamedThreat(creature) || IsOldSchoolStonetalonNamedThreat(creature)
             || IsOldSchoolAshenvaleNamedThreat(creature) || IsOldSchoolSouthernNamedThreat(creature)
             || IsOldSchoolTirisfalNamedThreat(creature) || IsOldSchoolSilverpineNamedThreat(creature)
-            || IsOldSchoolHillsbradNamedThreat(creature) || IsOldSchoolArathiNamedThreat(creature);
+            || IsOldSchoolHillsbradNamedThreat(creature) || IsOldSchoolArathiNamedThreat(creature)
+            || IsOldSchoolHinterlandsNamedThreat(creature);
         return namedThreat ? namedPercent : normalPercent;
     }
 
@@ -1479,10 +1481,56 @@ namespace CoAChallenges
         }
     }
 
+    bool IsOldSchoolHinterlandsNamedThreat(Creature const* creature)
+    {
+        if (!creature || creature->GetZoneId() != AREA_THE_HINTERLANDS)
+            return false;
+        switch (creature->GetEntry())
+        {
+            case 7977:
+            case 7995:
+            case 7996:
+            case 8210:
+            case 8211:
+            case 8212:
+            case 8213:
+            case 8214:
+            case 8215:
+            case 8216:
+            case 8217:
+            case 8218:
+            case 8219:
+            case 10802:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     int32 OldSchoolNamedThreatOffset(Creature const* creature)
     {
         if (!creature)
             return 0;
+
+        if (IsOldSchoolHinterlandsNamedThreat(creature))
+        {
+            switch (creature->GetEntry())
+            {
+                case 7995:
+                case 10802:
+                    return 10;
+                case 7996:
+                case 8215:
+                case 8217:
+                    return 8;
+                case 7977:
+                case 8216:
+                case 8218:
+                    return 6;
+                default:
+                    return 4;
+            }
+        }
 
         if (IsOldSchoolArathiNamedThreat(creature))
         {
@@ -1633,7 +1681,7 @@ namespace CoAChallenges
             if (IsOldSchoolStonetalonNamedThreat(creature) || IsOldSchoolAshenvaleNamedThreat(creature)
                 || IsOldSchoolSouthernNamedThreat(creature) || IsOldSchoolTirisfalNamedThreat(creature)
                 || IsOldSchoolSilverpineNamedThreat(creature) || IsOldSchoolHillsbradNamedThreat(creature)
-                || IsOldSchoolArathiNamedThreat(creature))
+                || IsOldSchoolArathiNamedThreat(creature) || IsOldSchoolHinterlandsNamedThreat(creature))
             {
                 int32 const offset = OldSchoolNamedThreatOffset(creature);
                 return offset >= 10 ? 300 : offset >= 8 ? 200 : 150;
@@ -1664,6 +1712,73 @@ namespace CoAChallenges
     {
         if (!creature)
             return { nullptr, nullptr, 0 };
+
+        if (creature->GetZoneId() == AREA_THE_HINTERLANDS)
+        {
+            switch (creature->GetEntry())
+            {
+                case 2649:
+                case 2651:
+                case 2653:
+                case 2686:
+                    return { "Witherbark village", "hunter", 1 };
+                case 2650:
+                case 2652:
+                case 2654:
+                    return { "Witherbark village", "spellcaster", 3 };
+                case 8218:
+                case 8219:
+                    return { "Witherbark village", "named leader", 5 };
+                case 2639:
+                case 4466:
+                    return { "Vilebranch foothold", "hunter", 2 };
+                case 2640:
+                case 4467:
+                    return { "Vilebranch foothold", "spellcaster", 4 };
+                case 2680:
+                    return { "Vilebranch foothold", "wolf pup", 1 };
+                case 2641:
+                case 2643:
+                case 2644:
+                case 2646:
+                case 4465:
+                case 7809:
+                    return { "Jintha'Alor fortress", "guard", 3 };
+                case 2642:
+                case 2645:
+                case 2647:
+                    return { "Jintha'Alor fortress", "spellcaster", 5 };
+                case 2648:
+                    return { "Jintha'Alor fortress", "temple guard", 6 };
+                case 2681:
+                case 4482:
+                    return { "Jintha'Alor fortress", "war wolf", 2 };
+                case 7995:
+                case 7996:
+                case 8216:
+                case 8217:
+                case 10802:
+                    return { "Jintha'Alor fortress", "named leader", 6 };
+                case 2657:
+                case 2658:
+                    return { "Razorbeak nests", "gryphon", 1 };
+                case 2659:
+                case 8276:
+                    return { "Razorbeak nests", "skylord", 3 };
+                case 8210:
+                    return { "Razorbeak nests", "named hunter", 4 };
+                case 2923:
+                case 2924:
+                    return { "Silvermane hunting grounds", "wolf", 1 };
+                case 2925:
+                case 2926:
+                    return { "Silvermane hunting grounds", "stalker", 2 };
+                case 8211:
+                    return { "Silvermane hunting grounds", "named hunter", 4 };
+                default:
+                    return { nullptr, nullptr, 0 };
+            }
+        }
 
         if (creature->GetZoneId() == AREA_ARATHI_HIGHLANDS)
         {
@@ -4507,7 +4622,8 @@ namespace CoAChallenges
                 else if (IsOldSchoolBarrensNamedThreat(target) || IsOldSchoolStonetalonNamedThreat(target)
                     || IsOldSchoolAshenvaleNamedThreat(target) || IsOldSchoolSouthernNamedThreat(target)
                     || IsOldSchoolTirisfalNamedThreat(target) || IsOldSchoolSilverpineNamedThreat(target)
-                    || IsOldSchoolHillsbradNamedThreat(target) || IsOldSchoolArathiNamedThreat(target))
+                    || IsOldSchoolHillsbradNamedThreat(target) || IsOldSchoolArathiNamedThreat(target)
+                    || IsOldSchoolHinterlandsNamedThreat(target))
                     handler->PSendSysMessage("Named threat: {} carries elevated hidden danger and reward; "
                         "use the con estimate before engaging.", target->GetName());
 
@@ -4523,6 +4639,10 @@ namespace CoAChallenges
                         campThreat.camp, campThreat.role);
                     static std::vector<uint32> const campEntries =
                     {
+                        2639, 2640, 2641, 2642, 2643, 2644, 2645, 2646, 2647, 2648, 2649,
+                        2650, 2651, 2652, 2653, 2654, 2657, 2658, 2659, 2680, 2681, 2686,
+                        2923, 2924, 2925, 2926, 4465, 4466, 4467, 4482, 7809, 7995, 7996,
+                        8210, 8211, 8216, 8217, 8218, 8219, 8276, 10802,
                         2240, 2241, 2242, 2243, 2245, 2246, 2247, 2319, 2552, 2553, 2554,
                         2555, 2556, 2557, 2558, 2562, 2564, 2566, 2567, 2569, 2570, 2571,
                         2572, 2573, 2574, 2583, 2584, 2585, 2586, 2587, 2588, 2589, 2590,
