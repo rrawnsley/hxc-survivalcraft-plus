@@ -148,68 +148,32 @@
       "save_as": "control_before"
     },
     {
-      "action": "attack",
+      "action": "attack_nearby",
       "actor": "control",
-      "target": "control_wolf_0"
+      "entry": 299,
+      "kill": true,
+      "label": "Controlled native killing blow for the party XP sample"
     },
     {
-      "action": "assert",
-      "actor": "control_wolf_0",
-      "metric": "alive",
-      "equals": 0,
-      "within_ms": 15000
-    },
-    {
-      "action": "stop_attack",
-      "actor": "control"
-    },
-    {
-      "action": "attack",
+      "action": "attack_nearby",
       "actor": "control",
-      "target": "control_wolf_1"
+      "entry": 299,
+      "kill": true,
+      "label": "Controlled native killing blow for the party XP sample"
     },
     {
-      "action": "assert",
-      "actor": "control_wolf_1",
-      "metric": "alive",
-      "equals": 0,
-      "within_ms": 15000
-    },
-    {
-      "action": "stop_attack",
-      "actor": "control"
-    },
-    {
-      "action": "attack",
+      "action": "attack_nearby",
       "actor": "control",
-      "target": "control_wolf_2"
+      "entry": 299,
+      "kill": true,
+      "label": "Controlled native killing blow for the party XP sample"
     },
     {
-      "action": "assert",
-      "actor": "control_wolf_2",
-      "metric": "alive",
-      "equals": 0,
-      "within_ms": 15000
-    },
-    {
-      "action": "stop_attack",
-      "actor": "control"
-    },
-    {
-      "action": "attack",
+      "action": "attack_nearby",
       "actor": "control",
-      "target": "control_wolf_3"
-    },
-    {
-      "action": "assert",
-      "actor": "control_wolf_3",
-      "metric": "alive",
-      "equals": 0,
-      "within_ms": 15000
-    },
-    {
-      "action": "stop_attack",
-      "actor": "control"
+      "entry": 299,
+      "kill": true,
+      "label": "Controlled native killing blow for the party XP sample"
     },
     {
       "action": "snapshot",
@@ -230,68 +194,32 @@
       "save_as": "old_before"
     },
     {
-      "action": "attack",
+      "action": "attack_nearby",
       "actor": "old",
-      "target": "old_wolf_0"
+      "entry": 299,
+      "kill": true,
+      "label": "Controlled native killing blow for the party XP sample"
     },
     {
-      "action": "assert",
-      "actor": "old_wolf_0",
-      "metric": "alive",
-      "equals": 0,
-      "within_ms": 15000
-    },
-    {
-      "action": "stop_attack",
-      "actor": "old"
-    },
-    {
-      "action": "attack",
+      "action": "attack_nearby",
       "actor": "old",
-      "target": "old_wolf_1"
+      "entry": 299,
+      "kill": true,
+      "label": "Controlled native killing blow for the party XP sample"
     },
     {
-      "action": "assert",
-      "actor": "old_wolf_1",
-      "metric": "alive",
-      "equals": 0,
-      "within_ms": 15000
-    },
-    {
-      "action": "stop_attack",
-      "actor": "old"
-    },
-    {
-      "action": "attack",
+      "action": "attack_nearby",
       "actor": "old",
-      "target": "old_wolf_2"
+      "entry": 299,
+      "kill": true,
+      "label": "Controlled native killing blow for the party XP sample"
     },
     {
-      "action": "assert",
-      "actor": "old_wolf_2",
-      "metric": "alive",
-      "equals": 0,
-      "within_ms": 15000
-    },
-    {
-      "action": "stop_attack",
-      "actor": "old"
-    },
-    {
-      "action": "attack",
+      "action": "attack_nearby",
       "actor": "old",
-      "target": "old_wolf_3"
-    },
-    {
-      "action": "assert",
-      "actor": "old_wolf_3",
-      "metric": "alive",
-      "equals": 0,
-      "within_ms": 15000
-    },
-    {
-      "action": "stop_attack",
-      "actor": "old"
+      "entry": 299,
+      "kill": true,
+      "label": "Controlled native killing blow for the party XP sample"
     },
     {
       "action": "snapshot",
