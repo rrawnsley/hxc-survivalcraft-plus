@@ -29,6 +29,6 @@
     { 148, 7015, nullptr, nullptr, 4, 150, true, false },
     { 148, 7016, nullptr, nullptr, 4, 150, true, false },
     { 148, 7017, nullptr, nullptr, 4, 150, true, false },
-    { 148, 10323, nullptr, nullptr, 4, 150, true, false },
+    { 148, 10323, "Greymist shore", "named leader", 4, 150, true, false },
     { 148, 10919, "Shatterspear village", "hunter", 1, 100, false, false },
     { 148, 11196, "Shatterspear village", "hunter", 1, 100, false, false },

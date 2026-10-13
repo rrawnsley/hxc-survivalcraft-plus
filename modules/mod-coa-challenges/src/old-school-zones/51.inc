@@ -17,7 +17,7 @@
     { 51, 8637, "Dark Iron worksite", "hunter", 1, 100, false, false },
     { 51, 8917, "Quarry worksite", "worker", 1, 100, false, false },
     { 51, 8924, nullptr, nullptr, 4, 150, true, true },
-    { 51, 14621, nullptr, nullptr, 6, 150, true, false },
+    { 51, 14621, "Dark Iron worksite", "named leader", 6, 150, true, false },
     { 51, 15692, "Dark Iron worksite", "hunter", 1, 100, false, false },
     { 51, 24818, "Anvilrage hold", "hunter", 1, 100, false, false },
     { 51, 24819, "Anvilrage hold", "hunter", 1, 100, false, false },
