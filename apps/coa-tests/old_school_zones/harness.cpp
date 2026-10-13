@@ -33,14 +33,41 @@ struct ObjectGuid
     uint32 GetCounter() const { return value; }
 };
 
+struct Group
+{
+    struct MemberSlot { ObjectGuid guid; };
+    bool raid = false;
+    bool battleground = false;
+    bool battlefield = false;
+    std::vector<MemberSlot> members;
+    bool isRaidGroup() const { return raid; }
+    bool isBGGroup() const { return battleground; }
+    bool isBFGroup() const { return battlefield; }
+    auto const& GetMemberSlots() const { return members; }
+};
+
 struct Player : Unit
 {
     uint32 guid = 17;
     uint32 level = 25;
+    Group* group = nullptr;
+    bool alive = true;
+    bool samePhase = true;
+    bool rewardDistance = true;
     Player* GetCharmerOrOwnerPlayerOrPlayerItself() override { return this; }
     uint32 GetLevel() const { return level; }
     ObjectGuid GetGUID() const { return { guid }; }
+    Group const* GetGroup() const { return group; }
+    bool IsAlive() const { return alive; }
+    bool InSamePhase(Creature const*) const { return samePhase; }
+    bool IsAtGroupRewardDistance(Creature const*) const { return rewardDistance; }
 };
+
+namespace ObjectAccessor
+{
+    std::map<uint32, Player*> players;
+    Player* FindPlayer(ObjectGuid guid) { return players[guid.value]; }
+}
 
 struct CreatureTemplate
 {
@@ -282,8 +309,53 @@ void ForestAndMountainProfiles()
     assert(OldSchoolNamedRewardHundredths(&creature) == 100);
 }
 
+void GroupRewards()
+{
+    Player player;
+    Player companion;
+    companion.guid = 18;
+    Creature creature;
+    Group group;
+    Enroll(player, 9001);
+    Enroll(companion, 9001);
+    ObjectAccessor::players[player.guid] = &player;
+    ObjectAccessor::players[companion.guid] = &companion;
+    group.members = { { player.GetGUID() }, { companion.GetGUID() } };
+    assert(OldSchoolGroupBonusPercent(&player, &creature) == 0);
+    player.group = &group;
+    assert(OldSchoolGroupBonusPercent(&player, &creature) == 10);
+    companion.alive = false;
+    assert(OldSchoolGroupBonusPercent(&player, &creature) == 0);
+    companion.alive = true;
+    companion.rewardDistance = false;
+    assert(OldSchoolGroupBonusPercent(&player, &creature) == 0);
+    companion.rewardDistance = true;
+    companion.samePhase = false;
+    assert(OldSchoolGroupBonusPercent(&player, &creature) == 0);
+    companion.samePhase = true;
+    Enroll(companion, 9002);
+    assert(OldSchoolGroupBonusPercent(&player, &creature) == 0);
+    Enroll(companion, 9001);
+    group.raid = true;
+    assert(OldSchoolGroupBonusPercent(&player, &creature) == 0);
+    group.raid = false;
+    group.battleground = true;
+    assert(OldSchoolGroupBonusPercent(&player, &creature) == 0);
+    group.battleground = false;
+    group.battlefield = true;
+    assert(OldSchoolGroupBonusPercent(&player, &creature) == 0);
+    group.battlefield = false;
+    ObjectAccessor::players[companion.guid] = nullptr;
+    assert(OldSchoolGroupBonusPercent(&player, &creature) == 0);
+    assert(OldSchoolGroupBonusPercent(nullptr, &creature) == 0);
+    assert(OldSchoolGroupBonusPercent(&player, nullptr) == 0);
+    ObjectAccessor::players.clear();
+    enrollment.clear();
+}
+
 int main()
 {
+    GroupRewards();
     NamedProfiles();
     MulgoreCampConsider();
     BarrensCampConsider();

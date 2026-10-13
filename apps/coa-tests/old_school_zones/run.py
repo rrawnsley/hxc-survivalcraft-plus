@@ -31,6 +31,7 @@ def main():
         'int32 OldSchoolThreatOffset(',
         'uint32 OldSchoolThreatLevel(',
         'OldSchoolPowerProfile GetOldSchoolPowerProfile(',
+        'uint32 OldSchoolGroupBonusPercent(',
     )
     assert 'CallForHelp(' not in source, 'Old School must preserve native creature assistance behavior'
     methods = '\n'.join(METHOD(source, signature).replace(' override', '')

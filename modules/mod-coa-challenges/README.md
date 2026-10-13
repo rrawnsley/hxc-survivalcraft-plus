@@ -203,6 +203,13 @@ does not consume the standard WoW rested-XP pool while its trial bonus is active
 necessary for the existing health/mana recovery and Fellowship benefits. The temporary `.coa camp`
 claim command was removed; a placed camp is the actual camp marker and benefit source.
 
+An ordinary party adds 10% to each Old School creature-kill XP share when another living member
+in the same trial is in the same phase and native group-reward range. Playerbot companions qualify.
+The bonus applies once regardless of party size, after native XP splitting, and stacks with camp rest.
+Solo, distant/dead/offline companions, raids and battleground groups do not qualify. Quest XP is unchanged
+by this bonus. `/consider` reports an eligible party bonus separately from the mob's base kill reward.
+Combat profiles remain unchanged pending representative solo-play evidence.
+
 ## License
 
 GNU General Public License v2.0 — see [LICENSE](LICENSE).

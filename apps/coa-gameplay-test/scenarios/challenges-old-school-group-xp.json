@@ -1,0 +1,300 @@
+{
+  "schema": 1,
+  "name": "Old School parties earn ten percent extra kill XP including playerbot companions",
+  "contract": "Ordinary two-member party splitting remains native. A living nearby companion in the same Old School trial adds 10% to each qualifying kill XP share. Playerbot companions qualify; solo, non-trial, dead, phased and distant companions do not. No combat profile retune is part of this feature.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 5,
+      "level": 30
+    },
+    {
+      "id": "controlbot",
+      "race": 1,
+      "class": 5,
+      "level": 30,
+      "bot": true
+    },
+    {
+      "id": "old",
+      "race": 1,
+      "class": 5,
+      "level": 30
+    },
+    {
+      "id": "oldbot",
+      "race": 1,
+      "class": 5,
+      "level": 30,
+      "bot": true
+    }
+  ],
+  "creatures": [
+    {
+      "id": "control_wolf_0",
+      "owner": "control",
+      "entry": 299,
+      "faction": 7,
+      "level": 30,
+      "health": 1,
+      "distance": 3,
+      "stationary": true
+    },
+    {
+      "id": "control_wolf_1",
+      "owner": "control",
+      "entry": 299,
+      "faction": 7,
+      "level": 30,
+      "health": 1,
+      "distance": 3,
+      "stationary": true
+    },
+    {
+      "id": "control_wolf_2",
+      "owner": "control",
+      "entry": 299,
+      "faction": 7,
+      "level": 30,
+      "health": 1,
+      "distance": 3,
+      "stationary": true
+    },
+    {
+      "id": "control_wolf_3",
+      "owner": "control",
+      "entry": 299,
+      "faction": 7,
+      "level": 30,
+      "health": 1,
+      "distance": 3,
+      "stationary": true
+    },
+    {
+      "id": "old_wolf_0",
+      "owner": "old",
+      "entry": 299,
+      "faction": 7,
+      "level": 30,
+      "health": 1,
+      "distance": 3,
+      "stationary": true
+    },
+    {
+      "id": "old_wolf_1",
+      "owner": "old",
+      "entry": 299,
+      "faction": 7,
+      "level": 30,
+      "health": 1,
+      "distance": 3,
+      "stationary": true
+    },
+    {
+      "id": "old_wolf_2",
+      "owner": "old",
+      "entry": 299,
+      "faction": 7,
+      "level": 30,
+      "health": 1,
+      "distance": 3,
+      "stationary": true
+    },
+    {
+      "id": "old_wolf_3",
+      "owner": "old",
+      "entry": 299,
+      "faction": 7,
+      "level": 30,
+      "health": 1,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "start_challenge",
+      "actor": "old",
+      "challenge": 9001,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "old",
+      "metric": "challenge_start_code",
+      "equals": 0
+    },
+    {
+      "action": "group",
+      "actor": "control",
+      "target": "controlbot"
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 585
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "xp",
+      "save_as": "control_before"
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 585,
+      "target": "control_wolf_0"
+    },
+    {
+      "action": "assert",
+      "actor": "control_wolf_0",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 585,
+      "target": "control_wolf_1"
+    },
+    {
+      "action": "assert",
+      "actor": "control_wolf_1",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 585,
+      "target": "control_wolf_2"
+    },
+    {
+      "action": "assert",
+      "actor": "control_wolf_2",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 585,
+      "target": "control_wolf_3"
+    },
+    {
+      "action": "assert",
+      "actor": "control_wolf_3",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "xp",
+      "relative_to": "control_before",
+      "save_as": "control_party_gain"
+    },
+    {
+      "action": "group",
+      "actor": "old",
+      "target": "oldbot"
+    },
+    {
+      "action": "learn",
+      "actor": "old",
+      "spell": 585
+    },
+    {
+      "action": "snapshot",
+      "actor": "old",
+      "metric": "xp",
+      "save_as": "old_before"
+    },
+    {
+      "action": "cast",
+      "actor": "old",
+      "spell": 585,
+      "target": "old_wolf_0"
+    },
+    {
+      "action": "assert",
+      "actor": "old_wolf_0",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "cast",
+      "actor": "old",
+      "spell": 585,
+      "target": "old_wolf_1"
+    },
+    {
+      "action": "assert",
+      "actor": "old_wolf_1",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "cast",
+      "actor": "old",
+      "spell": 585,
+      "target": "old_wolf_2"
+    },
+    {
+      "action": "assert",
+      "actor": "old_wolf_2",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "cast",
+      "actor": "old",
+      "spell": 585,
+      "target": "old_wolf_3"
+    },
+    {
+      "action": "assert",
+      "actor": "old_wolf_3",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "snapshot",
+      "actor": "old",
+      "metric": "xp",
+      "relative_to": "old_before",
+      "save_as": "old_party_gain"
+    },
+    {
+      "action": "assert",
+      "label": "Old School human with bot companion gets 50% pace plus 10% extra on native party share",
+      "actor": "old",
+      "metric": "xp",
+      "relative_to": "old_before",
+      "ratio_to": "control_party_gain",
+      "min": 0.53,
+      "max": 0.57
+    }
+  ]
+}

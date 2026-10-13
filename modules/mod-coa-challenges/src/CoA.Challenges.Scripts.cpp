@@ -1960,6 +1960,25 @@ namespace CoAChallenges
         return profile;
     }
 
+    uint32 OldSchoolGroupBonusPercent(Player const* player, Creature const* creature)
+    {
+        uint32 const challenge = OldSchoolChallenge(player);
+        Group const* group = player ? player->GetGroup() : nullptr;
+        if (!challenge || !creature || !group || group->isRaidGroup()
+            || group->isBGGroup() || group->isBFGroup())
+            return 0;
+
+        for (Group::MemberSlot const& slot : group->GetMemberSlots())
+        {
+            Player const* member = ObjectAccessor::FindPlayer(slot.guid);
+            if (member && member != player && member->IsAlive()
+                && OldSchoolChallenge(member) == challenge && member->InSamePhase(creature)
+                && member->IsAtGroupRewardDistance(creature))
+                return 10;
+        }
+        return 0;
+    }
+
     void MoveOldSchoolEquipmentToCorpse(Player* player)
     {
         if (!player || player->GetSession()->IsBot())
@@ -2908,6 +2927,7 @@ namespace CoAChallenges
                 uint64 scaledAmount = uint64(amount) * OldSchoolExperienceBasisPoints();
                 uint64 scaleNumerator = 100;
                 uint32 experienceMultiplierHundredths = 100;
+                uint32 groupBonusPercent = 0;
                 if (xpSource == XPSOURCE_KILL && victim && victim->IsCreature()
                     && OldSchoolCreature(victim->ToCreature())
                     && TappingAllowsRewards(player, victim->ToCreature()))
@@ -2920,9 +2940,11 @@ namespace CoAChallenges
                     if (CoANeeds::ReadOldSchoolRestedSeconds &&
                         CoANeeds::ReadOldSchoolRestedSeconds(player->GetGUID().GetCounter()))
                         scaleNumerator = 115;
+                    groupBonusPercent = OldSchoolGroupBonusPercent(player, creature);
                 }
                 scaledAmount *= experienceMultiplierHundredths;
                 scaledAmount *= scaleNumerator;
+                scaledAmount += scaledAmount / 100 * groupBonusPercent;
                 OldSchoolXPProgress* progress = player->CustomData.GetDefault<OldSchoolXPProgress>(OldSchoolXPProgressKey);
                 uint64 accumulated = scaledAmount + progress->remainder;
                 amount = static_cast<uint32>(std::min<uint64>(accumulated / 100000000, UINT32_MAX));
@@ -4002,10 +4024,13 @@ namespace CoAChallenges
                         : con == "Yellow"
                             ? "Very dangerous; bring a group."
                             : "Overwhelming; a group is strongly advised.";
-                handler->PSendSysMessage("Consider {}: {} con. {} Estimated health: {} ({}x); "
-                    "creature damage: {}x; kill XP: {:.2f}x base ({:.2f}% Old School pace). Estimate only; gear, abilities, companions and adds "
+                handler->PSendSysMessage("Consider {}: {} con. {} Estimated health: {} ({:.2f}x); "
+                    "creature damage: {:.2f}x; kill XP: {:.2f}x base ({:.2f}% Old School pace). Estimate only; gear, abilities, companions and adds "
                     "change the outcome.", target->GetName(), con, advice, health,
-                    healthPercent / 100, damageMultiplier, effectiveKillXpMultiplier, experiencePercent);
+                    healthPercent / 100.0f, float(damageMultiplier), effectiveKillXpMultiplier, experiencePercent);
+                if (uint32 const groupBonus = OldSchoolGroupBonusPercent(player, target))
+                    handler->PSendSysMessage("Group bonus: +{}% to your creature-kill XP share; "
+                        "camp rest is an additional bonus.", groupBonus);
                 if (target->GetZoneId() == AREA_MULGORE)
                 {
                     if (char const* namedThreat = OldSchoolMulgoreNamedThreatName(target))
