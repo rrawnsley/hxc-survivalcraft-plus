@@ -124,6 +124,10 @@ battleboars, poachers, taskmasters, supervisors, casters, and matriarchs receive
 identifies the camp role, and its added hidden threat contributes to the same con, combat scaling, and kill XP
 estimate. These role bonuses apply only inside Mulgore and only during either Old School trial.
 
+While either trial is active, the CoA client addon hides native numeric creature levels in the target and focus
+frames, unit tooltips, and ElvUI nameplates. Players judge a creature through `/consider`; its con and power
+estimate use the same hidden threat profile as combat.
+
 The Stonetalon slice adds Pridewing Patriarch (4015), Sorrow Wing (5928), Sister Riven (5930),
 Foreman Rigger (5931), and Taskmaster Whipfang (5932) to the same four-level named-threat rule.
 Both Old School trials use this rule only while the named creature is in Stonetalon Mountains.
