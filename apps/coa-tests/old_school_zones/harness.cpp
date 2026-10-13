@@ -57,9 +57,6 @@ struct Creature : Unit
     CreatureTemplate data;
     bool owned = false;
     Player* owner = nullptr;
-    uint32 helpCalls = 0;
-    float helpRadius = 0;
-    Unit* helpVictim = nullptr;
 
     Creature* ToCreature() override { return this; }
     Player* GetCharmerOrOwnerPlayerOrPlayerItself() override { return owner; }
@@ -69,12 +66,6 @@ struct Creature : Unit
     uint32 GetLevel() const { return level; }
     CreatureTemplate const* GetCreatureTemplate() const { return &data; }
     bool IsCharmedOwnedByPlayerOrPlayer() const { return owned; }
-    void CallForHelp(float radius, Unit* victim)
-    {
-        ++helpCalls;
-        helpRadius = radius;
-        helpVictim = victim;
-    }
 };
 
 Player const* ChallengeParticipant(Player const* player) { return player; }
@@ -119,15 +110,18 @@ void NamedProfiles()
         assert(creature.level == 25);
         assert(creature.data.rank == (entry == 5930 || entry == 5931 || entry == 5932
             ? CREATURE_ELITE_RAREELITE : CREATURE_ELITE_RARE));
+        creature.spawn = 0;
         for (uint32 zone : { AREA_MULGORE, AREA_THE_BARRENS, AREA_ASHENVALE })
         {
             creature.zone = zone;
             assert(!IsOldSchoolStonetalonNamedThreat(&creature));
             assert(OldSchoolThreatOffset(&creature) == 0);
         }
+        creature.spawn = 29981;
         creature.zone = AREA_STONETALON_MOUNTAINS;
     }
     creature.entry = 4000;
+    creature.spawn = 0;
     assert(!IsOldSchoolStonetalonNamedThreat(&creature));
     assert(OldSchoolThreatOffset(&creature) == 0);
     assert(!IsOldSchoolStonetalonNamedThreat(nullptr));
@@ -152,64 +146,7 @@ void NamedProfiles()
     }
 }
 
-void SocialEligibility()
-{
-    Player player;
-    for (uint32 challenge : { 9001u, 9002u })
-    {
-        Enroll(player, challenge);
-        for (uint32 zone : { AREA_MULGORE, AREA_THE_BARRENS, AREA_STONETALON_MOUNTAINS })
-        {
-            Creature creature;
-            creature.zone = zone;
-            OnUnitEnterCombat(&creature, &player);
-            assert(creature.helpCalls == 1);
-            assert(creature.helpRadius == 35.0f);
-            assert(creature.helpVictim == &player);
-        }
-    }
-    for (uint32 challenge : { 0u, 211u, 425u })
-    {
-        Enroll(player, challenge);
-        Creature creature;
-        OnUnitEnterCombat(&creature, &player);
-        assert(creature.helpCalls == 0);
-    }
-    Enroll(player, 9001);
-    Creature creature;
-    creature.zone = AREA_ASHENVALE;
-    OnUnitEnterCombat(&creature, &player);
-    assert(creature.helpCalls == 0);
-    creature.zone = AREA_STONETALON_MOUNTAINS;
-    creature.spawn = 0;
-    OnUnitEnterCombat(&creature, &player);
-    assert(creature.helpCalls == 0);
-    creature.spawn = 29981;
-    creature.data.type = CREATURE_TYPE_CRITTER;
-    OnUnitEnterCombat(&creature, &player);
-    assert(creature.helpCalls == 0);
-    creature.data.type = 1;
-    creature.owned = true;
-    OnUnitEnterCombat(&creature, &player);
-    assert(creature.helpCalls == 0);
-    creature.owned = false;
-    OnUnitEnterCombat(&creature, nullptr);
-    OnUnitEnterCombat(nullptr, &player);
-    OnUnitEnterCombat(&player, &creature);
-    assert(creature.helpCalls == 0);
-    challengesEnabled = false;
-    OnUnitEnterCombat(&creature, &player);
-    assert(creature.helpCalls == 0);
-    challengesEnabled = true;
-    Creature pet;
-    pet.owner = &player;
-    OnUnitEnterCombat(&creature, &pet);
-    assert(creature.helpCalls == 1);
-    assert(creature.helpVictim == &pet);
-}
-
 int main()
 {
     NamedProfiles();
-    SocialEligibility();
 }

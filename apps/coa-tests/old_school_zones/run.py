@@ -17,14 +17,16 @@ def main():
         'uint32 OldSchoolChallenge(',
         'bool OldSchoolCreature(',
         'struct OldSchoolPowerProfile',
+        'bool IsOldSchoolMulgoreNamedThreat(',
         'bool IsOldSchoolBarrensNamedThreat(',
-        'char const* OldSchoolSocialZoneName(',
         'bool IsOldSchoolStonetalonNamedThreat(',
+        'struct OldSchoolMulgoreCampThreat',
+        'OldSchoolMulgoreCampThreat GetOldSchoolMulgoreCampThreat(',
         'int32 OldSchoolThreatOffset(',
         'uint32 OldSchoolThreatLevel(',
         'OldSchoolPowerProfile GetOldSchoolPowerProfile(',
-        'void OnUnitEnterCombat(',
     )
+    assert 'CallForHelp(' not in source, 'Old School must preserve native creature assistance behavior'
     methods = '\n'.join(METHOD(source, signature).replace(' override', '')
                         + (';' if signature.startswith('struct ') else '') for signature in signatures)
     code = (HERE / 'harness.cpp').read_text().replace('// NATIVE_METHODS', methods)
@@ -47,8 +49,7 @@ def main():
             flags += [str(target), '-o', str(executable)]
         subprocess.run([compiler, *flags], cwd=out, check=True, timeout=120)
         subprocess.run([str(executable)], check=True, timeout=30)
-    print('PASS: Native Old School zone threat profiles and combat-hook eligibility; '
-          'engine assistance traversal and live spawns require gameplay validation')
+    print('PASS: Native Old School zone threat profiles; creature assistance behavior is unchanged')
 
 
 if __name__ == '__main__':
