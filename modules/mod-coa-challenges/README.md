@@ -163,7 +163,9 @@ and Sarilus Foulborne receive leader profiles; XT:4, XT:9, and Besseleth join th
 Ashenvale includes Thistlefur, Foulweald, Saltspittle, and Forsaken camps, with fourteen named encounters.
 Thousand Needles includes Galak camps and Grimtotem mesas, with six named encounters.
 Desolace includes Gelkis, Magram, Maraudine, and Slitherblade camps, with five named encounters.
-Named encounters in these four zones multiply con-based kill XP by 1.5x, 2x, or 3x according to their
+Dustwallow Marsh includes Firemane grounds and Mirefin shores, with nine named encounters.
+Feralas includes Gordunni compounds, Woodpaw camps, and Frayfeather nesting grounds, with eleven named encounters.
+Named encounters in these six zones multiply con-based kill XP by 1.5x, 2x, or 3x according to their
 authored threat tier. They also use the named gear retention rule. Native spawn positions, respawn timers,
 and movement continue to provide the world ecology. Continue zone authoring in progression order while
 player leveling feedback tunes the earlier slices.

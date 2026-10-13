@@ -1324,6 +1324,44 @@ namespace CoAChallenges
                     return false;
             }
         }
+        if (creature->GetZoneId() == AREA_DUSTWALLOW_MARSH)
+        {
+            switch (creature->GetEntry())
+            {
+                case 4841:
+                case 14230:
+                case 14231:
+                case 14232:
+                case 14233:
+                case 14234:
+                case 14235:
+                case 14236:
+                case 14237:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+        if (creature->GetZoneId() == AREA_FERALAS)
+        {
+            switch (creature->GetEntry())
+            {
+                case 5343:
+                case 5345:
+                case 5346:
+                case 5347:
+                case 5349:
+                case 5350:
+                case 5352:
+                case 5354:
+                case 5356:
+                case 5357:
+                case 5359:
+                    return true;
+                default:
+                    return false;
+            }
+        }
         return false;
     }
 
@@ -1380,7 +1418,8 @@ namespace CoAChallenges
         {
             if (creature->GetEntry() == 5760)
                 return 10;
-            if (creature->GetEntry() == 4499 || creature->GetEntry() == 5771)
+            if (creature->GetEntry() == 4499 || creature->GetEntry() == 5771 || creature->GetEntry() == 4841
+                || creature->GetEntry() == 14236 || creature->GetEntry() == 5357 || creature->GetEntry() == 5359)
                 return 8;
             return 6;
         }
@@ -1671,6 +1710,85 @@ namespace CoAChallenges
                     return { "Slitherblade shore", "oracle", 5 };
                 case 4719:
                     return { "Slitherblade shore", "sea witch", 6 };
+                default:
+                    return { nullptr, nullptr, 0 };
+            }
+        }
+
+        if (creature->GetZoneId() == AREA_DUSTWALLOW_MARSH)
+        {
+            switch (creature->GetEntry())
+            {
+                case 4328:
+                    return { "Firemane grounds", "scalebane", 4 };
+                case 4329:
+                    return { "Firemane grounds", "scout", 2 };
+                case 4331:
+                    return { "Firemane grounds", "ash tail", 3 };
+                case 4333:
+                    return { "Firemane grounds", "devourer", 5 };
+                case 4334:
+                    return { "Firemane grounds", "flamecaller", 6 };
+                case 4358:
+                    return { "Mirefin shore", "puddlejumper", 1 };
+                case 4359:
+                    return { "Mirefin shore", "murloc", 2 };
+                case 4360:
+                    return { "Mirefin shore", "warrior", 3 };
+                case 4361:
+                    return { "Mirefin shore", "muckdweller", 3 };
+                case 4362:
+                    return { "Mirefin shore", "coastrunner", 2 };
+                case 4363:
+                    return { "Mirefin shore", "oracle", 5 };
+                default:
+                    return { nullptr, nullptr, 0 };
+            }
+        }
+        if (creature->GetZoneId() == AREA_FERALAS)
+        {
+            switch (creature->GetEntry())
+            {
+                case 5229:
+                    return { "Gordunni compound", "ogre", 2 };
+                case 5231:
+                    return { "Gordunni compound", "enforcer", 3 };
+                case 5232:
+                    return { "Gordunni compound", "brute", 3 };
+                case 5234:
+                    return { "Gordunni compound", "mauler", 4 };
+                case 5236:
+                    return { "Gordunni compound", "shaman", 5 };
+                case 5237:
+                    return { "Gordunni compound", "ogre mage", 5 };
+                case 5238:
+                    return { "Gordunni compound", "battlemaster", 6 };
+                case 5239:
+                    return { "Gordunni compound", "mage-lord", 6 };
+                case 5240:
+                    return { "Gordunni compound", "warlock", 5 };
+                case 5241:
+                    return { "Gordunni compound", "warlord", 6 };
+                case 5249:
+                    return { "Woodpaw camp", "mongrel", 1 };
+                case 5251:
+                    return { "Woodpaw camp", "trapper", 3 };
+                case 5253:
+                    return { "Woodpaw camp", "brute", 3 };
+                case 5254:
+                    return { "Woodpaw camp", "mystic", 5 };
+                case 5255:
+                    return { "Woodpaw camp", "reaver", 4 };
+                case 5258:
+                    return { "Woodpaw camp", "alpha", 6 };
+                case 5300:
+                    return { "Frayfeather nesting grounds", "hippogryph", 2 };
+                case 5304:
+                    return { "Frayfeather nesting grounds", "stagwing", 3 };
+                case 5305:
+                    return { "Frayfeather nesting grounds", "skystormer", 5 };
+                case 5306:
+                    return { "Frayfeather nesting grounds", "patriarch", 6 };
                 default:
                     return { nullptr, nullptr, 0 };
             }
@@ -3921,7 +4039,10 @@ namespace CoAChallenges
                         4646, 4647, 4648, 4649, 4651, 4652, 4653, 4661,
                         4638, 4639, 4640, 4641, 4642, 4643, 4644, 4645, 4662,
                         4654, 4655, 4656, 4657, 4658, 4659, 4660, 4704, 6069, 6070, 11685,
-                        4711, 4712, 4713, 4714, 4715, 4716, 4717, 4718, 4719
+                        4711, 4712, 4713, 4714, 4715, 4716, 4717, 4718, 4719,
+                        4328, 4329, 4331, 4333, 4334, 4358, 4359, 4360, 4361, 4362, 4363,
+                        5229, 5231, 5232, 5234, 5236, 5237, 5238, 5239, 5240, 5241,
+                        5249, 5251, 5253, 5254, 5255, 5258, 5300, 5304, 5305, 5306
                     };
                     std::list<Creature*> nearbyCreatures;
                     target->GetCreatureListWithEntryInGrid(nearbyCreatures, campEntries, OldSchoolConsiderRange);

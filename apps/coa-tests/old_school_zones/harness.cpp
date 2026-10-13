@@ -262,6 +262,24 @@ void ForestAndMountainProfiles()
     creature.zone = AREA_MULGORE;
     assert(!IsOldSchoolSouthernNamedThreat(&creature));
     assert(OldSchoolThreatOffset(&creature) == 0);
+    creature.zone = AREA_DUSTWALLOW_MARSH;
+    creature.entry = 4334;
+    assert(std::strcmp(GetOldSchoolCampThreat(&creature).role, "flamecaller") == 0);
+    assert(OldSchoolThreatOffset(&creature) == 6);
+    creature.entry = 4841;
+    assert(IsOldSchoolSouthernNamedThreat(&creature));
+    assert(OldSchoolNamedRewardHundredths(&creature) == 200);
+    creature.zone = AREA_FERALAS;
+    creature.entry = 5258;
+    assert(std::strcmp(GetOldSchoolCampThreat(&creature).camp, "Woodpaw camp") == 0);
+    assert(OldSchoolThreatOffset(&creature) == 6);
+    creature.entry = 5357;
+    assert(IsOldSchoolSouthernNamedThreat(&creature));
+    assert(OldSchoolNamedThreatOffset(&creature) == 8);
+    assert(OldSchoolNamedRewardHundredths(&creature) == 200);
+    creature.zone = AREA_MULGORE;
+    assert(!IsOldSchoolSouthernNamedThreat(&creature));
+    assert(OldSchoolNamedRewardHundredths(&creature) == 100);
 }
 
 int main()
