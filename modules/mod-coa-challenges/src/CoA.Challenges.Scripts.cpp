@@ -7,7 +7,11 @@
 #include "Random.h"
 #include "AllCreatureScript.h"
 #include "AccountScript.h"
+#include "AreaDefines.h"
+#include "Group.h"
 #include "LocalLevelScaling.h"
+
+#include <cmath>
 
 using namespace Acore::ChatCommands;
 
@@ -1118,10 +1122,44 @@ namespace CoAChallenges
         uint32 experienceMultiplier;
     };
 
+    bool IsOldSchoolBarrensNamedThreat(Creature const* creature)
+    {
+        if (!creature || creature->GetZoneId() != AREA_THE_BARRENS)
+            return false;
+
+        switch (creature->GetEntry())
+        {
+            // Existing Barrens rares and patrols keep their native spawns and routes.
+            case 3398: // Gesharahan
+            case 3474: // Lakota'mani
+            case 5828: // Humar the Pridelord
+            case 5829: // Snort the Heckler
+            case 5831: // Swiftmane
+            case 5834: // Azzere the Skyblade
+            case 5847: // Heggin Stonewhisker
+            case 5865: // Dishu
+                return true;
+            default:
+                return false;
+        }
+    }
+
     int32 OldSchoolThreatOffset(Creature const* creature)
     {
-        if (!creature || creature->GetCreatureTemplate()->rank != CREATURE_ELITE_NORMAL
-            || !creature->GetSpawnId())
+        if (!creature)
+            return 0;
+
+        if (creature->GetZoneId() == AREA_MULGORE
+            && (creature->GetEntry() == 3056 || creature->GetEntry() == 3058 || creature->GetEntry() == 5807))
+            return 4;
+
+        if (IsOldSchoolBarrensNamedThreat(creature))
+            return 4;
+
+        if (creature->GetCreatureTemplate()->rank != CREATURE_ELITE_NORMAL)
+            return 0;
+
+        if (!creature->GetSpawnId())
             return 0;
 
         uint32 seed = creature->GetSpawnId();
@@ -1131,19 +1169,25 @@ namespace CoAChallenges
         seed *= 0x846ca68b;
         seed ^= seed >> 16;
 
-        static constexpr int32 threatOffsets[16] =
+        static constexpr int32 threatOffsets[32] =
         {
-            -6, -6, -4, -4, -2, -2, -2, -1,
-            -1,  0,  0,  0,  0,  1,  3,  5
+            -8, -6, -5, -4, -3, -2, -2, -1,
+            -1,  0,  0,  0,  0,  1,  2,  3,
+             4,  5,  6,  7,  8, 10, 12, 15,
+            18, 22, 28, 35, 42, 50, 58, 65
         };
-        return threatOffsets[seed & 0x0F];
+        return threatOffsets[seed & 0x1F];
+    }
+
+    uint32 OldSchoolThreatLevel(Creature const* creature)
+    {
+        return std::max(1, int32(creature ? creature->GetLevel() : 1) + OldSchoolThreatOffset(creature));
     }
 
     OldSchoolPowerProfile GetOldSchoolPowerProfile(Player const* player, Creature const* creature)
     {
         player = ChallengeParticipant(player);
-        int32 const levelDifference = int32(creature->GetLevel()) + OldSchoolThreatOffset(creature)
-            - int32(player->GetLevel());
+        int32 const levelDifference = int32(OldSchoolThreatLevel(creature)) - int32(player->GetLevel());
         OldSchoolPowerProfile profile;
         if (levelDifference <= -6)
             profile = { "Grey", 200, 1, 1 };
@@ -1159,6 +1203,10 @@ namespace CoAChallenges
             profile = { "Red", 1600, 10, 8 };
         else
             profile = { "Purple", 2400, 14, 10 };
+
+        float const threatStatScale = std::exp2(float(OldSchoolThreatOffset(creature)) / 25.0f);
+        profile.healthPercent = std::max(1u, uint32(std::lround(profile.healthPercent * threatStatScale)));
+        profile.damageMultiplier = std::max(1u, uint32(std::lround(profile.damageMultiplier * threatStatScale)));
 
         switch (creature->GetCreatureTemplate()->rank)
         {
@@ -2075,7 +2123,8 @@ namespace CoAChallenges
         // ---- Rules: experience source / talents / items ----------------------
         bool OnPlayerHasNoBonusExperience(Player* player) override
         {
-            return PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_BONUS_EXPERIENCE");
+            return PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_BONUS_EXPERIENCE")
+                || OldSchoolChallenge(player) != 0;
         }
 
         void OnPlayerGiveXP(Player* player, uint32& amount, Unit* victim, uint8 xpSource) override
@@ -2123,6 +2172,10 @@ namespace CoAChallenges
                 uint32 const multiplier = scaling ? scaling->experienceMultiplier
                     : GetOldSchoolPowerProfile(player, creature).experienceMultiplier;
                 amount = uint32(std::min<uint64>(uint64(amount) * multiplier, UINT32_MAX));
+
+                if (CoANeeds::ReadOldSchoolRestedSeconds &&
+                    CoANeeds::ReadOldSchoolRestedSeconds(player->GetGUID().GetCounter()))
+                    amount = uint32(std::min<uint64>(uint64(amount) * 115 / 100, UINT32_MAX));
             }
 
             // NO_KILL_CREDIT_UNLESS_AT_DISADVANTAGE ("Punching Up" / Overwhelming
@@ -3193,6 +3246,36 @@ namespace CoAChallenges
                     "creature damage: {}x; kill XP: {}x. Estimate only; gear, abilities, companions and adds "
                     "change the outcome.", target->GetName(), con, advice, health,
                     healthPercent / 100, damageMultiplier, experienceMultiplier);
+                if (target->GetZoneId() == AREA_MULGORE)
+                {
+                    handler->SendSysMessage("Mulgore: nearby same-faction creatures within 35 yards may join the fight.");
+                    switch (target->GetEntry())
+                    {
+                        case 3056:
+                            handler->SendSysMessage("Named roamer: Ghost Howl carries elevated hidden threat; "
+                                "use the con estimate before engaging.");
+                            break;
+                        case 3058:
+                            handler->SendSysMessage("Named patrol: Arra'chea carries elevated hidden threat; "
+                                "use the con estimate before engaging.");
+                            break;
+                        case 5807:
+                            handler->SendSysMessage("Named roamer: The Rake carries elevated hidden threat; "
+                                "use the con estimate before engaging.");
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                else if (target->GetZoneId() == AREA_THE_BARRENS)
+                {
+                    handler->SendSysMessage("The Barrens: nearby same-faction creatures within 35 yards may join the fight.");
+                    if (IsOldSchoolBarrensNamedThreat(target))
+                    {
+                        handler->PSendSysMessage("Named threat: {} carries elevated hidden danger and reward; "
+                            "use the con estimate before engaging.", target->GetName());
+                    }
+                }
                 return true;
             }
 
@@ -4307,12 +4390,30 @@ namespace CoAChallenges
                 AllowBandageHeal(healer->GetGUID().GetCounter());
         }
 
-        void OnBeforeRollMeleeOutcomeAgainst(Unit const* /*attacker*/, Unit const* victim,
-            WeaponAttackType /*attType*/, int32& /*attackerMaxSkillValueForLevel*/,
-            int32& /*victimMaxSkillValueForLevel*/, int32& /*attackerWeaponSkill*/,
-            int32& /*victimDefenseSkill*/, int32& crit_chance, int32& /*miss_chance*/,
+        void OnBeforeRollMeleeOutcomeAgainst(Unit const* attacker, Unit const* victim,
+            WeaponAttackType /*attType*/, int32& attackerMaxSkillValueForLevel,
+            int32& victimMaxSkillValueForLevel, int32& attackerWeaponSkill,
+            int32& victimDefenseSkill, int32& crit_chance, int32& /*miss_chance*/,
             int32& dodge_chance, int32& parry_chance, int32& block_chance) override
         {
+            Creature const* attackerCreature = attacker ? attacker->ToCreature() : nullptr;
+            Player* defender = victim ? victim->GetCharmerOrOwnerPlayerOrPlayerItself() : nullptr;
+            if (attackerCreature && defender && OldSchoolChallenge(defender) && OldSchoolCreature(attackerCreature))
+            {
+                int32 const skill = int32(OldSchoolThreatLevel(attackerCreature)) * 5;
+                attackerMaxSkillValueForLevel = skill;
+                attackerWeaponSkill = skill;
+            }
+
+            Creature const* victimCreature = victim ? victim->ToCreature() : nullptr;
+            Player* aggressor = attacker ? attacker->GetCharmerOrOwnerPlayerOrPlayerItself() : nullptr;
+            if (victimCreature && aggressor && OldSchoolChallenge(aggressor) && OldSchoolCreature(victimCreature))
+            {
+                int32 const skill = int32(OldSchoolThreatLevel(victimCreature)) * 5;
+                victimMaxSkillValueForLevel = skill;
+                victimDefenseSkill = skill;
+            }
+
             if (!victim || !victim->IsPlayer())
                 return;
             Player* pl = const_cast<Player*>(victim->ToPlayer());
@@ -4324,6 +4425,33 @@ namespace CoAChallenges
             }
             if (PlayerHasRule(pl, "CHALLENGE_RULES_TYPE_CAN_BE_CRITTED_BY_ANY_ABILITY"))
                 crit_chance = 10000;
+        }
+
+        void ModifyMagicSpellLevelDifference(Unit const* caster, Unit const* target,
+            int32& levelDifference) override
+        {
+            Player* casterPlayer = caster ? caster->GetCharmerOrOwnerPlayerOrPlayerItself() : nullptr;
+            Creature const* targetCreature = target ? target->ToCreature() : nullptr;
+            if (casterPlayer && OldSchoolChallenge(casterPlayer) && OldSchoolCreature(targetCreature))
+            {
+                levelDifference = int32(OldSchoolThreatLevel(targetCreature)) - int32(casterPlayer->GetLevel());
+                return;
+            }
+
+            Player* targetPlayer = target ? target->GetCharmerOrOwnerPlayerOrPlayerItself() : nullptr;
+            Creature const* casterCreature = caster ? caster->ToCreature() : nullptr;
+            if (targetPlayer && OldSchoolChallenge(targetPlayer) && OldSchoolCreature(casterCreature))
+                levelDifference = int32(targetPlayer->GetLevel()) - int32(OldSchoolThreatLevel(casterCreature));
+        }
+
+        void OnUnitEnterCombat(Unit* unit, Unit* victim) override
+        {
+            Creature* creature = unit ? unit->ToCreature() : nullptr;
+            Player* participant = victim ? victim->GetCharmerOrOwnerPlayerOrPlayerItself() : nullptr;
+            if (creature && creature->GetSpawnId()
+                && (creature->GetZoneId() == AREA_MULGORE || creature->GetZoneId() == AREA_THE_BARRENS)
+                && OldSchoolCreature(creature) && participant && OldSchoolChallenge(participant))
+                creature->CallForHelp(35.0f, victim);
         }
     };
 

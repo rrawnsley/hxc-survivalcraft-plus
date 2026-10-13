@@ -9,7 +9,11 @@
 namespace CoANeeds
 {
 using ChallengeReader = bool (*)(uint32_t, float&, float&);
+using OldSchoolTrialReader = bool (*)(uint32_t);
+using OldSchoolRestedReader = uint32_t (*)(uint32_t);
 inline ChallengeReader ReadChallengeNeeds = nullptr;
+inline OldSchoolTrialReader IsOldSchoolTrial = nullptr;
+inline OldSchoolRestedReader ReadOldSchoolRestedSeconds = nullptr;
 inline std::atomic<float> ChallengeMaximum{ 100.0f };
 }
 

@@ -99,14 +99,21 @@ keys are appended automatically on deploy.
 
 Old School (9001) and Old School - Hardcore (9002) are mutually exclusive native trials.
 Creature levels remain fixed internally and display as `??` while the trial is active. In the trial, their power and kill experience follow the
-participant's con. Ordinary persistent spawns have a stable hidden threat offset from -6 to +5 levels,
-so creatures of the same native level can present different cons within one area. `/consider`, combat
-scaling and kill experience use that same offset. Elites, bosses and temporary creatures keep their
-native level for con. Grey creatures have 2x health, 1x damage and 1x kill XP; green 3x/2x/2x;
+participant's con. Ordinary persistent spawns have a stable hidden threat offset from -8 to +65 levels,
+so a zone can contain approachable prey and severe threats even when its native creature levels are
+clustered. `/consider`, health, damage, melee skill, spell-hit level difference, and kill experience use that hidden threat rating;
+the rating is fixed per database spawn and never scales to the player. Native creature levels remain
+unchanged. Elites, bosses and temporary creatures keep their native level for con. Grey creatures have
+2x health, 1x damage and 1x kill XP before the threat-offset stat adjustment; green 3x/2x/2x;
 blue 5x/3x/3x; white 8x/5x/4x; yellow 12x/7x/6x; red 16x/10x/8x; and purple 24x/14x/10x.
 Elites and bosses multiply those values further. Quest experience is unchanged. Critters and
 player-owned units are excluded. Restricted tapping prevents players in another trial from
 assisting with the kill or claiming its rewards.
+
+In Mulgore and the Barrens, when an Old School participant engages a persistent hostile creature, eligible nearby
+same-faction creatures can join the fight from 35 yards. `/consider` warns about this social response.
+Mulgore's existing named waypoint roamers—Ghost Howl (3056), Arra'chea (3058), and The Rake (5807)—and the Barrens named threats Gesharahan (3398), Lakota'mani (3474), Humar the Pridelord (5828), Snort the Heckler (5829), Swiftmane (5831), Azzere the Skyblade (5834), Heggin Stonewhisker (5847), and Dishu (5865) carry four additional hidden threat levels in Old School. `/consider` identifies these named threats and this threat feeds the normal con, combat and kill XP calculations without changing native levels, routes, or ordinary-mode behavior. Their database spawns already roam on authored waypoint paths and retain
+their existing rare respawn timers. Ordinary play and zones beyond Mulgore and the Barrens keep their existing behavior for now.
 
 Ordinary Old School deaths outside battlegrounds and arenas remove 10% of the experience
 needed for the current level; the loss can delevel the character. Resurrection requires
@@ -124,6 +131,16 @@ creature. It also warns that gear, abilities, companions and adds can change the
 The client definitions are generated with `C:/Azerothcore/tools/build-coa-old-school.py`
 and shipped in CoA's existing `Data/patch-ZZ.MPQ`; the slash command is shipped in its
 Homebrew Nourishment addon. Neither trial grants completion items.
+
+Build a real camp using the Campfire ability from the Survivalist spellbook or the needs panel;
+it consumes Simple Wood harvested through Woodcutting. Shelter and Hearthstead are higher-tier
+options. The placed fire is also a Cooking fire. Sit beside it outside combat to receive the
+existing camp recovery. In either Old School trial, staying near a live camp replenishes a rested
+timer up to 20 minutes; time away from camp spends it while you are online and alive. A creature kill
+receives 15% additional XP while the timer has time remaining. Quest XP is unchanged. Old School
+does not consume the standard WoW rested-XP pool while its trial bonus is active. Sitting remains
+necessary for the existing health/mana recovery and Fellowship benefits. The temporary `.coa camp`
+claim command was removed; a placed camp is the actual camp marker and benefit source.
 
 ## License
 

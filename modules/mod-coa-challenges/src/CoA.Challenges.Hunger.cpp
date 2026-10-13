@@ -30,11 +30,20 @@ namespace CoAChallenges
         return true;
     }
 
+    bool IsOldSchoolForNeeds(uint32 guid)
+    {
+        for (auto const& [challenge, level] : CachedCharChallenges(guid))
+            if ((challenge == 9001 || challenge == 9002) && level > 0)
+                return true;
+        return false;
+    }
+
     struct NeedsBridgeRegistration
     {
         NeedsBridgeRegistration()
         {
             CoANeeds::ReadChallengeNeeds = ReadNeedsForVigor;
+            CoANeeds::IsOldSchoolTrial = IsOldSchoolForNeeds;
         }
     };
 

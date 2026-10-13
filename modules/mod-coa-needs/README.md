@@ -76,6 +76,14 @@ Sitting continuously for 30 seconds grants Campfire/Shelter/Hearthstead Fellowsh
 a stronger camp can upgrade it, and equal/weaker camps cannot continually refresh its duration.
 Camp rest auras stop when standing, entering combat, dying, or leaving the camp radius.
 
+During Old School and Old School - Hardcore only, a live camp restores a separate rested timer
+at 10 seconds per real second, up to 20 minutes. The timer is restored even while standing or
+fighting near the camp, and drains one second per second while online, alive and away from camp.
+Creature kills receive a 15% XP bonus while any timer remains; quest XP is unchanged. The
+ordinary WoW rested pool remains stored but its bonus is suppressed during these trials, so it
+does not stack with the Old School camp bonus. Outside those trials, the existing rested-XP-pool
+behavior is unchanged.
+
 ## Weather and injuries
 
 Weather exposure uses native zone weather through the global ALE hook. Rain and snow build

@@ -45,6 +45,8 @@ constexpr uint32 SprintAbility = 996015;
 constexpr uint32 DodgeAbility = 996016;
 constexpr uint32 WindAbility = 996017;
 constexpr uint32 CampRest = 996100;
+constexpr uint32 OldSchoolRestedCapMs = 20 * 60 * 1000;
+constexpr uint32 OldSchoolRestedRate = 10;
 constexpr uint32 Fellowship = 996103;
 constexpr uint32 CampAbility = 996106;
 constexpr uint32 PackAbility = 996109;
@@ -133,6 +135,7 @@ struct State
     bool delegated = false;
     uint32 campReady = 0;
     uint32 socialTick = 0;
+    uint32 oldSchoolRestedMs = 0;
     int32 restingCamp = -1;
     PendingMeal meal;
     Treatment treatment;
@@ -159,6 +162,13 @@ std::recursive_mutex Mutex;
 std::unordered_map<ObjectGuid::LowType, State> States;
 std::unordered_map<ObjectGuid::LowType, Camp> Camps;
 std::unordered_map<uint32, WeatherState> ZoneWeather;
+
+uint32 ReadOldSchoolRestedSeconds(uint32 guid)
+{
+    std::lock_guard<std::recursive_mutex> lock(Mutex);
+    auto const found = States.find(guid);
+    return found == States.end() ? 0 : found->second.oldSchoolRestedMs / 1000;
+}
 
 uint64 Milliseconds()
 {
@@ -221,10 +231,10 @@ void StopSprint(Player* player, State& state)
 
 void Save(Player* player, State const& state)
 {
-    std::array<uint32, 11> values = { 1, uint32(Clamp(state.food) * 1000.0f),
+    std::array<uint32, 12> values = { 1, uint32(Clamp(state.food) * 1000.0f),
         uint32(Clamp(state.water) * 1000.0f), uint32(Clamp(state.vigor) * 1000.0f),
         state.dodgeUntil, state.windUntil, state.exhaustedUntil, state.attackLockUntil, state.windBuffUntil,
-        state.campReady, state.injuries };
+        state.campReady, state.injuries, state.oldSchoolRestedMs };
     for (uint32 index = 0; index < values.size(); ++index)
         player->UpdatePlayerSetting(Storage, index, values[index]);
 }
@@ -391,15 +401,36 @@ void RestAtCamp(Player* player, State& state, int32 tier, uint32 elapsed)
     state.restingCamp = player->IsAlive() && player->IsSitState() && !player->IsInCombat() ? tier : -1;
     for (uint32 index = 0; index < 3; ++index)
         SetAura(player, CampRest + index, state.restingCamp == int32(index));
+    bool const oldSchool = CoANeeds::IsOldSchoolTrial &&
+        CoANeeds::IsOldSchoolTrial(player->GetGUID().GetCounter());
+    if (oldSchool)
+    {
+        uint32 const previous = state.oldSchoolRestedMs;
+        if (player->IsAlive() && tier >= 0)
+            state.oldSchoolRestedMs = std::min(OldSchoolRestedCapMs,
+                state.oldSchoolRestedMs + elapsed * OldSchoolRestedRate);
+        else if (player->IsAlive())
+            state.oldSchoolRestedMs = elapsed >= state.oldSchoolRestedMs ? 0 : state.oldSchoolRestedMs - elapsed;
+
+        if (previous < OldSchoolRestedCapMs && state.oldSchoolRestedMs == OldSchoolRestedCapMs)
+            ChatHandler(player->GetSession()).SendSysMessage("You are fully rested. Nearby camps preserve your 15% kill-experience bonus.");
+        else if (previous && !state.oldSchoolRestedMs)
+            ChatHandler(player->GetSession()).SendSysMessage("Your rested experience is spent. Return to a camp to renew it.");
+    }
+
     if (state.restingCamp < 0)
     {
         state.socialTick = 0;
         return;
     }
-    float seconds = elapsed / 1000.0f;
-    float restedCap = player->GetUInt32Value(PLAYER_NEXT_LEVEL_XP) * sWorld->getRate(RATE_REST_MAX_BONUS) / 2.0f;
-    float rested = restedCap * seconds / Config.campRestFillSeconds;
-    player->SetRestBonus(player->GetRestBonus() + rested);
+
+    if (!oldSchool)
+    {
+        float seconds = elapsed / 1000.0f;
+        float restedCap = player->GetUInt32Value(PLAYER_NEXT_LEVEL_XP) * sWorld->getRate(RATE_REST_MAX_BONUS) / 2.0f;
+        float rested = restedCap * seconds / Config.campRestFillSeconds;
+        player->SetRestBonus(player->GetRestBonus() + rested);
+    }
     state.socialTick += elapsed;
     if (state.socialTick < 30000)
         return;
@@ -656,7 +687,8 @@ class NeedsPlayer : public PlayerScript
 public:
     NeedsPlayer() : PlayerScript("CoANeedsPlayer", { PLAYERHOOK_ON_CREATE, PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_BEFORE_LOGOUT,
         PLAYERHOOK_ON_SAVE, PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_SPELL_CAST, PLAYERHOOK_ON_LEVEL_CHANGED,
-        PLAYERHOOK_ON_PLAYER_ENTER_COMBAT, PLAYERHOOK_CAN_PLAYER_USE_PRIVATE_CHAT, PLAYERHOOK_ON_UPDATE_SKILL, PLAYERHOOK_ON_SET_SKILL }) { }
+        PLAYERHOOK_ON_PLAYER_ENTER_COMBAT, PLAYERHOOK_CAN_PLAYER_USE_PRIVATE_CHAT, PLAYERHOOK_ON_UPDATE_SKILL,
+        PLAYERHOOK_ON_SET_SKILL }) { }
 
     void OnPlayerCreate(Player* player) override
     {
@@ -719,6 +751,8 @@ public:
                 state.campReady = (*saved)[9].value;
             if (saved->size() >= 11)
                 state.injuries = (*saved)[10].value & 15u;
+            if (saved->size() >= 12)
+                state.oldSchoolRestedMs = std::min((*saved)[11].value, OldSchoolRestedCapMs);
         }
         StopSprint(player, state);
         for (uint32 index = 0; index < 3; ++index)
@@ -1332,6 +1366,7 @@ public:
 
 void AddSC_coa_needs()
 {
+    CoANeeds::ReadOldSchoolRestedSeconds = ReadOldSchoolRestedSeconds;
     new NeedsWorld();
     new NeedsWeather();
     new NeedsPlayer();
