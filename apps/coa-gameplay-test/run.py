@@ -156,6 +156,8 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item'
                  'flat_coefficient_modifier', 'dominant_stat', 'off_stat',
                  'min_level', 'max_level', 'min_home_distance'}
 ACTIONS = {
+    'sit': ({'actor'}, {'actor'}),
+    'stand': ({'actor'}, {'actor'}),
     'stop_attack': ({'actor'}, {'actor'}),
     'set_moving': ({'actor', 'enabled'}, {'actor', 'enabled'}),
     'level_scaling_packet': ({'actor', 'value'}, {'actor', 'value'}),

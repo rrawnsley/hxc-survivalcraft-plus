@@ -4421,6 +4421,10 @@ private:
             else
                 player->RemoveUnitMovementFlag(MOVEMENTFLAG_FORWARD);
         }
+        else if (action == "sit")
+            player->SetStandState(UNIT_STAND_STATE_SIT);
+        else if (action == "stand")
+            player->SetStandState(UNIT_STAND_STATE_STAND);
         else if (action == "stop_attack")
         {
             WorldPacket packet(CMSG_ATTACKSTOP, 0);
