@@ -1,0 +1,291 @@
+{
+  "schema": 1,
+  "name": "Old School Stonetalon named threat: Taskmaster Whipfang",
+  "contract": "Stonetalon Taskmaster Whipfang (5932) has four additional hidden threat levels in both Old School trials. At equal native level 25 the resulting Red con grants an 16x kill XP, 22x creature damage, and 35.76x health. Ordinary play keeps native level and health, with no named threat or social warning. Existing spawn data is preserved. Temporary fixtures exercise named profiles and trial gating; they do not exercise the persistent-spawn social response.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 1,
+    "x": 1152.17,
+    "y": 93.8365,
+    "z": -7.14718,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 1,
+      "level": 25
+    },
+    {
+      "id": "old",
+      "race": 1,
+      "class": 1,
+      "level": 25
+    },
+    {
+      "id": "hardcore",
+      "race": 1,
+      "class": 1,
+      "level": 25
+    }
+  ],
+  "creatures": [
+    {
+      "id": "control_target",
+      "owner": "control",
+      "entry": 5932,
+      "faction": 14,
+      "level": 25,
+      "health": 1000,
+      "distance": 40,
+      "stationary": true
+    },
+    {
+      "id": "old_target",
+      "owner": "old",
+      "entry": 5932,
+      "faction": 14,
+      "level": 25,
+      "health": 1000,
+      "distance": 40,
+      "stationary": true
+    },
+    {
+      "id": "hardcore_target",
+      "owner": "hardcore",
+      "entry": 5932,
+      "faction": 14,
+      "level": 25,
+      "health": 1000,
+      "distance": 40,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "control",
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "set_health",
+      "actor": "old",
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "set_health",
+      "actor": "hardcore",
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "start_challenge",
+      "actor": "old",
+      "challenge": 9001,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "old",
+      "metric": "challenge_start_code",
+      "equals": 0,
+      "label": "old enters trial 9001"
+    },
+    {
+      "action": "start_challenge",
+      "actor": "hardcore",
+      "challenge": 9002,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hardcore",
+      "metric": "challenge_start_code",
+      "equals": 0,
+      "label": "hardcore enters trial 9002"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "client_packet",
+      "actor": "control",
+      "opcode": 317,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "control_target"
+        }
+      ]
+    },
+    {
+      "action": "command",
+      "actor": "control",
+      "command": ".coa consider"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "system_message_contains",
+      "equals": 0,
+      "label": "Ordinary play has no named threat warning",
+      "text": "Named threat:"
+    },
+    {
+      "action": "assert",
+      "actor": "control",
+      "metric": "system_message_contains",
+      "equals": 0,
+      "label": "Ordinary play has no expanded social warning",
+      "text": "within 35 yards"
+    },
+    {
+      "action": "client_packet",
+      "actor": "old",
+      "opcode": 317,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "old_target"
+        }
+      ]
+    },
+    {
+      "action": "command",
+      "actor": "old",
+      "command": ".coa consider"
+    },
+    {
+      "action": "assert",
+      "actor": "old",
+      "metric": "system_message_contains",
+      "equals": 1,
+      "label": "old consider reports Named threat: Taskmaster Whipfang",
+      "text": "Named threat: Taskmaster Whipfang"
+    },
+    {
+      "action": "assert",
+      "actor": "old",
+      "metric": "system_message_contains",
+      "equals": 1,
+      "label": "old consider reports Red con",
+      "text": "Red con"
+    },
+    {
+      "action": "assert",
+      "actor": "old",
+      "metric": "system_message_contains",
+      "equals": 1,
+      "label": "old consider reports Estimated health: estimate",
+      "text": "Estimated health:"
+    },
+    {
+      "action": "assert",
+      "actor": "old",
+      "metric": "system_message_contains",
+      "equals": 1,
+      "label": "old consider reports creature damage field",
+      "text": "creature damage:"
+    },
+    {
+      "action": "assert",
+      "actor": "old",
+      "metric": "system_message_contains",
+      "equals": 1,
+      "label": "old consider reports kill XP: 16x.",
+      "text": "kill XP: 16x."
+    },
+    {
+      "action": "assert",
+      "actor": "old",
+      "metric": "system_message_contains",
+      "equals": 1,
+      "label": "old consider reports Stonetalon Mountains: nearby",
+      "text": "Stonetalon Mountains: nearby"
+    },
+    {
+      "action": "assert",
+      "actor": "old",
+      "metric": "system_message_contains",
+      "equals": 1,
+      "label": "old consider reports within 35 yards",
+      "text": "within 35 yards"
+    },
+    {
+      "action": "client_packet",
+      "actor": "hardcore",
+      "opcode": 317,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "hardcore_target"
+        }
+      ]
+    },
+    {
+      "action": "command",
+      "actor": "hardcore",
+      "command": ".coa consider"
+    },
+    {
+      "action": "assert",
+      "actor": "hardcore",
+      "metric": "system_message_contains",
+      "equals": 1,
+      "label": "hardcore consider reports Named threat: Taskmaster Whipfang",
+      "text": "Named threat: Taskmaster Whipfang"
+    },
+    {
+      "action": "assert",
+      "actor": "hardcore",
+      "metric": "system_message_contains",
+      "equals": 1,
+      "label": "hardcore consider reports Red con",
+      "text": "Red con"
+    },
+    {
+      "action": "assert",
+      "actor": "hardcore",
+      "metric": "system_message_contains",
+      "equals": 1,
+      "label": "hardcore consider reports Estimated health: estimate",
+      "text": "Estimated health:"
+    },
+    {
+      "action": "assert",
+      "actor": "hardcore",
+      "metric": "system_message_contains",
+      "equals": 1,
+      "label": "hardcore consider reports creature damage field",
+      "text": "creature damage:"
+    },
+    {
+      "action": "assert",
+      "actor": "hardcore",
+      "metric": "system_message_contains",
+      "equals": 1,
+      "label": "hardcore consider reports kill XP: 16x.",
+      "text": "kill XP: 16x."
+    },
+    {
+      "action": "assert",
+      "actor": "hardcore",
+      "metric": "system_message_contains",
+      "equals": 1,
+      "label": "hardcore consider reports Stonetalon Mountains: nearby",
+      "text": "Stonetalon Mountains: nearby"
+    },
+    {
+      "action": "assert",
+      "actor": "hardcore",
+      "metric": "system_message_contains",
+      "equals": 1,
+      "label": "hardcore consider reports within 35 yards",
+      "text": "within 35 yards"
+    }
+  ]
+}

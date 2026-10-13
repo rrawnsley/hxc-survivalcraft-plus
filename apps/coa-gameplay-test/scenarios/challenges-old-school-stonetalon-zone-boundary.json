@@ -1,0 +1,201 @@
+{
+  "schema": 1,
+  "name": "Stonetalon named-threat bonus stays within its zone",
+  "contract": "A Stonetalon rare summoned in the Barrens retains native threat in both Old School trials: at equal native level 25 its con is White, rank-adjusted health remains, and kill XP estimate is 8x. It is not identified as a named threat there. The existing Barrens social warning is preserved. Temporary fixtures do not exercise persistent-spawn assistance.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 1,
+    "x": -2685.14,
+    "y": -1940.75,
+    "z": 98.2187,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "old",
+      "race": 1,
+      "class": 1,
+      "level": 25
+    },
+    {
+      "id": "hardcore",
+      "race": 1,
+      "class": 1,
+      "level": 25
+    }
+  ],
+  "creatures": [
+    {
+      "id": "old_target",
+      "owner": "old",
+      "entry": 5931,
+      "faction": 14,
+      "level": 25,
+      "health": 1000,
+      "distance": 40,
+      "stationary": true
+    },
+    {
+      "id": "hardcore_target",
+      "owner": "hardcore",
+      "entry": 5931,
+      "faction": 14,
+      "level": 25,
+      "health": 1000,
+      "distance": 40,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_health",
+      "actor": "old",
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "start_challenge",
+      "actor": "old",
+      "challenge": 9001,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "old",
+      "metric": "challenge_start_code",
+      "equals": 0,
+      "label": "old starts trial"
+    },
+    {
+      "action": "client_packet",
+      "actor": "old",
+      "opcode": 317,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "old_target"
+        }
+      ]
+    },
+    {
+      "action": "command",
+      "actor": "old",
+      "command": ".coa consider"
+    },
+    {
+      "action": "assert",
+      "actor": "old",
+      "metric": "system_message_contains",
+      "equals": 1,
+      "label": "old: White con",
+      "text": "White con"
+    },
+    {
+      "action": "assert",
+      "actor": "old",
+      "metric": "system_message_contains",
+      "equals": 1,
+      "label": "old: kill XP: 8x.",
+      "text": "kill XP: 8x."
+    },
+    {
+      "action": "assert",
+      "actor": "old",
+      "metric": "system_message_contains",
+      "equals": 1,
+      "label": "old: The Barrens: nearby",
+      "text": "The Barrens: nearby"
+    },
+    {
+      "action": "assert",
+      "actor": "old",
+      "metric": "system_message_contains",
+      "equals": 0,
+      "label": "old: Named threat:",
+      "text": "Named threat:"
+    },
+    {
+      "action": "assert",
+      "actor": "old",
+      "metric": "system_message_contains",
+      "equals": 0,
+      "label": "old: Stonetalon Mountains:",
+      "text": "Stonetalon Mountains:"
+    },
+    {
+      "action": "set_health",
+      "actor": "hardcore",
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "start_challenge",
+      "actor": "hardcore",
+      "challenge": 9002,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "hardcore",
+      "metric": "challenge_start_code",
+      "equals": 0,
+      "label": "hardcore starts trial"
+    },
+    {
+      "action": "client_packet",
+      "actor": "hardcore",
+      "opcode": 317,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "hardcore_target"
+        }
+      ]
+    },
+    {
+      "action": "command",
+      "actor": "hardcore",
+      "command": ".coa consider"
+    },
+    {
+      "action": "assert",
+      "actor": "hardcore",
+      "metric": "system_message_contains",
+      "equals": 1,
+      "label": "hardcore: White con",
+      "text": "White con"
+    },
+    {
+      "action": "assert",
+      "actor": "hardcore",
+      "metric": "system_message_contains",
+      "equals": 1,
+      "label": "hardcore: kill XP: 8x.",
+      "text": "kill XP: 8x."
+    },
+    {
+      "action": "assert",
+      "actor": "hardcore",
+      "metric": "system_message_contains",
+      "equals": 1,
+      "label": "hardcore: The Barrens: nearby",
+      "text": "The Barrens: nearby"
+    },
+    {
+      "action": "assert",
+      "actor": "hardcore",
+      "metric": "system_message_contains",
+      "equals": 0,
+      "label": "hardcore: Named threat:",
+      "text": "Named threat:"
+    },
+    {
+      "action": "assert",
+      "actor": "hardcore",
+      "metric": "system_message_contains",
+      "equals": 0,
+      "label": "hardcore: Stonetalon Mountains:",
+      "text": "Stonetalon Mountains:"
+    }
+  ]
+}

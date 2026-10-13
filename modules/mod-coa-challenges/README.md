@@ -110,10 +110,23 @@ Elites and bosses multiply those values further. Quest experience is unchanged. 
 player-owned units are excluded. Restricted tapping prevents players in another trial from
 assisting with the kill or claiming its rewards.
 
-In Mulgore and the Barrens, when an Old School participant engages a persistent hostile creature, eligible nearby
-same-faction creatures can join the fight from 35 yards. `/consider` warns about this social response.
-Mulgore's existing named waypoint roamers—Ghost Howl (3056), Arra'chea (3058), and The Rake (5807)—and the Barrens named threats Gesharahan (3398), Lakota'mani (3474), Humar the Pridelord (5828), Snort the Heckler (5829), Swiftmane (5831), Azzere the Skyblade (5834), Heggin Stonewhisker (5847), and Dishu (5865) carry four additional hidden threat levels in Old School. `/consider` identifies these named threats and this threat feeds the normal con, combat and kill XP calculations without changing native levels, routes, or ordinary-mode behavior. Their database spawns already roam on authored waypoint paths and retain
-their existing rare respawn timers. Ordinary play and zones beyond Mulgore and the Barrens keep their existing behavior for now.
+In Mulgore, the Barrens, and Stonetalon Mountains, when an Old School participant engages a persistent
+hostile creature, eligible nearby same-faction creatures can join the fight from 35 yards. `/consider` warns
+about this social response. Mulgore's named waypoint roamers - Ghost Howl (3056), Arra'chea (3058), and The
+Rake (5807) - and the Barrens threats Gesharahan (3398), Lakota'mani (3474), Humar the Pridelord (5828), Snort
+the Heckler (5829), Swiftmane (5831), Azzere the Skyblade (5834), Heggin Stonewhisker (5847), and Dishu
+(5865) carry four additional hidden threat levels in Old School. `/consider` identifies these threats, and the
+hidden rating affects con, combat and kill XP without changing native levels, routes, or ordinary-mode
+behavior. Their database spawns already roam on authored waypoint paths and retain their existing rare
+respawn timers.
+
+The Stonetalon slice adds Pridewing Patriarch (4015), Sorrow Wing (5928), Sister Riven (5930),
+Foreman Rigger (5931), and Taskmaster Whipfang (5932) to the same four-level named-threat rule.
+Both Old School trials use this rule only while the named creature is in Stonetalon Mountains.
+The existing native levels, random movement, Sorrow Wing waypoint route, spawn counts, loot,
+and respawn timers are preserved. Ordinary play and social response in other zones are unchanged.
+The next slices continue incrementally across Azeroth; live playtest tuning follows automated validation
+and does not gate further source development.
 
 Ordinary Old School deaths outside battlegrounds and arenas remove 10% of the experience
 needed for the current level; the loss can delevel the character. Resurrection requires

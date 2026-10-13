@@ -75,7 +75,8 @@
       "label": "The Rake's named-threat health is scaled in Old School",
       "actor": "old_the_rake",
       "metric": "max_health",
-      "equals": 17880
+      "equals": 17880,
+      "within_ms": 10000
     },
     {"action": "client_packet", "actor": "old", "opcode": 317, "consumed": false, "fields": [{"actor_guid": "old_the_rake"}]},
     {"action": "command", "actor": "old", "command": ".coa consider"},

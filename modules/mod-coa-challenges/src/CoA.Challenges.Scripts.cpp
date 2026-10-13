@@ -1144,6 +1144,39 @@ namespace CoAChallenges
         }
     }
 
+    char const* OldSchoolSocialZoneName(uint32 zone)
+    {
+        switch (zone)
+        {
+            case AREA_MULGORE:
+                return "Mulgore";
+            case AREA_THE_BARRENS:
+                return "The Barrens";
+            case AREA_STONETALON_MOUNTAINS:
+                return "Stonetalon Mountains";
+            default:
+                return nullptr;
+        }
+    }
+
+    bool IsOldSchoolStonetalonNamedThreat(Creature const* creature)
+    {
+        if (!creature || creature->GetZoneId() != AREA_STONETALON_MOUNTAINS)
+            return false;
+
+        switch (creature->GetEntry())
+        {
+            case 4015:
+            case 5928:
+            case 5930:
+            case 5931:
+            case 5932:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     int32 OldSchoolThreatOffset(Creature const* creature)
     {
         if (!creature)
@@ -1153,7 +1186,7 @@ namespace CoAChallenges
             && (creature->GetEntry() == 3056 || creature->GetEntry() == 3058 || creature->GetEntry() == 5807))
             return 4;
 
-        if (IsOldSchoolBarrensNamedThreat(creature))
+        if (IsOldSchoolBarrensNamedThreat(creature) || IsOldSchoolStonetalonNamedThreat(creature))
             return 4;
 
         if (creature->GetCreatureTemplate()->rank != CREATURE_ELITE_NORMAL)
@@ -3246,9 +3279,10 @@ namespace CoAChallenges
                     "creature damage: {}x; kill XP: {}x. Estimate only; gear, abilities, companions and adds "
                     "change the outcome.", target->GetName(), con, advice, health,
                     healthPercent / 100, damageMultiplier, experienceMultiplier);
+                if (char const* zone = OldSchoolSocialZoneName(target->GetZoneId()))
+                    handler->PSendSysMessage("{}: nearby same-faction creatures within 35 yards may join the fight.", zone);
                 if (target->GetZoneId() == AREA_MULGORE)
                 {
-                    handler->SendSysMessage("Mulgore: nearby same-faction creatures within 35 yards may join the fight.");
                     switch (target->GetEntry())
                     {
                         case 3056:
@@ -3267,15 +3301,9 @@ namespace CoAChallenges
                             break;
                     }
                 }
-                else if (target->GetZoneId() == AREA_THE_BARRENS)
-                {
-                    handler->SendSysMessage("The Barrens: nearby same-faction creatures within 35 yards may join the fight.");
-                    if (IsOldSchoolBarrensNamedThreat(target))
-                    {
-                        handler->PSendSysMessage("Named threat: {} carries elevated hidden danger and reward; "
-                            "use the con estimate before engaging.", target->GetName());
-                    }
-                }
+                else if (IsOldSchoolBarrensNamedThreat(target) || IsOldSchoolStonetalonNamedThreat(target))
+                    handler->PSendSysMessage("Named threat: {} carries elevated hidden danger and reward; "
+                        "use the con estimate before engaging.", target->GetName());
                 return true;
             }
 
@@ -4449,7 +4477,7 @@ namespace CoAChallenges
             Creature* creature = unit ? unit->ToCreature() : nullptr;
             Player* participant = victim ? victim->GetCharmerOrOwnerPlayerOrPlayerItself() : nullptr;
             if (creature && creature->GetSpawnId()
-                && (creature->GetZoneId() == AREA_MULGORE || creature->GetZoneId() == AREA_THE_BARRENS)
+                && OldSchoolSocialZoneName(creature->GetZoneId())
                 && OldSchoolCreature(creature) && participant && OldSchoolChallenge(participant))
                 creature->CallForHelp(35.0f, victim);
         }
