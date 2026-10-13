@@ -228,8 +228,8 @@ struct Mechanic
     std::array<std::uint32_t, 3> TargetBIds;
     std::array<std::uint32_t, 3> AuraIds = {};
     std::array<std::uint32_t, 3> TriggerSpellIds = {};
-    std::optional<std::array<std::int32_t, 3>> MiscValues;
-    std::optional<std::array<std::int32_t, 3>> BasePoints;
+    std::optional<std::array<std::int32_t, 3>> MiscValues = {};
+    std::optional<std::array<std::int32_t, 3>> BasePoints = {};
 };
 
 inline constexpr std::array Mechanics = {
