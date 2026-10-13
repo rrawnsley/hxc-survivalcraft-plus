@@ -13,7 +13,9 @@ for _, lines in ipairs(EncodedSharedPracticeSnapshots) do
     local ability = result.abilities[1]
     assert(#ability.sharedAbilities == 1)
     local shared = ability.sharedAbilities[1]
-    assert(shared.spellId == 712458 or shared.spellId == 680872 or shared.spellId == 800195
+    assert(shared.spellId == 680308 or shared.spellId == 501330 or shared.spellId == 501331
+        or shared.spellId == 501332 or shared.spellId == 501333 or shared.spellId == 501334 or shared.spellId == 501336
+        or shared.spellId == 712458 or shared.spellId == 680872 or shared.spellId == 800195
         or shared.spellId == 523513 or shared.spellId == 680294
         or shared.spellId == 523495 or shared.spellId == 523510 or shared.spellId == 803657
         or shared.spellId == 680303 or shared.spellId == 681442
@@ -54,7 +56,7 @@ for _, lines in ipairs(EncodedSharedPracticeSnapshots) do
     shared.proficiency = proficiency
     assert(Model.Validate(result))
     Wire.Reset()
-    local _, reason = Wire.Accept("B|8|1|13|60|0|779|80", 0, 0)
+    local _, reason = Wire.Accept("B|9|1|13|60|0|779|80", 0, 0)
     assert(reason == "Unsupported snapshot header")
     local expanded = {}
     for _, line in ipairs(lines) do
@@ -87,5 +89,5 @@ for _, lines in ipairs(EncodedSharedPracticeSnapshots) do
     end
     count = count + 1
 end
-assert(count == 102)
+assert(count == 123)
 print("PASS: 102 shared buff snapshots, exact parent forecasts, model rejection and menu rendering")

@@ -1,0 +1,327 @@
+{
+  "schema": 1,
+  "name": "Illidari Intuition native advanced levels and shared regular practice",
+  "contract": "Greater and advanced variants share regular rank5 practice at their native levels. The current trial completes at level80; its native trainer variant remains learnable and saved progress persists.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apintuadv",
+      "race": 1,
+      "class": 14,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "start_challenge",
+      "actor": "caster",
+      "challenge": 9001,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "challenge_start_code",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 800212
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.800212",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.800212",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.800212",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.800212",
+      "index": 3,
+      "value": 59
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.800212",
+      "index": 4,
+      "value": 0
+    },
+    {
+      "action": "relog",
+      "actor": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 680308,
+      "equals": 0,
+      "label": "Greater Intuition cannot bypass regular rank5 practice"
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.14.800212",
+      "index": 3,
+      "value": 60
+    },
+    {
+      "action": "relog",
+      "actor": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 501329,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 680308,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 501330,
+      "equals": 0,
+      "label": "Advanced variant keeps its native character level"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 501331,
+      "equals": 0,
+      "label": "Advanced variant keeps its native character level"
+    },
+    {
+      "action": "set_level",
+      "actor": "caster",
+      "value": 65
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 501330,
+      "equals": 1,
+      "label": "Native level and shared regular practice unlock the variant",
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 501331,
+      "equals": 1,
+      "label": "Native level and shared regular practice unlock the variant",
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.800212",
+      "index": 3,
+      "equals": 60
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 501332,
+      "equals": 0,
+      "label": "Advanced variant keeps its native character level"
+    },
+    {
+      "action": "set_level",
+      "actor": "caster",
+      "value": 70
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 501332,
+      "equals": 1,
+      "label": "Native level and shared regular practice unlock the variant",
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.800212",
+      "index": 3,
+      "equals": 60
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 501336,
+      "equals": 0,
+      "label": "Advanced variant keeps its native character level"
+    },
+    {
+      "action": "set_level",
+      "actor": "caster",
+      "value": 74
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 501336,
+      "equals": 1,
+      "label": "Native level and shared regular practice unlock the variant",
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.800212",
+      "index": 3,
+      "equals": 60
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 501333,
+      "equals": 0,
+      "label": "Advanced variant keeps its native character level"
+    },
+    {
+      "action": "set_level",
+      "actor": "caster",
+      "value": 77
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 501333,
+      "equals": 1,
+      "label": "Native level and shared regular practice unlock the variant",
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.800212",
+      "index": 3,
+      "equals": 60
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 501334,
+      "equals": 0,
+      "label": "Advanced variant keeps its native character level"
+    },
+    {
+      "action": "set_level",
+      "actor": "caster",
+      "value": 80
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.800212",
+      "index": 3,
+      "equals": 60
+    },
+    {
+      "action": "money",
+      "actor": "caster",
+      "copper": 1000000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 97930
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "caster"
+    },
+    {
+      "action": "trainer_buy",
+      "actor": "caster",
+      "spell": 501334
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 501334,
+      "equals": 1,
+      "label": "At trial completion, native level80 trainer requirements still apply"
+    },
+    {
+      "action": "relog",
+      "actor": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 501334,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.14.800212",
+      "index": 3,
+      "equals": 60
+    }
+  ]
+}

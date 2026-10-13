@@ -79,7 +79,8 @@ inline bool ConsistentTypedMastery(AbilityView const& view, std::uint32_t charac
     if (view.Kind != AbilityKind::Mastery)
         return view.Rewards.empty();
     if ((view.Route != PracticeRoute::Healing && view.Route != PracticeRoute::Damage &&
-        view.Route != PracticeRoute::ResourceDrain) ||
+        view.Route != PracticeRoute::ResourceDrain && view.Route != PracticeRoute::UtilityCooldown &&
+        view.Route != PracticeRoute::UtilityResourceEfficiency) ||
         view.Rewards.empty() || view.Rewards.size() > MaximumMasteryRewards)
         return false;
     std::uint32_t previousLevel = view.Ranks.front().Requirement.CharacterLevel;
@@ -91,7 +92,10 @@ inline bool ConsistentTypedMastery(AbilityView const& view, std::uint32_t charac
         if (reward.Requirement.CharacterLevel < previousLevel || reward.Requirement.CharacterLevel > 255 ||
             reward.Requirement.Proficiency <= previousProficiency ||
             !ValidMasteryEffect(reward, view.Route == PracticeRoute::Healing ? MasteryEffect::Healing :
-                view.Route == PracticeRoute::Damage ? MasteryEffect::Damage : MasteryEffect::ResourceDrain) ||
+                view.Route == PracticeRoute::Damage ? MasteryEffect::Damage :
+                view.Route == PracticeRoute::ResourceDrain ? MasteryEffect::ResourceDrain :
+                view.Route == PracticeRoute::UtilityCooldown ? MasteryEffect::Cooldown :
+                MasteryEffect::ResourceEfficiency) ||
             MasteryBonusAmount(reward) <= previousBonus ||
             MasteryBonusAmount(reward) > MaximumMasteryBasisPoints || !ValidForecast(entry.Practice))
             return false;
@@ -196,11 +200,12 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
     std::uint64_t generation = 0, std::optional<std::uint32_t> realmMaximumLevel = std::nullopt,
     std::optional<SessionLearningView> learning = std::nullopt,
     std::optional<SessionMasteryView> mastery = std::nullopt, bool includeShared = false,
-    bool includeResources = false, bool includeDebuffs = false)
+    bool includeResources = false, bool includeDebuffs = false, bool includeUtilityMastery = false)
 {
     if (!classId || classId > 255 || !characterLevel || characterLevel > 255 || !revision || abilities.size() > 512)
         return std::nullopt;
-    if ((includeDebuffs && !includeResources) || (includeResources && !includeShared))
+    if ((includeUtilityMastery && !includeDebuffs) || (includeDebuffs && !includeResources) ||
+        (includeResources && !includeShared))
         return std::nullopt;
     if (includeShared && !includeKinds)
         return std::nullopt;
@@ -240,7 +245,8 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
         }
     std::vector<std::string> lines;
     lines.reserve(abilities.size() * (includeKinds ? 6 : includeRoadmap ? 4 : 3) + rankCount + rewardCount + 3);
-    lines.push_back(Detail::WireLine('B', includeDebuffs ? DebuffMenuSchemaVersion :
+    lines.push_back(Detail::WireLine('B', includeUtilityMastery ? UtilityMasteryMenuSchemaVersion :
+        includeDebuffs ? DebuffMenuSchemaVersion :
         includeResources ? ResourceMenuSchemaVersion :
         includeShared ? SharedMenuSchemaVersion : includeKinds ? TypedMenuSchemaVersion :
         includeRoadmap ? RoadmapMenuSchemaVersion :
@@ -282,7 +288,8 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
                 ((view.RuleSet == 9 || view.RuleSet == 10) &&
                     (view.Route != PracticeRoute::Healing || view.Kind != AbilityKind::Mastery)) ||
                 view.Route < PracticeRoute::Damage ||
-                view.Route > (includeDebuffs ? PracticeRoute::AttackPowerReduction :
+                view.Route > (includeUtilityMastery ? PracticeRoute::UtilityResourceEfficiency :
+                    includeDebuffs ? PracticeRoute::AttackPowerReduction :
                     includeResources ? PracticeRoute::ResourceDrain : PracticeRoute::BuffCombat) ||
                 (view.Route == PracticeRoute::AttackPowerReduction &&
                     (view.Kind != AbilityKind::Ranked || (view.RuleSet != 1 && view.RuleSet != 4))) ||
@@ -294,6 +301,9 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
                     view.Route != PracticeRoute::ResourceDrain) ||
                 (view.Route == PracticeRoute::BuffCombat &&
                     (view.Kind != AbilityKind::Ranked || (view.RuleSet != 1 && view.RuleSet != 4))) ||
+                ((view.Route == PracticeRoute::UtilityCooldown ||
+                    view.Route == PracticeRoute::UtilityResourceEfficiency) &&
+                    (view.Kind != AbilityKind::Mastery || (view.RuleSet != 1 && view.RuleSet != 4))) ||
                 ((view.Kind == AbilityKind::Fixed) != (view.Route == PracticeRoute::Fixed)))
                 return std::nullopt;
             if (view.Kind != AbilityKind::Ranked && view.Kind != AbilityKind::Mastery && view.Kind != AbilityKind::Fixed)
@@ -365,6 +375,10 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
                     lines.back() += "|2";
                 if (reward.Reward.ResourceDrainBonusBasisPoints)
                     lines.back() += "|3";
+                if (reward.Reward.CooldownReductionBasisPoints)
+                    lines.back() += "|4";
+                if (reward.Reward.ResourceEfficiencyBasisPoints)
+                    lines.back() += "|5";
             }
             if (view.NextTrainingCap)
             {
@@ -491,7 +505,9 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
                 reward.Requirement.Proficiency != event.Reward.Requirement.Proficiency ||
                 reward.HealingBonusBasisPoints != event.Reward.HealingBonusBasisPoints ||
                 reward.DamageBonusBasisPoints != event.Reward.DamageBonusBasisPoints ||
-                reward.ResourceDrainBonusBasisPoints != event.Reward.ResourceDrainBonusBasisPoints)
+                reward.ResourceDrainBonusBasisPoints != event.Reward.ResourceDrainBonusBasisPoints ||
+                reward.CooldownReductionBasisPoints != event.Reward.CooldownReductionBasisPoints ||
+                reward.ResourceEfficiencyBasisPoints != event.Reward.ResourceEfficiencyBasisPoints)
                 return std::nullopt;
             lines.push_back(Detail::WireLine('O', revision, index + 1, event.AbilityId, event.Ordinal,
                 reward.Requirement.CharacterLevel, reward.Requirement.Proficiency, MasteryBonusAmount(reward)));
@@ -499,6 +515,10 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
                 lines.back() += "|2";
             if (reward.ResourceDrainBonusBasisPoints)
                 lines.back() += "|3";
+            if (reward.CooldownReductionBasisPoints)
+                lines.back() += "|4";
+            if (reward.ResourceEfficiencyBasisPoints)
+                lines.back() += "|5";
         }
     }
     if (session)

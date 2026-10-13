@@ -16,9 +16,17 @@ struct Variant
     std::uint32_t AbilityId;
     std::uint32_t EquivalentSpellId;
     std::uint32_t CharacterLevel;
+    bool TrainerBranch = false;
 };
 
 inline constexpr std::array Variants = {
+    Variant{ 14, 680308, 800212, 501329, 60 },
+    Variant{ 14, 501330, 800212, 501329, 65, true },
+    Variant{ 14, 501331, 800212, 501329, 65, true },
+    Variant{ 14, 501332, 800212, 501329, 70, true },
+    Variant{ 14, 501333, 800212, 501329, 77, true },
+    Variant{ 14, 501334, 800212, 501329, 80, true },
+    Variant{ 14, 501336, 800212, 501329, 74, true },
     Variant{ 27, 572390, 572384, 572389, 60 },
     Variant{ 27, 575045, 575040, 575043, 58 },
     Variant{ 27, 681160, 800852, 300865, 60 },

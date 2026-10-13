@@ -9,6 +9,23 @@
 
 namespace AbilityPractice::DevelopmentBuffs
 {
+inline constexpr std::array IllidariIntuition = {
+    AbilityRank{ 800212, 1, { 24, 1 } }, AbilityRank{ 501326, 2, { 32, 10 } },
+    AbilityRank{ 501327, 3, { 42, 20 } }, AbilityRank{ 501328, 4, { 52, 40 } },
+    AbilityRank{ 501329, 5, { 60, 60 } }
+};
+inline constexpr auto IllidariIntuitionCaps = Development::RankCaps(IllidariIntuition);
+inline constexpr std::array LibramOfConsecration = {
+    AbilityRank{ 801441, 1, { 4, 1 } }, AbilityRank{ 803890, 2, { 14, 10 } },
+    AbilityRank{ 803891, 3, { 24, 20 } }, AbilityRank{ 803892, 4, { 34, 40 } },
+    AbilityRank{ 803893, 5, { 44, 60 } }
+};
+inline constexpr auto LibramOfConsecrationCaps = Development::RankCaps(LibramOfConsecration);
+inline constexpr std::array WildBlessing = {
+    AbilityRank{ 681527, 1, { 46, 1 } }, AbilityRank{ 681538, 2, { 52, 10 } },
+    AbilityRank{ 681539, 3, { 58, 20 } }
+};
+inline constexpr auto WildBlessingCaps = Development::RankCaps(WildBlessing);
 inline constexpr std::array LeylineInscription = {
     AbilityRank{ 561260, 1, { 16, 1 } },
     AbilityRank{ 561261, 2, { 28, 10 } },
@@ -747,19 +764,42 @@ inline constexpr std::array Profiles = {
         Development::Policy, OutcomeKind::Damage },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 14, 800029, AbilityKind::Ranked, VengefulPact, VengefulPactCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 14, 800212, AbilityKind::Ranked, IllidariIntuition, IllidariIntuitionCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 19, 801441, AbilityKind::Ranked, LibramOfConsecration, LibramOfConsecrationCaps },
+        Development::Policy, OutcomeKind::Damage },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 21, 681527, AbilityKind::Ranked, WildBlessing, WildBlessingCaps },
         Development::Policy, OutcomeKind::Damage }
 };
 
-static_assert(Profiles.size() <= 64);
+static_assert([]
+{
+    for (auto const& profile : Profiles)
+        if (std::count_if(Profiles.begin(), Profiles.end(), [&profile](auto const& entry)
+            {
+                return entry.Definition.ClassId == profile.Definition.ClassId;
+            }) > 64)
+            return false;
+    return true;
+}());
 
 inline std::uint64_t ContributionBit(AbilityProfile const& profile)
 {
     if (profile.Definition.Kind != AbilityKind::Ranked || profile.Outcome != OutcomeKind::Damage)
         return 0;
-    for (std::size_t index = 0; index < Profiles.size(); ++index)
-        if (Profiles[index].Definition.ClassId == profile.Definition.ClassId &&
-            Profiles[index].Definition.AbilityId == profile.Definition.AbilityId)
+    std::size_t index = 0;
+    for (auto const& entry : Profiles)
+    {
+        if (entry.Definition.ClassId != profile.Definition.ClassId)
+            continue;
+        if (entry.Definition.AbilityId == profile.Definition.AbilityId)
             return std::uint64_t{ 1 } << index;
+        ++index;
+    }
     return 0;
 }
 
@@ -849,7 +889,10 @@ inline constexpr std::array Mechanics = {
     Mechanic{ 15, 680535, 1, 32, 143 },
     Mechanic{ 20, 802313, 21, 0, 15 },
     Mechanic{ 24, 1119754, 1, 4, 15 },
-    Mechanic{ 14, 800029, 1, 32, 143 }
+    Mechanic{ 14, 800029, 1, 32, 143 },
+    Mechanic{ 14, 800212, 21, 1 },
+    Mechanic{ 19, 801441, 1, 0, 4 },
+    Mechanic{ 21, 681527, 56, 8, 143, 2 }
 };
 
 static_assert(Mechanics.size() == Profiles.size());

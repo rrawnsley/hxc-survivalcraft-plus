@@ -15,10 +15,12 @@
 #include "AbilityPracticeDevelopmentLeech.h"
 #include "AbilityPracticeDevelopmentBuffs.h"
 #include "AbilityPracticeDevelopmentBuffVariants.h"
+#include "AbilityPracticeDevelopmentSpecializedBuffs.h"
 #include "AbilityPracticeDevelopmentFixed.h"
 #include "AbilityPracticeDevelopmentConjureFixed.h"
 #include "AbilityPracticeDevelopmentPassiveFixed.h"
 #include "AbilityPracticeDevelopmentUtilityFixed.h"
+#include "AbilityPracticeDevelopmentUtilityMastery.h"
 #include "AbilityPracticeDevelopmentTrainerFixed.h"
 #include "AbilityPracticeDevelopmentTrainerRanks.h"
 #include "AbilityPracticeDevelopmentBuffTrainerRanks.h"
@@ -45,6 +47,9 @@
 #include "CryptoRandom.h"
 #include "CombatManager.h"
 #include "Creature.h"
+#include "CellImpl.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
 #include "DBCStores.h"
 #include "Formulas.h"
 #include "Log.h"
@@ -138,7 +143,9 @@ bool SameProfile(Practice::AbilityProfile const& left, Practice::AbilityProfile 
                 return SameMilestone(lhs.Requirement, rhs.Requirement) &&
                     lhs.HealingBonusBasisPoints == rhs.HealingBonusBasisPoints &&
                     lhs.DamageBonusBasisPoints == rhs.DamageBonusBasisPoints &&
-                    lhs.ResourceDrainBonusBasisPoints == rhs.ResourceDrainBonusBasisPoints;
+                    lhs.ResourceDrainBonusBasisPoints == rhs.ResourceDrainBonusBasisPoints &&
+                    lhs.CooldownReductionBasisPoints == rhs.CooldownReductionBasisPoints &&
+                    lhs.ResourceEfficiencyBasisPoints == rhs.ResourceEfficiencyBasisPoints;
             });
 }
 
@@ -396,6 +403,8 @@ bool MasteryRequested = false;
 bool HelpersRequested = false;
 bool DirectLeechRequested = false;
 bool BuffContributionRequested = false;
+bool SpecializedBuffsRequested = false;
+bool UtilityMasteryRequested = false;
 bool SharedBuffVariantsRequested = false;
 bool TrainerRanksRequested = false;
 bool AbsorptionRequested = false;
@@ -510,6 +519,7 @@ struct MenuSession
     Clock::time_point NextArcaneSigilPractice{};
     Clock::time_point NextGeodePractice{};
     std::unordered_map<std::uint64_t, Clock::time_point> NextTriggeredDamagePractice;
+    std::unordered_map<std::uint64_t, std::uint32_t> UtilityEfficiencyRemainders;
     Clock::time_point NextEarthquakePractice{};
     Clock::time_point NextBellowPractice{};
     std::uint32_t OutgoingClass = 0;
@@ -544,6 +554,8 @@ std::uint64_t ProfileKey(Practice::AbilityDefinition const& ability)
 {
     return (static_cast<std::uint64_t>(ability.ClassId) << 32) | ability.AbilityId;
 }
+
+bool MatchesSpecializedBuffSpell(SpellInfo const* info);
 
 bool HasSupportedPeriodicOutcome(SpellInfo const* info, Practice::OutcomeKind outcome)
 {
@@ -1253,6 +1265,9 @@ bool HasSupportedSpecializedOutcome(SpellInfo const* info, Practice::AbilityProf
     }
     if (BuffContributionRequested && Practice::DevelopmentBuffs::IsSupportedStatBuff(profile))
     {
+        if (profile.Definition.AbilityId == 800212 || profile.Definition.AbilityId == 801441 ||
+            profile.Definition.AbilityId == 681527)
+            return MatchesSpecializedBuffSpell(info);
         if (Practice::DevelopmentBuffs::IsHealingTradeoffBuff(profile) &&
             !Practice::DevelopmentBuffs::IsLeylineInscription(profile))
         {
@@ -2505,7 +2520,12 @@ bool MatchesUtilityFixedMechanic(Practice::AbilityProfile const& profile)
         });
     if (found == authored.end())
         return true;
-    if (!SameProfile(profile, *found))
+    if (!SameProfile(profile, *found) &&
+        !(UtilityMasteryRequested && Practice::DevelopmentUtilityMastery::Contains(
+            profile.Definition.ClassId, profile.Definition.AbilityId) &&
+            profile.Definition.Kind == Practice::AbilityKind::Mastery &&
+            profile.Definition.Ranks.size() == 1 &&
+            profile.Definition.Ranks.front().SpellId == found->Definition.Ranks.front().SpellId))
         return false;
     return std::all_of(profile.Definition.Ranks.begin(), profile.Definition.Ranks.end(),
         [&profile](Practice::AbilityRank const& rank)
@@ -2523,6 +2543,14 @@ bool MatchesSharedBuffVariants()
         return false;
     for (auto const& variant : Practice::DevelopmentBuffVariants::Variants)
     {
+        auto reject = [&variant](std::uint32_t boundary)
+        {
+            LOG_ERROR("module.ability_practice", "Rejected shared buff boundary: class={}, spell={}, boundary={}",
+                variant.ClassId, variant.SpellId, boundary);
+            return false;
+        };
+        if (variant.AbilityId == 800212 && !SpecializedBuffsRequested)
+            continue;
         auto const* profile = ProfileLookup->Find(variant.ClassId, variant.AbilityId);
         auto const* rank = profile ? Practice::DevelopmentBuffVariants::EquivalentRank(*profile, variant) : nullptr;
         SpellInfo const* info = sSpellMgr->GetSpellInfo(variant.SpellId);
@@ -2530,7 +2558,7 @@ bool MatchesSharedBuffVariants()
         if (ProfileLookup->Find(variant.ClassId, variant.SpellId) ||
             !rank || !info || !parent || info->IsPassive() || info->IsDeprecatedForPlayers ||
             info->SpellFamilyName != parent->SpellFamilyName)
-            return false;
+            return reject(1);
         if (profile->Definition.Kind == Practice::AbilityKind::Ranked &&
             (profile->DefinitionVersion != Practice::DevelopmentRankCaps::DefinitionVersion ||
                 std::any_of(profile->Policy.Bands.begin(), profile->Policy.Bands.end(),
@@ -2538,7 +2566,13 @@ bool MatchesSharedBuffVariants()
                     {
                         return band.PointsPerLevel != profile->Policy.Bands.front().PointsPerLevel;
                     })))
-            return false;
+            return reject(2);
+        if (variant.AbilityId == 800212)
+        {
+            if (!MatchesSpecializedBuffSpell(info))
+                return reject(3);
+        }
+        else
         for (std::size_t index = 0; index < 3; ++index)
         {
             auto const& slot = info->Effects[index];
@@ -2562,7 +2596,7 @@ bool MatchesSharedBuffVariants()
                 slot.MiscValue != expected.MiscValue || slot.MiscValueB != expected.MiscValueB ||
                 slot.BasePoints != expected.BasePoints || slot.DieSides != expected.DieSides ||
                 slot.RealPointsPerLevel != expected.RealPointsPerLevel)
-                return false;
+                return reject(4);
         }
         auto const scripts = sObjectMgr->GetSpellScriptsBounds(info->Id);
         auto entry = scripts.first;
@@ -2571,7 +2605,7 @@ bool MatchesSharedBuffVariants()
             if (entry == scripts.second ||
                 sObjectMgr->GetScriptName(entry->second) != "aura_ascension_witch_doctor_lifecycle" ||
                 ++entry != scripts.second)
-                return false;
+                return reject(5);
         }
         else if (variant.ClassId == 28)
         {
@@ -2579,7 +2613,7 @@ bool MatchesSharedBuffVariants()
                 !Practice::DevelopmentBuffs::IsManaModule(*profile)) || !HasExpectedModuleGroup(info->Id) ||
                 entry == scripts.second || sObjectMgr->GetScriptName(entry->second) !=
                     "aura_ascension_tinker_lifecycle" || ++entry != scripts.second)
-                return false;
+                return reject(6);
         }
         else if (variant.ClassId == 27)
         {
@@ -2590,7 +2624,7 @@ bool MatchesSharedBuffVariants()
             {
                 LOG_ERROR("module.ability_practice", "Rejected shared Sun Cleric buff: ability={}, spell={}",
                     variant.AbilityId, variant.SpellId);
-                return false;
+                return reject(7);
             }
         }
         else if (variant.ClassId == 22)
@@ -2598,7 +2632,7 @@ bool MatchesSharedBuffVariants()
             constexpr std::array<std::int32_t, 4> wisdom{ 572391, 572396, 680307, 801523 };
             if (info->SpellFamilyName != 28 || entry != scripts.second ||
                 !HasExactBuffGroup(info->Id, 1135, SPELL_GROUP_STACK_RULE_EXCLUSIVE_FROM_SAME_CASTER, wisdom))
-                return false;
+                return reject(8);
         }
         else if (variant.ClassId == 18)
         {
@@ -2606,67 +2640,72 @@ bool MatchesSharedBuffVariants()
             auto const regular = sSpellMgr->GetSpellSpellGroupMapBounds(parent->Id);
             if (info->SpellFamilyName != 24 || entry != scripts.second ||
                 groups.first != groups.second || regular.first != regular.second)
-                return false;
+                return reject(9);
         }
         else if (variant.ClassId == 16)
         {
             if (info->SpellFamilyName != 22 || entry != scripts.second ||
                 !HasExpectedStormbornSharedGroup(variant.AbilityId, info->Id))
-                return false;
+                return reject(10);
         }
         else if (variant.ClassId == 26)
         {
             if (info->SpellFamilyName != 32 || entry != scripts.second ||
                 !HasExpectedStarcallerGroup(variant.AbilityId, info->Id))
-                return false;
+                return reject(11);
         }
         else if (variant.ClassId == 30)
         {
             if (info->SpellFamilyName != 36 || entry != scripts.second || !HasExpectedRiteGroup(info->Id))
-                return false;
+                return reject(12);
         }
         else if (variant.ClassId == 31)
         {
             if (info->SpellFamilyName != 37 || entry != scripts.second ||
                 !HasExpectedGeomancerGroup(variant.AbilityId, info->Id))
-                return false;
+                return reject(13);
         }
         else if (variant.ClassId == 32)
         {
             if (entry != scripts.second || !HasExpectedEtchingGroup(variant.AbilityId, info->Id))
-                return false;
+                return reject(14);
         }
         else if (variant.ClassId == 21)
         {
             if (entry != scripts.second || !HasExpectedAdaptationGroup(variant.AbilityId, info->Id))
-                return false;
+                return reject(15);
+        }
+        else if (variant.AbilityId == 800212)
+        {
+            if (entry != scripts.second)
+                return reject(16);
         }
         else if (!IsArmorOrEdictProfile(*profile) || entry != scripts.second ||
             !HasExpectedArmorOrEdictGroup(variant.AbilityId, info->Id))
-            return false;
+            return reject(17);
         std::array const ranks = { Practice::AbilityRank{ variant.SpellId, 1, { variant.CharacterLevel, 1 } } };
         Practice::AbilityProfile const native{
             Practice::Development::DefinitionVersion, Practice::AcquisitionSource::ClassGrant,
             { variant.ClassId, variant.SpellId, Practice::AbilityKind::Fixed, ranks, {} },
             Practice::Development::Policy, Practice::OutcomeKind::None };
-        if (!MatchesNativeClassGrant(native))
-            return false;
+        if (!variant.TrainerBranch && !MatchesNativeClassGrant(native))
+            return reject(18);
         auto const& trainers = sObjectMgr->GetTrainers();
         auto const found = trainers.find(900000 + variant.ClassId);
         if (found == trainers.end() || found->second.GetTrainerType() != Trainer::Type::Class ||
             found->second.GetTrainerRequirement() != variant.ClassId)
-            return false;
+            return reject(19);
         auto const& offers = found->second.GetSpells();
         if (std::count_if(offers.begin(), offers.end(), [&variant](Trainer::Spell const& offer)
             {
                 return offer.SpellId == variant.SpellId;
             }) != 1)
-            return false;
+            return reject(20);
         auto const* offer = found->second.GetSpell(variant.SpellId);
         if (!offer || offer->ReqLevel != variant.CharacterLevel || offer->ReqSkillLine || offer->ReqSkillRank ||
-            std::any_of(offer->ReqAbility.begin(), offer->ReqAbility.end(),
-                [](std::uint32_t required) { return required != 0; }))
-            return false;
+            offer->ReqAbility[0] != (variant.TrainerBranch ? variant.EquivalentSpellId : 0u) ||
+            offer->ReqAbility[1] || offer->ReqAbility[2])
+            return reject(21);
     }
     return true;
 }
@@ -2821,6 +2860,26 @@ bool MatchesNativeClassTrainer(Practice::AbilityProfile const& profile)
         }) == 1;
 }
 
+bool MatchesSpecializedBuffSpell(SpellInfo const* info)
+{
+    auto const* expected = info ? Practice::DevelopmentSpecializedBuffs::Find(info->Id) : nullptr;
+    if (!expected || info->SpellLevel != expected->Level || info->SpellFamilyName != expected->Family ||
+        info->IsPassive() || info->IsDeprecatedForPlayers)
+        return false;
+    for (std::size_t index = 0; index < 3; ++index)
+    {
+        auto const& effect = info->Effects[index];
+        auto const& authored = expected->Effects[index];
+        if (info->SpellFamilyFlags[index] != expected->Flags[index] || effect.Effect != authored.Kind ||
+            effect.ApplyAuraName != authored.Aura || effect.TargetA.GetTarget() != authored.Target ||
+            effect.TargetB.GetTarget() || effect.MiscValue != authored.Selector ||
+            effect.BasePoints != authored.Points || effect.DieSides != authored.DieSides ||
+            effect.TriggerSpell != authored.Trigger || effect.RealPointsPerLevel != authored.PointsPerLevel)
+            return false;
+    }
+    return true;
+}
+
 bool MatchesEffectiveRankChain(Practice::AbilityProfile const& profile)
 {
     auto const& ability = profile.Definition;
@@ -2865,6 +2924,10 @@ bool MatchesTrainerRankBoundary(Practice::AbilityDefinition const& ability)
         return false;
     auto known = [&ability](std::uint32_t spell)
     {
+        if (SharedBuffVariantsRequested)
+            if (auto const* variant = Practice::DevelopmentBuffVariants::Find(ability.ClassId, spell);
+                variant && variant->AbilityId == ability.AbilityId)
+                return true;
         return std::any_of(ability.Ranks.begin(), ability.Ranks.end(),
             [spell](Practice::AbilityRank const& rank) { return rank.SpellId == spell; });
     };
@@ -3053,7 +3116,8 @@ bool EffectiveBuffComponent(Player* player, AuraApplication const& application, 
             aura != SPELL_AURA_MOD_ATTACK_POWER && aura != SPELL_AURA_MOD_RANGED_ATTACK_POWER &&
             aura != SPELL_AURA_HASTE_SPELLS && aura != SPELL_AURA_MOD_CRIT_DAMAGE_BONUS &&
             aura != SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL && aura != SPELL_AURA_MOD_HEALING &&
-            aura != SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE && aura != SPELL_AURA_DAMAGE_SHIELD) ||
+            aura != SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE && aura != SPELL_AURA_DAMAGE_SHIELD &&
+            aura != SPELL_AURA_PROC_TRIGGER_SPELL && aura != SPELL_AURA_MOD_MELEE_ATTACK_POWER_VERSUS) ||
         !effect || effect->GetAuraType() != aura || effect->GetMiscValue() != selector ||
         (costReduction ? ((rankedCostReduction ? effect->GetAmount() >= 0 : effect->GetAmount() != -5) ||
             selector != 127) : durationReduction ?
@@ -3086,6 +3150,16 @@ bool EffectiveBuffComponent(Player* player, AuraApplication const& application, 
 bool EffectiveBuffApplication(Player* player, AuraApplication const& application,
     Practice::AbilityProfile const& profile)
 {
+    auto const* specialized = Practice::DevelopmentSpecializedBuffs::Find(application.GetBase()->GetId());
+    if (profile.Definition.AbilityId == 801441)
+    {
+        auto const* effect = application.GetBase()->GetEffect(EFFECT_0);
+        return specialized && application.HasEffect(EFFECT_0) && effect &&
+            effect->GetAuraType() == SPELL_AURA_DUMMY && effect->GetAmount() == 100 &&
+            MatchesSpecializedBuffSpell(application.GetBase()->GetSpellInfo());
+    }
+    if (profile.Definition.AbilityId == 800212 && specialized && specialized->Effects[0].Aura == 102)
+        return EffectiveBuffComponent(player, application, 0, 102, 1);
     if (!EffectiveBuffComponent(player, application, Practice::DevelopmentBuffs::EffectIndex(profile),
         Practice::DevelopmentBuffs::Aura(profile), Practice::DevelopmentBuffs::StatSelector(
             profile, application.GetBase()->GetSpellInfo()->Id)))
@@ -3196,6 +3270,61 @@ bool IsDevelopmentOpponent(Player const* player, Unit const* opponent)
     return script != "npc_training_dummy" && script != "npc_target_dummy";
 }
 
+constexpr std::uint32_t EyeRevealCountKey = 0x45590000;
+constexpr std::uint32_t EyeRevealGuidKey = 0x45590100;
+constexpr std::uint32_t EyeRevealStateKey = 0x45590200;
+constexpr std::uint32_t MaximumEyeRevealTargets = 64;
+
+void CaptureEyeReveals(Player* player, Spell* spell)
+{
+    if (!UtilityMasteryRequested || spell->GetSpellInfo()->Id != 804052 || !spell->GetPracticeCast())
+        return;
+    float const radius = std::max(spell->GetSpellInfo()->Effects[EFFECT_0].CalcRadius(player),
+        spell->GetSpellInfo()->Effects[EFFECT_1].CalcRadius(player));
+    std::list<Unit*> nearby;
+    Acore::AnyUnitInObjectRangeCheck check(player, radius);
+    Acore::UnitListSearcher<Acore::AnyUnitInObjectRangeCheck> searcher(player, nearby, check);
+    Cell::VisitObjects(player, searcher, radius);
+    std::uint32_t count = 0;
+    for (Unit* target : nearby)
+    {
+        if (!target->IsAlive() || !IsDevelopmentOpponent(player, target) || count == MaximumEyeRevealTargets)
+            continue;
+        std::uint32_t state = 0;
+        std::array const types{ SPELL_AURA_MOD_STEALTH, SPELL_AURA_MOD_INVISIBILITY };
+        for (std::uint32_t index = 0; index < types.size(); ++index)
+            for (auto const* effect : target->GetAuraEffectsByType(types[index]))
+            {
+                auto const* aura = effect->GetBase();
+                if (!aura->IsPassive() && aura->GetSpellInfo()->Dispel == (index ? DISPEL_INVISIBILITY : DISPEL_STEALTH) &&
+                    (aura->GetDuration() < 0 || aura->GetDuration() >= 1000))
+                    state |= 1u << index;
+            }
+        if (!state)
+            continue;
+        spell->SetScriptValue(EyeRevealGuidKey + count, target->GetGUID().GetRawValue());
+        spell->SetScriptValue(EyeRevealStateKey + count, state);
+        ++count;
+    }
+    spell->SetScriptValue(EyeRevealCountKey, count);
+}
+
+bool HasCapturedEyeReveal(Spell* spell, Unit* target)
+{
+    if (!UtilityMasteryRequested || spell->GetSpellInfo()->Id != 804052)
+        return false;
+    std::uint32_t const count = static_cast<std::uint32_t>(
+        std::min<std::uint64_t>(spell->GetScriptValue(EyeRevealCountKey), MaximumEyeRevealTargets));
+    for (std::uint32_t index = 0; index < count; ++index)
+        if (spell->GetScriptValue(EyeRevealGuidKey + index) == target->GetGUID().GetRawValue())
+        {
+            auto const state = spell->GetScriptValue(EyeRevealStateKey + index);
+            return ((state & 1u) && !target->HasAuraType(SPELL_AURA_MOD_STEALTH)) ||
+                ((state & 2u) && !target->HasAuraType(SPELL_AURA_MOD_INVISIBILITY));
+        }
+    return false;
+}
+
 bool HasCapturedCorpse(Player const* player, CoAAbilityPractice::CastReceipt const& receipt)
 {
     if (!HelpersRequested || !MasteryRequested || !player || !player->IsInWorld() || !player->FindMap() ||
@@ -3273,7 +3402,7 @@ std::vector<std::uint32_t> Learned(Player const* player, Practice::AbilityDefini
 CoAAbilityPractice::RankDecision EvaluateRank(Player const* player, std::uint32_t spellId)
 {
     using Decision = CoAAbilityPractice::RankDecision;
-    if (!RankActive.load() || !IsProfiledPlayer(player))
+    if (!RankActive.load() || !IsProfiledPlayer(player) || !Affects(player))
         return Decision::Unmanaged;
     auto const* variant = SharedBuffVariantsRequested ?
         Practice::DevelopmentBuffVariants::Find(player->getClass(), spellId) : nullptr;
@@ -3289,6 +3418,8 @@ CoAAbilityPractice::RankDecision EvaluateRank(Player const* player, std::uint32_
     std::lock_guard lock(Mutex);
     if (!RankRequested || !Affects(player))
         return Decision::Unmanaged;
+    if (variant && variant->TrainerBranch && !player->HasSpell(variant->EquivalentSpellId))
+        return Decision::Blocked;
     std::uint32_t const canonicalSpellId = SharedBuffRankSpellId(*ability, spellId);
     auto const desired = std::find_if(ability->Ranks.begin(), ability->Ranks.end(),
         [canonicalSpellId](Practice::AbilityRank const& rank) { return rank.SpellId == canonicalSpellId; });
@@ -3428,6 +3559,10 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
             Practice::AbilityDefinition const& ability = profile.Definition;
             if (ability.ClassId != player->getClass())
                 continue;
+            if (session.Protocol < Practice::UtilityMasteryMenuSchemaVersion &&
+                Practice::DevelopmentUtilityMastery::Contains(ability.ClassId, ability.AbilityId) &&
+                ability.Kind == Practice::AbilityKind::Mastery)
+                continue;
             if (session.Protocol < Practice::TypedMenuSchemaVersion &&
                 (ability.Kind == Practice::AbilityKind::Mastery ||
                     Practice::DevelopmentBuffs::IsSupportedStatBuff(profile)))
@@ -3483,6 +3618,10 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
                 ? Practice::PracticeRoute::DamageOrRoot :
                 AbsorptionRequested && Practice::DevelopmentAbsorption::IsEmeraldVeil(profile)
                 ? Practice::PracticeRoute::HealingAbsorption : RouteFor(profile.Outcome);
+            if (ability.Kind == Practice::AbilityKind::Mastery &&
+                Practice::DevelopmentUtilityMastery::Contains(ability.ClassId, ability.AbilityId))
+                view.Route = profile.Rewards.front().CooldownReductionBasisPoints ?
+                    Practice::PracticeRoute::UtilityCooldown : Practice::PracticeRoute::UtilityResourceEfficiency;
             view.AcquisitionSourceId = static_cast<std::uint32_t>(profile.Acquisition);
             if (view.Route == Practice::PracticeRoute::BuffCombat)
                 view.BuffState = BuffStateFor(player, session, profile);
@@ -3564,6 +3703,10 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
         std::any_of(mastery.Events.begin(), mastery.Events.end(), [](auto const& event)
         { return event.Reward.ResourceDrainBonusBasisPoints != 0; }))
         mastery = { false, 0, {} };
+    if (session.Protocol < Practice::UtilityMasteryMenuSchemaVersion &&
+        std::any_of(mastery.Events.begin(), mastery.Events.end(), [](auto const& event)
+        { return event.Reward.CooldownReductionBasisPoints || event.Reward.ResourceEfficiencyBasisPoints; }))
+        mastery = { false, 0, {} };
     auto messages = Practice::EncodeMenuSnapshot(player->getClass(), player->GetLevel(), ++Revision, views,
         session.Protocol >= Practice::SessionMenuSchemaVersion
             ? std::optional<Practice::SessionPractice>(progress) : std::nullopt,
@@ -3576,7 +3719,8 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
             ? std::optional<Practice::SessionMasteryView>(mastery)
             : std::nullopt, session.Protocol >= Practice::SharedMenuSchemaVersion,
         session.Protocol >= Practice::ResourceMenuSchemaVersion,
-        session.Protocol >= Practice::DebuffMenuSchemaVersion);
+        session.Protocol >= Practice::DebuffMenuSchemaVersion,
+        session.Protocol >= Practice::UtilityMasteryMenuSchemaVersion);
     if (!messages || messages->size() > MaxQueuedMessages)
         return false;
     if (OldSchoolRequired)
@@ -3656,11 +3800,60 @@ void RecordAward(Player* player, MenuSession& session, Practice::AbilityProfile 
         Refresh(player, session, Clock::now());
 }
 
+std::uint32_t UtilityMasteryBonus(Player* player, Practice::AbilityProfile const& profile)
+{
+    if (!UtilityMasteryRequested || !MasteryRequested || profile.Definition.Kind != Practice::AbilityKind::Mastery ||
+        !Practice::DevelopmentUtilityMastery::Contains(profile.Definition.ClassId, profile.Definition.AbilityId))
+        return 0;
+    auto const loaded = Practice::ReadPlayerProgress(*player, profile.Definition.ClassId,
+        profile.Definition.AbilityId, profile.Policy, profile.DefinitionVersion);
+    if (loaded.Status != Practice::LoadStatus::Loaded)
+        return 0;
+    return Practice::MasteryBonus(profile.Definition, profile.Rewards, loaded.Record.State, player->GetLevel(),
+        player->HasSpell(profile.Definition.AbilityId),
+        AcquisitionAllowed(player, profile.Definition, profile.Definition.AbilityId),
+        profile.Rewards.front().CooldownReductionBasisPoints ? Practice::MasteryEffect::Cooldown :
+            Practice::MasteryEffect::ResourceEfficiency);
+}
+
+void ApplyUtilityMasteryEfficiency(Player* player, Spell* spell, Practice::AbilityProfile const& profile,
+    std::uint32_t basisPoints, MenuSession& session)
+{
+    if (!basisPoints || basisPoints > Practice::MaximumMasteryBasisPoints ||
+        !Practice::DevelopmentUtilityMastery::Contains(profile.Definition.ClassId, profile.Definition.AbilityId))
+        return;
+    if (profile.Rewards.front().CooldownReductionBasisPoints)
+    {
+        auto const* info = spell->GetSpellInfo();
+        std::uint32_t const base = std::max(info->RecoveryTime, info->CategoryRecoveryTime);
+        std::uint32_t const reduction = std::min(player->GetSpellCooldownDelay(info->Id),
+            Practice::MasteryEfficiencyAmount(base, basisPoints));
+        if (reduction)
+            player->ModifySpellCooldown(info->Id, -static_cast<std::int32_t>(reduction));
+    }
+    else
+    {
+        auto const power = spell->GetSpellInfo()->PowerType;
+        if (power < POWER_MANA || power >= MAX_POWERS || spell->GetPowerCost() <= 0)
+            return;
+        auto& remainder = session.UtilityEfficiencyRemainders[ProfileKey(profile.Definition)];
+        auto const refund = Practice::AccumulateMasteryEfficiency(
+            static_cast<std::uint32_t>(spell->GetPowerCost()), basisPoints, remainder);
+        remainder = refund.Remainder;
+        if (refund.Amount)
+            player->ModifyPower(static_cast<Powers>(power), static_cast<std::int32_t>(refund.Amount));
+    }
+}
+
 void AwardOutcome(Player* player, Spell* spell, Practice::AbilityProfile const& profile)
 {
     std::lock_guard lock(Mutex);
     std::uint64_t const source = (static_cast<std::uint64_t>(profile.Definition.ClassId) << 32) |
         spell->GetSpellInfo()->Id;
+    if (Practice::DevelopmentUtilityMastery::Contains(profile.Definition.ClassId, profile.Definition.AbilityId))
+        LOG_DEBUG("module.ability_practice", "Utility award gate: spell={}, active={}, source={}, expected={}, receipt={}",
+            spell->GetSpellInfo()->Id, Affects(player), spell->GetScriptValue(PracticeCastSourceKey), source,
+            bool(spell->GetPracticeCast()));
     if (!Affects(player) || player->isBeingLoaded() || spell->GetScriptValue(PracticeCastSourceKey) != source ||
         !AcquisitionAllowed(player, profile.Definition, spell->GetSpellInfo()->Id))
         return;
@@ -3677,10 +3870,18 @@ void AwardOutcome(Player* player, Spell* spell, Practice::AbilityProfile const& 
         return;
     if (profile.Definition.Kind == Practice::AbilityKind::Mastery)
         ObserveMastery(player, session, false);
+    std::uint32_t const utilityBonus = UtilityMasteryBonus(player, profile);
     auto const award = Practice::HandleOutcome(*player, *spell, profile.Definition,
         effective->View(), profile.DefinitionVersion, context);
+    if (Practice::DevelopmentUtilityMastery::Contains(profile.Definition.ClassId, profile.Definition.AbilityId))
+        LOG_DEBUG("module.ability_practice", "Utility award result: spell={}, status={}, proficiency={}, points={}",
+            spell->GetSpellInfo()->Id, static_cast<unsigned>(award.Status), award.Record.State.Proficiency,
+            award.Record.State.Points);
     if (award.Status == Practice::OutcomeStatus::Awarded || award.Status == Practice::OutcomeStatus::Capped)
+    {
         receipt->MarkConsumed();
+        ApplyUtilityMasteryEfficiency(player, spell, profile, utilityBonus, session);
+    }
     RecordAward(player, session, profile, award);
 }
 
@@ -3870,6 +4071,20 @@ bool AwardOwnedBuffContribution(Player* player, MenuSession& session,
     return accepted;
 }
 
+bool SpecializedBuffOutcomeUseful(Player* player, MenuSession const& session,
+    Practice::AbilityProfile const& profile, SpellInfo const* action, Unit* target, std::uint32_t damage)
+{
+    if (profile.Definition.AbilityId == 801441)
+        return damage != 0;
+    if (profile.Definition.AbilityId != 800212)
+        return true;
+    auto const* buff = AcceptedBuffSpell(player, session, profile);
+    if (!buff || !buff->HasAura(SPELL_AURA_MOD_MELEE_ATTACK_POWER_VERSUS))
+        return true;
+    return damage && IsMeleeOrRangedAbility(action) && target &&
+        (target->GetCreatureTypeMask() & static_cast<std::uint32_t>(buff->Effects[EFFECT_0].MiscValue));
+}
+
 void AwardBuffContribution(Player* player, Spell* spell, Unit* target, std::uint32_t damage, std::uint32_t healing)
 {
     if (!IsBuffObserver(player) || !spell || !spell->GetScriptValue(PracticeBuffEligibilityKey) ||
@@ -3890,6 +4105,8 @@ void AwardBuffContribution(Player* player, Spell* spell, Unit* target, std::uint
     auto const now = Clock::now();
     for (auto const* profile : ProfilesForClass(player->getClass()))
     {
+        if (!SpecializedBuffOutcomeUseful(player, session, *profile, spell->GetSpellInfo(), target, damage))
+            continue;
         if (Practice::DevelopmentBuffs::IsPairedAttackPower(*profile) &&
             (!damage || !IsMeleeOrRangedAbility(spell->GetSpellInfo())))
             continue;
@@ -3941,6 +4158,8 @@ void AwardPeriodicBuffContribution(Player* player, Unit* target, std::uint32_t a
     auto const now = Clock::now();
     for (auto const* buffProfile : ProfilesForClass(player->getClass()))
     {
+        if (!SpecializedBuffOutcomeUseful(player, session, *buffProfile, info, target, damage))
+            continue;
         std::uint64_t const bit = Practice::DevelopmentBuffs::ContributionBit(*buffProfile);
         if (!bit || (periodic->AwardedBits & bit) ||
             (Practice::DevelopmentBuffs::IsPairedAttackPower(*buffProfile) &&
@@ -4107,6 +4326,10 @@ void AwardUtilityOutcome(Spell* spell, Unit* target, Practice::OutcomeKind kind,
     bool const qualified = player->IsFriendlyTo(target) ?
         kind == Practice::OutcomeKind::Dispel && HasDevelopmentEncounter(player, target) :
         IsDevelopmentOpponent(player, target);
+    if (Practice::DevelopmentUtilityMastery::Contains(profile->Definition.ClassId, profile->Definition.AbilityId))
+        LOG_DEBUG("module.ability_practice", "Utility outcome: spell={}, kind={}, count={}, qualified={}, profile={}",
+            spell->GetSpellInfo()->Id, static_cast<unsigned>(kind), count, qualified,
+            static_cast<unsigned>(profile->Definition.Kind));
     if (qualified)
         AwardOutcome(player, spell, *profile);
 }
@@ -4328,6 +4551,10 @@ public:
             sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentDirectLeech", false);
         BuffContributionRequested =
             sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentBuffContribution", false);
+        SpecializedBuffsRequested =
+            sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentSpecializedBuffs", false);
+        UtilityMasteryRequested =
+            sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentUtilityMastery", false);
         SharedBuffVariantsRequested =
             sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentSharedBuffVariants", false);
         AbsorptionRequested = sConfigMgr->GetOption<bool>("AbilityPractice.AllowDevelopmentAbsorption", false);
@@ -4380,7 +4607,8 @@ public:
             AppendProfiles(RuntimeProfiles, Practice::DevelopmentLeech::Profiles);
         bool const buffValid = !BuffContributionRequested ||
             (PacingRequested && TrainerRanksRequested &&
-                AppendProfiles(RuntimeProfiles, Practice::DevelopmentBuffs::Profiles));
+                AppendProfiles(RuntimeProfiles, std::span(Practice::DevelopmentBuffs::Profiles).first(
+                    Practice::DevelopmentBuffs::Profiles.size() - (SpecializedBuffsRequested ? 0 : 3))));
         bool const absorptionValid = !AbsorptionRequested ||
             AppendProfiles(RuntimeProfiles, Practice::DevelopmentAbsorption::Profiles);
         bool const fixedValid = !fixedCatalog || AppendProfiles(RuntimeProfiles, Practice::DevelopmentFixed::Profiles);
@@ -4390,6 +4618,17 @@ public:
             AppendProfiles(RuntimeProfiles, Practice::DevelopmentPassiveFixed::Profiles);
         bool const utilityFixedValid = !utilityFixedCatalog ||
             AppendProfiles(RuntimeProfiles, Practice::DevelopmentUtilityFixed::Profiles);
+        bool utilityMasteryValid = true;
+        if (UtilityMasteryRequested && MasteryRequested)
+        {
+            std::erase_if(RuntimeProfiles, [](Practice::AbilityProfile const& profile)
+            {
+                return profile.Definition.Kind == Practice::AbilityKind::Fixed &&
+                    Practice::DevelopmentUtilityMastery::Contains(profile.Definition.ClassId,
+                        profile.Definition.AbilityId);
+            });
+            utilityMasteryValid = AppendProfiles(RuntimeProfiles, Practice::DevelopmentUtilityMastery::Profiles);
+        }
         bool const controlFixedValid = !controlFixedCatalog ||
             AppendProfiles(RuntimeProfiles, Practice::DevelopmentControlFixed::Profiles);
         bool const trainerFixedValid = !trainerFixedCatalog ||
@@ -4408,11 +4647,15 @@ public:
             (RankCapsRequested && rankCapsValid && ApplyResourcePacing(RuntimeProfiles));
         std::span<Practice::AbilityProfile const> const profiles(RuntimeProfiles);
         ProfileLookup.emplace(profiles);
+        bool const sharedVariantsValid = MatchesSharedBuffVariants();
+        LOG_INFO("module.ability_practice", "Profile readiness: index={}, ranks={}, pacing={}, mastery={}, caps={}, shared={}",
+            ProfileLookup->IsValid(), trainerRanksValid, pacingValid, utilityMasteryValid, rankCapsValid, sharedVariantsValid);
         Ready = ProfileLookup->IsValid() && periodicValid && masteryValid && scriptedMasteryValid &&
             helpersValid && fixedValid &&
             absorptionValid && controlValid && pacingValid && masteryPacingValid && trainerFixedValid &&
             directLeechValid && conjureFixedValid && trainerRanksValid && passiveFixedValid && utilityFixedValid &&
-            controlFixedValid && buffValid && rankCapsValid && resourcePacingValid && MatchesSharedBuffVariants() &&
+            utilityMasteryValid &&
+            controlFixedValid && buffValid && rankCapsValid && resourcePacingValid && sharedVariantsValid &&
             Practice::ValidCatchupSettings(Catchup);
         for (Practice::AbilityProfile const& profile : profiles)
         {
@@ -4637,7 +4880,7 @@ public:
             return true;
         if (receiver != player || (message != "HXAP\tHELLO|1" && message != "HXAP\tHELLO|2" &&
             message != "HXAP\tHELLO|3" && message != "HXAP\tHELLO|4" && message != "HXAP\tHELLO|5" &&
-            message != "HXAP\tHELLO|6" && message != "HXAP\tHELLO|7"))
+            message != "HXAP\tHELLO|6" && message != "HXAP\tHELLO|7" && message != "HXAP\tHELLO|8"))
             return false;
         auto const now = Clock::now();
         auto& session = Sessions[player->GetGUID().GetRawValue()];
@@ -4653,7 +4896,8 @@ public:
         }
         session.LastRequest = now;
         session.InterestedUntil = now + InterestDuration;
-        std::uint32_t const protocol = message == "HXAP\tHELLO|7" ? Practice::DebuffMenuSchemaVersion :
+        std::uint32_t const protocol = message == "HXAP\tHELLO|8" ? Practice::UtilityMasteryMenuSchemaVersion :
+            message == "HXAP\tHELLO|7" ? Practice::DebuffMenuSchemaVersion :
             message == "HXAP\tHELLO|6" ? Practice::ResourceMenuSchemaVersion :
             message == "HXAP\tHELLO|5" ? Practice::SharedMenuSchemaVersion :
             message == "HXAP\tHELLO|4" ? Practice::TypedMenuSchemaVersion :
@@ -4907,6 +5151,7 @@ public:
                 spell->SetPracticeCast(std::make_shared<CoAAbilityPractice::CastReceipt>(
                     player->GetGUID().GetRawValue(), session.ActionSession, player->getClass(), spell->GetSpellInfo()->Id,
                     player->getRace(), player->GetActiveSpec(), session.LastCustomSpecialization));
+                CaptureEyeReveals(player, spell);
                 std::uint64_t eligible = 0;
                 if (IsBuffObserver(player))
                     for (auto const* buff : ProfilesForClass(player->getClass()))
@@ -4950,6 +5195,8 @@ public:
             Practice::DevelopmentMastery::IsFelBargain(*scriptedProfile) && spell->GetPracticeCast() &&
             scriptedHealing <= std::numeric_limits<std::uint32_t>::max())
             healing = std::max(healing, static_cast<std::uint32_t>(scriptedHealing));
+        if (HasCapturedEyeReveal(spell, target))
+            AwardUtilityOutcome(spell, target, Practice::OutcomeKind::Dispel, 1);
         BindBuffOrigin(player, spell, target);
         auto const receipt = spell->GetPracticeCast();
         auto const* corpseProfile = FindProfile(player, spell->GetSpellInfo()->Id);

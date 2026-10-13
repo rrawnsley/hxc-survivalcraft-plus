@@ -13,7 +13,8 @@ PROFILE_HEADERS = ('AbilityPracticeDevelopmentRanked.h', 'AbilityPracticeDevelop
                    'AbilityPracticeDevelopmentControl.h', 'AbilityPracticeDevelopmentTrainerFixed.h',
                    'AbilityPracticeDevelopmentLeech.h', 'AbilityPracticeDevelopmentConjureFixed.h',
                    'AbilityPracticeDevelopmentPassiveFixed.h', 'AbilityPracticeDevelopmentUtilityFixed.h',
-                   'AbilityPracticeDevelopmentControlFixed.h', 'AbilityPracticeDevelopmentBuffs.h')
+                   'AbilityPracticeDevelopmentControlFixed.h', 'AbilityPracticeDevelopmentBuffs.h',
+                   'AbilityPracticeDevelopmentUtilityMastery.h')
 PROFILE_PATTERN = re.compile(
     r'AbilityProfile\s*\{\s*(?:Development::DefinitionVersion|NativeUtilityDefinitionVersion),\s*'
     r'AcquisitionSource::(?:ClassGrant|ClassTrainer),\s*'
@@ -71,6 +72,14 @@ def declared_profiles(root):
             ranks = arrays[reference]
             if identity in result:
                 existing = result[identity]
+                if (filename == 'AbilityPracticeDevelopmentUtilityMastery.h' and kind == 'mastery' and
+                        existing['kind'] == 'fixed' and existing['authoredRanks'] == ranks and
+                        existing['acquisitionSource'] == acquisition and
+                        existing['sources'] == ['modules/mod-ability-practice/src/AbilityPracticeDevelopmentUtilityFixed.h']):
+                    result[identity] = {'kind': kind, 'sources': [relative], 'authoredRanks': ranks,
+                                        'acquisitionSource': acquisition, 'requiresRuntimeEquivalenceCheck': False,
+                                        'nativeFixedSources': existing['sources'], 'optionalUtilityMastery': True}
+                    continue
                 if (existing['kind'] != kind or existing['authoredRanks'] != ranks
                         or existing['acquisitionSource'] != acquisition or relative in existing['sources']):
                     raise ValueError('Conflicting or repeated header declaration: ' + str(identity))
@@ -87,12 +96,16 @@ def declared_shared_variants(root, declarations):
     relative = 'modules/mod-ability-practice/src/AbilityPracticeDevelopmentBuffVariants.h'
     text = (root / relative).read_text(encoding='utf-8')
     body = re.search(r'inline constexpr std::array Variants = \{(.*?)\};', text, re.DOTALL)
-    pattern = re.compile(r'Variant\s*\{\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+)\s*\}')
+    pattern = re.compile(r'Variant\s*\{\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+),\s*(\d+)(?:,\s*(true))?\s*\}')
     if not body or pattern.sub('', body[1]).replace(',', '').strip():
         raise ValueError('Unsupported shared variant declarations')
     result = {}
     for match in pattern.finditer(body[1]):
-        class_id, spell_id, ability_id, equivalent_id, level = map(int, match.groups())
+        class_id, spell_id, ability_id, equivalent_id, level = map(int, match.groups()[:5])
+        branch = bool(match[6])
+        if branch and (class_id != 14 or ability_id != 800212 or equivalent_id != 501329 or
+                       spell_id not in {501330, 501331, 501332, 501333, 501334, 501336}):
+            raise ValueError('Invalid native trainer branch')
         identity = (class_id, spell_id)
         parent = declarations.get((class_id, ability_id))
         equivalent = next((rank for rank in parent['authoredRanks'] if rank['spellId'] == equivalent_id),
@@ -104,7 +117,7 @@ def declared_shared_variants(root, declarations):
             raise ValueError('Invalid shared variant parent or native level')
         result[identity] = {'source': relative, 'abilityId': ability_id, 'equivalentSpellId': equivalent_id,
                             'characterLevel': level, 'proficiencyRequired': equivalent['proficiencyRequired'],
-                            'parentKind': parent['kind']}
+                            'parentKind': parent['kind'], 'trainerBranch': branch}
     return result
 
 

@@ -44,6 +44,10 @@ def check_client(wire_path):
                Path(str(wire_path) + '.debuffs').read_text().strip().split('\n\n')]
     runtime.globals().EncodedDebuffPracticeSnapshots = runtime.table_from(debuffs)
     runtime.execute((HERE / 'client_debuff_cases.lua').read_text(encoding='utf-8'))
+    utility = [runtime.table_from(block.splitlines()) for block in
+               Path(str(wire_path) + '.utility').read_text(encoding='utf-8').strip().split('\n\n')]
+    runtime.globals().EncodedUtilityMasterySnapshots = runtime.table_from(utility)
+    runtime.execute((HERE / 'client_utility_mastery_cases.lua').read_text(encoding='utf-8'))
     runtime.execute((client / 'Transport.lua').read_text(encoding='utf-8'))
     runtime.execute((HERE / 'client_transport_cases.lua').read_text(encoding='utf-8'))
 
@@ -115,7 +119,12 @@ def check_inventory():
     sys.path.insert(0, str(ROOT / 'modules/mod-ability-practice/tools'))
     from coverage import declared_profiles, declared_shared_variants
     variants = declared_shared_variants(ROOT, declared_profiles(ROOT))
-    assert len(variants) == 34
+    assert len(variants) == 41
+    assert variants[(14, 680308)]['equivalentSpellId'] == 501329
+    for spell, level in [(501330, 65), (501331, 65), (501332, 70), (501333, 77), (501334, 80), (501336, 74)]:
+        branch = variants[(14, spell)]
+        assert branch['trainerBranch'] and branch['characterLevel'] == level
+        assert branch['equivalentSpellId'] == 501329 and branch['proficiencyRequired'] == 60
     assert variants[(31, 582261)]['equivalentSpellId'] == 581315
     assert variants[(31, 582261)]['proficiencyRequired'] == 10
     assert variants[(13, 712458)]['equivalentSpellId'] == 707676

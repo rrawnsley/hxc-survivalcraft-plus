@@ -128,3 +128,9 @@ AbilityPractice.AllowDevelopmentResourcePacing = 0
 # Use the configured class list only for participants of Old School9001 or Hardcore9002.
 # Character creation cutoff is ignored; leaving permanently blocks Old School re-entry.
 AbilityPractice.RequireOldSchoolTrial = 0
+
+# Additional Illidari Intuition, Libram of Consecration and Wild Blessing practice ladders.
+AbilityPractice.AllowDevelopmentSpecializedBuffs = 0
+
+# Successful native interrupts, dispels and steals train modest capped efficiency rewards.
+AbilityPractice.AllowDevelopmentUtilityMastery = 0
