@@ -251,6 +251,14 @@ use +8/2x; the other profiles use +4 or +6/1.5x. Fozruk's consideration includes
 warning and preserves the existing waypoint patrol. Leaders share camp proximity readouts.
 No faction, movement, respawn or actual creature-level changes are made.
 
+The Hinterlands adds Witherbark village, Vilebranch foothold, Jintha'Alor fortress,
+Razorbeak nests and Silvermane hunting-ground rosters. Fourteen native named entries
+receive danger/reward and named gear profiles. Vile Priestess Hexx and Hitah'ya use +10
+threat/3x encounter XP; Qiaga, Grimungous and Mith'rethis use +8/2x; the remaining named
+profiles use +4 or +6/1.5x. Jintha'Alor guards and spellcasters retain elite rank modifiers.
+Existing movement, respawn windows and faction behavior are preserved. No new spawn or
+loot tables are added by these profiles; player leveling feedback will determine tuning.
+
 ## License
 
 GNU General Public License v2.0 — see [LICENSE](LICENSE).
