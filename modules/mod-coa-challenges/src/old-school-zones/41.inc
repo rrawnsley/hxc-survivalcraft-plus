@@ -1,0 +1,5 @@
+    { 41, 7369, "Deadwind ogre hold", "hunter", 1, 100, false, false },
+    { 41, 7371, "Deadwind ogre hold", "hunter", 1, 100, false, false },
+    { 41, 7372, "Deadwind ogre hold", "spellcaster", 4, 100, false, false },
+    { 41, 7376, "Sky Shadow hunting grounds", "spellcaster", 4, 100, false, false },
+    { 41, 7379, "Deadwind ogre hold", "spellcaster", 4, 100, false, false },

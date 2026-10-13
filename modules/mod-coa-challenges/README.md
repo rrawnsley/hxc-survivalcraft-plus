@@ -274,6 +274,24 @@ use +10 threat/3x encounter XP and display a roaming warning; Abbendis and the N
 Overseer use +8/2x; the other encounters use +4 or +6/1.5x. Native patrols remain in place.
 These profiles preserve factions, assistance, respawn windows and ordinary-mode behavior.
 
+## Level 1–60 outdoor zone coverage
+
+Both Old School variants now register authored native creature profiles in every leveling
+zone in Eastern Kingdoms and Kalimdor, plus Eversong Woods, Ghostlands, Azuremyst Isle,
+Bloodmyst Isle and the Scarlet Enclave introduction. The original fifteen zone rosters remain.
+Thirty additional zones add 949 template profiles, with camp roles, named encounter rewards,
+named gear retention and native patrol warnings. The registry is indexed by zone and template;
+consideration and combat use the same profile lookup. CoA's eight separate starter-zone IDs
+resolve to their parent region, including Valley of Trials, Coldridge Valley and Deathknell.
+
+The per-zone data and counts are in `src/old-school-zones/coverage.json`. Camp rosters describe
+native hunting sites; the existing harvested-wood camp ability provides player recovery,
+cooking and the renewable rest timer. Nearby-member readouts inspect within 40 yards and
+preserve native aggro and assistance. New zone data does not introduce additional NPC spawns,
+waypoint routes, respawn timers or bespoke loot tables. Those content passes and leveling
+balance remain separate from this complete first-pass profile coverage. Gameplay testing is
+deferred until Phase 1 is implemented, following the user's instruction.
+
 ## License
 
 GNU General Public License v2.0 — see [LICENSE](LICENSE).
