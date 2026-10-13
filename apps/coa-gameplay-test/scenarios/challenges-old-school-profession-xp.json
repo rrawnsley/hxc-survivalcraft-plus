@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "Old School profession skill-ups grant character experience",
+  "contract": "A successful Skinning skill-up while Old School is active grants character XP at the challenge's normal 50% profession XP pace, while retaining the skill increase.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "old",
+      "race": 1,
+      "class": 5,
+      "level": 30
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 5000
+    },
+    {
+      "action": "start_challenge",
+      "actor": "old",
+      "challenge": 9001,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "old",
+      "metric": "challenge_start_code",
+      "equals": 0
+    },
+    {
+      "action": "set_skill",
+      "actor": "old",
+      "skill": 393,
+      "value": 1,
+      "maximum": 75
+    },
+    {
+      "action": "snapshot",
+      "actor": "old",
+      "metric": "xp",
+      "save_as": "skinning_xp_before"
+    },
+    {
+      "action": "gather_skill",
+      "actor": "old",
+      "skill": 393,
+      "required": 1
+    },
+    {
+      "action": "assert",
+      "label": "Skinning increases while Old School is active",
+      "actor": "old",
+      "metric": "skill_value",
+      "skill": 393,
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "The Skinning skill-up grants character XP",
+      "actor": "old",
+      "metric": "xp",
+      "relative_to": "skinning_xp_before",
+      "min": 1
+    }
+  ]
+}

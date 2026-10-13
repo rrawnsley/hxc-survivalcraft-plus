@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Old School parties earn ten percent extra kill XP including playerbot companions",
-  "contract": "Ordinary two-member party splitting remains native. A living nearby companion in the same Old School trial adds 10% to each qualifying kill XP share. Playerbot companions qualify; solo, non-trial, dead, phased and distant companions do not. No combat profile retune is part of this feature.",
+  "contract": "Ordinary party XP splitting remains native. Qualifying living nearby members in the same Old School trial add 10% for a 2-player party, 15% for 3 players, and 20% for 4-5 players to each kill XP share. Playerbot companions qualify; solo, non-trial, dead, phased and distant companions do not.",
   "timeout_ms": 120000,
   "location": {
     "map": 0,

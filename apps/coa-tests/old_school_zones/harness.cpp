@@ -5,10 +5,15 @@
 #include <cstdint>
 #include <cstring>
 #include <map>
+#include <set>
 #include <utility>
 #include <vector>
 
 using int32 = std::int32_t;
+using uint8 = std::uint8_t;
+constexpr uint8 XPSOURCE_QUEST = 1;
+constexpr uint8 XPSOURCE_QUEST_DF = 2;
+constexpr uint8 XPSOURCE_KILL = 3;
 
 constexpr uint32 CREATURE_TYPE_CRITTER = 8;
 constexpr uint32 CREATURE_ELITE_NORMAL = 0;
@@ -102,6 +107,13 @@ bool challengesEnabled = true;
 std::map<uint32, std::vector<std::pair<uint32, uint32>>> enrollment;
 bool ChallengesEnabled() { return challengesEnabled; }
 auto const& CachedCharChallenges(uint32 guid) { return enrollment[guid]; }
+std::set<uint32> ActiveChallenges(uint32 guid)
+{
+    std::set<uint32> active;
+    for (auto const& challenge : CachedCharChallenges(guid))
+        active.insert(challenge.first);
+    return active;
+}
 void Enroll(Player const& player, uint32 challenge) { enrollment[player.guid] = { { challenge, 1 } }; }
 
 // NATIVE_METHODS
@@ -122,13 +134,13 @@ void NamedProfiles()
         if (creature.data.rank == CREATURE_ELITE_RAREELITE)
         {
             assert(profile.healthPercent == 3576);
-            assert(profile.damageMultiplier == 22);
+            assert(profile.damageMultiplier == 24);
             assert(profile.experienceMultiplierHundredths == 600);
         }
         else
         {
             assert(profile.healthPercent == 1788);
-            assert(profile.damageMultiplier == 11);
+            assert(profile.damageMultiplier == 12);
             assert(profile.experienceMultiplierHundredths == 300);
         }
         player.level = 35;
@@ -183,6 +195,59 @@ void NamedProfiles()
     assert(GetOldSchoolPowerProfile(&player, &creature).experienceMultiplierHundredths == 900);
     creature.entry = 3398;
     assert(GetOldSchoolPowerProfile(&player, &creature).experienceMultiplierHundredths == 200);
+}
+
+void MoreDifficultProfiles()
+{
+    Player player;
+    Creature creature;
+    creature.entry = 5000;
+    creature.spawn = 0;
+    creature.level = player.level;
+    creature.data.rank = CREATURE_ELITE_NORMAL;
+    auto const profile = GetOldSchoolPowerProfile(&player, &creature);
+    assert(std::strcmp(profile.con, "White") == 0);
+    assert(profile.healthPercent == 600);
+    assert(profile.damageMultiplier == 4);
+    assert(std::strcmp(OldSchoolConColor(profile.con), "|cffffffff") == 0);
+    assert(std::strcmp(OldSchoolConColor("Purple boss"), "|cffa335ee") == 0);
+    assert(std::strcmp(OldSchoolConColor("Red"), "|cffff0000") == 0);
+}
+
+void CreatureTypeThreatProfiles()
+{
+    assert(OldSchoolExperienceSourceMultiplier(XPSOURCE_QUEST) == 3);
+    assert(OldSchoolExperienceSourceMultiplier(XPSOURCE_QUEST_DF) == 3);
+    assert(OldSchoolExperienceSourceMultiplier(XPSOURCE_KILL) == 1);
+
+    Player player;
+    player.level = 1;
+    Creature skeleton;
+    skeleton.entry = 1890;
+    skeleton.zone = AREA_TIRISFAL_GLADES;
+    skeleton.level = 2;
+    skeleton.spawn = 1001;
+    assert(OldSchoolThreatOffset(&skeleton) == -3);
+    assert(std::strcmp(GetOldSchoolPowerProfile(&player, &skeleton).con, "Blue") == 0);
+
+    Creature first;
+    first.entry = 1512;
+    first.level = 2;
+    first.spawn = 1002;
+    Creature second = first;
+    second.spawn = 987654;
+    assert(OldSchoolThreatOffset(&first) == OldSchoolThreatOffset(&second));
+
+    player.level = 30;
+    Creature scaled;
+    scaled.entry = 5000;
+    scaled.level = uint32(int32(player.level) - OldSchoolThreatOffset(&scaled));
+    auto const white = GetOldSchoolPowerProfile(&player, &scaled);
+    assert(std::strcmp(white.con, "White") == 0);
+    scaled.level += 5;
+    auto const purple = GetOldSchoolPowerProfile(&player, &scaled);
+    assert(std::strcmp(purple.con, "Purple") == 0);
+    assert(purple.experienceMultiplierHundredths > white.experienceMultiplierHundredths);
 }
 
 void MulgoreCampConsider()
@@ -313,17 +378,31 @@ void GroupRewards()
 {
     Player player;
     Player companion;
+    Player companion2;
+    Player companion3;
     companion.guid = 18;
+    companion2.guid = 19;
+    companion3.guid = 20;
     Creature creature;
     Group group;
     Enroll(player, 9001);
     Enroll(companion, 9001);
+    Enroll(companion2, 9001);
+    Enroll(companion3, 9001);
     ObjectAccessor::players[player.guid] = &player;
     ObjectAccessor::players[companion.guid] = &companion;
+    ObjectAccessor::players[companion2.guid] = &companion2;
+    ObjectAccessor::players[companion3.guid] = &companion3;
     group.members = { { player.GetGUID() }, { companion.GetGUID() } };
     assert(OldSchoolGroupBonusPercent(&player, &creature) == 0);
     player.group = &group;
     assert(OldSchoolGroupBonusPercent(&player, &creature) == 10);
+    group.members.push_back({ companion2.GetGUID() });
+    assert(OldSchoolGroupBonusPercent(&player, &creature) == 15);
+    group.members.push_back({ companion3.GetGUID() });
+    assert(OldSchoolGroupBonusPercent(&player, &creature) == 20);
+    group.members.pop_back();
+    group.members.pop_back();
     companion.alive = false;
     assert(OldSchoolGroupBonusPercent(&player, &creature) == 0);
     companion.alive = true;
@@ -346,6 +425,8 @@ void GroupRewards()
     assert(OldSchoolGroupBonusPercent(&player, &creature) == 0);
     group.battlefield = false;
     ObjectAccessor::players[companion.guid] = nullptr;
+    ObjectAccessor::players[companion2.guid] = nullptr;
+    ObjectAccessor::players[companion3.guid] = nullptr;
     assert(OldSchoolGroupBonusPercent(&player, &creature) == 0);
     assert(OldSchoolGroupBonusPercent(nullptr, &creature) == 0);
     assert(OldSchoolGroupBonusPercent(&player, nullptr) == 0);
@@ -357,6 +438,8 @@ int main()
 {
     GroupRewards();
     NamedProfiles();
+    MoreDifficultProfiles();
+    CreatureTypeThreatProfiles();
     MulgoreCampConsider();
     BarrensCampConsider();
     ForestAndMountainProfiles();

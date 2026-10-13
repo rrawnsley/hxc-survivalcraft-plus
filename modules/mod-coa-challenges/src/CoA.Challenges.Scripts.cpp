@@ -1121,6 +1121,11 @@ namespace CoAChallenges
         return std::min(configured, 10000u);
     }
 
+    uint32 OldSchoolExperienceSourceMultiplier(uint8 xpSource)
+    {
+        return xpSource == XPSOURCE_QUEST || xpSource == XPSOURCE_QUEST_DF ? 3 : 1;
+    }
+
     bool OldSchoolCreature(Creature const* creature)
     {
         return creature && !creature->IsCharmedOwnedByPlayerOrPlayer()
@@ -2723,10 +2728,13 @@ namespace CoAChallenges
 
         int32 const campThreatBonus = GetOldSchoolCampThreat(creature).bonus;
 
+        if (creature->GetZoneId() == AREA_TIRISFAL_GLADES && creature->GetEntry() == 1890)
+            return -3;
+
         if (!creature->GetSpawnId())
             return campThreatBonus;
 
-        uint32 seed = creature->GetSpawnId();
+        uint32 seed = creature->GetEntry();
         seed ^= seed >> 16;
         seed *= 0x7feb352d;
         seed ^= seed >> 15;
@@ -2789,6 +2797,8 @@ namespace CoAChallenges
         float const threatStatScale = std::exp2(float(OldSchoolThreatOffset(creature)) / 25.0f);
         profile.healthPercent = std::max(1u, uint32(std::lround(profile.healthPercent * threatStatScale)));
         profile.damageMultiplier = std::max(1u, uint32(std::lround(profile.damageMultiplier * threatStatScale)));
+        profile.healthPercent *= 2;
+        profile.damageMultiplier *= 2;
 
         switch (creature->GetCreatureTemplate()->rank)
         {
@@ -2816,6 +2826,25 @@ namespace CoAChallenges
         return profile;
     }
 
+    char const* OldSchoolConColor(char const* con)
+    {
+        if (!con)
+            return "|cffffffff";
+        if (std::strcmp(con, "Grey") == 0)
+            return "|cff9d9d9d";
+        if (std::strcmp(con, "Green") == 0)
+            return "|cff1eff00";
+        if (std::strcmp(con, "Blue") == 0)
+            return "|cff0070dd";
+        if (std::strcmp(con, "White") == 0)
+            return "|cffffffff";
+        if (std::strcmp(con, "Yellow") == 0)
+            return "|cffffff00";
+        if (std::strcmp(con, "Red") == 0)
+            return "|cffff0000";
+        return "|cffa335ee";
+    }
+
     uint32 OldSchoolGroupBonusPercent(Player const* player, Creature const* creature)
     {
         uint32 const challenge = OldSchoolChallenge(player);
@@ -2824,15 +2853,16 @@ namespace CoAChallenges
             || group->isBGGroup() || group->isBFGroup())
             return 0;
 
+        uint32 companions = 0;
         for (Group::MemberSlot const& slot : group->GetMemberSlots())
         {
             Player const* member = ObjectAccessor::FindPlayer(slot.guid);
             if (member && member != player && member->IsAlive()
                 && OldSchoolChallenge(member) == challenge && member->InSamePhase(creature)
                 && member->IsAtGroupRewardDistance(creature))
-                return 10;
+                ++companions;
         }
-        return 0;
+        return companions == 0 ? 0 : companions == 1 ? 10 : companions == 2 ? 15 : 20;
     }
 
     void MoveOldSchoolEquipmentToCorpse(Player* player)
@@ -3658,14 +3688,12 @@ namespace CoAChallenges
                 && PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_PROFESSIONS"));
         }
 
-        // GROUP_PROFESSION_EXPERIENCE (+ its XP source rule): each profession
-        // skill-up grants player XP (base core awards none), shared with the
-        // whole party holding the profession-XP rule.
         void OnPlayerUpdateSkill(Player* player, uint32 skillId, uint32 /*value*/, uint32 /*max*/, uint32 /*step*/, uint32 /*newValue*/) override
         {
             if (!player || !IsProfessionSkill(skillId))
                 return;
-            if (!PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_PROFESSIONS"))
+            if (!PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_PROFESSIONS")
+                && !OldSchoolChallenge(player))
                 return;
             if (UsesCoreProfessionXP(player))
                 return;
@@ -3780,7 +3808,8 @@ namespace CoAChallenges
 
             if (amount && OldSchoolChallenge(player))
             {
-                uint64 scaledAmount = uint64(amount) * OldSchoolExperienceBasisPoints();
+                uint64 scaledAmount = uint64(amount) * OldSchoolExperienceBasisPoints()
+                    * OldSchoolExperienceSourceMultiplier(xpSource);
                 uint64 scaleNumerator = 100;
                 uint32 experienceMultiplierHundredths = 100;
                 uint32 groupBonusPercent = 0;
@@ -4882,12 +4911,13 @@ namespace CoAChallenges
                             : con == "Yellow"
                             ? "Very dangerous; bring a group."
                             : "Overwhelming; a group is strongly advised.";
-                handler->PSendSysMessage("Consider {}: {} con. {} Estimated health: {} ({:.2f}x); "
+                handler->PSendSysMessage("Consider {}: {}{}|r con. {} Estimated health: {} ({:.2f}x); "
                     "creature damage: {:.2f}x; kill XP: {:.2f}x base ({:.2f}% Old School pace). Estimate only; gear, abilities, companions and adds "
-                    "change the outcome.", target->GetName(), con, advice, health,
-                    healthPercent / 100.0f, float(damageMultiplier), effectiveKillXpMultiplier, experiencePercent);
+                    "change the outcome.", target->GetName(), OldSchoolConColor(con), con, advice, health,
+                    healthPercent / 100.0f,
+                    float(damageMultiplier), effectiveKillXpMultiplier, experiencePercent);
                 if (uint32 const groupBonus = OldSchoolGroupBonusPercent(player, target))
-                    handler->PSendSysMessage("Group bonus: +{}% to your creature-kill XP share; "
+                    handler->PSendSysMessage("Group bonus: +{}% to your creature-kill XP share after normal party splitting; "
                         "camp rest is an additional bonus.", groupBonus);
                 if (HxcOldSchool::NormalizeZone(target->GetZoneId()) == AREA_MULGORE)
                 {
@@ -4913,7 +4943,6 @@ namespace CoAChallenges
                 if (HxcOldSchool::NormalizeZone(target->GetZoneId()) == AREA_EASTERN_PLAGUELANDS
                     && (target->GetEntry() == 11896 || target->GetEntry() == 11897 || target->GetEntry() == 12339))
                     handler->SendSysMessage("Roaming named threat. Watch its route before choosing a hunting spot.");
-
                 OldSchoolCampThreat const campThreat = GetOldSchoolCampThreat(target);
                 if (auto const* profile = HxcOldSchool::FindZoneProfile(target->GetZoneId(), target->GetEntry());
                     profile && profile->roaming)
