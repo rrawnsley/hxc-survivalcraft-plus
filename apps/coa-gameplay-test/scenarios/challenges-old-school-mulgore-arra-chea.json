@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Old School makes Mulgore's named threats clear elevated-danger encounters",
-  "contract": "In Old School, Mulgore's named threats Ghost Howl, Arra'chea, Mazzranache, Sister Hatelash, Snagglespear, Enforcer Emilgund, and The Rake receive four additional hidden threat levels. The challenge's con estimate and combat health must reflect that danger, while ordinary mode keeps the creature's native threat profile.",
+  "contract": "In Old School, Mulgore's named threats Ghost Howl, Arra'chea, Mazzranache, Sister Hatelash, Snagglespear, Enforcer Emilgund, and The Rake receive four additional hidden threat levels. The challenge's con estimate and combat health must reflect that danger, while ordinary mode keeps the creature's native threat profile. Loot chance is covered by the Old School gear-scarcity scenario.",
   "timeout_ms": 60000,
   "location": {"map": 1, "x": -751.421, "y": -674.71, "z": -19.1842, "o": 0},
   "players": [
@@ -50,7 +50,7 @@
     {"action": "command", "actor": "old", "command": ".coa consider"},
     {"action": "assert", "label": "Consider identifies Arra'chea as a named threat", "actor": "old", "metric": "system_message_contains", "text": "Named threat: Arra'chea", "equals": 1},
     {"action": "assert", "label": "Consider reports the resulting red con", "actor": "old", "metric": "system_message_contains", "text": "Red con", "equals": 1},
-    {"action": "assert", "label": "Consider reports the elevated kill XP", "actor": "old", "metric": "system_message_contains", "text": "kill XP: 8x", "equals": 1},
+    {"action": "assert", "label": "Consider reports effective kill XP after the Old School pace", "actor": "old", "metric": "system_message_contains", "text": "kill XP: 1.6x base (20% Old School pace)", "equals": 1},
     {"action": "stop_attack", "actor": "old"},
     {"action": "attack", "actor": "old", "target": "old_ghost_howl"},
     {"action": "wait", "ms": 3000},
@@ -92,10 +92,6 @@
       "text": "Named threat: The Rake",
       "equals": 1
     },
-    {"action": "attack_nearby", "actor": "old", "entry": 5807, "kill": true, "label": "The Old School group defeats the named roamer"},
-    {"action": "loot_nearby", "actor": "old", "entry": 5807, "label": "The group opens the named roamer's corpse"},
-    {"action": "assert", "label": "The Rake's rare spawn retains its level-10 armor upgrade", "actor": "old", "metric": "loot_entry", "item": 17922, "equals": 17922},
-    {"action": "assert", "label": "The Rake's upgrade keeps its authored item level", "actor": "old", "metric": "loot_item_level", "item": 17922, "equals": 10},
     {"action": "client_packet", "actor": "old", "opcode": 317, "consumed": false, "fields": [{"actor_guid": "old_mazzranache"}]},
     {"action": "command", "actor": "old", "command": ".coa consider"},
     {"action": "assert", "label": "Consider identifies Mazzranache as a named threat", "actor": "old", "metric": "system_message_contains", "text": "Named threat: Mazzranache", "equals": 1},

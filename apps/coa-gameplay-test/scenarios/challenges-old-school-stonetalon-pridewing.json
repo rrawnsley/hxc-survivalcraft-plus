@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Old School Stonetalon named threat: Pridewing Patriarch",
-  "contract": "Stonetalon Pridewing Patriarch (4015) has four additional hidden threat levels in both Old School trials. At equal native level 25 the resulting Red con grants an 8x kill XP, 11x creature damage, and 17.88x health. Ordinary play keeps native level and health, with no trial-only social-assist behavior. Existing spawn data is preserved. Temporary fixtures exercise named profiles and trial gating.",
+  "contract": "Stonetalon Pridewing Patriarch (4015) has four additional hidden threat levels in both Old School trials. At equal native level 25 the resulting Red con grants an 1.6x effective kill XP, 11x creature damage, and 17.88x health. Ordinary play keeps native level and health, with no trial-only social-assist behavior. Existing spawn data is preserved. Temporary fixtures exercise named profiles and trial gating.",
   "timeout_ms": 90000,
   "location": {
     "map": 1,
@@ -188,8 +188,8 @@
       "actor": "old",
       "metric": "system_message_contains",
       "equals": 1,
-      "label": "old consider reports kill XP: 8x.",
-      "text": "kill XP: 8x."
+      "label": "old consider reports kill XP: 1.6x base (20% Old School pace).",
+      "text": "kill XP: 1.6x base (20% Old School pace)."
     },
     {
       "action": "assert",
@@ -252,8 +252,8 @@
       "actor": "hardcore",
       "metric": "system_message_contains",
       "equals": 1,
-      "label": "hardcore consider reports kill XP: 8x.",
-      "text": "kill XP: 8x."
+      "label": "hardcore consider reports kill XP: 1.6x base (20% Old School pace).",
+      "text": "kill XP: 1.6x base (20% Old School pace)."
     },
     {
       "action": "assert",

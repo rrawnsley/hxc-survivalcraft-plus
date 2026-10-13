@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Old School Mulgore gear scarcity is trial-only",
+  "contract": "With both Mulgore gear keep chances set to zero for this deterministic test, ordinary mode must retain The Rake's authored armor drop while Old School removes it. The filter applies to creature gear only and leaves creature combat and ordinary-mode loot behavior intact.",
+  "timeout_ms": 60000,
+  "location": {"map": 1, "x": -751.421, "y": -674.71, "z": -19.1842, "o": 0},
+  "players": [
+    {"id": "normal", "race": 1, "class": 1, "level": 1},
+    {"id": "old", "race": 1, "class": 1, "level": 1}
+  ],
+  "creatures": [
+    {"id": "normal_rake", "owner": "normal", "entry": 5807, "faction": 14, "level": 1, "health": 1000, "distance": 3, "stationary": true},
+    {"id": "old_rake", "owner": "old", "entry": 5807, "faction": 14, "level": 1, "health": 1000, "distance": 25, "stationary": true}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 1000},
+    {"action": "start_challenge", "actor": "old", "challenge": 9001, "level": 1},
+    {"action": "assert", "actor": "old", "metric": "challenge_start_code", "equals": 0},
+    {"action": "attack_nearby", "actor": "normal", "entry": 5807, "kill": true},
+    {"action": "loot_nearby", "actor": "normal", "entry": 5807},
+    {"action": "assert", "label": "The Rake retains its armor drop outside Old School", "actor": "normal", "metric": "loot_entry", "item": 17922, "equals": 17922},
+    {"action": "attack_nearby", "actor": "old", "entry": 5807, "kill": true},
+    {"action": "loot_nearby", "actor": "old", "entry": 5807},
+    {"action": "assert", "label": "Old School gear scarcity removes the rolled armor at a zero keep chance", "actor": "old", "metric": "loot_entry", "item": 17922, "equals": 0}
+  ]
+}

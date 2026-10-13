@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Old School con tiers drive creature difficulty, rewards, death XP and corpse runs",
-  "contract": "Owned trial IDs 9001/9002. Creature con sets health, damage and kill XP multipliers; quests retain normal XP. Old School death removes 10% of a level's XP and can delevel. A spirit must return to its corpse to resurrect. Hardcore death fails the run. Bots inherit their human leader's con.",
+  "contract": "Owned trial IDs 9001/9002. Both trials apply a 20% pace to all XP; creature kills then receive the con multiplier, while non-kill rewards remain at 20%. Old School death removes 10% of a level's XP and can delevel. A spirit must return to its corpse to resurrect. Hardcore death fails the run. Bots inherit their human leader's con.",
   "timeout_ms": 180000,
   "location": {
     "map": 0,
@@ -146,6 +146,18 @@
     {
       "action": "assert",
       "actor": "hard",
+      "metric": "challenge_start_code",
+      "equals": 0
+    },
+    {
+      "action": "start_challenge",
+      "actor": "quester",
+      "challenge": 9001,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "quester",
       "metric": "challenge_start_code",
       "equals": 0
     },
@@ -315,13 +327,62 @@
     },
     {
       "action": "assert",
-      "label": "Creature kills grant four times XP",
+      "label": "White con kills grant 0.8x base XP after the 20% Old School pace",
       "actor": "old",
       "metric": "xp",
       "relative_to": "old_xp",
       "ratio_to": "normal_kill",
-      "min": 3.99,
-      "max": 4.01
+      "min": 0.75,
+      "max": 0.85
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "xp",
+      "save_as": "control_before_quest"
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "control",
+      "quest": 7
+    },
+    {
+      "action": "reward_quest",
+      "actor": "control",
+      "quest": 7
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "xp",
+      "relative_to": "control_before_quest",
+      "save_as": "normal_quest_gain"
+    },
+    {
+      "action": "snapshot",
+      "actor": "quester",
+      "metric": "xp",
+      "save_as": "old_before_quest"
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "quester",
+      "quest": 7
+    },
+    {
+      "action": "reward_quest",
+      "actor": "quester",
+      "quest": 7
+    },
+    {
+      "action": "assert",
+      "label": "Quest rewards also follow the 20% Old School pace",
+      "actor": "quester",
+      "metric": "xp",
+      "relative_to": "old_before_quest",
+      "ratio_to": "normal_quest_gain",
+      "min": 0.15,
+      "max": 0.25
     },
     {
       "action": "group",
@@ -378,6 +439,14 @@
       "actor": "old",
       "metric": "system_message_contains",
       "text": "White con",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Consider reports effective kill XP after the Old School pace",
+      "actor": "old",
+      "metric": "system_message_contains",
+      "text": "kill XP: 0.8x base (20% Old School pace)",
       "equals": 1
     },
     {

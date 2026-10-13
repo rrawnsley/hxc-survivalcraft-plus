@@ -106,11 +106,19 @@ level difference, and kill experience use that hidden threat rating; the rating 
 spawn and never scales to the player. Native creature levels remain unchanged. Temporary creatures
 without a spawn ID skip the random spread; authored named-threat and Mulgore camp-role bonuses still
 apply. Elite and boss ranks retain their combat-stat multipliers. Grey creatures have
-2x health, 1x damage and 1x kill XP before the threat-offset stat adjustment; green 3x/2x/2x;
+2x health, 1x damage and 1x con-tier kill XP before the threat-offset stat adjustment; green 3x/2x/2x;
 blue 5x/3x/3x; white 8x/5x/4x; yellow 12x/7x/6x; red 16x/10x/8x; and purple 24x/14x/10x.
-Elites and bosses multiply those values further. Quest experience is unchanged. Critters and
+Elites and bosses multiply those values further. Old School applies a configurable 20% pace to all XP
+sources, then applies the creature con multiplier to kill XP; a white kill therefore awards 0.8x the
+ordinary creature XP, a red kill 1.6x, and a purple kill 2x before the rested-camp bonus. Quest and
+other non-creature XP awards are 20% of normal. Critters and
 player-owned units are excluded. Restricted tapping prevents players in another trial from
 assisting with the kill or claiming its rewards.
+
+In the Mulgore slice, only 5% of rolled ordinary-creature armor and weapon drops survive loot
+generation; named threats use a 20% keep chance. Quest items and crafting materials are preserved,
+and crafted gear is unaffected. This makes profession recipes a reliable route to incremental upgrades
+while named drops remain uncommon prizes. Both rates can be configured.
 
 Mulgore's named threats - Ghost Howl (3056), Arra'chea (3058), Mazzranache (3068), Sister Hatelash (5785),
 Snagglespear (5786), Enforcer Emilgund (5787), and The Rake (5807) - and the Barrens threats Gesharahan
@@ -119,7 +127,8 @@ the Heckler (5829), Swiftmane (5831), Azzere the Skyblade (5834), Heggin Stonewh
 (5865) carry four additional hidden threat levels in Old School. `/consider` identifies these threats, and the
 hidden rating affects con, combat and kill XP without changing native levels or ordinary-mode behavior. Ghost
 Howl, Arra'chea, and The Rake use their existing authored roam paths; this path behavior has not been newly
-runtime-verified. Existing rare spawn timers and loot remain intact.
+runtime-verified. Their rare spawn timers remain intact; their rolled equipment drops follow the Old School
+named-threat keep chance.
 
 Mulgore's Bristleback, Palemane, Venture Co., and Windfury Ridge camps use authored role bonuses on top
 of the stable spawn rating. Guards, workers, tanners, and skinners receive smaller bonuses; shamans,
@@ -166,7 +175,8 @@ Old School, the existing recipes continue to use Simple Wood. The placed fire is
 Sit beside it outside combat to receive the
 existing camp recovery. In either Old School trial, staying near a live camp replenishes a rested
 timer up to 20 minutes; time away from camp spends it while you are online and alive. A creature kill
-receives 15% additional XP while the timer has time remaining. Quest XP is unchanged. Old School
+receives 15% additional XP while the timer has time remaining, after the trial's 20% XP pace and con
+multiplier. Quest XP uses the 20% trial pace without the rested kill bonus. Old School
 does not consume the standard WoW rested-XP pool while its trial bonus is active. Sitting remains
 necessary for the existing health/mana recovery and Fellowship benefits. The temporary `.coa camp`
 claim command was removed; a placed camp is the actual camp marker and benefit source.

@@ -1110,6 +1110,13 @@ namespace CoAChallenges
 
     constexpr float OldSchoolConsiderRange = 40.0f;
 
+    uint32 OldSchoolExperiencePercent()
+    {
+        uint32 const configured = sConfigMgr->GetOption<uint32>(
+            "CoAChallenges.OldSchool.ExperiencePercent", 20);
+        return configured ? std::min(configured, 100u) : 20u;
+    }
+
     bool OldSchoolCreature(Creature const* creature)
     {
         return creature && !creature->IsCharmedOwnedByPlayerOrPlayer()
@@ -1133,6 +1140,40 @@ namespace CoAChallenges
                 return true;
             default:
                 return false;
+        }
+    }
+
+    bool IsOldSchoolGearLoot(Creature const* creature, Player const* player)
+    {
+        return creature && player && OldSchoolChallenge(player)
+            && creature->GetZoneId() == AREA_MULGORE && OldSchoolCreature(creature);
+    }
+
+    uint32 OldSchoolMulgoreGearKeepPercent(Creature const* creature)
+    {
+        uint32 const configured = sConfigMgr->GetOption<uint32>(
+            "CoAChallenges.OldSchool.Mulgore.GearDropPercent", 5);
+        uint32 const namedConfigured = sConfigMgr->GetOption<uint32>(
+            "CoAChallenges.OldSchool.Mulgore.NamedGearDropPercent", 20);
+        uint32 const normalPercent = std::min(configured, 100u);
+        uint32 const namedPercent = std::min(namedConfigured, 100u);
+        return IsOldSchoolMulgoreNamedThreat(creature) ? namedPercent : normalPercent;
+    }
+
+    void ThinOldSchoolMulgoreGearLoot(Loot* loot, Creature const* creature)
+    {
+        if (!loot || !creature)
+            return;
+
+        uint32 const keepPercent = OldSchoolMulgoreGearKeepPercent(creature);
+        for (auto it = loot->items.begin(); it != loot->items.end();)
+        {
+            ItemTemplate const* item = sObjectMgr->GetItemTemplate(it->itemid);
+            bool const equipment = item && (item->Class == ITEM_CLASS_WEAPON || item->Class == ITEM_CLASS_ARMOR);
+            if (equipment && !it->needs_quest && urand(1, 100) > keepPercent)
+                it = loot->items.erase(it);
+            else
+                ++it;
         }
     }
 
@@ -2275,18 +2316,24 @@ namespace CoAChallenges
             if (amount && AdventureModeTier(player))
                 amount = static_cast<uint32>(std::min<uint64_t>(uint64_t(amount) * 2, 0xFFFFFFFFu));
 
-            if (amount && OldSchoolChallenge(player) && xpSource == XPSOURCE_KILL
-                && victim && OldSchoolCreature(victim->ToCreature()) && TappingAllowsRewards(player, victim->ToCreature()))
+            if (amount && OldSchoolChallenge(player))
             {
-                Creature* creature = victim->ToCreature();
-                OldSchoolHealth* scaling = creature->CustomData.Get<OldSchoolHealth>(OldSchoolHealthKey);
-                uint32 const multiplier = scaling ? scaling->experienceMultiplier
-                    : GetOldSchoolPowerProfile(player, creature).experienceMultiplier;
-                amount = uint32(std::min<uint64>(uint64(amount) * multiplier, UINT32_MAX));
+                uint64 scaledAmount = uint64(amount) * OldSchoolExperiencePercent();
+                if (xpSource == XPSOURCE_KILL && victim && victim->IsCreature()
+                    && OldSchoolCreature(victim->ToCreature())
+                    && TappingAllowsRewards(player, victim->ToCreature()))
+                {
+                    Creature* creature = victim->ToCreature();
+                    OldSchoolHealth* scaling = creature->CustomData.Get<OldSchoolHealth>(OldSchoolHealthKey);
+                    uint32 const multiplier = scaling ? scaling->experienceMultiplier
+                        : GetOldSchoolPowerProfile(player, creature).experienceMultiplier;
+                    scaledAmount *= multiplier;
 
-                if (CoANeeds::ReadOldSchoolRestedSeconds &&
-                    CoANeeds::ReadOldSchoolRestedSeconds(player->GetGUID().GetCounter()))
-                    amount = uint32(std::min<uint64>(uint64(amount) * 115 / 100, UINT32_MAX));
+                    if (CoANeeds::ReadOldSchoolRestedSeconds &&
+                        CoANeeds::ReadOldSchoolRestedSeconds(player->GetGUID().GetCounter()))
+                        scaledAmount = scaledAmount * 115 / 100;
+                }
+                amount = uint32(std::clamp<uint64>(scaledAmount / 100, 1, UINT32_MAX));
             }
 
             // NO_KILL_CREDIT_UNLESS_AT_DISADVANTAGE ("Punching Up" / Overwhelming
@@ -3348,6 +3395,7 @@ namespace CoAChallenges
                 uint32 const healthPercent = scaling ? scaling->healthPercent : profile.healthPercent;
                 uint32 const damageMultiplier = scaling ? scaling->damageMultiplier : profile.damageMultiplier;
                 uint32 const experienceMultiplier = scaling ? scaling->experienceMultiplier : profile.experienceMultiplier;
+                float const effectiveKillXpMultiplier = float(experienceMultiplier) * OldSchoolExperiencePercent() / 100.0f;
                 char const* con = scaling ? scaling->con : profile.con;
                 if (!scaling)
                     health = health * healthPercent / 100;
@@ -3360,9 +3408,9 @@ namespace CoAChallenges
                             ? "Very dangerous; bring a group."
                             : "Overwhelming; a group is strongly advised.";
                 handler->PSendSysMessage("Consider {}: {} con. {} Estimated health: {} ({}x); "
-                    "creature damage: {}x; kill XP: {}x. Estimate only; gear, abilities, companions and adds "
+                    "creature damage: {}x; kill XP: {:.1f}x base ({}% Old School pace). Estimate only; gear, abilities, companions and adds "
                     "change the outcome.", target->GetName(), con, advice, health,
-                    healthPercent / 100, damageMultiplier, experienceMultiplier);
+                    healthPercent / 100, damageMultiplier, effectiveKillXpMultiplier, OldSchoolExperiencePercent());
                 if (target->GetZoneId() == AREA_MULGORE)
                 {
                     if (char const* namedThreat = OldSchoolMulgoreNamedThreatName(target))
@@ -3976,7 +4024,8 @@ namespace CoAChallenges
     class CoAChallengesMisc : public MiscScript
     {
     public:
-        CoAChallengesMisc() : MiscScript("CoAChallengesMisc", { MISCHOOK_CAN_SEND_AUCTIONHELLO }) { }
+        CoAChallengesMisc() : MiscScript("CoAChallengesMisc",
+            { MISCHOOK_CAN_SEND_AUCTIONHELLO, MISCHOOK_ON_AFTER_LOOT_TEMPLATE_PROCESS }) { }
 
         bool CanSendAuctionHello(WorldSession const* session, ObjectGuid /*guid*/, Creature* /*creature*/) override
         {
@@ -3990,6 +4039,17 @@ namespace CoAChallenges
                 return false;
             }
             return true;
+        }
+
+        void OnAfterLootTemplateProcess(Loot* loot, LootTemplate const*, LootStore const& store,
+            Player* owner, bool, bool, uint16) override
+        {
+            if (&store != &LootTemplates_Creature || !loot || !owner)
+                return;
+
+            Creature* creature = owner->GetMap()->GetCreature(loot->sourceWorldObjectGUID);
+            if (IsOldSchoolGearLoot(creature, owner))
+                ThinOldSchoolMulgoreGearLoot(loot, creature);
         }
     };
     // GuildScript: block the guild bank list for NO_GUILD_BANK challenges.
