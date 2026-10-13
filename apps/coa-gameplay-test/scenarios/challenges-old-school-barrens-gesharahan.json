@@ -1,0 +1,91 @@
+{
+  "schema": 1,
+  "name": "Old School considers Gesharahan an elevated Barrens threat",
+  "contract": "The existing Barrens rare Gesharahan (entry 3398, native rank 2) receives four hidden threat levels only in Old School. A level-25 trialist sees a Red con and the rank-adjusted 16x kill XP estimate; ordinary mode and the live spawn remain unchanged.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 1,
+    "x": -2685.14,
+    "y": -1940.75,
+    "z": 98.2187,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "old",
+      "race": 1,
+      "class": 1,
+      "level": 25
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "old",
+      "entry": 3398,
+      "faction": 14,
+      "level": 25,
+      "health": 1000000,
+      "distance": 40,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "start_challenge",
+      "actor": "old",
+      "challenge": 9001,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "old",
+      "metric": "challenge_start_code",
+      "equals": 0
+    },
+    {
+      "action": "client_packet",
+      "actor": "old",
+      "opcode": 317,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "target"
+        }
+      ]
+    },
+    {
+      "action": "command",
+      "actor": "old",
+      "command": ".coa consider"
+    },
+    {
+      "action": "assert",
+      "actor": "old",
+      "metric": "system_message_contains",
+      "text": "Named threat: Gesharahan",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "old",
+      "metric": "system_message_contains",
+      "text": "Red con",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "old",
+      "metric": "system_message_contains",
+      "text": "kill XP: 16x.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "old",
+      "metric": "system_message_contains",
+      "text": "within 35 yards",
+      "equals": 1
+    }
+  ]
+}

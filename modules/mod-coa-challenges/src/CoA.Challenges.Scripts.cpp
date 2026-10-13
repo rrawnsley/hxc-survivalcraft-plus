@@ -1122,6 +1122,28 @@ namespace CoAChallenges
         uint32 experienceMultiplier;
     };
 
+    bool IsOldSchoolBarrensNamedThreat(Creature const* creature)
+    {
+        if (!creature || creature->GetZoneId() != AREA_THE_BARRENS)
+            return false;
+
+        switch (creature->GetEntry())
+        {
+            // Existing Barrens rares and patrols keep their native spawns and routes.
+            case 3398: // Gesharahan
+            case 3474: // Lakota'mani
+            case 5828: // Humar the Pridelord
+            case 5829: // Snort the Heckler
+            case 5831: // Swiftmane
+            case 5834: // Azzere the Skyblade
+            case 5847: // Heggin Stonewhisker
+            case 5865: // Dishu
+                return true;
+            default:
+                return false;
+        }
+    }
+
     int32 OldSchoolThreatOffset(Creature const* creature)
     {
         if (!creature)
@@ -1129,6 +1151,9 @@ namespace CoAChallenges
 
         if (creature->GetZoneId() == AREA_MULGORE
             && (creature->GetEntry() == 3056 || creature->GetEntry() == 3058 || creature->GetEntry() == 5807))
+            return 4;
+
+        if (IsOldSchoolBarrensNamedThreat(creature))
             return 4;
 
         if (creature->GetCreatureTemplate()->rank != CREATURE_ELITE_NORMAL)
@@ -3242,6 +3267,15 @@ namespace CoAChallenges
                             break;
                     }
                 }
+                else if (target->GetZoneId() == AREA_THE_BARRENS)
+                {
+                    handler->SendSysMessage("The Barrens: nearby same-faction creatures within 35 yards may join the fight.");
+                    if (IsOldSchoolBarrensNamedThreat(target))
+                    {
+                        handler->PSendSysMessage("Named threat: {} carries elevated hidden danger and reward; "
+                            "use the con estimate before engaging.", target->GetName());
+                    }
+                }
                 return true;
             }
 
@@ -4414,7 +4448,8 @@ namespace CoAChallenges
         {
             Creature* creature = unit ? unit->ToCreature() : nullptr;
             Player* participant = victim ? victim->GetCharmerOrOwnerPlayerOrPlayerItself() : nullptr;
-            if (creature && creature->GetSpawnId() && creature->GetZoneId() == AREA_MULGORE
+            if (creature && creature->GetSpawnId()
+                && (creature->GetZoneId() == AREA_MULGORE || creature->GetZoneId() == AREA_THE_BARRENS)
                 && OldSchoolCreature(creature) && participant && OldSchoolChallenge(participant))
                 creature->CallForHelp(35.0f, victim);
         }
