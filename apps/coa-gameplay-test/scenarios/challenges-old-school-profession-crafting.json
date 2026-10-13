@@ -1,22 +1,40 @@
 {
   "schema": 1,
   "name": "Old School players can craft incremental gear",
-  "contract": "Old School's Mulgore creature-loot scarcity does not suppress profession-crafted gear. The native Tailoring Linen Belt recipe consumes its standard materials and produces its authored item while the trial is active.",
+  "contract": "Old School's Mulgore creature-loot scarcity does not suppress profession-crafted gear. Native Tailoring, Leatherworking, and Blacksmithing recipes consume their standard materials and produce authored gear while the trial is active.",
   "timeout_ms": 60000,
   "location": {"map": 1, "x": -751.421, "y": -674.71, "z": -19.1842, "o": 0},
   "players": [
-    {"id": "old", "race": 1, "class": 1, "level": 1}
+    {"id": "tailor", "race": 1, "class": 1, "level": 1},
+    {"id": "leatherworker", "race": 1, "class": 1, "level": 1},
+    {"id": "smith", "race": 1, "class": 1, "level": 1}
   ],
   "steps": [
     {"action": "wait", "ms": 1000},
-    {"action": "start_challenge", "actor": "old", "challenge": 9001, "level": 1},
-    {"action": "assert", "actor": "old", "metric": "challenge_start_code", "equals": 0},
-    {"action": "set_skill", "actor": "old", "skill": 197, "value": 1, "maximum": 75},
-    {"action": "add_item", "actor": "old", "item": 2996, "count": 1},
-    {"action": "add_item", "actor": "old", "item": 2320, "count": 1},
-    {"action": "learn", "actor": "old", "spell": 8776},
-    {"action": "cast", "actor": "old", "spell": 8776},
-    {"action": "wait", "ms": 2500, "label": "Let the native two-second Tailoring combine finish"},
-    {"action": "assert", "label": "Tailoring turns linen and thread into the Linen Belt upgrade during Old School", "actor": "old", "metric": "item_count", "item": 7026, "equals": 1}
+    {"action": "start_challenge", "actor": "tailor", "challenge": 9001, "level": 1},
+    {"action": "start_challenge", "actor": "leatherworker", "challenge": 9001, "level": 1},
+    {"action": "start_challenge", "actor": "smith", "challenge": 9001, "level": 1},
+    {"action": "assert", "actor": "tailor", "metric": "challenge_start_code", "equals": 0},
+    {"action": "assert", "actor": "leatherworker", "metric": "challenge_start_code", "equals": 0},
+    {"action": "assert", "actor": "smith", "metric": "challenge_start_code", "equals": 0},
+    {"action": "set_skill", "actor": "tailor", "skill": 197, "value": 15, "maximum": 75},
+    {"action": "set_skill", "actor": "leatherworker", "skill": 165, "value": 15, "maximum": 75},
+    {"action": "set_skill", "actor": "smith", "skill": 164, "value": 1, "maximum": 75},
+    {"action": "add_item", "actor": "tailor", "item": 2996, "count": 1},
+    {"action": "add_item", "actor": "tailor", "item": 2320, "count": 1},
+    {"action": "add_item", "actor": "leatherworker", "item": 2318, "count": 4},
+    {"action": "add_item", "actor": "leatherworker", "item": 2320, "count": 1},
+    {"action": "add_item", "actor": "smith", "item": 2840, "count": 6},
+    {"action": "learn", "actor": "tailor", "spell": 8776},
+    {"action": "learn", "actor": "leatherworker", "spell": 2153},
+    {"action": "learn", "actor": "smith", "spell": 2661},
+    {"action": "summon_gameobject", "actor": "smith", "entry": 1684, "distance": 2},
+    {"action": "cast", "actor": "tailor", "spell": 8776},
+    {"action": "cast", "actor": "leatherworker", "spell": 2153},
+    {"action": "cast", "actor": "smith", "spell": 2661},
+    {"action": "wait", "ms": 3500, "label": "Let the native crafting casts finish"},
+    {"action": "assert", "label": "Tailoring turns linen and thread into the Linen Belt upgrade during Old School", "actor": "tailor", "metric": "item_count", "item": 7026, "equals": 1},
+    {"action": "assert", "label": "Leatherworking turns skinned leather and thread into Handstitched Leather Pants during Old School", "actor": "leatherworker", "metric": "item_count", "item": 2303, "equals": 1},
+    {"action": "assert", "label": "Blacksmithing turns copper bars into a Copper Chain Belt during Old School", "actor": "smith", "metric": "item_count", "item": 2851, "equals": 1}
   ]
 }
