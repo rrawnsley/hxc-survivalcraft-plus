@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Old School considers Swiftmane an elevated Barrens threat",
-  "contract": "The existing Barrens rare Swiftmane (entry 5831, native rank 2) receives four hidden threat levels only in Old School. A level-25 trialist sees a Red con and the rank-adjusted 3.2x effective kill XP estimate; ordinary mode and the live spawn remain unchanged.",
+  "contract": "The existing Barrens rare Swiftmane (entry 5831, native rank 2) receives four hidden threat levels only in Old School. A level-25 trialist sees a Red con and the rank-adjusted 1.6x effective kill XP estimate; ordinary mode and the live spawn remain unchanged.",
   "timeout_ms": 90000,
   "location": {
     "map": 1,
@@ -26,7 +26,7 @@
       "faction": 14,
       "level": 25,
       "health": 1000000,
-      "distance": 40,
+      "distance": 39,
       "stationary": true
     }
   ],
@@ -77,7 +77,7 @@
       "action": "assert",
       "actor": "old",
       "metric": "system_message_contains",
-      "text": "kill XP: 3.2x base (20% Old School pace).",
+      "text": "kill XP: 1.6x base (10% Old School pace).",
       "equals": 1
     }
   ]

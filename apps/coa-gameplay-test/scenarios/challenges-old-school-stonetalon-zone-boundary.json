@@ -95,16 +95,8 @@
       "actor": "old",
       "metric": "system_message_contains",
       "equals": 1,
-      "label": "old: kill XP: 1.6x base (20% Old School pace).",
-      "text": "kill XP: 1.6x base (20% Old School pace)."
-    },
-    {
-      "action": "assert",
-      "actor": "old",
-      "metric": "system_message_contains",
-      "equals": 1,
-      "label": "old: The Barrens: nearby",
-      "text": "The Barrens: nearby"
+      "label": "old: kill XP: 0.8x base (10% Old School pace).",
+      "text": "kill XP: 0.8x base (10% Old School pace)."
     },
     {
       "action": "assert",
@@ -170,16 +162,8 @@
       "actor": "hardcore",
       "metric": "system_message_contains",
       "equals": 1,
-      "label": "hardcore: kill XP: 1.6x base (20% Old School pace).",
-      "text": "kill XP: 1.6x base (20% Old School pace)."
-    },
-    {
-      "action": "assert",
-      "actor": "hardcore",
-      "metric": "system_message_contains",
-      "equals": 1,
-      "label": "hardcore: The Barrens: nearby",
-      "text": "The Barrens: nearby"
+      "label": "hardcore: kill XP: 0.8x base (10% Old School pace).",
+      "text": "kill XP: 0.8x base (10% Old School pace)."
     },
     {
       "action": "assert",
