@@ -1,0 +1,20 @@
+{
+  "schema": 1,
+  "name": "Old School threat spread reaches native Mulgore spawns",
+  "contract": "Ordinary persistent Mulgore creatures use their stable spawn-id threat offset in Old School, so same-zone mobs can be much more dangerous than their native level suggests. The change is trial-gated and does not modify aggro or assistance.",
+  "timeout_ms": 90000,
+  "location": {"map": 1, "x": -2944.71, "y": -1004.2, "z": 54.7164, "o": 0},
+  "players": [
+    {"id": "old", "race": 6, "class": 1, "level": 1}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 1000},
+    {"action": "start_challenge", "actor": "old", "challenge": 9001, "level": 1},
+    {"action": "assert", "actor": "old", "metric": "challenge_start_code", "equals": 0},
+    {"action": "set_phase", "actor": "old", "value": 1},
+    {"action": "wait", "ms": 1000},
+    {"action": "assert", "label": "The native Bristleback shaman spawn is loaded in the player's phase", "actor": "old", "metric": "nearby_creature_count", "entry": 2953, "min": 1},
+    {"action": "attack_nearby", "actor": "old", "entry": 2953, "damage_pct": 10},
+    {"action": "assert", "label": "A persistent non-elite Bristleback shaman receives its stable threat-scaled health", "actor": "old", "metric": "nearby_creature_max_health", "entry": 2953, "min": 8000}
+  ]
+}

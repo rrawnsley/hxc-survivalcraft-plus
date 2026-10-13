@@ -1225,9 +1225,6 @@ namespace CoAChallenges
 
         int32 const campThreatBonus = GetOldSchoolMulgoreCampThreat(creature).bonus;
 
-        if (creature->GetCreatureTemplate()->rank != CREATURE_ELITE_NORMAL)
-            return campThreatBonus;
-
         if (!creature->GetSpawnId())
             return campThreatBonus;
 
