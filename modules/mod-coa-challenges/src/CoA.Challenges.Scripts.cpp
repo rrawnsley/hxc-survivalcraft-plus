@@ -1145,6 +1145,8 @@ namespace CoAChallenges
 
     bool IsOldSchoolBarrensNamedThreat(Creature const* creature);
     bool IsOldSchoolStonetalonNamedThreat(Creature const* creature);
+    bool IsOldSchoolAshenvaleNamedThreat(Creature const* creature);
+    bool IsOldSchoolSouthernNamedThreat(Creature const* creature);
 
     bool IsOldSchoolGearLoot(Creature const* creature, Player const* player)
     {
@@ -1158,7 +1160,8 @@ namespace CoAChallenges
         uint32 const normalPercent = std::min(configured, 100u);
         uint32 const namedPercent = std::min(namedConfigured, 100u);
         bool const namedThreat = IsOldSchoolMulgoreNamedThreat(creature)
-            || IsOldSchoolBarrensNamedThreat(creature) || IsOldSchoolStonetalonNamedThreat(creature);
+            || IsOldSchoolBarrensNamedThreat(creature) || IsOldSchoolStonetalonNamedThreat(creature)
+            || IsOldSchoolAshenvaleNamedThreat(creature) || IsOldSchoolSouthernNamedThreat(creature);
         return namedThreat ? namedPercent : normalPercent;
     }
 
@@ -1250,10 +1253,78 @@ namespace CoAChallenges
             case 5930:
             case 5931:
             case 5932:
+            case 3986:
+            case 4073:
+            case 4074:
+            case 4202:
+            case 11921:
                 return true;
             default:
                 return false;
         }
+    }
+
+    bool IsOldSchoolAshenvaleNamedThreat(Creature const* creature)
+    {
+        if (!creature || creature->GetZoneId() != AREA_ASHENVALE)
+            return false;
+
+        switch (creature->GetEntry())
+        {
+            case 3735:
+            case 3736:
+            case 3773:
+            case 3987:
+            case 4273:
+            case 10640:
+            case 10641:
+            case 10642:
+            case 10643:
+            case 12037:
+            case 12676:
+            case 12677:
+            case 12678:
+            case 12860:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    bool IsOldSchoolSouthernNamedThreat(Creature const* creature)
+    {
+        if (!creature)
+            return false;
+        if (creature->GetZoneId() == AREA_THOUSAND_NEEDLES)
+        {
+            switch (creature->GetEntry())
+            {
+                case 4132:
+                case 4499:
+                case 5933:
+                case 5934:
+                case 5935:
+                case 5937:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+        if (creature->GetZoneId() == AREA_DESOLACE)
+        {
+            switch (creature->GetEntry())
+            {
+                case 5760:
+                case 5771:
+                case 14225:
+                case 14226:
+                case 14227:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+        return false;
     }
 
     int32 OldSchoolNamedThreatOffset(Creature const* creature)
@@ -1275,14 +1346,64 @@ namespace CoAChallenges
             }
         }
 
-        return IsOldSchoolMulgoreNamedThreat(creature)
-            || IsOldSchoolBarrensNamedThreat(creature) || IsOldSchoolStonetalonNamedThreat(creature) ? 4 : 0;
+        if (creature->GetZoneId() == AREA_STONETALON_MOUNTAINS)
+        {
+            switch (creature->GetEntry())
+            {
+                case 3986:
+                case 4202:
+                    return 8;
+                case 4073:
+                case 4074:
+                case 11921:
+                    return 6;
+                default:
+                    break;
+            }
+        }
+        if (creature->GetZoneId() == AREA_ASHENVALE)
+        {
+            switch (creature->GetEntry())
+            {
+                case 3735:
+                case 3736:
+                case 3773:
+                case 3987:
+                case 4273:
+                case 12860:
+                    return 8;
+                default:
+                    break;
+            }
+        }
+        if (IsOldSchoolSouthernNamedThreat(creature))
+        {
+            if (creature->GetEntry() == 5760)
+                return 10;
+            if (creature->GetEntry() == 4499 || creature->GetEntry() == 5771)
+                return 8;
+            return 6;
+        }
+
+        return IsOldSchoolMulgoreNamedThreat(creature) || IsOldSchoolBarrensNamedThreat(creature)
+            || IsOldSchoolStonetalonNamedThreat(creature) || IsOldSchoolAshenvaleNamedThreat(creature) ? 4 : 0;
     }
 
     uint32 OldSchoolNamedRewardHundredths(Creature const* creature)
     {
-        if (!creature || creature->GetZoneId() != AREA_THE_BARRENS)
+        if (!creature)
             return 100;
+
+        if (creature->GetZoneId() != AREA_THE_BARRENS)
+        {
+            if (IsOldSchoolStonetalonNamedThreat(creature) || IsOldSchoolAshenvaleNamedThreat(creature)
+                || IsOldSchoolSouthernNamedThreat(creature))
+            {
+                int32 const offset = OldSchoolNamedThreatOffset(creature);
+                return offset >= 10 ? 300 : offset >= 8 ? 200 : 150;
+            }
+            return 100;
+        }
 
         switch (creature->GetEntry())
         {
@@ -1340,6 +1461,216 @@ namespace CoAChallenges
                     return { "Windfury Ridge", "sorceress", 4 };
                 case 2965:
                     return { "Windfury Ridge", "matriarch", 6 };
+                default:
+                    return { nullptr, nullptr, 0 };
+            }
+        }
+
+        if (creature->GetZoneId() == AREA_STONETALON_MOUNTAINS)
+        {
+            switch (creature->GetEntry())
+            {
+                case 3988:
+                    return { "Venture Co. worksite", "operator", 2 };
+                case 3989:
+                    return { "Venture Co. worksite", "logger", 1 };
+                case 3990:
+                    return { "Venture Co. worksite", "cutter", 1 };
+                case 3991:
+                    return { "Venture Co. worksite", "deforester", 2 };
+                case 3992:
+                    return { "Venture Co. worksite", "engineer", 4 };
+                case 3993:
+                    return { "Venture Co. worksite", "machine smith", 3 };
+                case 3997:
+                    return { "Venture Co. worksite", "overboss", 6 };
+                case 3998:
+                    return { "Windshear mine", "vermin", 1 };
+                case 3999:
+                    return { "Windshear mine", "digger", 1 };
+                case 4001:
+                    return { "Windshear mine", "tunnel rat", 2 };
+                case 4002:
+                    return { "Windshear mine", "stonecutter", 3 };
+                case 4003:
+                    return { "Windshear mine", "geomancer", 4 };
+                case 4004:
+                    return { "Windshear mine", "overlord", 6 };
+                case 4022:
+                    return { "Bloodfury roost", "harpy", 2 };
+                case 4023:
+                    return { "Bloodfury roost", "roguefeather", 3 };
+                case 4024:
+                    return { "Bloodfury roost", "slayer", 4 };
+                case 4025:
+                    return { "Bloodfury roost", "ambusher", 3 };
+                case 4026:
+                    return { "Bloodfury roost", "windcaller", 4 };
+                case 4027:
+                    return { "Bloodfury roost", "storm witch", 6 };
+                default:
+                    return { nullptr, nullptr, 0 };
+            }
+        }
+        if (creature->GetZoneId() == AREA_ASHENVALE)
+        {
+            switch (creature->GetEntry())
+            {
+                case 3921:
+                    return { "Thistlefur hold", "ursa", 3 };
+                case 3922:
+                    return { "Thistlefur hold", "totemic", 4 };
+                case 3923:
+                    return { "Thistlefur hold", "den watcher", 2 };
+                case 3924:
+                    return { "Thistlefur hold", "shaman", 5 };
+                case 3925:
+                    return { "Thistlefur hold", "avenger", 4 };
+                case 3926:
+                    return { "Thistlefur hold", "pathfinder", 2 };
+                case 3743:
+                    return { "Foulweald camp", "warrior", 2 };
+                case 3745:
+                    return { "Foulweald camp", "pathfinder", 2 };
+                case 3746:
+                    return { "Foulweald camp", "den watcher", 3 };
+                case 3748:
+                    return { "Foulweald camp", "shaman", 5 };
+                case 3749:
+                    return { "Foulweald camp", "ursa", 4 };
+                case 3737:
+                    return { "Saltspittle shore", "puddlejumper", 1 };
+                case 3739:
+                    return { "Saltspittle shore", "warrior", 2 };
+                case 3740:
+                    return { "Saltspittle shore", "muckdweller", 3 };
+                case 3742:
+                    return { "Saltspittle shore", "oracle", 5 };
+                case 3732:
+                    return { "Forsaken outpost", "seeker", 2 };
+                case 3733:
+                    return { "Forsaken outpost", "herbalist", 1 };
+                case 3734:
+                    return { "Forsaken outpost", "thug", 3 };
+                default:
+                    return { nullptr, nullptr, 0 };
+            }
+        }
+
+        if (creature->GetZoneId() == AREA_THOUSAND_NEEDLES)
+        {
+            switch (creature->GetEntry())
+            {
+                case 4093:
+                    return { "Galak camp", "wrangler", 2 };
+                case 4094:
+                    return { "Galak camp", "scout", 1 };
+                case 4095:
+                    return { "Galak camp", "mauler", 3 };
+                case 4096:
+                    return { "Galak camp", "windchaser", 3 };
+                case 4097:
+                    return { "Galak camp", "stormer", 5 };
+                case 4098:
+                    return { "Galak camp", "pack runner", 2 };
+                case 4099:
+                    return { "Galak camp", "marauder", 4 };
+                case 4250:
+                    return { "Galak camp", "packhound", 1 };
+                case 7404:
+                    return { "Galak camp", "flame guard", 6 };
+                case 10720:
+                    return { "Galak camp", "assassin", 4 };
+                case 10758:
+                    return { "Grimtotem mesa", "bandit", 2 };
+                case 10759:
+                    return { "Grimtotem mesa", "stomper", 3 };
+                case 10760:
+                    return { "Grimtotem mesa", "geomancer", 5 };
+                case 10761:
+                    return { "Grimtotem mesa", "reaver", 6 };
+                default:
+                    return { nullptr, nullptr, 0 };
+            }
+        }
+        if (creature->GetZoneId() == AREA_DESOLACE)
+        {
+            switch (creature->GetEntry())
+            {
+                case 4646:
+                    return { "Gelkis village", "outrunner", 1 };
+                case 4647:
+                    return { "Gelkis village", "scout", 1 };
+                case 4648:
+                    return { "Gelkis village", "stamper", 2 };
+                case 4649:
+                    return { "Gelkis village", "windchaser", 3 };
+                case 4651:
+                    return { "Gelkis village", "earthcaller", 5 };
+                case 4652:
+                    return { "Gelkis village", "mauler", 3 };
+                case 4653:
+                    return { "Gelkis village", "marauder", 4 };
+                case 4661:
+                    return { "Gelkis village", "rumbler", 2 };
+                case 4638:
+                    return { "Magram village", "scout", 1 };
+                case 4639:
+                    return { "Magram village", "outrunner", 1 };
+                case 4640:
+                    return { "Magram village", "wrangler", 2 };
+                case 4641:
+                    return { "Magram village", "windchaser", 3 };
+                case 4642:
+                    return { "Magram village", "stormer", 5 };
+                case 4643:
+                    return { "Magram village", "pack runner", 2 };
+                case 4644:
+                    return { "Magram village", "marauder", 4 };
+                case 4645:
+                    return { "Magram village", "mauler", 3 };
+                case 4662:
+                    return { "Magram village", "bonepaw", 3 };
+                case 4654:
+                    return { "Maraudine camp", "scout", 2 };
+                case 4655:
+                    return { "Maraudine camp", "wrangler", 3 };
+                case 4656:
+                    return { "Maraudine camp", "mauler", 4 };
+                case 4657:
+                    return { "Maraudine camp", "windchaser", 4 };
+                case 4658:
+                    return { "Maraudine camp", "stormer", 5 };
+                case 4659:
+                    return { "Maraudine camp", "marauder", 4 };
+                case 4660:
+                    return { "Maraudine camp", "bonepaw", 3 };
+                case 4704:
+                    return { "Maraudine camp", "pack runner", 3 };
+                case 6069:
+                    return { "Maraudine camp", "khan guard", 6 };
+                case 6070:
+                    return { "Maraudine camp", "khan advisor", 6 };
+                case 11685:
+                    return { "Maraudine camp", "priest", 6 };
+                case 4711:
+                    return { "Slitherblade shore", "naga", 2 };
+                case 4712:
+                    return { "Slitherblade shore", "sorceress", 4 };
+                case 4713:
+                    return { "Slitherblade shore", "warrior", 3 };
+                case 4714:
+                    return { "Slitherblade shore", "myrmidon", 4 };
+                case 4715:
+                    return { "Slitherblade shore", "razortail", 4 };
+                case 4716:
+                    return { "Slitherblade shore", "tidehunter", 4 };
+                case 4717:
+                    return { "Slitherblade shore", "tide priestess", 5 };
+                case 4718:
+                    return { "Slitherblade shore", "oracle", 5 };
+                case 4719:
+                    return { "Slitherblade shore", "sea witch", 6 };
                 default:
                     return { nullptr, nullptr, 0 };
             }
@@ -3565,7 +3896,8 @@ namespace CoAChallenges
                             "use the con estimate before engaging.", namedThreat);
                     }
                 }
-                else if (IsOldSchoolBarrensNamedThreat(target) || IsOldSchoolStonetalonNamedThreat(target))
+                else if (IsOldSchoolBarrensNamedThreat(target) || IsOldSchoolStonetalonNamedThreat(target)
+                    || IsOldSchoolAshenvaleNamedThreat(target) || IsOldSchoolSouthernNamedThreat(target))
                     handler->PSendSysMessage("Named threat: {} carries elevated hidden danger and reward; "
                         "use the con estimate before engaging.", target->GetName());
 
@@ -3579,7 +3911,17 @@ namespace CoAChallenges
                         2949, 2950, 2951, 2952, 2953, 2954, 2962, 2963, 2964, 2965,
                         2975, 2976, 2977, 2978, 2979,
                         3260, 3261, 3262, 3263, 3265, 3266, 3267, 3268, 3269, 3270, 3271,
-                        3272, 3273, 3274, 3275, 3276, 3277, 3278, 3374, 3375, 3376, 3377, 3378
+                        3272, 3273, 3274, 3275, 3276, 3277, 3278, 3374, 3375, 3376, 3377, 3378,
+                        3988, 3989, 3990, 3991, 3992, 3993, 3997, 3998, 3999, 4001, 4002, 4003, 4004,
+                        4022, 4023, 4024, 4025, 4026, 4027,
+                        3921, 3922, 3923, 3924, 3925, 3926, 3743, 3745, 3746, 3748, 3749,
+                        3737, 3739, 3740, 3742, 3732, 3733, 3734,
+                        4093, 4094, 4095, 4096, 4097, 4098, 4099, 4250, 7404, 10720,
+                        10758, 10759, 10760, 10761,
+                        4646, 4647, 4648, 4649, 4651, 4652, 4653, 4661,
+                        4638, 4639, 4640, 4641, 4642, 4643, 4644, 4645, 4662,
+                        4654, 4655, 4656, 4657, 4658, 4659, 4660, 4704, 6069, 6070, 11685,
+                        4711, 4712, 4713, 4714, 4715, 4716, 4717, 4718, 4719
                     };
                     std::list<Creature*> nearbyCreatures;
                     target->GetCreatureListWithEntryInGrid(nearbyCreatures, campEntries, OldSchoolConsiderRange);

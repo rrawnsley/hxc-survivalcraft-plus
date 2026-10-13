@@ -96,13 +96,13 @@ void NamedProfiles()
         {
             assert(profile.healthPercent == 3576);
             assert(profile.damageMultiplier == 22);
-            assert(profile.experienceMultiplierHundredths == 400);
+            assert(profile.experienceMultiplierHundredths == 600);
         }
         else
         {
             assert(profile.healthPercent == 1788);
             assert(profile.damageMultiplier == 11);
-            assert(profile.experienceMultiplierHundredths == 200);
+            assert(profile.experienceMultiplierHundredths == 300);
         }
         player.level = 35;
         profile = GetOldSchoolPowerProfile(&player, &creature);
@@ -213,9 +213,61 @@ void BarrensCampConsider()
     assert(std::strcmp(GetOldSchoolPowerProfile(&player, &geomancer).con, "Red") == 0);
 }
 
+void ForestAndMountainProfiles()
+{
+    Player player;
+    Creature creature;
+    creature.spawn = 0;
+    creature.zone = AREA_STONETALON_MOUNTAINS;
+    creature.entry = 4003;
+    assert(std::strcmp(GetOldSchoolCampThreat(&creature).camp, "Windshear mine") == 0);
+    assert(OldSchoolThreatOffset(&creature) == 4);
+    creature.entry = 4202;
+    assert(IsOldSchoolStonetalonNamedThreat(&creature));
+    assert(OldSchoolThreatOffset(&creature) == 8);
+    assert(GetOldSchoolPowerProfile(&player, &creature).experienceMultiplierHundredths == 600);
+    creature.zone = AREA_ASHENVALE;
+    assert(!IsOldSchoolStonetalonNamedThreat(&creature));
+    assert(OldSchoolThreatOffset(&creature) == 0);
+    creature.entry = 3924;
+    assert(std::strcmp(GetOldSchoolCampThreat(&creature).role, "shaman") == 0);
+    assert(OldSchoolThreatOffset(&creature) == 5);
+    creature.entry = 3736;
+    assert(IsOldSchoolAshenvaleNamedThreat(&creature));
+    assert(OldSchoolThreatOffset(&creature) == 8);
+    assert(GetOldSchoolPowerProfile(&player, &creature).experienceMultiplierHundredths == 600);
+    creature.entry = 10640;
+    assert(IsOldSchoolAshenvaleNamedThreat(&creature));
+    assert(OldSchoolThreatOffset(&creature) == 4);
+    assert(GetOldSchoolPowerProfile(&player, &creature).experienceMultiplierHundredths == 300);
+    creature.zone = AREA_THE_BARRENS;
+    assert(!IsOldSchoolAshenvaleNamedThreat(&creature));
+    assert(OldSchoolThreatOffset(&creature) == 0);
+    assert(OldSchoolNamedRewardHundredths(&creature) == 100);
+    creature.zone = AREA_THOUSAND_NEEDLES;
+    creature.entry = 10760;
+    assert(std::strcmp(GetOldSchoolCampThreat(&creature).camp, "Grimtotem mesa") == 0);
+    assert(OldSchoolThreatOffset(&creature) == 5);
+    creature.entry = 4499;
+    assert(IsOldSchoolSouthernNamedThreat(&creature));
+    assert(OldSchoolNamedRewardHundredths(&creature) == 200);
+    creature.zone = AREA_DESOLACE;
+    creature.entry = 4719;
+    assert(std::strcmp(GetOldSchoolCampThreat(&creature).camp, "Slitherblade shore") == 0);
+    assert(OldSchoolThreatOffset(&creature) == 6);
+    creature.entry = 5760;
+    assert(IsOldSchoolSouthernNamedThreat(&creature));
+    assert(OldSchoolThreatOffset(&creature) == 10);
+    assert(OldSchoolNamedRewardHundredths(&creature) == 300);
+    creature.zone = AREA_MULGORE;
+    assert(!IsOldSchoolSouthernNamedThreat(&creature));
+    assert(OldSchoolThreatOffset(&creature) == 0);
+}
+
 int main()
 {
     NamedProfiles();
     MulgoreCampConsider();
     BarrensCampConsider();
+    ForestAndMountainProfiles();
 }

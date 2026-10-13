@@ -158,8 +158,15 @@ carries ten hidden threat levels and a 3x encounter reward. The named bonus mult
 con-based kill XP used by `/consider`, on top of the 50% Old School pace and any elite-rank reward.
 Their native spawns and patrol movement remain intact. All of these profiles are active only in
 either Old School trial.
-Do not advance to the next zone until Mulgore has been played and tuned with the user. Continue the remaining
-zone work in player progression order, with a player playtest and tuning pass at each zone boundary.
+Stonetalon now includes Venture Co. worksites, Windshear mines, and Bloodfury roosts. Gerenzo Wrenchwhistle
+and Sarilus Foulborne receive leader profiles; XT:4, XT:9, and Besseleth join the named threat set.
+Ashenvale includes Thistlefur, Foulweald, Saltspittle, and Forsaken camps, with fourteen named encounters.
+Thousand Needles includes Galak camps and Grimtotem mesas, with six named encounters.
+Desolace includes Gelkis, Magram, Maraudine, and Slitherblade camps, with five named encounters.
+Named encounters in these four zones multiply con-based kill XP by 1.5x, 2x, or 3x according to their
+authored threat tier. They also use the named gear retention rule. Native spawn positions, respawn timers,
+and movement continue to provide the world ecology. Continue zone authoring in progression order while
+player leveling feedback tunes the earlier slices.
 
 Ordinary Old School deaths outside battlegrounds and arenas remove 10% of the experience
 needed for the current level; the loss can delevel the character. Resurrection requires

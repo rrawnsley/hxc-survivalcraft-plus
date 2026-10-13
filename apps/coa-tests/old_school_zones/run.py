@@ -20,6 +20,8 @@ def main():
         'bool IsOldSchoolMulgoreNamedThreat(',
         'bool IsOldSchoolBarrensNamedThreat(Creature const* creature)\n    {',
         'bool IsOldSchoolStonetalonNamedThreat(Creature const* creature)\n    {',
+        'bool IsOldSchoolAshenvaleNamedThreat(Creature const* creature)\n    {',
+        'bool IsOldSchoolSouthernNamedThreat(Creature const* creature)\n    {',
         'int32 OldSchoolNamedThreatOffset(Creature const* creature)\n    {',
         'uint32 OldSchoolNamedRewardHundredths(Creature const* creature)\n    {',
         'struct OldSchoolCampThreat',

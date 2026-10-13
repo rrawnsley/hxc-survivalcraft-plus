@@ -4768,6 +4768,7 @@ private:
             if (action == "attack_nearby")
             {
                 Require(player->IsValidAttackTarget(creatures.front()), "Invalid melee attack target");
+                player->SetSelection(creatures.front()->GetGUID());
                 if (step.get<bool>("kill", false))
                 {
                     Unit::DealDamage(player, creatures.front(), creatures.front()->GetMaxHealth() * 100u, nullptr, DIRECT_DAMAGE,
