@@ -22,7 +22,7 @@
     { 16, 6647, nullptr, nullptr, 4, 150, true, false },
     { 16, 6648, nullptr, nullptr, 4, 150, true, false },
     { 16, 6649, nullptr, nullptr, 4, 150, true, false },
-    { 16, 6650, nullptr, nullptr, 4, 150, true, false },
+    { 16, 6650, "Spitelash shore", "named leader", 4, 150, true, false },
     { 16, 6651, nullptr, nullptr, 4, 150, true, false },
     { 16, 6652, nullptr, nullptr, 4, 150, true, false },
     { 16, 7864, "Highborne ruins", "hunter", 1, 100, false, false },

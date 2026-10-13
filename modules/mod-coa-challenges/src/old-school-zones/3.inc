@@ -23,7 +23,7 @@
     { 3, 2906, "Dustbelcher stronghold", "hunter", 1, 100, false, false },
     { 3, 2907, "Dustbelcher stronghold", "spellcaster", 4, 100, false, false },
     { 3, 2931, nullptr, nullptr, 8, 200, true, false },
-    { 3, 2944, nullptr, nullptr, 8, 200, true, true },
+    { 3, 2944, "Dustbelcher stronghold", "named leader", 8, 200, true, true },
     { 3, 4844, "Shadowforge hold", "spellcaster", 4, 100, false, false },
     { 3, 4845, "Shadowforge hold", "spellcaster", 4, 100, false, false },
     { 3, 4846, "Shadowforge hold", "spellcaster", 4, 100, false, false },

@@ -30,7 +30,7 @@
     { 11, 1353, nullptr, nullptr, 4, 150, true, false },
     { 11, 1418, "Bluegill shore", "hunter", 1, 100, false, false },
     { 11, 2090, nullptr, nullptr, 4, 150, true, false },
-    { 11, 2091, nullptr, nullptr, 6, 150, true, false },
+    { 11, 2091, "Dragonmaw hold", "named leader", 6, 150, true, false },
     { 11, 2102, "Dragonmaw hold", "worker", 1, 100, false, false },
     { 11, 2103, "Dragonmaw hold", "hunter", 1, 100, false, false },
     { 11, 2108, nullptr, nullptr, 4, 150, true, false },

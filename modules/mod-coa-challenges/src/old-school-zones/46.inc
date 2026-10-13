@@ -18,7 +18,7 @@
     { 46, 8979, nullptr, nullptr, 4, 150, true, false },
     { 46, 8981, nullptr, nullptr, 4, 150, true, false },
     { 46, 9046, nullptr, nullptr, 4, 150, true, false },
-    { 46, 9176, nullptr, nullptr, 4, 150, true, true },
+    { 46, 9176, "Firegut stronghold", "named leader", 4, 150, true, true },
     { 46, 9602, nullptr, nullptr, 4, 150, true, false },
     { 46, 9604, nullptr, nullptr, 4, 150, true, false },
     { 46, 9776, "Flamekin grounds", "hunter", 1, 100, false, false },

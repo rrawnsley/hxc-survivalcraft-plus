@@ -28,7 +28,7 @@
     { 4298, 28939, "Scarlet enclave", "hunter", 1, 100, false, false },
     { 4298, 28940, "Scarlet enclave", "hunter", 1, 100, false, false },
     { 4298, 29000, "Scarlet enclave", "named leader", 4, 150, true, false },
-    { 4298, 29011, nullptr, nullptr, 4, 150, true, false },
+    { 4298, 29011, "Scarlet enclave", "named leader", 4, 150, true, false },
     { 4298, 29029, "Scarlet enclave", "hunter", 1, 100, false, false },
     { 4298, 29080, "Scarlet enclave", "elite guard", 4, 100, false, false },
     { 4298, 29102, "Crusader encampment", "elite guard", 4, 100, false, false },
