@@ -2728,7 +2728,8 @@ namespace CoAChallenges
 
         int32 const campThreatBonus = GetOldSchoolCampThreat(creature).bonus;
 
-        if (creature->GetZoneId() == AREA_TIRISFAL_GLADES && creature->GetEntry() == 1890)
+        if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) == AREA_TIRISFAL_GLADES
+            && creature->GetEntry() == 1890)
             return -3;
 
         if (!creature->GetSpawnId())
