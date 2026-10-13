@@ -267,6 +267,13 @@ other encounters use +4 or +6/1.5x. Quest-triggered cauldron lords receive their
 profile even without a persistent spawn ID. Native quest spawning, movement, factions,
 respawn windows, aggro and assistance remain intact.
 
+Eastern Plaguelands adds Tyr's Hand, Mossflayer marsh, Scourge ruins, crypt lairs,
+plaguehound grounds, plaguebat roosts and carrion feeding grounds. Thirteen native
+named/roaming entries gain fixed danger/reward profiles. Borelgore, Duskwing and Demetria
+use +10 threat/3x encounter XP and display a roaming warning; Abbendis and the Nerubian
+Overseer use +8/2x; the other encounters use +4 or +6/1.5x. Native patrols remain in place.
+These profiles preserve factions, assistance, respawn windows and ordinary-mode behavior.
+
 ## License
 
 GNU General Public License v2.0 — see [LICENSE](LICENSE).
