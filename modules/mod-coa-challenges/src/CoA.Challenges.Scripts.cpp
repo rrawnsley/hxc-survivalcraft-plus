@@ -3243,7 +3243,9 @@ namespace CoAChallenges
                 handler->SendSysMessage("Consider: select a living hostile creature.");
                 return true;
             }
-            if (oldSchool && !player->IsWithinDistInMap(target, OldSchoolConsiderRange))
+            // Consider uses a fixed center-to-center range; creature collision radii
+            // must not let large targets exceed the advertised 40-yard boundary.
+            if (oldSchool && !player->IsWithinDistInMap(target, OldSchoolConsiderRange, true, false, false))
             {
                 handler->PSendSysMessage("Consider: target is outside your {}-yard range.",
                     uint32(OldSchoolConsiderRange));
