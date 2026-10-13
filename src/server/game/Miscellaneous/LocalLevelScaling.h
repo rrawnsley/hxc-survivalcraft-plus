@@ -24,6 +24,15 @@ struct ItemTemplate;
 
 namespace LocalLevelScaling
 {
+using ChallengeRewardLevelResolver = std::uint8_t (*)(Player const*, Creature const*);
+inline std::atomic<ChallengeRewardLevelResolver> ChallengeRewardLevelOwner{nullptr};
+
+inline std::uint8_t ChallengeRewardLevelFor(Player const* player, Creature const* creature)
+{
+    ChallengeRewardLevelResolver const owner = ChallengeRewardLevelOwner.load(std::memory_order_relaxed);
+    return owner && player && creature ? owner(player, creature) : 0;
+}
+
 inline std::atomic<bool> QuestEnabled{false};
 inline std::atomic<std::uint8_t> CreatureOffset{4};
 

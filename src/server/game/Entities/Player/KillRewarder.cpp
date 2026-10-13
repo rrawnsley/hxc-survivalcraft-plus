@@ -16,6 +16,7 @@
  */
 
 #include "KillRewarder.h"
+#include "LocalLevelScaling.h"
 #include "Creature.h"
 #include "Formulas.h"
 #include "Group.h"
@@ -108,7 +109,9 @@ void KillRewarder::_InitGroupData()
                         // different level for each of them, so one member's scaled kill can be another
                         // member's gray kill. Without a view this is the object's own level.
                         uint32 grayLevel = Acore::XP::GetGrayLevel(lvl);
-                        if (_victim->getLevelForTarget(member) > grayLevel && (!_maxNotGrayMember || _maxNotGrayMemberLevel < lvl))
+                        uint8 const challengeRewardLevel = LocalLevelScaling::ChallengeRewardLevelFor(member, _victim->ToCreature());
+                        uint8 const rewardLevel = challengeRewardLevel ? challengeRewardLevel : _victim->getLevelForTarget(member);
+                        if (rewardLevel > grayLevel && (!_maxNotGrayMember || _maxNotGrayMemberLevel < lvl))
                         {
                             _maxNotGrayMember = member;
                             _maxNotGrayMemberLevel = lvl;
