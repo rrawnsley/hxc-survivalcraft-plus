@@ -4608,3 +4608,13 @@ no reruns. No new C++/build required beyond passing142350 binary. Native effect/
 acquisition data and this baseline precede practice classification. Catalog294unique/
 178ranked9mastery107Fixed376pending, addon0.4.83 remain unchanged; defaults0/unpublished.
 No production server/config/database/client/launcher changes.
+
+## All-class Old School live rollout (2026-10-13)
+
+The live challenge-only allowlist includes all CoA classes 12 through 32. Barbarian, Witch Hunter, Guardian, Bloodmage, Cultist, Tinker and Reaper activate their existing ranked profiles and implemented mastery tracks. Other standalone abilities and pending specialized utilities remain native. This is the ranked-progression-first release.
+
+Fourteen class-specific scenarios cover saved-progress conversion, meaningful credit, automatic rank promotion, promoted-rank menus, reconnect, exit retention, permanent exclusion from both trials and native progression for nonparticipants. Witch Hunter fixtures use a crossbow and a target outside minimum range. Parallel cases have distinct character names and matching self-whisper recipients. Reconnect steps restore fixture hit/expertise ratings, which otherwise disappear after logout and cause random misses.
+
+VERIFY ALL passed the corrected accelerated fourteen-case batch with no retries, acceleration sensitivity or batch sensitivity: `.cache/verify-all/20261013-165701/report.json`. The preceding full real-clock batch also passed fourteen cases, with Cultist marked batch-sensitive after one isolated retry before the rating correction: `.cache/verify-all/20261013-164756/report.json`. Source nine checks and the C++/Lua practice harness passed separately. These runs qualify the installed runtime at 93fda0727f69, SHA256 77B7E24B884512F24CDCA02C95DCA74E7DBA2393EEBD24384B96C62E933CD3DF. No new runtime build or unit-suite pass is claimed for this config-only release. Test catch-up is disabled for deterministic boundary comparisons; live catch-up remains enabled.
+
+Config reload on live worldserver 62140 confirmed `required=true, supported classes=21`, without a restart. Addon 0.5.14 remains automatic on owned Old School activation and retains its resizable minimized tracker. Production catalog 20261013.003707583 passed ten signed launcher routes, all 1,369 CoA payload files and public login/world checks. Full ability mastery coverage and ordinary-combat pacing remain outside this release claim.
