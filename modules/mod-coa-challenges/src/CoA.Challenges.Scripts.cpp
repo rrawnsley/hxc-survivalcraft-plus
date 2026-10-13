@@ -10,6 +10,7 @@
 #include "AreaDefines.h"
 #include "Group.h"
 #include "LocalLevelScaling.h"
+#include "OldSchoolZoneProfiles.h"
 
 #include <cmath>
 
@@ -1133,7 +1134,7 @@ namespace CoAChallenges
 
     bool IsOldSchoolMulgoreNamedThreat(Creature const* creature)
     {
-        if (!creature || creature->GetZoneId() != AREA_MULGORE)
+        if (!creature || HxcOldSchool::NormalizeZone(creature->GetZoneId()) != AREA_MULGORE)
             return false;
 
         switch (creature->GetEntry())
@@ -1149,6 +1150,15 @@ namespace CoAChallenges
             default:
                 return false;
         }
+    }
+
+    bool IsOldSchoolAdditionalNamedThreat(Creature const* creature)
+    {
+        if (!creature)
+            return false;
+
+        auto const* profile = HxcOldSchool::FindZoneProfile(creature->GetZoneId(), creature->GetEntry());
+        return profile && profile->named;
     }
 
     bool IsOldSchoolBarrensNamedThreat(Creature const* creature);
@@ -1178,7 +1188,8 @@ namespace CoAChallenges
             || IsOldSchoolAshenvaleNamedThreat(creature) || IsOldSchoolSouthernNamedThreat(creature)
             || IsOldSchoolTirisfalNamedThreat(creature) || IsOldSchoolSilverpineNamedThreat(creature)
             || IsOldSchoolHillsbradNamedThreat(creature) || IsOldSchoolArathiNamedThreat(creature)
-            || IsOldSchoolHinterlandsNamedThreat(creature) || IsOldSchoolPlaguelandsNamedThreat(creature);
+            || IsOldSchoolHinterlandsNamedThreat(creature) || IsOldSchoolPlaguelandsNamedThreat(creature)
+            || IsOldSchoolAdditionalNamedThreat(creature);
         return namedThreat ? namedPercent : normalPercent;
     }
 
@@ -1201,7 +1212,7 @@ namespace CoAChallenges
 
     char const* OldSchoolMulgoreNamedThreatName(Creature const* creature)
     {
-        if (!creature || creature->GetZoneId() != AREA_MULGORE)
+        if (!creature || HxcOldSchool::NormalizeZone(creature->GetZoneId()) != AREA_MULGORE)
             return nullptr;
 
         switch (creature->GetEntry())
@@ -1235,7 +1246,7 @@ namespace CoAChallenges
 
     bool IsOldSchoolBarrensNamedThreat(Creature const* creature)
     {
-        if (!creature || creature->GetZoneId() != AREA_THE_BARRENS)
+        if (!creature || HxcOldSchool::NormalizeZone(creature->GetZoneId()) != AREA_THE_BARRENS)
             return false;
 
         switch (creature->GetEntry())
@@ -1260,7 +1271,7 @@ namespace CoAChallenges
 
     bool IsOldSchoolStonetalonNamedThreat(Creature const* creature)
     {
-        if (!creature || creature->GetZoneId() != AREA_STONETALON_MOUNTAINS)
+        if (!creature || HxcOldSchool::NormalizeZone(creature->GetZoneId()) != AREA_STONETALON_MOUNTAINS)
             return false;
 
         switch (creature->GetEntry())
@@ -1283,7 +1294,7 @@ namespace CoAChallenges
 
     bool IsOldSchoolAshenvaleNamedThreat(Creature const* creature)
     {
-        if (!creature || creature->GetZoneId() != AREA_ASHENVALE)
+        if (!creature || HxcOldSchool::NormalizeZone(creature->GetZoneId()) != AREA_ASHENVALE)
             return false;
 
         switch (creature->GetEntry())
@@ -1312,7 +1323,7 @@ namespace CoAChallenges
     {
         if (!creature)
             return false;
-        if (creature->GetZoneId() == AREA_THOUSAND_NEEDLES)
+        if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) == AREA_THOUSAND_NEEDLES)
         {
             switch (creature->GetEntry())
             {
@@ -1327,7 +1338,7 @@ namespace CoAChallenges
                     return false;
             }
         }
-        if (creature->GetZoneId() == AREA_DESOLACE)
+        if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) == AREA_DESOLACE)
         {
             switch (creature->GetEntry())
             {
@@ -1341,7 +1352,7 @@ namespace CoAChallenges
                     return false;
             }
         }
-        if (creature->GetZoneId() == AREA_DUSTWALLOW_MARSH)
+        if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) == AREA_DUSTWALLOW_MARSH)
         {
             switch (creature->GetEntry())
             {
@@ -1359,7 +1370,7 @@ namespace CoAChallenges
                     return false;
             }
         }
-        if (creature->GetZoneId() == AREA_FERALAS)
+        if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) == AREA_FERALAS)
         {
             switch (creature->GetEntry())
             {
@@ -1384,7 +1395,7 @@ namespace CoAChallenges
 
     bool IsOldSchoolTirisfalNamedThreat(Creature const* creature)
     {
-        if (!creature || creature->GetZoneId() != AREA_TIRISFAL_GLADES)
+        if (!creature || HxcOldSchool::NormalizeZone(creature->GetZoneId()) != AREA_TIRISFAL_GLADES)
             return false;
         switch (creature->GetEntry())
         {
@@ -1412,7 +1423,7 @@ namespace CoAChallenges
 
     bool IsOldSchoolSilverpineNamedThreat(Creature const* creature)
     {
-        if (!creature || creature->GetZoneId() != AREA_SILVERPINE_FOREST)
+        if (!creature || HxcOldSchool::NormalizeZone(creature->GetZoneId()) != AREA_SILVERPINE_FOREST)
             return false;
         switch (creature->GetEntry())
         {
@@ -1435,7 +1446,7 @@ namespace CoAChallenges
 
     bool IsOldSchoolHillsbradNamedThreat(Creature const* creature)
     {
-        if (!creature || creature->GetZoneId() != AREA_HILLSBRAD_FOOTHILLS)
+        if (!creature || HxcOldSchool::NormalizeZone(creature->GetZoneId()) != AREA_HILLSBRAD_FOOTHILLS)
             return false;
         switch (creature->GetEntry())
         {
@@ -1464,7 +1475,7 @@ namespace CoAChallenges
 
     bool IsOldSchoolArathiNamedThreat(Creature const* creature)
     {
-        if (!creature || creature->GetZoneId() != AREA_ARATHI_HIGHLANDS)
+        if (!creature || HxcOldSchool::NormalizeZone(creature->GetZoneId()) != AREA_ARATHI_HIGHLANDS)
             return false;
         switch (creature->GetEntry())
         {
@@ -1489,7 +1500,7 @@ namespace CoAChallenges
 
     bool IsOldSchoolHinterlandsNamedThreat(Creature const* creature)
     {
-        if (!creature || creature->GetZoneId() != AREA_THE_HINTERLANDS)
+        if (!creature || HxcOldSchool::NormalizeZone(creature->GetZoneId()) != AREA_THE_HINTERLANDS)
             return false;
         switch (creature->GetEntry())
         {
@@ -1517,7 +1528,7 @@ namespace CoAChallenges
     {
         if (!creature)
             return false;
-        if (creature->GetZoneId() == AREA_EASTERN_PLAGUELANDS)
+        if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) == AREA_EASTERN_PLAGUELANDS)
         {
             switch (creature->GetEntry())
             {
@@ -1539,7 +1550,7 @@ namespace CoAChallenges
                     return false;
             }
         }
-        if (creature->GetZoneId() != AREA_WESTERN_PLAGUELANDS)
+        if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) != AREA_WESTERN_PLAGUELANDS)
             return false;
         switch (creature->GetEntry())
         {
@@ -1573,6 +1584,10 @@ namespace CoAChallenges
     {
         if (!creature)
             return 0;
+
+        if (auto const* profile = HxcOldSchool::FindZoneProfile(creature->GetZoneId(), creature->GetEntry());
+            profile && profile->named)
+            return profile->threat;
 
         if (IsOldSchoolPlaguelandsNamedThreat(creature))
         {
@@ -1711,7 +1726,7 @@ namespace CoAChallenges
             }
         }
 
-        if (creature->GetZoneId() == AREA_THE_BARRENS)
+        if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) == AREA_THE_BARRENS)
         {
             switch (creature->GetEntry())
             {
@@ -1725,7 +1740,7 @@ namespace CoAChallenges
             }
         }
 
-        if (creature->GetZoneId() == AREA_STONETALON_MOUNTAINS)
+        if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) == AREA_STONETALON_MOUNTAINS)
         {
             switch (creature->GetEntry())
             {
@@ -1740,7 +1755,7 @@ namespace CoAChallenges
                     break;
             }
         }
-        if (creature->GetZoneId() == AREA_ASHENVALE)
+        if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) == AREA_ASHENVALE)
         {
             switch (creature->GetEntry())
             {
@@ -1774,7 +1789,11 @@ namespace CoAChallenges
         if (!creature)
             return 100;
 
-        if (creature->GetZoneId() != AREA_THE_BARRENS)
+        if (auto const* profile = HxcOldSchool::FindZoneProfile(creature->GetZoneId(), creature->GetEntry());
+            profile && profile->named)
+            return profile->reward;
+
+        if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) != AREA_THE_BARRENS)
         {
             if (IsOldSchoolStonetalonNamedThreat(creature) || IsOldSchoolAshenvaleNamedThreat(creature)
                 || IsOldSchoolSouthernNamedThreat(creature) || IsOldSchoolTirisfalNamedThreat(creature)
@@ -1812,7 +1831,11 @@ namespace CoAChallenges
         if (!creature)
             return { nullptr, nullptr, 0 };
 
-        if (creature->GetZoneId() == AREA_EASTERN_PLAGUELANDS)
+        if (auto const* profile = HxcOldSchool::FindZoneProfile(creature->GetZoneId(), creature->GetEntry());
+            profile && profile->camp)
+            return { profile->camp, profile->role, profile->named ? 0 : profile->threat };
+
+        if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) == AREA_EASTERN_PLAGUELANDS)
         {
             switch (creature->GetEntry())
             {
@@ -1901,7 +1924,7 @@ namespace CoAChallenges
             }
         }
 
-        if (creature->GetZoneId() == AREA_WESTERN_PLAGUELANDS)
+        if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) == AREA_WESTERN_PLAGUELANDS)
         {
             switch (creature->GetEntry())
             {
@@ -1972,7 +1995,7 @@ namespace CoAChallenges
             }
         }
 
-        if (creature->GetZoneId() == AREA_THE_HINTERLANDS)
+        if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) == AREA_THE_HINTERLANDS)
         {
             switch (creature->GetEntry())
             {
@@ -2039,7 +2062,7 @@ namespace CoAChallenges
             }
         }
 
-        if (creature->GetZoneId() == AREA_ARATHI_HIGHLANDS)
+        if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) == AREA_ARATHI_HIGHLANDS)
         {
             switch (creature->GetEntry())
             {
@@ -2114,7 +2137,7 @@ namespace CoAChallenges
             }
         }
 
-        if (creature->GetZoneId() == AREA_HILLSBRAD_FOOTHILLS)
+        if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) == AREA_HILLSBRAD_FOOTHILLS)
         {
             switch (creature->GetEntry())
             {
@@ -2184,7 +2207,7 @@ namespace CoAChallenges
             }
         }
 
-        if (creature->GetZoneId() == AREA_SILVERPINE_FOREST)
+        if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) == AREA_SILVERPINE_FOREST)
         {
             switch (creature->GetEntry())
             {
@@ -2246,7 +2269,7 @@ namespace CoAChallenges
             }
         }
 
-        if (creature->GetZoneId() == AREA_TIRISFAL_GLADES)
+        if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) == AREA_TIRISFAL_GLADES)
         {
             switch (creature->GetEntry())
             {
@@ -2287,7 +2310,7 @@ namespace CoAChallenges
             }
         }
 
-        if (creature->GetZoneId() == AREA_MULGORE)
+        if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) == AREA_MULGORE)
         {
             switch (creature->GetEntry())
             {
@@ -2324,7 +2347,7 @@ namespace CoAChallenges
             }
         }
 
-        if (creature->GetZoneId() == AREA_STONETALON_MOUNTAINS)
+        if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) == AREA_STONETALON_MOUNTAINS)
         {
             switch (creature->GetEntry())
             {
@@ -2370,7 +2393,7 @@ namespace CoAChallenges
                     return { nullptr, nullptr, 0 };
             }
         }
-        if (creature->GetZoneId() == AREA_ASHENVALE)
+        if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) == AREA_ASHENVALE)
         {
             switch (creature->GetEntry())
             {
@@ -2415,7 +2438,7 @@ namespace CoAChallenges
             }
         }
 
-        if (creature->GetZoneId() == AREA_THOUSAND_NEEDLES)
+        if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) == AREA_THOUSAND_NEEDLES)
         {
             switch (creature->GetEntry())
             {
@@ -2451,7 +2474,7 @@ namespace CoAChallenges
                     return { nullptr, nullptr, 0 };
             }
         }
-        if (creature->GetZoneId() == AREA_DESOLACE)
+        if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) == AREA_DESOLACE)
         {
             switch (creature->GetEntry())
             {
@@ -2534,7 +2557,7 @@ namespace CoAChallenges
             }
         }
 
-        if (creature->GetZoneId() == AREA_DUSTWALLOW_MARSH)
+        if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) == AREA_DUSTWALLOW_MARSH)
         {
             switch (creature->GetEntry())
             {
@@ -2564,7 +2587,7 @@ namespace CoAChallenges
                     return { nullptr, nullptr, 0 };
             }
         }
-        if (creature->GetZoneId() == AREA_FERALAS)
+        if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) == AREA_FERALAS)
         {
             switch (creature->GetEntry())
             {
@@ -2613,7 +2636,7 @@ namespace CoAChallenges
             }
         }
 
-        if (creature->GetZoneId() != AREA_THE_BARRENS)
+        if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) != AREA_THE_BARRENS)
             return { nullptr, nullptr, 0 };
 
         switch (creature->GetEntry())
@@ -2672,7 +2695,8 @@ namespace CoAChallenges
     bool IsOldSchoolSameCamp(Creature const* target, Creature const* candidate)
     {
         if (!target || !candidate || target == candidate || !candidate->IsAlive()
-            || candidate->IsCharmedOwnedByPlayerOrPlayer() || target->GetZoneId() != candidate->GetZoneId())
+            || candidate->IsCharmedOwnedByPlayerOrPlayer()
+            || HxcOldSchool::NormalizeZone(target->GetZoneId()) != HxcOldSchool::NormalizeZone(candidate->GetZoneId()))
             return false;
 
         OldSchoolCampThreat const targetThreat = GetOldSchoolCampThreat(target);
@@ -4895,7 +4919,7 @@ namespace CoAChallenges
                 if (uint32 const groupBonus = OldSchoolGroupBonusPercent(player, target))
                     handler->PSendSysMessage("Group bonus: +{}% to your creature-kill XP share after normal party splitting; "
                         "camp rest is an additional bonus.", groupBonus);
-                if (target->GetZoneId() == AREA_MULGORE)
+                if (HxcOldSchool::NormalizeZone(target->GetZoneId()) == AREA_MULGORE)
                 {
                     if (char const* namedThreat = OldSchoolMulgoreNamedThreatName(target))
                     {
@@ -4907,23 +4931,28 @@ namespace CoAChallenges
                     || IsOldSchoolAshenvaleNamedThreat(target) || IsOldSchoolSouthernNamedThreat(target)
                     || IsOldSchoolTirisfalNamedThreat(target) || IsOldSchoolSilverpineNamedThreat(target)
                     || IsOldSchoolHillsbradNamedThreat(target) || IsOldSchoolArathiNamedThreat(target)
-                    || IsOldSchoolHinterlandsNamedThreat(target) || IsOldSchoolPlaguelandsNamedThreat(target))
+                    || IsOldSchoolHinterlandsNamedThreat(target) || IsOldSchoolPlaguelandsNamedThreat(target)
+                    || IsOldSchoolAdditionalNamedThreat(target))
                     handler->PSendSysMessage("Named threat: {} carries elevated hidden danger and reward; "
                         "use the con estimate before engaging.", target->GetName());
 
-                if (target->GetZoneId() == AREA_SILVERPINE_FOREST && target->GetEntry() == 2529)
+                if (HxcOldSchool::NormalizeZone(target->GetZoneId()) == AREA_SILVERPINE_FOREST && target->GetEntry() == 2529)
                     handler->SendSysMessage("Roaming threat: Son of Arugal. Watch its route before choosing a hunting spot.");
-                if (target->GetZoneId() == AREA_ARATHI_HIGHLANDS && target->GetEntry() == 2611)
+                if (HxcOldSchool::NormalizeZone(target->GetZoneId()) == AREA_ARATHI_HIGHLANDS && target->GetEntry() == 2611)
                     handler->SendSysMessage("Roaming threat: Fozruk. Watch its route before choosing a hunting spot.");
-                if (target->GetZoneId() == AREA_EASTERN_PLAGUELANDS
+                if (HxcOldSchool::NormalizeZone(target->GetZoneId()) == AREA_EASTERN_PLAGUELANDS
                     && (target->GetEntry() == 11896 || target->GetEntry() == 11897 || target->GetEntry() == 12339))
                     handler->SendSysMessage("Roaming named threat. Watch its route before choosing a hunting spot.");
                 OldSchoolCampThreat const campThreat = GetOldSchoolCampThreat(target);
+                if (auto const* profile = HxcOldSchool::FindZoneProfile(target->GetZoneId(), target->GetEntry());
+                    profile && profile->roaming)
+                    handler->SendSysMessage("Roaming threat. Watch its native route before choosing a hunting spot.");
+
                 if (campThreat.camp)
                 {
                     handler->PSendSysMessage("Camp role: {} {}. The con estimate includes this site's danger.",
                         campThreat.camp, campThreat.role);
-                    static std::vector<uint32> const campEntries =
+                    static std::vector<uint32> const legacyCampEntries =
                     {
                         8523, 8524, 8525, 8526, 8527, 8528, 8529, 8530, 8531, 8532, 8540,
                         8541, 8542, 8543, 8544, 8545, 8546, 8547, 8548, 8550, 8551, 8552,
@@ -4972,6 +5001,12 @@ namespace CoAChallenges
                         5229, 5231, 5232, 5234, 5236, 5237, 5238, 5239, 5240, 5241,
                         5249, 5251, 5253, 5254, 5255, 5258, 5300, 5304, 5305, 5306
                     };
+                    std::vector<uint32> campEntries = legacyCampEntries;
+                    uint32 const zone = HxcOldSchool::NormalizeZone(target->GetZoneId());
+                    for (HxcOldSchool::ZoneProfile const& profile : HxcOldSchool::ZoneProfiles)
+                        if (profile.zone == zone && profile.camp)
+                            campEntries.push_back(profile.entry);
+
                     std::list<Creature*> nearbyCreatures;
                     target->GetCreatureListWithEntryInGrid(nearbyCreatures, campEntries, OldSchoolConsiderRange);
                     std::vector<Creature const*> nearbyCampmates;

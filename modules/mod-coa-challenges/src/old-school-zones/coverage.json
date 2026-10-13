@@ -1,0 +1,407 @@
+{
+  "schema": 1,
+  "zones": [
+    {
+      "id": 1,
+      "name": "Dun Morogh",
+      "profiles": 29,
+      "named": 9,
+      "camps": [
+        "Dark Iron watch",
+        "Frostmane hold",
+        "Leper outpost",
+        "Rockjaw cave",
+        "Wendigo cave"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 3,
+      "name": "Badlands",
+      "profiles": 31,
+      "named": 11,
+      "camps": [
+        "Dustbelcher stronghold",
+        "Elemental grounds",
+        "Shadowforge hold",
+        "War golem grounds"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 4,
+      "name": "Blasted Lands",
+      "profiles": 34,
+      "named": 15,
+      "camps": [
+        "Defiler stronghold",
+        "Nethergarde outpost",
+        "Shadowsworn enclave"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 8,
+      "name": "Swamp of Sorrows",
+      "profiles": 20,
+      "named": 10,
+      "camps": [
+        "Lost One village",
+        "Silt feeding grounds",
+        "Sorrow nest",
+        "Stagalbog shore"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 10,
+      "name": "Duskwood",
+      "profiles": 28,
+      "named": 10,
+      "camps": [
+        "Defias hideout",
+        "Nightbane camp",
+        "Raven Hill graveyard"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 11,
+      "name": "Wetlands",
+      "profiles": 40,
+      "named": 11,
+      "camps": [
+        "Bluegill shore",
+        "Dark Iron outpost",
+        "Dragonmaw hold",
+        "Dragonmaw nesting grounds",
+        "Mosshide camp"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 12,
+      "name": "Elwynn Forest",
+      "profiles": 33,
+      "named": 9,
+      "camps": [
+        "Defias hideout",
+        "Kobold mine",
+        "Murloc shore",
+        "Riverpaw camp"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 14,
+      "name": "Durotar",
+      "profiles": 31,
+      "named": 11,
+      "camps": [
+        "Burning Blade enclave",
+        "Echo Isles ruins",
+        "Makrura shore",
+        "Razormane camp",
+        "Tiragarde keep"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 16,
+      "name": "Azshara",
+      "profiles": 32,
+      "named": 10,
+      "camps": [
+        "Haldarr enclave",
+        "Highborne ruins",
+        "Legashi enclave",
+        "Spitelash shore",
+        "Timbermaw hold"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 33,
+      "name": "Stranglethorn Vale",
+      "profiles": 88,
+      "named": 20,
+      "camps": [
+        "Bloodsail camp",
+        "Bloodscalp village",
+        "Kurzen compound",
+        "Mosh'Ogg stronghold",
+        "Saltscale shore",
+        "Skullsplitter village",
+        "Venture Co. worksite",
+        "Zanzil ruins"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 36,
+      "name": "Alterac Mountains",
+      "profiles": 33,
+      "named": 12,
+      "camps": [
+        "Crushridge stronghold",
+        "Dalaran enclave",
+        "Syndicate camp",
+        "Yeti cave"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 38,
+      "name": "Loch Modan",
+      "profiles": 33,
+      "named": 11,
+      "camps": [
+        "Dark Iron outpost",
+        "Mo'grosh stronghold",
+        "Stonesplinter hold",
+        "Tunnel Rat mine"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 40,
+      "name": "Westfall",
+      "profiles": 51,
+      "named": 12,
+      "camps": [
+        "Defias hideout",
+        "Dust storm grounds",
+        "Harvest worksite",
+        "Murloc coast",
+        "Riverpaw camp"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 41,
+      "name": "Deadwind Pass",
+      "profiles": 5,
+      "named": 0,
+      "camps": [
+        "Deadwind ogre hold",
+        "Sky Shadow hunting grounds"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 44,
+      "name": "Redridge Mountains",
+      "profiles": 38,
+      "named": 11,
+      "camps": [
+        "Blackrock stronghold",
+        "Redridge gnoll camp",
+        "Shadowhide camp"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 46,
+      "name": "Burning Steppes",
+      "profiles": 30,
+      "named": 11,
+      "camps": [
+        "Blackrock hold",
+        "Dragon nesting grounds",
+        "Firegut stronghold",
+        "Flamekin grounds"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 51,
+      "name": "Searing Gorge",
+      "profiles": 23,
+      "named": 9,
+      "camps": [
+        "Anvilrage hold",
+        "Dark Iron worksite",
+        "Quarry worksite",
+        "Twilight enclave"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 141,
+      "name": "Teldrassil",
+      "profiles": 35,
+      "named": 10,
+      "camps": [
+        "Barkshredder den",
+        "Gnarlpine hold",
+        "Grell hollow",
+        "Timberling grove",
+        "Webwood nest"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 148,
+      "name": "Darkshore",
+      "profiles": 34,
+      "named": 11,
+      "camps": [
+        "Blackwood camp",
+        "Greymist shore",
+        "Shatterspear village",
+        "Stormscale shore",
+        "Twilight enclave"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 361,
+      "name": "Felwood",
+      "profiles": 36,
+      "named": 12,
+      "camps": [
+        "Deadwood hold",
+        "Infernal grounds",
+        "Irontree grove",
+        "Jadefire enclave",
+        "Jaedenar enclave"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 440,
+      "name": "Tanaris",
+      "profiles": 32,
+      "named": 13,
+      "camps": [
+        "Dunemaul stronghold",
+        "Sandfury enclave",
+        "Silithid hive",
+        "Southsea camp",
+        "Wastewander camp"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 490,
+      "name": "Un'Goro Crater",
+      "profiles": 32,
+      "named": 8,
+      "camps": [
+        "Bloodpetal grove",
+        "Devilsaur hunting grounds",
+        "Gorishi hive",
+        "Pterrordax nesting grounds",
+        "Ravasaur hunting grounds",
+        "Tar feeding grounds"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 493,
+      "name": "Moonglade",
+      "profiles": 2,
+      "named": 0,
+      "camps": [
+        "Timbermaw entrance"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 618,
+      "name": "Winterspring",
+      "profiles": 34,
+      "named": 12,
+      "camps": [
+        "Hederine enclave",
+        "Ice Thistle cave",
+        "Mazthoril nesting grounds",
+        "Owlbeast hunting grounds",
+        "Winterfall village"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 1377,
+      "name": "Silithus",
+      "profiles": 37,
+      "named": 13,
+      "camps": [
+        "Dredge feeding grounds",
+        "Hive'Ashi colony",
+        "Hive'Regal colony",
+        "Hive'Zora colony",
+        "Twilight enclave"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 3430,
+      "name": "Eversong Woods",
+      "profiles": 21,
+      "named": 7,
+      "camps": [
+        "Amani camp",
+        "Grimscale shore",
+        "Scourge grove",
+        "Withered grove",
+        "Wretched enclave"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 3433,
+      "name": "Ghostlands",
+      "profiles": 20,
+      "named": 5,
+      "camps": [
+        "Deatholme enclave",
+        "Grimscale shore",
+        "Shadowpine camp",
+        "Spindleweb nest"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 3524,
+      "name": "Azuremyst Isle",
+      "profiles": 20,
+      "named": 3,
+      "camps": [
+        "Blood Elf encampment",
+        "Bristlelimb camp",
+        "Nestlewood grove",
+        "Siltfin shore",
+        "Stillpine hold",
+        "Wrathscale shore"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 3525,
+      "name": "Bloodmyst Isle",
+      "profiles": 28,
+      "named": 7,
+      "camps": [
+        "Blacksilt shore",
+        "Bloodcursed shore",
+        "Bristlelimb camp",
+        "Nazzivus enclave",
+        "Sunhawk enclave"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 4298,
+      "name": "Scarlet Enclave",
+      "profiles": 39,
+      "named": 2,
+      "camps": [
+        "Crusader encampment",
+        "Scarlet enclave",
+        "Scourge staging grounds"
+      ],
+      "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    }
+  ]
+}
