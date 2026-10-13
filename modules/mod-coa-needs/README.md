@@ -83,9 +83,9 @@ Camp rest auras stop when standing, entering combat, dying, or leaving the camp 
 During Old School and Old School - Hardcore only, a live camp restores a separate rested timer
 at 10 seconds per real second, up to 20 minutes. The timer is restored even while standing or
 fighting near the camp, and drains one second per second while online, alive and away from camp.
-Creature kills receive a 15% bonus while any timer remains, after the Old School 10% XP pace
-and con-based kill multiplier; the rested bonus raises a white-con kill from 0.4x to 0.46x
-ordinary XP. Quest XP follows the 10% trial pace and gets no camp bonus. The ordinary WoW rested
+Creature kills receive a 15% bonus while any timer remains, after the Old School 1% XP pace
+and con-based kill multiplier; the rested bonus raises a white-con kill from 0.04x to 0.046x
+ordinary XP. Quest XP follows the 1% trial pace and gets no camp bonus. The ordinary WoW rested
 pool remains stored but its bonus is suppressed during these trials, so it does not stack with
 the Old School camp bonus. Outside those trials, the existing rested-XP-pool behavior is unchanged.
 

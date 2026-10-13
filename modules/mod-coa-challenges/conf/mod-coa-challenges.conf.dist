@@ -28,14 +28,17 @@ CoAChallenges.Enable = 1
 # Old School and Old School - Hardcore apply this percentage to all experience
 # sources. Creature-kill experience then receives the additional con multiplier,
 # and the rested camp bonus is applied afterward. Values above 100 are clamped.
-# Default: 5
-CoAChallenges.OldSchool.ExperiencePercent = 5
+# Default: 1. Creature kills then receive the con multiplier (white 4x through
+# purple 10x), so a white kill pays about 4% of ordinary XP and a purple kill
+# about 10%; quest and other non-kill XP pay 1%.
+CoAChallenges.OldSchool.ExperiencePercent = 1
 
 # During either Old School trial, rolled creature armor and weapon drops across
 # all zones have a chance to remain in the loot. Quest items, materials, and
 # crafted gear are not affected. Authored named threats use their separate chance.
-# Defaults: ordinary creatures 5%, named threats 10%
-CoAChallenges.OldSchool.GearDropPercent = 5
+# Defaults: ordinary creatures 2%, named threats 10%. Profession-crafted gear
+# and quest rewards are unaffected, making crafts a dependable upgrade path.
+CoAChallenges.OldSchool.GearDropPercent = 2
 CoAChallenges.OldSchool.NamedGearDropPercent = 10
 
 # C_Config flag delivered in SMSG_COA_CONFIG (0x58D). Gates the Trials and

@@ -1113,8 +1113,8 @@ namespace CoAChallenges
     uint32 OldSchoolExperiencePercent()
     {
         uint32 const configured = sConfigMgr->GetOption<uint32>(
-            "CoAChallenges.OldSchool.ExperiencePercent", 5);
-        return configured ? std::min(configured, 100u) : 5u;
+            "CoAChallenges.OldSchool.ExperiencePercent", 1);
+        return configured ? std::min(configured, 100u) : 1u;
     }
 
     bool OldSchoolCreature(Creature const* creature)
@@ -1154,7 +1154,7 @@ namespace CoAChallenges
     uint32 OldSchoolGearKeepPercent(Creature const* creature)
     {
         uint32 const legacyNormal = creature && creature->GetZoneId() == AREA_MULGORE
-            ? sConfigMgr->GetOption<uint32>("CoAChallenges.OldSchool.Mulgore.GearDropPercent", 5) : 5;
+            ? sConfigMgr->GetOption<uint32>("CoAChallenges.OldSchool.Mulgore.GearDropPercent", 2) : 2;
         uint32 const legacyNamed = creature && creature->GetZoneId() == AREA_MULGORE
             ? sConfigMgr->GetOption<uint32>("CoAChallenges.OldSchool.Mulgore.NamedGearDropPercent", 10) : 10;
         uint32 const configured = sConfigMgr->GetOption<uint32>(
@@ -1543,6 +1543,7 @@ namespace CoAChallenges
 
     constexpr char const* AdventureHealthKey = "coa_challenges.adventure_health";
     constexpr char const* OldSchoolHealthKey = "coa_challenges.old_school_health";
+    constexpr char const* OldSchoolXPProgressKey = "coa_challenges.old_school_xp_progress";
 
     struct AdventureHealth : DataMap::Base
     {
@@ -1556,6 +1557,14 @@ namespace CoAChallenges
         uint32 experienceMultiplier = 1;
         uint32 healthPercent = 100;
         char const* con = "White";
+    };
+
+    // Old School awards fractional XP at its deliberately low pace. Carry the
+    // remainder within the player session so many small kill/quest awards add
+    // up to the configured rate instead of rounding each event down or up.
+    struct OldSchoolXPProgress : DataMap::Base
+    {
+        uint32 remainder = 0; // ten-thousandths of one XP
     };
 
     void ChangeMaxHealthKeepingPct(Creature* creature, float extra, bool apply)
@@ -2289,6 +2298,9 @@ namespace CoAChallenges
 
         void OnPlayerGiveXP(Player* player, uint32& amount, Unit* victim, uint8 xpSource) override
         {
+            if (!OldSchoolChallenge(player))
+                player->CustomData.Erase(OldSchoolXPProgressKey);
+
             if (PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_QUESTS"))
             {
                 if (xpSource != XPSOURCE_QUEST && xpSource != XPSOURCE_QUEST_DF)
@@ -2327,6 +2339,7 @@ namespace CoAChallenges
             if (amount && OldSchoolChallenge(player))
             {
                 uint64 scaledAmount = uint64(amount) * OldSchoolExperiencePercent();
+                uint64 scaleNumerator = 100; // convert hundredths of XP to ten-thousandths
                 if (xpSource == XPSOURCE_KILL && victim && victim->IsCreature()
                     && OldSchoolCreature(victim->ToCreature())
                     && TappingAllowsRewards(player, victim->ToCreature()))
@@ -2339,9 +2352,13 @@ namespace CoAChallenges
 
                     if (CoANeeds::ReadOldSchoolRestedSeconds &&
                         CoANeeds::ReadOldSchoolRestedSeconds(player->GetGUID().GetCounter()))
-                        scaledAmount = scaledAmount * 115 / 100;
+                        scaleNumerator = 115;
                 }
-                amount = uint32(std::clamp<uint64>(scaledAmount / 100, 1, UINT32_MAX));
+                scaledAmount *= scaleNumerator;
+                OldSchoolXPProgress* progress = player->CustomData.GetDefault<OldSchoolXPProgress>(OldSchoolXPProgressKey);
+                uint64 accumulated = scaledAmount + progress->remainder;
+                amount = static_cast<uint32>(std::min<uint64>(accumulated / 10000, UINT32_MAX));
+                progress->remainder = static_cast<uint32>(accumulated % 10000);
             }
 
             // NO_KILL_CREDIT_UNLESS_AT_DISADVANTAGE ("Punching Up" / Overwhelming
@@ -3416,7 +3433,7 @@ namespace CoAChallenges
                             ? "Very dangerous; bring a group."
                             : "Overwhelming; a group is strongly advised.";
                 handler->PSendSysMessage("Consider {}: {} con. {} Estimated health: {} ({}x); "
-                    "creature damage: {}x; kill XP: {:.1f}x base ({}% Old School pace). Estimate only; gear, abilities, companions and adds "
+                    "creature damage: {}x; kill XP: {:.2f}x base ({}% Old School pace). Estimate only; gear, abilities, companions and adds "
                     "change the outcome.", target->GetName(), con, advice, health,
                     healthPercent / 100, damageMultiplier, effectiveKillXpMultiplier, OldSchoolExperiencePercent());
                 if (target->GetZoneId() == AREA_MULGORE)
