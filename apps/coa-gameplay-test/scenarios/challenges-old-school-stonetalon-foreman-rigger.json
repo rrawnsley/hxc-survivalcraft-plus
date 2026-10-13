@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Old School Stonetalon named threat: Foreman Rigger",
-  "contract": "Stonetalon Foreman Rigger (5931) has four additional hidden threat levels in both Old School trials. At equal native level 25 the resulting Red con grants an 1.6x effective kill XP, 22x creature damage, and 35.76x health. Ordinary play keeps native level and health, with no trial-only social-assist behavior. Existing spawn data is preserved. Temporary fixtures exercise named profiles and trial gating.",
+  "contract": "Stonetalon Foreman Rigger (5931) has four additional hidden threat levels in both Old School trials. At equal native level 25 the resulting Red con grants an 0.8x effective kill XP, 22x creature damage, and 35.76x health. Ordinary play keeps native level and health, with no trial-only social-assist behavior. Existing spawn data is preserved. Temporary fixtures exercise named profiles and trial gating.",
   "timeout_ms": 90000,
   "location": {
     "map": 1,
@@ -188,8 +188,8 @@
       "actor": "old",
       "metric": "system_message_contains",
       "equals": 1,
-      "label": "old consider reports kill XP: 1.6x base (10% Old School pace).",
-      "text": "kill XP: 1.6x base (10% Old School pace)."
+      "label": "old consider reports kill XP: 0.8x base (5% Old School pace).",
+      "text": "kill XP: 0.8x base (5% Old School pace)."
     },
     {
       "action": "client_packet",
@@ -244,7 +244,7 @@
       "actor": "hardcore",
       "metric": "system_message_contains",
       "equals": 1,
-      "label": "hardcore consider reports kill XP: 1.6x base (10% Old School pace).",
-      "text": "kill XP: 1.6x base (10% Old School pace)."
+      "label": "hardcore consider reports kill XP: 0.8x base (5% Old School pace).",
+      "text": "kill XP: 0.8x base (5% Old School pace)."
     }]
 }

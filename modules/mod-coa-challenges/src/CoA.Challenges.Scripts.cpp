@@ -1113,8 +1113,8 @@ namespace CoAChallenges
     uint32 OldSchoolExperiencePercent()
     {
         uint32 const configured = sConfigMgr->GetOption<uint32>(
-            "CoAChallenges.OldSchool.ExperiencePercent", 10);
-        return configured ? std::min(configured, 100u) : 10u;
+            "CoAChallenges.OldSchool.ExperiencePercent", 5);
+        return configured ? std::min(configured, 100u) : 5u;
     }
 
     bool OldSchoolCreature(Creature const* creature)

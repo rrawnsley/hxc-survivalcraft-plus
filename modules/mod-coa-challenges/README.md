@@ -108,10 +108,10 @@ without a spawn ID skip the random spread; authored named-threat and Mulgore cam
 apply. Elite and boss ranks retain their combat-stat multipliers. Grey creatures have
 2x health, 1x damage and 1x con-tier kill XP before the threat-offset stat adjustment; green 3x/2x/2x;
 blue 5x/3x/3x; white 8x/5x/4x; yellow 12x/7x/6x; red 16x/10x/8x; and purple 24x/14x/10x.
-Elites and bosses multiply those values further. Old School applies a configurable 10% pace to all XP
-sources, then applies the creature con multiplier to kill XP; a white kill therefore awards 0.4x the
-ordinary creature XP, a red kill 0.8x, and a purple kill 1x before the rested-camp bonus. Quest and
-other non-creature XP awards are 10% of normal. Critters and
+Elites and bosses multiply those values further. Old School applies a configurable 5% pace to all XP
+sources, then applies the creature con multiplier to kill XP; a white kill therefore awards 0.2x the
+ordinary creature XP, a red kill 0.4x, and a purple kill 0.5x before the rested-camp bonus. Quest and
+other non-creature XP awards are 5% of normal. Critters and
 player-owned units are excluded. Restricted tapping prevents players in another trial from
 assisting with the kill or claiming its rewards.
 

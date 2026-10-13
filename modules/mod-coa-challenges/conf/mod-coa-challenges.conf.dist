@@ -28,8 +28,8 @@ CoAChallenges.Enable = 1
 # Old School and Old School - Hardcore apply this percentage to all experience
 # sources. Creature-kill experience then receives the additional con multiplier,
 # and the rested camp bonus is applied afterward. Values above 100 are clamped.
-# Default: 10
-CoAChallenges.OldSchool.ExperiencePercent = 10
+# Default: 5
+CoAChallenges.OldSchool.ExperiencePercent = 5
 
 # During either Old School trial, rolled creature armor and weapon drops across
 # all zones have a chance to remain in the loot. Quest items, materials, and

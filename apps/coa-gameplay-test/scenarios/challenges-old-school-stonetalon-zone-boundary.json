@@ -95,8 +95,8 @@
       "actor": "old",
       "metric": "system_message_contains",
       "equals": 1,
-      "label": "old: kill XP: 0.8x base (10% Old School pace).",
-      "text": "kill XP: 0.8x base (10% Old School pace)."
+      "label": "old: kill XP: 0.4x base (5% Old School pace).",
+      "text": "kill XP: 0.4x base (5% Old School pace)."
     },
     {
       "action": "assert",
@@ -162,8 +162,8 @@
       "actor": "hardcore",
       "metric": "system_message_contains",
       "equals": 1,
-      "label": "hardcore: kill XP: 0.8x base (10% Old School pace).",
-      "text": "kill XP: 0.8x base (10% Old School pace)."
+      "label": "hardcore: kill XP: 0.4x base (5% Old School pace).",
+      "text": "kill XP: 0.4x base (5% Old School pace)."
     },
     {
       "action": "assert",
