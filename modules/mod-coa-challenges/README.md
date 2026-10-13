@@ -108,17 +108,19 @@ without a spawn ID skip the random spread; authored named-threat and Mulgore cam
 apply. Elite and boss ranks retain their combat-stat multipliers. Grey creatures have
 2x health, 1x damage and 1x con-tier kill XP before the threat-offset stat adjustment; green 3x/2x/2x;
 blue 5x/3x/3x; white 8x/5x/4x; yellow 12x/7x/6x; red 16x/10x/8x; and purple 24x/14x/10x.
-Elites and bosses multiply those values further. Old School applies a configurable 20% pace to all XP
-sources, then applies the creature con multiplier to kill XP; a white kill therefore awards 0.8x the
-ordinary creature XP, a red kill 1.6x, and a purple kill 2x before the rested-camp bonus. Quest and
-other non-creature XP awards are 20% of normal. Critters and
+Elites and bosses multiply those values further. Old School applies a configurable 10% pace to all XP
+sources, then applies the creature con multiplier to kill XP; a white kill therefore awards 0.4x the
+ordinary creature XP, a red kill 0.8x, and a purple kill 1x before the rested-camp bonus. Quest and
+other non-creature XP awards are 10% of normal. Critters and
 player-owned units are excluded. Restricted tapping prevents players in another trial from
 assisting with the kill or claiming its rewards.
 
-In the Mulgore slice, only 5% of rolled ordinary-creature armor and weapon drops survive loot
-generation; named threats use a 20% keep chance. Quest items and crafting materials are preserved,
-and crafted gear is unaffected. This makes profession recipes a reliable route to incremental upgrades
-while named drops remain uncommon prizes. Both rates can be configured.
+Across all zones in either Old School trial, only 5% of rolled ordinary-creature armor and weapon drops
+survive loot generation; authored named threats in Mulgore, the Barrens, and Stonetalon use a 10% keep
+chance. Quest items and crafting materials are preserved, and crafted gear is unaffected. This makes
+professions a dependable route to incremental upgrades while dropped equipment remains rare. Both
+rates can be configured. Existing Mulgore-specific gear chance settings are used as fallbacks when the
+new global settings are absent.
 
 Mulgore's named threats - Ghost Howl (3056), Arra'chea (3058), Mazzranache (3068), Sister Hatelash (5785),
 Snagglespear (5786), Enforcer Emilgund (5787), and The Rake (5807) - and the Barrens threats Gesharahan
@@ -175,8 +177,8 @@ Old School, the existing recipes continue to use Simple Wood. The placed fire is
 Sit beside it outside combat to receive the
 existing camp recovery. In either Old School trial, staying near a live camp replenishes a rested
 timer up to 20 minutes; time away from camp spends it while you are online and alive. A creature kill
-receives 15% additional XP while the timer has time remaining, after the trial's 20% XP pace and con
-multiplier. Quest XP uses the 20% trial pace without the rested kill bonus. Old School
+receives 15% additional XP while the timer has time remaining, after the trial's 10% XP pace and con
+multiplier. Quest XP uses the 10% trial pace without the rested kill bonus. Old School
 does not consume the standard WoW rested-XP pool while its trial bonus is active. Sitting remains
 necessary for the existing health/mana recovery and Fellowship benefits. The temporary `.coa camp`
 claim command was removed; a placed camp is the actual camp marker and benefit source.

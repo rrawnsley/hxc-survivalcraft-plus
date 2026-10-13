@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Old School Mulgore gear scarcity is trial-only",
-  "contract": "With both Mulgore gear keep chances set to zero for this deterministic test, ordinary mode must retain The Rake's authored armor drop while Old School removes it. The filter applies to creature gear only and leaves creature combat and ordinary-mode loot behavior intact.",
+  "name": "Old School creature gear scarcity is trial-only",
+  "contract": "With the Old School gear keep chances set to zero for this deterministic test, ordinary mode must retain The Rake's authored armor drop while Old School removes it. The filter applies to creature gear only and leaves quest items, materials, crafted gear, creature combat, and ordinary-mode loot behavior intact.",
   "timeout_ms": 60000,
   "location": {"map": 1, "x": -751.421, "y": -674.71, "z": -19.1842, "o": 0},
   "players": [

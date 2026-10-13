@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Old School con tiers drive creature difficulty, rewards, death XP and corpse runs",
-  "contract": "Owned trial IDs 9001/9002. Both trials apply a 20% pace to all XP; creature kills then receive the con multiplier, while non-kill rewards remain at 20%. Old School death removes 10% of a level's XP and can delevel. A spirit must return to its corpse to resurrect. Hardcore death fails the run. Bots inherit their human leader's con.",
+  "contract": "Owned trial IDs 9001/9002. Both trials apply a 10% pace to all XP; creature kills then receive the con multiplier, while non-kill rewards remain at 10%. Old School death removes 10% of a level's XP and can delevel. A spirit must return to its corpse to resurrect. Hardcore death fails the run. Bots inherit their human leader's con.",
   "timeout_ms": 180000,
   "location": {
     "map": 0,
@@ -327,13 +327,13 @@
     },
     {
       "action": "assert",
-      "label": "White con kills grant 0.8x base XP after the 20% Old School pace",
+      "label": "White con kills grant 0.4x base XP after the 10% Old School pace",
       "actor": "old",
       "metric": "xp",
       "relative_to": "old_xp",
       "ratio_to": "normal_kill",
-      "min": 0.75,
-      "max": 0.85
+      "min": 0.35,
+      "max": 0.45
     },
     {
       "action": "snapshot",
@@ -376,13 +376,13 @@
     },
     {
       "action": "assert",
-      "label": "Quest rewards also follow the 20% Old School pace",
+      "label": "Quest rewards also follow the 10% Old School pace",
       "actor": "quester",
       "metric": "xp",
       "relative_to": "old_before_quest",
       "ratio_to": "normal_quest_gain",
-      "min": 0.15,
-      "max": 0.25
+      "min": 0.08,
+      "max": 0.12
     },
     {
       "action": "group",
@@ -446,7 +446,7 @@
       "label": "Consider reports effective kill XP after the Old School pace",
       "actor": "old",
       "metric": "system_message_contains",
-      "text": "kill XP: 0.8x base (20% Old School pace)",
+      "text": "kill XP: 0.4x base (10% Old School pace)",
       "equals": 1
     },
     {
@@ -498,6 +498,16 @@
       "equals": 1
     },
     {
+      "action": "prepare_quest",
+      "actor": "old",
+      "quest": 7
+    },
+    {
+      "action": "reward_quest",
+      "actor": "old",
+      "quest": 7
+    },
+    {
       "action": "snapshot",
       "actor": "old",
       "metric": "xp",
@@ -534,13 +544,13 @@
     },
     {
       "action": "assert",
-      "label": "Death removes 10% of a level",
+      "label": "Death removes 10% of a level up to available XP",
       "actor": "old",
       "metric": "xp",
       "relative_to": "before_death",
       "ratio_to": "level_xp",
       "min": -0.101,
-      "max": -0.099
+      "max": -0.097
     },
     {
       "action": "assert",
@@ -564,7 +574,7 @@
       "relative_to": "before_death",
       "ratio_to": "level_xp",
       "min": -0.101,
-      "max": -0.099
+      "max": -0.097
     },
     {
       "action": "assert",

@@ -1113,8 +1113,8 @@ namespace CoAChallenges
     uint32 OldSchoolExperiencePercent()
     {
         uint32 const configured = sConfigMgr->GetOption<uint32>(
-            "CoAChallenges.OldSchool.ExperiencePercent", 20);
-        return configured ? std::min(configured, 100u) : 20u;
+            "CoAChallenges.OldSchool.ExperiencePercent", 10);
+        return configured ? std::min(configured, 100u) : 10u;
     }
 
     bool OldSchoolCreature(Creature const* creature)
@@ -1143,29 +1143,37 @@ namespace CoAChallenges
         }
     }
 
+    bool IsOldSchoolBarrensNamedThreat(Creature const* creature);
+    bool IsOldSchoolStonetalonNamedThreat(Creature const* creature);
+
     bool IsOldSchoolGearLoot(Creature const* creature, Player const* player)
     {
-        return creature && player && OldSchoolChallenge(player)
-            && creature->GetZoneId() == AREA_MULGORE && OldSchoolCreature(creature);
+        return creature && player && OldSchoolChallenge(player) && OldSchoolCreature(creature);
     }
 
-    uint32 OldSchoolMulgoreGearKeepPercent(Creature const* creature)
+    uint32 OldSchoolGearKeepPercent(Creature const* creature)
     {
+        uint32 const legacyNormal = creature && creature->GetZoneId() == AREA_MULGORE
+            ? sConfigMgr->GetOption<uint32>("CoAChallenges.OldSchool.Mulgore.GearDropPercent", 5) : 5;
+        uint32 const legacyNamed = creature && creature->GetZoneId() == AREA_MULGORE
+            ? sConfigMgr->GetOption<uint32>("CoAChallenges.OldSchool.Mulgore.NamedGearDropPercent", 10) : 10;
         uint32 const configured = sConfigMgr->GetOption<uint32>(
-            "CoAChallenges.OldSchool.Mulgore.GearDropPercent", 5);
+            "CoAChallenges.OldSchool.GearDropPercent", legacyNormal);
         uint32 const namedConfigured = sConfigMgr->GetOption<uint32>(
-            "CoAChallenges.OldSchool.Mulgore.NamedGearDropPercent", 20);
+            "CoAChallenges.OldSchool.NamedGearDropPercent", legacyNamed);
         uint32 const normalPercent = std::min(configured, 100u);
         uint32 const namedPercent = std::min(namedConfigured, 100u);
-        return IsOldSchoolMulgoreNamedThreat(creature) ? namedPercent : normalPercent;
+        bool const namedThreat = IsOldSchoolMulgoreNamedThreat(creature)
+            || IsOldSchoolBarrensNamedThreat(creature) || IsOldSchoolStonetalonNamedThreat(creature);
+        return namedThreat ? namedPercent : normalPercent;
     }
 
-    void ThinOldSchoolMulgoreGearLoot(Loot* loot, Creature const* creature)
+    void ThinOldSchoolGearLoot(Loot* loot, Creature const* creature)
     {
         if (!loot || !creature)
             return;
 
-        uint32 const keepPercent = OldSchoolMulgoreGearKeepPercent(creature);
+        uint32 const keepPercent = OldSchoolGearKeepPercent(creature);
         for (auto it = loot->items.begin(); it != loot->items.end();)
         {
             ItemTemplate const* item = sObjectMgr->GetItemTemplate(it->itemid);
@@ -4049,7 +4057,7 @@ namespace CoAChallenges
 
             Creature* creature = owner->GetMap()->GetCreature(loot->sourceWorldObjectGUID);
             if (IsOldSchoolGearLoot(creature, owner))
-                ThinOldSchoolMulgoreGearLoot(loot, creature);
+                ThinOldSchoolGearLoot(loot, creature);
         }
     };
     // GuildScript: block the guild bank list for NO_GUILD_BANK challenges.
