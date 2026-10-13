@@ -118,14 +118,21 @@ local function Rewards(value, ability, ranks, characterLevel)
         count = count + 1
     end
     if count ~= #value or (ability.kind ~= 2 and count ~= 0)
-        or (ability.kind == 2 and (count == 0 or (ability.route ~= 1 and ability.route ~= 2 and ability.route ~= 14))) then return nil end
+        or (ability.kind == 2 and (count == 0 or (ability.route ~= 1 and ability.route ~= 2 and ability.route ~= 14
+            and ability.route ~= 16 and ability.route ~= 17))) then return nil end
     local result, previousLevel, previousProficiency, previousBonus = {}, ranks[1].characterLevel, 1, 0
     for _, entry in ipairs(value) do
         if type(entry) ~= "table" then return nil end
         local healing, damage, resource = entry.healingBonusBasisPoints or 0, entry.damageBonusBasisPoints or 0,
             entry.resourceDrainBonusBasisPoints or 0
-        local bonus = ability.route == 2 and healing or ability.route == 14 and resource or damage
-        if (ability.route == 2 and (damage ~= 0 or resource ~= 0))
+        local cooldown, efficiency = entry.cooldownReductionBasisPoints or 0, entry.resourceEfficiencyBasisPoints or 0
+        local bonus = ability.route == 2 and healing or ability.route == 14 and resource
+            or ability.route == 16 and cooldown or ability.route == 17 and efficiency or damage
+        if ((healing ~= 0 and 1 or 0) + (damage ~= 0 and 1 or 0) + (resource ~= 0 and 1 or 0)
+                + (cooldown ~= 0 and 1 or 0) + (efficiency ~= 0 and 1 or 0) ~= 1)
+            or (ability.route == 16 and (healing ~= 0 or damage ~= 0 or resource ~= 0 or efficiency ~= 0))
+            or (ability.route == 17 and (healing ~= 0 or damage ~= 0 or resource ~= 0 or cooldown ~= 0))
+            or (ability.route == 2 and (damage ~= 0 or resource ~= 0))
             or (ability.route == 1 and (healing ~= 0 or resource ~= 0))
             or (ability.route == 14 and (healing ~= 0 or damage ~= 0))
             or not Integer(entry.characterLevel, previousLevel, 255)
@@ -141,6 +148,7 @@ local function Rewards(value, ability, ranks, characterLevel)
         if entry.state ~= state or practice.status ~= forecast then return nil end
         result[#result + 1] = { characterLevel = entry.characterLevel, proficiency = entry.proficiency,
             healingBonusBasisPoints = healing, damageBonusBasisPoints = damage, resourceDrainBonusBasisPoints = resource,
+            cooldownReductionBasisPoints = cooldown, resourceEfficiencyBasisPoints = efficiency,
             state = entry.state, practice = practice }
         previousLevel, previousProficiency, previousBonus = entry.characterLevel, entry.proficiency, bonus
     end
@@ -184,7 +192,7 @@ local function Ability(value, schema, characterLevel)
         if value.acquisitionSource ~= nil and not Integer(value.acquisitionSource, 1, 5) then return nil end
         if value.acquisitionSource == 5 and value.kind ~= 3 then return nil end
         if not session or not Integer(value.kind, 1, 3)
-            or not Integer(value.route, 1, schema >= 7 and 15 or schema >= 6 and 14 or 13)
+            or not Integer(value.route, 1, schema >= 8 and 17 or schema >= 7 and 15 or schema >= 6 and 14 or 13)
             or not Integer(value.ruleSet, 1, schema >= 6 and 12 or 10)
             or ((value.ruleSet == 3 or value.ruleSet == 6) and (value.kind ~= 1 or value.route ~= 2))
             or ((value.ruleSet == 7 or value.ruleSet == 8) and (value.kind ~= 2 or value.route ~= 1))
@@ -193,6 +201,8 @@ local function Ability(value, schema, characterLevel)
             or (value.route == 14 and (value.ruleSet ~= 11 and value.ruleSet ~= 12))
             or (value.route == 13 and (value.kind ~= 1 or (value.ruleSet ~= 1 and value.ruleSet ~= 4)))
             or (value.route == 15 and (value.kind ~= 1 or (value.ruleSet ~= 1 and value.ruleSet ~= 4)))
+            or ((value.route == 16 or value.route == 17) and
+                (schema < 8 or value.kind ~= 2 or (value.ruleSet ~= 1 and value.ruleSet ~= 4)))
             or ((value.kind == 3) ~= (value.route == 6)) then return nil end
         if value.route == 13 then
             if not Integer(value.buffState, 1, 5) then return nil end
@@ -353,12 +363,16 @@ local function MasteryHistory(value, abilities)
         if not reward or event.characterLevel ~= reward.characterLevel or event.proficiency ~= reward.proficiency
             or (event.healingBonusBasisPoints or 0) ~= reward.healingBonusBasisPoints
             or (event.damageBonusBasisPoints or 0) ~= reward.damageBonusBasisPoints
-            or (event.resourceDrainBonusBasisPoints or 0) ~= reward.resourceDrainBonusBasisPoints then return nil end
+            or (event.resourceDrainBonusBasisPoints or 0) ~= reward.resourceDrainBonusBasisPoints
+            or (event.cooldownReductionBasisPoints or 0) ~= (reward.cooldownReductionBasisPoints or 0)
+            or (event.resourceEfficiencyBasisPoints or 0) ~= (reward.resourceEfficiencyBasisPoints or 0) then return nil end
         events[#events + 1] = { abilityId = event.abilityId, ordinal = event.ordinal,
             characterLevel = event.characterLevel, proficiency = event.proficiency,
             healingBonusBasisPoints = event.healingBonusBasisPoints or 0,
             damageBonusBasisPoints = event.damageBonusBasisPoints or 0,
-            resourceDrainBonusBasisPoints = event.resourceDrainBonusBasisPoints or 0 }
+            resourceDrainBonusBasisPoints = event.resourceDrainBonusBasisPoints or 0,
+            cooldownReductionBasisPoints = event.cooldownReductionBasisPoints or 0,
+            resourceEfficiencyBasisPoints = event.resourceEfficiencyBasisPoints or 0 }
     end
     return { available = value.available, total = value.total, events = events }
 end
@@ -367,7 +381,7 @@ function Model.Validate(snapshot)
     if type(snapshot) ~= "table"
         or (snapshot.schemaVersion ~= 1 and snapshot.schemaVersion ~= 2 and snapshot.schemaVersion ~= 3
             and snapshot.schemaVersion ~= 4 and snapshot.schemaVersion ~= 5 and snapshot.schemaVersion ~= 6
-            and snapshot.schemaVersion ~= 7)
+            and snapshot.schemaVersion ~= 7 and snapshot.schemaVersion ~= 8)
         or not Integer(snapshot.revision, 1, 4294967295) or not Integer(snapshot.classId, 1, 255)
         or not Integer(snapshot.characterLevel, 1, 255) or type(snapshot.abilities) ~= "table"
         or #snapshot.abilities > 512 then return nil, "Unsupported or incomplete progress update" end
@@ -478,11 +492,14 @@ end
 
 function Model.MasteryBonusAmount(reward)
     return math.max(reward.healingBonusBasisPoints or 0, reward.damageBonusBasisPoints or 0,
-        reward.resourceDrainBonusBasisPoints or 0)
+        reward.resourceDrainBonusBasisPoints or 0, reward.cooldownReductionBasisPoints or 0,
+        reward.resourceEfficiencyBasisPoints or 0)
 end
 
 function Model.MasteryEffectText(reward)
-    return (reward.resourceDrainBonusBasisPoints or 0) > 0 and "mana drain"
+    return (reward.cooldownReductionBasisPoints or 0) > 0 and "cooldown efficiency"
+        or (reward.resourceEfficiencyBasisPoints or 0) > 0 and "resource efficiency"
+        or (reward.resourceDrainBonusBasisPoints or 0) > 0 and "mana drain"
         or (reward.damageBonusBasisPoints or 0) > 0 and "damage" or "healing"
 end
 
@@ -643,6 +660,14 @@ function Model.PracticeRules(ability, saved)
     if ability.replacementSpellId then
         return Model.ReplacementText(ability) .. "\n\nUse the replacement from your spellbook."
             .. " The original ability can resume practice when it is available again."
+    end
+    if ability.route == 16 or ability.route == 17 then
+        return "Practice through a successful interrupt, dispel or stolen buff during level-appropriate PvE combat."
+            .. " Empty casts, gray targets and idle casting earn no practice; each original cast counts once."
+            .. " The ability has its full native effectiveness from the start."
+            .. (ability.route == 16 and " Mastery reduces its native cooldown by up to 2%."
+                or " Mastery refunds up to 2% of the resource actually spent on useful casts; fractional refunds accumulate during this login.")
+            .. " Prepare one upcoming mastery milestone. " .. LearnText(ability.acquisitionSource)
     end
     if ability.route == 15 then
         return "Practice by reducing the actual attack power of level-appropriate hostile PvE opponents."

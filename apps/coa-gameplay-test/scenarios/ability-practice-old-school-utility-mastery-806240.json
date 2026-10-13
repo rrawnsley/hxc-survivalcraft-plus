@@ -1,0 +1,559 @@
+{
+  "schema": 1,
+  "name": "Old School utility mastery: Hexbreak",
+  "contract": "Actual useful native interrupt/dispel/steal advances proficiency and earns a capped efficiency milestone; completed mastery preserves native utility and reports accurate schema8 benefits. Original cast ownership and existing Old School gating apply.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Aputilitys",
+      "race": 1,
+      "class": 13,
+      "level": 79,
+      "allow_regeneration": false,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "ranged_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 1574,
+      "level": 79,
+      "health": 1000000,
+      "distance": 3,
+      "stationary": true,
+      "reaction": 0,
+      "faction": 14
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "start_challenge",
+      "actor": "caster",
+      "challenge": 9001,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "challenge_start_code",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 806240
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 10040,
+      "stacks": 20
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "full": true
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.806240",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.806240",
+      "index": 1,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.806240",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.806240",
+      "index": 3,
+      "value": 99
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.13.806240",
+      "index": 4,
+      "value": 13500
+    },
+    {
+      "action": "relog",
+      "actor": "caster"
+    },
+    {
+      "action": "set_combat_rating",
+      "actor": "caster",
+      "rating": 5,
+      "value": 10000
+    },
+    {
+      "action": "set_combat_rating",
+      "actor": "caster",
+      "rating": 6,
+      "value": 10000
+    },
+    {
+      "action": "set_combat_rating",
+      "actor": "caster",
+      "rating": 7,
+      "value": 10000
+    },
+    {
+      "action": "set_combat_rating",
+      "actor": "caster",
+      "rating": 23,
+      "value": 10000
+    },
+    {
+      "action": "attack",
+      "actor": "caster",
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "caster"
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "full": true
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 1,
+      "full": true
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 2,
+      "full": true
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "full": true
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 806240,
+      "target": "caster"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.13.806240",
+      "index": 3,
+      "equals": 99,
+      "label": "Empty utility cast earns no practice"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.13.806240",
+      "index": 4,
+      "equals": 13500
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 806240
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "full": true
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 1,
+      "full": true
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 2,
+      "full": true
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "full": true
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 980,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 806240,
+      "target": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "casting",
+      "equals": 0,
+      "within_ms": 5000,
+      "label": "Wait for the native utility cast to finish before measuring its result"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 806240,
+      "equals": 0,
+      "label": "Native utility cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 980,
+      "equals": 0,
+      "label": "The actual native dispel or steal removed the prepared aura"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.13.806240",
+      "index": 3,
+      "equals": 100,
+      "label": "One useful native utility outcome earns the final proficiency milestone"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.13.806240",
+      "index": 4,
+      "equals": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 806240
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "full": true
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 1,
+      "full": true
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 2,
+      "full": true
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "full": true
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 980,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "power",
+      "power": 0,
+      "save_as": "before_power1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_power_cost",
+      "spell": 806240,
+      "save_as": "native_cost1"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 806240,
+      "target": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "casting",
+      "equals": 0,
+      "within_ms": 5000,
+      "label": "Wait for the native utility cast to finish before measuring its result"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 806240,
+      "equals": 0,
+      "label": "Native utility cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 980,
+      "equals": 0,
+      "within_ms": 2000,
+      "label": "The native utility still removes its intended aura"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "power",
+      "power": 0,
+      "relative_to": "before_power1",
+      "ratio_to": "native_cost1",
+      "min": -0.982,
+      "max": -0.978,
+      "label": "Completed mastery refunds two percent of actual native mana cost"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.13.806240",
+      "index": 3,
+      "equals": 100
+    },
+    {
+      "action": "whisper",
+      "actor": "caster",
+      "to": "Aputilitys",
+      "text": "HXAP\tHELLO|8",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "|806240|806240|1|100|0|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "|200|1|2|0|5",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "relog",
+      "actor": "caster"
+    },
+    {
+      "action": "set_combat_rating",
+      "actor": "caster",
+      "rating": 5,
+      "value": 10000
+    },
+    {
+      "action": "set_combat_rating",
+      "actor": "caster",
+      "rating": 6,
+      "value": 10000
+    },
+    {
+      "action": "set_combat_rating",
+      "actor": "caster",
+      "rating": 7,
+      "value": 10000
+    },
+    {
+      "action": "set_combat_rating",
+      "actor": "caster",
+      "rating": 23,
+      "value": 10000
+    },
+    {
+      "action": "stop_challenge",
+      "actor": "caster",
+      "challenge": 9001
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.old_school_practice_exit",
+      "index": 0,
+      "equals": 1,
+      "within_ms": 5000,
+      "label": "The native out-of-combat leave request succeeds"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 806240
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "full": true
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 1,
+      "full": true
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 2,
+      "full": true
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "full": true
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 980,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "power",
+      "power": 0,
+      "save_as": "before_power2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_power_cost",
+      "spell": 806240,
+      "save_as": "native_cost2"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 806240,
+      "target": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "casting",
+      "equals": 0,
+      "within_ms": 5000,
+      "label": "Wait for the native utility cast to finish before measuring its result"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cast_failure",
+      "spell": 806240,
+      "equals": 0,
+      "label": "Native utility cast succeeds"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "power",
+      "power": 0,
+      "relative_to": "before_power2",
+      "label": "Leaving Old School stops resource efficiency while preserving native utility",
+      "ratio_to": "native_cost2",
+      "min": -1.001,
+      "max": -0.999
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.13.806240",
+      "index": 3,
+      "equals": 100,
+      "label": "Leaving preserves saved proficiency"
+    }
+  ]
+}

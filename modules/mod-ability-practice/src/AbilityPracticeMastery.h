@@ -22,6 +22,8 @@ struct MasteryReward
     std::uint32_t HealingBonusBasisPoints;
     std::uint32_t DamageBonusBasisPoints = 0;
     std::uint32_t ResourceDrainBonusBasisPoints = 0;
+    std::uint32_t CooldownReductionBasisPoints = 0;
+    std::uint32_t ResourceEfficiencyBasisPoints = 0;
 };
 
 enum class MasteryEffect
@@ -29,23 +31,28 @@ enum class MasteryEffect
     Invalid,
     Healing,
     Damage,
-    ResourceDrain
+    ResourceDrain,
+    Cooldown,
+    ResourceEfficiency
 };
 
 inline MasteryEffect MasteryEffectOf(MasteryReward const& reward)
 {
     if (static_cast<unsigned>(reward.HealingBonusBasisPoints != 0) +
         static_cast<unsigned>(reward.DamageBonusBasisPoints != 0) +
-        static_cast<unsigned>(reward.ResourceDrainBonusBasisPoints != 0) != 1)
+        static_cast<unsigned>(reward.ResourceDrainBonusBasisPoints != 0) +
+        static_cast<unsigned>(reward.CooldownReductionBasisPoints != 0) +
+        static_cast<unsigned>(reward.ResourceEfficiencyBasisPoints != 0) != 1)
         return MasteryEffect::Invalid;
     return reward.HealingBonusBasisPoints ? MasteryEffect::Healing : reward.DamageBonusBasisPoints ?
-        MasteryEffect::Damage : MasteryEffect::ResourceDrain;
+        MasteryEffect::Damage : reward.ResourceDrainBonusBasisPoints ? MasteryEffect::ResourceDrain :
+        reward.CooldownReductionBasisPoints ? MasteryEffect::Cooldown : MasteryEffect::ResourceEfficiency;
 }
 
 inline std::uint32_t MasteryBonusAmount(MasteryReward const& reward)
 {
     return std::max({ reward.HealingBonusBasisPoints, reward.DamageBonusBasisPoints,
-        reward.ResourceDrainBonusBasisPoints });
+        reward.ResourceDrainBonusBasisPoints, reward.CooldownReductionBasisPoints, reward.ResourceEfficiencyBasisPoints });
 }
 
 inline bool ValidMasteryEffect(MasteryReward const& reward, MasteryEffect effect)
@@ -56,6 +63,27 @@ inline bool ValidMasteryEffect(MasteryReward const& reward, MasteryEffect effect
 inline bool ValidMasteryEffect(MasteryReward const& reward, bool healing)
 {
     return ValidMasteryEffect(reward, healing ? MasteryEffect::Healing : MasteryEffect::Damage);
+}
+
+inline std::uint32_t MasteryEfficiencyAmount(std::uint32_t original, std::uint32_t basisPoints)
+{
+    return basisPoints <= MaximumMasteryBasisPoints ?
+        static_cast<std::uint32_t>(std::uint64_t(original) * basisPoints / 10000) : 0;
+}
+
+struct MasteryEfficiencyRefund
+{
+    std::uint32_t Amount;
+    std::uint32_t Remainder;
+};
+
+inline MasteryEfficiencyRefund AccumulateMasteryEfficiency(std::uint32_t cost, std::uint32_t basisPoints,
+    std::uint32_t remainder)
+{
+    if (basisPoints > MaximumMasteryBasisPoints || remainder >= 10000)
+        return {};
+    std::uint64_t const total = static_cast<std::uint64_t>(cost) * basisPoints + remainder;
+    return { static_cast<std::uint32_t>(total / 10000), static_cast<std::uint32_t>(total % 10000) };
 }
 
 struct MasteryRewardView
@@ -126,7 +154,9 @@ inline std::uint32_t MasteryBonus(AbilityDefinition const& ability, std::span<Ma
             characterLevel >= reward.Requirement.CharacterLevel)
             bonus = effect == MasteryEffect::Healing ? reward.HealingBonusBasisPoints :
                 effect == MasteryEffect::Damage ? reward.DamageBonusBasisPoints :
-                effect == MasteryEffect::ResourceDrain ? reward.ResourceDrainBonusBasisPoints : 0;
+                effect == MasteryEffect::ResourceDrain ? reward.ResourceDrainBonusBasisPoints :
+                effect == MasteryEffect::Cooldown ? reward.CooldownReductionBasisPoints :
+                effect == MasteryEffect::ResourceEfficiency ? reward.ResourceEfficiencyBasisPoints : 0;
     return bonus;
 }
 

@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "name": "PvE sanctuary permits NPC purges and preserves hostile player restrictions",
+  "contract": "The inherited sanctuary dispel check remains effective for hostile player-controlled targets. NPC eligibility is covered by Old School utility mastery gameplay cases that failed before the narrowed guard.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster",
+      "name": "Apsanctuary",
+      "race": 1,
+      "class": 16,
+      "level": 79
+    },
+    {
+      "id": "opponent",
+      "name": "Apsanctarget",
+      "race": 2,
+      "class": 16,
+      "level": 79
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "teleport",
+      "actor": "opponent",
+      "map": 0,
+      "x": -8946.9502,
+      "y": -132.492996,
+      "z": 83.5311966,
+      "o": 3.14159265
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "pvp",
+      "actor": "opponent",
+      "enabled": true
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 705669
+    },
+    {
+      "action": "set_aura",
+      "actor": "opponent",
+      "spell": 1459,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 705669,
+      "target": "opponent"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "opponent",
+      "metric": "aura",
+      "spell": 1459,
+      "equals": 1,
+      "label": "PvE sanctuary does not permit purging a hostile player"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "cooldown_ms",
+      "spell": 705669,
+      "equals": 0
+    }
+  ]
+}

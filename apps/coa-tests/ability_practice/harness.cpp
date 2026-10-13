@@ -27,6 +27,7 @@
 #include "AbilityPracticeDevelopmentConjureFixed.h"
 #include "AbilityPracticeDevelopmentPassiveFixed.h"
 #include "AbilityPracticeDevelopmentUtilityFixed.h"
+#include "AbilityPracticeDevelopmentUtilityMastery.h"
 #include "AbilityPracticeDevelopmentControlFixed.h"
 #include "AbilityPracticeDevelopmentTrainerFixed.h"
 #include "AbilityPracticeNativeRankChain.h"
@@ -519,7 +520,7 @@ void CheckCurrentRankPolicies()
 {
     std::uint32_t forecasts = 0;
     std::array<bool, 21> classes{};
-    assert(DevelopmentPacing::Entries.size() == 198);
+    assert(DevelopmentPacing::Entries.size() == 201);
     for (auto const& entry : DevelopmentPacing::Entries)
     {
         classes.at(entry.ClassId - 12) = true;
@@ -879,8 +880,11 @@ void CheckMasteryFixedAndTrainerPolicies()
                 { 3, 1, { entry.PreviousRanks.back().Requirement.Proficiency, 0 } });
             assert(converted && converted->State.Proficiency == entry.PreviousRanks.back().Requirement.Proficiency);
         }
-    assert(DevelopmentBuffVariants::Variants.size() == 34);
+    assert(DevelopmentBuffVariants::Variants.size() == 41);
     constexpr std::array expectedProficiencies = {
+        std::pair{ 680308u, 60u }, std::pair{ 501330u, 60u }, std::pair{ 501331u, 60u },
+        std::pair{ 501332u, 60u }, std::pair{ 501333u, 60u }, std::pair{ 501334u, 60u },
+        std::pair{ 501336u, 60u },
         std::pair{ 572390u, 80u },
         std::pair{ 575045u, 40u }, std::pair{ 681160u, 100u },
         std::pair{ 572396u, 60u }, std::pair{ 680307u, 40u },
@@ -1437,6 +1441,67 @@ void CheckScriptedDamageReceipts()
     }
 }
 
+void WriteUtilityMasteryCases(std::string const& path)
+{
+    assert(ValidateProfiles(DevelopmentUtilityMastery::Profiles));
+    assert(MasteryEfficiencyAmount(18000, 50) == 90);
+    assert(MasteryEfficiencyAmount(45000, 200) == 900);
+    assert(MasteryEfficiencyAmount(123, 200) == 2);
+    assert(MasteryEfficiencyAmount(123, 201) == 0);
+    std::uint32_t remainder = 0;
+    std::uint32_t refunded = 0;
+    for (unsigned cast = 0; cast < 5; ++cast)
+    {
+        auto const result = AccumulateMasteryEfficiency(20, 200, remainder);
+        refunded += result.Amount;
+        remainder = result.Remainder;
+    }
+    assert(refunded == 2 && remainder == 0);
+    assert(AccumulateMasteryEfficiency(20, 201, 0).Amount == 0);
+    assert(AccumulateMasteryEfficiency(20, 200, 10000).Amount == 0);
+    std::ofstream output(path);
+    std::uint32_t revision = 0;
+    for (auto const& profile : DevelopmentUtilityMastery::Profiles)
+    {
+        auto const level = profile.Rewards.back().Requirement.CharacterLevel;
+        std::array learned{ profile.Definition.AbilityId };
+        Progress state{ 100, 0 };
+        auto view = BuildAbilityView(profile.Definition, profile.Policy, state, level, learned, true);
+        view.Rewards = DescribeMasteryRewards(profile.Definition, profile.Rewards, profile.Policy,
+            state, level, true, true);
+        view.Route = profile.Rewards.front().CooldownReductionBasisPoints ?
+            PracticeRoute::UtilityCooldown : PracticeRoute::UtilityResourceEfficiency;
+        view.RuleSet = 1;
+        view.AcquisitionSourceId = 1;
+        auto const effect = profile.Rewards.front().CooldownReductionBasisPoints ?
+            MasteryEffect::Cooldown : MasteryEffect::ResourceEfficiency;
+        assert(MasteryBonus(profile.Definition, profile.Rewards, state, level, true, true, effect) == 200);
+        assert(MasteryBonus(profile.Definition, profile.Rewards, state, level, true, true, MasteryEffect::Damage) == 0);
+        assert(MasteryBonus(profile.Definition, profile.Rewards, state, level, true, true, MasteryEffect::Healing) == 0);
+        std::array views{ view };
+        auto encoded = EncodeMenuSnapshot(profile.Definition.ClassId, level, ++revision, views,
+            SessionPractice{}, true, true, 777, 80, SessionLearning{}.View(), SessionMastery{}.View(),
+            true, true, true, true);
+        assert(encoded);
+        for (auto const& line : *encoded)
+            output << line << '\n';
+        output << '\n';
+        assert(!EncodeMenuSnapshot(profile.Definition.ClassId, level, revision, views,
+            SessionPractice{}, true, true, 777, 80, SessionLearning{}.View(), SessionMastery{}.View(),
+            true, true, true));
+    }
+    for (auto const& profile : DevelopmentBuffs::Profiles)
+    {
+        auto const bit = DevelopmentBuffs::ContributionBit(profile);
+        assert(bit && (bit & (bit - 1)) == 0);
+        for (auto const& other : DevelopmentBuffs::Profiles)
+            if (other.Definition.ClassId == profile.Definition.ClassId &&
+                other.Definition.AbilityId != profile.Definition.AbilityId)
+                assert(DevelopmentBuffs::ContributionBit(other) != bit);
+    }
+    std::cout << "PASS: utility mastery reward isolation, efficiency arithmetic, schema8 compatibility and per-class buff receipt bits\n";
+}
+
 int main(int argc, char** argv)
 {
     auto const enrollment = ParseCharacterEnrollment("10", "13,14,16,17,19,21,24,27,29,31,32", "100");
@@ -1495,6 +1560,7 @@ int main(int argc, char** argv)
         WriteSharedCases(std::string(argv[1]) + ".shared");
         WriteResourceCases(std::string(argv[1]) + ".resources");
         WriteDebuffCases(std::string(argv[1]) + ".debuffs");
+        WriteUtilityMasteryCases(std::string(argv[1]) + ".utility");
         std::array const ranks = { AbilityRank{ 101, 1, { 4, 1 } }, AbilityRank{ 102, 2, { 16, 20 } },
             AbilityRank{ 103, 3, { 24, 40 } } };
         std::array const caps = { ProficiencyCap{ 1, 10 }, ProficiencyCap{ 16, 30 }, ProficiencyCap{ 24, 60 } };

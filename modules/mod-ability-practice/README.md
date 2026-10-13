@@ -1,5 +1,35 @@
 # Ability practice development and live pilot
 
+## Specialized buffs and utility mastery — 13 October 2026
+
+Addon 0.5.15 supports protocol 8 utility mastery roadmaps, exact remaining-use counts and 0.5%, 1% and
+2% cooldown or resource-efficiency rewards. Existing compact, resizable and automatically opened displays
+are retained. Older protocols continue to receive supported rows.
+
+The startup flags `AllowDevelopmentSpecializedBuffs` and `AllowDevelopmentUtilityMastery` default off.
+The former adds Illidari Intuition, Libram of Consecration and Wild Blessing to ranked practice.
+Advanced Intuition variants retain native trainer levels and share regular rank-5 practice. The latter
+replaces nineteen native utility roadmap rows with meaningful interrupt, cleanse, purge, steal or reveal
+mastery. Their full native effectiveness is available immediately. Fractions of resource refunds accumulate
+within the login session so inexpensive energy abilities receive an actual benefit.
+
+Practice requires the character's own active Old School 9001/9002 challenge and excludes bots.
+Native trial completion at level 80 currently ends that enrollment. Manual exit preserves saved progress,
+removes practice benefits and retains the existing permanent re-entry block. Travel, forms, passives and
+unreviewed single-rank abilities retain native behavior.
+
+Qualification: `20261013-225339` passed source9, incremental build and the C++/Lua practice harness.
+`20261013-225738` passed all27 accelerated gameplay contracts without retries or sensitivity.
+The production binary SHA256 is `681ca6274f8b7c9f1bea3e168dec6a81148eab2131fe479ab69008ec5c4a5ac4`.
+CoA startup validates all330 profiles and21 supported Old School classes with both new flags enabled.
+Addon0.5.15 is installed; signed catalog20261013.160228462 is published. Public verification is recorded
+in the ops palace release tablet. Native game pixels and ordinary player pacing remain feedback scope.
+
+The inherited sanctuary dispel check is restricted to hostile player-controlled pairs, permitting ordinary
+NPC purges in CoA PvE mode while preserving PvP restrictions. Eye of Archimonde counts actual concealment
+removed by its original hit even when removal precedes the generic dispel callback; empty hits do not train.
+
+
 ## Tracker resizing and resource pacing —11October2026
 
 Addon0.5.12-development adds -/+ controls to the minimized tracker. Saved per-character scale ranges

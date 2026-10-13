@@ -18,6 +18,7 @@ inline constexpr std::uint32_t TypedMenuSchemaVersion = 4;
 inline constexpr std::uint32_t SharedMenuSchemaVersion = 5;
 inline constexpr std::uint32_t ResourceMenuSchemaVersion = 6;
 inline constexpr std::uint32_t DebuffMenuSchemaVersion = 7;
+inline constexpr std::uint32_t UtilityMasteryMenuSchemaVersion = 8;
 inline constexpr std::uint32_t HumanPvEResourceDrainRuleSet = 11;
 inline constexpr std::uint32_t HumanPvEResourceDrainCatchupRuleSet = 12;
 inline constexpr std::uint32_t HumanPvEPeriodicRuleSet = 2;
@@ -160,7 +161,9 @@ enum class PracticeRoute
     DamageOrRoot = 12,
     BuffCombat = 13,
     ResourceDrain = 14,
-    AttackPowerReduction = 15
+    AttackPowerReduction = 15,
+    UtilityCooldown = 16,
+    UtilityResourceEfficiency = 17
 };
 
 inline constexpr std::uint32_t HumanPvERuleSet = 1;

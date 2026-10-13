@@ -6222,8 +6222,8 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* /*param1*/, uint32* /*para
     {
         if (Unit* target = m_targets.GetUnitTarget())
         {
-            // Xinef: do not allow to cast on hostile targets in sanctuary
-            if (!m_caster->IsFriendlyTo(target))
+            // Xinef: do not allow dispels between hostile player-controlled units in sanctuary
+            if (!m_caster->IsFriendlyTo(target) && m_caster->GetAffectingPlayer() && target->GetAffectingPlayer())
             {
                 if (m_caster->IsInSanctuary() || target->IsInSanctuary())
                 {

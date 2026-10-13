@@ -62,10 +62,14 @@ inline bool ValidateProfiles(std::span<AbilityProfile const> profiles)
             ValidateDefinition(ability) != CatalogError::None || !ValidateMasteryRewards(ability, profile.Rewards) ||
             (ability.Kind == AbilityKind::Mastery &&
                 ((profile.Outcome != OutcomeKind::Healing && profile.Outcome != OutcomeKind::Damage &&
+                    profile.Outcome != OutcomeKind::Interrupt && profile.Outcome != OutcomeKind::Dispel &&
+                    profile.Outcome != OutcomeKind::Steal &&
                     profile.Outcome != OutcomeKind::ResourceDrain) ||
                     !ValidMasteryEffect(profile.Rewards.front(), profile.Outcome == OutcomeKind::Healing ?
                         MasteryEffect::Healing : profile.Outcome == OutcomeKind::Damage ? MasteryEffect::Damage :
-                        MasteryEffect::ResourceDrain))) ||
+                        profile.Outcome == OutcomeKind::ResourceDrain ? MasteryEffect::ResourceDrain :
+                        profile.Rewards.front().CooldownReductionBasisPoints ? MasteryEffect::Cooldown :
+                        MasteryEffect::ResourceEfficiency))) ||
             !ValidPolicy(profile.Policy) ||
             (ability.Kind == AbilityKind::Fixed ? profile.Outcome != OutcomeKind::None :
                 profile.Outcome != OutcomeKind::Damage && profile.Outcome != OutcomeKind::Healing &&
