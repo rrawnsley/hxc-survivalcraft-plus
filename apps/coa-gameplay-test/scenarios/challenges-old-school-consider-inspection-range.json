@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "Old School consider uses a 40-yard inspection boundary",
+  "contract": "The Old School /consider command inspects a selected hostile target within 40 yards. Its 40-yard limit is only an inspection boundary and does not change creature aggro, assistance, or social pulls.",
+  "timeout_ms": 60000,
+  "location": {"map": 1, "x": -751.421, "y": -674.71, "z": -19.1842, "o": 0},
+  "players": [
+    {"id": "old", "race": 1, "class": 1, "level": 20}
+  ],
+  "creatures": [
+    {"id": "within", "owner": "old", "entry": 2952, "faction": 14, "level": 20, "health": 1000, "distance": 39, "stationary": true},
+    {"id": "outside", "owner": "old", "entry": 2952, "faction": 14, "level": 20, "health": 1000, "distance": 41, "stationary": true}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 1000},
+    {"action": "start_challenge", "actor": "old", "challenge": 9001, "level": 1},
+    {"action": "assert", "actor": "old", "metric": "challenge_start_code", "equals": 0},
+    {"action": "attack", "actor": "old", "target": "within"},
+    {"action": "wait", "ms": 1000},
+    {"action": "client_packet", "actor": "old", "opcode": 317, "consumed": false, "fields": [{"actor_guid": "within"}]},
+    {"action": "command", "actor": "old", "command": ".coa consider"},
+    {"action": "assert", "label": "A target 39 yards away can be considered", "actor": "old", "metric": "system_message_contains", "text": "Consider Bristleback", "equals": 1},
+    {"action": "stop_attack", "actor": "old"},
+    {"action": "attack", "actor": "old", "target": "outside"},
+    {"action": "wait", "ms": 1000},
+    {"action": "client_packet", "actor": "old", "opcode": 317, "consumed": false, "fields": [{"actor_guid": "outside"}]},
+    {"action": "command", "actor": "old", "command": ".coa consider"},
+    {"action": "assert", "label": "A target 41 yards away is outside the inspection range", "actor": "old", "metric": "system_message_contains", "text": "outside your 40-yard range", "equals": 1}
+  ]
+}
