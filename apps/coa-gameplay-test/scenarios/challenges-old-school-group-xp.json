@@ -142,20 +142,14 @@
       "target": "controlbot"
     },
     {
-      "action": "learn",
-      "actor": "control",
-      "spell": 585
-    },
-    {
       "action": "snapshot",
       "actor": "control",
       "metric": "xp",
       "save_as": "control_before"
     },
     {
-      "action": "cast",
+      "action": "attack",
       "actor": "control",
-      "spell": 585,
       "target": "control_wolf_0"
     },
     {
@@ -163,12 +157,15 @@
       "actor": "control_wolf_0",
       "metric": "alive",
       "equals": 0,
-      "within_ms": 10000
+      "within_ms": 15000
     },
     {
-      "action": "cast",
+      "action": "stop_attack",
+      "actor": "control"
+    },
+    {
+      "action": "attack",
       "actor": "control",
-      "spell": 585,
       "target": "control_wolf_1"
     },
     {
@@ -176,12 +173,15 @@
       "actor": "control_wolf_1",
       "metric": "alive",
       "equals": 0,
-      "within_ms": 10000
+      "within_ms": 15000
     },
     {
-      "action": "cast",
+      "action": "stop_attack",
+      "actor": "control"
+    },
+    {
+      "action": "attack",
       "actor": "control",
-      "spell": 585,
       "target": "control_wolf_2"
     },
     {
@@ -189,12 +189,15 @@
       "actor": "control_wolf_2",
       "metric": "alive",
       "equals": 0,
-      "within_ms": 10000
+      "within_ms": 15000
     },
     {
-      "action": "cast",
+      "action": "stop_attack",
+      "actor": "control"
+    },
+    {
+      "action": "attack",
       "actor": "control",
-      "spell": 585,
       "target": "control_wolf_3"
     },
     {
@@ -202,7 +205,11 @@
       "actor": "control_wolf_3",
       "metric": "alive",
       "equals": 0,
-      "within_ms": 10000
+      "within_ms": 15000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "control"
     },
     {
       "action": "snapshot",
@@ -217,20 +224,14 @@
       "target": "oldbot"
     },
     {
-      "action": "learn",
-      "actor": "old",
-      "spell": 585
-    },
-    {
       "action": "snapshot",
       "actor": "old",
       "metric": "xp",
       "save_as": "old_before"
     },
     {
-      "action": "cast",
+      "action": "attack",
       "actor": "old",
-      "spell": 585,
       "target": "old_wolf_0"
     },
     {
@@ -238,12 +239,15 @@
       "actor": "old_wolf_0",
       "metric": "alive",
       "equals": 0,
-      "within_ms": 10000
+      "within_ms": 15000
     },
     {
-      "action": "cast",
+      "action": "stop_attack",
+      "actor": "old"
+    },
+    {
+      "action": "attack",
       "actor": "old",
-      "spell": 585,
       "target": "old_wolf_1"
     },
     {
@@ -251,12 +255,15 @@
       "actor": "old_wolf_1",
       "metric": "alive",
       "equals": 0,
-      "within_ms": 10000
+      "within_ms": 15000
     },
     {
-      "action": "cast",
+      "action": "stop_attack",
+      "actor": "old"
+    },
+    {
+      "action": "attack",
       "actor": "old",
-      "spell": 585,
       "target": "old_wolf_2"
     },
     {
@@ -264,12 +271,15 @@
       "actor": "old_wolf_2",
       "metric": "alive",
       "equals": 0,
-      "within_ms": 10000
+      "within_ms": 15000
     },
     {
-      "action": "cast",
+      "action": "stop_attack",
+      "actor": "old"
+    },
+    {
+      "action": "attack",
       "actor": "old",
-      "spell": 585,
       "target": "old_wolf_3"
     },
     {
@@ -277,7 +287,11 @@
       "actor": "old_wolf_3",
       "metric": "alive",
       "equals": 0,
-      "within_ms": 10000
+      "within_ms": 15000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "old"
     },
     {
       "action": "snapshot",
