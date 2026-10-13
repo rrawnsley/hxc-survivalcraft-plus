@@ -432,6 +432,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `whisper` | Player `actor`, `to`, `text`, optional `language` (Common by default): the client's whisper packet, sent as typed. |
 | `learn`, `unlearn` | `actor`, `spell`: configure learned spells/passives through player APIs. `unlearn` accepts `all_specs: true` to remove the fixture grant from every specialization before testing a lower weapon rank. |
 | `money` | `actor`, `copper`: fixture purse, so a priced trainer row can be bought on a character that starts with none. |
+| `set_player_setting` | `actor`, `source`, `index`, `value`: fixture a stored character setting, such as a value saved by an earlier build, before a `relog` reads it. |
 | `set_aura` | `actor`, `spell`, `stacks`: fixture aura state, within its stack limit; zero removes it. Optional `pet: true` selects the actor's current pet. |
 | `cancel_aura` | Player `actor`, `spell`: native `CMSG_CANCEL_AURA` handler; assert the resulting aura state. |
 | `cancel_mount` | Player `actor`: native `CMSG_CANCEL_MOUNT_AURA` handler, the dismount a client sends with a mounted cast. |
@@ -439,7 +440,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `reset_talents` | `actor`: reset active talents through normal removal, without a trainer fee. |
 | `specialization` | Player `actor`, `ChrSpecs.dbc` `id`: the client's specialization switch. Uploads the class tree plus the specialization's identity and signature entries as native `0x0727`, as `SwitchActiveChrSpec` and `ApplyPendingBuild` do, then waits up to 2 s for the server to activate it. With `refused: true` it instead waits for the upload's `0x072C` result and requires the specialization to stay inactive. |
 | `advancement_rank` | Player `actor`, CharacterAdvancement `entry`, `rank` (0 removes): uploads the known entries with that rank as native `0x0727`, then waits up to 2 s for the server to apply it. With `refused: true` it instead waits for the upload's `0x072C` result and requires the rank to stay unapplied. |
-| `client_packet` | Player `actor`, `opcode`, optional `fields` (a list of one-key objects: `u8`, `u32`, `u64`, `string` as a C string, `buyback_guid` slot, `actor_guid` player or creature id as a raw GUID, `packed_actor_guid` player or creature id as a packed GUID, `pet_guid` player id as the current pet raw GUID, `duel_arbiter` player id as the pending duel flag raw GUID, `stabled_pet` stable slot 0-3 as its pet number), `consumed` (default true) and `early` (default true): sends the request through the early packet hook as the client would, and a request that hook passes on reaches its logged-in core opcode handler, as the session would deliver it; `early: false` sends it through the packet hook the session update runs instead, as for `CMSG_SET_ACTIVE_MOVER` after the client enters the world. |
+| `client_packet` | Player `actor`, `opcode`, optional `fields` (a list of one-key objects: `u8`, `u32`, `u64`, `string` as a C string, `buyback_guid` slot, `actor_guid` player or creature id as a raw GUID, `packed_actor_guid` player or creature id as a packed GUID, `pet_guid` player id as the current pet raw GUID, `duel_arbiter` player id as the pending duel flag raw GUID, `invited_battleground_type` player id as the `u32` type of the battleground or arena it is invited to, as the client echoes it in `CMSG_BATTLEFIELD_PORT`, `stabled_pet` stable slot 0-3 as its pet number), `consumed` (default true) and `early` (default true): sends the request through the early packet hook as the client would, and a request that hook passes on reaches its logged-in core opcode handler, as the session would deliver it; `early: false` sends it through the packet hook the session update runs instead, as for `CMSG_SET_ACTIVE_MOVER` after the client enters the world. |
 | `apply_appearances` | Player `actor`, `selection` mapping category ids to appearance ids: sends the complete array as native `CMSG_APPLY_APPEARANCES` (`0x0697`); unlisted categories are 0. The next step sees the result. |
 | `cast` | `actor`, `spell`, optional `target` (self by default), `target_item` (an owned item entry) or `target_gameobject` (the nearest gameobject of that entry within 20 yards): normal session cast handler. |
 | `attack` | `actor`, `target`: native melee attack request; optional `pet: true` sends the pet's attack command. Verify combat or damage with assertions. |
@@ -903,12 +904,20 @@ force updates or inspect client rendering. `lfg_dungeon_disabled` takes an LFGDu
 returns 1 when the `disables` table locks that dungeon's map and difficulty out of Dungeon Finder, otherwise 0.
 `lfg_state` takes a player `actor` and returns its native Dungeon Finder state (0 none, 1 role check, 2 queued,
 3 proposal, 4 vote kick, 5 in dungeon, 6 finished dungeon, 7 raid browser).
+`in_arena` takes a player `actor` and returns 1 while that player is inside an arena match.
+`arena_team_members`, `arena_team_season_games` and `arena_team_season_wins` take a player `actor` and arena
+`slot` (0 2v2, 1 3v3, 2 5v5) and read the team in that slot: its member count (0 without a team), or its
+season games and wins (-1 without a team).
 `creature_query_rank` takes a player `actor` and creature `entry` and returns the rank of the
 last creature query response delivered to that session, or -1 before one arrives.
 `quest_level` and `quest_xp` take a player `actor` and `quest`
 and query the native quest level and XP calculations without awarding a reward.
 `quest_log_sent_level` and `quest_log_sent_xp` take the same arguments and return the last level or reward XP
 sent for that quest's log slot in `SMSG_UPDATE_OBJECT_ADDON` (fields 61 and 36 + slot), or -1 before one arrives.
+`sent_average_item_level` takes a player `actor` and returns the last average item level sent for that player in
+`SMSG_UPDATE_OBJECT_ADDON` (field 5), ignoring other fields and objects, or -1 before one arrives.
+`sent_average_item_level_count` counts those updates among the retained payloads; snapshot it before a teleport
+or other event to prove that the event resent the value.
 `quest_offer_sent_xp` reads the reward XP in the last native `SMSG_QUESTGIVER_OFFER_REWARD` for that quest,
 or -1 before the session receives a reward offer.
 `quest_query_scaled` takes the same arguments and returns 1 when the last quest query response for that quest

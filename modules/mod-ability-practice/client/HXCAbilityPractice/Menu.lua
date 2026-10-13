@@ -970,6 +970,17 @@ function API.Restore()
     if API.Request then API.Request() end
 end
 
+function API.OpenForOldSchool()
+    if API.IsShown() then return end
+    TrackedAbilities()
+    Refresh()
+    if HXCAbilityPracticePreferences.compactVisible then
+        tracker:Show()
+    else
+        panel:Show()
+    end
+end
+
 function API.Toggle()
     if panel:IsShown() then panel:Hide() else API.Restore() end
 end
