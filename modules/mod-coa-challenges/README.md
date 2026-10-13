@@ -259,6 +259,14 @@ profiles use +4 or +6/1.5x. Jintha'Alor guards and spellcasters retain elite ran
 Existing movement, respawn windows and faction behavior are preserved. No new spawn or
 loot tables are added by these profiles; player leveling feedback will determine tuning.
 
+Western Plaguelands adds Scourge ruins, Scarlet worksites, Hearthglen stronghold and
+plague-cauldron roster groups. Twenty native named templates use trial danger/reward
+profiles, including the four cauldron lords and the Scarlet and Scourge rare encounters.
+Araj and Isillien use +10 threat/3x encounter XP; stronger elite leaders use +8/2x;
+other encounters use +4 or +6/1.5x. Quest-triggered cauldron lords receive their fixed
+profile even without a persistent spawn ID. Native quest spawning, movement, factions,
+respawn windows, aggro and assistance remain intact.
+
 ## License
 
 GNU General Public License v2.0 — see [LICENSE](LICENSE).

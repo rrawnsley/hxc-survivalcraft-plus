@@ -1155,6 +1155,7 @@ namespace CoAChallenges
     bool IsOldSchoolHillsbradNamedThreat(Creature const* creature);
     bool IsOldSchoolArathiNamedThreat(Creature const* creature);
     bool IsOldSchoolHinterlandsNamedThreat(Creature const* creature);
+    bool IsOldSchoolPlaguelandsNamedThreat(Creature const* creature);
 
     bool IsOldSchoolGearLoot(Creature const* creature, Player const* player)
     {
@@ -1172,7 +1173,7 @@ namespace CoAChallenges
             || IsOldSchoolAshenvaleNamedThreat(creature) || IsOldSchoolSouthernNamedThreat(creature)
             || IsOldSchoolTirisfalNamedThreat(creature) || IsOldSchoolSilverpineNamedThreat(creature)
             || IsOldSchoolHillsbradNamedThreat(creature) || IsOldSchoolArathiNamedThreat(creature)
-            || IsOldSchoolHinterlandsNamedThreat(creature);
+            || IsOldSchoolHinterlandsNamedThreat(creature) || IsOldSchoolPlaguelandsNamedThreat(creature);
         return namedThreat ? namedPercent : normalPercent;
     }
 
@@ -1507,10 +1508,67 @@ namespace CoAChallenges
         }
     }
 
+    bool IsOldSchoolPlaguelandsNamedThreat(Creature const* creature)
+    {
+        if (!creature || creature->GetZoneId() != AREA_WESTERN_PLAGUELANDS)
+            return false;
+        switch (creature->GetEntry())
+        {
+            case 1837:
+            case 1838:
+            case 1839:
+            case 1840:
+            case 1841:
+            case 1843:
+            case 1844:
+            case 1845:
+            case 1846:
+            case 1847:
+            case 1848:
+            case 1849:
+            case 1850:
+            case 1851:
+            case 1852:
+            case 10817:
+            case 11075:
+            case 11076:
+            case 11077:
+            case 11078:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     int32 OldSchoolNamedThreatOffset(Creature const* creature)
     {
         if (!creature)
             return 0;
+
+        if (IsOldSchoolPlaguelandsNamedThreat(creature))
+        {
+            switch (creature->GetEntry())
+            {
+                case 1840:
+                case 1852:
+                    return 10;
+                case 1838:
+                case 1839:
+                case 1841:
+                case 1843:
+                case 1846:
+                case 1850:
+                    return 8;
+                case 1845:
+                case 11075:
+                case 11076:
+                case 11077:
+                case 11078:
+                    return 6;
+                default:
+                    return 4;
+            }
+        }
 
         if (IsOldSchoolHinterlandsNamedThreat(creature))
         {
@@ -1681,7 +1739,8 @@ namespace CoAChallenges
             if (IsOldSchoolStonetalonNamedThreat(creature) || IsOldSchoolAshenvaleNamedThreat(creature)
                 || IsOldSchoolSouthernNamedThreat(creature) || IsOldSchoolTirisfalNamedThreat(creature)
                 || IsOldSchoolSilverpineNamedThreat(creature) || IsOldSchoolHillsbradNamedThreat(creature)
-                || IsOldSchoolArathiNamedThreat(creature) || IsOldSchoolHinterlandsNamedThreat(creature))
+                || IsOldSchoolArathiNamedThreat(creature) || IsOldSchoolHinterlandsNamedThreat(creature)
+                || IsOldSchoolPlaguelandsNamedThreat(creature))
             {
                 int32 const offset = OldSchoolNamedThreatOffset(creature);
                 return offset >= 10 ? 300 : offset >= 8 ? 200 : 150;
@@ -1712,6 +1771,77 @@ namespace CoAChallenges
     {
         if (!creature)
             return { nullptr, nullptr, 0 };
+
+        if (creature->GetZoneId() == AREA_WESTERN_PLAGUELANDS)
+        {
+            switch (creature->GetEntry())
+            {
+                case 1783:
+                case 1785:
+                case 1787:
+                case 1790:
+                case 1791:
+                case 1793:
+                case 1794:
+                    return { "Scourge ruins", "undead guard", 2 };
+                case 1784:
+                case 1789:
+                case 1795:
+                case 1796:
+                case 1798:
+                case 1800:
+                case 1801:
+                case 1802:
+                    return { "Scourge ruins", "undead spellcaster", 4 };
+                case 1786:
+                case 1788:
+                case 1799:
+                    return { "Scourge ruins", "elite guard", 5 };
+                case 1847:
+                case 1848:
+                case 1849:
+                case 1850:
+                case 1851:
+                case 1852:
+                    return { "Scourge ruins", "named threat", 6 };
+                case 1883:
+                case 1884:
+                    return { "Scarlet worksite", "worker", 1 };
+                case 1843:
+                case 1844:
+                    return { "Scarlet worksite", "named foreman", 5 };
+                case 1831:
+                case 1833:
+                    return { "Hearthglen stronghold", "soldier", 2 };
+                case 1827:
+                case 1834:
+                case 1836:
+                case 4493:
+                    return { "Hearthglen stronghold", "elite guard", 4 };
+                case 1826:
+                case 1832:
+                case 1835:
+                case 4494:
+                case 9452:
+                case 10605:
+                    return { "Hearthglen stronghold", "spellcaster", 4 };
+                case 1837:
+                case 1838:
+                case 1839:
+                case 1840:
+                case 1841:
+                case 1845:
+                case 1846:
+                    return { "Hearthglen stronghold", "named leader", 6 };
+                case 11075:
+                case 11076:
+                case 11077:
+                case 11078:
+                    return { "Plague cauldron", "cauldron lord", 6 };
+                default:
+                    return { nullptr, nullptr, 0 };
+            }
+        }
 
         if (creature->GetZoneId() == AREA_THE_HINTERLANDS)
         {
@@ -4623,7 +4753,7 @@ namespace CoAChallenges
                     || IsOldSchoolAshenvaleNamedThreat(target) || IsOldSchoolSouthernNamedThreat(target)
                     || IsOldSchoolTirisfalNamedThreat(target) || IsOldSchoolSilverpineNamedThreat(target)
                     || IsOldSchoolHillsbradNamedThreat(target) || IsOldSchoolArathiNamedThreat(target)
-                    || IsOldSchoolHinterlandsNamedThreat(target))
+                    || IsOldSchoolHinterlandsNamedThreat(target) || IsOldSchoolPlaguelandsNamedThreat(target))
                     handler->PSendSysMessage("Named threat: {} carries elevated hidden danger and reward; "
                         "use the con estimate before engaging.", target->GetName());
 
@@ -4639,6 +4769,11 @@ namespace CoAChallenges
                         campThreat.camp, campThreat.role);
                     static std::vector<uint32> const campEntries =
                     {
+                        1783, 1784, 1785, 1786, 1787, 1788, 1789, 1790, 1791, 1793, 1794,
+                        1795, 1796, 1798, 1799, 1800, 1801, 1802, 1826, 1827, 1831, 1832,
+                        1833, 1834, 1835, 1836, 1837, 1838, 1839, 1840, 1841, 1843, 1844,
+                        1845, 1846, 1847, 1848, 1849, 1850, 1851, 1852, 1883, 1884, 4493,
+                        4494, 9452, 10605, 11075, 11076, 11077, 11078,
                         2639, 2640, 2641, 2642, 2643, 2644, 2645, 2646, 2647, 2648, 2649,
                         2650, 2651, 2652, 2653, 2654, 2657, 2658, 2659, 2680, 2681, 2686,
                         2923, 2924, 2925, 2926, 4465, 4466, 4467, 4482, 7809, 7995, 7996,
