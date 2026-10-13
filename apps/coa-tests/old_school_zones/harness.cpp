@@ -140,12 +140,22 @@ void NamedProfiles()
         creature.zone = AREA_MULGORE;
         assert(OldSchoolThreatOffset(&creature) == 4);
     }
-    for (uint32 entry : { 3398u, 3474u, 5828u, 5829u, 5831u, 5834u, 5847u, 5865u })
+    for (uint32 entry : { 3394u, 3395u, 3396u, 3398u, 3474u, 5828u, 5829u, 5831u, 5834u, 5847u, 5865u })
     {
         creature.entry = entry;
         creature.zone = AREA_THE_BARRENS;
-        assert(OldSchoolThreatOffset(&creature) == 4);
+        assert(OldSchoolThreatOffset(&creature) == (entry == 3396 ? 10 : entry == 3394 || entry == 3395 ? 8 : 4));
     }
+    creature.data.rank = CREATURE_ELITE_NORMAL;
+    creature.level = 25;
+    creature.entry = 3394;
+    assert(GetOldSchoolPowerProfile(&player, &creature).experienceMultiplierHundredths == 600);
+    creature.entry = 3395;
+    assert(GetOldSchoolPowerProfile(&player, &creature).experienceMultiplierHundredths == 600);
+    creature.entry = 3396;
+    assert(GetOldSchoolPowerProfile(&player, &creature).experienceMultiplierHundredths == 900);
+    creature.entry = 3398;
+    assert(GetOldSchoolPowerProfile(&player, &creature).experienceMultiplierHundredths == 200);
 }
 
 void MulgoreCampConsider()
@@ -167,17 +177,45 @@ void MulgoreCampConsider()
     Creature ownedGuard = guard;
     ownedGuard.owned = true;
     std::vector<Creature const*> nearby{ &shaman, &guard, &poacher, &skinner, &deadGuard, &ownedGuard };
-    assert(IsOldSchoolMulgoreSameCamp(&shaman, &guard));
-    assert(!IsOldSchoolMulgoreSameCamp(&shaman, &poacher));
-    assert(!IsOldSchoolMulgoreSameCamp(&shaman, &deadGuard));
-    assert(!IsOldSchoolMulgoreSameCamp(&shaman, &ownedGuard));
-    assert(CountOldSchoolMulgoreCampmates(&shaman, nearby) == 1);
-    assert(CountOldSchoolMulgoreCampmates(&poacher, nearby) == 1);
-    assert(CountOldSchoolMulgoreCampmates(&poacher, {}) == 0);
+    assert(IsOldSchoolSameCamp(&shaman, &guard));
+    assert(!IsOldSchoolSameCamp(&shaman, &poacher));
+    assert(!IsOldSchoolSameCamp(&shaman, &deadGuard));
+    assert(!IsOldSchoolSameCamp(&shaman, &ownedGuard));
+    assert(CountOldSchoolCampmates(&shaman, nearby) == 1);
+    assert(CountOldSchoolCampmates(&poacher, nearby) == 1);
+    assert(CountOldSchoolCampmates(&poacher, {}) == 0);
+}
+
+void BarrensCampConsider()
+{
+    Creature geomancer;
+    geomancer.entry = 3269;
+    geomancer.zone = AREA_THE_BARRENS;
+    geomancer.spawn = 0;
+    Creature defender;
+    defender.entry = 3266;
+    defender.zone = AREA_THE_BARRENS;
+    Creature stormer;
+    stormer.entry = 3273;
+    stormer.zone = AREA_THE_BARRENS;
+    Creature mulgoreGuard;
+    mulgoreGuard.entry = 2952;
+    mulgoreGuard.zone = AREA_MULGORE;
+    std::vector<Creature const*> nearby{ &defender, &stormer, &mulgoreGuard };
+    assert(std::strcmp(GetOldSchoolCampThreat(&geomancer).camp, "Razormane camp") == 0);
+    assert(IsOldSchoolSameCamp(&geomancer, &defender));
+    assert(!IsOldSchoolSameCamp(&geomancer, &stormer));
+    assert(!IsOldSchoolSameCamp(&geomancer, &mulgoreGuard));
+    assert(CountOldSchoolCampmates(&geomancer, nearby) == 1);
+    assert(OldSchoolThreatOffset(&geomancer) == 4);
+    assert(OldSchoolThreatLevel(&geomancer) == 29);
+    Player player;
+    assert(std::strcmp(GetOldSchoolPowerProfile(&player, &geomancer).con, "Red") == 0);
 }
 
 int main()
 {
     NamedProfiles();
     MulgoreCampConsider();
+    BarrensCampConsider();
 }

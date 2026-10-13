@@ -1,0 +1,23 @@
+{
+  "schema": 1,
+  "name": "Old School Barrens camp roles and Kolkar leader rewards",
+  "contract": "Native Barrens camp roles add authored danger to the Old School con. /consider identifies a camp role and counts nearby same-camp members without changing native aggro or assistance. Barak Kodobane and Verog the Dervish have elevated encounter rewards; Hezrul Bloodmark is the highest Kolkar threat tier.",
+  "timeout_ms": 90000,
+  "location": {"map": 1, "x": -80.7617, "y": -3370.37, "z": 93.2554, "o": 0},
+  "players": [
+    {"id": "old", "race": 1, "class": 1, "level": 25}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 1000},
+    {"action": "start_challenge", "actor": "old", "challenge": 9001, "level": 1},
+    {"action": "assert", "actor": "old", "metric": "challenge_start_code", "equals": 0},
+    {"action": "set_phase", "actor": "old", "value": 1},
+    {"action": "wait", "ms": 1000},
+    {"action": "assert", "label": "A persistent Razormane geomancer camp is loaded", "actor": "old", "metric": "nearby_creature_count", "entry": 3269, "min": 1},
+    {"action": "attack_nearby", "actor": "old", "entry": 3269, "damage_pct": 10},
+    {"action": "command", "actor": "old", "command": ".coa consider"},
+    {"action": "assert", "label": "Consider identifies the native Razormane camp role", "actor": "old", "metric": "system_message_contains", "text": "Camp role: Razormane camp geomancer", "equals": 1},
+    {"action": "assert", "label": "Consider reports same-camp members inside the 40-yard inspection range", "actor": "old", "metric": "system_message_contains", "text": "Other creatures from this camp within 40 yards:", "equals": 1},
+    {"action": "assert", "label": "The authored Razormane con drives its Old School reward estimate", "actor": "old", "metric": "system_message_contains", "text": "kill XP:", "equals": 1}
+  ]
+}

@@ -1229,6 +1229,9 @@ namespace CoAChallenges
             case 5834: // Azzere the Skyblade
             case 5847: // Heggin Stonewhisker
             case 5865: // Dishu
+            case 3394: // Barak Kodobane
+            case 3395: // Verog the Dervish
+            case 3396: // Hezrul Bloodmark
                 return true;
             default:
                 return false;
@@ -1253,74 +1256,172 @@ namespace CoAChallenges
         }
     }
 
-    struct OldSchoolMulgoreCampThreat
+    int32 OldSchoolNamedThreatOffset(Creature const* creature)
+    {
+        if (!creature)
+            return 0;
+
+        if (creature->GetZoneId() == AREA_THE_BARRENS)
+        {
+            switch (creature->GetEntry())
+            {
+                case 3396: // Hezrul Bloodmark
+                    return 10;
+                case 3394: // Barak Kodobane
+                case 3395: // Verog the Dervish
+                    return 8;
+                default:
+                    break;
+            }
+        }
+
+        return IsOldSchoolMulgoreNamedThreat(creature)
+            || IsOldSchoolBarrensNamedThreat(creature) || IsOldSchoolStonetalonNamedThreat(creature) ? 4 : 0;
+    }
+
+    uint32 OldSchoolNamedRewardHundredths(Creature const* creature)
+    {
+        if (!creature || creature->GetZoneId() != AREA_THE_BARRENS)
+            return 100;
+
+        switch (creature->GetEntry())
+        {
+            case 3396: // Hezrul Bloodmark
+                return 300;
+            case 3394: // Barak Kodobane
+            case 3395: // Verog the Dervish
+                return 200;
+            default:
+                return 100;
+        }
+    }
+
+    struct OldSchoolCampThreat
     {
         char const* camp;
         char const* role;
         int32 bonus;
     };
 
-    OldSchoolMulgoreCampThreat GetOldSchoolMulgoreCampThreat(Creature const* creature)
+    OldSchoolCampThreat GetOldSchoolCampThreat(Creature const* creature)
     {
-        if (!creature || creature->GetZoneId() != AREA_MULGORE)
+        if (!creature)
+            return { nullptr, nullptr, 0 };
+
+        if (creature->GetZoneId() == AREA_MULGORE)
+        {
+            switch (creature->GetEntry())
+            {
+                case 2952:
+                    return { "Bristleback camp", "quilboar guard", 1 };
+                case 2953:
+                    return { "Bristleback camp", "shaman", 3 };
+                case 2954:
+                    return { "Bristleback camp", "battleboar", 2 };
+                case 2949:
+                    return { "Palemane camp", "tanner", 1 };
+                case 2950:
+                    return { "Palemane camp", "skinner", 1 };
+                case 2951:
+                    return { "Palemane camp", "poacher", 3 };
+                case 2975:
+                case 2976:
+                case 2978:
+                    return { "Venture Co. camp", "worker", 1 };
+                case 2977:
+                    return { "Venture Co. camp", "taskmaster", 2 };
+                case 2979:
+                    return { "Venture Co. camp", "supervisor", 3 };
+                case 2962:
+                    return { "Windfury Ridge", "harpy", 2 };
+                case 2963:
+                    return { "Windfury Ridge", "wind witch", 3 };
+                case 2964:
+                    return { "Windfury Ridge", "sorceress", 4 };
+                case 2965:
+                    return { "Windfury Ridge", "matriarch", 6 };
+                default:
+                    return { nullptr, nullptr, 0 };
+            }
+        }
+
+        if (creature->GetZoneId() != AREA_THE_BARRENS)
             return { nullptr, nullptr, 0 };
 
         switch (creature->GetEntry())
         {
-            case 2952:
-                return { "Bristleback camp", "quilboar guard", 1 };
-            case 2953:
-                return { "Bristleback camp", "shaman", 3 };
-            case 2954:
-                return { "Bristleback camp", "battleboar", 2 };
-            case 2949:
-                return { "Palemane camp", "tanner", 1 };
-            case 2950:
-                return { "Palemane camp", "skinner", 1 };
-            case 2951:
-                return { "Palemane camp", "poacher", 3 };
-            case 2975:
-            case 2976:
-            case 2978:
-                return { "Venture Co. camp", "worker", 1 };
-            case 2977:
-                return { "Venture Co. camp", "taskmaster", 2 };
-            case 2979:
-                return { "Venture Co. camp", "supervisor", 3 };
-            case 2962:
-                return { "Windfury Ridge", "harpy", 2 };
-            case 2963:
-                return { "Windfury Ridge", "wind witch", 3 };
-            case 2964:
-                return { "Windfury Ridge", "sorceress", 4 };
-            case 2965:
-                return { "Windfury Ridge", "matriarch", 6 };
+            case 3260:
+                return { "Bristleback camp", "water seeker", 2 };
+            case 3261:
+                return { "Bristleback camp", "thornweaver", 3 };
+            case 3262:
+                return { "Bristleback camp", "mystic", 4 };
+            case 3263:
+                return { "Bristleback camp", "geomancer", 4 };
+            case 3265:
+                return { "Razormane camp", "hunter", 1 };
+            case 3266:
+                return { "Razormane camp", "defender", 2 };
+            case 3267:
+                return { "Razormane camp", "water seeker", 2 };
+            case 3268:
+                return { "Razormane camp", "thornweaver", 3 };
+            case 3269:
+                return { "Razormane camp", "geomancer", 4 };
+            case 3270:
+                return { "Razormane camp", "elder mystic", 6 };
+            case 3271:
+                return { "Razormane camp", "mystic", 4 };
+            case 3272:
+                return { "Kolkar camp", "wrangler", 1 };
+            case 3273:
+                return { "Kolkar camp", "stormer", 3 };
+            case 3274:
+                return { "Kolkar camp", "pack runner", 2 };
+            case 3275:
+                return { "Kolkar camp", "marauder", 3 };
+            case 3276:
+                return { "Witchwing roost", "harpy", 2 };
+            case 3277:
+                return { "Witchwing roost", "roguefeather", 3 };
+            case 3278:
+                return { "Witchwing roost", "slayer", 4 };
+            case 3374:
+                return { "Bael'dun excavation", "excavator", 1 };
+            case 3375:
+                return { "Bael'dun excavation", "foreman", 2 };
+            case 3376:
+                return { "Bael'dun excavation", "soldier", 2 };
+            case 3377:
+                return { "Bael'dun excavation", "rifleman", 3 };
+            case 3378:
+                return { "Bael'dun excavation", "officer", 4 };
             default:
                 return { nullptr, nullptr, 0 };
         }
     }
 
-    bool IsOldSchoolMulgoreSameCamp(Creature const* target, Creature const* candidate)
+    bool IsOldSchoolSameCamp(Creature const* target, Creature const* candidate)
     {
         if (!target || !candidate || target == candidate || !candidate->IsAlive()
-            || candidate->IsCharmedOwnedByPlayerOrPlayer())
+            || candidate->IsCharmedOwnedByPlayerOrPlayer() || target->GetZoneId() != candidate->GetZoneId())
             return false;
 
-        OldSchoolMulgoreCampThreat const targetThreat = GetOldSchoolMulgoreCampThreat(target);
-        OldSchoolMulgoreCampThreat const candidateThreat = GetOldSchoolMulgoreCampThreat(candidate);
+        OldSchoolCampThreat const targetThreat = GetOldSchoolCampThreat(target);
+        OldSchoolCampThreat const candidateThreat = GetOldSchoolCampThreat(candidate);
         return targetThreat.camp && candidateThreat.camp
             && std::strcmp(targetThreat.camp, candidateThreat.camp) == 0;
     }
 
-    uint32 CountOldSchoolMulgoreCampmates(Creature const* target, std::vector<Creature const*> const& candidates)
+    uint32 CountOldSchoolCampmates(Creature const* target, std::vector<Creature const*> const& candidates)
     {
-        if (!target || !GetOldSchoolMulgoreCampThreat(target).camp)
+        if (!target || !GetOldSchoolCampThreat(target).camp)
             return 0;
 
         return static_cast<uint32>(std::count_if(candidates.begin(), candidates.end(),
             [target](Creature const* candidate)
             {
-                return IsOldSchoolMulgoreSameCamp(target, candidate);
+                return IsOldSchoolSameCamp(target, candidate);
             }));
     }
 
@@ -1329,13 +1430,11 @@ namespace CoAChallenges
         if (!creature)
             return 0;
 
-        if (IsOldSchoolMulgoreNamedThreat(creature))
-            return 4;
+        int32 const namedThreatOffset = OldSchoolNamedThreatOffset(creature);
+        if (namedThreatOffset)
+            return namedThreatOffset;
 
-        if (IsOldSchoolBarrensNamedThreat(creature) || IsOldSchoolStonetalonNamedThreat(creature))
-            return 4;
-
-        int32 const campThreatBonus = GetOldSchoolMulgoreCampThreat(creature).bonus;
+        int32 const campThreatBonus = GetOldSchoolCampThreat(creature).bonus;
 
         if (!creature->GetSpawnId())
             return campThreatBonus;
@@ -1407,6 +1506,8 @@ namespace CoAChallenges
             default:
                 break;
         }
+        profile.experienceMultiplierHundredths *= OldSchoolNamedRewardHundredths(creature);
+        profile.experienceMultiplierHundredths /= 100;
         return profile;
     }
 
@@ -3463,32 +3564,34 @@ namespace CoAChallenges
                         handler->PSendSysMessage("Named threat: {} carries elevated hidden danger; "
                             "use the con estimate before engaging.", namedThreat);
                     }
-
-                    OldSchoolMulgoreCampThreat const campThreat = GetOldSchoolMulgoreCampThreat(target);
-                    if (campThreat.camp)
-                    {
-                        handler->PSendSysMessage("Camp role: {} {}. The con estimate includes this site's danger.",
-                            campThreat.camp, campThreat.role);
-                        static std::vector<uint32> const campEntries =
-                        {
-                            2949, 2950, 2951, 2952, 2953, 2954, 2962, 2963, 2964, 2965,
-                            2975, 2976, 2977, 2978, 2979
-                        };
-                        std::list<Creature*> nearbyCreatures;
-                        target->GetCreatureListWithEntryInGrid(nearbyCreatures, campEntries, OldSchoolConsiderRange);
-                        std::vector<Creature const*> nearbyCampmates;
-                        nearbyCampmates.reserve(nearbyCreatures.size());
-                        for (Creature const* creature : nearbyCreatures)
-                            nearbyCampmates.push_back(creature);
-                        uint32 const nearbyCampmateCount = CountOldSchoolMulgoreCampmates(target, nearbyCampmates);
-                        handler->PSendSysMessage("Other creatures from this camp within {} yards: {}. "
-                            "Native aggro and assistance rules determine who joins a fight.",
-                            uint32(OldSchoolConsiderRange), nearbyCampmateCount);
-                    }
                 }
                 else if (IsOldSchoolBarrensNamedThreat(target) || IsOldSchoolStonetalonNamedThreat(target))
                     handler->PSendSysMessage("Named threat: {} carries elevated hidden danger and reward; "
                         "use the con estimate before engaging.", target->GetName());
+
+                OldSchoolCampThreat const campThreat = GetOldSchoolCampThreat(target);
+                if (campThreat.camp)
+                {
+                    handler->PSendSysMessage("Camp role: {} {}. The con estimate includes this site's danger.",
+                        campThreat.camp, campThreat.role);
+                    static std::vector<uint32> const campEntries =
+                    {
+                        2949, 2950, 2951, 2952, 2953, 2954, 2962, 2963, 2964, 2965,
+                        2975, 2976, 2977, 2978, 2979,
+                        3260, 3261, 3262, 3263, 3265, 3266, 3267, 3268, 3269, 3270, 3271,
+                        3272, 3273, 3274, 3275, 3276, 3277, 3278, 3374, 3375, 3376, 3377, 3378
+                    };
+                    std::list<Creature*> nearbyCreatures;
+                    target->GetCreatureListWithEntryInGrid(nearbyCreatures, campEntries, OldSchoolConsiderRange);
+                    std::vector<Creature const*> nearbyCampmates;
+                    nearbyCampmates.reserve(nearbyCreatures.size());
+                    for (Creature const* creature : nearbyCreatures)
+                        nearbyCampmates.push_back(creature);
+                    uint32 const nearbyCampmateCount = CountOldSchoolCampmates(target, nearbyCampmates);
+                    handler->PSendSysMessage("Other creatures from this camp within {} yards: {}. "
+                        "Native aggro and assistance rules determine who joins a fight.",
+                        uint32(OldSchoolConsiderRange), nearbyCampmateCount);
+                }
                 return true;
             }
 

@@ -149,6 +149,15 @@ Foreman Rigger (5931), and Taskmaster Whipfang (5932) to the same four-level nam
 Both Old School trials use this rule only while the named creature is in Stonetalon Mountains.
 The existing native levels, random movement, Sorrow Wing waypoint route, spawn counts, loot,
 and respawn timers are preserved. Existing creature aggro and assistance behavior is unchanged.
+
+The Barrens slice assigns hidden camp-role danger to its native Bristleback, Razormane, Kolkar,
+Witchwing, and Bael'dun rosters. Consider reports nearby living members of the same roster in the
+40-yard inspection range; the readout does not change native aggro or assistance. Barak Kodobane
+and Verog the Dervish carry eight hidden threat levels and a 2x encounter reward; Hezrul Bloodmark
+carries ten hidden threat levels and a 3x encounter reward. The named bonus multiplies the same
+con-based kill XP used by `/consider`, on top of the 50% Old School pace and any elite-rank reward.
+Their native spawns and patrol movement remain intact. All of these profiles are active only in
+either Old School trial.
 Do not advance to the next zone until Mulgore has been played and tuned with the user. Continue the remaining
 zone work in player progression order, with a player playtest and tuning pass at each zone boundary.
 
