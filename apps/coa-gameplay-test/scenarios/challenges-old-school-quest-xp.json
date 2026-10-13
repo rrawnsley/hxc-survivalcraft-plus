@@ -1,0 +1,101 @@
+{
+  "schema": 1,
+  "name": "Old School quest turn-ins grant three times their current XP",
+  "contract": "Old School and Old School Hardcore characters receive three times their normal challenge-scaled XP from quest turn-ins. With the default 50% Old School pace, this is 150% of the same quest reward outside the challenge.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 1,
+      "level": 1
+    },
+    {
+      "id": "old",
+      "race": 1,
+      "class": 1,
+      "level": 1
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 5000
+    },
+    {
+      "action": "start_challenge",
+      "actor": "old",
+      "challenge": 9001,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "old",
+      "metric": "challenge_start_code",
+      "equals": 0
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "control",
+      "quest": 7
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "old",
+      "quest": 7
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "xp",
+      "save_as": "control_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "old",
+      "metric": "xp",
+      "save_as": "old_before"
+    },
+    {
+      "action": "reward_quest",
+      "actor": "control",
+      "quest": 7
+    },
+    {
+      "action": "reward_quest",
+      "actor": "old",
+      "quest": 7
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "xp",
+      "relative_to": "control_before",
+      "save_as": "control_gain"
+    },
+    {
+      "action": "assert",
+      "label": "Both characters stay below the next level during the comparison",
+      "actor": "old",
+      "metric": "level",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Old School grants 1.5 times normal quest XP, triple its 50 percent pace",
+      "actor": "old",
+      "metric": "xp",
+      "relative_to": "old_before",
+      "ratio_to": "control_gain",
+      "min": 1.45,
+      "max": 1.55
+    }
+  ]
+}

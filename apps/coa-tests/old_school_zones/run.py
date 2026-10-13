@@ -14,7 +14,7 @@ METHOD = runpy.run_path(str(HERE.parent / 'client_compat/run.py'))['method']
 def main():
     source = (ROOT / 'modules/mod-coa-challenges/src/CoA.Challenges.Scripts.cpp').read_text()
     signatures = (
-        'uint32 OldSchoolChallenge(',
+        'uint32 OldSchoolChallenge(Player const* player)\n    {',
         'bool OldSchoolCreature(',
         'struct OldSchoolPowerProfile',
         'bool IsOldSchoolMulgoreNamedThreat(',
@@ -22,6 +22,12 @@ def main():
         'bool IsOldSchoolStonetalonNamedThreat(Creature const* creature)\n    {',
         'bool IsOldSchoolAshenvaleNamedThreat(Creature const* creature)\n    {',
         'bool IsOldSchoolSouthernNamedThreat(Creature const* creature)\n    {',
+        'bool IsOldSchoolTirisfalNamedThreat(Creature const* creature)\n    {',
+        'bool IsOldSchoolSilverpineNamedThreat(Creature const* creature)\n    {',
+        'bool IsOldSchoolHillsbradNamedThreat(Creature const* creature)\n    {',
+        'bool IsOldSchoolArathiNamedThreat(Creature const* creature)\n    {',
+        'bool IsOldSchoolHinterlandsNamedThreat(Creature const* creature)\n    {',
+        'bool IsOldSchoolPlaguelandsNamedThreat(Creature const* creature)\n    {',
         'int32 OldSchoolNamedThreatOffset(Creature const* creature)\n    {',
         'uint32 OldSchoolNamedRewardHundredths(Creature const* creature)\n    {',
         'struct OldSchoolCampThreat',
@@ -29,8 +35,10 @@ def main():
         'bool IsOldSchoolSameCamp(',
         'uint32 CountOldSchoolCampmates(',
         'int32 OldSchoolThreatOffset(',
-        'uint32 OldSchoolThreatLevel(',
+        'int32 OldSchoolThreatLevel(',
         'OldSchoolPowerProfile GetOldSchoolPowerProfile(',
+        'uint32 OldSchoolExperienceSourceMultiplier(',
+        'char const* OldSchoolConColor(',
         'uint32 OldSchoolGroupBonusPercent(',
     )
     assert 'CallForHelp(' not in source, 'Old School must preserve native creature assistance behavior'

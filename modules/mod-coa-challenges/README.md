@@ -99,22 +99,22 @@ keys are appended automatically on deploy.
 
 Old School (9001) and Old School - Hardcore (9002) are mutually exclusive native trials.
 Creature levels remain fixed internally and display as `??` while the trial is active. In the trial, their power and kill experience follow the
-participant's con. Ordinary persistent spawns have a stable hidden threat offset from -8 to +65 levels,
-so a zone can contain approachable prey and severe threats even when its native creature levels are
-clustered. This includes non-elite persistent spawns. `/consider`, health, damage, melee skill, spell-hit
-level difference, and kill experience use that hidden threat rating; the rating is fixed per database
-spawn and never scales to the player. Native creature levels remain unchanged. Temporary creatures
-without a spawn ID skip the random spread; authored named-threat and Mulgore camp-role bonuses still
-apply. Elite and boss ranks retain their combat-stat multipliers. Grey creatures have
-1x health, 1x damage and 0.50x con-tier kill XP; green 1.5x/1x/0.75x; blue 2x/1x/0.90x;
-white 3x/2x/1x; yellow 5x/3x/1.5x; red 8x/5x/2x; and purple 12x/8x/3x.
-Elites and bosses multiply those values further. Old School applies a configurable 50% pace to all XP
-sources, then applies the creature con multiplier to kill XP; a white kill therefore awards 0.5x the
-ordinary creature XP, a red kill 1x, and a purple kill 1.5x before the rested-camp bonus. Quest and
-other non-creature XP awards are 50% of normal. The pace is configured in basis points (5000 = 50%),
-and fractional XP carries between awards. Critters and
-player-owned units are excluded. Restricted tapping prevents players in another trial from
-assisting with the kill or claiming its rewards.
+participant's con. Persistent spawns use a stable hidden threat offset from -8 to +65 levels, derived
+from creature entry, so copies of the same creature type receive the same offset. Authored named-threat
+and camp-role bonuses still apply; Rattlecage Skeletons in Tirisfal start blue for level-one characters.
+`/consider`, health, damage, melee skill, spell-hit level difference, and kill experience use that hidden
+threat rating, which never scales to the player. Native creature levels remain unchanged. Temporary
+creatures without a spawn ID skip the threat spread. Elite and boss ranks retain their combat-stat
+multipliers. Grey creatures have 2x health, 2x damage and 0.50x con-tier kill XP; green 3x/2x/0.75x;
+blue 4x/2x/0.90x; white 6x/4x/1x; yellow 10x/6x/1.5x; red 16x/10x/2x; and purple 24x/16x/3x.
+Threat offsets and elite ranks further modify combat stats. Old School applies a configurable 50% pace
+to XP sources, then applies the creature con multiplier to kill XP; a white kill therefore awards 0.5x
+ordinary creature XP, a red kill 1x, and a purple kill 1.5x before group and rested-camp bonuses.
+Quest turn-ins award three times the current challenge-scaled quest XP (1.5x normal at the default
+50% pace); other non-creature XP remains at the configured pace. The pace is configured in basis
+points (5000 = 50%), and fractional XP carries between awards. Critters and player-owned units are
+excluded. Restricted tapping prevents players in another trial from assisting with the kill or claiming
+its rewards.
 
 Across all zones in either Old School trial, only 1% of rolled ordinary-creature armor and weapon drops
 survive loot generation; authored named threats in Mulgore, the Barrens, and Stonetalon use a 5% keep
@@ -203,12 +203,14 @@ does not consume the standard WoW rested-XP pool while its trial bonus is active
 necessary for the existing health/mana recovery and Fellowship benefits. The temporary `.coa camp`
 claim command was removed; a placed camp is the actual camp marker and benefit source.
 
-An ordinary party adds 10% to each Old School creature-kill XP share when another living member
-in the same trial is in the same phase and native group-reward range. Playerbot companions qualify.
-The bonus applies once regardless of party size, after native XP splitting, and stacks with camp rest.
+An ordinary party adds 10% to each Old School creature-kill XP share at 2 members, 15% at 3,
+and 20% at 4-5. Qualifying members must be alive, in the same trial and phase, and in native
+group-reward range. Playerbot companions qualify. The bonus is applied after native XP splitting
+and stacks with camp rest.
 Solo, distant/dead/offline companions, raids and battleground groups do not qualify. Quest XP is unchanged
 by this bonus. `/consider` reports an eligible party bonus separately from the mob's base kill reward.
-The first-play combat profiles above replace the earlier 8x-health/5x-damage white baseline.
+All con profiles now have twice their former health and damage multipliers. A white con has 6x health
+and deals 4x damage before threat-offset and creature-rank adjustments.
 Con uses a signed hidden threat rating, so green and blue targets are available at character level 1.
 Melee skills retain a valid minimum; health adjustments support values below ordinary health without
 unsigned underflow. Unnamed persistent level-1/2 prey uses a smaller fixed spread (-3 to +10), with
