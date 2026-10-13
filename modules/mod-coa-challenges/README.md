@@ -243,6 +243,14 @@ Citizen Wilkes, Miner Hackett, Tamra Stormpike, Scargil, Lady Zephris, Ro'Bark, 
 Big Samras. Captain Ironhill uses +8 threat/2x encounter XP; other profiles use +2, +4 or +6
 threat/1.5x encounter XP. Native factions, spawns, movement and respawn windows remain intact.
 
+Arathi Highlands adds Witherbark village, Boulderfist stronghold, Drywhisker mine,
+Stromgarde garrison, Syndicate occupation and Daggerspine reef rosters. Thirteen native
+named entries receive fixed threat and encounter rewards. Falconcrest, Galen Trollbane
+and Fozruk use +10 threat/3x encounter XP; Darbel Montrose, Ruul Onestone and Marez Cowl
+use +8/2x; the other profiles use +4 or +6/1.5x. Fozruk's consideration includes a roaming
+warning and preserves the existing waypoint patrol. Leaders share camp proximity readouts.
+No faction, movement, respawn or actual creature-level changes are made.
+
 ## License
 
 GNU General Public License v2.0 — see [LICENSE](LICENSE).
