@@ -4869,6 +4869,19 @@ private:
             packet << guid;
             player->GetSession()->HandleGossipHelloOpcode(packet);
         }
+        else if (action == "trainer_list")
+        {
+            ObjectGuid guid = step.get_optional<std::string>("target") ?
+                GetUnit(step.get<std::string>("target"))->GetGUID() : player->GetCritterGUID();
+            Require(!guid.IsEmpty(), "Trainer list needs a target or summoned companion");
+            Require(player->GetNPCIfCanInteractWith(guid, UNIT_NPC_FLAG_TRAINER) != nullptr,
+                "Trainer target is not interactable");
+            WorldPacket packet(CMSG_TRAINER_LIST, 8);
+            packet << guid;
+            WorldPackets::NPC::Hello request(std::move(packet));
+            request.Read();
+            player->GetSession()->HandleTrainerListOpcode(request);
+        }
         else if (action == "gossip_select")
         {
             auto const& menu = player->PlayerTalkClass->GetGossipMenu();
