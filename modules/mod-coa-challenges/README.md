@@ -118,6 +118,12 @@ hidden rating affects con, combat and kill XP without changing native levels, ro
 behavior. Their database spawns already roam on authored waypoint paths and retain their existing rare
 respawn timers.
 
+Mulgore's Bristleback, Palemane, Venture Co., and Windfury Ridge camps use authored role bonuses on top
+of the stable spawn rating. Guards, workers, tanners, and skinners receive smaller bonuses; shamans,
+battleboars, poachers, taskmasters, supervisors, casters, and matriarchs receive larger bonuses. `/consider`
+identifies the camp role, and its added hidden threat contributes to the same con, combat scaling, and kill XP
+estimate. These role bonuses apply only inside Mulgore and only during either Old School trial.
+
 The Stonetalon slice adds Pridewing Patriarch (4015), Sorrow Wing (5928), Sister Riven (5930),
 Foreman Rigger (5931), and Taskmaster Whipfang (5932) to the same four-level named-threat rule.
 Both Old School trials use this rule only while the named creature is in Stonetalon Mountains.

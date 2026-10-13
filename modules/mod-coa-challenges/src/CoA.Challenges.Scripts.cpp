@@ -1164,6 +1164,53 @@ namespace CoAChallenges
         }
     }
 
+    struct OldSchoolMulgoreCampThreat
+    {
+        char const* camp;
+        char const* role;
+        int32 bonus;
+    };
+
+    OldSchoolMulgoreCampThreat GetOldSchoolMulgoreCampThreat(Creature const* creature)
+    {
+        if (!creature || creature->GetZoneId() != AREA_MULGORE)
+            return { nullptr, nullptr, 0 };
+
+        switch (creature->GetEntry())
+        {
+            case 2952:
+                return { "Bristleback camp", "quilboar guard", 1 };
+            case 2953:
+                return { "Bristleback camp", "shaman", 3 };
+            case 2954:
+                return { "Bristleback camp", "battleboar", 2 };
+            case 2949:
+                return { "Palemane camp", "tanner", 1 };
+            case 2950:
+                return { "Palemane camp", "skinner", 1 };
+            case 2951:
+                return { "Palemane camp", "poacher", 3 };
+            case 2975:
+            case 2976:
+            case 2978:
+                return { "Venture Co. camp", "worker", 1 };
+            case 2977:
+                return { "Venture Co. camp", "taskmaster", 2 };
+            case 2979:
+                return { "Venture Co. camp", "supervisor", 3 };
+            case 2962:
+                return { "Windfury Ridge", "harpy", 2 };
+            case 2963:
+                return { "Windfury Ridge", "wind witch", 3 };
+            case 2964:
+                return { "Windfury Ridge", "sorceress", 4 };
+            case 2965:
+                return { "Windfury Ridge", "matriarch", 6 };
+            default:
+                return { nullptr, nullptr, 0 };
+        }
+    }
+
     int32 OldSchoolThreatOffset(Creature const* creature)
     {
         if (!creature)
@@ -1176,11 +1223,13 @@ namespace CoAChallenges
         if (IsOldSchoolBarrensNamedThreat(creature) || IsOldSchoolStonetalonNamedThreat(creature))
             return 4;
 
+        int32 const campThreatBonus = GetOldSchoolMulgoreCampThreat(creature).bonus;
+
         if (creature->GetCreatureTemplate()->rank != CREATURE_ELITE_NORMAL)
-            return 0;
+            return campThreatBonus;
 
         if (!creature->GetSpawnId())
-            return 0;
+            return campThreatBonus;
 
         uint32 seed = creature->GetSpawnId();
         seed ^= seed >> 16;
@@ -1196,7 +1245,7 @@ namespace CoAChallenges
              4,  5,  6,  7,  8, 10, 12, 15,
             18, 22, 28, 35, 42, 50, 58, 65
         };
-        return threatOffsets[seed & 0x1F];
+        return threatOffsets[seed & 0x1F] + campThreatBonus;
     }
 
     uint32 OldSchoolThreatLevel(Creature const* creature)
@@ -3243,8 +3292,6 @@ namespace CoAChallenges
                 handler->SendSysMessage("Consider: select a living hostile creature.");
                 return true;
             }
-            // Consider uses a fixed center-to-center range; creature collision radii
-            // must not let large targets exceed the advertised 40-yard boundary.
             if (oldSchool && !player->IsWithinDistInMap(target, OldSchoolConsiderRange, true, false, false))
             {
                 handler->PSendSysMessage("Consider: target is outside your {}-yard range.",
@@ -3293,6 +3340,11 @@ namespace CoAChallenges
                         default:
                             break;
                     }
+
+                    OldSchoolMulgoreCampThreat const campThreat = GetOldSchoolMulgoreCampThreat(target);
+                    if (campThreat.camp)
+                        handler->PSendSysMessage("Camp role: {} {}. The con estimate includes this site's danger.",
+                            campThreat.camp, campThreat.role);
                 }
                 else if (IsOldSchoolBarrensNamedThreat(target) || IsOldSchoolStonetalonNamedThreat(target))
                     handler->PSendSysMessage("Named threat: {} carries elevated hidden danger and reward; "
