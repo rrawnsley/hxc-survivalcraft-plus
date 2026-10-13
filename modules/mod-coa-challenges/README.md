@@ -142,16 +142,20 @@ permanently fails the run, while resurrection remains available under CoA's exis
 rules. Abandoning a progressed Hardcore run also fails it. Starting either trial requires being
 alive and outside combat; Old School cannot be abandoned while dead or during combat.
 
-During Old School, target a hostile creature within 40 yards and use `/consider` (or `.coa consider`).
-The response reports its con and the same health, damage and kill XP multipliers used by that
-creature. It also warns that gear, abilities, companions and adds can change the outcome.
+During Old School, target a hostile creature within 40 yards (center to center) and use `/consider`
+(or `.coa consider`). This is only the range for inspecting a target; it does not change aggro,
+assist, or social-pull behavior. The response reports its con and the same health, damage and kill XP
+multipliers used by that creature. It also warns that gear, abilities, companions and adds can change
+the outcome.
 The client definitions are generated with `C:/Azerothcore/tools/build-coa-old-school.py`
 and shipped in CoA's existing `Data/patch-ZZ.MPQ`; the slash command is shipped in its
 Homebrew Nourishment addon. Neither trial grants completion items.
 
-Build a real camp using the Campfire ability from the Survivalist spellbook or the needs panel;
-it consumes Simple Wood harvested through Woodcutting. Shelter and Hearthstead are higher-tier
-options. The placed fire is also a Cooking fire. Sit beside it outside combat to receive the
+Build a real camp using the Campfire ability from the Survivalist spellbook or the needs panel.
+During Old School, Campfire consumes two harvested Forestwood Logs; Shelter consumes two Wildwood
+Logs and four Light Leather; Hearthstead consumes two Everwood Logs and four Heavy Leather. Outside
+Old School, the existing recipes continue to use Simple Wood. The placed fire is also a Cooking fire.
+Sit beside it outside combat to receive the
 existing camp recovery. In either Old School trial, staying near a live camp replenishes a rested
 timer up to 20 minutes; time away from camp spends it while you are online and alive. A creature kill
 receives 15% additional XP while the timer has time remaining. Quest XP is unchanged. Old School
