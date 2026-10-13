@@ -1151,6 +1151,7 @@ namespace CoAChallenges
     bool IsOldSchoolAshenvaleNamedThreat(Creature const* creature);
     bool IsOldSchoolSouthernNamedThreat(Creature const* creature);
     bool IsOldSchoolTirisfalNamedThreat(Creature const* creature);
+    bool IsOldSchoolSilverpineNamedThreat(Creature const* creature);
 
     bool IsOldSchoolGearLoot(Creature const* creature, Player const* player)
     {
@@ -1166,7 +1167,7 @@ namespace CoAChallenges
         bool const namedThreat = IsOldSchoolMulgoreNamedThreat(creature)
             || IsOldSchoolBarrensNamedThreat(creature) || IsOldSchoolStonetalonNamedThreat(creature)
             || IsOldSchoolAshenvaleNamedThreat(creature) || IsOldSchoolSouthernNamedThreat(creature)
-            || IsOldSchoolTirisfalNamedThreat(creature);
+            || IsOldSchoolTirisfalNamedThreat(creature) || IsOldSchoolSilverpineNamedThreat(creature);
         return namedThreat ? namedPercent : normalPercent;
     }
 
@@ -1398,10 +1399,52 @@ namespace CoAChallenges
         }
     }
 
+    bool IsOldSchoolSilverpineNamedThreat(Creature const* creature)
+    {
+        if (!creature || creature->GetZoneId() != AREA_SILVERPINE_FOREST)
+            return false;
+        switch (creature->GetEntry())
+        {
+            case 1944:
+            case 1947:
+            case 1948:
+            case 1972:
+            case 1983:
+            case 2106:
+            case 2283:
+            case 2529:
+            case 12431:
+            case 12432:
+            case 12433:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     int32 OldSchoolNamedThreatOffset(Creature const* creature)
     {
         if (!creature)
             return 0;
+
+        if (IsOldSchoolSilverpineNamedThreat(creature))
+        {
+            switch (creature->GetEntry())
+            {
+                case 2529:
+                    return 10;
+                case 1947:
+                case 2106:
+                    return 8;
+                case 1944:
+                case 1948:
+                case 2283:
+                case 12433:
+                    return 6;
+                default:
+                    return 4;
+            }
+        }
 
         if (IsOldSchoolTirisfalNamedThreat(creature))
         {
@@ -1487,7 +1530,8 @@ namespace CoAChallenges
         if (creature->GetZoneId() != AREA_THE_BARRENS)
         {
             if (IsOldSchoolStonetalonNamedThreat(creature) || IsOldSchoolAshenvaleNamedThreat(creature)
-                || IsOldSchoolSouthernNamedThreat(creature) || IsOldSchoolTirisfalNamedThreat(creature))
+                || IsOldSchoolSouthernNamedThreat(creature) || IsOldSchoolTirisfalNamedThreat(creature)
+                || IsOldSchoolSilverpineNamedThreat(creature))
             {
                 int32 const offset = OldSchoolNamedThreatOffset(creature);
                 return offset >= 10 ? 300 : offset >= 8 ? 200 : 150;
@@ -1518,6 +1562,68 @@ namespace CoAChallenges
     {
         if (!creature)
             return { nullptr, nullptr, 0 };
+
+        if (creature->GetZoneId() == AREA_SILVERPINE_FOREST)
+        {
+            switch (creature->GetEntry())
+            {
+                case 1769:
+                case 1770:
+                    return { "Moonrage hunting grounds", "hunter", 1 };
+                case 1779:
+                    return { "Moonrage hunting grounds", "glutton", 2 };
+                case 1782:
+                case 1924:
+                    return { "Moonrage hunting grounds", "bloodhowler", 3 };
+                case 1892:
+                case 1893:
+                    return { "Moonrage hunting grounds", "sentry", 3 };
+                case 1896:
+                    return { "Moonrage hunting grounds", "elder", 5 };
+                case 1772:
+                    return { "Rot Hide haunt", "runner", 1 };
+                case 1773:
+                case 1940:
+                    return { "Rot Hide haunt", "plague caster", 3 };
+                case 1939:
+                case 1942:
+                case 1943:
+                    return { "Rot Hide haunt", "brute", 2 };
+                case 1944:
+                case 1983:
+                    return { "Rot Hide haunt", "named threat", 4 };
+                case 1866:
+                case 1868:
+                case 1974:
+                    return { "Ravenclaw enclave", "servant", 1 };
+                case 1865:
+                case 1869:
+                case 1973:
+                    return { "Ravenclaw enclave", "guard", 2 };
+                case 1870:
+                    return { "Ravenclaw enclave", "hand of Ravenclaw", 4 };
+                case 1947:
+                case 2283:
+                    return { "Ravenclaw enclave", "leader", 6 };
+                case 1867:
+                    return { "Dalaran enclave", "apprentice", 1 };
+                case 1912:
+                case 1913:
+                    return { "Dalaran enclave", "warder", 2 };
+                case 1889:
+                case 1914:
+                case 1915:
+                    return { "Dalaran enclave", "spellcaster", 4 };
+                case 1953:
+                case 1954:
+                    return { "Lakeshore ambush", "skulker", 1 };
+                case 1955:
+                case 1956:
+                    return { "Lakeshore ambush", "creeper", 2 };
+                default:
+                    return { nullptr, nullptr, 0 };
+            }
+        }
 
         if (creature->GetZoneId() == AREA_TIRISFAL_GLADES)
         {
@@ -4153,9 +4259,12 @@ namespace CoAChallenges
                 }
                 else if (IsOldSchoolBarrensNamedThreat(target) || IsOldSchoolStonetalonNamedThreat(target)
                     || IsOldSchoolAshenvaleNamedThreat(target) || IsOldSchoolSouthernNamedThreat(target)
-                    || IsOldSchoolTirisfalNamedThreat(target))
+                    || IsOldSchoolTirisfalNamedThreat(target) || IsOldSchoolSilverpineNamedThreat(target))
                     handler->PSendSysMessage("Named threat: {} carries elevated hidden danger and reward; "
                         "use the con estimate before engaging.", target->GetName());
+
+                if (target->GetZoneId() == AREA_SILVERPINE_FOREST && target->GetEntry() == 2529)
+                    handler->SendSysMessage("Roaming threat: Son of Arugal. Watch its route before choosing a hunting spot.");
 
                 OldSchoolCampThreat const campThreat = GetOldSchoolCampThreat(target);
                 if (campThreat.camp)
@@ -4164,6 +4273,9 @@ namespace CoAChallenges
                         campThreat.camp, campThreat.role);
                     static std::vector<uint32> const campEntries =
                     {
+                        1769, 1770, 1772, 1773, 1779, 1782, 1865, 1866, 1867, 1868, 1869, 1870,
+                        1889, 1892, 1893, 1896, 1912, 1913, 1914, 1915, 1924, 1939, 1940, 1942,
+                        1943, 1944, 1947, 1953, 1954, 1955, 1956, 1973, 1974, 1983, 2283,
                         1520, 1522, 1523, 1525, 1526, 1527, 1528, 1529, 1530, 1534,
                         1535, 1536, 1537, 1538, 1539, 1540, 1543, 1544, 1545, 1941,
                         2949, 2950, 2951, 2952, 2953, 2954, 2962, 2963, 2964, 2965,

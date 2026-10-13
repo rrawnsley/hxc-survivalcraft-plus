@@ -224,6 +224,16 @@ family, three Scarlet captains, Maggot Eye, Samuel Fipps, Farmer Solliden, Bayne
 Fellicent's Shade, Gorefang, Old Vicejaw, and Krethis Shadowspinner. Existing spawns and movement remain
 in place; this adds trial profiles rather than new routes or respawn timers.
 
+Silverpine Forest adds Moonrage hunting grounds, Rot Hide haunts, Ravenclaw and Dalaran enclaves,
+and lakeshore ambush rosters. `/consider` identifies each role and nearby living roster members.
+Eleven existing named or roaming entries gain fixed threat and reward profiles: Rot Hide Bruiser,
+Thule Ravenclaw, Snarlmane, Grimson the Pale, Nightlash, Apothecary Berard, Ravenclaw Regent,
+Son of Arugal, Gorefang, Old Vicejaw and Krethis Shadowspinner. Son of Arugal uses a +10 threat
+profile with a 3x named reward and a roaming warning; Thule and Berard use +8/2x; other profiles
+use +4 or +6/1.5x. Con, rank and the 50% XP pace still apply. These encounters also use named
+gear retention. Native movement and respawn windows remain in place; this release does not
+create new routes or spawn locations. Both Old School variants receive the profiles.
+
 ## License
 
 GNU General Public License v2.0 — see [LICENSE](LICENSE).
