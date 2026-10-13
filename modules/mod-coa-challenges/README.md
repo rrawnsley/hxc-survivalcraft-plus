@@ -108,10 +108,10 @@ without a spawn ID skip the random spread; authored named-threat and Mulgore cam
 apply. Elite and boss ranks retain their combat-stat multipliers. Grey creatures have
 2x health, 1x damage and 1x con-tier kill XP before the threat-offset stat adjustment; green 3x/2x/2x;
 blue 5x/3x/3x; white 8x/5x/4x; yellow 12x/7x/6x; red 16x/10x/8x; and purple 24x/14x/10x.
-Elites and bosses multiply those values further. Old School applies a configurable 0.50% pace to all XP
-sources, then applies the creature con multiplier to kill XP; a white kill therefore awards 0.02x the
-ordinary creature XP, a red kill 0.04x, and a purple kill 0.05x before the rested-camp bonus. Quest and
-other non-creature XP awards are 0.50% of normal. The pace is configured in basis points (50 = 0.50%),
+Elites and bosses multiply those values further. Old School applies a configurable 0.25% pace to all XP
+sources, then applies the creature con multiplier to kill XP; a white kill therefore awards 0.01x the
+ordinary creature XP, a red kill 0.02x, and a purple kill 0.025x before the rested-camp bonus. Quest and
+other non-creature XP awards are 0.25% of normal. The pace is configured in basis points (25 = 0.25%),
 and fractional XP carries between awards. Critters and
 player-owned units are excluded. Restricted tapping prevents players in another trial from
 assisting with the kill or claiming its rewards.
@@ -120,8 +120,7 @@ Across all zones in either Old School trial, only 1% of rolled ordinary-creature
 survive loot generation; authored named threats in Mulgore, the Barrens, and Stonetalon use a 5% keep
 chance. Quest items and crafting materials are preserved, and crafted gear is unaffected. This makes
 professions a dependable route to incremental upgrades while dropped equipment remains rare. Both
-rates can be configured. Existing Mulgore-specific gear chance settings are used as fallbacks when the
-new global settings are absent.
+rates can be configured globally for the two Old School trials.
 
 Mulgore's named threats - Ghost Howl (3056), Arra'chea (3058), Mazzranache (3068), Sister Hatelash (5785),
 Snagglespear (5786), Enforcer Emilgund (5787), and The Rake (5807) - and the Barrens threats Gesharahan
@@ -129,9 +128,9 @@ Snagglespear (5786), Enforcer Emilgund (5787), and The Rake (5807) - and the Bar
 the Heckler (5829), Swiftmane (5831), Azzere the Skyblade (5834), Heggin Stonewhisker (5847), and Dishu
 (5865) carry four additional hidden threat levels in Old School. `/consider` identifies these threats, and the
 hidden rating affects con, combat and kill XP without changing native levels or ordinary-mode behavior. Ghost
-Howl, Arra'chea, and The Rake use their existing authored roam paths; this path behavior has not been newly
-runtime-verified. Their rare spawn timers remain intact; their rolled equipment drops follow the Old School
-named-threat keep chance.
+Howl, Arra'chea, and The Rake use their existing authored roam paths; an isolated gameplay scenario verifies
+that each moves at least eight yards from its database spawn while the Old School phase is active. Their rare
+spawn timers remain intact; their rolled equipment drops follow the Old School named-threat keep chance.
 
 Mulgore's Bristleback, Palemane, Venture Co., and Windfury Ridge camps use authored role bonuses on top
 of the stable spawn rating. Guards, workers, tanners, and skinners receive smaller bonuses; shamans,
@@ -148,8 +147,8 @@ Foreman Rigger (5931), and Taskmaster Whipfang (5932) to the same four-level nam
 Both Old School trials use this rule only while the named creature is in Stonetalon Mountains.
 The existing native levels, random movement, Sorrow Wing waypoint route, spawn counts, loot,
 and respawn timers are preserved. Existing creature aggro and assistance behavior is unchanged.
-The next slices continue incrementally across Azeroth; live playtest tuning follows automated validation
-and does not gate further source development.
+Do not advance to the next zone until Mulgore has been played and tuned with the user. Continue the remaining
+zone work in player progression order, with a player playtest and tuning pass at each zone boundary.
 
 Ordinary Old School deaths outside battlegrounds and arenas remove 10% of the experience
 needed for the current level; the loss can delevel the character. Resurrection requires
@@ -178,8 +177,8 @@ Old School, the existing recipes continue to use Simple Wood. The placed fire is
 Sit beside it outside combat to receive the
 existing camp recovery. In either Old School trial, staying near a live camp replenishes a rested
 timer up to 20 minutes; time away from camp spends it while you are online and alive. A creature kill
- receives 15% additional XP while the timer has time remaining, after the trial's 0.50% XP pace and con
- multiplier. Quest XP uses the 0.50% trial pace without the rested kill bonus. Old School
+ receives 15% additional XP while the timer has time remaining, after the trial's 0.25% XP pace and con
+ multiplier. Quest XP uses the 0.25% trial pace without the rested kill bonus. Old School
 does not consume the standard WoW rested-XP pool while its trial bonus is active. Sitting remains
 necessary for the existing health/mana recovery and Fellowship benefits. The temporary `.coa camp`
 claim command was removed; a placed camp is the actual camp marker and benefit source.

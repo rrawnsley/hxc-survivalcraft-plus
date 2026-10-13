@@ -1113,7 +1113,7 @@ namespace CoAChallenges
     uint32 OldSchoolExperienceBasisPoints()
     {
         uint32 const configured = sConfigMgr->GetOption<uint32>(
-            "CoAChallenges.OldSchool.ExperienceBasisPoints", 50);
+            "CoAChallenges.OldSchool.ExperienceBasisPoints", 25);
         return std::min(configured, 10000u);
     }
 

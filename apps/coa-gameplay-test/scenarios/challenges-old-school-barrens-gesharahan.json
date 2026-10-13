@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Old School considers Gesharahan an elevated Barrens threat",
-  "contract": "The existing Barrens rare Gesharahan (entry 3398, native rank 2) receives four hidden threat levels only in Old School. A level-25 trialist sees a Red con and the rank-adjusted 0.16x effective kill XP estimate; ordinary mode and the live spawn remain unchanged.",
+  "contract": "The existing Barrens rare Gesharahan (entry 3398, native rank 2) receives four hidden threat levels only in Old School. A level-25 trialist sees a Red con and the rank-adjusted 0.04x effective kill XP estimate; ordinary mode and the live spawn remain unchanged.",
   "timeout_ms": 90000,
   "location": {
     "map": 1,
@@ -77,7 +77,7 @@
       "action": "assert",
       "actor": "old",
       "metric": "system_message_contains",
-      "text": "kill XP: 0.16x base (1% Old School pace).",
+      "text": "kill XP: 0.04x base (0.25% Old School pace).",
       "equals": 1
     }
   ]

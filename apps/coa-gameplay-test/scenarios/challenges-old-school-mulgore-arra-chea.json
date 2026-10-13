@@ -50,7 +50,7 @@
     {"action": "command", "actor": "old", "command": ".coa consider"},
     {"action": "assert", "label": "Consider identifies Arra'chea as a named threat", "actor": "old", "metric": "system_message_contains", "text": "Named threat: Arra'chea", "equals": 1},
     {"action": "assert", "label": "Consider reports the resulting red con", "actor": "old", "metric": "system_message_contains", "text": "Red con", "equals": 1},
-    {"action": "assert", "label": "Consider reports effective kill XP after the Old School pace", "actor": "old", "metric": "system_message_contains", "text": "kill XP: 0.08x base (1% Old School pace)", "equals": 1},
+    {"action": "assert", "label": "Consider reports effective kill XP after the Old School pace", "actor": "old", "metric": "system_message_contains", "text": "kill XP: 0.02x base (0.25% Old School pace)", "equals": 1},
     {"action": "stop_attack", "actor": "old"},
     {"action": "attack", "actor": "old", "target": "old_ghost_howl"},
     {"action": "wait", "ms": 3000},
