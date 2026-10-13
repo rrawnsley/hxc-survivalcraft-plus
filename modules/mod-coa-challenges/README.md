@@ -106,8 +106,8 @@ level difference, and kill experience use that hidden threat rating; the rating 
 spawn and never scales to the player. Native creature levels remain unchanged. Temporary creatures
 without a spawn ID skip the random spread; authored named-threat and Mulgore camp-role bonuses still
 apply. Elite and boss ranks retain their combat-stat multipliers. Grey creatures have
-2x health, 1x damage and 0.50x con-tier kill XP; green 3x/2x/0.75x; blue 5x/3x/0.90x;
-white 8x/5x/1x; yellow 12x/7x/1.5x; red 16x/10x/2x; and purple 24x/14x/3x.
+1x health, 1x damage and 0.50x con-tier kill XP; green 1.5x/1x/0.75x; blue 2x/1x/0.90x;
+white 3x/2x/1x; yellow 5x/3x/1.5x; red 8x/5x/2x; and purple 12x/8x/3x.
 Elites and bosses multiply those values further. Old School applies a configurable 50% pace to all XP
 sources, then applies the creature con multiplier to kill XP; a white kill therefore awards 0.5x the
 ordinary creature XP, a red kill 1x, and a purple kill 1.5x before the rested-camp bonus. Quest and
@@ -208,7 +208,21 @@ in the same trial is in the same phase and native group-reward range. Playerbot 
 The bonus applies once regardless of party size, after native XP splitting, and stacks with camp rest.
 Solo, distant/dead/offline companions, raids and battleground groups do not qualify. Quest XP is unchanged
 by this bonus. `/consider` reports an eligible party bonus separately from the mob's base kill reward.
-Combat profiles remain unchanged pending representative solo-play evidence.
+The first-play combat profiles above replace the earlier 8x-health/5x-damage white baseline.
+Con uses a signed hidden threat rating, so green and blue targets are available at character level 1.
+Melee skills retain a valid minimum; health adjustments support values below ordinary health without
+unsigned underflow. Unnamed persistent level-1/2 prey uses a smaller fixed spread (-3 to +10), with
+approachable candidates and a minority of dangerous outliers. Higher-level spawns retain -8 to +65.
+Old School blocks Destiny Weaver creature scaling, including for playerbot companions. Native solo and
+party XP eligibility use hidden threat rather than native mob level; native aggro and assistance remain
+unchanged. Automated gameplay and balance checks are deferred until Phase 1 implementation is complete,
+per the user; leveling feedback is the current tuning input.
+
+Tirisfal Glades adds Scarlet outposts, Agamand Mills, Vile Fin shores, and Rot Hide graveyards to camp
+consider readouts. Sixteen native named creatures receive fixed danger and reward profiles: the Agamand
+family, three Scarlet captains, Maggot Eye, Samuel Fipps, Farmer Solliden, Bayne, Ressan the Needler,
+Fellicent's Shade, Gorefang, Old Vicejaw, and Krethis Shadowspinner. Existing spawns and movement remain
+in place; this adds trial profiles rather than new routes or respawn timers.
 
 ## License
 

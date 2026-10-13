@@ -17,6 +17,7 @@ using namespace Acore::ChatCommands;
 
 namespace CoAChallenges
 {
+    uint32 OldSchoolChallenge(Player const* player);
 
     bool UsesCoreProfessionXP(Player* player)
     {
@@ -773,11 +774,12 @@ namespace CoAChallenges
 
     uint8 LevelScalingBlocks(Player const* player)
     {
+        uint8 const trialBlocks = OldSchoolChallenge(player) ? LocalLevelScaling::ChallengeBlocksCreatureScaling : 0;
         if (!player || !LevelScalingMaskCount.load(std::memory_order_relaxed))
-            return 0;
+            return trialBlocks;
         std::lock_guard<std::mutex> lock(LevelScalingMutex);
         auto const it = LevelScalingMasks.find(player->GetGUID().GetCounter());
-        return it == LevelScalingMasks.end() ? 0 : it->second;
+        return trialBlocks | (it == LevelScalingMasks.end() ? 0 : it->second);
     }
 
     uint8 StoreLevelScalingBlocks(uint32 guid, uint8 blocks)
@@ -808,7 +810,8 @@ namespace CoAChallenges
         if (ChallengesEnabled())
         {
             uint32 level = 0;
-            if (ActiveChallengeWithRule(player, "CHALLENGE_RULES_TYPE_NO_CREATURE_LEVEL_SCALING", level))
+            if (OldSchoolChallenge(player)
+                || ActiveChallengeWithRule(player, "CHALLENGE_RULES_TYPE_NO_CREATURE_LEVEL_SCALING", level))
                 blocks |= LocalLevelScaling::ChallengeBlocksCreatureScaling;
             if (ActiveChallengeWithRule(player, "CHALLENGE_RULES_TYPE_NO_QUEST_LEVEL_SCALING", level))
                 blocks |= LocalLevelScaling::ChallengeBlocksQuestScaling;
@@ -1147,6 +1150,7 @@ namespace CoAChallenges
     bool IsOldSchoolStonetalonNamedThreat(Creature const* creature);
     bool IsOldSchoolAshenvaleNamedThreat(Creature const* creature);
     bool IsOldSchoolSouthernNamedThreat(Creature const* creature);
+    bool IsOldSchoolTirisfalNamedThreat(Creature const* creature);
 
     bool IsOldSchoolGearLoot(Creature const* creature, Player const* player)
     {
@@ -1161,7 +1165,8 @@ namespace CoAChallenges
         uint32 const namedPercent = std::min(namedConfigured, 100u);
         bool const namedThreat = IsOldSchoolMulgoreNamedThreat(creature)
             || IsOldSchoolBarrensNamedThreat(creature) || IsOldSchoolStonetalonNamedThreat(creature)
-            || IsOldSchoolAshenvaleNamedThreat(creature) || IsOldSchoolSouthernNamedThreat(creature);
+            || IsOldSchoolAshenvaleNamedThreat(creature) || IsOldSchoolSouthernNamedThreat(creature)
+            || IsOldSchoolTirisfalNamedThreat(creature);
         return namedThreat ? namedPercent : normalPercent;
     }
 
@@ -1365,10 +1370,56 @@ namespace CoAChallenges
         return false;
     }
 
+    bool IsOldSchoolTirisfalNamedThreat(Creature const* creature)
+    {
+        if (!creature || creature->GetZoneId() != AREA_TIRISFAL_GLADES)
+            return false;
+        switch (creature->GetEntry())
+        {
+            case 1654:
+            case 1655:
+            case 1656:
+            case 1657:
+            case 1662:
+            case 1664:
+            case 1665:
+            case 1753:
+            case 1919:
+            case 1936:
+            case 10356:
+            case 10357:
+            case 10358:
+            case 12431:
+            case 12432:
+            case 12433:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     int32 OldSchoolNamedThreatOffset(Creature const* creature)
     {
         if (!creature)
             return 0;
+
+        if (IsOldSchoolTirisfalNamedThreat(creature))
+        {
+            switch (creature->GetEntry())
+            {
+                case 1919:
+                    return 2;
+                case 1665:
+                case 12433:
+                    return 8;
+                case 1662:
+                case 1664:
+                case 1753:
+                    return 6;
+                default:
+                    return 4;
+            }
+        }
 
         if (creature->GetZoneId() == AREA_THE_BARRENS)
         {
@@ -1436,7 +1487,7 @@ namespace CoAChallenges
         if (creature->GetZoneId() != AREA_THE_BARRENS)
         {
             if (IsOldSchoolStonetalonNamedThreat(creature) || IsOldSchoolAshenvaleNamedThreat(creature)
-                || IsOldSchoolSouthernNamedThreat(creature))
+                || IsOldSchoolSouthernNamedThreat(creature) || IsOldSchoolTirisfalNamedThreat(creature))
             {
                 int32 const offset = OldSchoolNamedThreatOffset(creature);
                 return offset >= 10 ? 300 : offset >= 8 ? 200 : 150;
@@ -1467,6 +1518,47 @@ namespace CoAChallenges
     {
         if (!creature)
             return { nullptr, nullptr, 0 };
+
+        if (creature->GetZoneId() == AREA_TIRISFAL_GLADES)
+        {
+            switch (creature->GetEntry())
+            {
+                case 1535:
+                    return { "Scarlet outpost", "warrior", 1 };
+                case 1536:
+                case 1538:
+                    return { "Scarlet outpost", "healer", 3 };
+                case 1537:
+                    return { "Scarlet outpost", "zealot", 2 };
+                case 1539:
+                    return { "Scarlet outpost", "caster", 3 };
+                case 1540:
+                    return { "Scarlet outpost", "vanguard", 4 };
+                case 1525:
+                case 1526:
+                    return { "Agamand Mills", "restless corpse", 1 };
+                case 1527:
+                case 1528:
+                case 1529:
+                    return { "Agamand Mills", "ravenous dead", 2 };
+                case 1530:
+                case 1534:
+                    return { "Agamand Mills", "ancestor", 3 };
+                case 1543:
+                case 1545:
+                    return { "Vile Fin shore", "murloc hunter", 1 };
+                case 1544:
+                    return { "Vile Fin shore", "oracle", 3 };
+                case 1520:
+                case 1523:
+                case 1941:
+                    return { "Rot Hide graveyard", "grave guard", 1 };
+                case 1522:
+                    return { "Rot Hide graveyard", "bonecaster", 3 };
+                default:
+                    return { nullptr, nullptr, 0 };
+            }
+        }
 
         if (creature->GetZoneId() == AREA_MULGORE)
         {
@@ -1895,6 +1987,18 @@ namespace CoAChallenges
         seed *= 0x846ca68b;
         seed ^= seed >> 16;
 
+        if (creature->GetLevel() <= 2 && !campThreatBonus)
+        {
+            static constexpr int32 starterThreatOffsets[32] =
+            {
+                -3, -3, -2, -2, -2, -1, -1, -1,
+                -1, -1,  0,  0,  0,  0,  0,  0,
+                 0,  1,  1,  1,  1,  2,  2,  2,
+                 2,  3,  3,  4,  4,  5,  8, 10
+            };
+            return starterThreatOffsets[seed & 0x1F];
+        }
+
         static constexpr int32 threatOffsets[32] =
         {
             -8, -6, -5, -4, -3, -2, -2, -1,
@@ -1905,9 +2009,15 @@ namespace CoAChallenges
         return threatOffsets[seed & 0x1F] + campThreatBonus;
     }
 
-    uint32 OldSchoolThreatLevel(Creature const* creature)
+    int32 OldSchoolThreatLevel(Creature const* creature)
     {
-        return std::max(1, int32(creature ? creature->GetLevel() : 1) + OldSchoolThreatOffset(creature));
+        return int32(creature ? creature->GetLevel() : 1) + OldSchoolThreatOffset(creature);
+    }
+
+    uint8 OldSchoolRewardLevel(Player const* player, Creature const* creature)
+    {
+        return OldSchoolChallenge(player) && OldSchoolCreature(creature)
+            ? uint8(std::clamp(OldSchoolThreatLevel(creature), 1, 255)) : 0;
     }
 
     OldSchoolPowerProfile GetOldSchoolPowerProfile(Player const* player, Creature const* creature)
@@ -1916,19 +2026,19 @@ namespace CoAChallenges
         int32 const levelDifference = int32(OldSchoolThreatLevel(creature)) - int32(player->GetLevel());
         OldSchoolPowerProfile profile;
         if (levelDifference <= -6)
-            profile = { "Grey", 200, 1, 50 };
+            profile = { "Grey", 100, 1, 50 };
         else if (levelDifference <= -3)
-            profile = { "Green", 300, 2, 75 };
+            profile = { "Green", 150, 1, 75 };
         else if (levelDifference < 0)
-            profile = { "Blue", 500, 3, 90 };
+            profile = { "Blue", 200, 1, 90 };
         else if (levelDifference == 0)
-            profile = { "White", 800, 5, 100 };
+            profile = { "White", 300, 2, 100 };
         else if (levelDifference <= 2)
-            profile = { "Yellow", 1200, 7, 150 };
+            profile = { "Yellow", 500, 3, 150 };
         else if (levelDifference <= 4)
-            profile = { "Red", 1600, 10, 200 };
+            profile = { "Red", 800, 5, 200 };
         else
-            profile = { "Purple", 2400, 14, 300 };
+            profile = { "Purple", 1200, 8, 300 };
 
         float const threatStatScale = std::exp2(float(OldSchoolThreatOffset(creature)) / 25.0f);
         profile.healthPercent = std::max(1u, uint32(std::lround(profile.healthPercent * threatStatScale)));
@@ -2181,7 +2291,7 @@ namespace CoAChallenges
         {
             OldSchoolPowerProfile const profile = GetOldSchoolPowerProfile(attacker, creature);
             auto* state = new OldSchoolHealth();
-            state->extra = float(CalculatePct(creature->GetMaxHealth(), profile.healthPercent - 100));
+            state->extra = float(creature->GetMaxHealth()) * (profile.healthPercent / 100.0f - 1.0f);
             state->damageMultiplier = profile.damageMultiplier;
             state->experienceMultiplierHundredths = profile.experienceMultiplierHundredths;
             state->healthPercent = profile.healthPercent;
@@ -4019,9 +4129,11 @@ namespace CoAChallenges
 
                 char const* advice = con == "Grey" || con == "Green"
                     ? "Lower danger; watch for adds and abilities."
-                    : con == "Blue" || con == "White"
-                        ? "Dangerous; prepare carefully."
-                        : con == "Yellow"
+                    : con == "Blue"
+                        ? "Solo candidate; pull one and recover between fights."
+                        : con == "White"
+                            ? "Challenging; prepare carefully or bring a companion."
+                            : con == "Yellow"
                             ? "Very dangerous; bring a group."
                             : "Overwhelming; a group is strongly advised.";
                 handler->PSendSysMessage("Consider {}: {} con. {} Estimated health: {} ({:.2f}x); "
@@ -4040,7 +4152,8 @@ namespace CoAChallenges
                     }
                 }
                 else if (IsOldSchoolBarrensNamedThreat(target) || IsOldSchoolStonetalonNamedThreat(target)
-                    || IsOldSchoolAshenvaleNamedThreat(target) || IsOldSchoolSouthernNamedThreat(target))
+                    || IsOldSchoolAshenvaleNamedThreat(target) || IsOldSchoolSouthernNamedThreat(target)
+                    || IsOldSchoolTirisfalNamedThreat(target))
                     handler->PSendSysMessage("Named threat: {} carries elevated hidden danger and reward; "
                         "use the con estimate before engaging.", target->GetName());
 
@@ -4051,6 +4164,8 @@ namespace CoAChallenges
                         campThreat.camp, campThreat.role);
                     static std::vector<uint32> const campEntries =
                     {
+                        1520, 1522, 1523, 1525, 1526, 1527, 1528, 1529, 1530, 1534,
+                        1535, 1536, 1537, 1538, 1539, 1540, 1543, 1544, 1545, 1941,
                         2949, 2950, 2951, 2952, 2953, 2954, 2962, 2963, 2964, 2965,
                         2975, 2976, 2977, 2978, 2979,
                         3260, 3261, 3262, 3263, 3265, 3266, 3267, 3268, 3269, 3270, 3271,
@@ -5216,7 +5331,7 @@ namespace CoAChallenges
             Player* defender = victim ? victim->GetCharmerOrOwnerPlayerOrPlayerItself() : nullptr;
             if (attackerCreature && defender && OldSchoolChallenge(defender) && OldSchoolCreature(attackerCreature))
             {
-                int32 const skill = int32(OldSchoolThreatLevel(attackerCreature)) * 5;
+                int32 const skill = std::max(1, OldSchoolThreatLevel(attackerCreature)) * 5;
                 attackerMaxSkillValueForLevel = skill;
                 attackerWeaponSkill = skill;
             }
@@ -5225,7 +5340,7 @@ namespace CoAChallenges
             Player* aggressor = attacker ? attacker->GetCharmerOrOwnerPlayerOrPlayerItself() : nullptr;
             if (victimCreature && aggressor && OldSchoolChallenge(aggressor) && OldSchoolCreature(victimCreature))
             {
-                int32 const skill = int32(OldSchoolThreatLevel(victimCreature)) * 5;
+                int32 const skill = std::max(1, OldSchoolThreatLevel(victimCreature)) * 5;
                 victimMaxSkillValueForLevel = skill;
                 victimDefenseSkill = skill;
             }
@@ -5297,6 +5412,7 @@ namespace CoAChallenges
 
 void Addmod_coa_challengesScripts()
 {
+    LocalLevelScaling::ChallengeRewardLevelOwner.store(&CoAChallenges::OldSchoolRewardLevel, std::memory_order_relaxed);
     RegisterAscensionClientConfig(&CoAChallenges::AppendClientConfig);
     LocalLevelScaling::ChallengeBlocksOwner.store(&CoAChallenges::LevelScalingBlocks, std::memory_order_relaxed);
     new CoAChallenges::CoAChallengesPlayer();
