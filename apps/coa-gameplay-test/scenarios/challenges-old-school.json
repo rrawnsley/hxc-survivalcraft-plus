@@ -580,7 +580,7 @@
       "action": "start_challenge",
       "actor": "deleveler",
       "challenge": 9001,
-      "level": 1
+      "level": 2
     },
     {
       "action": "assert",
