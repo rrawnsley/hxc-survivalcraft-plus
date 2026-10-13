@@ -403,5 +403,125 @@
       ],
       "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
     }
-  ]
+  ],
+  "legacyZones": [
+    {
+      "id": 215,
+      "name": "Mulgore",
+      "source": "Existing named and camp profiles in CoA.Challenges.Scripts.cpp"
+    },
+    {
+      "id": 17,
+      "name": "The Barrens",
+      "source": "Existing named and camp profiles in CoA.Challenges.Scripts.cpp"
+    },
+    {
+      "id": 406,
+      "name": "Stonetalon Mountains",
+      "source": "Existing named and camp profiles in CoA.Challenges.Scripts.cpp"
+    },
+    {
+      "id": 331,
+      "name": "Ashenvale",
+      "source": "Existing named and camp profiles in CoA.Challenges.Scripts.cpp"
+    },
+    {
+      "id": 400,
+      "name": "Thousand Needles",
+      "source": "Existing named and camp profiles in CoA.Challenges.Scripts.cpp"
+    },
+    {
+      "id": 405,
+      "name": "Desolace",
+      "source": "Existing named and camp profiles in CoA.Challenges.Scripts.cpp"
+    },
+    {
+      "id": 15,
+      "name": "Dustwallow Marsh",
+      "source": "Existing named and camp profiles in CoA.Challenges.Scripts.cpp"
+    },
+    {
+      "id": 357,
+      "name": "Feralas",
+      "source": "Existing named and camp profiles in CoA.Challenges.Scripts.cpp"
+    },
+    {
+      "id": 85,
+      "name": "Tirisfal Glades",
+      "source": "Existing named and camp profiles in CoA.Challenges.Scripts.cpp"
+    },
+    {
+      "id": 130,
+      "name": "Silverpine Forest",
+      "source": "Existing named and camp profiles in CoA.Challenges.Scripts.cpp"
+    },
+    {
+      "id": 267,
+      "name": "Hillsbrad Foothills",
+      "source": "Existing named and camp profiles in CoA.Challenges.Scripts.cpp"
+    },
+    {
+      "id": 45,
+      "name": "Arathi Highlands",
+      "source": "Existing named and camp profiles in CoA.Challenges.Scripts.cpp"
+    },
+    {
+      "id": 47,
+      "name": "The Hinterlands",
+      "source": "Existing named and camp profiles in CoA.Challenges.Scripts.cpp"
+    },
+    {
+      "id": 28,
+      "name": "Western Plaguelands",
+      "source": "Existing named and camp profiles in CoA.Challenges.Scripts.cpp"
+    },
+    {
+      "id": 139,
+      "name": "Eastern Plaguelands",
+      "source": "Existing named and camp profiles in CoA.Challenges.Scripts.cpp"
+    }
+  ],
+  "starterAliases": [
+    {
+      "id": 10138,
+      "parent": 12,
+      "name": "Northshire"
+    },
+    {
+      "id": 10139,
+      "parent": 1,
+      "name": "Coldridge Valley"
+    },
+    {
+      "id": 10140,
+      "parent": 85,
+      "name": "Deathknell"
+    },
+    {
+      "id": 10141,
+      "parent": 3430,
+      "name": "Sunstrider Isle"
+    },
+    {
+      "id": 10142,
+      "parent": 3524,
+      "name": "Ammen Vale"
+    },
+    {
+      "id": 10143,
+      "parent": 141,
+      "name": "Shadowglen"
+    },
+    {
+      "id": 10144,
+      "parent": 14,
+      "name": "Valley of Trials"
+    },
+    {
+      "id": 10146,
+      "parent": 215,
+      "name": "Red Cloud Mesa"
+    }
+  ],
+  "scope": "45 outdoor regions with Old School creature profiles; native spawning, movement, respawn and assistance; gameplay balancing deferred."
 }
