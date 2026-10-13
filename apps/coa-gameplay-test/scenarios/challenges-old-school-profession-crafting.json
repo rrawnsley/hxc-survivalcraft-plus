@@ -35,6 +35,9 @@
     {"action": "wait", "ms": 3500, "label": "Let the native crafting casts finish"},
     {"action": "assert", "label": "Tailoring turns linen and thread into the Linen Belt upgrade during Old School", "actor": "tailor", "metric": "item_count", "item": 7026, "equals": 1},
     {"action": "assert", "label": "Leatherworking turns skinned leather and thread into Handstitched Leather Pants during Old School", "actor": "leatherworker", "metric": "item_count", "item": 2303, "equals": 1},
-    {"action": "assert", "label": "Blacksmithing turns copper bars into a Copper Chain Belt during Old School", "actor": "smith", "metric": "item_count", "item": 2851, "equals": 1}
+    {"action": "assert", "label": "Blacksmithing turns copper bars into a Copper Chain Belt during Old School", "actor": "smith", "metric": "item_count", "item": 2851, "equals": 1},
+    {"action": "assert", "label": "The Linen Belt is wearable armor rather than a cosmetic craft", "actor": "tailor", "metric": "carried_item_armor", "item": 7026, "min": 1},
+    {"action": "assert", "label": "The leather pants provide real armor", "actor": "leatherworker", "metric": "carried_item_armor", "item": 2303, "min": 1},
+    {"action": "assert", "label": "The copper belt provides real armor", "actor": "smith", "metric": "carried_item_armor", "item": 2851, "min": 1}
   ]
 }
