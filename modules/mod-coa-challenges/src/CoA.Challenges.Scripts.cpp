@@ -1300,6 +1300,30 @@ namespace CoAChallenges
         }
     }
 
+    bool IsOldSchoolMulgoreSameCamp(Creature const* target, Creature const* candidate)
+    {
+        if (!target || !candidate || target == candidate || !candidate->IsAlive()
+            || candidate->IsCharmedOwnedByPlayerOrPlayer())
+            return false;
+
+        OldSchoolMulgoreCampThreat const targetThreat = GetOldSchoolMulgoreCampThreat(target);
+        OldSchoolMulgoreCampThreat const candidateThreat = GetOldSchoolMulgoreCampThreat(candidate);
+        return targetThreat.camp && candidateThreat.camp
+            && std::strcmp(targetThreat.camp, candidateThreat.camp) == 0;
+    }
+
+    uint32 CountOldSchoolMulgoreCampmates(Creature const* target, std::vector<Creature const*> const& candidates)
+    {
+        if (!target || !GetOldSchoolMulgoreCampThreat(target).camp)
+            return 0;
+
+        return static_cast<uint32>(std::count_if(candidates.begin(), candidates.end(),
+            [target](Creature const* candidate)
+            {
+                return IsOldSchoolMulgoreSameCamp(target, candidate);
+            }));
+    }
+
     int32 OldSchoolThreatOffset(Creature const* creature)
     {
         if (!creature)
@@ -3442,8 +3466,25 @@ namespace CoAChallenges
 
                     OldSchoolMulgoreCampThreat const campThreat = GetOldSchoolMulgoreCampThreat(target);
                     if (campThreat.camp)
+                    {
                         handler->PSendSysMessage("Camp role: {} {}. The con estimate includes this site's danger.",
                             campThreat.camp, campThreat.role);
+                        static std::vector<uint32> const campEntries =
+                        {
+                            2949, 2950, 2951, 2952, 2953, 2954, 2962, 2963, 2964, 2965,
+                            2975, 2976, 2977, 2978, 2979
+                        };
+                        std::list<Creature*> nearbyCreatures;
+                        target->GetCreatureListWithEntryInGrid(nearbyCreatures, campEntries, OldSchoolConsiderRange);
+                        std::vector<Creature const*> nearbyCampmates;
+                        nearbyCampmates.reserve(nearbyCreatures.size());
+                        for (Creature const* creature : nearbyCreatures)
+                            nearbyCampmates.push_back(creature);
+                        uint32 const nearbyCampmateCount = CountOldSchoolMulgoreCampmates(target, nearbyCampmates);
+                        handler->PSendSysMessage("Other creatures from this camp within {} yards: {}. "
+                            "Native aggro and assistance rules determine who joins a fight.",
+                            uint32(OldSchoolConsiderRange), nearbyCampmateCount);
+                    }
                 }
                 else if (IsOldSchoolBarrensNamedThreat(target) || IsOldSchoolStonetalonNamedThreat(target))
                     handler->PSendSysMessage("Named threat: {} carries elevated hidden danger and reward; "

@@ -135,8 +135,10 @@ spawn timers remain intact; their rolled equipment drops follow the Old School n
 Mulgore's Bristleback, Palemane, Venture Co., and Windfury Ridge camps use authored role bonuses on top
 of the stable spawn rating. Guards, workers, tanners, and skinners receive smaller bonuses; shamans,
 battleboars, poachers, taskmasters, supervisors, casters, and matriarchs receive larger bonuses. `/consider`
-identifies the camp role, and its added hidden threat contributes to the same con, combat scaling, and kill XP
-estimate. These role bonuses apply only inside Mulgore and only during either Old School trial.
+identifies the camp role and reports living members of the same camp within the 40-yard inspection range.
+Its added hidden threat contributes to the same con, combat scaling, and kill XP estimate. This is proximity
+information only; native aggro and assistance rules determine who joins combat. These role bonuses apply only
+inside Mulgore and only during either Old School trial.
 
 While either trial is active, the CoA client addon hides native numeric creature levels in the target and focus
 frames, unit tooltips, and ElvUI nameplates. Players judge a creature through `/consider`; its con and power

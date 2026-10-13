@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Old School Mulgore camp roles shape consider, combat and rewards",
-  "contract": "Bristleback, Palemane, Venture Co., and Windfury Ridge camp roles add a stable hidden danger bonus in Mulgore. The role changes the same con used for combat and kill XP, is described by /consider, and has no effect outside Old School.",
+  "contract": "Bristleback, Palemane, Venture Co., and Windfury Ridge camp roles add a stable hidden danger bonus in Mulgore. /consider reports the number of living same-camp creatures within its 40-yard inspection range without changing native aggro or assistance. The role changes the same con used for combat and kill XP and has no effect outside Old School.",
   "timeout_ms": 90000,
   "location": {"map": 1, "x": -751.421, "y": -674.71, "z": -19.1842, "o": 0},
   "players": [
@@ -31,6 +31,7 @@
     {"action": "client_packet", "actor": "old", "opcode": 317, "consumed": false, "fields": [{"actor_guid": "old_shaman"}]},
     {"action": "command", "actor": "old", "command": ".coa consider"},
     {"action": "assert", "label": "Consider names the Bristleback camp role", "actor": "old", "metric": "system_message_contains", "text": "Camp role: Bristleback camp shaman", "equals": 1},
+    {"action": "assert", "label": "Consider reports nearby camp members without changing assistance behavior", "actor": "old", "metric": "system_message_contains", "text": "Other creatures from this camp within 40 yards:", "equals": 1},
     {"action": "assert", "label": "Consider reports the combat con for the Bristleback role", "actor": "old", "metric": "system_message_contains", "text": "Red con", "equals": 1},
     {"action": "assert", "label": "The Bristleback shaman's con drives effective kill XP after the Old School pace", "actor": "old", "metric": "system_message_contains", "text": "kill XP: 1.00x base (50.00% Old School pace)", "equals": 1},
     {"action": "stop_attack", "actor": "old"},

@@ -56,6 +56,7 @@ struct Creature : Unit
     uint32 level = 25;
     CreatureTemplate data;
     bool owned = false;
+    bool alive = true;
     Player* owner = nullptr;
 
     Creature* ToCreature() override { return this; }
@@ -66,6 +67,7 @@ struct Creature : Unit
     uint32 GetLevel() const { return level; }
     CreatureTemplate const* GetCreatureTemplate() const { return &data; }
     bool IsCharmedOwnedByPlayerOrPlayer() const { return owned; }
+    bool IsAlive() const { return alive; }
 };
 
 Player const* ChallengeParticipant(Player const* player) { return player; }
@@ -94,13 +96,13 @@ void NamedProfiles()
         {
             assert(profile.healthPercent == 3576);
             assert(profile.damageMultiplier == 22);
-            assert(profile.experienceMultiplier == 16);
+            assert(profile.experienceMultiplierHundredths == 400);
         }
         else
         {
             assert(profile.healthPercent == 1788);
             assert(profile.damageMultiplier == 11);
-            assert(profile.experienceMultiplier == 8);
+            assert(profile.experienceMultiplierHundredths == 200);
         }
         player.level = 35;
         profile = GetOldSchoolPowerProfile(&player, &creature);
@@ -146,7 +148,36 @@ void NamedProfiles()
     }
 }
 
+void MulgoreCampConsider()
+{
+    Creature shaman;
+    shaman.entry = 2953;
+    shaman.zone = AREA_MULGORE;
+    Creature guard;
+    guard.entry = 2952;
+    guard.zone = AREA_MULGORE;
+    Creature poacher;
+    poacher.entry = 2951;
+    poacher.zone = AREA_MULGORE;
+    Creature skinner;
+    skinner.entry = 2950;
+    skinner.zone = AREA_MULGORE;
+    Creature deadGuard = guard;
+    deadGuard.alive = false;
+    Creature ownedGuard = guard;
+    ownedGuard.owned = true;
+    std::vector<Creature const*> nearby{ &shaman, &guard, &poacher, &skinner, &deadGuard, &ownedGuard };
+    assert(IsOldSchoolMulgoreSameCamp(&shaman, &guard));
+    assert(!IsOldSchoolMulgoreSameCamp(&shaman, &poacher));
+    assert(!IsOldSchoolMulgoreSameCamp(&shaman, &deadGuard));
+    assert(!IsOldSchoolMulgoreSameCamp(&shaman, &ownedGuard));
+    assert(CountOldSchoolMulgoreCampmates(&shaman, nearby) == 1);
+    assert(CountOldSchoolMulgoreCampmates(&poacher, nearby) == 1);
+    assert(CountOldSchoolMulgoreCampmates(&poacher, {}) == 0);
+}
+
 int main()
 {
     NamedProfiles();
+    MulgoreCampConsider();
 }
