@@ -2786,10 +2786,14 @@ private:
             return std::count_if(creatures.begin(), creatures.end(),
                 [minLevel, maxLevel, minHomeDistance](Creature* creature)
                 {
+                    CreatureData const* spawnData = creature->GetCreatureData();
+                    float const distanceFromHome = spawnData
+                        ? creature->GetExactDist2d(spawnData->posX, spawnData->posY)
+                        : creature->GetExactDist2d(creature->GetHomePosition());
                     return creature->IsInWorld() && creature->IsAlive()
                         && creature->GetLevel() >= minLevel && creature->GetLevel() <= maxLevel
                         && (minHomeDistance == 0.0f
-                            || creature->GetExactDist2d(creature->GetHomePosition()) >= minHomeDistance);
+                            || distanceFromHome >= minHomeDistance);
                 });
         }
         if (metric == "carried_money")

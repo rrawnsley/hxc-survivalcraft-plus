@@ -1,0 +1,25 @@
+{
+  "schema": 1,
+  "name": "Old School Mulgore named threats patrol their native routes",
+  "contract": "Ghost Howl, Arra'chea, and The Rake remain on their existing Mulgore waypoint paths during Old School. The test observes native spawn movement away from each home position after the player enters the trial phase; it does not add or rewrite routes or alter non-trial behavior.",
+  "timeout_ms": 120000,
+  "location": {"map": 1, "x": -751.421, "y": -674.71, "z": -19.1842, "o": 0},
+  "players": [
+    {"id": "old", "race": 6, "class": 1, "level": 1}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 1000},
+    {"action": "start_challenge", "actor": "old", "challenge": 9001, "level": 1},
+    {"action": "assert", "actor": "old", "metric": "challenge_start_code", "equals": 0},
+    {"action": "set_phase", "actor": "old", "value": 1},
+    {"action": "teleport", "actor": "old", "map": 1, "x": -805.0, "y": 132.0, "z": 2.8},
+    {"action": "wait", "ms": 8000, "label": "Allow Ghost Howl's native waypoint patrol to advance"},
+    {"action": "assert", "label": "Ghost Howl is moving away from its native home spawn on patrol", "actor": "old", "metric": "nearby_creature_count", "entry": 3056, "min": 1, "min_home_distance": 8},
+    {"action": "teleport", "actor": "old", "map": 1, "x": -800.0, "y": -700.0, "z": -20.0},
+    {"action": "wait", "ms": 8000, "label": "Allow Arra'chea's native waypoint patrol to advance"},
+    {"action": "assert", "label": "Arra'chea is moving away from its native home spawn on patrol", "actor": "old", "metric": "nearby_creature_count", "entry": 3058, "min": 1, "min_home_distance": 8},
+    {"action": "teleport", "actor": "old", "map": 1, "x": -910.0, "y": -665.0, "z": -42.0},
+    {"action": "wait", "ms": 8000, "label": "Allow The Rake's native waypoint patrol to advance"},
+    {"action": "assert", "label": "The Rake is moving away from its native home spawn on patrol", "actor": "old", "metric": "nearby_creature_count", "entry": 5807, "min": 1, "min_home_distance": 8}
+  ]
+}
