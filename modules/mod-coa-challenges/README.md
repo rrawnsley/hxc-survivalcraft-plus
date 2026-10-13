@@ -234,6 +234,15 @@ use +4 or +6/1.5x. Con, rank and the 50% XP pace still apply. These encounters a
 gear retention. Native movement and respawn windows remain in place; this release does not
 create new routes or spawn locations. Both Old School variants receive the profiles.
 
+Hillsbrad Foothills adds settlement workers/guards, Azurelode mine, Dun Garok fortress,
+Syndicate camps, Daggerspine shores and Torn Fin coastal rosters. Camp leaders share the
+nearby-member consideration readout with their guards. Seventeen native named entries gain
+fixed threat, extra encounter XP and named gear retention: Farmer Ray/Getz/Kalaba, Captain
+Ironhill, Foreman Bonds, Magistrate Burnside, Jailors Eston/Marlgen, Clerk Horrace Whitesteed,
+Citizen Wilkes, Miner Hackett, Tamra Stormpike, Scargil, Lady Zephris, Ro'Bark, Creepthess and
+Big Samras. Captain Ironhill uses +8 threat/2x encounter XP; other profiles use +2, +4 or +6
+threat/1.5x encounter XP. Native factions, spawns, movement and respawn windows remain intact.
+
 ## License
 
 GNU General Public License v2.0 — see [LICENSE](LICENSE).
