@@ -1110,11 +1110,11 @@ namespace CoAChallenges
 
     constexpr float OldSchoolConsiderRange = 40.0f;
 
-    uint32 OldSchoolExperiencePercent()
+    uint32 OldSchoolExperienceBasisPoints()
     {
         uint32 const configured = sConfigMgr->GetOption<uint32>(
-            "CoAChallenges.OldSchool.ExperiencePercent", 1);
-        return configured ? std::min(configured, 100u) : 1u;
+            "CoAChallenges.OldSchool.ExperienceBasisPoints", 50);
+        return std::min(configured, 10000u);
     }
 
     bool OldSchoolCreature(Creature const* creature)
@@ -1153,14 +1153,8 @@ namespace CoAChallenges
 
     uint32 OldSchoolGearKeepPercent(Creature const* creature)
     {
-        uint32 const legacyNormal = creature && creature->GetZoneId() == AREA_MULGORE
-            ? sConfigMgr->GetOption<uint32>("CoAChallenges.OldSchool.Mulgore.GearDropPercent", 2) : 2;
-        uint32 const legacyNamed = creature && creature->GetZoneId() == AREA_MULGORE
-            ? sConfigMgr->GetOption<uint32>("CoAChallenges.OldSchool.Mulgore.NamedGearDropPercent", 10) : 10;
-        uint32 const configured = sConfigMgr->GetOption<uint32>(
-            "CoAChallenges.OldSchool.GearDropPercent", legacyNormal);
-        uint32 const namedConfigured = sConfigMgr->GetOption<uint32>(
-            "CoAChallenges.OldSchool.NamedGearDropPercent", legacyNamed);
+        uint32 const configured = sConfigMgr->GetOption<uint32>("CoAChallenges.OldSchool.GearDropPercent", 1);
+        uint32 const namedConfigured = sConfigMgr->GetOption<uint32>("CoAChallenges.OldSchool.NamedGearDropPercent", 5);
         uint32 const normalPercent = std::min(configured, 100u);
         uint32 const namedPercent = std::min(namedConfigured, 100u);
         bool const namedThreat = IsOldSchoolMulgoreNamedThreat(creature)
@@ -2338,8 +2332,8 @@ namespace CoAChallenges
 
             if (amount && OldSchoolChallenge(player))
             {
-                uint64 scaledAmount = uint64(amount) * OldSchoolExperiencePercent();
-                uint64 scaleNumerator = 100; // convert hundredths of XP to ten-thousandths
+                uint64 scaledAmount = uint64(amount) * OldSchoolExperienceBasisPoints();
+                uint64 scaleNumerator = 100;
                 if (xpSource == XPSOURCE_KILL && victim && victim->IsCreature()
                     && OldSchoolCreature(victim->ToCreature())
                     && TappingAllowsRewards(player, victim->ToCreature()))
@@ -2357,8 +2351,8 @@ namespace CoAChallenges
                 scaledAmount *= scaleNumerator;
                 OldSchoolXPProgress* progress = player->CustomData.GetDefault<OldSchoolXPProgress>(OldSchoolXPProgressKey);
                 uint64 accumulated = scaledAmount + progress->remainder;
-                amount = static_cast<uint32>(std::min<uint64>(accumulated / 10000, UINT32_MAX));
-                progress->remainder = static_cast<uint32>(accumulated % 10000);
+                amount = static_cast<uint32>(std::min<uint64>(accumulated / 1000000, UINT32_MAX));
+                progress->remainder = static_cast<uint32>(accumulated % 1000000);
             }
 
             // NO_KILL_CREDIT_UNLESS_AT_DISADVANTAGE ("Punching Up" / Overwhelming
@@ -3420,7 +3414,8 @@ namespace CoAChallenges
                 uint32 const healthPercent = scaling ? scaling->healthPercent : profile.healthPercent;
                 uint32 const damageMultiplier = scaling ? scaling->damageMultiplier : profile.damageMultiplier;
                 uint32 const experienceMultiplier = scaling ? scaling->experienceMultiplier : profile.experienceMultiplier;
-                float const effectiveKillXpMultiplier = float(experienceMultiplier) * OldSchoolExperiencePercent() / 100.0f;
+                float const experiencePercent = OldSchoolExperienceBasisPoints() / 100.0f;
+                float const effectiveKillXpMultiplier = float(experienceMultiplier) * experiencePercent / 100.0f;
                 char const* con = scaling ? scaling->con : profile.con;
                 if (!scaling)
                     health = health * healthPercent / 100;
@@ -3433,9 +3428,9 @@ namespace CoAChallenges
                             ? "Very dangerous; bring a group."
                             : "Overwhelming; a group is strongly advised.";
                 handler->PSendSysMessage("Consider {}: {} con. {} Estimated health: {} ({}x); "
-                    "creature damage: {}x; kill XP: {:.2f}x base ({}% Old School pace). Estimate only; gear, abilities, companions and adds "
+                    "creature damage: {}x; kill XP: {:.2f}x base ({:.2f}% Old School pace). Estimate only; gear, abilities, companions and adds "
                     "change the outcome.", target->GetName(), con, advice, health,
-                    healthPercent / 100, damageMultiplier, effectiveKillXpMultiplier, OldSchoolExperiencePercent());
+                    healthPercent / 100, damageMultiplier, effectiveKillXpMultiplier, experiencePercent);
                 if (target->GetZoneId() == AREA_MULGORE)
                 {
                     if (char const* namedThreat = OldSchoolMulgoreNamedThreatName(target))

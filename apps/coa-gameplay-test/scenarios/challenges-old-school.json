@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Old School con tiers drive creature difficulty, rewards, death XP and corpse runs",
-  "contract": "Owned trial IDs 9001/9002. Both trials apply a 1% pace to all XP; creature kills then receive the con multiplier, while non-kill rewards remain at 1%. Old School death removes up to 10% of a level's XP, capped by XP currently held, and can delevel. A spirit must return to its corpse to resurrect. Hardcore death fails the run. Bots inherit their human leader's con.",
+  "contract": "Owned trial IDs 9001/9002. Both trials apply a 0.50% pace to all XP; creature kills then receive the con multiplier, while non-kill rewards remain at 0.50%. Old School death removes up to 10% of a level's XP, capped by XP currently held, and can delevel. A spirit must return to its corpse to resurrect. Hardcore death fails the run. Bots inherit their human leader's con.",
   "timeout_ms": 180000,
   "location": {
     "map": 0,
@@ -327,13 +327,13 @@
     },
     {
       "action": "assert",
-      "label": "White con kills grant 0.04x base XP after the 1% Old School pace",
+      "label": "White con kills grant 0.02x base XP after the 0.50% Old School pace",
       "actor": "old",
       "metric": "xp",
       "relative_to": "old_xp",
       "ratio_to": "normal_kill",
-      "min": 0.03,
-      "max": 0.05
+      "min": 0.015,
+      "max": 0.025
     },
     {
       "action": "snapshot",
@@ -376,13 +376,13 @@
     },
     {
       "action": "assert",
-      "label": "Quest rewards also follow the 1% Old School pace",
+      "label": "Sub-point quest XP is carried forward at the 0.50% Old School pace",
       "actor": "quester",
       "metric": "xp",
       "relative_to": "old_before_quest",
       "ratio_to": "normal_quest_gain",
-      "min": 0.004,
-      "max": 0.015
+      "min": 0,
+      "max": 0.008
     },
     {
       "action": "group",
@@ -446,7 +446,7 @@
       "label": "Consider reports effective kill XP after the Old School pace",
       "actor": "old",
       "metric": "system_message_contains",
-      "text": "kill XP: 0.04x base (1% Old School pace)",
+      "text": "kill XP: 0.02x base (0.50% Old School pace)",
       "equals": 1
     },
     {
@@ -549,8 +549,8 @@
       "metric": "xp",
       "relative_to": "before_death",
       "ratio_to": "level_xp",
-      "min": -0.01,
-      "max": -0.005
+      "min": -0.003,
+      "max": 0
     },
     {
       "action": "assert",
@@ -573,8 +573,8 @@
       "metric": "xp",
       "relative_to": "before_death",
       "ratio_to": "level_xp",
-      "min": -0.01,
-      "max": -0.005
+      "min": -0.003,
+      "max": 0
     },
     {
       "action": "assert",
