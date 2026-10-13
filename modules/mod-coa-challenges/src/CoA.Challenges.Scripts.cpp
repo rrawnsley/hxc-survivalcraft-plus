@@ -1510,7 +1510,31 @@ namespace CoAChallenges
 
     bool IsOldSchoolPlaguelandsNamedThreat(Creature const* creature)
     {
-        if (!creature || creature->GetZoneId() != AREA_WESTERN_PLAGUELANDS)
+        if (!creature)
+            return false;
+        if (creature->GetZoneId() == AREA_EASTERN_PLAGUELANDS)
+        {
+            switch (creature->GetEntry())
+            {
+                case 10821:
+                case 10822:
+                case 10823:
+                case 10824:
+                case 10825:
+                case 10826:
+                case 10827:
+                case 10828:
+                case 11896:
+                case 11897:
+                case 12248:
+                case 12339:
+                case 16184:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+        if (creature->GetZoneId() != AREA_WESTERN_PLAGUELANDS)
             return false;
         switch (creature->GetEntry())
         {
@@ -1551,6 +1575,9 @@ namespace CoAChallenges
             {
                 case 1840:
                 case 1852:
+                case 11896:
+                case 11897:
+                case 12339:
                     return 10;
                 case 1838:
                 case 1839:
@@ -1558,12 +1585,20 @@ namespace CoAChallenges
                 case 1843:
                 case 1846:
                 case 1850:
+                case 10828:
+                case 16184:
                     return 8;
                 case 1845:
                 case 11075:
                 case 11076:
                 case 11077:
                 case 11078:
+                case 10822:
+                case 10823:
+                case 10824:
+                case 10826:
+                case 10827:
+                case 12248:
                     return 6;
                 default:
                     return 4;
@@ -1771,6 +1806,95 @@ namespace CoAChallenges
     {
         if (!creature)
             return { nullptr, nullptr, 0 };
+
+        if (creature->GetZoneId() == AREA_EASTERN_PLAGUELANDS)
+        {
+            switch (creature->GetEntry())
+            {
+                case 9447:
+                case 9448:
+                    return { "Tyr's Hand stronghold", "elite guard", 3 };
+                case 9449:
+                case 9450:
+                case 9451:
+                    return { "Tyr's Hand stronghold", "spellcaster", 5 };
+                case 10828:
+                    return { "Tyr's Hand stronghold", "named leader", 6 };
+                case 8560:
+                case 8562:
+                case 11290:
+                case 11291:
+                    return { "Mossflayer marsh", "scout", 1 };
+                case 8561:
+                case 12261:
+                    return { "Mossflayer marsh", "spellcaster", 3 };
+                case 11292:
+                    return { "Mossflayer marsh", "berserker", 3 };
+                case 12248:
+                    return { "Mossflayer marsh", "named leader", 5 };
+                case 8523:
+                case 8525:
+                case 8527:
+                case 8529:
+                case 8530:
+                case 8531:
+                case 8532:
+                    return { "Scourge ruins", "undead guard", 2 };
+                case 8524:
+                case 8526:
+                case 8528:
+                case 8540:
+                case 8541:
+                case 8542:
+                case 8546:
+                case 8547:
+                case 8548:
+                case 8550:
+                case 8551:
+                case 8552:
+                case 8553:
+                    return { "Scourge ruins", "undead spellcaster", 4 };
+                case 8543:
+                case 8544:
+                case 8545:
+                    return { "Scourge ruins", "abomination", 5 };
+                case 10821:
+                case 10825:
+                case 10826:
+                case 10827:
+                    return { "Scourge ruins", "named threat", 6 };
+                case 8555:
+                case 8556:
+                    return { "Crypt lair", "stalker", 2 };
+                case 8557:
+                case 8558:
+                case 8559:
+                    return { "Crypt lair", "horror", 4 };
+                case 16184:
+                    return { "Crypt lair", "named overseer", 6 };
+                case 8596:
+                case 8597:
+                    return { "Plaguehound hunting grounds", "hound", 1 };
+                case 8598:
+                case 8599:
+                    return { "Plaguehound hunting grounds", "mastiff", 3 };
+                case 8600:
+                case 8601:
+                    return { "Plaguebat roost", "bat", 1 };
+                case 8602:
+                    return { "Plaguebat roost", "monstrous bat", 3 };
+                case 11897:
+                    return { "Plaguebat roost", "named hunter", 6 };
+                case 8603:
+                    return { "Carrion feeding grounds", "grub", 1 };
+                case 8605:
+                    return { "Carrion feeding grounds", "devourer", 3 };
+                case 11896:
+                    return { "Carrion feeding grounds", "named hunter", 6 };
+                default:
+                    return { nullptr, nullptr, 0 };
+            }
+        }
 
         if (creature->GetZoneId() == AREA_WESTERN_PLAGUELANDS)
         {
@@ -4761,6 +4885,9 @@ namespace CoAChallenges
                     handler->SendSysMessage("Roaming threat: Son of Arugal. Watch its route before choosing a hunting spot.");
                 if (target->GetZoneId() == AREA_ARATHI_HIGHLANDS && target->GetEntry() == 2611)
                     handler->SendSysMessage("Roaming threat: Fozruk. Watch its route before choosing a hunting spot.");
+                if (target->GetZoneId() == AREA_EASTERN_PLAGUELANDS
+                    && (target->GetEntry() == 11896 || target->GetEntry() == 11897 || target->GetEntry() == 12339))
+                    handler->SendSysMessage("Roaming named threat. Watch its route before choosing a hunting spot.");
 
                 OldSchoolCampThreat const campThreat = GetOldSchoolCampThreat(target);
                 if (campThreat.camp)
@@ -4769,6 +4896,12 @@ namespace CoAChallenges
                         campThreat.camp, campThreat.role);
                     static std::vector<uint32> const campEntries =
                     {
+                        8523, 8524, 8525, 8526, 8527, 8528, 8529, 8530, 8531, 8532, 8540,
+                        8541, 8542, 8543, 8544, 8545, 8546, 8547, 8548, 8550, 8551, 8552,
+                        8553, 8555, 8556, 8557, 8558, 8559, 8560, 8561, 8562, 8596, 8597,
+                        8598, 8599, 8600, 8601, 8602, 8603, 8605, 9447, 9448, 9449, 9450,
+                        9451, 10821, 10825, 10826, 10827, 10828, 11290, 11291, 11292,
+                        11896, 11897, 12248, 12261, 16184,
                         1783, 1784, 1785, 1786, 1787, 1788, 1789, 1790, 1791, 1793, 1794,
                         1795, 1796, 1798, 1799, 1800, 1801, 1802, 1826, 1827, 1831, 1832,
                         1833, 1834, 1835, 1836, 1837, 1838, 1839, 1840, 1841, 1843, 1844,
