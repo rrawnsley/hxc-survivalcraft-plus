@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Old School con tiers drive creature difficulty, rewards, death XP and corpse runs",
-  "contract": "Owned trial IDs 9001/9002. Both trials apply a 50% pace to all XP; kill XP scales by con (White 1x, Yellow 1.5x, Red 2x, Purple 3x), while non-kill rewards remain at 50%. Old School death removes up to 10% of a level's XP, capped by XP currently held, and can delevel. A spirit must return to its corpse to resurrect. Hardcore death fails the run. Bots inherit their human leader's con.",
+  "contract": "Owned trial IDs 9001/9002. Both trials apply a 50% pace to all XP; kill XP scales by con (White 1x, Yellow 1.5x, Red 2x, Purple 3x), while non-kill rewards remain at 50%. Old School death removes 10% of a level's XP and can delevel, with level one as the floor. A spirit must return to its corpse to resurrect. Hardcore death fails the run. Bots inherit their human leader's con.",
   "timeout_ms": 180000,
   "location": {
     "map": 0,
@@ -574,13 +574,13 @@
     },
     {
       "action": "assert",
-      "label": "Death XP loss is capped by the XP currently held",
+      "label": "Death removes ten percent of the level's XP requirement",
       "actor": "old",
       "metric": "xp",
       "relative_to": "before_death",
       "ratio_to": "level_xp",
-      "min": -0.003,
-      "max": 0
+      "min": -0.100001,
+      "max": -0.099999
     },
     {
       "action": "assert",
@@ -603,8 +603,8 @@
       "metric": "xp",
       "relative_to": "before_death",
       "ratio_to": "level_xp",
-      "min": -0.003,
-      "max": 0
+      "min": -0.100001,
+      "max": -0.099999
     },
     {
       "action": "assert",
@@ -689,7 +689,7 @@
       "action": "start_challenge",
       "actor": "deleveler",
       "challenge": 9001,
-      "level": 2
+      "level": 1
     },
     {
       "action": "assert",
