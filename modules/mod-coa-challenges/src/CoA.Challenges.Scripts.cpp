@@ -1116,6 +1116,52 @@ namespace CoAChallenges
             && creature->GetCreatureTemplate()->type != CREATURE_TYPE_CRITTER;
     }
 
+    bool IsOldSchoolMulgoreNamedThreat(Creature const* creature)
+    {
+        if (!creature || creature->GetZoneId() != AREA_MULGORE)
+            return false;
+
+        switch (creature->GetEntry())
+        {
+            case 3056:
+            case 3058:
+            case 3068:
+            case 5785:
+            case 5786:
+            case 5787:
+            case 5807:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    char const* OldSchoolMulgoreNamedThreatName(Creature const* creature)
+    {
+        if (!creature || creature->GetZoneId() != AREA_MULGORE)
+            return nullptr;
+
+        switch (creature->GetEntry())
+        {
+            case 3056:
+                return "Ghost Howl";
+            case 3058:
+                return "Arra'chea";
+            case 3068:
+                return "Mazzranache";
+            case 5785:
+                return "Sister Hatelash";
+            case 5786:
+                return "Snagglespear";
+            case 5787:
+                return "Enforcer Emilgund";
+            case 5807:
+                return "The Rake";
+            default:
+                return nullptr;
+        }
+    }
+
     struct OldSchoolPowerProfile
     {
         char const* con;
@@ -1216,8 +1262,7 @@ namespace CoAChallenges
         if (!creature)
             return 0;
 
-        if (creature->GetZoneId() == AREA_MULGORE
-            && (creature->GetEntry() == 3056 || creature->GetEntry() == 3058 || creature->GetEntry() == 5807))
+        if (IsOldSchoolMulgoreNamedThreat(creature))
             return 4;
 
         if (IsOldSchoolBarrensNamedThreat(creature) || IsOldSchoolStonetalonNamedThreat(creature))
@@ -3320,22 +3365,10 @@ namespace CoAChallenges
                     healthPercent / 100, damageMultiplier, experienceMultiplier);
                 if (target->GetZoneId() == AREA_MULGORE)
                 {
-                    switch (target->GetEntry())
+                    if (char const* namedThreat = OldSchoolMulgoreNamedThreatName(target))
                     {
-                        case 3056:
-                            handler->SendSysMessage("Named roamer: Ghost Howl carries elevated hidden threat; "
-                                "use the con estimate before engaging.");
-                            break;
-                        case 3058:
-                            handler->SendSysMessage("Named patrol: Arra'chea carries elevated hidden threat; "
-                                "use the con estimate before engaging.");
-                            break;
-                        case 5807:
-                            handler->SendSysMessage("Named roamer: The Rake carries elevated hidden threat; "
-                                "use the con estimate before engaging.");
-                            break;
-                        default:
-                            break;
+                        handler->PSendSysMessage("Named threat: {} carries elevated hidden danger; "
+                            "use the con estimate before engaging.", namedThreat);
                     }
 
                     OldSchoolMulgoreCampThreat const campThreat = GetOldSchoolMulgoreCampThreat(target);

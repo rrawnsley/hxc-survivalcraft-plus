@@ -112,13 +112,14 @@ Elites and bosses multiply those values further. Quest experience is unchanged. 
 player-owned units are excluded. Restricted tapping prevents players in another trial from
 assisting with the kill or claiming its rewards.
 
-Mulgore's named waypoint roamers - Ghost Howl (3056), Arra'chea (3058), and The
-Rake (5807) - and the Barrens threats Gesharahan (3398), Lakota'mani (3474), Humar the Pridelord (5828), Snort
+Mulgore's named threats - Ghost Howl (3056), Arra'chea (3058), Mazzranache (3068), Sister Hatelash (5785),
+Snagglespear (5786), Enforcer Emilgund (5787), and The Rake (5807) - and the Barrens threats Gesharahan
+(3398), Lakota'mani (3474), Humar the Pridelord (5828), Snort
 the Heckler (5829), Swiftmane (5831), Azzere the Skyblade (5834), Heggin Stonewhisker (5847), and Dishu
 (5865) carry four additional hidden threat levels in Old School. `/consider` identifies these threats, and the
-hidden rating affects con, combat and kill XP without changing native levels, routes, or ordinary-mode
-behavior. Their database spawns already roam on authored waypoint paths and retain their existing rare
-respawn timers.
+hidden rating affects con, combat and kill XP without changing native levels or ordinary-mode behavior. Ghost
+Howl, Arra'chea, and The Rake use their existing authored roam paths; this path behavior has not been newly
+runtime-verified. Existing rare spawn timers and loot remain intact.
 
 Mulgore's Bristleback, Palemane, Venture Co., and Windfury Ridge camps use authored role bonuses on top
 of the stable spawn rating. Guards, workers, tanners, and skinners receive smaller bonuses; shamans,

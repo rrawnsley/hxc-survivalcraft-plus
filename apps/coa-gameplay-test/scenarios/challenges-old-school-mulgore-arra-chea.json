@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Old School makes Mulgore's named roamers clear elevated-threat encounters",
-  "contract": "In Old School, Mulgore's named waypoint roamers Ghost Howl, Arra'chea, and The Rake receive four additional hidden threat levels. The challenge's con estimate and combat health must reflect that danger, while ordinary mode keeps the creature's native threat profile.",
+  "name": "Old School makes Mulgore's named threats clear elevated-danger encounters",
+  "contract": "In Old School, Mulgore's named threats Ghost Howl, Arra'chea, Mazzranache, Sister Hatelash, Snagglespear, Enforcer Emilgund, and The Rake receive four additional hidden threat levels. The challenge's con estimate and combat health must reflect that danger, while ordinary mode keeps the creature's native threat profile.",
   "timeout_ms": 60000,
   "location": {"map": 1, "x": -751.421, "y": -674.71, "z": -19.1842, "o": 0},
   "players": [
@@ -9,7 +9,7 @@
     {"id": "old", "race": 1, "class": 1, "level": 1}
   ],
   "creatures": [
-    {"id": "control_arrachea", "owner": "control", "entry": 3058, "faction": 14, "level": 1, "health": 1000, "distance": 3, "stationary": true},
+    {"id": "control_arrachea", "owner": "control", "entry": 3058, "faction": 14, "level": 1, "health": 1000, "distance": 25, "stationary": true},
     {"id": "old_arrachea", "owner": "old", "entry": 3058, "faction": 14, "level": 1, "health": 1000, "distance": 3, "stationary": true},
     {
       "id": "old_ghost_howl",
@@ -30,7 +30,11 @@
       "health": 1000,
       "distance": 3,
       "stationary": true
-    }
+    },
+    {"id": "old_mazzranache", "owner": "old", "entry": 3068, "faction": 14, "level": 1, "health": 1000, "distance": 25, "stationary": true},
+    {"id": "old_sister_hatelash", "owner": "old", "entry": 5785, "faction": 14, "level": 1, "health": 1000, "distance": 25, "stationary": true},
+    {"id": "old_snagglespear", "owner": "old", "entry": 5786, "faction": 14, "level": 1, "health": 1000, "distance": 25, "stationary": true},
+    {"id": "old_enforcer_emilgund", "owner": "old", "entry": 5787, "faction": 14, "level": 1, "health": 1000, "distance": 25, "stationary": true}
   ],
   "steps": [
     {"action": "wait", "ms": 1000},
@@ -44,7 +48,7 @@
     {"action": "assert", "label": "Arra'chea's elevated hidden threat scales Old School health", "actor": "old_arrachea", "metric": "max_health", "equals": 17880},
     {"action": "client_packet", "actor": "old", "opcode": 317, "consumed": false, "fields": [{"actor_guid": "old_arrachea"}]},
     {"action": "command", "actor": "old", "command": ".coa consider"},
-    {"action": "assert", "label": "Consider identifies Arra'chea as a named threat", "actor": "old", "metric": "system_message_contains", "text": "Named patrol: Arra'chea", "equals": 1},
+    {"action": "assert", "label": "Consider identifies Arra'chea as a named threat", "actor": "old", "metric": "system_message_contains", "text": "Named threat: Arra'chea", "equals": 1},
     {"action": "assert", "label": "Consider reports the resulting red con", "actor": "old", "metric": "system_message_contains", "text": "Red con", "equals": 1},
     {"action": "assert", "label": "Consider reports the elevated kill XP", "actor": "old", "metric": "system_message_contains", "text": "kill XP: 8x", "equals": 1},
     {"action": "stop_attack", "actor": "old"},
@@ -61,10 +65,10 @@
     {"action": "command", "actor": "old", "command": ".coa consider"},
     {
       "action": "assert",
-      "label": "Consider identifies Ghost Howl as a named roamer",
+      "label": "Consider identifies Ghost Howl as a named threat",
       "actor": "old",
       "metric": "system_message_contains",
-      "text": "Named roamer: Ghost Howl",
+      "text": "Named threat: Ghost Howl",
       "equals": 1
     },
     {"action": "stop_attack", "actor": "old"},
@@ -82,15 +86,27 @@
     {"action": "command", "actor": "old", "command": ".coa consider"},
     {
       "action": "assert",
-      "label": "Consider identifies The Rake as a named roamer",
+      "label": "Consider identifies The Rake as a named threat",
       "actor": "old",
       "metric": "system_message_contains",
-      "text": "Named roamer: The Rake",
+      "text": "Named threat: The Rake",
       "equals": 1
     },
     {"action": "attack_nearby", "actor": "old", "entry": 5807, "kill": true, "label": "The Old School group defeats the named roamer"},
     {"action": "loot_nearby", "actor": "old", "entry": 5807, "label": "The group opens the named roamer's corpse"},
     {"action": "assert", "label": "The Rake's rare spawn retains its level-10 armor upgrade", "actor": "old", "metric": "loot_entry", "item": 17922, "equals": 17922},
-    {"action": "assert", "label": "The Rake's upgrade keeps its authored item level", "actor": "old", "metric": "loot_item_level", "item": 17922, "equals": 10}
+    {"action": "assert", "label": "The Rake's upgrade keeps its authored item level", "actor": "old", "metric": "loot_item_level", "item": 17922, "equals": 10},
+    {"action": "client_packet", "actor": "old", "opcode": 317, "consumed": false, "fields": [{"actor_guid": "old_mazzranache"}]},
+    {"action": "command", "actor": "old", "command": ".coa consider"},
+    {"action": "assert", "label": "Consider identifies Mazzranache as a named threat", "actor": "old", "metric": "system_message_contains", "text": "Named threat: Mazzranache", "equals": 1},
+    {"action": "client_packet", "actor": "old", "opcode": 317, "consumed": false, "fields": [{"actor_guid": "old_sister_hatelash"}]},
+    {"action": "command", "actor": "old", "command": ".coa consider"},
+    {"action": "assert", "label": "Consider identifies Sister Hatelash as a named threat", "actor": "old", "metric": "system_message_contains", "text": "Named threat: Sister Hatelash", "equals": 1},
+    {"action": "client_packet", "actor": "old", "opcode": 317, "consumed": false, "fields": [{"actor_guid": "old_snagglespear"}]},
+    {"action": "command", "actor": "old", "command": ".coa consider"},
+    {"action": "assert", "label": "Consider identifies Snagglespear as a named threat", "actor": "old", "metric": "system_message_contains", "text": "Named threat: Snagglespear", "equals": 1},
+    {"action": "client_packet", "actor": "old", "opcode": 317, "consumed": false, "fields": [{"actor_guid": "old_enforcer_emilgund"}]},
+    {"action": "command", "actor": "old", "command": ".coa consider"},
+    {"action": "assert", "label": "Consider identifies Enforcer Emilgund as a named threat", "actor": "old", "metric": "system_message_contains", "text": "Named threat: Enforcer Emilgund", "equals": 1}
   ]
 }
