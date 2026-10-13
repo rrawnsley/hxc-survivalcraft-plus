@@ -1152,6 +1152,7 @@ namespace CoAChallenges
     bool IsOldSchoolSouthernNamedThreat(Creature const* creature);
     bool IsOldSchoolTirisfalNamedThreat(Creature const* creature);
     bool IsOldSchoolSilverpineNamedThreat(Creature const* creature);
+    bool IsOldSchoolHillsbradNamedThreat(Creature const* creature);
 
     bool IsOldSchoolGearLoot(Creature const* creature, Player const* player)
     {
@@ -1167,7 +1168,8 @@ namespace CoAChallenges
         bool const namedThreat = IsOldSchoolMulgoreNamedThreat(creature)
             || IsOldSchoolBarrensNamedThreat(creature) || IsOldSchoolStonetalonNamedThreat(creature)
             || IsOldSchoolAshenvaleNamedThreat(creature) || IsOldSchoolSouthernNamedThreat(creature)
-            || IsOldSchoolTirisfalNamedThreat(creature) || IsOldSchoolSilverpineNamedThreat(creature);
+            || IsOldSchoolTirisfalNamedThreat(creature) || IsOldSchoolSilverpineNamedThreat(creature)
+            || IsOldSchoolHillsbradNamedThreat(creature);
         return namedThreat ? namedPercent : normalPercent;
     }
 
@@ -1422,10 +1424,61 @@ namespace CoAChallenges
         }
     }
 
+    bool IsOldSchoolHillsbradNamedThreat(Creature const* creature)
+    {
+        if (!creature || creature->GetZoneId() != AREA_HILLSBRAD_FOOTHILLS)
+            return false;
+        switch (creature->GetEntry())
+        {
+            case 232:
+            case 2304:
+            case 2305:
+            case 2335:
+            case 2403:
+            case 2427:
+            case 2428:
+            case 2448:
+            case 2449:
+            case 2450:
+            case 2451:
+            case 14275:
+            case 14276:
+            case 14277:
+            case 14278:
+            case 14279:
+            case 14280:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     int32 OldSchoolNamedThreatOffset(Creature const* creature)
     {
         if (!creature)
             return 0;
+
+        if (IsOldSchoolHillsbradNamedThreat(creature))
+        {
+            switch (creature->GetEntry())
+            {
+                case 2304:
+                    return 8;
+                case 2305:
+                case 2335:
+                case 14275:
+                case 14277:
+                    return 6;
+                case 232:
+                case 2403:
+                case 2448:
+                case 2449:
+                case 2451:
+                    return 2;
+                default:
+                    return 4;
+            }
+        }
 
         if (IsOldSchoolSilverpineNamedThreat(creature))
         {
@@ -1531,7 +1584,7 @@ namespace CoAChallenges
         {
             if (IsOldSchoolStonetalonNamedThreat(creature) || IsOldSchoolAshenvaleNamedThreat(creature)
                 || IsOldSchoolSouthernNamedThreat(creature) || IsOldSchoolTirisfalNamedThreat(creature)
-                || IsOldSchoolSilverpineNamedThreat(creature))
+                || IsOldSchoolSilverpineNamedThreat(creature) || IsOldSchoolHillsbradNamedThreat(creature))
             {
                 int32 const offset = OldSchoolNamedThreatOffset(creature);
                 return offset >= 10 ? 300 : offset >= 8 ? 200 : 150;
@@ -1562,6 +1615,76 @@ namespace CoAChallenges
     {
         if (!creature)
             return { nullptr, nullptr, 0 };
+
+        if (creature->GetZoneId() == AREA_HILLSBRAD_FOOTHILLS)
+        {
+            switch (creature->GetEntry())
+            {
+                case 2264:
+                case 2265:
+                case 2266:
+                case 2267:
+                case 2360:
+                    return { "Hillsbrad settlement", "worker", 1 };
+                case 2268:
+                case 2270:
+                    return { "Hillsbrad settlement", "guard", 2 };
+                case 232:
+                case 2403:
+                case 2451:
+                    return { "Hillsbrad settlement", "farmer", 2 };
+                case 2387:
+                case 2448:
+                case 2449:
+                    return { "Hillsbrad settlement", "town official", 3 };
+                case 2335:
+                    return { "Hillsbrad settlement", "magistrate", 5 };
+                case 2269:
+                    return { "Azurelode mine", "miner", 1 };
+                case 2503:
+                    return { "Azurelode mine", "foreman", 3 };
+                case 2305:
+                case 2450:
+                    return { "Azurelode mine", "named overseer", 5 };
+                case 2344:
+                case 7360:
+                    return { "Dun Garok fortress", "soldier", 2 };
+                case 2345:
+                    return { "Dun Garok fortress", "rifleman", 3 };
+                case 2346:
+                    return { "Dun Garok fortress", "priest", 4 };
+                case 2304:
+                    return { "Dun Garok fortress", "captain", 6 };
+                case 2260:
+                    return { "Syndicate camp", "rogue", 1 };
+                case 2261:
+                    return { "Syndicate camp", "watchman", 2 };
+                case 2244:
+                    return { "Syndicate camp", "shadow mage", 4 };
+                case 2427:
+                case 2428:
+                    return { "Syndicate camp", "jailor", 4 };
+                case 2368:
+                case 2369:
+                    return { "Daggerspine shore", "hunter", 2 };
+                case 2370:
+                case 2371:
+                    return { "Daggerspine shore", "siren", 4 };
+                case 14277:
+                    return { "Daggerspine shore", "named leader", 6 };
+                case 2374:
+                case 2375:
+                    return { "Torn Fin coast", "scout", 1 };
+                case 2376:
+                    return { "Torn Fin coast", "oracle", 3 };
+                case 2377:
+                    return { "Torn Fin coast", "tidehunter", 2 };
+                case 14276:
+                    return { "Torn Fin coast", "named leader", 4 };
+                default:
+                    return { nullptr, nullptr, 0 };
+            }
+        }
 
         if (creature->GetZoneId() == AREA_SILVERPINE_FOREST)
         {
@@ -4259,7 +4382,8 @@ namespace CoAChallenges
                 }
                 else if (IsOldSchoolBarrensNamedThreat(target) || IsOldSchoolStonetalonNamedThreat(target)
                     || IsOldSchoolAshenvaleNamedThreat(target) || IsOldSchoolSouthernNamedThreat(target)
-                    || IsOldSchoolTirisfalNamedThreat(target) || IsOldSchoolSilverpineNamedThreat(target))
+                    || IsOldSchoolTirisfalNamedThreat(target) || IsOldSchoolSilverpineNamedThreat(target)
+                    || IsOldSchoolHillsbradNamedThreat(target))
                     handler->PSendSysMessage("Named threat: {} carries elevated hidden danger and reward; "
                         "use the con estimate before engaging.", target->GetName());
 
@@ -4273,6 +4397,10 @@ namespace CoAChallenges
                         campThreat.camp, campThreat.role);
                     static std::vector<uint32> const campEntries =
                     {
+                        232, 2244, 2260, 2261, 2264, 2265, 2266, 2267, 2268, 2269, 2270,
+                        2304, 2305, 2335, 2344, 2345, 2346, 2360, 2368, 2369, 2370, 2371,
+                        2374, 2375, 2376, 2377, 2387, 2403, 2427, 2428, 2448, 2449, 2450,
+                        2451, 2503, 7360, 14276, 14277,
                         1769, 1770, 1772, 1773, 1779, 1782, 1865, 1866, 1867, 1868, 1869, 1870,
                         1889, 1892, 1893, 1896, 1912, 1913, 1914, 1915, 1924, 1939, 1940, 1942,
                         1943, 1944, 1947, 1953, 1954, 1955, 1956, 1973, 1974, 1983, 2283,
