@@ -87,6 +87,10 @@
       "metric": "system_message_contains",
       "text": "Named roamer: The Rake",
       "equals": 1
-    }
+    },
+    {"action": "attack_nearby", "actor": "old", "entry": 5807, "kill": true, "label": "The Old School group defeats the named roamer"},
+    {"action": "loot_nearby", "actor": "old", "entry": 5807, "label": "The group opens the named roamer's corpse"},
+    {"action": "assert", "label": "The Rake's rare spawn retains its level-10 armor upgrade", "actor": "old", "metric": "loot_entry", "item": 17922, "equals": 17922},
+    {"action": "assert", "label": "The Rake's upgrade keeps its authored item level", "actor": "old", "metric": "loot_item_level", "item": 17922, "equals": 10}
   ]
 }
