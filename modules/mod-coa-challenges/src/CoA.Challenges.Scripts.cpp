@@ -1153,6 +1153,7 @@ namespace CoAChallenges
     bool IsOldSchoolTirisfalNamedThreat(Creature const* creature);
     bool IsOldSchoolSilverpineNamedThreat(Creature const* creature);
     bool IsOldSchoolHillsbradNamedThreat(Creature const* creature);
+    bool IsOldSchoolArathiNamedThreat(Creature const* creature);
 
     bool IsOldSchoolGearLoot(Creature const* creature, Player const* player)
     {
@@ -1169,7 +1170,7 @@ namespace CoAChallenges
             || IsOldSchoolBarrensNamedThreat(creature) || IsOldSchoolStonetalonNamedThreat(creature)
             || IsOldSchoolAshenvaleNamedThreat(creature) || IsOldSchoolSouthernNamedThreat(creature)
             || IsOldSchoolTirisfalNamedThreat(creature) || IsOldSchoolSilverpineNamedThreat(creature)
-            || IsOldSchoolHillsbradNamedThreat(creature);
+            || IsOldSchoolHillsbradNamedThreat(creature) || IsOldSchoolArathiNamedThreat(creature);
         return namedThreat ? namedPercent : normalPercent;
     }
 
@@ -1453,10 +1454,57 @@ namespace CoAChallenges
         }
     }
 
+    bool IsOldSchoolArathiNamedThreat(Creature const* creature)
+    {
+        if (!creature || creature->GetZoneId() != AREA_ARATHI_HIGHLANDS)
+            return false;
+        switch (creature->GetEntry())
+        {
+            case 2597:
+            case 2598:
+            case 2599:
+            case 2600:
+            case 2602:
+            case 2603:
+            case 2604:
+            case 2605:
+            case 2606:
+            case 2607:
+            case 2609:
+            case 2611:
+            case 2783:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     int32 OldSchoolNamedThreatOffset(Creature const* creature)
     {
         if (!creature)
             return 0;
+
+        if (IsOldSchoolArathiNamedThreat(creature))
+        {
+            switch (creature->GetEntry())
+            {
+                case 2597:
+                case 2607:
+                case 2611:
+                    return 10;
+                case 2598:
+                case 2602:
+                case 2783:
+                    return 8;
+                case 2599:
+                case 2605:
+                case 2606:
+                case 2609:
+                    return 6;
+                default:
+                    return 4;
+            }
+        }
 
         if (IsOldSchoolHillsbradNamedThreat(creature))
         {
@@ -1584,7 +1632,8 @@ namespace CoAChallenges
         {
             if (IsOldSchoolStonetalonNamedThreat(creature) || IsOldSchoolAshenvaleNamedThreat(creature)
                 || IsOldSchoolSouthernNamedThreat(creature) || IsOldSchoolTirisfalNamedThreat(creature)
-                || IsOldSchoolSilverpineNamedThreat(creature) || IsOldSchoolHillsbradNamedThreat(creature))
+                || IsOldSchoolSilverpineNamedThreat(creature) || IsOldSchoolHillsbradNamedThreat(creature)
+                || IsOldSchoolArathiNamedThreat(creature))
             {
                 int32 const offset = OldSchoolNamedThreatOffset(creature);
                 return offset >= 10 ? 300 : offset >= 8 ? 200 : 150;
@@ -1615,6 +1664,81 @@ namespace CoAChallenges
     {
         if (!creature)
             return { nullptr, nullptr, 0 };
+
+        if (creature->GetZoneId() == AREA_ARATHI_HIGHLANDS)
+        {
+            switch (creature->GetEntry())
+            {
+                case 2552:
+                case 2554:
+                case 2556:
+                    return { "Witherbark village", "hunter", 1 };
+                case 2553:
+                case 2555:
+                case 2557:
+                    return { "Witherbark village", "spellcaster", 3 };
+                case 2558:
+                    return { "Witherbark village", "berserker", 4 };
+                case 2605:
+                case 2606:
+                    return { "Witherbark village", "named leader", 6 };
+                case 2562:
+                case 2564:
+                case 2566:
+                    return { "Boulderfist stronghold", "brute", 2 };
+                case 2567:
+                case 2570:
+                    return { "Boulderfist stronghold", "spellcaster", 4 };
+                case 2569:
+                case 2571:
+                    return { "Boulderfist stronghold", "overseer", 5 };
+                case 2602:
+                case 2604:
+                    return { "Boulderfist stronghold", "named leader", 6 };
+                case 2572:
+                case 2573:
+                case 2574:
+                    return { "Drywhisker mine", "miner", 1 };
+                case 2609:
+                    return { "Drywhisker mine", "geomancer", 5 };
+                case 2583:
+                case 2584:
+                case 2738:
+                    return { "Stromgarde garrison", "soldier", 2 };
+                case 2585:
+                    return { "Stromgarde garrison", "vindicator", 4 };
+                case 2240:
+                case 2241:
+                case 2242:
+                case 2586:
+                case 2587:
+                case 2588:
+                case 2589:
+                    return { "Syndicate occupation", "scout", 1 };
+                case 2243:
+                case 2245:
+                case 2246:
+                case 2247:
+                    return { "Syndicate occupation", "enforcer", 3 };
+                case 2319:
+                case 2590:
+                case 2591:
+                    return { "Syndicate occupation", "spellcaster", 4 };
+                case 2597:
+                case 2598:
+                case 2599:
+                case 2783:
+                    return { "Syndicate occupation", "named leader", 6 };
+                case 2595:
+                case 2775:
+                    return { "Daggerspine reef", "raider", 2 };
+                case 2596:
+                case 2807:
+                    return { "Daggerspine reef", "wavecaller", 4 };
+                default:
+                    return { nullptr, nullptr, 0 };
+            }
+        }
 
         if (creature->GetZoneId() == AREA_HILLSBRAD_FOOTHILLS)
         {
@@ -4383,12 +4507,14 @@ namespace CoAChallenges
                 else if (IsOldSchoolBarrensNamedThreat(target) || IsOldSchoolStonetalonNamedThreat(target)
                     || IsOldSchoolAshenvaleNamedThreat(target) || IsOldSchoolSouthernNamedThreat(target)
                     || IsOldSchoolTirisfalNamedThreat(target) || IsOldSchoolSilverpineNamedThreat(target)
-                    || IsOldSchoolHillsbradNamedThreat(target))
+                    || IsOldSchoolHillsbradNamedThreat(target) || IsOldSchoolArathiNamedThreat(target))
                     handler->PSendSysMessage("Named threat: {} carries elevated hidden danger and reward; "
                         "use the con estimate before engaging.", target->GetName());
 
                 if (target->GetZoneId() == AREA_SILVERPINE_FOREST && target->GetEntry() == 2529)
                     handler->SendSysMessage("Roaming threat: Son of Arugal. Watch its route before choosing a hunting spot.");
+                if (target->GetZoneId() == AREA_ARATHI_HIGHLANDS && target->GetEntry() == 2611)
+                    handler->SendSysMessage("Roaming threat: Fozruk. Watch its route before choosing a hunting spot.");
 
                 OldSchoolCampThreat const campThreat = GetOldSchoolCampThreat(target);
                 if (campThreat.camp)
@@ -4397,6 +4523,11 @@ namespace CoAChallenges
                         campThreat.camp, campThreat.role);
                     static std::vector<uint32> const campEntries =
                     {
+                        2240, 2241, 2242, 2243, 2245, 2246, 2247, 2319, 2552, 2553, 2554,
+                        2555, 2556, 2557, 2558, 2562, 2564, 2566, 2567, 2569, 2570, 2571,
+                        2572, 2573, 2574, 2583, 2584, 2585, 2586, 2587, 2588, 2589, 2590,
+                        2591, 2595, 2596, 2597, 2598, 2599, 2602, 2604, 2605, 2606, 2609,
+                        2738, 2775, 2783, 2807,
                         232, 2244, 2260, 2261, 2264, 2265, 2266, 2267, 2268, 2269, 2270,
                         2304, 2305, 2335, 2344, 2345, 2346, 2360, 2368, 2369, 2370, 2371,
                         2374, 2375, 2376, 2377, 2387, 2403, 2427, 2428, 2448, 2449, 2450,
