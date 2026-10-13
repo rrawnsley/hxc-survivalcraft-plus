@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Stonetalon named-threat bonus stays within its zone",
-  "contract": "A Stonetalon rare summoned in the Barrens retains native threat in both Old School trials: at equal native level 25 its con is White, rank-adjusted health remains, and kill XP estimate is 0.02x after the 0.25% pace. It is not identified as a named threat there. Existing native creature aggro and assistance behavior is unchanged. Temporary fixtures do not exercise persistent-spawn assistance.",
+  "contract": "A Stonetalon rare summoned in the Barrens retains native threat in both Old School trials: at equal native level 25 its con is White, rank-adjusted health remains, and kill XP estimate is 1.00x after the 50.00% pace. It is not identified as a named threat there. Existing native creature aggro and assistance behavior is unchanged. Temporary fixtures do not exercise persistent-spawn assistance.",
   "timeout_ms": 90000,
   "location": {
     "map": 1,
@@ -95,8 +95,8 @@
       "actor": "old",
       "metric": "system_message_contains",
       "equals": 1,
-      "label": "old: kill XP: 0.02x base (0.25% Old School pace).",
-      "text": "kill XP: 0.02x base (0.25% Old School pace)."
+      "label": "old: kill XP: 1.00x base (50.00% Old School pace).",
+      "text": "kill XP: 1.00x base (50.00% Old School pace)."
     },
     {
       "action": "assert",
@@ -162,8 +162,8 @@
       "actor": "hardcore",
       "metric": "system_message_contains",
       "equals": 1,
-      "label": "hardcore: kill XP: 0.02x base (0.25% Old School pace).",
-      "text": "kill XP: 0.02x base (0.25% Old School pace)."
+      "label": "hardcore: kill XP: 1.00x base (50.00% Old School pace).",
+      "text": "kill XP: 1.00x base (50.00% Old School pace)."
     },
     {
       "action": "assert",

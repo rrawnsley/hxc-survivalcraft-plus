@@ -106,12 +106,12 @@ level difference, and kill experience use that hidden threat rating; the rating 
 spawn and never scales to the player. Native creature levels remain unchanged. Temporary creatures
 without a spawn ID skip the random spread; authored named-threat and Mulgore camp-role bonuses still
 apply. Elite and boss ranks retain their combat-stat multipliers. Grey creatures have
-2x health, 1x damage and 1x con-tier kill XP before the threat-offset stat adjustment; green 3x/2x/2x;
-blue 5x/3x/3x; white 8x/5x/4x; yellow 12x/7x/6x; red 16x/10x/8x; and purple 24x/14x/10x.
-Elites and bosses multiply those values further. Old School applies a configurable 0.25% pace to all XP
-sources, then applies the creature con multiplier to kill XP; a white kill therefore awards 0.01x the
-ordinary creature XP, a red kill 0.02x, and a purple kill 0.025x before the rested-camp bonus. Quest and
-other non-creature XP awards are 0.25% of normal. The pace is configured in basis points (25 = 0.25%),
+2x health, 1x damage and 0.50x con-tier kill XP; green 3x/2x/0.75x; blue 5x/3x/0.90x;
+white 8x/5x/1x; yellow 12x/7x/1.5x; red 16x/10x/2x; and purple 24x/14x/3x.
+Elites and bosses multiply those values further. Old School applies a configurable 50% pace to all XP
+sources, then applies the creature con multiplier to kill XP; a white kill therefore awards 0.5x the
+ordinary creature XP, a red kill 1x, and a purple kill 1.5x before the rested-camp bonus. Quest and
+other non-creature XP awards are 50% of normal. The pace is configured in basis points (5000 = 50%),
 and fractional XP carries between awards. Critters and
 player-owned units are excluded. Restricted tapping prevents players in another trial from
 assisting with the kill or claiming its rewards.
@@ -177,8 +177,8 @@ Old School, the existing recipes continue to use Simple Wood. The placed fire is
 Sit beside it outside combat to receive the
 existing camp recovery. In either Old School trial, staying near a live camp replenishes a rested
 timer up to 20 minutes; time away from camp spends it while you are online and alive. A creature kill
- receives 15% additional XP while the timer has time remaining, after the trial's 0.25% XP pace and con
- multiplier. Quest XP uses the 0.25% trial pace without the rested kill bonus. Old School
+ receives 15% additional XP while the timer has time remaining, after the trial's 50% XP pace and con
+ multiplier. Quest XP uses the 50% trial pace without the rested kill bonus. Old School
 does not consume the standard WoW rested-XP pool while its trial bonus is active. Sitting remains
 necessary for the existing health/mana recovery and Fellowship benefits. The temporary `.coa camp`
 claim command was removed; a placed camp is the actual camp marker and benefit source.

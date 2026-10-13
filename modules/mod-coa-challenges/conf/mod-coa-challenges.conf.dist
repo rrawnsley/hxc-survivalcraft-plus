@@ -26,14 +26,13 @@
 CoAChallenges.Enable = 1
 
 # Old School and Old School - Hardcore apply this percentage to all experience
-# sources. Creature-kill experience then receives the additional con multiplier,
-# and the rested camp bonus is applied afterward. Values are basis points:
-# 25 = 0.25%, 100 = 1%, 10000 = 100%. Creature kills receive the con multiplier
-# (white 4x through purple 10x), so white kills pay 1% and purple kills 2.5% of
-# ordinary creature XP before rested camp bonus. Quest and other non-kill XP pay
-# 0.25%. Fractional XP carries between awards.
-# Default: 25
-CoAChallenges.OldSchool.ExperienceBasisPoints = 25
+# sources. Creature-kill experience then receives a con multiplier in hundredths:
+# grey 0.50x, green 0.75x, blue 0.90x, white 1x, yellow 1.5x, red 2x, purple 3x.
+# Values are basis points: 5000 = 50%, 10000 = 100%. At the default, quest and
+# white-con XP pay 50% of normal; red pays 100% and purple 150% before rested XP.
+# Fractional XP carries between awards.
+# Default: 5000
+CoAChallenges.OldSchool.ExperienceBasisPoints = 5000
 
 # During either Old School trial, rolled creature armor and weapon drops across
 # all zones have a chance to remain in the loot. Quest items, materials, and

@@ -1113,7 +1113,7 @@ namespace CoAChallenges
     uint32 OldSchoolExperienceBasisPoints()
     {
         uint32 const configured = sConfigMgr->GetOption<uint32>(
-            "CoAChallenges.OldSchool.ExperienceBasisPoints", 25);
+            "CoAChallenges.OldSchool.ExperienceBasisPoints", 5000);
         return std::min(configured, 10000u);
     }
 
@@ -1210,7 +1210,7 @@ namespace CoAChallenges
         char const* con;
         uint32 healthPercent;
         uint32 damageMultiplier;
-        uint32 experienceMultiplier;
+        uint32 experienceMultiplierHundredths;
     };
 
     bool IsOldSchoolBarrensNamedThreat(Creature const* creature)
@@ -1344,19 +1344,19 @@ namespace CoAChallenges
         int32 const levelDifference = int32(OldSchoolThreatLevel(creature)) - int32(player->GetLevel());
         OldSchoolPowerProfile profile;
         if (levelDifference <= -6)
-            profile = { "Grey", 200, 1, 1 };
+            profile = { "Grey", 200, 1, 50 };
         else if (levelDifference <= -3)
-            profile = { "Green", 300, 2, 2 };
+            profile = { "Green", 300, 2, 75 };
         else if (levelDifference < 0)
-            profile = { "Blue", 500, 3, 3 };
+            profile = { "Blue", 500, 3, 90 };
         else if (levelDifference == 0)
-            profile = { "White", 800, 5, 4 };
+            profile = { "White", 800, 5, 100 };
         else if (levelDifference <= 2)
-            profile = { "Yellow", 1200, 7, 6 };
+            profile = { "Yellow", 1200, 7, 150 };
         else if (levelDifference <= 4)
-            profile = { "Red", 1600, 10, 8 };
+            profile = { "Red", 1600, 10, 200 };
         else
-            profile = { "Purple", 2400, 14, 10 };
+            profile = { "Purple", 2400, 14, 300 };
 
         float const threatStatScale = std::exp2(float(OldSchoolThreatOffset(creature)) / 25.0f);
         profile.healthPercent = std::max(1u, uint32(std::lround(profile.healthPercent * threatStatScale)));
@@ -1367,18 +1367,18 @@ namespace CoAChallenges
             case CREATURE_ELITE_ELITE:
                 profile.healthPercent = profile.healthPercent * 3 / 2;
                 profile.damageMultiplier = (profile.damageMultiplier * 3 + 1) / 2;
-                profile.experienceMultiplier = (profile.experienceMultiplier * 3 + 1) / 2;
+                profile.experienceMultiplierHundredths = (profile.experienceMultiplierHundredths * 3 + 1) / 2;
                 break;
             case CREATURE_ELITE_RAREELITE:
                 profile.healthPercent *= 2;
                 profile.damageMultiplier *= 2;
-                profile.experienceMultiplier *= 2;
+                profile.experienceMultiplierHundredths *= 2;
                 break;
             case CREATURE_ELITE_WORLDBOSS:
                 profile.con = "Purple boss";
                 profile.healthPercent *= 2;
                 profile.damageMultiplier *= 2;
-                profile.experienceMultiplier *= 2;
+                profile.experienceMultiplierHundredths *= 2;
                 break;
             default:
                 break;
@@ -1548,17 +1548,16 @@ namespace CoAChallenges
     {
         float extra = 0.0f;
         uint32 damageMultiplier = 1;
-        uint32 experienceMultiplier = 1;
+        uint32 experienceMultiplierHundredths = 1;
         uint32 healthPercent = 100;
         char const* con = "White";
     };
 
-    // Old School awards fractional XP at its deliberately low pace. Carry the
-    // remainder within the player session so many small kill/quest awards add
-    // up to the configured rate instead of rounding each event down or up.
+    // Carry fractional Old School XP within the player session so small awards
+    // add up to the configured rate instead of rounding each event.
     struct OldSchoolXPProgress : DataMap::Base
     {
-        uint32 remainder = 0; // ten-thousandths of one XP
+        uint32 remainder = 0;
     };
 
     void ChangeMaxHealthKeepingPct(Creature* creature, float extra, bool apply)
@@ -1591,7 +1590,7 @@ namespace CoAChallenges
             auto* state = new OldSchoolHealth();
             state->extra = float(CalculatePct(creature->GetMaxHealth(), profile.healthPercent - 100));
             state->damageMultiplier = profile.damageMultiplier;
-            state->experienceMultiplier = profile.experienceMultiplier;
+            state->experienceMultiplierHundredths = profile.experienceMultiplierHundredths;
             state->healthPercent = profile.healthPercent;
             state->con = profile.con;
             creature->CustomData.Set(OldSchoolHealthKey, state);
@@ -2334,25 +2333,26 @@ namespace CoAChallenges
             {
                 uint64 scaledAmount = uint64(amount) * OldSchoolExperienceBasisPoints();
                 uint64 scaleNumerator = 100;
+                uint32 experienceMultiplierHundredths = 100;
                 if (xpSource == XPSOURCE_KILL && victim && victim->IsCreature()
                     && OldSchoolCreature(victim->ToCreature())
                     && TappingAllowsRewards(player, victim->ToCreature()))
                 {
                     Creature* creature = victim->ToCreature();
                     OldSchoolHealth* scaling = creature->CustomData.Get<OldSchoolHealth>(OldSchoolHealthKey);
-                    uint32 const multiplier = scaling ? scaling->experienceMultiplier
-                        : GetOldSchoolPowerProfile(player, creature).experienceMultiplier;
-                    scaledAmount *= multiplier;
+                    experienceMultiplierHundredths = scaling ? scaling->experienceMultiplierHundredths
+                        : GetOldSchoolPowerProfile(player, creature).experienceMultiplierHundredths;
 
                     if (CoANeeds::ReadOldSchoolRestedSeconds &&
                         CoANeeds::ReadOldSchoolRestedSeconds(player->GetGUID().GetCounter()))
                         scaleNumerator = 115;
                 }
+                scaledAmount *= experienceMultiplierHundredths;
                 scaledAmount *= scaleNumerator;
                 OldSchoolXPProgress* progress = player->CustomData.GetDefault<OldSchoolXPProgress>(OldSchoolXPProgressKey);
                 uint64 accumulated = scaledAmount + progress->remainder;
-                amount = static_cast<uint32>(std::min<uint64>(accumulated / 1000000, UINT32_MAX));
-                progress->remainder = static_cast<uint32>(accumulated % 1000000);
+                amount = static_cast<uint32>(std::min<uint64>(accumulated / 100000000, UINT32_MAX));
+                progress->remainder = static_cast<uint32>(accumulated % 100000000);
             }
 
             // NO_KILL_CREDIT_UNLESS_AT_DISADVANTAGE ("Punching Up" / Overwhelming
@@ -3413,9 +3413,10 @@ namespace CoAChallenges
                 OldSchoolPowerProfile const profile = GetOldSchoolPowerProfile(player, target);
                 uint32 const healthPercent = scaling ? scaling->healthPercent : profile.healthPercent;
                 uint32 const damageMultiplier = scaling ? scaling->damageMultiplier : profile.damageMultiplier;
-                uint32 const experienceMultiplier = scaling ? scaling->experienceMultiplier : profile.experienceMultiplier;
+                uint32 const experienceMultiplierHundredths = scaling
+                    ? scaling->experienceMultiplierHundredths : profile.experienceMultiplierHundredths;
                 float const experiencePercent = OldSchoolExperienceBasisPoints() / 100.0f;
-                float const effectiveKillXpMultiplier = float(experienceMultiplier) * experiencePercent / 100.0f;
+                float const effectiveKillXpMultiplier = float(experienceMultiplierHundredths) * experiencePercent / 10000.0f;
                 char const* con = scaling ? scaling->con : profile.con;
                 if (!scaling)
                     health = health * healthPercent / 100;
