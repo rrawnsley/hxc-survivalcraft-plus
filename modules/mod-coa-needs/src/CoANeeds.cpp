@@ -47,6 +47,7 @@ constexpr uint32 WindAbility = 996017;
 constexpr uint32 CampRest = 996100;
 constexpr uint32 OldSchoolRestedCapMs = 20 * 60 * 1000;
 constexpr uint32 OldSchoolRestedRate = 10;
+constexpr std::array<uint32, 3> OldSchoolCampLogs = { 8210210, 8210211, 8210212 };
 constexpr uint32 Fellowship = 996103;
 constexpr uint32 CampAbility = 996106;
 constexpr uint32 PackAbility = 996109;
@@ -351,9 +352,16 @@ void PlaceCamp(Player* player, State& state, uint32 tier)
     if (tier > 2 || player->GetPureSkillValue(SurvivalistSkill) < RecipeSkill(CampAbility + tier) || state.campReady > now)
         return;
     uint32 leather = tier == 1 ? 2318 : 4234;
-    if (!player->HasItemCount(4470, 2, false) || (tier && !player->HasItemCount(leather, 4, false)))
+    bool const oldSchool = CoANeeds::IsOldSchoolTrial &&
+        CoANeeds::IsOldSchoolTrial(player->GetGUID().GetCounter());
+    uint32 const wood = oldSchool ? OldSchoolCampLogs[tier] : 4470;
+    if (!player->HasItemCount(wood, 2, false) || (tier && !player->HasItemCount(leather, 4, false)))
     {
-        ChatHandler(player->GetSession()).SendSysMessage(tier == 0 ? "Campfire requires 2 Simple Wood." :
+        ChatHandler(player->GetSession()).SendSysMessage(oldSchool ?
+            tier == 0 ? "Campfire requires 2 Forestwood Logs." :
+            tier == 1 ? "Shelter requires 2 Wildwood Logs and 4 Light Leather." :
+            "Hearthstead requires 2 Everwood Logs and 4 Heavy Leather." :
+            tier == 0 ? "Campfire requires 2 Simple Wood." :
             tier == 1 ? "Shelter requires 2 Simple Wood and 4 Light Leather." :
             "Hearthstead requires 2 Simple Wood and 4 Heavy Leather.");
         return;
@@ -378,7 +386,7 @@ void PlaceCamp(Player* player, State& state, uint32 tier)
         }
     }
     PackCamp(player);
-    player->DestroyItemCount(4470, 2, true);
+    player->DestroyItemCount(wood, 2, true);
     if (tier)
         player->DestroyItemCount(leather, 4, true);
     Camp camp;
