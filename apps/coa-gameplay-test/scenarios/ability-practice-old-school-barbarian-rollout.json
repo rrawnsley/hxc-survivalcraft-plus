@@ -1,0 +1,373 @@
+{
+  "schema": 1,
+  "name": "Old School ability practice rollout: Barbarian",
+  "contract": "Qualification candidate: owned Old School enrollment, saved definition2-to4 fraction, one original-cast award, promoted DisplaySpellId menu, reconnect, exit retention, native damage after exit and permanent exclusion from both trials.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 12,
+      "level": 8,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "name": "Apbarblive",
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 8,
+      "health": 1000000,
+      "distance": 3,
+      "stationary": true,
+      "reaction": 0,
+      "faction": 14
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "start_challenge",
+      "actor": "caster",
+      "challenge": 9001,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "challenge_start_code",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 201
+    },
+    {
+      "action": "add_item",
+      "actor": "caster",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "caster",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 801576
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.12.801576",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.12.801576",
+      "index": 1,
+      "value": 2
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.12.801576",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.12.801576",
+      "index": 3,
+      "value": 9
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.12.801576",
+      "index": 4,
+      "value": 15930
+    },
+    {
+      "action": "relog",
+      "actor": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "equals": 4,
+      "source": "core.hxc.ability_practice.12.801576",
+      "index": 1,
+      "label": "Prior definition converted to current"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "equals": 9,
+      "source": "core.hxc.ability_practice.12.801576",
+      "index": 3
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "equals": 15930,
+      "source": "core.hxc.ability_practice.12.801576",
+      "index": 4
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "equals": 0,
+      "spell": 802444
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "full": true
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 801576,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "equals": 10,
+      "source": "core.hxc.ability_practice.12.801576",
+      "index": 3,
+      "label": "One meaningful cast reaches rank boundary"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "equals": 0,
+      "source": "core.hxc.ability_practice.12.801576",
+      "index": 4,
+      "label": "One cast receives one award"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "equals": 1,
+      "spell": 802444,
+      "within_ms": 5000
+    },
+    {
+      "action": "whisper",
+      "actor": "caster",
+      "to": "Apbarblive",
+      "text": "HXAP\tHELLO|7",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "HXAP\tMODE|ACTIVE",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "|12|8|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "|801576|802444|2|10|0|",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "relog",
+      "actor": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "equals": 10,
+      "source": "core.hxc.ability_practice.12.801576",
+      "index": 3
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "equals": 0,
+      "source": "core.hxc.ability_practice.12.801576",
+      "index": 4
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "equals": 1,
+      "spell": 802444
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "stop_challenge",
+      "actor": "caster",
+      "challenge": 9001
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "equals": 1,
+      "source": "core.hxc.old_school_practice_exit",
+      "index": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 11000
+    },
+    {
+      "action": "whisper",
+      "actor": "caster",
+      "to": "Apbarblive",
+      "text": "HXAP\tHELLO|7",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "HXAP\tMODE|OLD_SCHOOL_ENDED",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 3,
+      "full": true
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "caster",
+      "spell": 802444
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "health",
+      "save_as": "before_exit_cast"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 802444,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "health",
+      "relative_to": "before_exit_cast",
+      "max": -1,
+      "within_ms": 5000,
+      "label": "Native combat cast still causes damage after exit"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "equals": 10,
+      "source": "core.hxc.ability_practice.12.801576",
+      "index": 3
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "equals": 0,
+      "source": "core.hxc.ability_practice.12.801576",
+      "index": 4,
+      "label": "No practice outside challenge"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "equals": 1,
+      "spell": 802444
+    },
+    {
+      "action": "relog",
+      "actor": "caster"
+    },
+    {
+      "action": "start_challenge",
+      "actor": "caster",
+      "challenge": 9001,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "challenge_start_code",
+      "equals": 12
+    },
+    {
+      "action": "start_challenge",
+      "actor": "caster",
+      "challenge": 9002,
+      "level": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "challenge_start_code",
+      "equals": 12
+    }
+  ]
+}

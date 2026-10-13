@@ -1,0 +1,190 @@
+{
+  "schema": 1,
+  "name": "Old School ability practice nonparticipant: Reaper",
+  "contract": "Qualification candidate: useful native casts and native rank learning outside both trials, no practice credit or saved-record conversion; menu requests enrollment.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 30,
+      "level": 8,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "name": "Apreaplive"
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 8,
+      "health": 1000000,
+      "distance": 3,
+      "stationary": true,
+      "reaction": 0,
+      "faction": 14
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 573316
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.30.573316",
+      "index": 0,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.30.573316",
+      "index": 1,
+      "value": 4
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.30.573316",
+      "index": 2,
+      "value": 1
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.30.573316",
+      "index": 3,
+      "value": 9
+    },
+    {
+      "action": "set_player_setting",
+      "actor": "caster",
+      "source": "core.hxc.ability_practice.30.573316",
+      "index": 4,
+      "value": 101
+    },
+    {
+      "action": "relog",
+      "actor": "caster"
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 803031,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "power": 0,
+      "full": true
+    },
+    {
+      "action": "snapshot",
+      "actor": "enemy",
+      "metric": "health",
+      "save_as": "native_health"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 573316,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "enemy",
+      "metric": "health",
+      "relative_to": "native_health",
+      "max": -1,
+      "label": "Nonparticipant retains native damage"
+    },
+    {
+      "action": "relog",
+      "actor": "caster"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.30.573316",
+      "index": 0,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.30.573316",
+      "index": 1,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.30.573316",
+      "index": 2,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.30.573316",
+      "index": 3,
+      "equals": 9
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "player_setting",
+      "source": "core.hxc.ability_practice.30.573316",
+      "index": 4,
+      "equals": 101
+    },
+    {
+      "action": "whisper",
+      "actor": "caster",
+      "to": "Apreaplive",
+      "text": "HXAP\tHELLO|7",
+      "language": 4294967295
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "whisper_contains",
+      "from": "caster",
+      "text": "HXAP\tMODE|OLD_SCHOOL_REQUIRED",
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 573317
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "knows_spell",
+      "spell": 573317,
+      "equals": 1,
+      "label": "Native learning outside either trial has no proficiency gate"
+    }
+  ]
+}

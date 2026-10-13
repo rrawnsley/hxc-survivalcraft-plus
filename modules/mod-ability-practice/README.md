@@ -1,5 +1,109 @@
 # Ability practice development and live pilot
 
+## Seven-class cloud qualification candidate — 12 October 2026
+
+Cloud branch `codex/ability-practice-seven-cloud` starts at frozen practice commit
+`51469e7ccce4d09fb2df790936f6ba336954cc60` and merges deployed Old School/Barrens baseline
+`172a2d268680d5b10c22bbeb0eea42d5054922a7`. Neither published input branch is changed.
+The baseline merge retains camp/rested recovery, global threat, social pulls and named patrols.
+Subsequent zone work remains a separate branch and must be reviewed before a later release merge.
+
+These classes already have declared development profiles. The new fixtures exercise those profiles;
+no new native ability, acquisition ladder, proficiency category or production default is invented.
+All seven remain **unqualified for live enablement** until their native fixtures and production
+checks pass. Cloud source/harness compilation does not establish effective DBC/SQL behavior.
+The utility mechanic metadata now explicitly defaults both optional value guards to empty, preserving
+their prior semantics while allowing the existing GCC `-Werror` harness to compile.
+
+| Class | Ranked declarations | Existing mastery | Rollout ability and native rank 2 | Definition |
+| --- | ---: | --- | --- | ---: |
+| Barbarian 12 | 8 | None | Ancestral Strike 801576 → 802444 at 8 | 4 |
+| Witch Hunter 15 | 9 | Pommel Smash 680515 | Darkslayer 804179 → 680256 at 6 | 4 |
+| Guardian 18 | 9 | None | Pulverize 800311 → 802439 at 8 | 4 |
+| Bloodmage 20 | 12 | Lunge 500126 | Bloodbolt 804685 → 806928 at 14 | 4 |
+| Cultist 25 | 10 | None | Entropic Slam 804152 → 555351 at 20 | 5 |
+| Tinker 28 | 6 | None | Scrap Shot 500549 → 500556 at 10 | 4 |
+| Reaper 30 | 8 | Soul Capture 561289; Soulslam 504014 | Soulrend 573316 → 573317 at 8 | 5 |
+
+The `ability-practice-old-school-{class}-rollout` fixtures cover owned trial enrollment,
+retained saved fractions, single awards, automatic promotion, promoted DisplaySpellId menu rows,
+reconnect, voluntary exit outside combat, native post-exit damage and permanent denial of both
+9001 and 9002. Witch Hunter, Bloodmage and Reaper use 9002; the other four use 9001.
+The seven matching `-nonparticipant` fixtures check useful native casts, unchanged saved records,
+OLD_SCHOOL_REQUIRED menus and native rank learning without a practice gate.
+HELLO requests are separated by at least 11 seconds. These are authored qualification candidates,
+not recorded native passes. The existing addon harness checks automatic opening and minimized restore.
+
+Specialized review retains current original-cast attribution: Bloodmage leech damage earns one use
+without a second self-heal award; Taldaram's Torment and Sanguine Rupture use their existing periodic/helper
+receipts. Guardian Advance retains its existing helper attribution. Cultist Whispers retains actual
+new attack-power reduction credit; Entropic Slam and Chastise retain their reviewed 4x weighting.
+Reaper Soulrend retains 9x setup credit; Soul Capture requires a qualifying unused corpse and useful
+native recovery, and Soulslam retains implemented mastery. Tinker summon/Mechsuit/turret and
+Witch Hunter pet/brand/setup candidates, plus other undeclared groups, remain native pending effective
+DBC/SQL, acquisition and attribution review. Source grouping alone cannot approve those abilities.
+Ordinary curves and the 30–60-minute target remain unchanged; actual combat cadence is unmeasured.
+
+### Cloud verification results
+
+Final candidate run `20261013-025518` reports **VERIFY ALL: FAILED**. Against frozen practice
+base `51469e7cc`, source9 passed, the complete Linux worldserver/native-unit build passed1024.3s,
+and the ability-practice C++/Lua5.1 harness passed6.6s. Its198rank policies,7164current comparisons,
+16weighted profiles and998typed snapshots include all21classes and automatic/minimized menu behavior.
+C++ style and whitespace passed. No active-client pixels or ordinary gameplay timing were observed.
+
+The full unit executable aborts in unchanged `ShapeshiftModelTest` because
+`GetAscensionIncarnationDisplay` reads an uninitialized CoA ENABLED configuration. The fixture,
+configuration cache, incarnation path and `Unit::GetModelForForm` body match the frozen practice base.
+This is an inherited unit-fixture initialization blocker, not a passing unit run. Native gameplay is
+unavailable: no worldserver configuration, mysql/mysqldump, test module directory, CoA DBCs or disposable
+world/database setup is accessible. No native scenario ran; no batch/acceleration sensitivity was measured.
+
+Initial full-main run `20261013-023747` reports **VERIFY ALL: FAILED**:17source checks passed,
+2inherited rule failures;52harnesses passed,36failed,63unavailable. The36failures comprise24DBC
+prerequisites,1Lua executable prerequisite,10unchanged unrelated harnesses and the GCC optional-default
+issue corrected here. Build was killed at the cloud8GiB memory limit; units/gameplay were blocked.
+An unchanged-input build retry `20261013-025143` was stopped once the memory cause was confirmed.
+The final build keeps default9jobs and uses a3-task Ninja compile pool plus1link task, with original
+-O2/-g1 flags; no further OOM kills occurred. No Windows build or live rollout was attempted.
+
+### Isolated qualification and release handoff
+
+1. Provision a cloud or disposable Windows test checkout of the candidate, the required CoA DBCs,
+   an effective world database and MySQL 8 credentials authorized to create `coa_test_*` schemas.
+   Keep credentials outside Git and reports. Read `docs/coa/verification.md` for settings.
+2. Copy `apps/coa-tests/ability_practice/native-qualification-old-school.conf` as `AbilityPractice.conf`
+   into a separate test module-config directory, together with the existing challenge/needs test
+   configurations. Realm enrollment is off; the all-21 class list is test-only, cutoff 1 pairs with
+   the parser and is ignored for trial enrollment. Catch-up is off for deterministic exact credit.
+3. Freeze the candidate and run `python -B tools/verify_all.py --base origin/main`. For the focused
+   real-clock native lifecycle suite use
+   `python -B tools/verify_all.py --stages gameplay --query ability-practice-old-school --gameplay-clock real --gameplay-jobs 1`. Pass the isolated
+   `--settings` file to both commands. Include `build` whenever native sources change. Do not
+   start a live server, run component tests directly or reuse a production database.
+4. Re-run specialized resource/helper/mastery regressions using their appropriate isolated
+   enrollment configuration, including Entropic Slam/Chastise/Soulrend, Advance, Bloodbolt,
+   Ravenous Strike, Sanguine Rupture, Pommel Smash, Lunge and Soul Capture/Soulslam. Complete
+   active-client menu and reconnect acceptance; mock Lua checks do not inspect game pixels.
+5. After native qualification, build/package the exact reviewed commit for Windows in an authorized
+   cloud Windows builder or hand off explicitly for Windows verification. A Linux worldserver is
+   not a replacement for the live Windows executable. Back up installed binaries, module configs,
+   addon and character settings; retain the old binary with its old config as a rollback pair.
+   Last handoff-qualified installed SHA256 is
+   `D14973CD5DE89935D51A59BA2102625B60D7F2701F391F6457CF058C7247AFE1`;
+   recheck the actual installed binary before deployment rather than assuming it is unchanged.
+6. In a separately authorized deployment window, retain the qualified production switches and
+   add only passing classes to `AbilityPractice.DevelopmentNewCharacterClassIds`, with
+   `AbilityPractice.RequireOldSchoolTrial = 1`. The eventual all-21 list is
+   `12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32`; do not copy the test
+   configuration wholesale. Confirm dataReady, own-trial enrollment in both modes, bot/native
+   exclusions, existing saved ranks/fractions, promoted menus, reconnect and irreversible exit
+   in production before calling any class shipped. Preserve public auth/world availability.
+
+Code, builds and tests for this candidate stay in the cloud. `C:/Azerothcore-CoA/server` is only
+handoff context; this work does not access or modify that Windows tree, the active client or live server.
+
+
 ## Tracker resizing and resource pacing —11October2026
 
 Addon0.5.12-development adds -/+ controls to the minimized tracker. Saved per-character scale ranges
