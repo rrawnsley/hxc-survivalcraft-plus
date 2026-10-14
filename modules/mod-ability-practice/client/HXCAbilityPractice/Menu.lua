@@ -609,7 +609,9 @@ Refresh = function()
             filterButton:SetText("Filter: " .. filterLabels[filterMode] .. " (" .. filterCounts[filterMode] .. ")")
         end
         local emptyView = "No abilities in this view."
-        if search ~= "" then emptyView = "No abilities match your search and filter in this view."
+        if search ~= "" then emptyView = tab == "upcoming"
+            and "No upcoming rank matches. Check My Skills for abilities you already know."
+            or "No abilities match your search and filter in this view."
         elseif filterMode ~= "all" then emptyView = "No abilities match this filter. Select Filter: All to see more."
         elseif tab == "session" then
             emptyView = (snapshot.schemaVersion < 4 or not session or not session.available)
