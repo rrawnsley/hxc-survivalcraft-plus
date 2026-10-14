@@ -107,6 +107,18 @@
       "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
     },
     {
+      "id": 15,
+      "name": "Dustwallow Marsh",
+      "profiles": 3,
+      "named": 3,
+      "camps": [
+        "Marshstalker raptor patrol",
+        "Cindermaw dragon patrol",
+        "Karn Grimtotem patrol"
+      ],
+      "source": "Authored Old School named spawns, loot, native models, and encounter abilities."
+    },
+    {
       "id": 16,
       "name": "Azshara",
       "profiles": 32,
@@ -229,8 +241,8 @@
     {
       "id": 141,
       "name": "Teldrassil",
-      "profiles": 35,
-      "named": 10,
+      "profiles": 37,
+      "named": 12,
       "camps": [
         "Barkshredder den",
         "Gnarlpine hold",
@@ -253,6 +265,18 @@
         "Twilight enclave"
       ],
       "source": "Native CoA creature templates/spawns plus terrain AreaTable data; explicit quest-spawned names use native templates."
+    },
+    {
+      "id": 357,
+      "name": "Feralas",
+      "profiles": 3,
+      "named": 3,
+      "camps": [
+        "Stormfang Woodpaw patrol",
+        "Hollowbark forest patrol",
+        "Soulchiller Gordunni patrol"
+      ],
+      "source": "Authored Old School named spawns, loot, native models, and encounter abilities."
     },
     {
       "id": 361,
