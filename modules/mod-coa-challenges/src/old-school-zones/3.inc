@@ -1,3 +1,6 @@
+    { 3, 996788, "Marshal Dargan Shadowforge patrol", "named roaming threat", 0, 150, true, true },
+    { 3, 996789, "Shaman Korruk Dustbelcher patrol", "named roaming threat", 0, 150, true, true },
+    { 3, 996790, "Borgash the Wyrmbreaker patrol", "named roaming threat", 0, 200, true, true },
     { 3, 92, "Elemental grounds", "hunter", 1, 100, false, false },
     { 3, 2701, "Dustbelcher stronghold", "hunter", 1, 100, false, false },
     { 3, 2715, "Dustbelcher stronghold", "hunter", 1, 100, false, false },

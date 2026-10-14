@@ -1,3 +1,6 @@
+    { 440, 996800, "Needlequeen Hazzali patrol", "named roaming threat", 0, 150, true, true },
+    { 440, 996801, "Thornroot the Parched patrol", "named roaming threat", 0, 150, true, true },
+    { 440, 996802, "Dunerend the Ancient patrol", "named roaming threat", 0, 200, true, true },
     { 440, 4133, "Silithid hive", "hunter", 1, 100, false, false },
     { 440, 5469, "Dunemaul stronghold", "named leader", 6, 150, true, true },
     { 440, 5471, "Dunemaul stronghold", "hunter", 1, 100, false, false },

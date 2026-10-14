@@ -1,3 +1,6 @@
+    { 618, 996821, "Shalara the Frost Prowler patrol", "named roaming threat", 0, 150, true, true },
+    { 618, 996822, "Thruk Snowpaw patrol", "named roaming threat", 0, 150, true, true },
+    { 618, 996823, "Morthul Hederine patrol", "named roaming threat", 0, 200, true, true },
     { 618, 7435, "Mazthoril nesting grounds", "elite guard", 4, 100, false, false },
     { 618, 7436, "Mazthoril nesting grounds", "elite guard", 4, 100, false, false },
     { 618, 7437, "Mazthoril nesting grounds", "spellcaster", 4, 100, false, false },

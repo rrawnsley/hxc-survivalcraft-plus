@@ -1,3 +1,6 @@
+    { 33, 996794, "Razorwake the River Hunter patrol", "named roaming threat", 0, 150, true, true },
+    { 33, 996795, "Silverback Stonehide patrol", "named roaming threat", 0, 150, true, true },
+    { 33, 996796, "Ogor Hexweaver patrol", "named roaming threat", 0, 200, true, true },
     { 33, 587, "Bloodscalp village", "hunter", 1, 100, false, false },
     { 33, 588, "Bloodscalp village", "hunter", 1, 100, false, false },
     { 33, 595, "Bloodscalp village", "hunter", 1, 100, false, false },

@@ -1,3 +1,6 @@
+    { 16, 996809, "Lord Theren the Unquiet patrol", "named roaming threat", 0, 150, true, true },
+    { 16, 996810, "Stormtalon the Twin Maw patrol", "named roaming threat", 0, 150, true, true },
+    { 16, 996811, "Orath Cliffbreaker patrol", "named roaming threat", 0, 200, true, true },
     { 16, 6116, "Highborne ruins", "hunter", 1, 100, false, false },
     { 16, 6117, "Highborne ruins", "hunter", 1, 100, false, false },
     { 16, 6118, nullptr, nullptr, 4, 150, true, true },

@@ -1,3 +1,6 @@
+    { 46, 996812, "Rokthar Blackrock patrol", "named roaming threat", 0, 150, true, true },
+    { 46, 996813, "Maldris the Ashbinder patrol", "named roaming threat", 0, 150, true, true },
+    { 46, 996814, "Vulthrax Searscale patrol", "named roaming threat", 0, 200, true, true },
     { 46, 7025, "Blackrock hold", "hunter", 1, 100, false, false },
     { 46, 7026, "Blackrock hold", "spellcaster", 4, 100, false, false },
     { 46, 7027, "Blackrock hold", "hunter", 1, 100, false, false },

@@ -1,3 +1,6 @@
+    { 8, 996791, "Veshka Blackwater patrol", "named roaming threat", 0, 150, true, true },
+    { 8, 996792, "Gorrul of the Lost Marsh patrol", "named roaming threat", 0, 150, true, true },
+    { 8, 996793, "Vaelra the Dreamless patrol", "named roaming threat", 0, 200, true, true },
     { 8, 747, "Stagalbog shore", "hunter", 1, 100, false, false },
     { 8, 755, "Lost One village", "hunter", 1, 100, false, false },
     { 8, 757, "Lost One village", "hunter", 1, 100, false, false },

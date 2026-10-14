@@ -1,3 +1,6 @@
+    { 490, 996818, "Skyshriek the Scarred patrol", "named roaming threat", 0, 150, true, true },
+    { 490, 996819, "Thunderback the Ancient patrol", "named roaming threat", 0, 150, true, true },
+    { 490, 996820, "King Bloodmaw patrol", "named roaming threat", 0, 200, true, true },
     { 490, 6498, "Devilsaur hunting grounds", "elite guard", 4, 100, false, true },
     { 490, 6505, "Ravasaur hunting grounds", "hunter", 1, 100, false, false },
     { 490, 6506, "Ravasaur hunting grounds", "hunter", 1, 100, false, false },

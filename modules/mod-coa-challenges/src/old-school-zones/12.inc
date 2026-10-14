@@ -1,3 +1,5 @@
+    { 12, 996780, "Northshire outer camps", "named starter threat", 0, 125, true, false },
+    { 12, 996781, "Northshire outer camps", "named starter threat", 0, 150, true, false },
     { 12, 996731, "Blackfang brood patrol", "named webbing spider", 0, 150, true, true },
     { 12, 996732, "Embercandle mine patrol", "named kobold firecaster", 0, 200, true, true },
     { 12, 996733, "Blackblade Defias patrol", "named brotherhood enforcer", 0, 200, true, true },

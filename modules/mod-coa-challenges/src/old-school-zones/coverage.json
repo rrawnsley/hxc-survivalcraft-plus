@@ -4,8 +4,8 @@
     {
       "id": 1,
       "name": "Dun Morogh",
-      "profiles": 29,
-      "named": 9,
+      "profiles": 34,
+      "named": 14,
       "camps": [
         "Dark Iron watch",
         "Frostmane hold",
@@ -18,8 +18,8 @@
     {
       "id": 3,
       "name": "Badlands",
-      "profiles": 31,
-      "named": 11,
+      "profiles": 34,
+      "named": 14,
       "camps": [
         "Dustbelcher stronghold",
         "Elemental grounds",
@@ -31,8 +31,8 @@
     {
       "id": 4,
       "name": "Blasted Lands",
-      "profiles": 34,
-      "named": 15,
+      "profiles": 37,
+      "named": 18,
       "camps": [
         "Defiler stronghold",
         "Nethergarde outpost",
@@ -43,8 +43,8 @@
     {
       "id": 8,
       "name": "Swamp of Sorrows",
-      "profiles": 20,
-      "named": 10,
+      "profiles": 23,
+      "named": 13,
       "camps": [
         "Lost One village",
         "Silt feeding grounds",
@@ -82,8 +82,8 @@
     {
       "id": 12,
       "name": "Elwynn Forest",
-      "profiles": 33,
-      "named": 9,
+      "profiles": 38,
+      "named": 14,
       "camps": [
         "Defias hideout",
         "Kobold mine",
@@ -95,8 +95,8 @@
     {
       "id": 14,
       "name": "Durotar",
-      "profiles": 31,
-      "named": 11,
+      "profiles": 36,
+      "named": 16,
       "camps": [
         "Burning Blade enclave",
         "Echo Isles ruins",
@@ -121,8 +121,8 @@
     {
       "id": 16,
       "name": "Azshara",
-      "profiles": 32,
-      "named": 10,
+      "profiles": 35,
+      "named": 13,
       "camps": [
         "Haldarr enclave",
         "Highborne ruins",
@@ -135,8 +135,8 @@
     {
       "id": 33,
       "name": "Stranglethorn Vale",
-      "profiles": 88,
-      "named": 20,
+      "profiles": 91,
+      "named": 23,
       "camps": [
         "Bloodsail camp",
         "Bloodscalp village",
@@ -152,8 +152,8 @@
     {
       "id": 36,
       "name": "Alterac Mountains",
-      "profiles": 33,
-      "named": 12,
+      "profiles": 36,
+      "named": 15,
       "camps": [
         "Crushridge stronghold",
         "Dalaran enclave",
@@ -215,8 +215,8 @@
     {
       "id": 46,
       "name": "Burning Steppes",
-      "profiles": 30,
-      "named": 11,
+      "profiles": 33,
+      "named": 14,
       "camps": [
         "Blackrock hold",
         "Dragon nesting grounds",
@@ -228,8 +228,8 @@
     {
       "id": 51,
       "name": "Searing Gorge",
-      "profiles": 23,
-      "named": 9,
+      "profiles": 26,
+      "named": 12,
       "camps": [
         "Anvilrage hold",
         "Dark Iron worksite",
@@ -281,8 +281,8 @@
     {
       "id": 361,
       "name": "Felwood",
-      "profiles": 36,
-      "named": 12,
+      "profiles": 39,
+      "named": 15,
       "camps": [
         "Deadwood hold",
         "Infernal grounds",
@@ -295,8 +295,8 @@
     {
       "id": 440,
       "name": "Tanaris",
-      "profiles": 32,
-      "named": 13,
+      "profiles": 35,
+      "named": 16,
       "camps": [
         "Dunemaul stronghold",
         "Sandfury enclave",
@@ -309,8 +309,8 @@
     {
       "id": 490,
       "name": "Un'Goro Crater",
-      "profiles": 32,
-      "named": 8,
+      "profiles": 35,
+      "named": 11,
       "camps": [
         "Bloodpetal grove",
         "Devilsaur hunting grounds",
@@ -334,8 +334,8 @@
     {
       "id": 618,
       "name": "Winterspring",
-      "profiles": 34,
-      "named": 12,
+      "profiles": 37,
+      "named": 15,
       "camps": [
         "Hederine enclave",
         "Ice Thistle cave",
@@ -348,8 +348,8 @@
     {
       "id": 1377,
       "name": "Silithus",
-      "profiles": 37,
-      "named": 13,
+      "profiles": 40,
+      "named": 16,
       "camps": [
         "Dredge feeding grounds",
         "Hive'Ashi colony",

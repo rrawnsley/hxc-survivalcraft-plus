@@ -1,3 +1,6 @@
+    { 36, 996797, "Soren the Cutpurse patrol", "named roaming threat", 0, 150, true, true },
+    { 36, 996798, "Rimehowl the Cruel patrol", "named roaming threat", 0, 150, true, true },
+    { 36, 996799, "Brogath Crushridge patrol", "named roaming threat", 0, 200, true, true },
     { 36, 2240, "Syndicate camp", "hunter", 1, 100, false, false },
     { 36, 2241, "Syndicate camp", "hunter", 1, 100, false, false },
     { 36, 2242, "Syndicate camp", "hunter", 1, 100, false, false },

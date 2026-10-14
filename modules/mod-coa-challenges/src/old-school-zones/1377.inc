@@ -1,3 +1,6 @@
+    { 1377, 996824, "Lord Vaerun Twilight patrol", "named roaming threat", 0, 150, true, true },
+    { 1377, 996825, "Reaver Xarak patrol", "named roaming threat", 0, 150, true, true },
+    { 1377, 996826, "Prophetess Saritha patrol", "named roaming threat", 0, 200, true, true },
     { 1377, 11698, "Hive'Ashi colony", "elite guard", 4, 100, false, false },
     { 1377, 11721, "Hive'Ashi colony", "worker", 1, 100, false, false },
     { 1377, 11722, "Hive'Ashi colony", "elite guard", 4, 100, false, false },

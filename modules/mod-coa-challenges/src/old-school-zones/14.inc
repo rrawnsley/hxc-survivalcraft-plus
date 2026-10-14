@@ -1,3 +1,5 @@
+    { 14, 996786, "Valley of Trials outer camps", "named starter threat", 0, 125, true, false },
+    { 14, 996787, "Valley of Trials outer camps", "named starter threat", 0, 150, true, false },
     { 14, 996728, "Sharpspine Razormane patrol", "named quillboar scout", 0, 150, true, true },
     { 14, 996729, "Redhide hunting grounds", "named charging boar", 0, 200, true, true },
     { 14, 996730, "Hexbound Echo Isles patrol", "named hexed caster", 0, 200, true, true },

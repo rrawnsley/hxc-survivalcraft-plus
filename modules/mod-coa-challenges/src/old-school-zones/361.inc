@@ -1,3 +1,6 @@
+    { 361, 996815, "Zhaelor Banebreath patrol", "named roaming threat", 0, 150, true, true },
+    { 361, 996816, "Brusk Deadwood patrol", "named roaming threat", 0, 150, true, true },
+    { 361, 996817, "Nerath the Darkweaver patrol", "named roaming threat", 0, 200, true, true },
     { 361, 7104, nullptr, nullptr, 8, 200, true, false },
     { 361, 7105, "Jadefire enclave", "hunter", 1, 100, false, false },
     { 361, 7106, "Jadefire enclave", "hunter", 1, 100, false, false },

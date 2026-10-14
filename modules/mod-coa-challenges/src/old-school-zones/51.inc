@@ -1,3 +1,6 @@
+    { 51, 996803, "Ashsilk the Broodmother patrol", "named roaming threat", 0, 150, true, true },
+    { 51, 996804, "Vharash Cinderhoof patrol", "named roaming threat", 0, 150, true, true },
+    { 51, 996805, "Smolderheart the Unbound patrol", "named roaming threat", 0, 200, true, true },
     { 51, 5839, "Dark Iron worksite", "hunter", 1, 100, false, false },
     { 51, 5840, "Dark Iron worksite", "hunter", 1, 100, false, false },
     { 51, 5844, "Dark Iron worksite", "worker", 1, 100, false, false },

@@ -1,3 +1,6 @@
+    { 4, 996806, "Gorath Dreadblade patrol", "named roaming threat", 0, 150, true, true },
+    { 4, 996807, "Rotwing the Carrion King patrol", "named roaming threat", 0, 150, true, true },
+    { 4, 996808, "Vorgul Doomguard patrol", "named roaming threat", 0, 200, true, true },
     { 4, 950, nullptr, nullptr, 4, 150, true, false },
     { 4, 5996, "Nethergarde outpost", "worker", 1, 100, false, false },
     { 4, 5997, "Nethergarde outpost", "hunter", 1, 100, false, false },
