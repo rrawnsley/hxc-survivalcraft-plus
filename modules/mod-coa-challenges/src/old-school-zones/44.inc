@@ -1,3 +1,6 @@
+    { 44, 996749, "Stormgnawer Redridge patrol", "named gnoll lightning caster", 0, 150, true, true },
+    { 44, 996750, "Gorvash Blackrock patrol", "named frenzied orc champion", 0, 200, true, true },
+    { 44, 996751, "Cragfist mountain patrol", "named hostile stone giant", 0, 200, true, true },
     { 44, 334, "Blackrock stronghold", "named leader", 6, 150, true, false },
     { 44, 423, "Redridge gnoll camp", "hunter", 1, 100, false, false },
     { 44, 424, "Redridge gnoll camp", "hunter", 1, 100, false, false },
