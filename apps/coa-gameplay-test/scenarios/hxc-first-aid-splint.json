@@ -177,6 +177,14 @@
     {
       "action": "assert",
       "actor": "patient",
+      "metric": "skill_value",
+      "skill": 129,
+      "equals": 1,
+      "label": "Using a Survivalist craft does not award First Aid skill"
+    },
+    {
+      "action": "assert",
+      "actor": "patient",
       "metric": "item_count",
       "item": 4470,
       "equals": 4
