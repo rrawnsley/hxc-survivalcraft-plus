@@ -218,7 +218,7 @@ local function Ability(value, schema, characterLevel)
         if value.catchup then
             local policy = value.catchup
             if type(policy) ~= "table" or value.kind == 3 or not Integer(policy.gap, 1, 500)
-                or not Integer(policy.multiplier, 2, 4) or not Integer(policy.basePointsPerUse, 1, 4294967295)
+                or not Integer(policy.multiplier, 2, 8) or not Integer(policy.basePointsPerUse, 1, 4294967295)
                 or not Integer(policy.effectivePointsPerUse, 1, 4294967295)
                 or type(policy.boosted) ~= "boolean" then return nil end
             local boosted = value.proficiency < value.cap and value.cap - value.proficiency >= policy.gap
@@ -405,9 +405,15 @@ function Model.Validate(snapshot)
         count = count + 1
     end
     if count ~= #snapshot.abilities then return nil, "Incomplete ability list" end
-    for _, value in ipairs(snapshot.abilities) do
+    for index, value in ipairs(snapshot.abilities) do
         local ability = Ability(value, snapshot.schemaVersion, snapshot.characterLevel)
-        if not ability or seen[ability.abilityId] then return nil, "Invalid or duplicate ability" end
+        if not ability then
+            return nil, "Invalid ability index " .. index .. " id " .. tostring(value.abilityId)
+                .. " route " .. tostring(value.route) .. " rule " .. tostring(value.ruleSet)
+        end
+        if seen[ability.abilityId] then
+            return nil, "Duplicate ability id " .. tostring(ability.abilityId)
+        end
         rankCount = rankCount + (ability.ranks and #ability.ranks or 0)
         if rankCount > 2048 then return nil, "Rank roadmap is too large" end
         rewardCount = rewardCount + (ability.rewards and #ability.rewards or 0)
