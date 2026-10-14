@@ -1,3 +1,6 @@
+    { 10, 996752, "Bloodcursed cemetery patrol", "named blood-cursing ghoul", 0, 150, true, true },
+    { 10, 996753, "Nightstalker worgen patrol", "named hunting worgen", 0, 200, true, true },
+    { 10, 996754, "Hollow Knight graveyard patrol", "named enraged undead knight", 0, 200, true, true },
     { 10, 48, "Raven Hill graveyard", "hunter", 1, 100, false, false },
     { 10, 202, "Raven Hill graveyard", "hunter", 1, 100, false, false },
     { 10, 203, "Raven Hill graveyard", "spellcaster", 4, 100, false, false },
