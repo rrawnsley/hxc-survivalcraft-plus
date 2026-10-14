@@ -32,17 +32,18 @@ CoAChallenges.Enable = 1
 CoAChallenges.OldSchool.ExperienceBasisPoints = 10000
 
 # Basic poor/common equipment retains its native loot probabilities. Only random
-# uncommon-or-better equipment is thinned. Authored named encounters and dungeon/
+# uncommon-or-better reference-pool equipment is thinned. Creature-specific direct
+# equipment entries retain their native rolls. Rare/named encounters and dungeon/
 # world bosses retain their native equipment rolls at 100%; this is not a new
 # per-kill drop chance. Quest items, materials and crafted gear remain untouched.
-CoAChallenges.OldSchool.GearDropPercent = 1
+CoAChallenges.OldSchool.GearDropPercent = 25
 CoAChallenges.OldSchool.NamedGearDropPercent = 100
 
 # Fixed encounter stats use the hidden rating's native creature base stats.
 # The initial ordinary profile emphasizes sustained fights over damage spikes.
 # Gameplay pacing target: ordinary blue enemies take roughly 20-40 seconds solo,
 # depending on class, abilities, gear and recovery. These are CoA tuning values.
-CoAChallenges.OldSchool.OrdinaryHealthPercent = 250
+CoAChallenges.OldSchool.OrdinaryHealthPercent = 1250
 CoAChallenges.OldSchool.OrdinaryDamageMultiplier = 1.25
 
 # C_Config flag delivered in SMSG_COA_CONFIG (0x58D). Gates the Trials and

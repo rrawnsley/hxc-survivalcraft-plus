@@ -316,7 +316,7 @@ void RefreshProfessions(Player* player)
     }
 }
 
-bool UsesOldSchoolSprint(Player const* player)
+bool IsOldSchoolPlayer(Player const* player)
 {
     return CoANeeds::IsOldSchoolTrial &&
         CoANeeds::IsOldSchoolTrial(player->GetGUID().GetCounter());
@@ -324,12 +324,12 @@ bool UsesOldSchoolSprint(Player const* player)
 
 float SprintVigorScale(Player const* player, State const& state)
 {
-    return UsesOldSchoolSprint(player) ? state.cap / 100.0f : 1.0f;
+    return IsOldSchoolPlayer(player) ? state.cap / 100.0f : 1.0f;
 }
 
 float SprintDrainPerSecond(Player const* player, State const& state)
 {
-    return UsesOldSchoolSprint(player) ? 75.0f * SprintVigorScale(player, state) /
+    return IsOldSchoolPlayer(player) ? 75.0f * SprintVigorScale(player, state) /
         Config.oldSchoolSprintSeconds : Config.sprintDrain;
 }
 
@@ -456,7 +456,8 @@ void Send(Player* player, State const& state)
     for (uint32 index = 0; index < 5; ++index)
         if (state.weather[index])
             flags |= 1u << index;
-    wire << '~' << flags << '~' << state.injuries;
+    wire << '~' << flags << '~' << state.injuries << '~' << player->IsSitState()
+         << '~' << IsOldSchoolPlayer(player);
     WorldPacket packet;
     ChatHandler::BuildChatPacket(packet, CHAT_MSG_WHISPER, LANG_ADDON, player, nullptr, wire.str());
     player->SendDirectMessage(&packet);
@@ -1521,7 +1522,27 @@ public:
         std::lock_guard<std::recursive_mutex> lock(Mutex);
         auto const found = States.find(player->GetGUID().GetCounter());
         if (found != States.end())
+        {
+            if (message == "HXN\tREST" && IsOldSchoolPlayer(player) && player->IsInWorld()
+                && player->IsAlive() && player->GetClientControlling() == player)
+            {
+                if (player->IsSitState())
+                    player->SetStandState(UNIT_STAND_STATE_STAND);
+                else if (player->IsInCombat() || player->HasUnitState(UNIT_STATE_CONTROLLED))
+                    ChatHandler(player->GetSession()).SendSysMessage("Finish combat before resting.");
+                else if (player->isMoving() || player->IsMounted() || player->IsInFlight()
+                    || player->IsInWater() || player->IsFlying())
+                    ChatHandler(player->GetSession()).SendSysMessage("Stop on dry ground before resting.");
+                else
+                {
+                    StopSprint(player, found->second);
+                    player->AttackStop();
+                    player->InterruptNonMeleeSpells(false);
+                    player->SetStandState(UNIT_STAND_STATE_SIT);
+                }
+            }
             Send(player, found->second);
+        }
         return false;
     }
 };

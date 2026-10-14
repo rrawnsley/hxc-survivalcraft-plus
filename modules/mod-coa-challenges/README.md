@@ -188,7 +188,7 @@ light blue at -3/-4, dark blue at -1/-2, white at equal level, yellow at +1/+2, 
 orange at +5/+6, and red at +7 or higher. Con color, neutral/hostile disposition, and combat rank
 are separate signals. Native creature levels remain unchanged. Combat uses the creature base health,
 armor and weapon-damage budget at its fixed encounter level, normalized against its native template
-level. Ordinary health starts at 600% of that fixed base and ordinary damage at 1x; elite and boss
+level. Ordinary outdoor health starts at 1250% of that fixed base and ordinary damage at 1.25x; elite and boss
 rank modifiers still apply. The values are tunable through `OrdinaryHealthPercent` and
 `OrdinaryDamageMultiplier`. Old School applies a configurable 100% XP pace. Kill XP follows the
 creature's fixed level and named-encounter reward, then group and rested-camp bonuses; con color does
@@ -200,7 +200,8 @@ its rewards.
 
 Across all zones in either Old School trial, poor/common basic armor and weapons
 retain their native drop probabilities. Ordinary random uncommon-or-better equipment
-retains 1% of already-rolled drops. Authored named encounters and native dungeon/world
+retains 25% of already-rolled reference-pool drops. Direct creature-specific equipment entries
+retain their native chances. Rare creatures, authored named encounters and native dungeon/world
 bosses retain their native equipment rolls at the default 100% keep setting, so targeted
 camp rewards are no longer discarded by an additional 95% suppression roll. Their native
 loot chances and rare spawn timers still govern availability. Quest items and crafting
@@ -209,6 +210,11 @@ the trial, so gear does not automatically grow with the player's level. Professi
 skill-ups grant character XP; crafted-item rarity now participates in that XP path.
 Native profession recipes, trainers and material tiers form the dependable crafting path;
 bespoke recipe/item-stat changes are not included in this pass.
+
+Outdoor party pulls add one solo health budget per additional eligible nearby member. If more
+party members arrive after the initial hit, the health budget increases while retaining the
+creature's current health percentage. It does not decrease when members leave mid-fight.
+Playerbots count. Dungeon health scaling retains its existing ten-percent-per-member rule.
 
 Mulgore's named threats - Ghost Howl (3056), Arra'chea (3058), Mazzranache (3068), Sister Hatelash (5785),
 Snagglespear (5786), Enforcer Emilgund (5787), and The Rake (5807) - and the Barrens threats Gesharahan

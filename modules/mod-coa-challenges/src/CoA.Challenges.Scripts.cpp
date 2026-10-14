@@ -1223,13 +1223,33 @@ namespace CoAChallenges
 
     struct OldSchoolTuning
     {
-        uint32 ordinaryGearKeepPercent = 1;
+        uint32 ordinaryGearKeepPercent = 25;
         uint32 namedGearKeepPercent = 100;
-        uint32 ordinaryHealthPercent = 250;
+        uint32 ordinaryHealthPercent = 1250;
         float ordinaryDamageMultiplier = 1.25f;
     };
 
     OldSchoolTuning OldSchoolOptions;
+
+    std::unordered_map<uint32, std::unordered_set<uint32>> OldSchoolCreatureGear;
+
+    void PrepareOldSchoolCreatureGear()
+    {
+        OldSchoolCreatureGear.clear();
+        QueryResult result = WorldDatabase.Query(
+            "SELECT l.Entry, l.Item FROM creature_loot_template l "
+            "JOIN item_template i ON i.entry = l.Item "
+            "WHERE l.Reference = 0 AND i.class IN (2, 4) AND i.Quality >= 2");
+        if (result)
+            do
+            {
+                Field* fields = result->Fetch();
+                OldSchoolCreatureGear[fields[0].Get<uint32>()].insert(fields[1].Get<uint32>());
+            }
+            while (result->NextRow());
+        LOG_INFO("module.coa_challenges", "Old School creature-specific gear tables: {}",
+            OldSchoolCreatureGear.size());
+    }
 
     std::unordered_map<uint64, uint32> OldSchoolBasicQuestRewards;
     LocalLevelScaling::QuestRewardItemResolver PreviousQuestRewardItemResolver = nullptr;
@@ -1348,7 +1368,9 @@ namespace CoAChallenges
             || IsOldSchoolHillsbradNamedThreat(creature) || IsOldSchoolArathiNamedThreat(creature)
             || IsOldSchoolHinterlandsNamedThreat(creature) || IsOldSchoolPlaguelandsNamedThreat(creature)
             || IsOldSchoolAdditionalNamedThreat(creature) || creature->IsDungeonBoss()
-            || creature->GetCreatureTemplate()->rank == CREATURE_ELITE_WORLDBOSS;
+            || creature->GetCreatureTemplate()->rank == CREATURE_ELITE_WORLDBOSS
+            || creature->GetCreatureTemplate()->rank == CREATURE_ELITE_RARE
+            || creature->GetCreatureTemplate()->rank == CREATURE_ELITE_RAREELITE;
         if (namedThreat)
             return OldSchoolOptions.namedGearKeepPercent;
         if (creature->GetMap()->IsDungeon() && !creature->GetMap()->IsRaid())
@@ -1362,11 +1384,14 @@ namespace CoAChallenges
             return;
 
         uint32 const keepPercent = OldSchoolGearKeepPercent(creature);
+        auto const specific = OldSchoolCreatureGear.find(creature->GetCreatureTemplate()->lootid);
         for (auto it = loot->items.begin(); it != loot->items.end();)
         {
             ItemTemplate const* item = sObjectMgr->GetItemTemplate(it->itemid);
             bool const equipment = item && (item->Class == ITEM_CLASS_WEAPON || item->Class == ITEM_CLASS_ARMOR);
-            if (equipment && item->Quality >= ITEM_QUALITY_UNCOMMON && !it->needs_quest
+            bool const creatureReward = specific != OldSchoolCreatureGear.end()
+                && specific->second.contains(it->itemid);
+            if (equipment && item->Quality >= ITEM_QUALITY_UNCOMMON && !creatureReward && !it->needs_quest
                 && urand(1, 100) > keepPercent)
                 it = loot->items.erase(it);
             else
@@ -3316,6 +3341,7 @@ namespace CoAChallenges
         float damageMultiplier = 1.0f;
         uint32 healthPercent = 100;
         float armorExtra = 0.0f;
+        uint32 groupSize = 1;
     };
 
     // Carry fractional Old School XP within the player session so small awards
@@ -3339,13 +3365,35 @@ namespace CoAChallenges
         Creature* creature = victim->ToCreature();
         if (!creature || creature->IsCharmedOwnedByPlayerOrPlayer() || !creature->IsAlive())
             return;
-        if (creature->CustomData.Get<AdventureHealth>(AdventureHealthKey)
-            || creature->CustomData.Get<OldSchoolHealth>(OldSchoolHealthKey))
+        if (creature->CustomData.Get<AdventureHealth>(AdventureHealthKey))
             return;
         if (creature->hasLootRecipient() && !creature->isTappedBy(attacker))
             return;
         uint32 const tier = AdventureModeTier(attacker);
         bool const oldSchool = OldSchoolChallenge(attacker) && OldSchoolCreature(creature);
+        if (OldSchoolHealth* state = creature->CustomData.Get<OldSchoolHealth>(OldSchoolHealthKey))
+        {
+            uint32 const groupSize = oldSchool ? OldSchoolGroupRewardSize(attacker, creature) : 1;
+            if (groupSize > state->groupSize)
+            {
+                bool const dungeon = creature->GetMap()->IsDungeon() && !creature->GetMap()->IsRaid();
+                float const healthPerMember = dungeon ? 0.1f : 1.0f;
+                float const oldHealth = 1.0f + healthPerMember * float(state->groupSize - 1);
+                float const newHealth = 1.0f + healthPerMember * float(groupSize - 1);
+                float const baseHealth = std::max(1.0f, float(creature->GetMaxHealth()) - state->extra);
+                uint32 const healthPercent = uint32(state->healthPercent * newHealth / oldHealth);
+                float const extra = baseHealth * (healthPercent / 100.0f - 1.0f);
+                ChangeMaxHealthKeepingPct(creature, state->extra, false);
+                ChangeMaxHealthKeepingPct(creature, extra, true);
+                state->extra = extra;
+                state->healthPercent = healthPercent;
+                if (!dungeon)
+                    state->damageMultiplier *= (1.0f + 0.125f * float(groupSize - 1))
+                        / (1.0f + 0.125f * float(state->groupSize - 1));
+                state->groupSize = groupSize;
+            }
+            return;
+        }
         if (!tier && !oldSchool)
             return;
 
@@ -3354,13 +3402,14 @@ namespace CoAChallenges
             OldSchoolPowerProfile const profile = GetOldSchoolPowerProfile(attacker, creature);
             uint32 const groupSize = OldSchoolGroupRewardSize(attacker, creature);
             bool const dungeon = creature->GetMap()->IsDungeon() && !creature->GetMap()->IsRaid();
-            float const groupHealth = 1.0f + (dungeon ? 0.1f : 0.75f) * float(groupSize - 1);
+            float const groupHealth = 1.0f + (dungeon ? 0.1f : 1.0f) * float(groupSize - 1);
             float const groupDamage = dungeon ? 1.0f : 1.0f + 0.125f * float(groupSize - 1);
             auto* state = new OldSchoolHealth();
             state->extra = float(creature->GetMaxHealth()) *
                 (profile.healthPercent * groupHealth / 100.0f - 1.0f);
             state->damageMultiplier = profile.damageMultiplier * groupDamage;
             state->healthPercent = uint32(profile.healthPercent * groupHealth);
+            state->groupSize = groupSize;
             state->armorExtra = float(creature->GetArmor()) * (profile.armorMultiplier - 1.0f);
             creature->HandleStatFlatModifier(UNIT_MOD_ARMOR, TOTAL_VALUE, state->armorExtra, true);
             creature->CustomData.Set(OldSchoolHealthKey, state);
@@ -4759,11 +4808,11 @@ namespace CoAChallenges
         {
             LoadChallengesEnabled();
             OldSchoolOptions.ordinaryGearKeepPercent = std::min(100u,
-                sConfigMgr->GetOption<uint32>("CoAChallenges.OldSchool.GearDropPercent", 1));
+                sConfigMgr->GetOption<uint32>("CoAChallenges.OldSchool.GearDropPercent", 25));
             OldSchoolOptions.namedGearKeepPercent = std::min(100u,
                 sConfigMgr->GetOption<uint32>("CoAChallenges.OldSchool.NamedGearDropPercent", 100));
             OldSchoolOptions.ordinaryHealthPercent = std::clamp(
-                sConfigMgr->GetOption<uint32>("CoAChallenges.OldSchool.OrdinaryHealthPercent", 250), 1u, 10000u);
+                sConfigMgr->GetOption<uint32>("CoAChallenges.OldSchool.OrdinaryHealthPercent", 1250), 1u, 10000u);
             OldSchoolOptions.ordinaryDamageMultiplier = std::clamp(
                 sConfigMgr->GetOption<float>("CoAChallenges.OldSchool.OrdinaryDamageMultiplier", 1.25f), 0.1f, 20.0f);
             CoANeeds::ChallengeMaximum = std::max(1.0f,
@@ -4775,6 +4824,7 @@ namespace CoAChallenges
             EnsureTables();
             LoadChallengeDefinitions();
             PrepareOldSchoolQuestRewards();
+            PrepareOldSchoolCreatureGear();
         }
 
         void OnUpdate(uint32 diff) override
