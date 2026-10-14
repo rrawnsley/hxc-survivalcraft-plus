@@ -40,6 +40,7 @@ inline ZoneProfile const ZoneProfiles[] =
 #include "old-school-zones/406.inc"
 #include "old-school-zones/331.inc"
 #include "old-school-zones/405.inc"
+#include "old-school-zones/400.inc"
 #include "old-school-zones/28.inc"
 #include "old-school-zones/47.inc"
 #include "old-school-zones/45.inc"
