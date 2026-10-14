@@ -1,6 +1,7 @@
 #include "CoA.Challenges.Review.h"
 #include "CoA.Challenges.CorpseRuns.h"
 #include "CreatureScript.h"
+#include "Corpse.h"
 #include "Map.h"
 #include "ObjectMgr.h"
 #include "PassiveAI.h"
@@ -40,13 +41,13 @@ namespace CoAChallenges
         }
 
         void AppendCorpseHeader(CharacterDatabaseTransaction const& transaction, Player* player,
-            uint64 id, WorldLocation const& location)
+            uint64 id, WorldLocation const& location, uint32 instance)
         {
             auto* statement = CharacterDatabase.GetPreparedStatement(CHAR_INS_COA_EQUIPMENT_CORPSE);
             statement->SetData(0, id);
             statement->SetData(1, player->GetGUID().GetCounter());
             statement->SetData(2, location.GetMapId());
-            statement->SetData(3, player->GetInstanceId());
+            statement->SetData(3, instance);
             statement->SetData(4, location.GetPositionX());
             statement->SetData(5, location.GetPositionY());
             statement->SetData(6, location.GetPositionZ());
@@ -83,9 +84,16 @@ namespace CoAChallenges
                 location = WorldLocation(player->GetMapId(), player->GetPositionX(), player->GetPositionY(),
                     player->GetPositionZ(), player->GetOrientation());
 
+            uint32 instance = player->GetInstanceId();
+            if (Corpse const* corpse = player->GetCorpse())
+            {
+                location = WorldLocation(corpse->GetMapId(), corpse->GetPositionX(), corpse->GetPositionY(),
+                    corpse->GetPositionZ(), corpse->GetOrientation());
+                instance = corpse->GetInstanceId();
+            }
             uint64 const id = NextEquipmentCorpseId.fetch_add(1);
             CharacterDatabaseTransaction transaction = CharacterDatabase.BeginTransaction();
-            AppendCorpseHeader(transaction, player, id, location);
+            AppendCorpseHeader(transaction, player, id, location, instance);
             auto* import = CharacterDatabase.GetPreparedStatement(CHAR_INS_COA_EQUIPMENT_CORPSE_LEGACY);
             import->SetData(0, id);
             import->SetData(1, owner);
@@ -330,7 +338,7 @@ namespace CoAChallenges
         uint64 const id = NextEquipmentCorpseId.fetch_add(1);
         uint32 const owner = player->GetGUID().GetCounter();
         CharacterDatabaseTransaction transaction = CharacterDatabase.BeginTransaction();
-        AppendCorpseHeader(transaction, player, id, location);
+        AppendCorpseHeader(transaction, player, id, location, player->GetInstanceId());
         for (EquipmentItem const& entry : equipment)
         {
             entry.item->FSetState(ITEM_NEW);
