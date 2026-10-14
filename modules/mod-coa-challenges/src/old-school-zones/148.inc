@@ -1,3 +1,6 @@
+    { 148, 996746, "Ashfeather nesting grounds", "named dustcloud strider", 0, 150, true, true },
+    { 148, 996747, "Rootcaller Blackwood patrol", "named furbolg totemist", 0, 200, true, true },
+    { 148, 996748, "Stonebound ruin patrol", "named stone behemoth", 0, 200, true, true },
     { 148, 2167, "Blackwood camp", "hunter", 1, 100, false, false },
     { 148, 2168, "Blackwood camp", "hunter", 1, 100, false, false },
     { 148, 2169, "Blackwood camp", "hunter", 1, 100, false, false },
