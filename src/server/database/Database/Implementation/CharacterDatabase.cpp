@@ -752,7 +752,8 @@ void CharacterDatabaseConnection::DoPrepareStatements()
         "? AND c.owner = ? AND NOT EXISTS (SELECT 1 FROM character_inventory inv WHERE inv.item = ci.item_guid)", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_COA_EQUIPMENT_CORPSES,
         "SELECT c.id, c.x, c.y, c.z, c.o, c.display FROM coa_old_school_equipment_corpse c WHERE c.owner = ? AND "
-        "c.map = ? AND c.instance = ? AND EXISTS (SELECT 1 FROM coa_old_school_equipment_corpse_item ci WHERE "
+        "c.map = ? AND (c.instance = ? OR NOT EXISTS (SELECT 1 FROM instance saved WHERE saved.id = c.instance "
+        "AND saved.map = c.map)) AND EXISTS (SELECT 1 FROM coa_old_school_equipment_corpse_item ci WHERE "
         "ci.corpse = c.id)", CONNECTION_SYNCH);
     PrepareStatement(CHAR_SEL_COA_EQUIPMENT_CORPSE_ITEMS,
         "SELECT ii.creatorGuid, ii.giftCreatorGuid, ii.count, ii.duration, ii.charges, ii.flags, ii.enchantments, "
