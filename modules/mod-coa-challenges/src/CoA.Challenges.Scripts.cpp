@@ -1349,7 +1349,11 @@ namespace CoAChallenges
             || IsOldSchoolHinterlandsNamedThreat(creature) || IsOldSchoolPlaguelandsNamedThreat(creature)
             || IsOldSchoolAdditionalNamedThreat(creature) || creature->IsDungeonBoss()
             || creature->GetCreatureTemplate()->rank == CREATURE_ELITE_WORLDBOSS;
-        return namedThreat ? OldSchoolOptions.namedGearKeepPercent : OldSchoolOptions.ordinaryGearKeepPercent;
+        if (namedThreat)
+            return OldSchoolOptions.namedGearKeepPercent;
+        if (creature->GetMap()->IsDungeon() && !creature->GetMap()->IsRaid())
+            return std::max(25u, OldSchoolOptions.ordinaryGearKeepPercent);
+        return OldSchoolOptions.ordinaryGearKeepPercent;
     }
 
     void ThinOldSchoolGearLoot(Loot* loot, Creature const* creature)
@@ -2915,10 +2919,13 @@ namespace CoAChallenges
             + effective->AttackPower / 14.0f * info->BaseVariance;
         float const damageRatio = effectiveDamage / std::max(0.01f, nativeDamage);
         float const armorRatio = effective->GenerateArmor(info) / std::max(1.0f, native->GenerateArmor(info));
+        bool const dungeon = creature->GetMap()->IsDungeon() && !creature->GetMap()->IsRaid();
+        uint32 const healthPercent = dungeon ? 125 : OldSchoolOptions.ordinaryHealthPercent;
+        float const damageMultiplier = dungeon ? 1.15f : OldSchoolOptions.ordinaryDamageMultiplier;
         return { nullptr,
-            uint32(std::clamp(double(OldSchoolOptions.ordinaryHealthPercent) * healthRatio * noviceScale,
+            uint32(std::clamp(double(healthPercent) * healthRatio * noviceScale,
                 1.0, double(UINT32_MAX))),
-            std::max(0.01f, OldSchoolOptions.ordinaryDamageMultiplier * damageRatio * noviceScale),
+            std::max(0.01f, damageMultiplier * damageRatio * noviceScale),
             100, std::max(0.01f, armorRatio * noviceScale) };
     }
 
@@ -3044,6 +3051,9 @@ namespace CoAChallenges
         }
         profile.experienceMultiplierHundredths *= OldSchoolNamedRewardHundredths(creature);
         profile.experienceMultiplierHundredths /= 100;
+        if (creature->GetMap()->IsDungeon() && !creature->GetMap()->IsRaid())
+            profile.experienceMultiplierHundredths =
+                profile.experienceMultiplierHundredths * 5 / 4;
         return profile;
     }
 
@@ -3343,8 +3353,9 @@ namespace CoAChallenges
         {
             OldSchoolPowerProfile const profile = GetOldSchoolPowerProfile(attacker, creature);
             uint32 const groupSize = OldSchoolGroupRewardSize(attacker, creature);
-            float const groupHealth = 1.0f + 1.2f * float(groupSize - 1);
-            float const groupDamage = 1.0f + 0.35f * float(groupSize - 1);
+            bool const dungeon = creature->GetMap()->IsDungeon() && !creature->GetMap()->IsRaid();
+            float const groupHealth = 1.0f + (dungeon ? 0.1f : 1.2f) * float(groupSize - 1);
+            float const groupDamage = dungeon ? 1.0f : 1.0f + 0.35f * float(groupSize - 1);
             auto* state = new OldSchoolHealth();
             state->extra = float(creature->GetMaxHealth()) *
                 (profile.healthPercent * groupHealth / 100.0f - 1.0f);

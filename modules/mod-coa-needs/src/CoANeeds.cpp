@@ -390,6 +390,32 @@ void PackCamp(Player* player)
     Camps.erase(found);
 }
 
+bool Precipitation(Player* player)
+{
+    Map* map = player->FindMap();
+    if (!Config.weather || !map || !player->IsOutdoors())
+        return false;
+    map->GetOrGenerateZoneDefaultWeather(player->GetZoneId());
+    auto current = ZoneWeather.find(player->GetZoneId());
+    if (current == ZoneWeather.end())
+        return false;
+    switch (current->second)
+    {
+        case WEATHER_STATE_LIGHT_RAIN:
+        case WEATHER_STATE_MEDIUM_RAIN:
+        case WEATHER_STATE_HEAVY_RAIN:
+        case WEATHER_STATE_THUNDERS:
+        case WEATHER_STATE_BLACKRAIN:
+        case WEATHER_STATE_LIGHT_SNOW:
+        case WEATHER_STATE_MEDIUM_SNOW:
+        case WEATHER_STATE_HEAVY_SNOW:
+        case WEATHER_STATE_BLACKSNOW:
+            return true;
+        default:
+            return false;
+    }
+}
+
 int32 NearbyCamp(Player* player)
 {
     Map* map = player->FindMap();
@@ -397,6 +423,7 @@ int32 NearbyCamp(Player* player)
         return -1;
     uint32 now = uint32(std::time(nullptr));
     int32 tier = -1;
+    bool const precipitation = Precipitation(player);
     for (auto camp = Camps.begin(); camp != Camps.end();)
     {
         if (camp->second.expires <= now)
@@ -412,7 +439,8 @@ int32 NearbyCamp(Player* player)
                 camp = Camps.erase(camp);
                 continue;
             }
-            if (player->InSamePhase(fire) && player->IsWithinDistInMap(fire, 15.0f + 5.0f * camp->second.tier))
+            if ((!precipitation || camp->second.tier > 0) && player->InSamePhase(fire)
+                && player->IsWithinDistInMap(fire, 15.0f + 5.0f * camp->second.tier))
                 tier = std::max(tier, int32(camp->second.tier));
         }
         ++camp;
@@ -437,6 +465,33 @@ void PlaceCamp(Player* player, State& state, uint32 tier)
         CoANeeds::IsOldSchoolTrial(player->GetGUID().GetCounter());
     uint32 const wood = oldSchool ? OldSchoolCampLogs[tier] : 4470;
     auto current = Camps.find(player->GetGUID().GetCounter());
+    if (tier == 1 && current != Camps.end() && current->second.tier == 0
+        && current->second.map == map->GetId() && current->second.expires > now)
+    {
+        GameObject* existingFire = map->GetGameObject(current->second.fire);
+        if (existingFire && player->InSamePhase(existingFire)
+            && player->IsWithinDistInMap(existingFire, 15.0f))
+        {
+            if (!player->HasItemCount(CampKit + tier, 1, false))
+            {
+                ChatHandler(player->GetSession()).SendSysMessage("Craft a Shelter Kit with Survivalist to cover this fire.");
+                return;
+            }
+            float const orientation = existingFire->GetOrientation();
+            GameObject* tent = player->SummonGameObject(184592, existingFire->GetPositionX(),
+                existingFire->GetPositionY(), existingFire->GetPositionZ(), orientation,
+                0, 0, std::sin(orientation / 2), std::cos(orientation / 2), Config.campLifetime);
+            if (!tent)
+                return;
+            existingFire->SetRespawnTime(Config.campLifetime);
+            current->second.tent = tent->GetGUID();
+            current->second.tier = tier;
+            current->second.expires = now + Config.campLifetime;
+            player->DestroyItemCount(CampKit + tier, 1, true);
+            ChatHandler(player->GetSession()).SendSysMessage("Shelter raised over your fire. It now protects camp recovery from rain and snow.");
+            return;
+        }
+    }
     if (oldSchool && current != Camps.end() && current->second.tier == tier && current->second.map == map->GetId()
         && current->second.expires > now)
     {
@@ -476,7 +531,7 @@ void PlaceCamp(Player* player, State& state, uint32 tier)
     if (tier)
     {
         float x, y, z;
-        player->GetNearPoint(nullptr, x, y, z, 0.0f, tier == 1 ? 5.0f : 8.0f, orientation + 1.5707963f);
+        player->GetNearPoint(nullptr, x, y, z, 0.0f, tier == 1 ? 1.5f : 2.0f, orientation + 1.5707963f);
         tent = player->SummonGameObject(tier == 1 ? 184592 : 184593, x, y, z, orientation,
             0, 0, std::sin(orientation / 2), std::cos(orientation / 2), Config.campLifetime);
         if (!tent)

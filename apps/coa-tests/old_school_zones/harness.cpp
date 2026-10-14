@@ -26,6 +26,13 @@ constexpr uint32 OldSchoolEquipmentCorpseEntry = 996900;
 
 struct Player;
 struct Creature;
+struct Map
+{
+    bool dungeon = false;
+    bool raid = false;
+    bool IsDungeon() const { return dungeon; }
+    bool IsRaid() const { return raid; }
+};
 
 struct Unit
 {
@@ -108,6 +115,7 @@ struct
 
 struct Creature : Unit
 {
+    Map map;
     uint32 entry = 4015;
     uint32 zone = AREA_STONETALON_MOUNTAINS;
     uint32 spawn = 29981;
@@ -123,6 +131,7 @@ struct Creature : Unit
     uint32 GetZoneId() const { return zone; }
     uint32 GetSpawnId() const { return spawn; }
     uint32 GetLevel() const { return level; }
+    Map const* GetMap() const { return &map; }
     CreatureTemplate const* GetCreatureTemplate() const { data.maxlevel = level; return &data; }
     bool IsCharmedOwnedByPlayerOrPlayer() const { return owned; }
     bool IsAlive() const { return alive; }
@@ -461,8 +470,29 @@ void GroupRewards()
     enrollment.clear();
 }
 
+void DungeonProfiles()
+{
+    Player player;
+    Creature creature;
+    creature.entry = 999999;
+    creature.zone = AREA_MULGORE;
+    OldSchoolOptions.ordinaryDamageMultiplier = 2.0f;
+    auto const outdoor = GetOldSchoolPowerProfile(&player, &creature);
+    creature.map.dungeon = true;
+    auto const dungeon = GetOldSchoolPowerProfile(&player, &creature);
+    assert(dungeon.healthPercent < outdoor.healthPercent);
+    assert(dungeon.damageMultiplier < outdoor.damageMultiplier);
+    assert(dungeon.experienceMultiplierHundredths > outdoor.experienceMultiplierHundredths);
+    creature.map.raid = true;
+    auto const raid = GetOldSchoolPowerProfile(&player, &creature);
+    assert(raid.healthPercent == outdoor.healthPercent);
+    assert(raid.experienceMultiplierHundredths == outdoor.experienceMultiplierHundredths);
+    OldSchoolOptions.ordinaryDamageMultiplier = 1.0f;
+}
+
 int main()
 {
+    DungeonProfiles();
     GroupRewards();
     NamedProfiles();
     MoreDifficultProfiles();
