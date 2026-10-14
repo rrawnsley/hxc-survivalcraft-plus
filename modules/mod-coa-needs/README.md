@@ -53,9 +53,15 @@ Campfire unlocks at Survivalist skill 1 and costs 2 Simple Wood. Shelter unlocks
 4 Light Leather; Hearthstead unlocks at skill 150 and also costs 4 Heavy Leather. The existing CoA
 item 190120 is Branding Rod, so the Survival realm's Tinder reagent cannot be reused.
 In Old School and Old School - Hardcore, these camp recipes instead consume harvested woodcutting logs:
-2 Forestwood Logs for Campfire, 2 Wildwood Logs plus 4 Light Leather for Shelter, and 2 Everwood Logs
+8 Forestwood Logs for Campfire, 2 Wildwood Logs plus 4 Light Leather for Shelter, and 2 Everwood Logs
 plus 4 Heavy Leather for Hearthstead. The log tier follows Woodcutting's 0/75/150 skill progression;
 outside these trials the existing Simple Wood recipes remain unchanged.
+In either Old School trial, use the matching camp ability again near your own placed camp
+to rekindle it with one harvested log of that tier. This refreshes the configured camp lifetime
+and requires no command or additional leather. It does not grant crafting skill for refueling.
+Old School rest accumulates at camps and native inns. Rain, storms and snow block accumulation
+at an exposed campfire; indoor locations, Shelter and Hearthstead protect the rest refill.
+The 15% bonus, 20-minute cap and two-minute full refill follow Monsters & Memories.
 Native placement and pack-up abilities appear as buttons in the needs panel and in a dedicated
 Survivalist spellbook section (SkillLine 9200, category 14), together with the vigor abilities.
 The skill mappings allow all CoA races and classes. Placement requires
