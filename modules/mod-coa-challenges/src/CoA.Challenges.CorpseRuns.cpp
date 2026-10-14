@@ -1,5 +1,6 @@
 #include "CoA.Challenges.Review.h"
 #include "CoA.Challenges.CorpseRuns.h"
+#include "AllCreatureScript.h"
 #include "CreatureScript.h"
 #include "Corpse.h"
 #include "Map.h"
@@ -7,15 +8,46 @@
 #include "PassiveAI.h"
 #include "ScriptedGossip.h"
 #include "TemporarySummon.h"
+#include "Trainer.h"
 #include "WorldScript.h"
 
 namespace CoAChallenges
 {
+    uint32 OldSchoolChallenge(Player const* player);
+
     namespace
     {
         constexpr char const* PlayerCorpseKey = "coa.old_school.equipment_corpses";
         constexpr char const* EquipmentCorpseKey = "coa.old_school.equipment_corpse";
         constexpr uint32 EquipmentCorpseDisplay = 11400;
+        constexpr uint32 TrainerRecoverySender = 900101;
+        constexpr uint32 TrainerRecoveryAction = 1;
+
+        uint32 TrainerRecoveryPrice(Player const* player)
+        {
+            uint32 const level = player->GetLevel() - 1;
+            return 500 + 20 * level * level;
+        }
+
+        bool CanUseRecoveryTrainer(Player* player, Creature* creature)
+        {
+            if (!player || !creature || OldSchoolChallenge(player) != 9001 || !player->IsAlive()
+                || player->IsInCombat() || player->GetSession()->IsBot()
+                || !creature->HasNpcFlag(UNIT_NPC_FLAG_TRAINER_CLASS))
+                return false;
+            Trainer::Trainer const* trainer = Trainer::GetTrainerFor(creature, player);
+            return trainer && trainer->GetTrainerType() == Trainer::Type::Class
+                && (trainer->GetTrainerRequirement() == player->getClass()
+                    || trainer->GetTrainerRequirement() == 0)
+                && trainer->IsTrainerValidForPlayer(player);
+        }
+
+        PreparedQueryResult SelectOwnerCorpses(Player* player)
+        {
+            auto* statement = CharacterDatabase.GetPreparedStatement(CHAR_SEL_COA_OWNER_EQUIPMENT_CORPSES);
+            statement->SetData(0, player->GetGUID().GetCounter());
+            return CharacterDatabase.Query(statement);
+        }
 
         struct EquipmentCorpsePlayerState : DataMap::Base
         {
@@ -305,6 +337,88 @@ namespace CoAChallenges
                     NextEquipmentCorpseId.store(result->Fetch()[0].Get<uint64>() + 1);
             }
         };
+
+        class OldSchoolTrainerRecovery : public AllCreatureScript
+        {
+        public:
+            OldSchoolTrainerRecovery() : AllCreatureScript("OldSchoolTrainerRecovery") { }
+
+            bool CanCreatureGossipHello(Player* player, Creature* creature) override
+            {
+                if (!CanUseRecoveryTrainer(player, creature) || !SelectOwnerCorpses(player))
+                    return false;
+
+                player->PrepareGossipMenu(creature, creature->GetGossipMenuId(), true);
+                uint32 const price = TrainerRecoveryPrice(player);
+                std::string const label = Acore::StringFormat(
+                    "Recover all my lost equipment ({} gold, {} silver, {} copper)",
+                    price / 10000, price / 100 % 100, price % 100);
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, label, TrainerRecoverySender,
+                    TrainerRecoveryAction, "Pay the trainer to recover equipment from your Old School corpses?",
+                    price, false);
+                player->SendPreparedGossip(creature);
+                return true;
+            }
+
+            bool CanCreatureGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) override
+            {
+                if (sender != TrainerRecoverySender || action != TrainerRecoveryAction)
+                    return false;
+                CloseGossipMenuFor(player);
+                if (!CanUseRecoveryTrainer(player, creature) || !player->IsWithinDistInMap(creature, 5.0f))
+                    return true;
+                if (!ImportLegacyCorpse(player))
+                {
+                    NotifyPlayer(player, "Old School: your equipment could not be secured. Try again.");
+                    return true;
+                }
+                PreparedQueryResult rows = SelectOwnerCorpses(player);
+                if (!rows)
+                {
+                    NotifyPlayer(player, "Old School: you have no lost equipment to recover.");
+                    return true;
+                }
+                uint32 const price = TrainerRecoveryPrice(player);
+                if (!player->HasEnoughMoney(price))
+                {
+                    NotifyPlayer(player, "Old School: you need more money for trainer recovery.");
+                    return true;
+                }
+                if (!player->ModifyMoney(-int32(price)))
+                    return true;
+
+                uint32 recovered = 0;
+                do
+                {
+                    uint64 const id = rows->Fetch()[0].Get<uint64>();
+                    recovered += RecoverEquipmentCorpse(player, id);
+                    if (!CharacterDatabase.Query(SelectCorpseItems(id, player->GetGUID().GetCounter())))
+                    {
+                        ObjectGuid visual;
+                        {
+                            std::lock_guard<std::mutex> lock(EquipmentCorpseMutex);
+                            if (auto it = EquipmentCorpseGuids.find(id); it != EquipmentCorpseGuids.end())
+                            {
+                                visual = it->second;
+                                EquipmentCorpseGuids.erase(it);
+                            }
+                        }
+                        if (Creature* corpse = ObjectAccessor::GetCreature(*player, visual))
+                            corpse->DespawnOrUnsummon();
+                    }
+                }
+                while (rows->NextRow());
+                if (!recovered)
+                {
+                    player->ModifyMoney(int32(price));
+                    NotifyPlayer(player, "Old School: no equipment fit in your bags; your fee was refunded.");
+                }
+                else
+                    NotifyPlayer(player, "Old School: your trainer recovered {} item(s) for {} copper.",
+                        recovered, price);
+                return true;
+            }
+        };
     }
 
     bool PreserveOldSchoolCorpseEquipment(Player* player)
@@ -452,5 +566,6 @@ namespace CoAChallenges
     {
         new OldSchoolEquipmentCorpse();
         new OldSchoolEquipmentCorpseWorld();
+        new OldSchoolTrainerRecovery();
     }
 }

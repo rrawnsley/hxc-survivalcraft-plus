@@ -1159,7 +1159,12 @@ public:
         uint16 const step = player->HasSkill(definition.SkillId)
                                 ? player->GetSkillStep(definition.SkillId)
                                 : 0;
-        player->SetSkill(definition.SkillId, step, maximum, maximum);
+        uint16 const value = definition.ScalesWithLevel
+                                 ? (player->HasSkill(definition.SkillId)
+                                     ? std::min<uint16>(player->GetPureSkillValue(definition.SkillId), maximum)
+                                     : std::min<uint16>(5, maximum))
+                                 : 1;
+        player->SetSkill(definition.SkillId, step, value, maximum);
         continue;
       }
 
@@ -1243,7 +1248,7 @@ public:
       if (entry.SkillId == SKILL_UNARMED)
         continue;
       uint16 const maximum = weapon ? player->GetMaxSkillValueForLevel() : entry.Maximum;
-      uint16 const value = weapon ? maximum : entry.Rank;
+      uint16 const value = weapon ? std::min<uint16>(5, maximum) : entry.Rank;
       player->SetSkill(entry.SkillId, 0, value, maximum);
     }
     return true;
