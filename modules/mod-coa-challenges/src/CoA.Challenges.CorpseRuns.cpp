@@ -64,13 +64,19 @@ namespace CoAChallenges
             CharacterDatabase.DirectExecute(statement);
         }
 
-        void ImportLegacyCorpse(Player* player)
+        bool CommitEquipmentTransaction(CharacterDatabaseTransaction transaction)
+        {
+            TransactionCallback completion = CharacterDatabase.AsyncCommitTransaction(transaction);
+            return completion.m_future.get();
+        }
+
+        bool ImportLegacyCorpse(Player* player)
         {
             uint32 const owner = player->GetGUID().GetCounter();
             auto* select = CharacterDatabase.GetPreparedStatement(CHAR_SEL_COA_OLD_SCHOOL_CORPSE_ITEMS);
             select->SetData(0, owner);
             if (!CharacterDatabase.Query(select))
-                return;
+                return true;
 
             WorldLocation location = player->GetCorpseLocation();
             if (!sMapStore.LookupEntry(location.GetMapId()))
@@ -88,8 +94,10 @@ namespace CoAChallenges
             cleanup->SetData(0, id);
             cleanup->SetData(1, owner);
             transaction->Append(cleanup);
-            CharacterDatabase.DirectCommitTransaction(transaction);
+            if (!CommitEquipmentTransaction(transaction))
+                return false;
             DeleteEmptyCorpse(id, owner);
+            return true;
         }
 
         uint32 RecoverEquipmentCorpse(Player* player, uint64 id)
@@ -110,7 +118,7 @@ namespace CoAChallenges
                 uint32 const entry = fields[12].Get<uint32>();
                 uint8 const originalSlot = fields[13].Get<uint8>();
                 ItemTemplate const* itemTemplate = sObjectMgr->GetItemTemplate(entry);
-                if (!itemTemplate)
+                if (!itemTemplate || player->GetItemByGuid(ObjectGuid::Create<HighGuid::Item>(itemGuid)))
                     continue;
 
                 std::unique_ptr<Item> item(NewItemOrBag(itemTemplate));
@@ -152,7 +160,8 @@ namespace CoAChallenges
                 remove->SetData(1, itemGuid);
                 remove->SetData(2, owner);
                 transaction->Append(remove);
-                CharacterDatabase.DirectCommitTransaction(transaction);
+                if (!CommitEquipmentTransaction(transaction))
+                    continue;
 
                 auto* proof = CharacterDatabase.GetPreparedStatement(CHAR_SEL_COA_CORPSE_INVENTORY_ITEM);
                 proof->SetData(0, owner);
@@ -160,7 +169,10 @@ namespace CoAChallenges
                 proof->SetData(2, bagGuid);
                 proof->SetData(3, itemSlot);
                 if (!CharacterDatabase.Query(proof))
-                    continue;
+                {
+                    NotifyPlayer(player, "Old School: recovery was recorded. Reconnect to refresh your inventory.");
+                    return recovered;
+                }
 
                 Item* restored = item.release();
                 if (equip)
@@ -220,7 +232,6 @@ namespace CoAChallenges
                 body->SetStandState(UNIT_STAND_STATE_DEAD);
                 body->SetReactState(REACT_PASSIVE);
                 body->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
-                body->SetNPCFlag(UNIT_NPC_FLAG_GOSSIP);
                 std::lock_guard<std::mutex> lock(EquipmentCorpseMutex);
                 EquipmentCorpseGuids[id] = body->GetGUID();
             }
@@ -322,8 +333,7 @@ namespace CoAChallenges
         AppendCorpseHeader(transaction, player, id, location);
         for (EquipmentItem const& entry : equipment)
         {
-            if (entry.state == ITEM_UNCHANGED)
-                entry.item->FSetState(ITEM_CHANGED);
+            entry.item->FSetState(ITEM_NEW);
             entry.item->SaveToDB(transaction);
             entry.item->DeleteFromInventoryDB(transaction);
             auto* link = CharacterDatabase.GetPreparedStatement(CHAR_INS_COA_EQUIPMENT_CORPSE_ITEM);
@@ -332,13 +342,7 @@ namespace CoAChallenges
             link->SetData(2, entry.slot);
             transaction->Append(link);
         }
-        CharacterDatabase.DirectCommitTransaction(transaction);
-
-        auto* proof = CharacterDatabase.GetPreparedStatement(CHAR_SEL_COA_EQUIPMENT_CORPSE_COUNT);
-        proof->SetData(0, id);
-        proof->SetData(1, owner);
-        PreparedQueryResult count = CharacterDatabase.Query(proof);
-        if (!count || count->Fetch()[0].Get<uint32>() != equipment.size())
+        if (!CommitEquipmentTransaction(transaction))
         {
             for (EquipmentItem const& entry : equipment)
             {
@@ -377,7 +381,11 @@ namespace CoAChallenges
         if (!PreserveOldSchoolCorpseEquipment(player))
             return false;
 
-        ImportLegacyCorpse(player);
+        if (!ImportLegacyCorpse(player))
+        {
+            NotifyPlayer(player, "Old School: existing corpse equipment could not be secured. Release again to retry.");
+            return false;
+        }
         EquipmentCorpsePlayerState* state = player->CustomData.GetDefault<EquipmentCorpsePlayerState>(PlayerCorpseKey);
         state->bindRespawn = true;
         player->ResurrectPlayer(0.2f, false);

@@ -3580,7 +3580,7 @@ namespace CoAChallenges
                         corpseLocation.GetPositionZ()) <= 39.0f;
                 if (!atCorpse)
                 {
-                    NotifyPlayer(player, "Old School: return to your corpse as a spirit before you can resurrect.");
+                    NotifyPlayer(player, "Old School: release to revive at your bind point, or receive resurrection at your death location.");
                     return false;
                 }
             }
