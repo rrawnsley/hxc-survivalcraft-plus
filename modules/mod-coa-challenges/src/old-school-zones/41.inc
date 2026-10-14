@@ -1,3 +1,6 @@
+    { 41, 996884, "Nightshriek the Hollow Wing camp", "named local threat", 0, 150, true, false },
+    { 41, 996885, "Vharun the Hollow Seer camp", "named local threat", 0, 150, true, false },
+    { 41, 996886, "Gromath the Passkeeper camp", "named local threat", 0, 200, true, false },
     { 41, 7369, "Deadwind ogre hold", "hunter", 1, 100, false, false },
     { 41, 7371, "Deadwind ogre hold", "hunter", 1, 100, false, false },
     { 41, 7372, "Deadwind ogre hold", "spellcaster", 4, 100, false, false },

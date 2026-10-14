@@ -1,2 +1,5 @@
+    { 493, 996881, "Old Mossback camp", "named local threat", 0, 150, true, true },
+    { 493, 996882, "Nighttrail the Silver Fang camp", "named local threat", 0, 150, true, true },
+    { 493, 996883, "Elder Rowanheart camp", "named local threat", 0, 200, true, true },
     { 493, 11516, "Timbermaw entrance", "hunter", 1, 100, false, false },
     { 493, 11552, "Timbermaw entrance", "spellcaster", 4, 100, false, false },

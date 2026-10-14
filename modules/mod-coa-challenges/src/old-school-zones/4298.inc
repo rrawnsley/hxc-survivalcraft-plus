@@ -1,3 +1,6 @@
+    { 4298, 996887, "Chaplain Verena camp", "named local threat", 0, 150, true, true },
+    { 4298, 996888, "Commander Halric camp", "named local threat", 0, 150, true, true },
+    { 4298, 996889, "Champion Severin camp", "named local threat", 0, 200, true, true },
     { 4298, 28385, "Scarlet enclave", "hunter", 1, 100, false, false },
     { 4298, 28529, "Scarlet enclave", "hunter", 1, 100, false, false },
     { 4298, 28530, "Scarlet enclave", "guard", 3, 100, false, false },
