@@ -102,6 +102,7 @@ struct Options
     float drink = 55.0f;
     float regen = 8.0f;
     float sprintDrain = 10.0f;
+    float oldSchoolSprintSeconds = 14.0f;
     uint32 campLifetime = 3600;
     uint32 campRestFillSeconds = 300;
     bool weather = true;
@@ -157,7 +158,7 @@ struct State
     uint64 lastAttack = 0;
     uint64 lastCombat = 0;
     bool sprint = false;
-    bool sprintSyncPending = false;
+    uint64 sprintStartedAt = 0;
     bool delegated = false;
     uint32 campReady = 0;
     uint32 socialTick = 0;
@@ -315,10 +316,27 @@ void RefreshProfessions(Player* player)
     }
 }
 
+bool UsesOldSchoolSprint(Player const* player)
+{
+    return CoANeeds::IsOldSchoolTrial &&
+        CoANeeds::IsOldSchoolTrial(player->GetGUID().GetCounter());
+}
+
+float SprintVigorScale(Player const* player, State const& state)
+{
+    return UsesOldSchoolSprint(player) ? state.cap / 100.0f : 1.0f;
+}
+
+float SprintDrainPerSecond(Player const* player, State const& state)
+{
+    return UsesOldSchoolSprint(player) ? 75.0f * SprintVigorScale(player, state) /
+        Config.oldSchoolSprintSeconds : Config.sprintDrain;
+}
+
 void StopSprint(Player* player, State& state)
 {
     state.sprint = false;
-    state.sprintSyncPending = false;
+    state.sprintStartedAt = 0;
     player->RemoveAurasDueToSpell(SprintAura);
 }
 
@@ -945,6 +963,8 @@ public:
         Config.drink = std::max(0.0f, sConfigMgr->GetOption<float>("CoANeeds.DrinkFill", 55.0f));
         Config.regen = std::max(0.0f, sConfigMgr->GetOption<float>("CoANeeds.VigorRegenPerSecond", 8.0f));
         Config.sprintDrain = std::max(0.0f, sConfigMgr->GetOption<float>("CoANeeds.SprintDrainPerSecond", 10.0f));
+        Config.oldSchoolSprintSeconds = std::max(1.0f,
+            sConfigMgr->GetOption<float>("CoANeeds.OldSchoolSprintDurationSeconds", 14.0f));
         Config.campLifetime = std::clamp(sConfigMgr->GetOption<uint32>("CoANeeds.CampLifetimeSeconds", 3600),
             60u, 86400u);
         Config.campRestFillSeconds = std::clamp(
@@ -1218,12 +1238,13 @@ public:
                 if (state.sprint)
                 {
                     StopSprint(player, state);
-                    if (state.vigor <= 15.0f)
+                    if (state.vigor <= 15.0f * SprintVigorScale(player, state))
                         Exhaust(player, state);
                 }
                 else if (player->HasUnitMovementFlag(MOVEMENTFLAG_WALKING))
                     ChatHandler(player->GetSession()).SendSysMessage("Switch from walking to running before sprinting.");
-                else if (state.vigor > 25.0f && state.displayFood > 5.0f && state.exhaustedUntil <= now)
+                else if (state.vigor > 25.0f * SprintVigorScale(player, state) &&
+                    state.displayFood > 5.0f && state.exhaustedUntil <= now)
                 {
                     float const before = player->GetSpeedRate(MOVE_RUN);
                     RefreshSprint(player, true);
@@ -1244,14 +1265,14 @@ public:
                     }
                     else
                     {
-                        state.vigor -= 10.0f;
+                        state.vigor -= 10.0f * SprintVigorScale(player, state);
                         state.sprint = true;
-                        state.sprintSyncPending = true;
+                        state.sprintStartedAt = Milliseconds();
                         state.lastSpend = Milliseconds();
                     }
                 }
-                else if (state.vigor <= 25.0f)
-                    ChatHandler(player->GetSession()).SendSysMessage("Vigor Sprint requires more than 25 vigor.");
+                else if (state.vigor <= 25.0f * SprintVigorScale(player, state))
+                    ChatHandler(player->GetSession()).SendSysMessage("Recover more vigor before sprinting.");
                 else if (state.displayFood <= 5.0f)
                     ChatHandler(player->GetSession()).SendSysMessage("You are too hungry to sprint.");
                 else
@@ -1422,14 +1443,17 @@ public:
         }
         if (alive && state.sprint && player->isMoving())
         {
-            state.vigor = std::max(0.0f, state.vigor - Config.sprintDrain * seconds);
+            float const activeSeconds = std::min(seconds, steady > state.sprintStartedAt ?
+                float(steady - state.sprintStartedAt) / 1000.0f : 0.0f);
+            state.vigor = std::max(0.0f, state.vigor -
+                SprintDrainPerSecond(player, state) * activeSeconds);
             state.lastSpend = steady;
             if (!state.delegated)
             {
                 state.food = Clamp(state.food - 2.0f * seconds / 60.0f);
                 state.water = Clamp(state.water - 3.0f * seconds / 60.0f);
             }
-            if (state.vigor <= 15.0f)
+            if (state.vigor <= 15.0f * SprintVigorScale(player, state))
                 Exhaust(player, state);
         }
         else if (alive && player->IsInWater() && player->isMoving())
@@ -1465,11 +1489,6 @@ public:
             state.vigor = std::min(state.cap, state.vigor + regen * seconds);
         }
         RefreshSprint(player, alive && state.sprint);
-        if (state.sprintSyncPending && alive && state.sprint && player->GetClientControlling() == player)
-        {
-            player->SendSpeedToController(MOVE_RUN, player);
-            state.sprintSyncPending = false;
-        }
         SetAura(player, Starving, alive && !state.delegated && state.displayFood <= 5.0f);
         SetAura(player, Dehydrated, alive && !state.delegated && state.displayWater <= 30.0f);
         SetAura(player, Exhausted, alive && state.exhaustedUntil > now);
