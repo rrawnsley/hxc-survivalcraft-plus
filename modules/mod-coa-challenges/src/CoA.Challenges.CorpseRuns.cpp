@@ -15,6 +15,7 @@ namespace CoAChallenges
     {
         constexpr char const* PlayerCorpseKey = "coa.old_school.equipment_corpses";
         constexpr char const* EquipmentCorpseKey = "coa.old_school.equipment_corpse";
+        constexpr uint32 EquipmentCorpseDisplay = 11400;
 
         struct EquipmentCorpsePlayerState : DataMap::Base
         {
@@ -52,7 +53,7 @@ namespace CoAChallenges
             statement->SetData(5, location.GetPositionY());
             statement->SetData(6, location.GetPositionZ());
             statement->SetData(7, location.GetOrientation());
-            statement->SetData(8, player->GetNativeDisplayId());
+            statement->SetData(8, EquipmentCorpseDisplay);
             statement->SetData(9, uint32(std::time(nullptr)));
             transaction->Append(statement);
         }
@@ -235,8 +236,8 @@ namespace CoAChallenges
                 state->owner = player->GetGUID().GetCounter();
                 body->SetOwnerGUID(ObjectGuid::Empty);
                 body->SetPhaseMask(PHASEMASK_ANYWHERE, true);
-                body->SetDisplayId(fields[5].Get<uint32>());
-                body->SetNativeDisplayId(fields[5].Get<uint32>());
+                body->SetDisplayId(EquipmentCorpseDisplay);
+                body->SetNativeDisplayId(EquipmentCorpseDisplay);
                 body->SetStandState(UNIT_STAND_STATE_DEAD);
                 body->SetReactState(REACT_PASSIVE);
                 body->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
@@ -341,6 +342,7 @@ namespace CoAChallenges
         AppendCorpseHeader(transaction, player, id, location, player->GetInstanceId());
         for (EquipmentItem const& entry : equipment)
         {
+            entry.item->RemoveFromUpdateQueueOf(player);
             entry.item->FSetState(ITEM_NEW);
             entry.item->SaveToDB(transaction);
             entry.item->DeleteFromInventoryDB(transaction);

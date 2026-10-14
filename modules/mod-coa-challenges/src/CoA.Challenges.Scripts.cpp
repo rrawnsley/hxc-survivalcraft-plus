@@ -1225,8 +1225,8 @@ namespace CoAChallenges
     {
         uint32 ordinaryGearKeepPercent = 1;
         uint32 namedGearKeepPercent = 100;
-        uint32 ordinaryHealthPercent = 600;
-        float ordinaryDamageMultiplier = 1.0f;
+        uint32 ordinaryHealthPercent = 250;
+        float ordinaryDamageMultiplier = 1.25f;
     };
 
     OldSchoolTuning OldSchoolOptions;
@@ -3008,8 +3008,8 @@ namespace CoAChallenges
         }
         else if (levelDifference <= 4)
         {
-            healthFactor = 1.75f;
-            damageFactor = 1.75f;
+            healthFactor = 1.4f;
+            damageFactor = 1.3f;
             experienceFactor = 175;
         }
         else if (levelDifference <= 6)
@@ -3354,8 +3354,8 @@ namespace CoAChallenges
             OldSchoolPowerProfile const profile = GetOldSchoolPowerProfile(attacker, creature);
             uint32 const groupSize = OldSchoolGroupRewardSize(attacker, creature);
             bool const dungeon = creature->GetMap()->IsDungeon() && !creature->GetMap()->IsRaid();
-            float const groupHealth = 1.0f + (dungeon ? 0.1f : 1.2f) * float(groupSize - 1);
-            float const groupDamage = dungeon ? 1.0f : 1.0f + 0.35f * float(groupSize - 1);
+            float const groupHealth = 1.0f + (dungeon ? 0.1f : 0.4f) * float(groupSize - 1);
+            float const groupDamage = dungeon ? 1.0f : 1.0f + 0.05f * float(groupSize - 1);
             auto* state = new OldSchoolHealth();
             state->extra = float(creature->GetMaxHealth()) *
                 (profile.healthPercent * groupHealth / 100.0f - 1.0f);
@@ -4759,9 +4759,9 @@ namespace CoAChallenges
             OldSchoolOptions.namedGearKeepPercent = std::min(100u,
                 sConfigMgr->GetOption<uint32>("CoAChallenges.OldSchool.NamedGearDropPercent", 100));
             OldSchoolOptions.ordinaryHealthPercent = std::clamp(
-                sConfigMgr->GetOption<uint32>("CoAChallenges.OldSchool.OrdinaryHealthPercent", 600), 1u, 10000u);
+                sConfigMgr->GetOption<uint32>("CoAChallenges.OldSchool.OrdinaryHealthPercent", 250), 1u, 10000u);
             OldSchoolOptions.ordinaryDamageMultiplier = std::clamp(
-                sConfigMgr->GetOption<float>("CoAChallenges.OldSchool.OrdinaryDamageMultiplier", 1.0f), 0.1f, 20.0f);
+                sConfigMgr->GetOption<float>("CoAChallenges.OldSchool.OrdinaryDamageMultiplier", 1.25f), 0.1f, 20.0f);
             CoANeeds::ChallengeMaximum = std::max(1.0f,
                 sConfigMgr->GetOption<float>("CoAChallenges.HungerMax", 100.0f));
         }

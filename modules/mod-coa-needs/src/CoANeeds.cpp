@@ -306,6 +306,25 @@ void StopSprint(Player* player, State& state)
     player->RemoveAurasDueToSpell(SprintAura);
 }
 
+void RefreshSprint(Player* player, bool active)
+{
+    if (!active)
+    {
+        player->RemoveAurasDueToSpell(SprintAura);
+        return;
+    }
+    Aura* aura = player->GetAura(SprintAura);
+    if (!aura)
+        aura = player->AddAura(SprintAura, player);
+    if (!aura)
+        return;
+    aura->SetMaxDuration(-1);
+    aura->SetDuration(-1);
+    if (AuraEffect* effect = aura->GetEffect(EFFECT_0))
+        if (effect->GetAmount() != 30)
+            effect->ChangeAmount(30);
+}
+
 void Save(Player* player, State const& state)
 {
     std::array<uint32, 12> values = { 1, uint32(Clamp(state.food) * 1000.0f),
@@ -558,20 +577,21 @@ void PlaceCamp(Player* player, State& state, uint32 tier)
 
 void RestAtCamp(Player* player, State& state, int32 tier, uint32 elapsed)
 {
+    bool const oldSchool = CoANeeds::IsOldSchoolTrial &&
+        CoANeeds::IsOldSchoolTrial(player->GetGUID().GetCounter());
     state.restingCamp = player->IsAlive() && !player->IsInCombat() ? tier : -1;
     for (uint32 index = 0; index < 3; ++index)
         SetAura(player, CampRest + index, state.restingCamp == int32(index));
-    if (state.restingCamp >= 0)
+    if (state.restingCamp >= 0 && (!oldSchool || player->IsSitState()))
     {
         float const tierRecovery = 0.005f + 0.0025f * state.restingCamp;
-        float const recovery = tierRecovery * (player->IsSitState() ? 2.0f : 1.0f) * elapsed / 1000.0f;
+        float const recovery = tierRecovery * (oldSchool ? 1.0f : player->IsSitState() ? 2.0f : 1.0f)
+            * elapsed / 1000.0f;
         player->ModifyHealth(int32(std::max(1.0f, player->GetMaxHealth() * recovery)));
         if (player->GetMaxPower(POWER_MANA))
             player->ModifyPower(POWER_MANA,
                 int32(std::max(1.0f, player->GetMaxPower(POWER_MANA) * recovery)));
     }
-    bool const oldSchool = CoANeeds::IsOldSchoolTrial &&
-        CoANeeds::IsOldSchoolTrial(player->GetGUID().GetCounter());
     if (oldSchool)
     {
         uint32 const previous = state.oldSchoolRestedMs;
@@ -908,7 +928,15 @@ public:
     NeedsPlayer() : PlayerScript("CoANeedsPlayer", { PLAYERHOOK_ON_CREATE, PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_BEFORE_LOGOUT,
         PLAYERHOOK_ON_SAVE, PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_SPELL_CAST, PLAYERHOOK_ON_LEVEL_CHANGED,
         PLAYERHOOK_ON_PLAYER_ENTER_COMBAT, PLAYERHOOK_CAN_PLAYER_USE_PRIVATE_CHAT, PLAYERHOOK_ON_UPDATE_SKILL,
-        PLAYERHOOK_ON_SET_SKILL }) { }
+        PLAYERHOOK_ON_SET_SKILL, PLAYERHOOK_ON_CAN_REGENERATE }) { }
+
+    bool OnPlayerCanRegenerate(Player* player, int32 power) override
+    {
+        if (!player || (power != POWER_HEALTH && power != POWER_MANA) || !Affects(player)
+            || !CoANeeds::IsOldSchoolTrial || !CoANeeds::IsOldSchoolTrial(player->GetGUID().GetCounter()))
+            return true;
+        return player->IsSitState();
+    }
 
     void OnPlayerCreate(Player* player) override
     {
@@ -1109,7 +1137,7 @@ public:
                     state.vigor -= 10.0f;
                     state.sprint = true;
                     state.lastSpend = Milliseconds();
-                    SetAura(player, SprintAura, true);
+                    RefreshSprint(player, true);
                 }
             }
             else if (id == DodgeAbility && player->GetLevel() >= 30 && state.vigor >= 25.0f &&
@@ -1308,7 +1336,7 @@ public:
                 regen *= 2.5f;
             state.vigor = std::min(state.cap, state.vigor + regen * seconds);
         }
-        SetAura(player, SprintAura, alive && state.sprint);
+        RefreshSprint(player, alive && state.sprint);
         SetAura(player, Starving, alive && !state.delegated && state.displayFood <= 5.0f);
         SetAura(player, Dehydrated, alive && !state.delegated && state.displayWater <= 30.0f);
         SetAura(player, Exhausted, alive && state.exhaustedUntil > now);
