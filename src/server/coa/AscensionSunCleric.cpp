@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionSunCleric.h"
 #include "AscensionSunClericData.h"
+#include "AscensionRealmClock.h"
 #include "CellImpl.h"
 #include "GameTime.h"
 #include "GridNotifiers.h"
@@ -303,14 +304,7 @@ void Eclipse(Player* player, Unit* target, uint32 amount)
 }
 bool Daytime()
 {
-    time_t now = time_t(GameTime::GetGameTime().count());
-    tm local{};
-#ifdef _WIN32
-    localtime_s(&local, &now);
-#else
-    localtime_r(&now, &local);
-#endif
-    return local.tm_hour >= 6 && local.tm_hour < 18;
+    return !AscensionRealmClock::IsNight();
 }
 void ReleaseSuncharge(Player* player, Unit* target, uint32 stacks)
 {

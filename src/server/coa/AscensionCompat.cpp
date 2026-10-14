@@ -9,6 +9,7 @@
 #include "AscensionFelsworn.h"
 #include "AscensionItemScaling.h"
 #include "AscensionPyromancer.h"
+#include "AscensionRealmClock.h"
 #include "AscensionCultist.h"
 #include "AscensionVenomancer.h"
 #include "AscensionTinker.h"
@@ -8117,8 +8118,6 @@ public:
     return true;
   }
 
-  static constexpr float REAL_TIME_GAME_SPEED = 0.01666667f;
-
   static time_t SameDayAt(time_t time, uint8 hour, uint8 minute) {
     std::tm local = Acore::Time::TimeBreakdown(time);
     local.tm_hour = hour;
@@ -8141,11 +8140,11 @@ public:
       return true;
     }
 
-    time_t const now = GameTime::GetGameTime().count();
+    time_t const now = AscensionRealmClock::ClientTime();
     time_t const shown = hour ? SameDayAt(now, *hour, minute.value_or(0)) : now;
     WorldPacket data(SMSG_LOGIN_SETTIMESPEED, 4 + 4 + 4);
     data.AppendPackedTime(shown);
-    data << REAL_TIME_GAME_SPEED;
+    data << AscensionRealmClock::GameSpeed;
     data << uint32(0);
     player->SendDirectMessage(&data);
 

@@ -27,6 +27,7 @@
 #include "ArenaTeamMgr.h"
 #include "ArenaSeasonMgr.h"
 #include "AscensionPooledVitality.h"
+#include "RealmDayCycle.h"
 #include "Battlefield.h"
 #include "BattlefieldMgr.h"
 #include "BattlefieldWG.h"
@@ -12325,8 +12326,8 @@ void Player::SendInitialPacketsBeforeAddToMap()
     SendEquipmentSetList();
 
     data.Initialize(SMSG_LOGIN_SETTIMESPEED, 4 + 4 + 4);
-    data.AppendPackedTime(GameTime::GetGameTime().count());
-    data << float(0.01666667f);                             // game speed
+    data.AppendPackedTime(AscensionRealmClock::ClientTime());
+    data << AscensionRealmClock::GameSpeed;                  // game speed
     data << uint32(0);                                      // added in 3.1.2
     SendDirectMessage(&data);
 

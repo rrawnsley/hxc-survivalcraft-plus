@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionStarcaller.h"
+#include "AscensionRealmClock.h"
 #include "GameTime.h"
 #include "MotionMaster.h"
 #include "Player.h"
@@ -153,8 +154,7 @@ class aura_ascension_starcaller_lifecycle : public AuraScript
             Pull(player), GetAura()->Remove();
         if (id == 300256)
         {
-            uint32 hour = (uint64(GameTime::GetGameTime().count()) / 3600 + 3) % 24;
-            bool night = hour < 6 || hour >= 18;
+            bool night = AscensionRealmClock::IsNight();
             if (night && !player->HasAura(301328))
                 Cast(player, player, 301328);
             if (!night)
