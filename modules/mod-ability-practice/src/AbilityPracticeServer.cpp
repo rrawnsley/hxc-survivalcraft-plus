@@ -413,6 +413,7 @@ bool RankCapsRequested = false;
 bool MasteryPacingRequested = false;
 bool ControlRequested = false;
 Practice::CatchupSettings Catchup;
+constexpr std::uint32_t PracticeRateMultiplier = 2;
 
 struct PreviousPacing
 {
@@ -3597,7 +3598,7 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
             }
             bool const acquisition = AcquisitionAllowed(player, ability, ability.Ranks.front().SpellId);
             auto const effective = Practice::BuildCatchupPolicy(profile.Policy,
-                Practice::CapAtLevel(ability, player->GetLevel()), Catchup);
+                Practice::CapAtLevel(ability, player->GetLevel()), Catchup, PracticeRateMultiplier);
             if (!effective)
                 return false;
             auto view = Practice::BuildAbilityView(ability, effective->View(), state,
@@ -3649,7 +3650,7 @@ bool Send(Player* player, MenuSession& session, Clock::time_point now)
                 auto const rate = effective->View().Bands[
                     Practice::Detail::BandIndex(effective->View(), state.Proficiency)];
                 view.Catchup = Practice::CatchupView{ Catchup.Gap, Catchup.Multiplier,
-                    base.PointsPerUse, rate.PointsPerUse,
+                    base.PointsPerUse * PracticeRateMultiplier, rate.PointsPerUse,
                     state.Proficiency < view.Cap && view.Cap - state.Proficiency >= Catchup.Gap };
             }
             view.Session = {};
@@ -3865,7 +3866,7 @@ void AwardOutcome(Player* player, Spell* spell, Practice::AbilityProfile const& 
     auto& session = found->second;
     Practice::OutcomeContext const context{ true, true, true, true, player->GetLevel() };
     auto const effective = Practice::BuildCatchupPolicy(profile.Policy,
-        Practice::CapAtLevel(profile.Definition, player->GetLevel()), Catchup);
+        Practice::CapAtLevel(profile.Definition, player->GetLevel()), Catchup, PracticeRateMultiplier);
     if (!effective)
         return;
     if (profile.Definition.Kind == Practice::AbilityKind::Mastery)
@@ -3963,7 +3964,7 @@ void AwardScriptedDamage(Player* player, Spell* spell, Unit* target, std::uint32
         return;
     }
     auto const effective = Practice::BuildCatchupPolicy(profile->Policy,
-        Practice::CapAtLevel(profile->Definition, player->GetLevel()), Catchup);
+        Practice::CapAtLevel(profile->Definition, player->GetLevel()), Catchup, PracticeRateMultiplier);
     if (!effective)
         return;
     if (profile->Definition.Kind == Practice::AbilityKind::Mastery)
@@ -4006,7 +4007,7 @@ void AwardResourceDrain(Player* player, Spell* spell, Unit* target, std::uint32_
         return;
     }
     auto const effective = Practice::BuildCatchupPolicy(profile->Policy,
-        Practice::CapAtLevel(profile->Definition, player->GetLevel()), Catchup);
+        Practice::CapAtLevel(profile->Definition, player->GetLevel()), Catchup, PracticeRateMultiplier);
     if (!effective)
         return;
     ObserveMastery(player, found->second, false);
@@ -4052,7 +4053,7 @@ bool AwardOwnedBuffContribution(Player* player, MenuSession& session,
     if (!info)
         return false;
     auto const effective = Practice::BuildCatchupPolicy(profile.Policy,
-        Practice::CapAtLevel(profile.Definition, player->GetLevel()), Catchup);
+        Practice::CapAtLevel(profile.Definition, player->GetLevel()), Catchup, PracticeRateMultiplier);
     if (!effective)
         return false;
     CoAAbilityPractice::CastReceipt contribution(player->GetGUID().GetRawValue(), session.ActionSession,
@@ -4223,7 +4224,7 @@ void AwardPeriodicOutcome(Unit* caster, Unit* target, std::uint32_t auraSpellId,
     ReceiptCast cast{ player, sSpellMgr->GetSpellInfo(receipt->SpellId), *receipt };
     Practice::OutcomeContext const context{ true, true, true, true, player->GetLevel() };
     auto const effective = Practice::BuildCatchupPolicy(profile->Policy,
-        Practice::CapAtLevel(profile->Definition, player->GetLevel()), Catchup);
+        Practice::CapAtLevel(profile->Definition, player->GetLevel()), Catchup, PracticeRateMultiplier);
     if (!effective)
         return;
     auto const award = Practice::HandleOutcome(*player, cast, profile->Definition,
@@ -4265,7 +4266,7 @@ void AwardAttackPowerReduction(Unit* caster, Unit* target, std::uint32_t auraSpe
     ReceiptCast cast{ player, sSpellMgr->GetSpellInfo(receipt->SpellId), *receipt };
     Practice::OutcomeContext const context{ true, true, true, true, player->GetLevel() };
     auto const effective = Practice::BuildCatchupPolicy(profile->Policy,
-        Practice::CapAtLevel(profile->Definition, player->GetLevel()), Catchup);
+        Practice::CapAtLevel(profile->Definition, player->GetLevel()), Catchup, PracticeRateMultiplier);
     if (!effective)
         return;
     auto const award = Practice::HandleOutcome(*player, cast, profile->Definition,
@@ -4303,7 +4304,7 @@ void AwardControlOutcome(Unit* caster, Unit* target, std::uint32_t auraSpellId, 
     ReceiptCast cast{ player, sSpellMgr->GetSpellInfo(receipt->SpellId), *receipt };
     Practice::OutcomeContext const context{ true, true, true, true, player->GetLevel() };
     auto const effective = Practice::BuildCatchupPolicy(profile->Policy,
-        Practice::CapAtLevel(profile->Definition, player->GetLevel()), Catchup);
+        Practice::CapAtLevel(profile->Definition, player->GetLevel()), Catchup, PracticeRateMultiplier);
     if (!effective)
         return;
     auto const award = Practice::HandleOutcome(*player, cast, profile->Definition,
@@ -4661,7 +4662,7 @@ public:
         {
             std::uint32_t const maximumCap = profile.Definition.Caps.empty() ? 1 :
                 profile.Definition.Caps.back().Proficiency;
-            if (!Practice::BuildCatchupPolicy(profile.Policy, maximumCap, Catchup))
+            if (!Practice::BuildCatchupPolicy(profile.Policy, maximumCap, Catchup, PracticeRateMultiplier))
             {
                 Ready = false;
                 LOG_ERROR("module.ability_practice", "Rejected catch-up policy: class={}, ability={}",

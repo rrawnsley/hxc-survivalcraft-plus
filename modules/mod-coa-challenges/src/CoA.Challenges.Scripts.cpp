@@ -3008,8 +3008,8 @@ namespace CoAChallenges
         }
         else if (levelDifference <= 4)
         {
-            healthFactor = 1.4f;
-            damageFactor = 1.3f;
+            healthFactor = 1.6f;
+            damageFactor = 1.6f;
             experienceFactor = 175;
         }
         else if (levelDifference <= 6)
@@ -4120,6 +4120,7 @@ namespace CoAChallenges
                 uint64 scaleNumerator = 100;
                 uint32 experienceMultiplierHundredths = 100;
                 uint32 groupSize = 1;
+                uint32 soloKillRewardPercent = 100;
                 if (xpSource == XPSOURCE_KILL && victim && victim->IsCreature()
                     && OldSchoolCreature(victim->ToCreature())
                     && TappingAllowsRewards(player, victim->ToCreature()))
@@ -4132,9 +4133,12 @@ namespace CoAChallenges
                         CoANeeds::ReadOldSchoolRestedSeconds(player->GetGUID().GetCounter()))
                         scaleNumerator = 115;
                     groupSize = OldSchoolGroupRewardSize(player, creature);
+                    if (groupSize == 1)
+                        soloKillRewardPercent = 160;
                 }
                 scaledAmount *= experienceMultiplierHundredths;
                 scaledAmount *= scaleNumerator;
+                scaledAmount = scaledAmount * soloKillRewardPercent / 100;
                 if (groupSize > 1)
                 {
                     uint32 const groupRateThousandths = groupSize == 3 ? 1166

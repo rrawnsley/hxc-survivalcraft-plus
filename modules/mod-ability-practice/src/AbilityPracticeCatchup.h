@@ -34,32 +34,35 @@ inline bool ValidCatchupSettings(CatchupSettings settings)
 }
 
 inline std::optional<EffectiveTrainingPolicy> BuildCatchupPolicy(TrainingPolicy original,
-    std::uint32_t cap, CatchupSettings settings)
+    std::uint32_t cap, CatchupSettings settings, std::uint32_t practiceRateMultiplier = 1)
 {
-    if (!ValidPolicy(original) || !ValidCatchupSettings(settings))
+    if (!ValidPolicy(original) || !ValidCatchupSettings(settings) || !practiceRateMultiplier ||
+        practiceRateMultiplier > 8)
         return std::nullopt;
     EffectiveTrainingPolicy result{ original };
-    if (!settings.Enabled || cap <= settings.Gap)
+    if (practiceRateMultiplier == 1 && (!settings.Enabled || cap <= settings.Gap))
         return result;
-    if (original.Bands.size() > result.Bands.size() - 1)
+    std::uint32_t const cutoff = settings.Enabled && cap > settings.Gap ? cap - settings.Gap + 1 : 0;
+    if (original.Bands.size() > result.Bands.size() - (cutoff ? 1 : 0))
         return std::nullopt;
-    std::uint32_t const cutoff = cap - settings.Gap + 1;
     for (std::size_t index = 0; index < original.Bands.size(); ++index)
     {
         TrainingBand band = original.Bands[index];
-        if (band.FirstProficiency < cutoff)
-        {
-            std::uint64_t const points = std::uint64_t(band.PointsPerUse) * settings.Multiplier;
-            if (points > std::numeric_limits<std::uint32_t>::max())
-                return std::nullopt;
-            band.PointsPerUse = static_cast<std::uint32_t>(points);
-        }
+        std::uint64_t const points = std::uint64_t(band.PointsPerUse) * practiceRateMultiplier *
+            (cutoff && band.FirstProficiency < cutoff ? settings.Multiplier : 1);
+        if (points > std::numeric_limits<std::uint32_t>::max())
+            return std::nullopt;
+        band.PointsPerUse = static_cast<std::uint32_t>(points);
         result.Bands[result.Count++] = band;
-        if (band.FirstProficiency < cutoff && (index + 1 == original.Bands.size() ||
+        if (cutoff && band.FirstProficiency < cutoff && (index + 1 == original.Bands.size() ||
             cutoff < original.Bands[index + 1].FirstProficiency))
         {
             band = original.Bands[index];
             band.FirstProficiency = cutoff;
+            std::uint64_t const normalPoints = std::uint64_t(band.PointsPerUse) * practiceRateMultiplier;
+            if (normalPoints > std::numeric_limits<std::uint32_t>::max())
+                return std::nullopt;
+            band.PointsPerUse = static_cast<std::uint32_t>(normalPoints);
             result.Bands[result.Count++] = band;
         }
     }

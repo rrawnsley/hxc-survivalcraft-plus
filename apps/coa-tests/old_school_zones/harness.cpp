@@ -168,14 +168,14 @@ void NamedProfiles()
         assert(std::strcmp(profile.con, "Gold") == 0);
         if (creature.data.rank == CREATURE_ELITE_RAREELITE)
         {
-            assert(profile.healthPercent >= 2100);
-            assert(profile.damageMultiplier >= 3.5f);
+            assert(profile.healthPercent >= 1920);
+            assert(profile.damageMultiplier >= 3.2f);
             assert(profile.experienceMultiplierHundredths >= 350);
         }
         else
         {
-            assert(profile.healthPercent >= 1050);
-            assert(profile.damageMultiplier >= 1.75f);
+            assert(profile.healthPercent >= 960);
+            assert(profile.damageMultiplier >= 1.6f);
             assert(profile.experienceMultiplierHundredths >= 175);
         }
         player.level = 35;
@@ -280,10 +280,22 @@ void CreatureTypeThreatProfiles()
     scaled.level = uint32(int32(player.level) - OldSchoolThreatOffset(&scaled));
     auto const white = GetOldSchoolPowerProfile(&player, &scaled);
     assert(std::strcmp(white.con, "White") == 0);
-    scaled.level += 5;
+    scaled.level += 1;
+    auto const yellow = GetOldSchoolPowerProfile(&player, &scaled);
+    assert(std::strcmp(yellow.con, "Yellow") == 0);
+    scaled.level += 2;
+    auto const gold = GetOldSchoolPowerProfile(&player, &scaled);
+    assert(std::strcmp(gold.con, "Gold") == 0);
+    assert(white.healthPercent < yellow.healthPercent && yellow.healthPercent < gold.healthPercent);
+    assert(white.damageMultiplier < yellow.damageMultiplier && yellow.damageMultiplier < gold.damageMultiplier);
+    assert(white.experienceMultiplierHundredths < yellow.experienceMultiplierHundredths &&
+        yellow.experienceMultiplierHundredths < gold.experienceMultiplierHundredths);
+    scaled.level += 2;
     auto const purple = GetOldSchoolPowerProfile(&player, &scaled);
     assert(std::strcmp(purple.con, "Orange") == 0);
-    assert(purple.experienceMultiplierHundredths > white.experienceMultiplierHundredths);
+    assert(purple.healthPercent > gold.healthPercent);
+    assert(purple.damageMultiplier > gold.damageMultiplier);
+    assert(purple.experienceMultiplierHundredths > gold.experienceMultiplierHundredths);
 }
 
 void MulgoreCampConsider()

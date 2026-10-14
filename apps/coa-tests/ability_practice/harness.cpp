@@ -531,6 +531,22 @@ void CheckFastCatchup()
     std::cout << "PASS: eightfold catch-up reaches Lichfrost's first rank in 68 qualifying uses\n";
 }
 
+void CheckLivePracticeRate()
+{
+    auto const found = std::find_if(DevelopmentPacing::Entries.begin(), DevelopmentPacing::Entries.end(),
+        [](auto const& entry) { return entry.ClassId == 23 && entry.AbilityId == 801722; });
+    assert(found != DevelopmentPacing::Entries.end());
+    CatchupSettings const catchup{ true, 40, 8 };
+    auto const previous = BuildCatchupPolicy(found->Policy, 10, catchup);
+    auto const faster = BuildCatchupPolicy(found->Policy, 10, catchup, 2);
+    assert(previous && faster);
+    assert(previous->View().Bands.front().PointsPerUse == 270);
+    assert(faster->View().Bands.front().PointsPerUse == 540);
+    assert(UsesUntil(previous->View(), { 1, 0 }, 10, 10).Uses == 540);
+    assert(UsesUntil(faster->View(), { 1, 0 }, 10, 10).Uses == 270);
+    assert(ApplyQualifyingUse(faster->View(), { 2, 1000 }, 10).State.Points == 1540);
+}
+
 void CheckCurrentRankPolicies()
 {
     std::uint32_t forecasts = 0;
@@ -811,7 +827,7 @@ void CheckMasteryFixedAndTrainerPolicies()
             assert(!view.NextTrainingCap && view.Rewards.empty());
         }
     }
-    assert(fixedCount == 118);
+    assert(fixedCount == 119);
     for (auto const& profile : DevelopmentUtilityFixed::Profiles)
         for (auto const& rank : profile.Definition.Ranks)
         {
@@ -1558,6 +1574,7 @@ int main(int argc, char** argv)
     CheckPersistence(policy);
     CheckOutcome(policy);
     CheckFastCatchup();
+    CheckLivePracticeRate();
     CheckCurrentRankPolicies();
     CheckResourcePacing();
     CheckMasteryFixedAndTrainerPolicies();
