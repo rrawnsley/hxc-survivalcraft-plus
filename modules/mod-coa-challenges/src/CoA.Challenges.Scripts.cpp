@@ -783,6 +783,28 @@ namespace CoAChallenges
         return trialBlocks | (it == LevelScalingMasks.end() ? 0 : it->second);
     }
 
+    bool HideCreatureLevelForOldSchool(Player const* player, Creature const* creature)
+    {
+        return creature && OldSchoolChallenge(player);
+    }
+
+    void RefreshCreatureLevelVisibility(Player* player)
+    {
+        VisibleWorldObjectsMap* visibleObjects = player->GetObjectVisibilityContainer().GetVisibleWorldObjectsMap();
+        if (!visibleObjects)
+            return;
+
+        for (auto const& entry : *visibleObjects)
+        {
+            WorldObject* object = entry.second;
+            if (!object || !object->IsCreature())
+                continue;
+
+            object->DestroyForPlayer(player);
+            object->SendUpdateToPlayer(player);
+        }
+    }
+
     uint8 StoreLevelScalingBlocks(uint32 guid, uint8 blocks)
     {
         std::lock_guard<std::mutex> lock(LevelScalingMutex);
@@ -817,7 +839,11 @@ namespace CoAChallenges
             if (ActiveChallengeWithRule(player, "CHALLENGE_RULES_TYPE_NO_QUEST_LEVEL_SCALING", level))
                 blocks |= LocalLevelScaling::ChallengeBlocksQuestScaling;
         }
-        if (StoreLevelScalingBlocks(player->GetGUID().GetCounter(), blocks) == blocks || !player->IsInWorld())
+        uint8 const previous = StoreLevelScalingBlocks(player->GetGUID().GetCounter(), blocks);
+        if (!player->IsInWorld())
+            return;
+        LocalLevelScaling::NotifyCreatureLevelVisibilityChanged(player);
+        if (previous == blocks)
             return;
         if (!LocalLevelScaling::NotifyScalingChanged(player))
             player->RefreshQuestLogQueries();
@@ -6239,6 +6265,10 @@ void Addmod_coa_challengesScripts()
     LocalLevelScaling::ChallengeRewardLevelOwner.store(&CoAChallenges::OldSchoolRewardLevel, std::memory_order_relaxed);
     RegisterAscensionClientConfig(&CoAChallenges::AppendClientConfig);
     LocalLevelScaling::ChallengeBlocksOwner.store(&CoAChallenges::LevelScalingBlocks, std::memory_order_relaxed);
+    LocalLevelScaling::CreatureLevelVisibilityOwner.store(&CoAChallenges::HideCreatureLevelForOldSchool,
+        std::memory_order_relaxed);
+    LocalLevelScaling::CreatureLevelVisibilityChangedOwner.store(&CoAChallenges::RefreshCreatureLevelVisibility,
+        std::memory_order_relaxed);
     new CoAChallenges::CoAChallengesPlayer();
     new CoAChallenges::CoAChallengesWorld();
     new CoAChallenges::CoAChallengesServer();

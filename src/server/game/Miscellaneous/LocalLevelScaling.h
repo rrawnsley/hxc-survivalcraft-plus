@@ -70,6 +70,26 @@ inline std::uint8_t ChallengeBlocksFor(Player const* player)
     return owner && player ? owner(player) : 0;
 }
 
+using CreatureLevelVisibilityResolver = bool (*)(Player const*, Creature const*);
+inline std::atomic<CreatureLevelVisibilityResolver> CreatureLevelVisibilityOwner{nullptr};
+
+inline bool HideCreatureLevelFor(Player const* viewer, Creature const* creature)
+{
+    CreatureLevelVisibilityResolver const owner = CreatureLevelVisibilityOwner.load(std::memory_order_relaxed);
+    return owner && owner(viewer, creature);
+}
+
+using CreatureLevelVisibilityChangedResolver = void (*)(Player*);
+inline std::atomic<CreatureLevelVisibilityChangedResolver> CreatureLevelVisibilityChangedOwner{nullptr};
+
+inline void NotifyCreatureLevelVisibilityChanged(Player* player)
+{
+    CreatureLevelVisibilityChangedResolver const owner =
+        CreatureLevelVisibilityChangedOwner.load(std::memory_order_relaxed);
+    if (owner && player)
+        owner(player);
+}
+
 /// War Mode and High-Risk switch all level scaling off in the open world; their own tooltips say
 /// "Level scaling is disabled while in War Mode / High-Risk". The ruleset owner installs the resolver.
 using RulesetBlocksResolver = bool (*)(Player const*);
