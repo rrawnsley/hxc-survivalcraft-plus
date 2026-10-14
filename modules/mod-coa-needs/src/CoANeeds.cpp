@@ -157,6 +157,7 @@ struct State
     uint64 lastAttack = 0;
     uint64 lastCombat = 0;
     bool sprint = false;
+    bool sprintSyncPending = false;
     bool delegated = false;
     uint32 campReady = 0;
     uint32 socialTick = 0;
@@ -314,6 +315,7 @@ void RefreshProfessions(Player* player)
 void StopSprint(Player* player, State& state)
 {
     state.sprint = false;
+    state.sprintSyncPending = false;
     player->RemoveAurasDueToSpell(SprintAura);
 }
 
@@ -334,6 +336,7 @@ void RefreshSprint(Player* player, bool active)
     if (AuraEffect* effect = aura->GetEffect(EFFECT_0))
         if (effect->GetAmount() != 30)
             effect->ChangeAmount(30);
+    player->UpdateSpeed(MOVE_RUN, true);
 }
 
 void RefreshResourceTracking(Player* player, State const& state)
@@ -1209,16 +1212,31 @@ public:
                     if (state.vigor <= 15.0f)
                         Exhaust(player, state);
                 }
+                else if (player->HasUnitMovementFlag(MOVEMENTFLAG_WALKING))
+                    ChatHandler(player->GetSession()).SendSysMessage("Switch from walking to running before sprinting.");
                 else if (state.vigor > 25.0f && state.displayFood > 5.0f && state.exhaustedUntil <= now)
                 {
+                    float const before = player->GetSpeedRate(MOVE_RUN);
                     RefreshSprint(player, true);
+                    float const after = player->GetSpeedRate(MOVE_RUN);
+                    LOG_INFO("module.coa_needs", "Vigor Sprint player={} run before={} after={} aura={} slow={} cap={}",
+                        player->GetName(), before, after, player->HasAura(SprintAura),
+                        player->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_DECREASE_SPEED),
+                        player->GetMaxPositiveAuraModifier(SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED));
                     if (!player->HasAura(SprintAura))
                         ChatHandler(player->GetSession()).SendSysMessage(
                             "Vigor Sprint could not start. Try again after your current effects end.");
+                    else if (after <= before + 0.0001f)
+                    {
+                        StopSprint(player, state);
+                        ChatHandler(player->GetSession()).SendSysMessage(
+                            "Sprint cannot increase your current run speed. No vigor was spent.");
+                    }
                     else
                     {
                         state.vigor -= 10.0f;
                         state.sprint = true;
+                        state.sprintSyncPending = true;
                         state.lastSpend = Milliseconds();
                     }
                 }
@@ -1386,6 +1404,11 @@ public:
             state.exhaustedUntil = now;
             state.attackLockUntil = now;
         }
+        if (state.sprint && player->HasUnitMovementFlag(MOVEMENTFLAG_WALKING))
+        {
+            StopSprint(player, state);
+            ChatHandler(player->GetSession()).SendSysMessage("Sprint stopped because you switched to walking.");
+        }
         if (alive && state.sprint && player->isMoving())
         {
             state.vigor = std::max(0.0f, state.vigor - Config.sprintDrain * seconds);
@@ -1431,6 +1454,11 @@ public:
             state.vigor = std::min(state.cap, state.vigor + regen * seconds);
         }
         RefreshSprint(player, alive && state.sprint);
+        if (state.sprintSyncPending && alive && state.sprint && player->GetClientControlling() == player)
+        {
+            player->SendSpeedToController(MOVE_RUN, player);
+            state.sprintSyncPending = false;
+        }
         SetAura(player, Starving, alive && !state.delegated && state.displayFood <= 5.0f);
         SetAura(player, Dehydrated, alive && !state.delegated && state.displayWater <= 30.0f);
         SetAura(player, Exhausted, alive && state.exhaustedUntil > now);
