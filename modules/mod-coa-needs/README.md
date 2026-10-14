@@ -17,7 +17,7 @@ The complete Survival realm layer is not installed.
   Each also multiplies vigor recovery by 0.65. Empty vigor reduces damage by 50%.
 - Hunger at or below 5 reduces maximum health by 30%. Hydration at or below 10 causes
   2% maximum-health environmental damage every 10 seconds outside rest areas and battlegrounds.
-- Sprint unlocks at level 1: +40% speed, 10 vigor to start and 10 per moving second.
+- Sprint unlocks at level 1: +30% speed, 10 vigor to start and 10 per moving second outside Old School.
   Sprint adds 2 hunger and 3 hydration drain per minute. It is unavailable while mounted,
   in flight, controlled, starving, exhausted, seated, or in battlegrounds/arenas.
 - Sprint ends at 15 vigor, causing 15 seconds of Exhaustion: attributes -25%, maximum health
@@ -33,6 +33,13 @@ this module does not drain or penalize their hunger/hydration a second time.
 State and expiry timestamps use existing `character_settings`, source `core.coa.needs`,
 through the core's prepared statements and character save transaction. No new schema is needed.
 Sprint never persists across logout. Cooldowns, Exhaustion, needs and vigor do persist.
+
+Old School Sprint scales its costs to the current Vigor cap: starting costs 10%, moving drains
+75% over `CoANeeds.OldSchoolSprintDurationSeconds` (default 14 seconds), and exhaustion begins
+at 15%. A full bar therefore supports about 14 seconds of continuous running outside combat,
+even when hunger and thirst reduce the cap. Combat costs remain additional. The first drain
+tick excludes time before Sprint activated. Native aura speed updates synchronize movement;
+there is no additional delayed forced-speed resend.
 
 Client/server Spell.dbc must contain 996009-996017 and 996100-996109. Startup fails closed for this module if
 any of these spells are absent. The CoA-only HomebrewNourishment payload loads `CoANeeds.lua`;
@@ -90,9 +97,11 @@ Sitting continuously for 30 seconds grants Campfire/Shelter/Hearthstead Fellowsh
 a stronger camp can upgrade it, and equal/weaker camps cannot continually refresh its duration.
 Camp rest auras stop when standing, entering combat, dying, or leaving the camp radius.
 
-During Old School and Old School - Hardcore only, a live camp restores a separate rested timer
-at 10 seconds per real second, up to 20 minutes. The timer is restored even while standing or
-fighting near the camp, and drains one second per second while online, alive and away from camp.
+During Old School and Old School - Hardcore only, a live camp or inn restores a separate rested
+timer up to 20 minutes. Outside combat, a basic camp restores five seconds per real second while
+standing or ten while sitting; higher camp tiers renew it faster. Rain and snow prevent uncovered
+campfires from renewing it. The timer drains one second per second while online and alive without
+eligible rest. Camp Rested (996163) is a visible timed buff and stacks with Party Spirit.
 Creature kills receive a 15% bonus while any timer remains, after the configured Old School XP pace
 and named/rank reward. Con color does not multiply kill XP. Quest XP follows its configured pace and
 existing quest-source multiplier, with no camp bonus. The ordinary WoW rested
