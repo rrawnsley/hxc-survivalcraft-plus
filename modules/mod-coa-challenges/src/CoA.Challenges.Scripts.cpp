@@ -6298,7 +6298,10 @@ namespace CoAChallenges
         void OnBeforeWorldObjectSetPhaseMask(WorldObject const* object, uint32& /*oldPhaseMask*/,
             uint32& newPhaseMask, bool& /*useCombinedPhases*/, bool& /*update*/) override
         {
-            Unit const* unit = object ? object->ToUnit() : nullptr;
+            if (!object || !object->IsInWorld())
+                return;
+
+            Unit const* unit = object->ToUnit();
             Player const* player = unit ? unit->GetCharmerOrOwnerPlayerOrPlayerItself() : nullptr;
             if (!player || !player->IsInWorld() || player->IsGameMaster())
                 return;
