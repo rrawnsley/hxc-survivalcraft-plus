@@ -132,6 +132,21 @@ rules. Both regions' new roamers start at different existing waypoint nodes to a
 stacking with their native counterparts at the initial spawn point. Native creatures,
 path geometry and respawn timers remain intact.
 
+### Authored Tirisfal roaming encounters
+
+- Morrowbone the Cold: fixed rating 14, rare bonecaster, a Rot Hide graveyard path and
+  frostbolt, Morrowbone Wand with the craftable Greater Magic Wand budget.
+- The Bellwether: fixed rating 18, rare undead road patrol, a Scarlet patrol's existing
+  route and Rotting Ancestor's combat ability, Bellwether Burial Cape with the craftable
+  Black Whelp Cloak budget.
+- Veilwalker: fixed rating 22, elite shade, Fellicent's existing path and combat spells,
+  Veilwalker Band with the Heart Ring budget.
+
+Each follows the trial-only phase, 30-minute respawn and 25% specific reward rules.
+Starts use distinct native waypoint nodes. New templates retain combat abilities while
+excluding the native undead quest-credit and quest-despawn SmartAI rows. Fixed models
+give the new named creatures consistent appearances. Native quest creatures remain intact.
+
 Old School (9001) and Old School - Hardcore (9002) are mutually exclusive native trials.
 Creature levels remain fixed internally and display as `??` while the trial is active. In the trial, their power and kill experience follow the
 participant's con. Persistent spawns use authored named-threat and camp-role offsets instead
