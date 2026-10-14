@@ -349,16 +349,41 @@ void PlaceCamp(Player* player, State& state, uint32 tier)
         ChatHandler(player->GetSession()).SendSysMessage("Place camps on dry land outside combat and instances.");
         return;
     }
-    if (tier > 2 || player->GetPureSkillValue(SurvivalistSkill) < RecipeSkill(CampAbility + tier) || state.campReady > now)
+    if (tier > 2 || player->GetPureSkillValue(SurvivalistSkill) < RecipeSkill(CampAbility + tier))
         return;
     uint32 leather = tier == 1 ? 2318 : 4234;
     bool const oldSchool = CoANeeds::IsOldSchoolTrial &&
         CoANeeds::IsOldSchoolTrial(player->GetGUID().GetCounter());
     uint32 const wood = oldSchool ? OldSchoolCampLogs[tier] : 4470;
-    if (!player->HasItemCount(wood, 2, false) || (tier && !player->HasItemCount(leather, 4, false)))
+    auto current = Camps.find(player->GetGUID().GetCounter());
+    if (oldSchool && current != Camps.end() && current->second.tier == tier && current->second.map == map->GetId()
+        && current->second.expires > now)
+    {
+        GameObject* existingFire = map->GetGameObject(current->second.fire);
+        if (existingFire && player->InSamePhase(existingFire)
+            && player->IsWithinDistInMap(existingFire, 15.0f + 5.0f * tier))
+        {
+            if (!player->HasItemCount(wood, 1, false))
+            {
+                ChatHandler(player->GetSession()).SendSysMessage("Rekindling your camp requires one harvested log of its wood tier.");
+                return;
+            }
+            existingFire->SetRespawnTime(Config.campLifetime);
+            if (GameObject* existingTent = map->GetGameObject(current->second.tent))
+                existingTent->SetRespawnTime(Config.campLifetime);
+            current->second.expires = now + Config.campLifetime;
+            player->DestroyItemCount(wood, 1, true);
+            ChatHandler(player->GetSession()).SendSysMessage("Camp rekindled with one harvested log.");
+            return;
+        }
+    }
+    if (state.campReady > now)
+        return;
+    uint32 const woodCount = oldSchool && tier == 0 ? 8 : 2;
+    if (!player->HasItemCount(wood, woodCount, false) || (tier && !player->HasItemCount(leather, 4, false)))
     {
         ChatHandler(player->GetSession()).SendSysMessage(oldSchool ?
-            tier == 0 ? "Campfire requires 2 Forestwood Logs." :
+            tier == 0 ? "Campfire requires 8 Forestwood Logs." :
             tier == 1 ? "Shelter requires 2 Wildwood Logs and 4 Light Leather." :
             "Hearthstead requires 2 Everwood Logs and 4 Heavy Leather." :
             tier == 0 ? "Campfire requires 2 Simple Wood." :
@@ -386,7 +411,7 @@ void PlaceCamp(Player* player, State& state, uint32 tier)
         }
     }
     PackCamp(player);
-    player->DestroyItemCount(wood, 2, true);
+    player->DestroyItemCount(wood, woodCount, true);
     if (tier)
         player->DestroyItemCount(leather, 4, true);
     Camp camp;
@@ -414,14 +439,27 @@ void RestAtCamp(Player* player, State& state, int32 tier, uint32 elapsed)
     if (oldSchool)
     {
         uint32 const previous = state.oldSchoolRestedMs;
-        if (player->IsAlive() && tier >= 0)
+        bool const inn = player->HasRestFlag(REST_FLAG_IN_TAVERN);
+        bool exposed = false;
+        Map* map = player->FindMap();
+        if (Config.weather && map && player->IsOutdoors() && tier < 1 && !inn)
+        {
+            map->GetOrGenerateZoneDefaultWeather(player->GetZoneId());
+            auto currentWeather = ZoneWeather.find(player->GetZoneId());
+            WeatherState const sky = currentWeather != ZoneWeather.end() ? currentWeather->second : WEATHER_STATE_FINE;
+            exposed = sky == WEATHER_STATE_LIGHT_RAIN || sky == WEATHER_STATE_MEDIUM_RAIN
+                || sky == WEATHER_STATE_HEAVY_RAIN || sky == WEATHER_STATE_THUNDERS || sky == WEATHER_STATE_BLACKRAIN
+                || sky == WEATHER_STATE_LIGHT_SNOW || sky == WEATHER_STATE_MEDIUM_SNOW
+                || sky == WEATHER_STATE_HEAVY_SNOW || sky == WEATHER_STATE_BLACKSNOW;
+        }
+        if (player->IsAlive() && (tier >= 0 || inn) && !exposed)
             state.oldSchoolRestedMs = std::min(OldSchoolRestedCapMs,
                 state.oldSchoolRestedMs + elapsed * OldSchoolRestedRate);
         else if (player->IsAlive())
             state.oldSchoolRestedMs = elapsed >= state.oldSchoolRestedMs ? 0 : state.oldSchoolRestedMs - elapsed;
 
         if (previous < OldSchoolRestedCapMs && state.oldSchoolRestedMs == OldSchoolRestedCapMs)
-            ChatHandler(player->GetSession()).SendSysMessage("You are fully rested. Nearby camps preserve your 15% kill-experience bonus.");
+            ChatHandler(player->GetSession()).SendSysMessage("You are fully rested. Camps and inns preserve your 15% kill-experience bonus.");
         else if (previous && !state.oldSchoolRestedMs)
             ChatHandler(player->GetSession()).SendSysMessage("Your rested experience is spent. Return to a camp to renew it.");
     }

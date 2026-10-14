@@ -191,7 +191,7 @@ and shipped in CoA's existing `Data/patch-ZZ.MPQ`; the slash command is shipped 
 Homebrew Nourishment addon. Neither trial grants completion items.
 
 Build a real camp using the Campfire ability from the Survivalist spellbook or the needs panel.
-During Old School, Campfire consumes two harvested Forestwood Logs; Shelter consumes two Wildwood
+During Old School, Campfire consumes eight harvested Forestwood Logs; Shelter consumes two Wildwood
 Logs and four Light Leather; Hearthstead consumes two Everwood Logs and four Heavy Leather. Outside
 Old School, the existing recipes continue to use Simple Wood. The placed fire is also a Cooking fire.
 Sit beside it outside combat to receive the
@@ -294,9 +294,11 @@ implemented; further class-specific pacing and resource calibration remains requ
 The Monsters & Memories new-player guide documents eight harvested wood for a campfire,
 one additional wood to rekindle it, a 15% rested bonus, a 20-minute accumulated-rest cap,
 and about two minutes near the fire to reach that cap. Rain prevents accumulation unless
-sheltered. CoA currently matches the bonus, cap and refill speed, but uses two tier-specific
-logs, lacks the documented one-wood refueling interaction and does not yet reproduce the
-weather-dependent accumulation rules. These differences remain implementation work.
+sheltered. CoA matches the bonus, cap, refill speed and eight-log basic campfire recipe. Reusing the
+matching camp ability near an owned fire consumes one tier-specific log to refuel it. Native
+inns also replenish rest, and rain/storm/snow exposure blocks refill at unsheltered campfires.
+Shelter and Hearthstead retain their CoA tier recipes and protect rest accumulation. Refueling
+refreshes CoA's configured camp lifetime; the source guide does not publish a fuel-duration value.
 
 The intended loot progression needs coherent named encounter tables, useful basic gear,
 small lasting upgrades and craftable alternatives. Current 1% ordinary / 5% named gear
