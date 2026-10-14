@@ -1,3 +1,6 @@
+    { 14, 996728, "Sharpspine Razormane patrol", "named quillboar scout", 0, 150, true, true },
+    { 14, 996729, "Redhide hunting grounds", "named charging boar", 0, 200, true, true },
+    { 14, 996730, "Hexbound Echo Isles patrol", "named hexed caster", 0, 200, true, true },
     { 14, 3101, "Burning Blade enclave", "hunter", 1, 100, false, false },
     { 14, 3103, "Makrura shore", "hunter", 1, 100, false, false },
     { 14, 3104, "Makrura shore", "hunter", 1, 100, false, false },
