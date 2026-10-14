@@ -97,16 +97,37 @@ keys are appended automatically on deploy.
 
 ## HXC Old School trials
 
+### Authored Mulgore roaming encounters
+
+Old School participants and their playerbot companions gain an additional encounter phase,
+preserving their ordinary quest phases. Trial exit removes that phase; native phase changes
+retain it while the trial is active. The three new Mulgore spawns exist only in that phase.
+They reuse local creature models and existing native waypoint routes without changing the
+original creatures, routes, aggro ranges or assistance rules.
+
+- Ashmane Matriarch: fixed rating 14, rare prowler, The Rake's route, Ashmane Hide Vest.
+- Sablewind: fixed rating 18, rare spirit wolf, Ghost Howl's route and howl, Sablewind Mantle.
+- Gravetusk: fixed rating 22, elite elder kodo, Arra'chea's route, Gravetusk Band.
+
+Each has a 30-minute respawn and a 25% roll for its specific reward. Rewards preserve
+existing item budgets: Fine Leather Tunic, Mystic Shawl and Ring of Iron Will respectively,
+with new names and bind-on-equip trading. The vest has the same budget as its craftable
+alternative. Existing skinning rewards remain. Named XP multipliers are 1.5x, 2x and 2x,
+applied alongside the existing con, rank, challenge pace and party rules. These are initial
+authored encounters; gameplay pacing and route behavior remain unverified until Phase 1
+testing resumes. Other regions currently have native camp and named profiles, with new
+trial-only roaming content still to be authored one zone at a time.
+
 Old School (9001) and Old School - Hardcore (9002) are mutually exclusive native trials.
 Creature levels remain fixed internally and display as `??` while the trial is active. In the trial, their power and kill experience follow the
-participant's con. Persistent spawns use a stable hidden threat offset from -8 to +65 levels, derived
-from creature entry, so copies of the same creature type receive the same offset. Persistent
+participant's con. Persistent spawns use authored named-threat and camp-role offsets instead
+of a hashed difficulty spread. Unprofiled ordinary creatures use their native template strength. Persistent
 creatures use the template maximum level as the fixed reference rather than a random spawn
 level within its range; their resulting hidden rating and normalized strength are consistent. Authored named-threat
 and camp-role bonuses still apply; Rattlecage Skeletons in Tirisfal start blue for level-one characters.
 `/consider`, health, damage, melee skill, spell-hit level difference, and kill experience use that hidden
 threat rating, which never scales to the player. Native creature levels remain unchanged. Temporary
-creatures without a spawn ID skip the threat spread. Elite and boss ranks retain their combat-stat
+creatures without a spawn ID use only authored offsets. Elite and boss ranks retain their combat-stat
 multipliers. Combat uses the creature base health, armor and weapon-damage budget at its hidden
 rating, normalized against its native template level. This corrects low-level creatures
 receiving a high con while retaining low-level power. Ordinary health starts at 600% of
@@ -223,12 +244,12 @@ group-reward range. Playerbot companions qualify. The bonus is applied after nat
 and stacks with camp rest.
 Solo, distant/dead/offline companions, raids and battleground groups do not qualify. Quest XP is unchanged
 by this bonus. `/consider` reports an eligible party bonus separately from the mob's base kill reward.
-All con profiles now have twice their former health and damage multipliers. A white con has 6x health
-and deals 4x damage before threat-offset and creature-rank adjustments.
+Ordinary encounters use 6x health and 1x damage at their fixed hidden rating before encounter-rank adjustments.
 Con uses a signed hidden threat rating, so green and blue targets are available at character level 1.
 Melee skills retain a valid minimum; health adjustments support values below ordinary health without
-unsigned underflow. Unnamed persistent level-1/2 prey uses a smaller fixed spread (-3 to +10), with
-approachable candidates and a minority of dangerous outliers. Higher-level spawns retain -8 to +65.
+unsigned underflow. Unprofiled persistent level-1/2 prey receives a two-point novice reduction;
+authored workers, guards, casters and named threats retain their specific profiles. Unprofiled higher-level
+creatures receive no extra threat offset. Difficulty no longer depends on hashing a creature ID.
 Old School blocks Destiny Weaver creature scaling, including for playerbot companions. Native solo and
 party XP eligibility use hidden threat rather than native mob level; native aggro and assistance remain
 unchanged. Automated gameplay and balance checks are deferred until Phase 1 implementation is complete,

@@ -11,6 +11,7 @@
 #include "Group.h"
 #include "LocalLevelScaling.h"
 #include "OldSchoolZoneProfiles.h"
+#include "GlobalScript.h"
 
 #include <cmath>
 
@@ -1139,6 +1140,19 @@ namespace CoAChallenges
     }
 
     constexpr float OldSchoolConsiderRange = 40.0f;
+    constexpr uint32 OldSchoolEncounterPhase = 0x40000000;
+
+    void UpdateOldSchoolEncounterPhase(Player* player)
+    {
+        if (!player || !player->IsInWorld() || player->IsGameMaster())
+            return;
+
+        uint32 const phase = OldSchoolChallenge(player)
+            ? player->GetPhaseMask() | OldSchoolEncounterPhase
+            : player->GetPhaseMask() & ~OldSchoolEncounterPhase;
+        if (phase != player->GetPhaseMask())
+            player->SetPhaseMask(phase ? phase : PHASEMASK_NORMAL, true);
+    }
 
     uint32 OldSchoolExperienceBasisPoints()
     {
@@ -2767,36 +2781,13 @@ namespace CoAChallenges
             && creature->GetEntry() == 1890)
             return -3;
 
-        if (!creature->GetSpawnId())
+        if (auto const* profile = HxcOldSchool::FindZoneProfile(creature->GetZoneId(), creature->GetEntry()))
+            return profile->threat;
+
+        if (campThreatBonus || !creature->GetSpawnId())
             return campThreatBonus;
 
-        uint32 seed = creature->GetEntry();
-        seed ^= seed >> 16;
-        seed *= 0x7feb352d;
-        seed ^= seed >> 15;
-        seed *= 0x846ca68b;
-        seed ^= seed >> 16;
-
-        if (creature->GetCreatureTemplate()->maxlevel <= 2 && !campThreatBonus)
-        {
-            static constexpr int32 starterThreatOffsets[32] =
-            {
-                -3, -3, -2, -2, -2, -1, -1, -1,
-                -1, -1,  0,  0,  0,  0,  0,  0,
-                 0,  1,  1,  1,  1,  2,  2,  2,
-                 2,  3,  3,  4,  4,  5,  8, 10
-            };
-            return starterThreatOffsets[seed & 0x1F];
-        }
-
-        static constexpr int32 threatOffsets[32] =
-        {
-            -8, -6, -5, -4, -3, -2, -2, -1,
-            -1,  0,  0,  0,  0,  1,  2,  3,
-             4,  5,  6,  7,  8, 10, 12, 15,
-            18, 22, 28, 35, 42, 50, 58, 65
-        };
-        return threatOffsets[seed & 0x1F] + campThreatBonus;
+        return creature->GetCreatureTemplate()->maxlevel <= 2 ? -2 : 0;
     }
 
     int32 OldSchoolThreatLevel(Creature const* creature)
@@ -4408,6 +4399,7 @@ namespace CoAChallenges
 
         void OnPlayerUpdate(Player* player, uint32 diff) override
         {
+            UpdateOldSchoolEncounterPhase(player);
             SpellbindProcessPending(player);
             HungerUpdate(player, diff);
             FatigueUpdate(player, diff);
@@ -6297,6 +6289,31 @@ namespace CoAChallenges
         }
     };
 
+    class CoAChallengesEncounterPhase : public GlobalScript
+    {
+    public:
+        CoAChallengesEncounterPhase() : GlobalScript("CoAChallengesEncounterPhase",
+            { GLOBALHOOK_ON_BEFORE_WORLDOBJECT_SET_PHASEMASK }) { }
+
+        void OnBeforeWorldObjectSetPhaseMask(WorldObject const* object, uint32& /*oldPhaseMask*/,
+            uint32& newPhaseMask, bool& /*useCombinedPhases*/, bool& /*update*/) override
+        {
+            Unit const* unit = object ? object->ToUnit() : nullptr;
+            Player const* player = unit ? unit->GetCharmerOrOwnerPlayerOrPlayerItself() : nullptr;
+            if (!player || !player->IsInWorld() || player->IsGameMaster())
+                return;
+
+            if (OldSchoolChallenge(player))
+                newPhaseMask |= OldSchoolEncounterPhase;
+            else
+            {
+                newPhaseMask &= ~OldSchoolEncounterPhase;
+                if (!newPhaseMask)
+                    newPhaseMask = PHASEMASK_NORMAL;
+            }
+        }
+    };
+
     class CoAChallengesAllCreature : public AllCreatureScript
     {
     public:
@@ -6337,5 +6354,6 @@ void Addmod_coa_challengesScripts()
     new CoAChallenges::CoAChallengesGroup();
     new CoAChallenges::CoAChallengesSpells();
     new CoAChallenges::CoAChallengesAllCreature();
+    new CoAChallenges::CoAChallengesEncounterPhase();
     new CoAChallenges::CoAChallengesAccount();
 }
