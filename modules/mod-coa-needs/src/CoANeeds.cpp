@@ -140,6 +140,7 @@ struct State
     uint32 attackLockUntil = 0;
     uint32 windBuffUntil = 0;
     uint32 tick = 0;
+    uint32 unlockRetry = 0;
     uint32 dehydrationTick = 0;
     uint32 saveTick = 0;
     uint64 lastSpend = 0;
@@ -1078,7 +1079,14 @@ public:
         std::lock_guard<std::recursive_mutex> lock(Mutex);
         auto found = States.find(player->GetGUID().GetCounter());
         if (found == States.end())
-            return;
+        {
+            if (!Affects(player))
+                return;
+            OnPlayerLogin(player);
+            found = States.find(player->GetGUID().GetCounter());
+            if (found == States.end())
+                return;
+        }
         State& state = found->second;
         if (!Affects(player))
         {
@@ -1121,6 +1129,21 @@ public:
         uint32 elapsed = state.tick;
         float seconds = elapsed / 1000.0f;
         state.tick = 0;
+        if (state.unlockRetry <= elapsed)
+        {
+            state.unlockRetry = 30000;
+            if (!player->HasSkill(SurvivalistSkill) || !player->HasActiveSpell(SurvivalistProfession) ||
+                !player->HasActiveSpell(SprintAbility))
+            {
+                Unlock(player);
+                if (!player->HasSkill(SurvivalistSkill) || !player->HasActiveSpell(SurvivalistProfession) ||
+                    !player->HasActiveSpell(SprintAbility))
+                    LOG_ERROR("module.coa_needs", "Survivalist unlock still missing for character {} (class {})",
+                        player->GetGUID().GetCounter(), player->getClass());
+            }
+        }
+        else
+            state.unlockRetry -= elapsed;
         uint32 now = uint32(std::time(nullptr));
         uint64 steady = Milliseconds();
         bool alive = player->IsAlive();
