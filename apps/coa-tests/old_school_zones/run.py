@@ -49,11 +49,14 @@ def main():
     assert compiler, 'A C++20 compiler is required'
     with tempfile.TemporaryDirectory(prefix='coa-old-school-zones-') as directory:
         out = Path(directory)
-        (out / 'Define.h').write_text('#pragma once\n#include <cstdint>\nusing uint32 = std::uint32_t;\n')
+        (out / 'Define.h').write_text('#pragma once\n#include <cstdint>\n'
+                                    'using uint32 = std::uint32_t;\n'
+                                    'using uint64 = std::uint64_t;\n'
+                                    'using int32 = std::int32_t;\n')
         target = out / 'harness.cpp'
         target.write_text(code)
         executable = out / ('harness.exe' if os.name == 'nt' else 'harness')
-        includes = [out, ROOT / 'src/server/game/Maps']
+        includes = [out, ROOT / 'src/server/game/Maps', ROOT / 'modules/mod-coa-challenges/src']
         if Path(compiler).stem.lower() == 'cl':
             flags = ['/nologo', '/std:c++20', '/EHsc', '/W4', '/WX', '/utf-8']
             flags += ['/I' + str(path) for path in includes]

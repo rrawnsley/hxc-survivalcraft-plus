@@ -1,4 +1,5 @@
 #include "AreaDefines.h"
+#include "OldSchoolZoneProfiles.h"
 #include <algorithm>
 #include <cassert>
 #include <cmath>
