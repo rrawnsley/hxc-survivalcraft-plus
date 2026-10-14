@@ -276,6 +276,47 @@ use +10 threat/3x encounter XP and display a roaming warning; Abbendis and the N
 Overseer use +8/2x; the other encounters use +4 or +6/1.5x. Native patrols remain in place.
 These profiles preserve factions, assistance, respawn windows and ordinary-mode behavior.
 
+## Reference systems and implementation boundary
+
+Old School is intended to reproduce classic EverQuest's shared-world encounter model,
+with Monsters & Memories camp recovery and slow equipment advancement. Pantheon's
+published template and progression design provides additional concrete implementation
+references. The numerical CoA combat curve remains provisional; it is not a measured
+conversion of any other game's NPC statistics.
+
+NPC combat strength belongs to the creature template, authored threat and encounter rank.
+It must not depend on the level of the player who considers or first attacks it. Con color
+and con-based XP are assessed separately for each player. The creature stores only its
+applied combat adjustments, never the first attacker's con or XP tier. Existing numerical
+combat tiers are retained at the native-level reference point while this separation is
+implemented; further class-specific pacing and resource calibration remains required.
+
+The Monsters & Memories new-player guide documents eight harvested wood for a campfire,
+one additional wood to rekindle it, a 15% rested bonus, a 20-minute accumulated-rest cap,
+and about two minutes near the fire to reach that cap. Rain prevents accumulation unless
+sheltered. CoA currently matches the bonus, cap and refill speed, but uses two tier-specific
+logs, lacks the documented one-wood refueling interaction and does not yet reproduce the
+weather-dependent accumulation rules. These differences remain implementation work.
+
+The intended loot progression needs coherent named encounter tables, useful basic gear,
+small lasting upgrades and craftable alternatives. Current 1% ordinary / 5% named gear
+retention is a scarcity filter, not an implementation of that progression. Quest and vendor
+reward bypasses, material availability and crafted item advancement still need integration.
+
+References:
+
+- https://monstersandmemories.com/gameplay
+- https://monstersandmemories.com/new-player-guide
+- https://www.pantheonmmo.com/news/combat-progression-update-details-part-2-unified-npc-templates/
+- https://www.pantheonmmo.com/news/combat-progression-update-details-part-5-leveling-experience-progression-adjustments/
+- https://www.pantheonmmo.com/news/combat-progression-update-details-part-8-crafting-gathering/
+- https://www.pantheonmmo.com/news/combat-progression-update-details-part-9-itemization-economy-roadmap/
+
+Pantheon references describe published development targets, not proof of its current live
+balance. The user's selected classic 1999–2000 EverQuest rules and explicit CoA requirements
+remain authoritative where the games differ: 40-yard consideration only, native assistance,
+50% configured XP baseline, selected party bonuses and CoA lumbering/Survivalist integration.
+
 ## Level 1–60 outdoor zone coverage
 
 Both Old School variants now register authored native creature profiles in every leveling
