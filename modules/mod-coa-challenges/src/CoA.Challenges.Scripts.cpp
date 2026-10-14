@@ -3012,13 +3012,13 @@ namespace CoAChallenges
         return "|cffff0000";
     }
 
-    uint32 OldSchoolGroupBonusPercent(Player const* player, Creature const* creature)
+    uint32 OldSchoolGroupRewardSize(Player const* player, Creature const* creature)
     {
         uint32 const challenge = OldSchoolChallenge(player);
         Group const* group = player ? player->GetGroup() : nullptr;
         if (!challenge || !creature || !group || group->isRaidGroup()
             || group->isBGGroup() || group->isBFGroup())
-            return 0;
+            return 1;
 
         uint32 companions = 0;
         for (Group::MemberSlot const& slot : group->GetMemberSlots())
@@ -3029,7 +3029,7 @@ namespace CoAChallenges
                 && member->IsAtGroupRewardDistance(creature))
                 ++companions;
         }
-        return companions == 0 ? 0 : companions == 1 ? 20 : companions == 2 ? 30 : 40;
+        return std::min(companions + 1, 5u);
     }
 
     void UpdateOldSchoolGroupBonusAura(Player* player, uint32 diff)
@@ -3282,10 +3282,14 @@ namespace CoAChallenges
         if (oldSchool)
         {
             OldSchoolPowerProfile const profile = GetOldSchoolPowerProfile(attacker, creature);
+            uint32 const groupSize = OldSchoolGroupRewardSize(attacker, creature);
+            float const groupHealth = 1.0f + 0.8f * float(groupSize - 1);
+            float const groupDamage = 1.0f + 0.2f * float(groupSize - 1);
             auto* state = new OldSchoolHealth();
-            state->extra = float(creature->GetMaxHealth()) * (profile.healthPercent / 100.0f - 1.0f);
-            state->damageMultiplier = profile.damageMultiplier;
-            state->healthPercent = profile.healthPercent;
+            state->extra = float(creature->GetMaxHealth()) *
+                (profile.healthPercent * groupHealth / 100.0f - 1.0f);
+            state->damageMultiplier = profile.damageMultiplier * groupDamage;
+            state->healthPercent = uint32(profile.healthPercent * groupHealth);
             state->armorExtra = float(creature->GetArmor()) * (profile.armorMultiplier - 1.0f);
             creature->HandleStatFlatModifier(UNIT_MOD_ARMOR, TOTAL_VALUE, state->armorExtra, true);
             creature->CustomData.Set(OldSchoolHealthKey, state);
@@ -4044,7 +4048,7 @@ namespace CoAChallenges
                     * OldSchoolExperienceSourceMultiplier(xpSource);
                 uint64 scaleNumerator = 100;
                 uint32 experienceMultiplierHundredths = 100;
-                uint32 groupBonusPercent = 0;
+                uint32 groupSize = 1;
                 if (xpSource == XPSOURCE_KILL && victim && victim->IsCreature()
                     && OldSchoolCreature(victim->ToCreature())
                     && TappingAllowsRewards(player, victim->ToCreature()))
@@ -4056,11 +4060,18 @@ namespace CoAChallenges
                     if (CoANeeds::ReadOldSchoolRestedSeconds &&
                         CoANeeds::ReadOldSchoolRestedSeconds(player->GetGUID().GetCounter()))
                         scaleNumerator = 115;
-                    groupBonusPercent = OldSchoolGroupBonusPercent(player, creature);
+                    groupSize = OldSchoolGroupRewardSize(player, creature);
                 }
                 scaledAmount *= experienceMultiplierHundredths;
                 scaledAmount *= scaleNumerator;
-                scaledAmount += scaledAmount / 100 * groupBonusPercent;
+                if (groupSize > 1)
+                {
+                    uint32 const groupRateThousandths = groupSize == 3 ? 1166
+                        : groupSize == 4 ? 1300 : groupSize == 5 ? 1400 : 1000;
+                    uint32 const bonusPercent = groupSize == 2 ? 20 : groupSize == 3 ? 30 : 40;
+                    scaledAmount = scaledAmount * groupSize * (100 + bonusPercent) * 10
+                        / groupRateThousandths;
+                }
                 OldSchoolXPProgress* progress = player->CustomData.GetDefault<OldSchoolXPProgress>(OldSchoolXPProgressKey);
                 uint64 accumulated = scaledAmount + progress->remainder;
                 amount = static_cast<uint32>(std::min<uint64>(accumulated / 100000000, UINT32_MAX));

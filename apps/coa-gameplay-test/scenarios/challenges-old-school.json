@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Old School con tiers drive creature difficulty, rewards, death XP and corpse runs",
-  "contract": "Owned trial IDs 9001/9002. Both trials apply a 100% base XP pace; creature kill XP follows fixed creature level and named/rank rewards rather than arbitrary con-color multipliers. Quest rewards use the existing three-times challenge quest multiplier. Old School death removes 10% of a level's XP and can delevel, with level one as the floor. A spirit must return to its corpse to resurrect. Hardcore death fails the run. Bots inherit their human leader's con.",
+  "contract": "Owned trial IDs 9001/9002. Both trials apply a 100% solo base XP pace; nearby trial parties offset group sharing and gain 20/30/40% kill XP by size. Creatures pulled by those parties gain health and damage without changing con color. Quest rewards use the existing three-times challenge quest multiplier. Old School death removes 10% of a level's XP and can delevel, with level one as the floor. A spirit must return to its corpse to resurrect. Hardcore death fails the run. Bots inherit their human leader's con.",
   "timeout_ms": 180000,
   "location": {
     "map": 0,
@@ -430,10 +430,10 @@
     },
     {
       "action": "assert",
-      "label": "Companion pulls inherit white con Old School difficulty",
+      "label": "Companion pulls scale white con Old School health for a duo",
       "actor": "bot_wolf",
       "metric": "max_health",
-      "equals": 8000
+      "equals": 14400
     },
     {
       "action": "stop_attack",
