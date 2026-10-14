@@ -26,6 +26,7 @@
 #include "GameTime.h"
 #include "GridNotifiers.h"
 #include "Log.h"
+#include "LocalLevelScaling.h"
 #include "MapMgr.h"
 #include "MiscPackets.h"
 #include "MovementPacketBuilder.h"
@@ -505,7 +506,11 @@ void Object::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* targe
                 ((updateType == UPDATETYPE_VALUES ? _changesMask.GetBit(index) : m_uint32Values[index]) && (flags[index] & visibleFlag)))
         {
             updateMask.SetBit(index);
-            fieldBuffer << m_uint32Values[index];
+            uint32 value = m_uint32Values[index];
+            if (index == UNIT_FIELD_LEVEL && IsCreature() &&
+                LocalLevelScaling::HideCreatureLevelFor(target, ToCreature()))
+                value = 0;
+            fieldBuffer << value;
         }
     }
 
