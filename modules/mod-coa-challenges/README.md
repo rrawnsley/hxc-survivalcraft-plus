@@ -100,7 +100,9 @@ keys are appended automatically on deploy.
 Old School (9001) and Old School - Hardcore (9002) are mutually exclusive native trials.
 Creature levels remain fixed internally and display as `??` while the trial is active. In the trial, their power and kill experience follow the
 participant's con. Persistent spawns use a stable hidden threat offset from -8 to +65 levels, derived
-from creature entry, so copies of the same creature type receive the same offset. Authored named-threat
+from creature entry, so copies of the same creature type receive the same offset. Persistent
+creatures use the template maximum level as the fixed reference rather than a random spawn
+level within its range; their resulting hidden rating and normalized strength are consistent. Authored named-threat
 and camp-role bonuses still apply; Rattlecage Skeletons in Tirisfal start blue for level-one characters.
 `/consider`, health, damage, melee skill, spell-hit level difference, and kill experience use that hidden
 threat rating, which never scales to the player. Native creature levels remain unchanged. Temporary
