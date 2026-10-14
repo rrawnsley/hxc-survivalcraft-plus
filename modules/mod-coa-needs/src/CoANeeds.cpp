@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-2.0-or-later
 
 #include "Chat.h"
+#include "RealmDayCycle.h"
 #include "Config.h"
 #include "Creature.h"
 #include "DatabaseEnv.h"
@@ -215,14 +216,7 @@ void SetAura(Player* player, uint32 spell, bool active)
 
 bool IsNight()
 {
-    std::time_t now = std::time(nullptr);
-    std::tm local = {};
-#ifdef _WIN32
-    localtime_s(&local, &now);
-#else
-    localtime_r(&now, &local);
-#endif
-    return local.tm_hour >= 20 || local.tm_hour < 6;
+    return AscensionRealmClock::IsDark();
 }
 
 uint32 NightLight(uint32 mapId, bool torch)
@@ -265,7 +259,8 @@ void RefreshNightLight(Player* player, State& state)
         WorldPacket packet(SMSG_OVERRIDE_LIGHT, 12);
         packet << uint32(GetDefaultMapLight(mapId));
         packet << uint32(lightId);
-        packet << uint32(state.lightSent ? 3000 : 1000);
+        packet << uint32(state.lightSent && state.lightId != lightId && (!state.lightId || !lightId) ? 300000 :
+            state.lightSent ? 3000 : 1000);
         player->SendDirectMessage(&packet);
         state.lightMap = mapId;
         state.lightZone = zoneId;

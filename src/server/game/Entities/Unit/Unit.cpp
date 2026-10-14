@@ -18152,7 +18152,9 @@ void Unit::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target)
             else
             {
                 if (sScriptMgr->ShouldTrackValuesUpdatePosByIndex(this, updateType, index) ||
-                    (index == UNIT_FIELD_LEVEL && IsCreature() && LocalLevelScaling::ItemPreviewActive()))
+                    (index == UNIT_FIELD_LEVEL && IsCreature() &&
+                        (LocalLevelScaling::ItemPreviewActive() ||
+                            LocalLevelScaling::CreatureLevelVisibilityOwner.load(std::memory_order_relaxed))))
                     cacheValue.posPointers.other[index] = static_cast<uint32>(fieldBuffer.wpos());
 
                 // send in current format (float as float, uint32 as uint32)
@@ -18323,6 +18325,10 @@ void Unit::PatchValuesUpdate(ByteBuffer& valuesUpdateBuf, BuildValuesCachePosPoi
     if (uint32 corpseLevel = LocalLevelScaling::CorpsePreviewLevel(target, creature))
         if (auto const level = posPointers.other.find(UNIT_FIELD_LEVEL); level != posPointers.other.end())
             valuesUpdateBuf.put(level->second, corpseLevel);
+
+    if (creature && LocalLevelScaling::HideCreatureLevelFor(target, creature))
+        if (auto const level = posPointers.other.find(UNIT_FIELD_LEVEL); level != posPointers.other.end())
+            valuesUpdateBuf.put(level->second, uint32(0));
 }
 
 void Unit::ReplaceAllDynamicFlags(uint32 flag)
