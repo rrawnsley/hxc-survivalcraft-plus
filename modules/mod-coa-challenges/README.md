@@ -431,3 +431,45 @@ deferred until Phase 1 is implemented, following the user's instruction.
 ## License
 
 GNU General Public License v2.0 — see [LICENSE](LICENSE).
+
+### Bristleback Ravine outdoor expedition
+
+The Old School encounter phase adds a shared outdoor expedition east of Red Cloud Mesa in Mulgore.
+There is no instance entrance or personal copy. Existing native occupants remain; the expedition adds
+12 stationary enemies, four named leaders, two patrols and one guide. The four camps are the supply
+hollow, boar pens, ritual rise and warbanner camp. Existing terrain paths offer a low approach and
+separate eastern and southern climbs. Placements use native waypoint coordinates spaced from existing
+spawn positions; the two added patrols copy native 74-point and 31-point routes without their actions.
+
+Ravine Scout Tahu stands beside Grull Hawkwind in Camp Narache. Gossip explains routes, camp recovery,
+loot and native crafting materials. The guide and new enemies appear only in Old School and its
+Hardcore variation. Player-built camps retain the existing harvested-wood kit, seated recovery,
+cooking and timed Camp Rested rules; the expedition does not supply a free camp or promise safety.
+
+Ordinary encounter ratings are fixed at 4, 6, 7, 8 and 9. Named ratings are 5, 7, 8 and 10, with
+Goretusk, Vesh and Kraz elite. Profiles feed existing consider, con-based power, party-size durability,
+XP and named-loot preservation. No extra hidden level offsets or new assistance radius are applied.
+These are authored ratings, not measured kill-time guarantees. Native level labels remain hidden in
+Old School. Regular enemies respawn after six minutes; named leaders after fifteen minutes.
+
+Ruk, Goretusk and Kraz warn three seconds before a short frenzy below 40 percent health. The frenzy
+is removed after eight seconds and on reset. Vesh warns before recurring, interruptible Lightning
+Bolt casts. Battleboars retain native Boar Charge. Named scripts are scoped to their unique spawns.
+
+Fixed bind-on-equip rewards use native item budgets and requirements:
+
+- Ruk: Supplykeeper's Linen Trousers, 25 percent; native Journeyman's Pants budget, required level 5.
+- Goretusk: Penbreaker Hide Boots, 25 percent; native Embossed Leather Boots, required level 10.
+- Vesh: Ashcaller's Linen Robe, 25 percent; native Brown Linen Robe, required level 5.
+- Kraz: Ravine War Axe and Warbanner Chain Vest, independent 15 percent rolls; native Copper Battle
+  Axe and Copper Chain Vest budgets, required levels 8 and 5 respectively.
+
+Ordinary mobs roll linen cloth, light leather or copper ore at 35–40 percent; named leaders always
+roll 1–3 materials. Supply workers and guards can also drop rough stone. Materials feed existing
+Linen Belt/Barbaric Linen Vest, Embossed Leather Boots/Fine Leather Tunic and Copper Dagger/Copper
+Chain Vest recipes, including the realm's existing crafted item progression. No new profession,
+recipe, quest reward override or scaling equipment is introduced by this expedition.
+
+SQL: `rev_20261014_67_old_school_bristleback_ravine.sql`; templates 996930–996941, gear 996935–996938
+and 996942, spawns 9997000–9997018. Combat pacing, camp safety, geometry and visual reward presentation
+await player feedback; automated gameplay tests are deferred at the user's request.
