@@ -99,6 +99,7 @@ inline constexpr std::array Defibrillate = {
     AbilityRank{ 803632, 7, { 70, 1 } },
     AbilityRank{ 803633, 8, { 80, 1 } }
 };
+inline constexpr std::array SentryTurret = { AbilityRank{ 500239, 1, { 1, 1 } } };
 inline constexpr std::array PrayerBeads = {
     AbilityRank{ 520681, 1, { 10, 1 } },
     AbilityRank{ 520844, 2, { 20, 1 } },
@@ -165,6 +166,8 @@ inline constexpr std::array Profiles = {
         { 27, 801790, AbilityKind::Fixed, Revivify, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 28, 802175, AbilityKind::Fixed, Defibrillate, {} }, Development::Policy, OutcomeKind::None },
+    AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
+        { 28, 500239, AbilityKind::Fixed, SentryTurret, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
         { 29, 520681, AbilityKind::Fixed, PrayerBeads, {} }, Development::Policy, OutcomeKind::None },
     AbilityProfile{ Development::DefinitionVersion, AcquisitionSource::ClassGrant,
