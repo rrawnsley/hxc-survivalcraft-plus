@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "name": "Tinkerer level-up preserves earned weapon skill",
+  "contract": "Leveling a Tinkerer increases the weapon skill cap without awarding unearned weapon points.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "tinkerer", "race": 2, "class": 28, "level": 5 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 2000 },
+    { "action": "set_skill", "actor": "tinkerer", "skill": 44, "value": 7, "maximum": 25 },
+    { "action": "set_level", "actor": "tinkerer", "value": 6 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "assert", "actor": "tinkerer", "metric": "skill_value", "skill": 44, "equals": 7 },
+    { "action": "assert", "actor": "tinkerer", "metric": "skill_maximum", "skill": 44, "equals": 30 }
+  ]
+}
