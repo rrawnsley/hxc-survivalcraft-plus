@@ -2777,7 +2777,7 @@ namespace CoAChallenges
         seed *= 0x846ca68b;
         seed ^= seed >> 16;
 
-        if (creature->GetLevel() <= 2 && !campThreatBonus)
+        if (creature->GetCreatureTemplate()->maxlevel <= 2 && !campThreatBonus)
         {
             static constexpr int32 starterThreatOffsets[32] =
             {
@@ -2801,7 +2801,12 @@ namespace CoAChallenges
 
     int32 OldSchoolThreatLevel(Creature const* creature)
     {
-        return int32(creature ? creature->GetLevel() : 1) + OldSchoolThreatOffset(creature);
+        if (!creature)
+            return 1;
+
+        uint32 const nativeLevel = creature->GetSpawnId()
+            ? std::max(1u, uint32(creature->GetCreatureTemplate()->maxlevel)) : creature->GetLevel();
+        return int32(nativeLevel) + OldSchoolThreatOffset(creature);
     }
 
     uint8 OldSchoolRewardLevel(Player const* player, Creature const* creature)
