@@ -1,3 +1,6 @@
+    { 141, 996737, "Bramblehide furbolg patrol", "named furbolg hunter", 0, 150, true, true },
+    { 141, 996738, "Thornscarred grell patrol", "named grell raider", 0, 200, true, true },
+    { 141, 996739, "Gnarlmaw hunting grounds", "named feral furbolg", 0, 200, true, true },
     { 141, 1986, "Webwood nest", "hunter", 1, 100, false, false },
     { 141, 1988, "Grell hollow", "hunter", 1, 100, false, false },
     { 141, 1989, "Grell hollow", "hunter", 1, 100, false, false },
