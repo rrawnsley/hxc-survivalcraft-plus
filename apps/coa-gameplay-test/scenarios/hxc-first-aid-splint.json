@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "HXC First Aid splint treatment",
-  "contract": "First Aid gains skill only on successful fracture treatment; unsuccessful treatment neither awards skill nor consumes materials.",
+  "name": "HXC Survivalist Field Splint crafting and treatment",
+  "contract": "Field Splint is crafted in Survivalist, not learned as a First Aid ability. Failed treatment keeps the item; successful fracture treatment consumes it.",
   "timeout_ms": 120000,
   "location": {
     "map": 0,
@@ -50,25 +50,51 @@
       "count": 4
     },
     {
+      "action": "assert",
+      "actor": "patient",
+      "metric": "knows_spell",
+      "spell": 996119,
+      "equals": 0,
+      "label": "Old Field Splint ability is absent"
+    },
+    {
       "action": "cast",
       "actor": "patient",
+      "spell": 996178
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "actor": "patient",
+      "metric": "item_count",
+      "item": 996215,
+      "equals": 1,
+      "label": "Survivalist creates one Field Splint"
+    },
+    {
+      "action": "use_item",
+      "actor": "patient",
+      "item": 996215,
       "spell": 996119
     },
     {
       "action": "assert",
       "actor": "patient",
-      "metric": "skill_value",
-      "skill": 129,
+      "metric": "item_count",
+      "item": 996215,
       "equals": 1,
-      "label": "No injury means no First Aid skill gain"
+      "label": "No fracture keeps the crafted splint"
     },
     {
       "action": "assert",
       "actor": "patient",
       "metric": "item_count",
       "item": 4470,
-      "equals": 8,
-      "label": "Failed treatment consumes no materials"
+      "equals": 4,
+      "label": "Crafting consumed four Simple Wood"
     },
     {
       "action": "set_health",
@@ -122,8 +148,9 @@
       "equals": 0
     },
     {
-      "action": "cast",
+      "action": "use_item",
       "actor": "patient",
+      "item": 996215,
       "spell": 996119
     },
     {
@@ -142,10 +169,10 @@
     {
       "action": "assert",
       "actor": "patient",
-      "metric": "skill_value",
-      "skill": 129,
-      "min": 2,
-      "label": "Successful treatment improves First Aid"
+      "metric": "item_count",
+      "item": 996215,
+      "equals": 0,
+      "label": "Successful treatment consumes the Field Splint"
     },
     {
       "action": "assert",

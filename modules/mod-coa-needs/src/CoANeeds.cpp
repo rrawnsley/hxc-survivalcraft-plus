@@ -58,6 +58,7 @@ constexpr uint32 PackAbility = 996109;
 constexpr uint32 WeatherAura = 996110;
 constexpr uint32 InjuryAura = 996115;
 constexpr uint32 SplintAbility = 996119;
+constexpr uint32 SplintRecipe = 996178;
 constexpr uint32 ToolRecipe = 996120;
 constexpr uint32 ProfessionAura = 996140;
 constexpr uint32 SurvivalistSkill = 9200;
@@ -67,6 +68,7 @@ constexpr uint32 CampKitRecipe = 996170;
 constexpr uint32 SurvivalistProfession = 996180;
 constexpr uint32 CampKit = 996211;
 constexpr uint32 TorchItem = 996214;
+constexpr uint32 SplintItem = 996215;
 constexpr uint32 TorchAura = 996181;
 constexpr uint32 SurveyAbility = 996183;
 constexpr uint32 SurveyAura = 996184;
@@ -84,6 +86,8 @@ uint32 RecipeSkill(uint32 spell)
     if (spell >= CampKitRecipe && spell < CampKitRecipe + 6)
         return std::array<uint32, 3>{ 1, 75, 150 }[(spell - CampKitRecipe) % 3];
     if (spell == 996176 || spell == 996177)
+        return 1;
+    if (spell == SplintRecipe)
         return 1;
     return spell == ScissorsRecipe ? 75 : 0;
 }
@@ -444,8 +448,8 @@ void Unlock(Player* player)
     player->learnSpell(SurvivalistProfession);
     player->learnSpell(SprintAbility);
     player->learnSpell(SurveyAbility);
-    if (player->HasSkill(SKILL_FIRST_AID))
-        player->learnSpell(SplintAbility);
+    if (player->HasSpell(SplintAbility))
+        player->removeSpell(SplintAbility, SPEC_MASK_ALL, false);
     if (Config.tools)
     {
         for (uint32 index = 0; index < 8; ++index)
@@ -458,6 +462,7 @@ void Unlock(Player* player)
                 player->learnSpell(CampKitRecipe + index);
         player->learnSpell(996176);
         player->learnSpell(996177);
+        player->learnSpell(SplintRecipe);
     }
     if (player->GetLevel() >= 30)
         player->learnSpell(DodgeAbility);
@@ -1173,26 +1178,6 @@ public:
             RefreshResourceTracking(player, state);
             return;
         }
-        if (id == SplintAbility)
-        {
-            if (!Config.injuries || !player->IsAlive() || player->IsInCombat() || player->isMoving() ||
-                player->IsMounted() || player->IsInFlight() || player->InBattleground() || player->InArena())
-                return;
-            if (!(state.injuries & 12u))
-                ChatHandler(player->GetSession()).SendSysMessage("You have no broken arm or leg to splint.");
-            else if (player->GetItemCount(4470, false) < 4 || player->GetItemCount(2589, false) < 2)
-                ChatHandler(player->GetSession()).SendSysMessage("Field Splint requires 4 Simple Wood and 2 Linen Cloth.");
-            else
-            {
-                player->DestroyItemCount(4470, 4, true);
-                player->DestroyItemCount(2589, 2, true);
-                ChangeInjury(player, state, (state.injuries & 4u) ? 2 : 3, false);
-                RefreshInjuries(player, state);
-                player->UpdateCraftSkill(SplintAbility);
-            }
-            Send(player, state);
-            return;
-        }
         if (id >= CampAbility && id <= PackAbility)
         {
             if (id == PackAbility)
@@ -1210,7 +1195,12 @@ public:
             UpdateNeeds(player, state);
             if (!player->IsAlive() || player->IsMounted() || player->IsInFlight() || player->IsSitState() ||
                 player->HasUnitState(UNIT_STATE_CONTROLLED))
+            {
+                if (id == SprintAbility)
+                    ChatHandler(player->GetSession()).SendSysMessage(
+                        "Vigor Sprint requires you to be alive, standing, unmounted and in control.");
                 return;
+            }
             if (id == SprintAbility)
             {
                 if (state.sprint)
@@ -1221,11 +1211,23 @@ public:
                 }
                 else if (state.vigor > 25.0f && state.displayFood > 5.0f && state.exhaustedUntil <= now)
                 {
-                    state.vigor -= 10.0f;
-                    state.sprint = true;
-                    state.lastSpend = Milliseconds();
                     RefreshSprint(player, true);
+                    if (!player->HasAura(SprintAura))
+                        ChatHandler(player->GetSession()).SendSysMessage(
+                            "Vigor Sprint could not start. Try again after your current effects end.");
+                    else
+                    {
+                        state.vigor -= 10.0f;
+                        state.sprint = true;
+                        state.lastSpend = Milliseconds();
+                    }
                 }
+                else if (state.vigor <= 25.0f)
+                    ChatHandler(player->GetSession()).SendSysMessage("Vigor Sprint requires more than 25 vigor.");
+                else if (state.displayFood <= 5.0f)
+                    ChatHandler(player->GetSession()).SendSysMessage("You are too hungry to sprint.");
+                else
+                    ChatHandler(player->GetSession()).SendSysMessage("You are exhausted and cannot sprint yet.");
             }
             else if (id == DodgeAbility && player->GetLevel() >= 30 && state.vigor >= 25.0f &&
                 state.dodgeUntil <= now && state.attackLockUntil <= now)
@@ -1630,8 +1632,6 @@ public:
         uint32 requirement = RecipeSkill(id);
         if (requirement && player->GetPureSkillValue(SurvivalistSkill) < requirement)
             result = SPELL_FAILED_LOW_CASTLEVEL;
-        else if (id == SplintAbility && !player->HasSkill(SKILL_FIRST_AID))
-            result = SPELL_FAILED_LOW_CASTLEVEL;
     }
 };
 
@@ -1670,6 +1670,24 @@ public:
             return true;
         }
         uint32 entry = item->GetEntry();
+        if (entry == SplintItem)
+        {
+            auto found = States.find(player->GetGUID().GetCounter());
+            if (!Config.injuries || found == States.end() || player->isMoving() || player->InBattleground()
+                || player->InArena())
+                return true;
+            State& state = found->second;
+            if (!(state.injuries & 12u))
+                ChatHandler(player->GetSession()).SendSysMessage("You have no broken arm or leg to splint.");
+            else
+            {
+                ChangeInjury(player, state, (state.injuries & 4u) ? 2 : 3, false);
+                RefreshInjuries(player, state);
+                player->DestroyItemCount(SplintItem, 1, true);
+                Send(player, state);
+            }
+            return true;
+        }
         if (entry >= CampKit && entry < CampKit + 3)
         {
             if (auto state = States.find(player->GetGUID().GetCounter()); state != States.end())
