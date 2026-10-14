@@ -351,7 +351,7 @@ inline std::optional<std::vector<std::string>> EncodeMenuSnapshot(std::uint32_t 
                 std::uint64_t const expected = std::uint64_t(catchup.BasePointsPerUse) *
                     (boosted ? catchup.Multiplier : 1);
                 if (view.Kind == AbilityKind::Fixed || !catchup.Gap || catchup.Gap > 500 ||
-                    catchup.Multiplier < 2 || catchup.Multiplier > 4 || !catchup.BasePointsPerUse ||
+                    catchup.Multiplier < 2 || catchup.Multiplier > 8 || !catchup.BasePointsPerUse ||
                     expected != catchup.EffectivePointsPerUse || boosted != catchup.Boosted)
                     return std::nullopt;
                 lines.push_back(Detail::WireLine('G', revision, index + 1, catchup.Gap, catchup.Multiplier,

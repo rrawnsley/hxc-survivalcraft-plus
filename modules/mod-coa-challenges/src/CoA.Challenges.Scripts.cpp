@@ -25,7 +25,8 @@ namespace CoAChallenges
 
     bool UsesCoreProfessionXP(Player* player)
     {
-        return player && ActiveChallenges(player->GetGUID().GetCounter()).contains(167);
+        return player && (OldSchoolChallenge(player)
+            || ActiveChallenges(player->GetGUID().GetCounter()).contains(167));
     }
 
     // Heal-path helpers (defined below, used by HealBlocked earlier in this TU).
@@ -2961,6 +2962,65 @@ namespace CoAChallenges
             profile.con = "Red";
         }
 
+        float healthFactor = 1.0f;
+        float damageFactor = 1.0f;
+        uint32 experienceFactor = 100;
+        if (levelDifference <= -7)
+        {
+            healthFactor = 0.7f;
+            damageFactor = 0.7f;
+        }
+        else if (levelDifference <= -5)
+        {
+            healthFactor = 0.85f;
+            damageFactor = 0.85f;
+        }
+        else if (levelDifference <= -3)
+        {
+            healthFactor = 0.95f;
+            damageFactor = 0.95f;
+            experienceFactor = 110;
+        }
+        else if (levelDifference < 0)
+        {
+            healthFactor = 1.1f;
+            damageFactor = 1.1f;
+            experienceFactor = 120;
+        }
+        else if (levelDifference == 0)
+        {
+            healthFactor = 1.25f;
+            damageFactor = 1.25f;
+            experienceFactor = 125;
+        }
+        else if (levelDifference <= 2)
+        {
+            healthFactor = 1.5f;
+            damageFactor = 1.5f;
+            experienceFactor = 150;
+        }
+        else if (levelDifference <= 4)
+        {
+            healthFactor = 1.75f;
+            damageFactor = 1.75f;
+            experienceFactor = 175;
+        }
+        else if (levelDifference <= 6)
+        {
+            healthFactor = 2.0f;
+            damageFactor = 2.0f;
+            experienceFactor = 200;
+        }
+        else
+        {
+            healthFactor = 2.5f;
+            damageFactor = 2.5f;
+            experienceFactor = 250;
+        }
+        profile.healthPercent = uint32(profile.healthPercent * healthFactor);
+        profile.damageMultiplier *= damageFactor;
+        profile.experienceMultiplierHundredths = experienceFactor;
+
         switch (creature->GetCreatureTemplate()->rank)
         {
             case CREATURE_ELITE_ELITE:
@@ -3283,8 +3343,8 @@ namespace CoAChallenges
         {
             OldSchoolPowerProfile const profile = GetOldSchoolPowerProfile(attacker, creature);
             uint32 const groupSize = OldSchoolGroupRewardSize(attacker, creature);
-            float const groupHealth = 1.0f + 0.8f * float(groupSize - 1);
-            float const groupDamage = 1.0f + 0.2f * float(groupSize - 1);
+            float const groupHealth = 1.0f + 1.2f * float(groupSize - 1);
+            float const groupDamage = 1.0f + 0.35f * float(groupSize - 1);
             auto* state = new OldSchoolHealth();
             state->extra = float(creature->GetMaxHealth()) *
                 (profile.healthPercent * groupHealth / 100.0f - 1.0f);
@@ -4057,7 +4117,7 @@ namespace CoAChallenges
                     experienceMultiplierHundredths =
                         GetOldSchoolPowerProfile(player, creature).experienceMultiplierHundredths;
 
-                    if (CoANeeds::ReadOldSchoolRestedSeconds &&
+                    if (player->HasAura(996163) && CoANeeds::ReadOldSchoolRestedSeconds &&
                         CoANeeds::ReadOldSchoolRestedSeconds(player->GetGUID().GetCounter()))
                         scaleNumerator = 115;
                     groupSize = OldSchoolGroupRewardSize(player, creature);

@@ -814,6 +814,7 @@ void Player::RewardProfessionXP(uint32 skillId, uint32 current, uint32 gray, uin
     {
         case SKILL_MINING: profession = RATE_XP_PROFESSION_MINING; break;
         case SKILL_HERBALISM: profession = RATE_XP_PROFESSION_HERBALISM; break;
+        case SKILL_WOODCUTTING: profession = RATE_XP_PROFESSION_HERBALISM; break;
         case SKILL_SKINNING: profession = RATE_XP_PROFESSION_SKINNING; break;
         case SKILL_FISHING: profession = RATE_XP_PROFESSION_FISHING; break;
         case SKILL_BLACKSMITHING: profession = RATE_XP_PROFESSION_BLACKSMITHING; break;
@@ -823,6 +824,8 @@ void Player::RewardProfessionXP(uint32 skillId, uint32 current, uint32 gray, uin
         case SKILL_FIRST_AID: profession = RATE_XP_PROFESSION_FIRST_AID; break;
         case SKILL_COOKING: profession = RATE_XP_PROFESSION_COOKING; break;
         case SKILL_ENGINEERING: profession = RATE_XP_PROFESSION_ENGINEERING; break;
+        case SKILL_WOODWORKING: profession = RATE_XP_PROFESSION_ENGINEERING; break;
+        case 9200: profession = RATE_XP_PROFESSION_ENGINEERING; break; // CoA Survivalist
         case SKILL_TAILORING: profession = RATE_XP_PROFESSION_TAILORING; break;
         case SKILL_LOCKPICKING: profession = RATE_XP_PROFESSION_LOCKPICKING; break;
         case SKILL_INSCRIPTION: profession = RATE_XP_PROFESSION_INSCRIPTION; break;

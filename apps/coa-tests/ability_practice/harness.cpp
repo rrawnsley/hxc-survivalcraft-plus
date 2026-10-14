@@ -516,6 +516,21 @@ void CheckResourcePacing()
     std::cout << "PASS: sixteen resource spenders, individual practice rates, exact forecasts and saved fractions\n";
 }
 
+void CheckFastCatchup()
+{
+    auto const found = std::find_if(DevelopmentPacing::Entries.begin(), DevelopmentPacing::Entries.end(),
+        [](auto const& entry) { return entry.ClassId == 23 && entry.AbilityId == 801722; });
+    assert(found != DevelopmentPacing::Entries.end());
+    assert(!ValidCatchupSettings({ true, 1, 9 }));
+    auto const effective = BuildCatchupPolicy(found->Policy, 10, { true, 1, 8 });
+    assert(effective);
+    auto const policy = effective->View();
+    assert(policy.Bands.front().PointsPerUse == 2160);
+    assert(UsesUntil(policy, { 1, 0 }, 10, 10).Uses == 68);
+    assert(ApplyQualifyingUse(policy, { 2, 0 }, 10).State.Points == 2160);
+    std::cout << "PASS: eightfold catch-up reaches Lichfrost's first rank in 68 qualifying uses\n";
+}
+
 void CheckCurrentRankPolicies()
 {
     std::uint32_t forecasts = 0;
@@ -1542,6 +1557,7 @@ int main(int argc, char** argv)
     CheckMenu(policy);
     CheckPersistence(policy);
     CheckOutcome(policy);
+    CheckFastCatchup();
     CheckCurrentRankPolicies();
     CheckResourcePacing();
     CheckMasteryFixedAndTrainerPolicies();

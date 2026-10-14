@@ -40,7 +40,7 @@ def main():
         'OldSchoolPowerProfile GetOldSchoolPowerProfile(',
         'uint32 OldSchoolExperienceSourceMultiplier(',
         'char const* OldSchoolConColor(',
-        'uint32 OldSchoolGroupBonusPercent(',
+        'uint32 OldSchoolGroupRewardSize(',
     )
     assert 'CallForHelp(' not in source, 'Old School must preserve native creature assistance behavior'
     methods = '\n'.join(METHOD(source, signature).replace(' override', '')

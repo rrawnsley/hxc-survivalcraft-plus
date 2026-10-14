@@ -43,7 +43,7 @@ CoAChallenges.OldSchool.NamedGearDropPercent = 100
 # Gameplay pacing target: ordinary blue enemies take roughly 20-40 seconds solo,
 # depending on class, abilities, gear and recovery. These are CoA tuning values.
 CoAChallenges.OldSchool.OrdinaryHealthPercent = 600
-CoAChallenges.OldSchool.OrdinaryDamageMultiplier = 1.0
+CoAChallenges.OldSchool.OrdinaryDamageMultiplier = 2.0
 
 # C_Config flag delivered in SMSG_COA_CONFIG (0x58D). Gates the Trials and
 # Challenges tabs of the client UI (patch-B.MPQ).

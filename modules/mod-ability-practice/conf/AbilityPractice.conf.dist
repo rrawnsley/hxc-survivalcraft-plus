@@ -57,7 +57,7 @@ AbilityPractice.AllowDevelopmentTrainerFixedCatalog = 0
 
 # Optional catch-up for neglected abilities. Startup-only, unapproved development balance.
 # Boost practice when proficiency is at least Gap behind the current cap; stop below that gap.
-# Gap must be 1-500 and multiplier 2-4 when enabled. No saved progress is retroactively multiplied.
+# Gap must be 1-500 and multiplier 2-8 when enabled. No saved progress is retroactively multiplied.
 AbilityPractice.AllowDevelopmentCatchup = 0
 AbilityPractice.DevelopmentCatchupGap = 40
 AbilityPractice.DevelopmentCatchupMultiplier = 2

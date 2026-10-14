@@ -47,8 +47,10 @@ constexpr uint32 SprintAbility = 996015;
 constexpr uint32 DodgeAbility = 996016;
 constexpr uint32 WindAbility = 996017;
 constexpr uint32 CampRest = 996100;
+constexpr uint32 CampExperienceAura = 996163;
 constexpr uint32 OldSchoolRestedCapMs = 20 * 60 * 1000;
-constexpr uint32 OldSchoolRestedRate = 10;
+constexpr uint32 OldSchoolRestedStandingRate = 5;
+constexpr uint32 OldSchoolRestedSittingRate = 10;
 constexpr std::array<uint32, 3> OldSchoolCampLogs = { 8210210, 8210211, 8210212 };
 constexpr uint32 Fellowship = 996103;
 constexpr uint32 CampAbility = 996106;
@@ -234,7 +236,7 @@ uint32 NightLight(uint32 mapId, bool torch)
     return 101001 + index + (torch ? 4 : 0);
 }
 
-void RefreshNightLight(Player* player, State& state)
+void RefreshNightLight(Player* player, State& state, int32 campTier = -1)
 {
     Map* map = player->FindMap();
     bool outdoors = Config.darkness && map && !map->Instanceable() && player->IsOutdoors() &&
@@ -244,7 +246,7 @@ void RefreshNightLight(Player* player, State& state)
         state.torchLit = false;
     SetAura(player, TorchAura, state.torchLit);
     uint32 mapId = map ? map->GetId() : 0;
-    uint32 lightId = outdoors && IsNight() ? NightLight(mapId, state.torchLit) : 0;
+    uint32 lightId = outdoors && IsNight() ? NightLight(mapId, state.torchLit || campTier >= 0) : 0;
     uint32 zoneId = player->GetZoneId();
     if (state.lightSent && state.lightMap == mapId && state.lightZone == zoneId && state.lightId == lightId)
         return;
@@ -496,14 +498,22 @@ void PlaceCamp(Player* player, State& state, uint32 tier)
     state.campReady = now + 60;
     Unlock(player);
     Save(player, state);
-    ChatHandler(player->GetSession()).SendSysMessage("Camp placed. Sit nearby to recover and gain rested experience.");
+    ChatHandler(player->GetSession()).SendSysMessage("Camp placed. Stay nearby to recover and renew your 20-minute camp XP buff; sit for faster recovery.");
 }
 
 void RestAtCamp(Player* player, State& state, int32 tier, uint32 elapsed)
 {
-    state.restingCamp = player->IsAlive() && player->IsSitState() && !player->IsInCombat() ? tier : -1;
+    state.restingCamp = player->IsAlive() && !player->IsInCombat() ? tier : -1;
     for (uint32 index = 0; index < 3; ++index)
         SetAura(player, CampRest + index, state.restingCamp == int32(index));
+    if (state.restingCamp >= 0)
+    {
+        float const recovery = (player->IsSitState() ? 0.01f : 0.005f) * elapsed / 1000.0f;
+        player->ModifyHealth(int32(std::max(1.0f, player->GetMaxHealth() * recovery)));
+        if (player->GetMaxPower(POWER_MANA))
+            player->ModifyPower(POWER_MANA,
+                int32(std::max(1.0f, player->GetMaxPower(POWER_MANA) * recovery)));
+    }
     bool const oldSchool = CoANeeds::IsOldSchoolTrial &&
         CoANeeds::IsOldSchoolTrial(player->GetGUID().GetCounter());
     if (oldSchool)
@@ -522,17 +532,34 @@ void RestAtCamp(Player* player, State& state, int32 tier, uint32 elapsed)
                 || sky == WEATHER_STATE_LIGHT_SNOW || sky == WEATHER_STATE_MEDIUM_SNOW
                 || sky == WEATHER_STATE_HEAVY_SNOW || sky == WEATHER_STATE_BLACKSNOW;
         }
-        if (player->IsAlive() && (tier >= 0 || inn) && !exposed)
+        if (player->IsAlive() && (state.restingCamp >= 0 || inn) && !exposed)
             state.oldSchoolRestedMs = std::min(OldSchoolRestedCapMs,
-                state.oldSchoolRestedMs + elapsed * OldSchoolRestedRate);
+                state.oldSchoolRestedMs + elapsed *
+                    (player->IsSitState() ? OldSchoolRestedSittingRate : OldSchoolRestedStandingRate));
         else if (player->IsAlive())
             state.oldSchoolRestedMs = elapsed >= state.oldSchoolRestedMs ? 0 : state.oldSchoolRestedMs - elapsed;
 
+        player->SetRestBonus(0);
+        if (state.oldSchoolRestedMs)
+        {
+            if (Aura* aura = player->GetAura(CampExperienceAura))
+                aura->SetDuration(state.oldSchoolRestedMs);
+            else if (Aura* aura = player->AddAura(CampExperienceAura, player))
+            {
+                aura->SetMaxDuration(OldSchoolRestedCapMs);
+                aura->SetDuration(state.oldSchoolRestedMs);
+            }
+        }
+        else
+            player->RemoveAurasDueToSpell(CampExperienceAura);
+
         if (previous < OldSchoolRestedCapMs && state.oldSchoolRestedMs == OldSchoolRestedCapMs)
-            ChatHandler(player->GetSession()).SendSysMessage("You are fully rested. Camps and inns preserve your 15% kill-experience bonus.");
+            ChatHandler(player->GetSession()).SendSysMessage("Camp Rested is full: 20 minutes of 15% bonus kill experience.");
         else if (previous && !state.oldSchoolRestedMs)
-            ChatHandler(player->GetSession()).SendSysMessage("Your rested experience is spent. Return to a camp to renew it.");
+            ChatHandler(player->GetSession()).SendSysMessage("Camp Rested expired. Return to a camp to renew it.");
     }
+    else
+        player->RemoveAurasDueToSpell(CampExperienceAura);
 
     if (state.restingCamp < 0)
     {
@@ -546,6 +573,11 @@ void RestAtCamp(Player* player, State& state, int32 tier, uint32 elapsed)
         float restedCap = player->GetUInt32Value(PLAYER_NEXT_LEVEL_XP) * sWorld->getRate(RATE_REST_MAX_BONUS) / 2.0f;
         float rested = restedCap * seconds / Config.campRestFillSeconds;
         player->SetRestBonus(player->GetRestBonus() + rested);
+    }
+    if (!player->IsSitState())
+    {
+        state.socialTick = 0;
+        return;
     }
     state.socialTick += elapsed;
     if (state.socialTick < 30000)
@@ -787,7 +819,7 @@ public:
                 SpellsReady = false;
                 LOG_ERROR("module.coa_needs", "Missing profession spell {}; module disabled", id);
             }
-        for (uint32 id : { 996176u, 996177u, TorchAura })
+        for (uint32 id : { 996176u, 996177u, TorchAura, CampExperienceAura })
             if (!sSpellMgr->GetSpellInfo(id))
             {
                 SpellsReady = false;
@@ -1151,7 +1183,7 @@ public:
         int32 campTier = NearbyCamp(player);
         RestAtCamp(player, state, campTier, elapsed);
         TickWeather(player, state, campTier, elapsed);
-        RefreshNightLight(player, state);
+        RefreshNightLight(player, state, campTier);
         RefreshInjuries(player, state);
         RefreshProfessions(player);
         if (alive && !pvp && !state.delegated && campTier < 0)
@@ -1211,7 +1243,7 @@ public:
             else if (player->IsSitState())
                 regen *= 2.0f;
             if (state.restingCamp >= 0)
-                regen *= 1.5f + 0.5f * state.restingCamp;
+                regen *= (player->IsSitState() ? 2.0f : 1.5f) + 0.5f * state.restingCamp;
             if (state.windBuffUntil > now)
                 regen *= 2.5f;
             state.vigor = std::min(state.cap, state.vigor + regen * seconds);

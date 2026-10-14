@@ -30,7 +30,7 @@ struct EffectiveTrainingPolicy
 inline bool ValidCatchupSettings(CatchupSettings settings)
 {
     return !settings.Enabled || (settings.Gap >= 1 && settings.Gap <= 500 &&
-        settings.Multiplier >= 2 && settings.Multiplier <= 4);
+        settings.Multiplier >= 2 && settings.Multiplier <= 8);
 }
 
 inline std::optional<EffectiveTrainingPolicy> BuildCatchupPolicy(TrainingPolicy original,
