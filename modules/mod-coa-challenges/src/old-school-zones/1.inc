@@ -1,3 +1,6 @@
+    { 1, 996734, "Icefang hunting grounds", "named diseased wolf", 0, 150, true, true },
+    { 1, 996735, "Frostpriest Frostmane patrol", "named troll priest", 0, 200, true, true },
+    { 1, 996736, "Frostmaw mountain patrol", "named frost yeti", 0, 200, true, true },
     { 1, 706, "Frostmane hold", "hunter", 1, 100, false, false },
     { 1, 707, "Rockjaw cave", "hunter", 0, 100, false, false },
     { 1, 724, "Rockjaw cave", "hunter", 0, 100, false, false },
