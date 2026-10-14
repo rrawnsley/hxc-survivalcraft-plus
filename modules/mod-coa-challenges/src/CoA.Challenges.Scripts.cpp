@@ -3562,6 +3562,8 @@ namespace CoAChallenges
                 return false;
             if (IsOldSchoolBindRespawn(player))
                 return true;
+            if (OldSchoolChallenge(player) == 9001 && !player->HasPlayerFlag(PLAYER_FLAGS_GHOST))
+                return true;
             bool requiresCorpseRun = OldSchoolChallenge(player) == 9001;
             if (!requiresCorpseRun && !player->GetSession()->IsBot() && player->IsInWorld()
                 && !player->IsAlive())
