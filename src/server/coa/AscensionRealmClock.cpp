@@ -23,13 +23,13 @@ public:
         if (!_initialized)
         {
             _initialized = true;
-            _daylight = daylight;
+            _isDaylight = daylight;
             return;
         }
-        if (_daylight == daylight)
+        if (_isDaylight == daylight)
             return;
 
-        _daylight = daylight;
+        _isDaylight = daylight;
         time_t const clientTime = AscensionRealmClock::ClientTime();
         float const gameSpeed = AscensionRealmClock::GameSpeed();
         for (auto const& [accountId, session] : sWorldSessionMgr->GetAllSessions())
@@ -50,7 +50,7 @@ public:
 
 private:
     bool _initialized = false;
-    bool _daylight = false;
+    bool _isDaylight = false;
 };
 }
 
