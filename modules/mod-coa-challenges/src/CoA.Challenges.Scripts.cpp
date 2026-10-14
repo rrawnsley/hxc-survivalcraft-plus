@@ -12,6 +12,7 @@
 #include "LocalLevelScaling.h"
 #include "OldSchoolZoneProfiles.h"
 #include "GlobalScript.h"
+#include "QuestDef.h"
 
 #include <cmath>
 
@@ -1226,6 +1227,114 @@ namespace CoAChallenges
     };
 
     OldSchoolTuning OldSchoolOptions;
+
+    std::unordered_map<uint64, uint32> OldSchoolBasicQuestRewards;
+    LocalLevelScaling::QuestRewardItemResolver PreviousQuestRewardItemResolver = nullptr;
+
+    uint32 OldSchoolBasicGearKey(ItemTemplate const& item)
+    {
+        uint32 slot = item.InventoryType;
+        if (slot == INVTYPE_ROBE)
+            slot = INVTYPE_CHEST;
+        if (slot == INVTYPE_WEAPONMAINHAND || slot == INVTYPE_WEAPONOFFHAND)
+            slot = INVTYPE_WEAPON;
+        return (item.Class << 24) | (item.SubClass << 16) | slot;
+    }
+
+    uint32 OldSchoolQuestMaterial(ItemTemplate const& item)
+    {
+        uint32 const level = item.ItemLevel;
+        if (item.Class == ITEM_CLASS_ARMOR && item.SubClass == ITEM_SUBCLASS_ARMOR_CLOTH)
+            return level < 20 ? 2589 : level < 30 ? 2592 : level < 45 ? 4306 : level < 55 ? 4338 : 14047;
+        if (item.Class == ITEM_CLASS_ARMOR && item.SubClass == ITEM_SUBCLASS_ARMOR_LEATHER)
+            return level < 20 ? 2318 : level < 35 ? 2319 : level < 45 ? 4234 : level < 55 ? 4304 : 8170;
+        if (item.Class == ITEM_CLASS_WEAPON && item.SubClass == ITEM_SUBCLASS_WEAPON_WAND)
+            return level < 25 ? 10940 : level < 40 ? 11083 : level < 50 ? 11137 : level < 60 ? 11176 : 16204;
+        if (item.Class == ITEM_CLASS_ARMOR && item.SubClass == ITEM_SUBCLASS_ARMOR_MISC)
+            return level < 20 ? 818 : level < 35 ? 1206 : level < 45 ? 1529 : level < 55 ? 7909 : 7910;
+        return level < 20 ? 2770 : level < 35 ? 2772 : level < 50 ? 3858 : 10620;
+    }
+
+    uint32 ResolveOldSchoolQuestRewardItem(Player const* player, uint32 itemId, Quest const* quest)
+    {
+        if (!OldSchoolChallenge(player))
+            return PreviousQuestRewardItemResolver ? PreviousQuestRewardItemResolver(player, itemId, quest) : itemId;
+
+        auto const replacement = OldSchoolBasicQuestRewards.find((uint64(quest->GetQuestId()) << 32) | itemId);
+        return replacement == OldSchoolBasicQuestRewards.end() ? itemId : replacement->second;
+    }
+
+    void PrepareOldSchoolQuestRewards()
+    {
+        std::unordered_set<uint32> protectedItems;
+        for (auto const& [id, quest] : sObjectMgr->GetQuestTemplates())
+        {
+            protectedItems.insert(quest->GetSrcItemId());
+            for (uint32 item : quest->RequiredItemId)
+                protectedItems.insert(item);
+            for (uint32 item : quest->ItemDrop)
+                protectedItems.insert(item);
+        }
+
+        std::unordered_map<uint32, std::vector<ItemTemplate const*>> basicGear;
+        for (auto const& [id, item] : *sObjectMgr->GetItemTemplateStore())
+        {
+            if (id >= 50000 || item.Quality != ITEM_QUALITY_NORMAL || !item.ItemLevel || item.StatsCount
+                || (item.Class != ITEM_CLASS_WEAPON && item.Class != ITEM_CLASS_ARMOR)
+                || item.StartQuest || item.ScriptId || item.RequiredSkill || item.RequiredSpell
+                || item.RequiredHonorRank || item.RequiredReputationFaction || item.Map || item.Area
+                || item.AllowableClass != uint32(-1) || item.AllowableRace != uint32(-1)
+                || item.Bonding >= BIND_QUEST_ITEM || item.HasFlag(ITEM_FLAG_CONJURED)
+                || protectedItems.contains(id)
+                || std::any_of(std::begin(item.Spells), std::end(item.Spells),
+                    [](_Spell const& spell) { return spell.SpellId != 0; }))
+                continue;
+            basicGear[OldSchoolBasicGearKey(item)].push_back(&item);
+        }
+        for (auto& [key, items] : basicGear)
+            std::sort(items.begin(), items.end(), [](ItemTemplate const* left, ItemTemplate const* right)
+            {
+                return left->ItemLevel != right->ItemLevel ? left->ItemLevel > right->ItemLevel
+                    : left->ItemId < right->ItemId;
+            });
+
+        OldSchoolBasicQuestRewards.clear();
+        for (auto const& [questId, quest] : sObjectMgr->GetQuestTemplates())
+        {
+            auto prepare = [&](uint32 itemId)
+            {
+                ItemTemplate const* item = sObjectMgr->GetItemTemplate(itemId);
+                if (!item || item->Quality < ITEM_QUALITY_UNCOMMON || protectedItems.contains(itemId)
+                    || (item->Class != ITEM_CLASS_WEAPON && item->Class != ITEM_CLASS_ARMOR)
+                    || item->StartQuest || item->ScriptId || item->RequiredSkill || item->RequiredSpell
+                    || item->Bonding >= BIND_QUEST_ITEM)
+                    return;
+
+                uint32 replacement = OldSchoolQuestMaterial(*item);
+                auto const candidates = basicGear.find(OldSchoolBasicGearKey(*item));
+                if (candidates != basicGear.end())
+                    for (ItemTemplate const* candidate : candidates->second)
+                        if (candidate->ItemLevel <= item->ItemLevel
+                            && candidate->RequiredLevel <= std::max(item->RequiredLevel, quest->GetMinLevel()))
+                        {
+                            replacement = candidate->ItemId;
+                            break;
+                        }
+                if (sObjectMgr->GetItemTemplate(replacement))
+                    OldSchoolBasicQuestRewards.emplace((uint64(questId) << 32) | itemId, replacement);
+            };
+            for (uint32 item : quest->RewardItemId)
+                prepare(item);
+            for (uint32 item : quest->RewardChoiceItemId)
+                prepare(item);
+        }
+        auto const current = LocalLevelScaling::QuestRewardItemOwner.load(std::memory_order_relaxed);
+        if (current != &ResolveOldSchoolQuestRewardItem)
+            PreviousQuestRewardItemResolver = current;
+        LocalLevelScaling::QuestRewardItemOwner.store(&ResolveOldSchoolQuestRewardItem, std::memory_order_relaxed);
+        LOG_INFO("module.coa_challenges", "Prepared {} Old School basic quest reward substitutions",
+            OldSchoolBasicQuestRewards.size());
+    }
 
     uint32 OldSchoolGearKeepPercent(Creature const* creature)
     {
@@ -4512,11 +4621,12 @@ namespace CoAChallenges
                 sConfigMgr->GetOption<float>("CoAChallenges.HungerMax", 100.0f));
         }
 
-            void OnStartup() override
-            {
-                EnsureTables();
-                LoadChallengeDefinitions();
-            }
+        void OnStartup() override
+        {
+            EnsureTables();
+            LoadChallengeDefinitions();
+            PrepareOldSchoolQuestRewards();
+        }
 
         void OnUpdate(uint32 diff) override
         {

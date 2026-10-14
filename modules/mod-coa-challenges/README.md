@@ -97,6 +97,23 @@ keys are appended automatically on deploy.
 
 ## HXC Old School trials
 
+### Basic quest equipment and profession materials
+
+Old School quest previews, reward selection, inventory-space checks and grants share the
+native per-player reward resolver. Its Old School wrapper replaces ordinary magical
+equipment rewards with an unrestricted common item of the same equipment family/slot
+and no greater item level, usable at the authored reward/quest minimum level. Robes and
+chests share a slot; one-handed weapons retain their weapon family. When no suitable
+basic item exists, the slot offers a tier-appropriate cloth, leather, ore, gem or enchanting
+dust component. Native reward quantities, coin, XP, materials, recipes and learned spells
+remain. Harvested camp logs are not granted through this replacement path.
+
+Quest source/required/drop items, quest-bound objects and equipment needed for a
+profession, spell or scripted function are protected. The startup cache is built from
+loaded native item and quest data. Old School rewards keep authored item budgets;
+other modes delegate to the existing reward resolver, including its scaling behavior.
+Named and crafted equipment remains the main source of ordinary stat-bearing upgrades.
+
 ### Authored Mulgore roaming encounters
 
 Old School participants and their playerbot companions gain an additional encounter phase,
