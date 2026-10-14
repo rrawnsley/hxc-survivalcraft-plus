@@ -4,6 +4,7 @@
 #include "Config.h"
 #include "Creature.h"
 #include "DatabaseEnv.h"
+#include "DBCStores.h"
 #include "GameObject.h"
 #include "Item.h"
 #include "Log.h"
@@ -62,6 +63,8 @@ constexpr uint32 ScissorsUse = 996137;
 constexpr uint32 CampKitRecipe = 996170;
 constexpr uint32 SurvivalistProfession = 996180;
 constexpr uint32 CampKit = 996211;
+constexpr uint32 TorchItem = 996214;
+constexpr uint32 TorchAura = 996181;
 std::unordered_set<uint32> BandageSpells;
 std::unordered_set<uint32> PotionSpells;
 
@@ -73,6 +76,8 @@ uint32 RecipeSkill(uint32 spell)
         return std::array<uint32, 8>{ 1, 1, 1, 1, 100, 150, 50, 1 }[spell - ToolRecipe];
     if (spell >= CampKitRecipe && spell < CampKitRecipe + 6)
         return std::array<uint32, 3>{ 1, 75, 150 }[(spell - CampKitRecipe) % 3];
+    if (spell == 996176 || spell == 996177)
+        return 1;
     return spell == ScissorsRecipe ? 75 : 0;
 }
 
@@ -92,6 +97,8 @@ struct Options
     bool injuries = true;
     bool tools = true;
     bool professions = true;
+    bool darkness = true;
+    float rainyNightColdMultiplier = 1.5f;
     uint32 wetExposure = 300000;
     uint32 coldExposure = 420000;
     uint32 heatExposure = 180000;
@@ -151,6 +158,11 @@ struct State
     uint32 stormTick = 0;
     uint32 injuries = 0;
     char condition = 'S';
+    bool torchLit = false;
+    uint32 lightMap = 0;
+    uint32 lightZone = 0;
+    uint32 lightId = 0;
+    bool lightSent = false;
 };
 
 struct Camp
@@ -199,6 +211,67 @@ void SetAura(Player* player, uint32 spell, bool active)
         player->RemoveAurasDueToSpell(spell);
     else if (!player->HasAura(spell))
         player->AddAura(spell, player);
+}
+
+bool IsNight()
+{
+    std::time_t now = std::time(nullptr);
+    std::tm local = {};
+#ifdef _WIN32
+    localtime_s(&local, &now);
+#else
+    localtime_r(&now, &local);
+#endif
+    return local.tm_hour >= 20 || local.tm_hour < 6;
+}
+
+uint32 NightLight(uint32 mapId, bool torch)
+{
+    uint32 index = 0;
+    switch (mapId)
+    {
+        case 0: index = 0; break;
+        case 1: index = 1; break;
+        case 530: index = 2; break;
+        case 571: index = 3; break;
+        default: return 0;
+    }
+    return 101001 + index + (torch ? 4 : 0);
+}
+
+void RefreshNightLight(Player* player, State& state)
+{
+    Map* map = player->FindMap();
+    bool outdoors = Config.darkness && map && !map->Instanceable() && player->IsOutdoors() &&
+        !player->InBattleground() && !player->InArena();
+    Item* equippedTorch = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+    if (state.torchLit && (!player->IsAlive() || !equippedTorch || equippedTorch->GetEntry() != TorchItem))
+        state.torchLit = false;
+    SetAura(player, TorchAura, state.torchLit);
+    uint32 mapId = map ? map->GetId() : 0;
+    uint32 lightId = outdoors && IsNight() ? NightLight(mapId, state.torchLit) : 0;
+    uint32 zoneId = player->GetZoneId();
+    if (state.lightSent && state.lightMap == mapId && state.lightZone == zoneId && state.lightId == lightId)
+        return;
+    if (!lightId && !state.lightId)
+    {
+        state.lightMap = mapId;
+        state.lightZone = zoneId;
+        state.lightSent = true;
+        return;
+    }
+    if (map)
+    {
+        WorldPacket packet(SMSG_OVERRIDE_LIGHT, 12);
+        packet << uint32(GetDefaultMapLight(mapId));
+        packet << uint32(lightId);
+        packet << uint32(state.lightSent ? 3000 : 1000);
+        player->SendDirectMessage(&packet);
+        state.lightMap = mapId;
+        state.lightZone = zoneId;
+        state.lightId = lightId;
+        state.lightSent = true;
+    }
 }
 
 float SkillScale(Player const* player, uint32 skill)
@@ -291,6 +364,8 @@ void Unlock(Player* player)
         for (uint32 index = 0; index < 6; ++index)
             if (player->GetPureSkillValue(SurvivalistSkill) >= RecipeSkill(CampKitRecipe + index))
                 player->learnSpell(CampKitRecipe + index);
+        player->learnSpell(996176);
+        player->learnSpell(996177);
     }
     if (player->GetLevel() >= 30)
         player->learnSpell(DodgeAbility);
@@ -566,13 +641,16 @@ void TickWeather(Player* player, State& state, int32 campTier, uint32 elapsed)
         };
         static std::array<uint32, 9> const coldZones = { 1, 618, 2817, 65, 394, 495, 210, 67, 66 };
         bool hot = std::find(hotZones.begin(), hotZones.end(), player->GetZoneId()) != hotZones.end();
-        bool cold = snow || (player->GetMapId() == 571 && player->GetZoneId() != 3711) ||
+        bool cold = snow || (IsNight() && rain) ||
+            (player->GetMapId() == 571 && player->GetZoneId() != 3711) ||
             std::find(coldZones.begin(), coldZones.end(), player->GetZoneId()) != coldZones.end();
         std::array<bool, 3> exposed = { rain || snow, cold, hot && !rain && !snow };
         std::array<uint32, 3> limits = { Config.wetExposure, Config.coldExposure, Config.heatExposure };
         for (uint32 index = 0; index < 3; ++index)
         {
-            uint64 amount = exposed[index] ? uint64(state.exposure[index]) + elapsed :
+            uint32 gain = index == 1 && IsNight() ?
+                uint32(std::lround(elapsed * Config.rainyNightColdMultiplier)) : elapsed;
+            uint64 amount = exposed[index] ? uint64(state.exposure[index]) + gain :
                 (uint64(elapsed) * 2 >= state.exposure[index] ? 0 : state.exposure[index] - uint64(elapsed) * 2);
             state.exposure[index] = uint32(std::min<uint64>(amount, limits[index]));
             state.weather[index] = state.exposure[index] >= limits[index];
@@ -672,6 +750,9 @@ public:
         Config.campRestFillSeconds = std::clamp(
             sConfigMgr->GetOption<uint32>("CoANeeds.CampRestFillSeconds", 300), 1u, 86400u);
         Config.weather = sConfigMgr->GetOption<bool>("CoANeeds.Weather.Enable", true);
+        Config.darkness = sConfigMgr->GetOption<bool>("CoANeeds.Darkness.Enable", true);
+        Config.rainyNightColdMultiplier = std::clamp(
+            sConfigMgr->GetOption<float>("CoANeeds.Weather.NightColdExposureMultiplier", 1.5f), 1.0f, 4.0f);
         Config.injuries = sConfigMgr->GetOption<bool>("CoANeeds.Injuries.Enable", true);
         Config.tools = sConfigMgr->GetOption<bool>("CoANeeds.Tools.Enable", true);
         Config.professions = sConfigMgr->GetOption<bool>("CoANeeds.Professions.Enable", true);
@@ -709,6 +790,12 @@ public:
             {
                 SpellsReady = false;
                 LOG_ERROR("module.coa_needs", "Missing profession spell {}; module disabled", id);
+            }
+        for (uint32 id : { 996176u, 996177u, TorchAura })
+            if (!sSpellMgr->GetSpellInfo(id))
+            {
+                SpellsReady = false;
+                LOG_ERROR("module.coa_needs", "Missing torch spell {}; module disabled", id);
             }
         BandageSpells.clear();
         PotionSpells.clear();
@@ -800,6 +887,7 @@ public:
                 state.oldSchoolRestedMs = std::min((*saved)[11].value, OldSchoolRestedCapMs);
         }
         StopSprint(player, state);
+        player->RemoveAurasDueToSpell(TorchAura);
         for (uint32 index = 0; index < 3; ++index)
             player->RemoveAurasDueToSpell(CampRest + index);
         UpdateNeeds(player, state);
@@ -1045,6 +1133,7 @@ public:
         int32 campTier = NearbyCamp(player);
         RestAtCamp(player, state, campTier, elapsed);
         TickWeather(player, state, campTier, elapsed);
+        RefreshNightLight(player, state);
         RefreshInjuries(player, state);
         RefreshProfessions(player);
         if (alive && !pvp && !state.delegated && campTier < 0)
@@ -1298,6 +1387,16 @@ public:
                 return;
             }
         }
+        if (id == 996176 || id == 996177)
+        {
+            bool const oldSchool = CoANeeds::IsOldSchoolTrial &&
+                CoANeeds::IsOldSchoolTrial(player->GetGUID().GetCounter());
+            if ((id == 996177) != oldSchool)
+            {
+                result = SPELL_FAILED_NOT_HERE;
+                return;
+            }
+        }
         uint32 requirement = RecipeSkill(id);
         if (requirement && player->GetPureSkillValue(SurvivalistSkill) < requirement)
             result = SPELL_FAILED_LOW_CASTLEVEL;
@@ -1317,6 +1416,23 @@ public:
         Map* map = player ? player->FindMap() : nullptr;
         if (!Config.tools || !Affects(player) || !item || !map)
             return true;
+        if (item->GetEntry() == TorchItem)
+        {
+            if (player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND) != item)
+            {
+                ChatHandler(player->GetSession()).SendSysMessage("Equip the torch in your off hand before lighting it.");
+                return true;
+            }
+            auto found = States.find(player->GetGUID().GetCounter());
+            if (found != States.end() && player->IsAlive())
+            {
+                found->second.torchLit = !found->second.torchLit;
+                RefreshNightLight(player, found->second);
+                ChatHandler(player->GetSession()).SendSysMessage(found->second.torchLit ?
+                    "You light your torch." : "You put out your torch.");
+            }
+            return true;
+        }
         if (!player->IsAlive() || player->IsInCombat() || player->IsMounted() || player->IsInFlight() ||
             player->HasUnitState(UNIT_STATE_CONTROLLED))
         {
