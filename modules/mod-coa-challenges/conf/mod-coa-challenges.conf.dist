@@ -34,13 +34,19 @@ CoAChallenges.Enable = 1
 # Default: 5000
 CoAChallenges.OldSchool.ExperienceBasisPoints = 5000
 
-# During either Old School trial, rolled creature armor and weapon drops across
-# all zones have a chance to remain in the loot. Quest items, materials, and
-# crafted gear are not affected. Authored named threats use their separate chance.
-# Defaults: ordinary creatures 1%, named threats 5%. Profession-crafted gear
-# and quest rewards are unaffected, making crafts a dependable upgrade path.
+# Basic poor/common equipment retains its native loot probabilities. Only random
+# uncommon-or-better equipment is thinned. Authored named encounters and dungeon/
+# world bosses retain their native equipment rolls at 100%; this is not a new
+# per-kill drop chance. Quest items, materials and crafted gear remain untouched.
 CoAChallenges.OldSchool.GearDropPercent = 1
-CoAChallenges.OldSchool.NamedGearDropPercent = 5
+CoAChallenges.OldSchool.NamedGearDropPercent = 100
+
+# Fixed encounter stats use the hidden rating's native creature base stats.
+# The initial ordinary profile emphasizes sustained fights over damage spikes.
+# Gameplay pacing target: ordinary blue enemies take roughly 20-40 seconds solo,
+# depending on class, abilities, gear and recovery. These are CoA tuning values.
+CoAChallenges.OldSchool.OrdinaryHealthPercent = 600
+CoAChallenges.OldSchool.OrdinaryDamageMultiplier = 1.0
 
 # C_Config flag delivered in SMSG_COA_CONFIG (0x58D). Gates the Trials and
 # Challenges tabs of the client UI (patch-B.MPQ).

@@ -1203,20 +1203,27 @@ namespace CoAChallenges
         return creature && player && OldSchoolChallenge(player) && OldSchoolCreature(creature);
     }
 
+    struct OldSchoolTuning
+    {
+        uint32 ordinaryGearKeepPercent = 1;
+        uint32 namedGearKeepPercent = 100;
+        uint32 ordinaryHealthPercent = 600;
+        float ordinaryDamageMultiplier = 1.0f;
+    };
+
+    OldSchoolTuning OldSchoolOptions;
+
     uint32 OldSchoolGearKeepPercent(Creature const* creature)
     {
-        uint32 const configured = sConfigMgr->GetOption<uint32>("CoAChallenges.OldSchool.GearDropPercent", 1);
-        uint32 const namedConfigured = sConfigMgr->GetOption<uint32>("CoAChallenges.OldSchool.NamedGearDropPercent", 5);
-        uint32 const normalPercent = std::min(configured, 100u);
-        uint32 const namedPercent = std::min(namedConfigured, 100u);
         bool const namedThreat = IsOldSchoolMulgoreNamedThreat(creature)
             || IsOldSchoolBarrensNamedThreat(creature) || IsOldSchoolStonetalonNamedThreat(creature)
             || IsOldSchoolAshenvaleNamedThreat(creature) || IsOldSchoolSouthernNamedThreat(creature)
             || IsOldSchoolTirisfalNamedThreat(creature) || IsOldSchoolSilverpineNamedThreat(creature)
             || IsOldSchoolHillsbradNamedThreat(creature) || IsOldSchoolArathiNamedThreat(creature)
             || IsOldSchoolHinterlandsNamedThreat(creature) || IsOldSchoolPlaguelandsNamedThreat(creature)
-            || IsOldSchoolAdditionalNamedThreat(creature);
-        return namedThreat ? namedPercent : normalPercent;
+            || IsOldSchoolAdditionalNamedThreat(creature) || creature->IsDungeonBoss()
+            || creature->GetCreatureTemplate()->rank == CREATURE_ELITE_WORLDBOSS;
+        return namedThreat ? OldSchoolOptions.namedGearKeepPercent : OldSchoolOptions.ordinaryGearKeepPercent;
     }
 
     void ThinOldSchoolGearLoot(Loot* loot, Creature const* creature)
@@ -1229,7 +1236,8 @@ namespace CoAChallenges
         {
             ItemTemplate const* item = sObjectMgr->GetItemTemplate(it->itemid);
             bool const equipment = item && (item->Class == ITEM_CLASS_WEAPON || item->Class == ITEM_CLASS_ARMOR);
-            if (equipment && !it->needs_quest && urand(1, 100) > keepPercent)
+            if (equipment && item->Quality >= ITEM_QUALITY_UNCOMMON && !it->needs_quest
+                && urand(1, 100) > keepPercent)
                 it = loot->items.erase(it);
             else
                 ++it;
@@ -1266,8 +1274,9 @@ namespace CoAChallenges
     {
         char const* con;
         uint32 healthPercent;
-        uint32 damageMultiplier;
+        float damageMultiplier;
         uint32 experienceMultiplierHundredths;
+        float armorMultiplier = 1.0f;
     };
 
     bool IsOldSchoolBarrensNamedThreat(Creature const* creature)
@@ -2803,20 +2812,25 @@ namespace CoAChallenges
 
     OldSchoolPowerProfile GetOldSchoolEncounterPower(Creature const* creature)
     {
-        int32 const threatOffset = OldSchoolThreatOffset(creature);
-        if (threatOffset <= -6)
-            return { nullptr, 100, 1, 100 };
-        if (threatOffset <= -3)
-            return { nullptr, 150, 1, 100 };
-        if (threatOffset < 0)
-            return { nullptr, 200, 1, 100 };
-        if (threatOffset == 0)
-            return { nullptr, 300, 2, 100 };
-        if (threatOffset <= 2)
-            return { nullptr, 500, 3, 100 };
-        if (threatOffset <= 4)
-            return { nullptr, 800, 5, 100 };
-        return { nullptr, 1200, 8, 100 };
+        CreatureTemplate const* info = creature->GetCreatureTemplate();
+        CreatureBaseStats const* native = sObjectMgr->GetCreatureBaseStats(creature->GetLevel(), info->unit_class);
+        int32 const rating = OldSchoolThreatLevel(creature);
+        uint8 const combatLevel = uint8(std::clamp(rating, 1, 100));
+        CreatureBaseStats const* effective = sObjectMgr->GetCreatureBaseStats(combatLevel, info->unit_class);
+        float const noviceScale = rating < 1 ? std::pow(0.75f, float(1 - rating)) : 1.0f;
+        float const healthRatio = float(effective->GenerateHealth(info))
+            / std::max(1.0f, float(native->GenerateHealth(info)));
+        float const nativeDamage = 1.25f * native->GenerateBaseDamage(info)
+            + native->AttackPower / 14.0f * info->BaseVariance;
+        float const effectiveDamage = 1.25f * effective->GenerateBaseDamage(info)
+            + effective->AttackPower / 14.0f * info->BaseVariance;
+        float const damageRatio = effectiveDamage / std::max(0.01f, nativeDamage);
+        float const armorRatio = effective->GenerateArmor(info) / std::max(1.0f, native->GenerateArmor(info));
+        return { nullptr,
+            uint32(std::clamp(double(OldSchoolOptions.ordinaryHealthPercent) * healthRatio * noviceScale,
+                1.0, double(UINT32_MAX))),
+            std::max(0.01f, OldSchoolOptions.ordinaryDamageMultiplier * damageRatio * noviceScale),
+            100, std::max(0.01f, armorRatio * noviceScale) };
     }
 
     OldSchoolPowerProfile GetOldSchoolPowerProfile(Player const* player, Creature const* creature)
@@ -2857,17 +2871,11 @@ namespace CoAChallenges
             profile.experienceMultiplierHundredths = 300;
         }
 
-        float const threatStatScale = std::exp2(float(OldSchoolThreatOffset(creature)) / 25.0f);
-        profile.healthPercent = std::max(1u, uint32(std::lround(profile.healthPercent * threatStatScale)));
-        profile.damageMultiplier = std::max(1u, uint32(std::lround(profile.damageMultiplier * threatStatScale)));
-        profile.healthPercent *= 2;
-        profile.damageMultiplier *= 2;
-
         switch (creature->GetCreatureTemplate()->rank)
         {
             case CREATURE_ELITE_ELITE:
                 profile.healthPercent = profile.healthPercent * 3 / 2;
-                profile.damageMultiplier = (profile.damageMultiplier * 3 + 1) / 2;
+                profile.damageMultiplier *= 1.5f;
                 profile.experienceMultiplierHundredths = (profile.experienceMultiplierHundredths * 3 + 1) / 2;
                 break;
             case CREATURE_ELITE_RAREELITE:
@@ -3089,8 +3097,9 @@ namespace CoAChallenges
     struct OldSchoolHealth : DataMap::Base
     {
         float extra = 0.0f;
-        uint32 damageMultiplier = 1;
+        float damageMultiplier = 1.0f;
         uint32 healthPercent = 100;
+        float armorExtra = 0.0f;
     };
 
     // Carry fractional Old School XP within the player session so small awards
@@ -3131,6 +3140,8 @@ namespace CoAChallenges
             state->extra = float(creature->GetMaxHealth()) * (profile.healthPercent / 100.0f - 1.0f);
             state->damageMultiplier = profile.damageMultiplier;
             state->healthPercent = profile.healthPercent;
+            state->armorExtra = float(creature->GetArmor()) * (profile.armorMultiplier - 1.0f);
+            creature->HandleStatFlatModifier(UNIT_MOD_ARMOR, TOTAL_VALUE, state->armorExtra, true);
             creature->CustomData.Set(OldSchoolHealthKey, state);
             ChangeMaxHealthKeepingPct(creature, state->extra, true);
             return;
@@ -3160,6 +3171,7 @@ namespace CoAChallenges
         if (oldSchool)
         {
             ChangeMaxHealthKeepingPct(creature, oldSchool->extra, false);
+            creature->HandleStatFlatModifier(UNIT_MOD_ARMOR, TOTAL_VALUE, oldSchool->armorExtra, false);
             creature->CustomData.Erase(OldSchoolHealthKey);
         }
     }
@@ -3716,7 +3728,8 @@ namespace CoAChallenges
         {
             // This hook's gain parameter is the profession skill step, not XP.
             // Record rarity only when the challenge uses the custom profession XP path.
-            if (player && PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_PROFESSIONS")
+            if (player && (OldSchoolChallenge(player)
+                || PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_PROFESSIONS"))
                 && !UsesCoreProfessionXP(player))
             {
                 std::lock_guard<std::mutex> lock(CraftRarityMutex);
@@ -3728,7 +3741,8 @@ namespace CoAChallenges
         {
             // This hook's gain parameter is the profession skill step, not XP.
             // Record rarity only when the challenge uses the custom profession XP path.
-            if (player && PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_PROFESSIONS")
+            if (player && (OldSchoolChallenge(player)
+                || PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_PROFESSIONS"))
                 && !UsesCoreProfessionXP(player))
             {
                 // Gathering has no crafted item: flat XP, also clears a stale
@@ -4489,6 +4503,14 @@ namespace CoAChallenges
         void OnAfterConfigLoad(bool /*reload*/) override
         {
             LoadChallengesEnabled();
+            OldSchoolOptions.ordinaryGearKeepPercent = std::min(100u,
+                sConfigMgr->GetOption<uint32>("CoAChallenges.OldSchool.GearDropPercent", 1));
+            OldSchoolOptions.namedGearKeepPercent = std::min(100u,
+                sConfigMgr->GetOption<uint32>("CoAChallenges.OldSchool.NamedGearDropPercent", 100));
+            OldSchoolOptions.ordinaryHealthPercent = std::clamp(
+                sConfigMgr->GetOption<uint32>("CoAChallenges.OldSchool.OrdinaryHealthPercent", 600), 1u, 10000u);
+            OldSchoolOptions.ordinaryDamageMultiplier = std::clamp(
+                sConfigMgr->GetOption<float>("CoAChallenges.OldSchool.OrdinaryDamageMultiplier", 1.0f), 0.1f, 20.0f);
             CoANeeds::ChallengeMaximum = std::max(1.0f,
                 sConfigMgr->GetOption<float>("CoAChallenges.HungerMax", 100.0f));
         }
@@ -4951,7 +4973,7 @@ namespace CoAChallenges
                 OldSchoolHealth* scaling = target->CustomData.Get<OldSchoolHealth>(OldSchoolHealthKey);
                 OldSchoolPowerProfile const profile = GetOldSchoolPowerProfile(player, target);
                 uint32 const healthPercent = scaling ? scaling->healthPercent : profile.healthPercent;
-                uint32 const damageMultiplier = scaling ? scaling->damageMultiplier : profile.damageMultiplier;
+                float const damageMultiplier = scaling ? scaling->damageMultiplier : profile.damageMultiplier;
                 uint32 const experienceMultiplierHundredths = profile.experienceMultiplierHundredths;
                 float const experiencePercent = OldSchoolExperienceBasisPoints() / 100.0f;
                 float const effectiveKillXpMultiplier = float(experienceMultiplierHundredths) * experiencePercent / 10000.0f;
@@ -6148,9 +6170,9 @@ namespace CoAChallenges
                     {
                         ScaleAdventureHealth(defender, attacker);
                         OldSchoolHealth* scaling = attacker->CustomData.Get<OldSchoolHealth>(OldSchoolHealthKey);
-                        uint32 const multiplier = scaling ? scaling->damageMultiplier
+                        float const multiplier = scaling ? scaling->damageMultiplier
                             : GetOldSchoolPowerProfile(defender, attacker->ToCreature()).damageMultiplier;
-                        damage = uint32(std::min<uint64>(uint64(damage) * multiplier, UINT32_MAX));
+                        damage = uint32(std::clamp(double(damage) * multiplier, 1.0, double(UINT32_MAX)));
                     }
             // Resolve the controlling player: a pet/guardian must not be able to
             // bypass NO_DAMAGE / NO_KILL_* by dealing the damage itself.
