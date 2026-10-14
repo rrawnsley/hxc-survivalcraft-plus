@@ -351,10 +351,10 @@ namespace CoAChallenges
                 player->PrepareGossipMenu(creature, creature->GetGossipMenuId(), true);
                 uint32 const price = TrainerRecoveryPrice(player);
                 std::string const label = Acore::StringFormat(
-                    "Recover all my lost equipment ({} gold, {} silver, {} copper)",
+                    "Recover lost equipment that fits ({} gold, {} silver, {} copper)",
                     price / 10000, price / 100 % 100, price % 100);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, label, TrainerRecoverySender,
-                    TrainerRecoveryAction, "Pay the trainer to recover equipment from your Old School corpses?",
+                    TrainerRecoveryAction, "Pay the trainer to recover equipment that fits in your bags?",
                     price, false);
                 player->SendPreparedGossip(creature);
                 return true;
