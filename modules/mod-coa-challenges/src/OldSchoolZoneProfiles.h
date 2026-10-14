@@ -36,6 +36,7 @@ struct ZoneProfile
 
 inline ZoneProfile const ZoneProfiles[] =
 {
+#include "old-school-zones/47.inc"
 #include "old-school-zones/45.inc"
 #include "old-school-zones/267.inc"
 #include "old-school-zones/130.inc"
