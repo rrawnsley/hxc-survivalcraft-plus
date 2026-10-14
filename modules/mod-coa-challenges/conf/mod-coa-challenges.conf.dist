@@ -25,14 +25,11 @@
 # Default: 1
 CoAChallenges.Enable = 1
 
-# Old School and Old School - Hardcore apply this percentage to all experience
-# sources. Creature-kill experience then receives a con multiplier in hundredths:
-# grey 0.50x, green 0.75x, blue 0.90x, white 1x, yellow 1.5x, red 2x, purple 3x.
-# Values are basis points: 5000 = 50%, 10000 = 100%. At the default, quest and
-# white-con XP pay 50% of normal; red pays 100% and purple 150% before rested XP.
-# Fractional XP carries between awards.
-# Default: 5000
-CoAChallenges.OldSchool.ExperienceBasisPoints = 5000
+# Old School and Old School - Hardcore apply this percentage to XP sources.
+# Creature XP follows its fixed creature level, then group and rested bonuses.
+# Values are basis points: 10000 = 100%. Fractional XP carries between awards.
+# Default: 10000
+CoAChallenges.OldSchool.ExperienceBasisPoints = 10000
 
 # Basic poor/common equipment retains its native loot probabilities. Only random
 # uncommon-or-better equipment is thinned. Authored named encounters and dungeon/
