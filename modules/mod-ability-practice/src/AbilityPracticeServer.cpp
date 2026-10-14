@@ -2539,7 +2539,7 @@ bool MatchesSharedBuffVariants()
 {
     if (!SharedBuffVariantsRequested)
         return true;
-    if (!BuffContributionRequested || !RankRequested || !RankCapsRequested || !TrainerRanksRequested ||
+    if (!BuffContributionRequested || !RankCapsRequested || !TrainerRanksRequested ||
         !ProfileLookup)
         return false;
     for (auto const& variant : Practice::DevelopmentBuffVariants::Variants)
