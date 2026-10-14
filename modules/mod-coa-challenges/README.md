@@ -118,6 +118,20 @@ authored encounters; gameplay pacing and route behavior remain unverified until 
 testing resumes. Other regions currently have native camp and named profiles, with new
 trial-only roaming content still to be authored one zone at a time.
 
+### Authored Barrens roaming encounters
+
+- Cacklemaw: fixed rating 24, rare hyena, Snort's route and toxic spit, Cacklemaw Shroud.
+- Sablemane: fixed rating 28, rare lion, a staggered start on Snort's route and Humar's
+  native combat ability, Sablemane Hide Harness.
+- Thunderhide: fixed rating 34, elite elder kodo, Lakota'mani's route, Thunderhide Signet.
+
+These use the same trial-only phase, 30-minute respawn and 25% specific equipment roll.
+Their item budgets match Silver-thread Cloak, craftable Raptor Hide Harness and Ring of
+Silver Might. Their named XP multipliers are 1.5x, 2x and 2x before existing pace/con/rank
+rules. Both regions' new roamers start at different existing waypoint nodes to avoid
+stacking with their native counterparts at the initial spawn point. Native creatures,
+path geometry and respawn timers remain intact.
+
 Old School (9001) and Old School - Hardcore (9002) are mutually exclusive native trials.
 Creature levels remain fixed internally and display as `??` while the trial is active. In the trial, their power and kill experience follow the
 participant's con. Persistent spawns use authored named-threat and camp-role offsets instead
