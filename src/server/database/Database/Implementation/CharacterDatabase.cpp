@@ -339,13 +339,13 @@ void CharacterDatabaseConnection::DoPrepareStatements()
     PrepareStatement(CHAR_DEL_ITEM_BOP_TRADE, "DELETE FROM item_soulbound_trade_data WHERE itemGuid = ? LIMIT 1", CONNECTION_ASYNC);
     PrepareStatement(CHAR_INS_ITEM_BOP_TRADE, "INSERT INTO item_soulbound_trade_data VALUES (?, ?)", CONNECTION_ASYNC);
     PrepareStatement(CHAR_REP_INVENTORY_ITEM, "REPLACE INTO character_inventory (guid, bag, slot, item) VALUES (?, ?, ?, ?)", CONNECTION_ASYNC);
-    PrepareStatement(CHAR_REP_ITEM_INSTANCE, "REPLACE INTO item_instance (itemEntry, owner_guid, creatorGuid, giftCreatorGuid, count, duration, charges, flags, enchantments, randomPropertyId, durability, playedTime, text, guid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
-    PrepareStatement(CHAR_UPD_ITEM_INSTANCE, "UPDATE item_instance SET itemEntry = ?, owner_guid = ?, creatorGuid = ?, giftCreatorGuid = ?, count = ?, duration = ?, charges = ?, flags = ?, enchantments = ?, randomPropertyId = ?, durability = ?, playedTime = ?, text = ? WHERE guid = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_REP_ITEM_INSTANCE, "REPLACE INTO item_instance (itemEntry, owner_guid, creatorGuid, giftCreatorGuid, count, duration, charges, flags, enchantments, randomPropertyId, durability, playedTime, text, guid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_BOTH);
+    PrepareStatement(CHAR_UPD_ITEM_INSTANCE, "UPDATE item_instance SET itemEntry = ?, owner_guid = ?, creatorGuid = ?, giftCreatorGuid = ?, count = ?, duration = ?, charges = ?, flags = ?, enchantments = ?, randomPropertyId = ?, durability = ?, playedTime = ?, text = ? WHERE guid = ?", CONNECTION_BOTH);
     PrepareStatement(CHAR_UPD_ITEM_INSTANCE_ON_LOAD, "UPDATE item_instance SET duration = ?, flags = ?, durability = ? WHERE guid = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_UPD_ITEM_COUNT, "UPDATE item_instance SET count = ? WHERE guid = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_ITEM_INSTANCE, "DELETE FROM item_instance WHERE guid = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_ITEM_INSTANCE_BY_OWNER, "DELETE FROM item_instance WHERE owner_guid = ?", CONNECTION_ASYNC);
-    PrepareStatement(CHAR_UPD_GIFT_OWNER, "UPDATE character_gifts SET guid = ? WHERE item_guid = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_UPD_GIFT_OWNER, "UPDATE character_gifts SET guid = ? WHERE item_guid = ?", CONNECTION_BOTH);
     PrepareStatement(CHAR_DEL_GIFT, "DELETE FROM character_gifts WHERE item_guid = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_CHARACTER_GIFT_BY_ITEM, "SELECT entry, flags FROM character_gifts WHERE item_guid = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_ACCOUNT_BY_NAME, "SELECT account FROM characters WHERE name = ?", CONNECTION_SYNCH);
@@ -728,7 +728,7 @@ void CharacterDatabaseConnection::DoPrepareStatements()
                      "ON DUPLICATE KEY UPDATE action = VALUES(action), type = VALUES(type)", CONNECTION_ASYNC);
     PrepareStatement(CHAR_UPD_CHAR_ACTION, "UPDATE character_action SET action = ?, type = ? WHERE guid = ? AND button = ? AND spec = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_CHAR_ACTION_BY_BUTTON_SPEC, "DELETE FROM character_action WHERE guid = ? AND button = ? AND spec = ?", CONNECTION_ASYNC);
-    PrepareStatement(CHAR_DEL_CHAR_INVENTORY_BY_ITEM, "DELETE FROM character_inventory WHERE item = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_DEL_CHAR_INVENTORY_BY_ITEM, "DELETE FROM character_inventory WHERE item = ?", CONNECTION_BOTH);
     PrepareStatement(CHAR_DEL_CHAR_INVENTORY_BY_BAG_SLOT, "DELETE FROM character_inventory WHERE bag = ? AND slot = ? AND guid = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_SEL_COA_OLD_SCHOOL_CORPSE_ITEMS,
         "SELECT ii.creatorGuid, ii.giftCreatorGuid, ii.count, ii.duration, ii.charges, ii.flags, ii.enchantments, "
@@ -739,6 +739,48 @@ void CharacterDatabaseConnection::DoPrepareStatements()
         "REPLACE INTO coa_old_school_corpse_item (guid, item_guid, slot) VALUES (?, ?, ?)", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_COA_OLD_SCHOOL_CORPSE_ITEM,
         "DELETE FROM coa_old_school_corpse_item WHERE guid = ? AND item_guid = ?", CONNECTION_ASYNC);
+    PrepareStatement(CHAR_SEL_COA_MAX_EQUIPMENT_CORPSE,
+        "SELECT COALESCE(MAX(id), 0) FROM coa_old_school_equipment_corpse", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_INS_COA_EQUIPMENT_CORPSE,
+        "INSERT INTO coa_old_school_equipment_corpse (id, owner, map, instance, x, y, z, o, display, created) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_BOTH);
+    PrepareStatement(CHAR_INS_COA_EQUIPMENT_CORPSE_ITEM,
+        "INSERT INTO coa_old_school_equipment_corpse_item (corpse, item_guid, slot) VALUES (?, ?, ?)", CONNECTION_BOTH);
+    PrepareStatement(CHAR_SEL_COA_EQUIPMENT_CORPSE_COUNT,
+        "SELECT COUNT(*) FROM coa_old_school_equipment_corpse_item ci JOIN coa_old_school_equipment_corpse c ON "
+        "c.id = ci.corpse JOIN item_instance ii ON ii.guid = ci.item_guid AND ii.owner_guid = c.owner WHERE c.id = "
+        "? AND c.owner = ? AND NOT EXISTS (SELECT 1 FROM character_inventory inv WHERE inv.item = ci.item_guid)", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_COA_EQUIPMENT_CORPSES,
+        "SELECT c.id, c.x, c.y, c.z, c.o, c.display FROM coa_old_school_equipment_corpse c WHERE c.owner = ? AND "
+        "c.map = ? AND c.instance = ? AND EXISTS (SELECT 1 FROM coa_old_school_equipment_corpse_item ci WHERE "
+        "ci.corpse = c.id)", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_SEL_COA_EQUIPMENT_CORPSE_ITEMS,
+        "SELECT ii.creatorGuid, ii.giftCreatorGuid, ii.count, ii.duration, ii.charges, ii.flags, ii.enchantments, "
+        "ii.randomPropertyId, ii.durability, ii.playedTime, ii.text, ii.guid, ii.itemEntry, ci.slot FROM "
+        "coa_old_school_equipment_corpse_item ci JOIN coa_old_school_equipment_corpse c ON c.id = ci.corpse JOIN "
+        "item_instance ii ON ii.guid = ci.item_guid AND ii.owner_guid = c.owner WHERE c.id = ? AND c.owner = ? AND "
+        "NOT EXISTS (SELECT 1 FROM character_inventory inv WHERE inv.item = ci.item_guid) ORDER BY ci.slot", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_INS_COA_CORPSE_INVENTORY_ITEM,
+        "INSERT INTO character_inventory (guid, bag, slot, item) SELECT c.owner, ?, ?, ci.item_guid FROM "
+        "coa_old_school_equipment_corpse_item ci JOIN coa_old_school_equipment_corpse c ON c.id = ci.corpse JOIN "
+        "item_instance ii ON ii.guid = ci.item_guid AND ii.owner_guid = c.owner WHERE c.id = ? AND c.owner = ? AND "
+        "ci.item_guid = ? AND NOT EXISTS (SELECT 1 FROM character_inventory inv WHERE inv.item = ci.item_guid)", CONNECTION_BOTH);
+    PrepareStatement(CHAR_DEL_COA_RECOVERED_CORPSE_ITEM,
+        "DELETE ci FROM coa_old_school_equipment_corpse_item ci JOIN character_inventory inv ON inv.item = "
+        "ci.item_guid WHERE ci.corpse = ? AND ci.item_guid = ? AND inv.guid = ?", CONNECTION_BOTH);
+    PrepareStatement(CHAR_SEL_COA_CORPSE_INVENTORY_ITEM,
+        "SELECT 1 FROM character_inventory WHERE guid = ? AND item = ? AND bag = ? AND slot = ?", CONNECTION_SYNCH);
+    PrepareStatement(CHAR_DEL_COA_EMPTY_EQUIPMENT_CORPSE,
+        "DELETE FROM coa_old_school_equipment_corpse WHERE id = ? AND owner = ? AND NOT EXISTS (SELECT 1 FROM "
+        "coa_old_school_equipment_corpse_item ci WHERE ci.corpse = id)", CONNECTION_BOTH);
+    PrepareStatement(CHAR_INS_COA_EQUIPMENT_CORPSE_LEGACY,
+        "INSERT INTO coa_old_school_equipment_corpse_item (corpse, item_guid, slot) SELECT ?, ci.item_guid, "
+        "ci.slot FROM coa_old_school_corpse_item ci JOIN item_instance ii ON ii.guid = ci.item_guid AND "
+        "ii.owner_guid = ci.guid WHERE ci.guid = ? AND NOT EXISTS (SELECT 1 FROM character_inventory inv WHERE "
+        "inv.item = ci.item_guid)", CONNECTION_BOTH);
+    PrepareStatement(CHAR_DEL_COA_EQUIPMENT_CORPSE_LEGACY,
+        "DELETE ci FROM coa_old_school_corpse_item ci JOIN coa_old_school_equipment_corpse_item ec ON ec.item_guid "
+        "= ci.item_guid WHERE ec.corpse = ? AND ci.guid = ?", CONNECTION_BOTH);
     PrepareStatement(CHAR_UPD_MAIL, "UPDATE mail SET has_items = ?, expire_time = ?, deliver_time = ?, money = ?, cod = ?, checked = ? WHERE id = ?", CONNECTION_ASYNC);
     PrepareStatement(CHAR_REP_CHAR_QUESTSTATUS, "REPLACE INTO character_queststatus (guid, quest, status, explored, timer, mobcount1, mobcount2, mobcount3, mobcount4, itemcount1, itemcount2, itemcount3, itemcount4, itemcount5, itemcount6, playercount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", CONNECTION_ASYNC);
     PrepareStatement(CHAR_DEL_CHAR_QUESTSTATUS_BY_QUEST, "DELETE FROM character_queststatus WHERE guid = ? AND quest = ?", CONNECTION_ASYNC);
