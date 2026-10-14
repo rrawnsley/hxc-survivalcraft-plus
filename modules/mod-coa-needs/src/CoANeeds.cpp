@@ -336,7 +336,6 @@ void RefreshSprint(Player* player, bool active)
     if (AuraEffect* effect = aura->GetEffect(EFFECT_0))
         if (effect->GetAmount() != 30)
             effect->ChangeAmount(30);
-    player->UpdateSpeed(MOVE_RUN, true);
 }
 
 void RefreshResourceTracking(Player* player, State const& state)
@@ -1218,6 +1217,7 @@ public:
                 {
                     float const before = player->GetSpeedRate(MOVE_RUN);
                     RefreshSprint(player, true);
+                    player->UpdateSpeed(MOVE_RUN, true);
                     float const after = player->GetSpeedRate(MOVE_RUN);
                     LOG_INFO("module.coa_needs", "Vigor Sprint player={} run before={} after={} aura={} slow={} cap={}",
                         player->GetName(), before, after, player->HasAura(SprintAura),
