@@ -68,6 +68,10 @@ constexpr uint32 SurvivalistProfession = 996180;
 constexpr uint32 CampKit = 996211;
 constexpr uint32 TorchItem = 996214;
 constexpr uint32 TorchAura = 996181;
+constexpr uint32 SurveyAbility = 996183;
+constexpr uint32 SurveyAura = 996184;
+constexpr uint32 SeatedRecoveryAura = 996185;
+constexpr uint32 ResourceTrackingMask = (1u << 1) | (1u << 2) | (1u << 18) | (1u << 23);
 std::unordered_set<uint32> BandageSpells;
 std::unordered_set<uint32> PotionSpells;
 
@@ -88,8 +92,8 @@ struct Options
 {
     bool enabled = false;
     bool bots = false;
-    float foodDrain = 4.5f;
-    float waterDrain = 6.0f;
+    float foodDrain = 4.0f;
+    float waterDrain = 5.4f;
     float meal = 45.0f;
     float drink = 55.0f;
     float regen = 8.0f;
@@ -167,6 +171,9 @@ struct State
     uint32 lightZone = 0;
     uint32 lightId = 0;
     bool lightSent = false;
+    bool surveying = false;
+    float seatedHealth = 0.0f;
+    float seatedMana = 0.0f;
 };
 
 struct Camp
@@ -325,6 +332,73 @@ void RefreshSprint(Player* player, bool active)
             effect->ChangeAmount(30);
 }
 
+void RefreshResourceTracking(Player* player, State const& state)
+{
+    bool const active = state.surveying && player->IsAlive();
+    SetAura(player, SurveyAura, active);
+    if (active)
+    {
+        player->SetFlag(PLAYER_TRACK_RESOURCES, ResourceTrackingMask);
+        return;
+    }
+    uint32 nativeTracking = 0;
+    for (AuraEffect const* effect : player->GetAuraEffectsByType(SPELL_AURA_TRACK_RESOURCES))
+        if (effect->GetMiscValue() > 0 && effect->GetMiscValue() <= 32)
+            nativeTracking |= 1u << (effect->GetMiscValue() - 1);
+    player->RemoveFlag(PLAYER_TRACK_RESOURCES, ResourceTrackingMask & ~nativeTracking);
+}
+
+float SeatedConsumableRecovery(Player const* player, AuraType type)
+{
+    float recovery = 0.0f;
+    for (AuraEffect const* effect : player->GetAuraEffectsByType(type))
+        if ((effect->GetSpellInfo()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) &&
+            (type != SPELL_AURA_MOD_POWER_REGEN || effect->GetMiscValue() == POWER_MANA))
+            recovery += std::max(0, effect->GetAmount()) / 5.0f;
+    return recovery;
+}
+
+void RecoverWhileSeated(Player* player, State& state, uint32 elapsed)
+{
+    bool const resting = CoANeeds::IsOldSchoolTrial &&
+        CoANeeds::IsOldSchoolTrial(player->GetGUID().GetCounter()) && player->IsAlive() &&
+        player->IsSitState() && !player->isMoving() && !player->IsInCombat();
+    SetAura(player, SeatedRecoveryAura, resting);
+    if (!resting)
+    {
+        state.seatedHealth = 0.0f;
+        state.seatedMana = 0.0f;
+        return;
+    }
+    float const seconds = elapsed / 1000.0f;
+    float const campRecovery = state.restingCamp >= 0 ? 0.005f + 0.0025f * state.restingCamp : 0.0f;
+    float const recovery = 0.0025f + campRecovery;
+    float const manaRecovery = 0.25f + 0.75f *
+        std::min(state.displayFood, state.displayWater) / 100.0f;
+    if (player->GetHealth() < player->GetMaxHealth() &&
+        !player->HasAuraTypeWithMiscvalue(SPELL_AURA_PREVENT_REGENERATE_POWER, POWER_HEALTH))
+    {
+        state.seatedHealth += (player->GetMaxHealth() * recovery +
+            SeatedConsumableRecovery(player, SPELL_AURA_MOD_REGEN)) * seconds;
+        int32 const amount = int32(state.seatedHealth);
+        state.seatedHealth -= amount;
+        player->ModifyHealth(amount);
+    }
+    else
+        state.seatedHealth = 0.0f;
+    if (player->GetPower(POWER_MANA) < player->GetMaxPower(POWER_MANA) &&
+        !player->HasAuraTypeWithMiscvalue(SPELL_AURA_PREVENT_REGENERATE_POWER, POWER_MANA + 1))
+    {
+        state.seatedMana += (player->GetMaxPower(POWER_MANA) * recovery +
+            SeatedConsumableRecovery(player, SPELL_AURA_MOD_POWER_REGEN)) * manaRecovery * seconds;
+        int32 const amount = int32(state.seatedMana);
+        state.seatedMana -= amount;
+        player->ModifyPower(POWER_MANA, amount);
+    }
+    else
+        state.seatedMana = 0.0f;
+}
+
 void Save(Player* player, State const& state)
 {
     std::array<uint32, 12> values = { 1, uint32(Clamp(state.food) * 1000.0f),
@@ -369,6 +443,7 @@ void Unlock(Player* player)
         player->SetSkill(SurvivalistSkill, 1, 1, 300);
     player->learnSpell(SurvivalistProfession);
     player->learnSpell(SprintAbility);
+    player->learnSpell(SurveyAbility);
     if (player->HasSkill(SKILL_FIRST_AID))
         player->learnSpell(SplintAbility);
     if (Config.tools)
@@ -582,10 +657,10 @@ void RestAtCamp(Player* player, State& state, int32 tier, uint32 elapsed)
     state.restingCamp = player->IsAlive() && !player->IsInCombat() ? tier : -1;
     for (uint32 index = 0; index < 3; ++index)
         SetAura(player, CampRest + index, state.restingCamp == int32(index));
-    if (state.restingCamp >= 0 && (!oldSchool || player->IsSitState()))
+    if (state.restingCamp >= 0 && !oldSchool)
     {
         float const tierRecovery = 0.005f + 0.0025f * state.restingCamp;
-        float const recovery = tierRecovery * (oldSchool ? 1.0f : player->IsSitState() ? 2.0f : 1.0f)
+        float const recovery = tierRecovery * (player->IsSitState() ? 2.0f : 1.0f)
             * elapsed / 1000.0f;
         player->ModifyHealth(int32(std::max(1.0f, player->GetMaxHealth() * recovery)));
         if (player->GetMaxPower(POWER_MANA))
@@ -847,8 +922,8 @@ public:
         std::lock_guard<std::recursive_mutex> lock(Mutex);
         Config.enabled = sConfigMgr->GetOption<bool>("CoANeeds.Enable", true);
         Config.bots = sConfigMgr->GetOption<bool>("CoANeeds.IncludeBots", false);
-        Config.foodDrain = std::max(0.0f, sConfigMgr->GetOption<float>("CoANeeds.HungerDrainPerMinute", 4.5f));
-        Config.waterDrain = std::max(0.0f, sConfigMgr->GetOption<float>("CoANeeds.HydrationDrainPerMinute", 6.0f));
+        Config.foodDrain = std::max(0.0f, sConfigMgr->GetOption<float>("CoANeeds.HungerDrainPerMinute", 4.0f));
+        Config.waterDrain = std::max(0.0f, sConfigMgr->GetOption<float>("CoANeeds.HydrationDrainPerMinute", 5.4f));
         Config.meal = std::max(0.0f, sConfigMgr->GetOption<float>("CoANeeds.MealFill", 45.0f));
         Config.drink = std::max(0.0f, sConfigMgr->GetOption<float>("CoANeeds.DrinkFill", 55.0f));
         Config.regen = std::max(0.0f, sConfigMgr->GetOption<float>("CoANeeds.VigorRegenPerSecond", 8.0f));
@@ -899,7 +974,8 @@ public:
                 SpellsReady = false;
                 LOG_ERROR("module.coa_needs", "Missing profession spell {}; module disabled", id);
             }
-        for (uint32 id : { 996176u, 996177u, TorchAura, CampExperienceAura })
+        for (uint32 id : { 996176u, 996177u, TorchAura, CampExperienceAura,
+            SurveyAbility, SurveyAura, SeatedRecoveryAura })
             if (!sSpellMgr->GetSpellInfo(id))
             {
                 SpellsReady = false;
@@ -935,7 +1011,7 @@ public:
         if (!player || (power != POWER_HEALTH && power != POWER_MANA) || !Affects(player)
             || !CoANeeds::IsOldSchoolTrial || !CoANeeds::IsOldSchoolTrial(player->GetGUID().GetCounter()))
             return true;
-        return player->IsSitState();
+        return false;
     }
 
     void OnPlayerCreate(Player* player) override
@@ -1003,6 +1079,8 @@ public:
                 state.oldSchoolRestedMs = std::min((*saved)[11].value, OldSchoolRestedCapMs);
         }
         StopSprint(player, state);
+        player->RemoveAurasDueToSpell(SeatedRecoveryAura);
+        RefreshResourceTracking(player, state);
         player->RemoveAurasDueToSpell(TorchAura);
         for (uint32 index = 0; index < 3; ++index)
             player->RemoveAurasDueToSpell(CampRest + index);
@@ -1053,6 +1131,9 @@ public:
         if (found == States.end())
             return;
         StopSprint(player, found->second);
+        found->second.surveying = false;
+        RefreshResourceTracking(player, found->second);
+        player->RemoveAurasDueToSpell(SeatedRecoveryAura);
         PackCamp(player);
         for (uint32 index = 0; index < 3; ++index)
             player->RemoveAurasDueToSpell(CampRest + index);
@@ -1086,6 +1167,12 @@ public:
         State& state = found->second;
         uint32 id = spell->GetSpellInfo()->Id;
         uint32 now = uint32(std::time(nullptr));
+        if (id == SurveyAbility)
+        {
+            state.surveying = !state.surveying;
+            RefreshResourceTracking(player, state);
+            return;
+        }
         if (id == SplintAbility)
         {
             if (!Config.injuries || !player->IsAlive() || player->IsInCombat() || player->isMoving() ||
@@ -1211,6 +1298,9 @@ public:
         if (!Affects(player))
         {
             StopSprint(player, state);
+            state.surveying = false;
+            RefreshResourceTracking(player, state);
+            player->RemoveAurasDueToSpell(SeatedRecoveryAura);
             for (uint32 id : { Starving, Dehydrated, Exhausted, WindAura })
                 player->RemoveAurasDueToSpell(id);
             for (uint32 index = 0; index < 3; ++index)
@@ -1253,11 +1343,11 @@ public:
         {
             state.unlockRetry = 30000;
             if (!player->HasSkill(SurvivalistSkill) || !player->HasActiveSpell(SurvivalistProfession) ||
-                !player->HasActiveSpell(SprintAbility))
+                !player->HasActiveSpell(SprintAbility) || !player->HasActiveSpell(SurveyAbility))
             {
                 Unlock(player);
                 if (!player->HasSkill(SurvivalistSkill) || !player->HasActiveSpell(SurvivalistProfession) ||
-                    !player->HasActiveSpell(SprintAbility))
+                    !player->HasActiveSpell(SprintAbility) || !player->HasActiveSpell(SurveyAbility))
                     LOG_ERROR("module.coa_needs", "Survivalist unlock still missing for character {} (class {})",
                         player->GetGUID().GetCounter(), player->getClass());
             }
@@ -1270,6 +1360,8 @@ public:
         bool pvp = player->InBattleground() || player->InArena();
         int32 campTier = NearbyCamp(player);
         RestAtCamp(player, state, campTier, elapsed);
+        RecoverWhileSeated(player, state, elapsed);
+        RefreshResourceTracking(player, state);
         TickWeather(player, state, campTier, elapsed);
         RefreshNightLight(player, state, campTier);
         RefreshInjuries(player, state);
