@@ -3354,8 +3354,8 @@ namespace CoAChallenges
             OldSchoolPowerProfile const profile = GetOldSchoolPowerProfile(attacker, creature);
             uint32 const groupSize = OldSchoolGroupRewardSize(attacker, creature);
             bool const dungeon = creature->GetMap()->IsDungeon() && !creature->GetMap()->IsRaid();
-            float const groupHealth = 1.0f + (dungeon ? 0.1f : 0.4f) * float(groupSize - 1);
-            float const groupDamage = dungeon ? 1.0f : 1.0f + 0.05f * float(groupSize - 1);
+            float const groupHealth = 1.0f + (dungeon ? 0.1f : 0.75f) * float(groupSize - 1);
+            float const groupDamage = dungeon ? 1.0f : 1.0f + 0.125f * float(groupSize - 1);
             auto* state = new OldSchoolHealth();
             state->extra = float(creature->GetMaxHealth()) *
                 (profile.healthPercent * groupHealth / 100.0f - 1.0f);
