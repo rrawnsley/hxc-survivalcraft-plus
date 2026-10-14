@@ -1,3 +1,6 @@
+    { 40, 996743, "Saltgill coastal patrol", "named netting murloc", 0, 150, true, true },
+    { 40, 996744, "Ashhand Defias patrol", "named defias firecaster", 0, 200, true, true },
+    { 40, 996745, "Gravekeeper mine patrol", "named skeletal miner", 0, 200, true, true },
     { 40, 36, "Harvest worksite", "hunter", 1, 100, false, false },
     { 40, 95, "Defias hideout", "hunter", 1, 100, false, false },
     { 40, 98, "Riverpaw camp", "hunter", 1, 100, false, false },
