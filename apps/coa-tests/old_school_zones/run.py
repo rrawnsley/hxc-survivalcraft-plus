@@ -36,6 +36,7 @@ def main():
         'uint32 CountOldSchoolCampmates(',
         'int32 OldSchoolThreatOffset(',
         'int32 OldSchoolThreatLevel(',
+        'OldSchoolPowerProfile GetOldSchoolEncounterPower(',
         'OldSchoolPowerProfile GetOldSchoolPowerProfile(',
         'uint32 OldSchoolExperienceSourceMultiplier(',
         'char const* OldSchoolConColor(',
