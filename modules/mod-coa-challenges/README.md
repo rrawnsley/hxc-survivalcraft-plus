@@ -164,6 +164,19 @@ Starts use distinct native waypoint nodes. New templates retain combat abilities
 excluding the native undead quest-credit and quest-despawn SmartAI rows. Fixed models
 give the new named creatures consistent appearances. Native quest creatures remain intact.
 
+### Authored Silverpine roaming encounters
+
+- Moonfang the Pale: fixed rating 22, rare wolf, Gorefang's route and bleed,
+  Moonfang Mantle with the craftable Hillman's Shoulders budget.
+- Blackbough Widow: fixed rating 28, elite spider, Krethis's route and combat spells,
+  Blackbough Silk Cape with the Emblazoned Cloak budget.
+- Caldris the Exile: fixed rating 34, rare frost caster, a Dalaran Wizard's existing patrol,
+  frost armor, frostbolt, frost nova and ward; Caldris Frostwood Wand with the craftable
+  Lesser Mystic Wand budget. The new exile is hostile to both factions.
+
+These use the same encounter phase, staggered path starts, 30-minute respawns and 25%
+specific reward rolls. Native Silverpine creatures and their faction relationships remain intact.
+
 Old School (9001) and Old School - Hardcore (9002) are mutually exclusive native trials.
 Creature levels remain fixed internally and display as `??` while the trial is active. In the trial, their power and kill experience follow the
 participant's con. Persistent spawns use authored named-threat and camp-role offsets instead
