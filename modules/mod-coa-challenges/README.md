@@ -254,11 +254,14 @@ and movement continue to provide the world ecology. Continue zone authoring in p
 player leveling feedback tunes the earlier slices.
 
 Ordinary Old School deaths outside battlegrounds and arenas remove 10% of the experience
-needed for the current level; the loss can delevel the character. Resurrection requires
-returning to the character's corpse as a spirit. Worn equipment is removed from the ghost and
-persisted on the corpse record; reaching and resurrecting at the body restores the same item
-instances, including after reconnect. The standard corpse remains at its death location and
-displays the character's equipment during the run. Hardcore uses one life: death
+needed for the current level; the loss can delevel the character. Releasing revives the character
+alive at their bind point with 20% health and mana. Worn equipment stays on a persistent equipment
+corpse at the death location. Return alive and out of combat, then click the corpse within five
+yards to recover the original item instances, including their enchantments and durability.
+Items that cannot fit stay on the corpse. Each equipped death has its own record, so another
+corpse run death does not replace earlier equipment corpses. Reconnects and restarts preserve
+the records. Bank contents, carried supplies and coin stay with the character in this version.
+There is no corpse expiration timer. Hardcore uses one life: death
 permanently fails the run, while resurrection remains available under CoA's existing Hardcore
 rules. Abandoning a progressed Hardcore run also fails it. Starting either trial requires being
 alive and outside combat; Old School cannot be abandoned while dead or during combat.
