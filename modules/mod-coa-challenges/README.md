@@ -105,9 +105,15 @@ and camp-role bonuses still apply; Rattlecage Skeletons in Tirisfal start blue f
 `/consider`, health, damage, melee skill, spell-hit level difference, and kill experience use that hidden
 threat rating, which never scales to the player. Native creature levels remain unchanged. Temporary
 creatures without a spawn ID skip the threat spread. Elite and boss ranks retain their combat-stat
-multipliers. Grey creatures have 2x health, 2x damage and 0.50x con-tier kill XP; green 3x/2x/0.75x;
-blue 4x/2x/0.90x; white 6x/4x/1x; yellow 10x/6x/1.5x; red 16x/10x/2x; and purple 24x/16x/3x.
-Threat offsets and elite ranks further modify combat stats. Old School applies a configurable 50% pace
+multipliers. Combat uses the creature base health, armor and weapon-damage budget at its hidden
+rating, normalized against its native template level. This corrects low-level creatures
+receiving a high con while retaining low-level power. Ordinary health starts at 600% of
+that fixed base; ordinary damage starts at 1x, with floating-point ratios preserving
+small differences. Existing elite/boss rank modifiers still apply. Ratings below one
+receive a novice reduction. The pacing target is 20-40 seconds for ordinary blue foes,
+with class/gear-specific leveling feedback still required. The values are tunable through
+`OrdinaryHealthPercent` and `OrdinaryDamageMultiplier`; no actor-level scaling is used.
+Old School applies a configurable 50% pace
 to XP sources, then applies the creature con multiplier to kill XP; a white kill therefore awards 0.5x
 ordinary creature XP, a red kill 1x, and a purple kill 1.5x before group and rested-camp bonuses.
 Quest turn-ins award three times the current challenge-scaled quest XP (1.5x normal at the default
@@ -116,11 +122,17 @@ points (5000 = 50%), and fractional XP carries between awards. Critters and play
 excluded. Restricted tapping prevents players in another trial from assisting with the kill or claiming
 its rewards.
 
-Across all zones in either Old School trial, only 1% of rolled ordinary-creature armor and weapon drops
-survive loot generation; authored named threats in Mulgore, the Barrens, and Stonetalon use a 5% keep
-chance. Quest items and crafting materials are preserved, and crafted gear is unaffected. This makes
-professions a dependable route to incremental upgrades while dropped equipment remains rare. Both
-rates can be configured globally for the two Old School trials.
+Across all zones in either Old School trial, poor/common basic armor and weapons
+retain their native drop probabilities. Ordinary random uncommon-or-better equipment
+retains 1% of already-rolled drops. Authored named encounters and native dungeon/world
+bosses retain their native equipment rolls at the default 100% keep setting, so targeted
+camp rewards are no longer discarded by an additional 95% suppression roll. Their native
+loot chances and rare spawn timers still govern availability. Quest items and crafting
+materials remain, and crafted gear is unaffected. Native item scaling is blocked during
+the trial, so gear does not automatically grow with the player's level. Profession
+skill-ups grant character XP; crafted-item rarity now participates in that XP path.
+Native profession recipes, trainers and material tiers form the dependable crafting path;
+bespoke recipe/item-stat changes are not included in this pass.
 
 Mulgore's named threats - Ghost Howl (3056), Arra'chea (3058), Mazzranache (3068), Sister Hatelash (5785),
 Snagglespear (5786), Enforcer Emilgund (5787), and The Rake (5807) - and the Barrens threats Gesharahan
@@ -287,9 +299,9 @@ conversion of any other game's NPC statistics.
 NPC combat strength belongs to the creature template, authored threat and encounter rank.
 It must not depend on the level of the player who considers or first attacks it. Con color
 and con-based XP are assessed separately for each player. The creature stores only its
-applied combat adjustments, never the first attacker's con or XP tier. Existing numerical
-combat tiers are retained at the native-level reference point while this separation is
-implemented; further class-specific pacing and resource calibration remains required.
+applied combat adjustments, never the first attacker's con or XP tier. Combat health, armor and damage are now normalized to fixed native stats at the hidden
+rating. The ordinary profile starts at 6x health and 1x damage to support the user-selected
+20-40 second blue-con target; class-specific pacing feedback remains required.
 
 The Monsters & Memories new-player guide documents eight harvested wood for a campfire,
 one additional wood to rekindle it, a 15% rested bonus, a 20-minute accumulated-rest cap,
@@ -301,9 +313,10 @@ Shelter and Hearthstead retain their CoA tier recipes and protect rest accumulat
 refreshes CoA's configured camp lifetime; the source guide does not publish a fuel-duration value.
 
 The intended loot progression needs coherent named encounter tables, useful basic gear,
-small lasting upgrades and craftable alternatives. Current 1% ordinary / 5% named gear
-retention is a scarcity filter, not an implementation of that progression. Quest and vendor
-reward bypasses, material availability and crafted item advancement still need integration.
+small lasting upgrades and craftable alternatives. Ordinary random magical equipment retains a 1% filter; basic gear and native named
+rewards are preserved. Native professions provide fixed gear upgrades without item-level
+scaling. Quest/vendor reward balance, bespoke crafted item advancement and additional
+curated encounter tables remain further content work.
 
 References:
 
