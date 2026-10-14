@@ -28,7 +28,13 @@ SELECT
     1, `ManaModifier`, `ArmorModifier`, 1,
     `RacialLeader`, `movementId`, `RegenHealth`, `CreatureImmunitiesId`,
     `flags_extra`, '', `VerifiedBuild`
-FROM `creature_template` WHERE `entry` = 5807 AND NOT EXISTS (SELECT 1 FROM `creature_template` WHERE `entry` = 996701);
+FROM `creature_template` WHERE `entry` = 5807
+ON DUPLICATE KEY UPDATE
+    `minlevel` = VALUES(`minlevel`), `maxlevel` = VALUES(`maxlevel`), `rank` = VALUES(`rank`), `lootid` = VALUES(`lootid`),
+    `KillCredit1` = VALUES(`KillCredit1`), `KillCredit2` = VALUES(`KillCredit2`), `npcflag` = VALUES(`npcflag`), `gossip_menu_id` = VALUES(`gossip_menu_id`),
+    `HealthModifier` = VALUES(`HealthModifier`), `DamageModifier` = VALUES(`DamageModifier`), `ExperienceModifier` = VALUES(`ExperienceModifier`), `difficulty_entry_1` = VALUES(`difficulty_entry_1`),
+    `difficulty_entry_2` = VALUES(`difficulty_entry_2`), `difficulty_entry_3` = VALUES(`difficulty_entry_3`), `mingold` = VALUES(`mingold`), `maxgold` = VALUES(`maxgold`),
+    `pickpocketloot` = VALUES(`pickpocketloot`), `name` = VALUES(`name`), `subname` = VALUES(`subname`), `ScriptName` = VALUES(`ScriptName`);
 
 DELETE FROM `creature_template_model` WHERE `CreatureID` = 996701;
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, `VerifiedBuild`)
@@ -107,7 +113,10 @@ SELECT
     `duration`, `ItemLimitCategory`, `HolidayId`, `ScriptName`,
     `DisenchantID`, `FoodType`, `minMoneyLoot`, `maxMoneyLoot`,
     `flagsCustom`, `VerifiedBuild`
-FROM `item_template` WHERE `entry` = 4243 AND NOT EXISTS (SELECT 1 FROM `item_template` WHERE `entry` = 996701);
+FROM `item_template` WHERE `entry` = 4243
+ON DUPLICATE KEY UPDATE
+    `name` = VALUES(`name`), `bonding` = VALUES(`bonding`), `maxcount` = VALUES(`maxcount`), `RandomProperty` = VALUES(`RandomProperty`),
+    `RandomSuffix` = VALUES(`RandomSuffix`), `RequiredReputationFaction` = VALUES(`RequiredReputationFaction`), `RequiredReputationRank` = VALUES(`RequiredReputationRank`);
 
 DELETE FROM `creature_loot_template` WHERE `Entry` = 996701;
 INSERT INTO `creature_loot_template`
@@ -168,7 +177,13 @@ SELECT
     1, `ManaModifier`, `ArmorModifier`, 1,
     `RacialLeader`, `movementId`, `RegenHealth`, `CreatureImmunitiesId`,
     `flags_extra`, '', `VerifiedBuild`
-FROM `creature_template` WHERE `entry` = 3056 AND NOT EXISTS (SELECT 1 FROM `creature_template` WHERE `entry` = 996702);
+FROM `creature_template` WHERE `entry` = 3056
+ON DUPLICATE KEY UPDATE
+    `minlevel` = VALUES(`minlevel`), `maxlevel` = VALUES(`maxlevel`), `rank` = VALUES(`rank`), `lootid` = VALUES(`lootid`),
+    `KillCredit1` = VALUES(`KillCredit1`), `KillCredit2` = VALUES(`KillCredit2`), `npcflag` = VALUES(`npcflag`), `gossip_menu_id` = VALUES(`gossip_menu_id`),
+    `HealthModifier` = VALUES(`HealthModifier`), `DamageModifier` = VALUES(`DamageModifier`), `ExperienceModifier` = VALUES(`ExperienceModifier`), `difficulty_entry_1` = VALUES(`difficulty_entry_1`),
+    `difficulty_entry_2` = VALUES(`difficulty_entry_2`), `difficulty_entry_3` = VALUES(`difficulty_entry_3`), `mingold` = VALUES(`mingold`), `maxgold` = VALUES(`maxgold`),
+    `pickpocketloot` = VALUES(`pickpocketloot`), `name` = VALUES(`name`), `subname` = VALUES(`subname`), `ScriptName` = VALUES(`ScriptName`);
 
 DELETE FROM `creature_template_model` WHERE `CreatureID` = 996702;
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, `VerifiedBuild`)
@@ -247,7 +262,10 @@ SELECT
     `duration`, `ItemLimitCategory`, `HolidayId`, `ScriptName`,
     `DisenchantID`, `FoodType`, `minMoneyLoot`, `maxMoneyLoot`,
     `flagsCustom`, `VerifiedBuild`
-FROM `item_template` WHERE `entry` = 3449 AND NOT EXISTS (SELECT 1 FROM `item_template` WHERE `entry` = 996702);
+FROM `item_template` WHERE `entry` = 3449
+ON DUPLICATE KEY UPDATE
+    `name` = VALUES(`name`), `bonding` = VALUES(`bonding`), `maxcount` = VALUES(`maxcount`), `RandomProperty` = VALUES(`RandomProperty`),
+    `RandomSuffix` = VALUES(`RandomSuffix`), `RequiredReputationFaction` = VALUES(`RequiredReputationFaction`), `RequiredReputationRank` = VALUES(`RequiredReputationRank`);
 
 DELETE FROM `creature_loot_template` WHERE `Entry` = 996702;
 INSERT INTO `creature_loot_template`
@@ -308,7 +326,13 @@ SELECT
     1, `ManaModifier`, `ArmorModifier`, 1,
     `RacialLeader`, `movementId`, `RegenHealth`, `CreatureImmunitiesId`,
     `flags_extra`, '', `VerifiedBuild`
-FROM `creature_template` WHERE `entry` = 3058 AND NOT EXISTS (SELECT 1 FROM `creature_template` WHERE `entry` = 996703);
+FROM `creature_template` WHERE `entry` = 3058
+ON DUPLICATE KEY UPDATE
+    `minlevel` = VALUES(`minlevel`), `maxlevel` = VALUES(`maxlevel`), `rank` = VALUES(`rank`), `lootid` = VALUES(`lootid`),
+    `KillCredit1` = VALUES(`KillCredit1`), `KillCredit2` = VALUES(`KillCredit2`), `npcflag` = VALUES(`npcflag`), `gossip_menu_id` = VALUES(`gossip_menu_id`),
+    `HealthModifier` = VALUES(`HealthModifier`), `DamageModifier` = VALUES(`DamageModifier`), `ExperienceModifier` = VALUES(`ExperienceModifier`), `difficulty_entry_1` = VALUES(`difficulty_entry_1`),
+    `difficulty_entry_2` = VALUES(`difficulty_entry_2`), `difficulty_entry_3` = VALUES(`difficulty_entry_3`), `mingold` = VALUES(`mingold`), `maxgold` = VALUES(`maxgold`),
+    `pickpocketloot` = VALUES(`pickpocketloot`), `name` = VALUES(`name`), `subname` = VALUES(`subname`), `ScriptName` = VALUES(`ScriptName`);
 
 DELETE FROM `creature_template_model` WHERE `CreatureID` = 996703;
 INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, `VerifiedBuild`)
@@ -387,7 +411,10 @@ SELECT
     `duration`, `ItemLimitCategory`, `HolidayId`, `ScriptName`,
     `DisenchantID`, `FoodType`, `minMoneyLoot`, `maxMoneyLoot`,
     `flagsCustom`, `VerifiedBuild`
-FROM `item_template` WHERE `entry` = 1319 AND NOT EXISTS (SELECT 1 FROM `item_template` WHERE `entry` = 996703);
+FROM `item_template` WHERE `entry` = 1319
+ON DUPLICATE KEY UPDATE
+    `name` = VALUES(`name`), `bonding` = VALUES(`bonding`), `maxcount` = VALUES(`maxcount`), `RandomProperty` = VALUES(`RandomProperty`),
+    `RandomSuffix` = VALUES(`RandomSuffix`), `RequiredReputationFaction` = VALUES(`RequiredReputationFaction`), `RequiredReputationRank` = VALUES(`RequiredReputationRank`);
 
 DELETE FROM `creature_loot_template` WHERE `Entry` = 996703;
 INSERT INTO `creature_loot_template`
