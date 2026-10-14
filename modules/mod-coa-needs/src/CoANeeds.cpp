@@ -369,8 +369,9 @@ void PlaceCamp(Player* player, State& state, uint32 tier)
                 return;
             }
             existingFire->SetRespawnTime(Config.campLifetime);
-            if (GameObject* existingTent = map->GetGameObject(current->second.tent))
-                existingTent->SetRespawnTime(Config.campLifetime);
+            if (current->second.tent)
+                if (GameObject* existingTent = map->GetGameObject(current->second.tent))
+                    existingTent->SetRespawnTime(Config.campLifetime);
             current->second.expires = now + Config.campLifetime;
             player->DestroyItemCount(wood, 1, true);
             ChatHandler(player->GetSession()).SendSysMessage("Camp rekindled with one harvested log.");
