@@ -1,3 +1,6 @@
+    { 3524, 996830, "Duskwatcher Nestlewood camp", "named local threat", 0, 125, true, true },
+    { 3524, 996831, "Scout Vaerissa camp", "named local threat", 0, 125, true, true },
+    { 3524, 996832, "Murkfin the Salt-Eyed camp", "named local threat", 0, 125, true, true },
     { 3524, 16518, "Nestlewood grove", "hunter", 1, 100, false, false },
     { 3524, 16521, "Blood Elf encampment", "hunter", 1, 100, false, false },
     { 3524, 17183, "Bristlelimb camp", "hunter", 1, 100, false, false },

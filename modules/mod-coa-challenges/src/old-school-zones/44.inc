@@ -1,3 +1,6 @@
+    { 44, 996854, "Mongrel Hark Redridge camp", "named local threat", 0, 125, true, true },
+    { 44, 996855, "Poacher Grell Quickshot camp", "named local threat", 0, 125, true, true },
+    { 44, 996856, "Mystic Ratha Redridge camp", "named local threat", 0, 125, true, true },
     { 44, 996749, "Stormgnawer Redridge patrol", "named gnoll lightning caster", 0, 150, true, true },
     { 44, 996750, "Gorvash Blackrock patrol", "named frenzied orc champion", 0, 200, true, true },
     { 44, 996751, "Cragfist mountain patrol", "named hostile stone giant", 0, 200, true, true },

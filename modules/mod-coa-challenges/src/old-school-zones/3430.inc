@@ -1,3 +1,6 @@
+    { 3430, 996827, "Dawnstripe the Watchful camp", "named local threat", 0, 125, true, false },
+    { 3430, 996828, "Vaelis the Mana-Hollow camp", "named local threat", 0, 125, true, false },
+    { 3430, 996829, "Vorlak Amani camp", "named local threat", 0, 125, true, true },
     { 3430, 15294, "Withered grove", "hunter", 1, 100, false, false },
     { 3430, 15367, nullptr, nullptr, 2, 150, true, false },
     { 3430, 15407, "Amani camp", "named leader", 2, 150, true, false },

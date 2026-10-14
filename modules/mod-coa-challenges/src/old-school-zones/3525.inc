@@ -1,3 +1,6 @@
+    { 3525, 996851, "Zalvyr Nazzivus camp", "named local threat", 0, 125, true, true },
+    { 3525, 996852, "Felsworn Azrath camp", "named local threat", 0, 125, true, true },
+    { 3525, 996853, "Selissa the Crimson Blade camp", "named local threat", 0, 125, true, true },
     { 3525, 17320, "Bristlelimb camp", "spellcaster", 4, 100, false, false },
     { 3525, 17321, "Bristlelimb camp", "hunter", 1, 100, false, false },
     { 3525, 17325, "Blacksilt shore", "worker", 1, 100, false, false },

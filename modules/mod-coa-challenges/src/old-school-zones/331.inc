@@ -1,3 +1,6 @@
+    { 331, 996866, "Duskrunner Ghostpaw camp", "named local threat", 0, 125, true, true },
+    { 331, 996867, "Sorceress Vaesh Wrathtail camp", "named local threat", 0, 125, true, true },
+    { 331, 996868, "Lady Soryss of the Shoals camp", "named local threat", 0, 125, true, true },
     { 331, 996761, "Rainbrand Shadethicket patrol", "named lightning caller", 0, 150, true, true },
     { 331, 996762, "Varaz satyr patrol", "named fire and arcane caster", 0, 200, true, true },
     { 331, 996763, "Veilguard demon patrol", "named felguard enforcer", 0, 200, true, true },

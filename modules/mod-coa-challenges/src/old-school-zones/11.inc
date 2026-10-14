@@ -1,3 +1,6 @@
+    { 11, 996860, "Garn Darkiron camp", "named local threat", 0, 125, true, true },
+    { 11, 996861, "Scout Ruzak Dragonmaw camp", "named local threat", 0, 125, true, true },
+    { 11, 996862, "Battlemaster Thargun camp", "named local threat", 0, 125, true, true },
     { 11, 996755, "Scartusk Dragonmaw patrol", "named orc sharpshooter", 0, 150, true, true },
     { 11, 996756, "Darkcoil Dark Iron patrol", "named explosive engineer", 0, 200, true, true },
     { 11, 996757, "Thornclaw nesting grounds", "named bleeding raptor", 0, 200, true, true },

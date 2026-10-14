@@ -1,3 +1,6 @@
+    { 40, 996842, "Smuggler Vale Crow camp", "named local threat", 0, 125, true, true },
+    { 40, 996843, "Trapper Janna Redhand camp", "named local threat", 0, 125, true, true },
+    { 40, 996844, "Pillager Oren Ashwick camp", "named local threat", 0, 125, true, true },
     { 40, 996743, "Saltgill coastal patrol", "named netting murloc", 0, 150, true, true },
     { 40, 996744, "Ashhand Defias patrol", "named defias firecaster", 0, 200, true, true },
     { 40, 996745, "Gravekeeper mine patrol", "named skeletal miner", 0, 200, true, true },

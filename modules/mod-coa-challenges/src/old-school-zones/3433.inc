@@ -1,3 +1,6 @@
+    { 3433, 996848, "Broodguard Neris camp", "named local threat", 0, 125, true, true },
+    { 3433, 996849, "Witch Selzara Shadowpine camp", "named local threat", 0, 125, true, true },
+    { 3433, 996850, "Elyss the Phantasmal camp", "named local threat", 0, 125, true, true },
     { 3433, 16245, nullptr, nullptr, 6, 150, true, true },
     { 3433, 16246, nullptr, nullptr, 6, 150, true, true },
     { 3433, 16313, "Deatholme enclave", "hunter", 1, 100, false, false },

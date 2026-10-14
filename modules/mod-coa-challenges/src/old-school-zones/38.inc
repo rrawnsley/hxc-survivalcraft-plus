@@ -1,3 +1,6 @@
+    { 38, 996839, "Brannik Tunnelshot camp", "named local threat", 0, 125, true, true },
+    { 38, 996840, "Digger Krez Stonebite camp", "named local threat", 0, 125, true, true },
+    { 38, 996841, "Grizzleback the Old camp", "named local threat", 0, 125, true, true },
     { 38, 996740, "Flameward Stonesplinter patrol", "named warded trogg", 0, 150, true, true },
     { 38, 996741, "Silkshade hunting grounds", "named venomous spinner", 0, 200, true, true },
     { 38, 996742, "Splitfist Mogrosh patrol", "named ogre brute", 0, 200, true, true },

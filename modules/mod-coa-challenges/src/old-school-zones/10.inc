@@ -1,3 +1,6 @@
+    { 10, 996857, "Nighthowl the Mangy camp", "named local threat", 0, 125, true, true },
+    { 10, 996858, "Venomlace the Widow camp", "named local threat", 0, 125, true, true },
+    { 10, 996859, "Broodmother Veilfang camp", "named local threat", 0, 125, true, true },
     { 10, 996752, "Bloodcursed cemetery patrol", "named blood-cursing ghoul", 0, 150, true, true },
     { 10, 996753, "Nightstalker worgen patrol", "named hunting worgen", 0, 200, true, true },
     { 10, 996754, "Hollow Knight graveyard patrol", "named enraged undead knight", 0, 200, true, true },

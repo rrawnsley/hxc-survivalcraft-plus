@@ -56,8 +56,8 @@
     {
       "id": 10,
       "name": "Duskwood",
-      "profiles": 28,
-      "named": 10,
+      "profiles": 34,
+      "named": 16,
       "camps": [
         "Defias hideout",
         "Nightbane camp",
@@ -68,8 +68,8 @@
     {
       "id": 11,
       "name": "Wetlands",
-      "profiles": 40,
-      "named": 11,
+      "profiles": 46,
+      "named": 17,
       "camps": [
         "Bluegill shore",
         "Dark Iron outpost",
@@ -165,8 +165,8 @@
     {
       "id": 38,
       "name": "Loch Modan",
-      "profiles": 33,
-      "named": 11,
+      "profiles": 39,
+      "named": 17,
       "camps": [
         "Dark Iron outpost",
         "Mo'grosh stronghold",
@@ -178,8 +178,8 @@
     {
       "id": 40,
       "name": "Westfall",
-      "profiles": 51,
-      "named": 12,
+      "profiles": 57,
+      "named": 18,
       "camps": [
         "Defias hideout",
         "Dust storm grounds",
@@ -203,8 +203,8 @@
     {
       "id": 44,
       "name": "Redridge Mountains",
-      "profiles": 38,
-      "named": 11,
+      "profiles": 44,
+      "named": 17,
       "camps": [
         "Blackrock stronghold",
         "Redridge gnoll camp",
@@ -255,8 +255,8 @@
     {
       "id": 148,
       "name": "Darkshore",
-      "profiles": 34,
-      "named": 11,
+      "profiles": 40,
+      "named": 17,
       "camps": [
         "Blackwood camp",
         "Greymist shore",
@@ -362,8 +362,8 @@
     {
       "id": 3430,
       "name": "Eversong Woods",
-      "profiles": 21,
-      "named": 7,
+      "profiles": 24,
+      "named": 10,
       "camps": [
         "Amani camp",
         "Grimscale shore",
@@ -376,8 +376,8 @@
     {
       "id": 3433,
       "name": "Ghostlands",
-      "profiles": 20,
-      "named": 5,
+      "profiles": 23,
+      "named": 8,
       "camps": [
         "Deatholme enclave",
         "Grimscale shore",
@@ -389,8 +389,8 @@
     {
       "id": 3524,
       "name": "Azuremyst Isle",
-      "profiles": 20,
-      "named": 3,
+      "profiles": 23,
+      "named": 6,
       "camps": [
         "Blood Elf encampment",
         "Bristlelimb camp",
@@ -404,8 +404,8 @@
     {
       "id": 3525,
       "name": "Bloodmyst Isle",
-      "profiles": 28,
-      "named": 7,
+      "profiles": 31,
+      "named": 10,
       "camps": [
         "Blacksilt shore",
         "Bloodcursed shore",

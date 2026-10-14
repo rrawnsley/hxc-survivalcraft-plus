@@ -1,3 +1,6 @@
+    { 17, 996833, "Zarzoth the Water-Taker camp", "named local threat", 0, 125, true, true },
+    { 17, 996834, "Thornweaver Chagri camp", "named local threat", 0, 125, true, true },
+    { 17, 996835, "Karnak Kolkar camp", "named local threat", 0, 125, true, true },
     { 17, 996704, "Cacklemaw hunting grounds", "named hyena", 0, 150, true, true },
     { 17, 996705, "Sablemane hunting grounds", "named lion", 0, 200, true, true },
     { 17, 996706, "Thunderhide migration", "named elder kodo", 0, 200, true, true },

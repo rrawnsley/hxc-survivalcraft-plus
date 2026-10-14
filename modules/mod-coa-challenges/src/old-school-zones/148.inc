@@ -1,3 +1,6 @@
+    { 148, 996845, "Nettlewing the Bitter camp", "named local threat", 0, 125, true, true },
+    { 148, 996846, "Moonfang the Unseen camp", "named local threat", 0, 125, true, true },
+    { 148, 996847, "Windtalker Khorun camp", "named local threat", 0, 125, true, true },
     { 148, 996746, "Ashfeather nesting grounds", "named dustcloud strider", 0, 150, true, true },
     { 148, 996747, "Rootcaller Blackwood patrol", "named furbolg totemist", 0, 200, true, true },
     { 148, 996748, "Stonebound ruin patrol", "named stone behemoth", 0, 200, true, true },
