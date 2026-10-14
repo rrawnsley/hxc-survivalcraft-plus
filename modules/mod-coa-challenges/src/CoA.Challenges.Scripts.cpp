@@ -1140,8 +1140,8 @@ namespace CoAChallenges
         return 0;
     }
 
-    constexpr float OldSchoolConsiderRange = 40.0f;
     constexpr uint32 OldSchoolEncounterPhase = 0x40000000;
+    constexpr std::array<uint32, 3> OldSchoolGroupBonusAuras = { 996160, 996161, 996162 };
 
     void UpdateOldSchoolEncounterPhase(Player* player)
     {
@@ -1158,7 +1158,7 @@ namespace CoAChallenges
     uint32 OldSchoolExperienceBasisPoints()
     {
         uint32 const configured = sConfigMgr->GetOption<uint32>(
-            "CoAChallenges.OldSchool.ExperienceBasisPoints", 5000);
+            "CoAChallenges.OldSchool.ExperienceBasisPoints", 10000);
         return std::min(configured, 10000u);
     }
 
@@ -2877,26 +2877,7 @@ namespace CoAChallenges
 
     int32 OldSchoolThreatOffset(Creature const* creature)
     {
-        if (!creature)
-            return 0;
-
-        int32 const namedThreatOffset = OldSchoolNamedThreatOffset(creature);
-        if (namedThreatOffset)
-            return namedThreatOffset;
-
-        int32 const campThreatBonus = GetOldSchoolCampThreat(creature).bonus;
-
-        if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) == AREA_TIRISFAL_GLADES
-            && creature->GetEntry() == 1890)
-            return -3;
-
-        if (auto const* profile = HxcOldSchool::FindZoneProfile(creature->GetZoneId(), creature->GetEntry()))
-            return profile->threat;
-
-        if (campThreatBonus || !creature->GetSpawnId())
-            return campThreatBonus;
-
-        return creature->GetCreatureTemplate()->maxlevel <= 2 ? -2 : 0;
+        return creature ? OldSchoolNamedThreatOffset(creature) : 0;
     }
 
     int32 OldSchoolThreatLevel(Creature const* creature)
@@ -2943,37 +2924,39 @@ namespace CoAChallenges
         player = ChallengeParticipant(player);
         int32 const levelDifference = int32(OldSchoolThreatLevel(creature)) - int32(player->GetLevel());
         OldSchoolPowerProfile profile = GetOldSchoolEncounterPower(creature);
-        if (levelDifference <= -6)
+        if (levelDifference <= -7)
         {
             profile.con = "Grey";
-            profile.experienceMultiplierHundredths = 50;
+        }
+        else if (levelDifference <= -5)
+        {
+            profile.con = "Green";
         }
         else if (levelDifference <= -3)
         {
-            profile.con = "Green";
-            profile.experienceMultiplierHundredths = 75;
+            profile.con = "Light Blue";
         }
         else if (levelDifference < 0)
         {
-            profile.con = "Blue";
-            profile.experienceMultiplierHundredths = 90;
+            profile.con = "Dark Blue";
         }
         else if (levelDifference == 0)
             profile.con = "White";
         else if (levelDifference <= 2)
         {
             profile.con = "Yellow";
-            profile.experienceMultiplierHundredths = 150;
         }
         else if (levelDifference <= 4)
         {
-            profile.con = "Red";
-            profile.experienceMultiplierHundredths = 200;
+            profile.con = "Gold";
+        }
+        else if (levelDifference <= 6)
+        {
+            profile.con = "Orange";
         }
         else
         {
-            profile.con = "Purple";
-            profile.experienceMultiplierHundredths = 300;
+            profile.con = "Red";
         }
 
         switch (creature->GetCreatureTemplate()->rank)
@@ -3010,15 +2993,21 @@ namespace CoAChallenges
             return "|cff9d9d9d";
         if (std::strcmp(con, "Green") == 0)
             return "|cff1eff00";
-        if (std::strcmp(con, "Blue") == 0)
+        if (std::strcmp(con, "Light Blue") == 0)
             return "|cff0070dd";
+        if (std::strcmp(con, "Dark Blue") == 0)
+            return "|cff0050aa";
+        if (std::strcmp(con, "Purple boss") == 0)
+            return "|cffa335ee";
         if (std::strcmp(con, "White") == 0)
             return "|cffffffff";
         if (std::strcmp(con, "Yellow") == 0)
             return "|cffffff00";
-        if (std::strcmp(con, "Red") == 0)
-            return "|cffff0000";
-        return "|cffa335ee";
+        if (std::strcmp(con, "Gold") == 0)
+            return "|cffffd700";
+        if (std::strcmp(con, "Orange") == 0)
+            return "|cffff8000";
+        return "|cffff0000";
     }
 
     uint32 OldSchoolGroupBonusPercent(Player const* player, Creature const* creature)
@@ -3038,7 +3027,51 @@ namespace CoAChallenges
                 && member->IsAtGroupRewardDistance(creature))
                 ++companions;
         }
-        return companions == 0 ? 0 : companions == 1 ? 10 : companions == 2 ? 15 : 20;
+        return companions == 0 ? 0 : companions == 1 ? 20 : companions == 2 ? 30 : 40;
+    }
+
+    void UpdateOldSchoolGroupBonusAura(Player* player, uint32 diff)
+    {
+        if (!player)
+            return;
+
+        struct RefreshTimer : DataMap::Base
+        {
+            uint32 remaining = 0;
+        };
+        RefreshTimer* timer = player->CustomData.GetDefault<RefreshTimer>("coa.old_school.group_bonus_aura");
+        if (timer->remaining > diff)
+        {
+            timer->remaining -= diff;
+            return;
+        }
+        timer->remaining = 1000;
+
+        uint32 bonus = 0;
+        uint32 const challenge = OldSchoolChallenge(player);
+        Group const* group = player->GetGroup();
+        if (challenge && group && !group->isRaidGroup() && !group->isBGGroup() && !group->isBFGroup())
+        {
+            uint32 companions = 0;
+            for (Group::MemberSlot const& slot : group->GetMemberSlots())
+            {
+                Player const* member = ObjectAccessor::FindPlayer(slot.guid);
+                if (member && member != player && member->IsAlive()
+                    && OldSchoolChallenge(member) == challenge && player->InSamePhase(member)
+                    && player->IsAtGroupRewardDistance(member))
+                    ++companions;
+            }
+            bonus = companions == 0 ? 0 : companions == 1 ? 20 : companions == 2 ? 30 : 40;
+        }
+
+        uint32 activeAura = bonus == 20 ? OldSchoolGroupBonusAuras[0]
+            : bonus == 30 ? OldSchoolGroupBonusAuras[1]
+            : bonus >= 40 ? OldSchoolGroupBonusAuras[2] : 0;
+        for (uint32 aura : OldSchoolGroupBonusAuras)
+            if (aura != activeAura && player->HasAura(aura))
+                player->RemoveAurasDueToSpell(aura);
+        if (activeAura && !player->HasAura(activeAura))
+            player->AddAura(activeAura, player);
     }
 
     void MoveOldSchoolEquipmentToCorpse(Player* player)
@@ -4509,6 +4542,7 @@ namespace CoAChallenges
         void OnPlayerUpdate(Player* player, uint32 diff) override
         {
             UpdateOldSchoolEncounterPhase(player);
+            UpdateOldSchoolGroupBonusAura(player, diff);
             SpellbindProcessPending(player);
             HungerUpdate(player, diff);
             FatigueUpdate(player, diff);
@@ -5063,147 +5097,24 @@ namespace CoAChallenges
             Player* player = handler->GetSession()->GetPlayer();
             Creature* target = handler->getSelectedCreature();
             bool const oldSchool = OldSchoolChallenge(player) != 0;
-            if (!OldSchoolCreature(target) || !target->IsAlive() || !player->IsValidAttackTarget(target))
+            if (!OldSchoolCreature(target) || !target->IsAlive()
+                || (!oldSchool && !player->IsValidAttackTarget(target)))
             {
-                handler->SendSysMessage("Consider: select a living hostile creature.");
-                return true;
-            }
-            if (oldSchool && !player->IsWithinDistInMap(target, OldSchoolConsiderRange, true, false, false))
-            {
-                handler->PSendSysMessage("Consider: target is outside your {}-yard range.",
-                    uint32(OldSchoolConsiderRange));
+                handler->SendSysMessage("Consider: select a living creature.");
                 return true;
             }
             uint64 health = target->GetMaxHealth();
             if (oldSchool)
             {
-                OldSchoolHealth* scaling = target->CustomData.Get<OldSchoolHealth>(OldSchoolHealthKey);
                 OldSchoolPowerProfile const profile = GetOldSchoolPowerProfile(player, target);
-                uint32 const healthPercent = scaling ? scaling->healthPercent : profile.healthPercent;
-                float const damageMultiplier = scaling ? scaling->damageMultiplier : profile.damageMultiplier;
-                uint32 const experienceMultiplierHundredths = profile.experienceMultiplierHundredths;
-                float const experiencePercent = OldSchoolExperienceBasisPoints() / 100.0f;
-                float const effectiveKillXpMultiplier = float(experienceMultiplierHundredths) * experiencePercent / 10000.0f;
                 char const* con = profile.con;
-                if (!scaling)
-                    health = health * healthPercent / 100;
-
-                char const* advice = con == "Grey" || con == "Green"
-                    ? "Lower danger; watch for adds and abilities."
-                    : con == "Blue"
-                        ? "Solo candidate; pull one and recover between fights."
-                        : con == "White"
-                            ? "Challenging; prepare carefully or bring a companion."
-                            : con == "Yellow"
-                            ? "Very dangerous; bring a group."
-                            : "Overwhelming; a group is strongly advised.";
-                handler->PSendSysMessage("Consider {}: {}{}|r con. {} Estimated health: {} ({:.2f}x); "
-                    "creature damage: {:.2f}x; kill XP: {:.2f}x base ({:.2f}% Old School pace). Estimate only; gear, abilities, companions and adds "
-                    "change the outcome.", target->GetName(), OldSchoolConColor(con), con, advice, health,
-                    healthPercent / 100.0f,
-                    float(damageMultiplier), effectiveKillXpMultiplier, experiencePercent);
-                if (uint32 const groupBonus = OldSchoolGroupBonusPercent(player, target))
-                    handler->PSendSysMessage("Group bonus: +{}% to your creature-kill XP share after normal party splitting; "
-                        "camp rest is an additional bonus.", groupBonus);
-                if (HxcOldSchool::NormalizeZone(target->GetZoneId()) == AREA_MULGORE)
-                {
-                    if (char const* namedThreat = OldSchoolMulgoreNamedThreatName(target))
-                    {
-                        handler->PSendSysMessage("Named threat: {} carries elevated hidden danger; "
-                            "use the con estimate before engaging.", namedThreat);
-                    }
-                }
-                else if (IsOldSchoolBarrensNamedThreat(target) || IsOldSchoolStonetalonNamedThreat(target)
-                    || IsOldSchoolAshenvaleNamedThreat(target) || IsOldSchoolSouthernNamedThreat(target)
-                    || IsOldSchoolTirisfalNamedThreat(target) || IsOldSchoolSilverpineNamedThreat(target)
-                    || IsOldSchoolHillsbradNamedThreat(target) || IsOldSchoolArathiNamedThreat(target)
-                    || IsOldSchoolHinterlandsNamedThreat(target) || IsOldSchoolPlaguelandsNamedThreat(target)
-                    || IsOldSchoolAdditionalNamedThreat(target))
-                    handler->PSendSysMessage("Named threat: {} carries elevated hidden danger and reward; "
-                        "use the con estimate before engaging.", target->GetName());
-
-                if (HxcOldSchool::NormalizeZone(target->GetZoneId()) == AREA_SILVERPINE_FOREST && target->GetEntry() == 2529)
-                    handler->SendSysMessage("Roaming threat: Son of Arugal. Watch its route before choosing a hunting spot.");
-                if (HxcOldSchool::NormalizeZone(target->GetZoneId()) == AREA_ARATHI_HIGHLANDS && target->GetEntry() == 2611)
-                    handler->SendSysMessage("Roaming threat: Fozruk. Watch its route before choosing a hunting spot.");
-                if (HxcOldSchool::NormalizeZone(target->GetZoneId()) == AREA_EASTERN_PLAGUELANDS
-                    && (target->GetEntry() == 11896 || target->GetEntry() == 11897 || target->GetEntry() == 12339))
-                    handler->SendSysMessage("Roaming named threat. Watch its route before choosing a hunting spot.");
-                OldSchoolCampThreat const campThreat = GetOldSchoolCampThreat(target);
-                if (auto const* profile = HxcOldSchool::FindZoneProfile(target->GetZoneId(), target->GetEntry());
-                    profile && profile->roaming)
-                    handler->SendSysMessage("Roaming threat. Watch its native route before choosing a hunting spot.");
-
-                if (campThreat.camp)
-                {
-                    handler->PSendSysMessage("Camp role: {} {}. The con estimate includes this site's danger.",
-                        campThreat.camp, campThreat.role);
-                    static std::vector<uint32> const legacyCampEntries =
-                    {
-                        8523, 8524, 8525, 8526, 8527, 8528, 8529, 8530, 8531, 8532, 8540,
-                        8541, 8542, 8543, 8544, 8545, 8546, 8547, 8548, 8550, 8551, 8552,
-                        8553, 8555, 8556, 8557, 8558, 8559, 8560, 8561, 8562, 8596, 8597,
-                        8598, 8599, 8600, 8601, 8602, 8603, 8605, 9447, 9448, 9449, 9450,
-                        9451, 10821, 10825, 10826, 10827, 10828, 11290, 11291, 11292,
-                        11896, 11897, 12248, 12261, 16184,
-                        1783, 1784, 1785, 1786, 1787, 1788, 1789, 1790, 1791, 1793, 1794,
-                        1795, 1796, 1798, 1799, 1800, 1801, 1802, 1826, 1827, 1831, 1832,
-                        1833, 1834, 1835, 1836, 1837, 1838, 1839, 1840, 1841, 1843, 1844,
-                        1845, 1846, 1847, 1848, 1849, 1850, 1851, 1852, 1883, 1884, 4493,
-                        4494, 9452, 10605, 11075, 11076, 11077, 11078,
-                        2639, 2640, 2641, 2642, 2643, 2644, 2645, 2646, 2647, 2648, 2649,
-                        2650, 2651, 2652, 2653, 2654, 2657, 2658, 2659, 2680, 2681, 2686,
-                        2923, 2924, 2925, 2926, 4465, 4466, 4467, 4482, 7809, 7995, 7996,
-                        8210, 8211, 8216, 8217, 8218, 8219, 8276, 10802,
-                        2240, 2241, 2242, 2243, 2245, 2246, 2247, 2319, 2552, 2553, 2554,
-                        2555, 2556, 2557, 2558, 2562, 2564, 2566, 2567, 2569, 2570, 2571,
-                        2572, 2573, 2574, 2583, 2584, 2585, 2586, 2587, 2588, 2589, 2590,
-                        2591, 2595, 2596, 2597, 2598, 2599, 2602, 2604, 2605, 2606, 2609,
-                        2738, 2775, 2783, 2807,
-                        232, 2244, 2260, 2261, 2264, 2265, 2266, 2267, 2268, 2269, 2270,
-                        2304, 2305, 2335, 2344, 2345, 2346, 2360, 2368, 2369, 2370, 2371,
-                        2374, 2375, 2376, 2377, 2387, 2403, 2427, 2428, 2448, 2449, 2450,
-                        2451, 2503, 7360, 14276, 14277,
-                        1769, 1770, 1772, 1773, 1779, 1782, 1865, 1866, 1867, 1868, 1869, 1870,
-                        1889, 1892, 1893, 1896, 1912, 1913, 1914, 1915, 1924, 1939, 1940, 1942,
-                        1943, 1944, 1947, 1953, 1954, 1955, 1956, 1973, 1974, 1983, 2283,
-                        1520, 1522, 1523, 1525, 1526, 1527, 1528, 1529, 1530, 1534,
-                        1535, 1536, 1537, 1538, 1539, 1540, 1543, 1544, 1545, 1941,
-                        2949, 2950, 2951, 2952, 2953, 2954, 2962, 2963, 2964, 2965,
-                        2975, 2976, 2977, 2978, 2979,
-                        3260, 3261, 3262, 3263, 3265, 3266, 3267, 3268, 3269, 3270, 3271,
-                        3272, 3273, 3274, 3275, 3276, 3277, 3278, 3374, 3375, 3376, 3377, 3378,
-                        3988, 3989, 3990, 3991, 3992, 3993, 3997, 3998, 3999, 4001, 4002, 4003, 4004,
-                        4022, 4023, 4024, 4025, 4026, 4027,
-                        3921, 3922, 3923, 3924, 3925, 3926, 3743, 3745, 3746, 3748, 3749,
-                        3737, 3739, 3740, 3742, 3732, 3733, 3734,
-                        4093, 4094, 4095, 4096, 4097, 4098, 4099, 4250, 7404, 10720,
-                        10758, 10759, 10760, 10761,
-                        4646, 4647, 4648, 4649, 4651, 4652, 4653, 4661,
-                        4638, 4639, 4640, 4641, 4642, 4643, 4644, 4645, 4662,
-                        4654, 4655, 4656, 4657, 4658, 4659, 4660, 4704, 6069, 6070, 11685,
-                        4711, 4712, 4713, 4714, 4715, 4716, 4717, 4718, 4719,
-                        4328, 4329, 4331, 4333, 4334, 4358, 4359, 4360, 4361, 4362, 4363,
-                        5229, 5231, 5232, 5234, 5236, 5237, 5238, 5239, 5240, 5241,
-                        5249, 5251, 5253, 5254, 5255, 5258, 5300, 5304, 5305, 5306
-                    };
-                    std::vector<uint32> campEntries = legacyCampEntries;
-                    uint32 const zone = HxcOldSchool::NormalizeZone(target->GetZoneId());
-                    for (HxcOldSchool::ZoneProfile const& profile : HxcOldSchool::ZoneProfiles)
-                        if (profile.zone == zone && profile.camp)
-                            campEntries.push_back(profile.entry);
-
-                    std::list<Creature*> nearbyCreatures;
-                    target->GetCreatureListWithEntryInGrid(nearbyCreatures, campEntries, OldSchoolConsiderRange);
-                    std::vector<Creature const*> nearbyCampmates;
-                    nearbyCampmates.reserve(nearbyCreatures.size());
-                    for (Creature const* creature : nearbyCreatures)
-                        nearbyCampmates.push_back(creature);
-                    uint32 const nearbyCampmateCount = CountOldSchoolCampmates(target, nearbyCampmates);
-                    handler->PSendSysMessage("Other creatures from this camp within {} yards: {}. "
-                        "Native aggro and assistance rules determine who joins a fight.",
-                        uint32(OldSchoolConsiderRange), nearbyCampmateCount);
-                }
+                auto const reaction = target->GetReactionTo(player);
+                char const* mood = reaction <= REP_HOSTILE ? "is seething in anger"
+                    : reaction == REP_NEUTRAL ? "seems indifferent" : "seems at ease";
+                char const* disposition = reaction <= REP_HOSTILE ? "hostile"
+                    : reaction == REP_NEUTRAL ? "neutral" : "friendly";
+                handler->PSendSysMessage("{}{} {} ({} con; {}).|r", OldSchoolConColor(con), target->GetName(),
+                    mood, con, disposition);
                 return true;
             }
 

@@ -59,6 +59,9 @@ constexpr uint32 ProfessionAura = 996140;
 constexpr uint32 SurvivalistSkill = 9200;
 constexpr uint32 ScissorsRecipe = 996136;
 constexpr uint32 ScissorsUse = 996137;
+constexpr uint32 CampKitRecipe = 996170;
+constexpr uint32 SurvivalistProfession = 996180;
+constexpr uint32 CampKit = 996211;
 std::unordered_set<uint32> BandageSpells;
 std::unordered_set<uint32> PotionSpells;
 
@@ -68,6 +71,8 @@ uint32 RecipeSkill(uint32 spell)
         return std::array<uint32, 3>{ 1, 75, 150 }[spell - CampAbility];
     if (spell >= ToolRecipe && spell < ToolRecipe + 8)
         return std::array<uint32, 8>{ 1, 1, 1, 1, 100, 150, 50, 1 }[spell - ToolRecipe];
+    if (spell >= CampKitRecipe && spell < CampKitRecipe + 6)
+        return std::array<uint32, 3>{ 1, 75, 150 }[(spell - CampKitRecipe) % 3];
     return spell == ScissorsRecipe ? 75 : 0;
 }
 
@@ -272,6 +277,7 @@ void Unlock(Player* player)
         return;
     if (!player->HasSkill(SurvivalistSkill))
         player->SetSkill(SurvivalistSkill, 1, 1, 300);
+    player->learnSpell(SurvivalistProfession);
     player->learnSpell(SprintAbility);
     if (player->HasSkill(SKILL_FIRST_AID))
         player->learnSpell(SplintAbility);
@@ -282,6 +288,9 @@ void Unlock(Player* player)
                 player->learnSpell(ToolRecipe + index);
         if (player->GetPureSkillValue(SurvivalistSkill) >= RecipeSkill(ScissorsRecipe))
             player->learnSpell(ScissorsRecipe);
+        for (uint32 index = 0; index < 6; ++index)
+            if (player->GetPureSkillValue(SurvivalistSkill) >= RecipeSkill(CampKitRecipe + index))
+                player->learnSpell(CampKitRecipe + index);
     }
     if (player->GetLevel() >= 30)
         player->learnSpell(DodgeAbility);
@@ -351,7 +360,6 @@ void PlaceCamp(Player* player, State& state, uint32 tier)
     }
     if (tier > 2 || player->GetPureSkillValue(SurvivalistSkill) < RecipeSkill(CampAbility + tier))
         return;
-    uint32 leather = tier == 1 ? 2318 : 4234;
     bool const oldSchool = CoANeeds::IsOldSchoolTrial &&
         CoANeeds::IsOldSchoolTrial(player->GetGUID().GetCounter());
     uint32 const wood = oldSchool ? OldSchoolCampLogs[tier] : 4470;
@@ -380,16 +388,9 @@ void PlaceCamp(Player* player, State& state, uint32 tier)
     }
     if (state.campReady > now)
         return;
-    uint32 const woodCount = oldSchool && tier == 0 ? 8 : 2;
-    if (!player->HasItemCount(wood, woodCount, false) || (tier && !player->HasItemCount(leather, 4, false)))
+    if (!player->HasItemCount(CampKit + tier, 1, false))
     {
-        ChatHandler(player->GetSession()).SendSysMessage(oldSchool ?
-            tier == 0 ? "Campfire requires 8 Forestwood Logs." :
-            tier == 1 ? "Shelter requires 2 Wildwood Logs and 4 Light Leather." :
-            "Hearthstead requires 2 Everwood Logs and 4 Heavy Leather." :
-            tier == 0 ? "Campfire requires 2 Simple Wood." :
-            tier == 1 ? "Shelter requires 2 Simple Wood and 4 Light Leather." :
-            "Hearthstead requires 2 Simple Wood and 4 Heavy Leather.");
+        ChatHandler(player->GetSession()).SendSysMessage("Craft a matching camp kit with Survivalist before placing your camp.");
         return;
     }
     float orientation = player->GetOrientation();
@@ -412,9 +413,7 @@ void PlaceCamp(Player* player, State& state, uint32 tier)
         }
     }
     PackCamp(player);
-    player->DestroyItemCount(wood, woodCount, true);
-    if (tier)
-        player->DestroyItemCount(leather, 4, true);
+    player->DestroyItemCount(CampKit + tier, 1, true);
     Camp camp;
     camp.map = map->GetId();
     camp.expires = now + Config.campLifetime;
@@ -424,7 +423,6 @@ void PlaceCamp(Player* player, State& state, uint32 tier)
         camp.tent = tent->GetGUID();
     Camps[player->GetGUID().GetCounter()] = camp;
     state.campReady = now + 60;
-    player->UpdateCraftSkill(CampAbility + tier);
     Unlock(player);
     Save(player, state);
     ChatHandler(player->GetSession()).SendSysMessage("Camp placed. Sit nearby to recover and gain rested experience.");
@@ -1290,6 +1288,16 @@ public:
         if (!Affects(player) || result != SPELL_CAST_OK)
             return;
         uint32 id = spell->GetSpellInfo()->Id;
+        if (id >= CampKitRecipe && id < CampKitRecipe + 6)
+        {
+            bool const oldSchool = CoANeeds::IsOldSchoolTrial &&
+                CoANeeds::IsOldSchoolTrial(player->GetGUID().GetCounter());
+            if ((id >= CampKitRecipe + 3) != oldSchool)
+            {
+                result = SPELL_FAILED_NOT_HERE;
+                return;
+            }
+        }
         uint32 requirement = RecipeSkill(id);
         if (requirement && player->GetPureSkillValue(SurvivalistSkill) < requirement)
             result = SPELL_FAILED_LOW_CASTLEVEL;
@@ -1316,6 +1324,12 @@ public:
             return true;
         }
         uint32 entry = item->GetEntry();
+        if (entry >= CampKit && entry < CampKit + 3)
+        {
+            if (auto state = States.find(player->GetGUID().GetCounter()); state != States.end())
+                PlaceCamp(player, state->second, entry - CampKit);
+            return true;
+        }
         if (entry == 996210)
         {
             if (!player->IsOutdoors() || map->Instanceable())

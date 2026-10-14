@@ -263,6 +263,22 @@
       "action": "assert",
       "actor": "newbie",
       "metric": "knows_spell",
+      "spell": 996180,
+      "equals": 1,
+      "label": "Survivalist has a native profession recipe window"
+    },
+    {
+      "action": "assert",
+      "actor": "newbie",
+      "metric": "knows_spell",
+      "spell": 996170,
+      "equals": 1,
+      "label": "Campfire Kit is a learned Survivalist recipe"
+    },
+    {
+      "action": "assert",
+      "actor": "newbie",
+      "metric": "knows_spell",
       "spell": 996107,
       "equals": 0,
       "label": "Shelter is not learned at Survivalist 1"
@@ -286,6 +302,14 @@
       "action": "assert",
       "actor": "newbie",
       "metric": "knows_spell",
+      "spell": 996171,
+      "equals": 1,
+      "label": "Shelter Kit recipe unlocks at Survivalist 75"
+    },
+    {
+      "action": "assert",
+      "actor": "newbie",
+      "metric": "knows_spell",
       "spell": 996136,
       "equals": 1,
       "label": "Scissors unlock at Survivalist 75"
@@ -304,6 +328,14 @@
       "spell": 996108,
       "equals": 1,
       "label": "Hearthstead unlocks at Survivalist 150"
+    },
+    {
+      "action": "assert",
+      "actor": "newbie",
+      "metric": "knows_spell",
+      "spell": 996172,
+      "equals": 1,
+      "label": "Hearthstead Kit recipe unlocks at Survivalist 150"
     },
     {
       "action": "add_item",

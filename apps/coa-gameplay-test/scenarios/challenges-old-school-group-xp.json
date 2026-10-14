@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Old School parties earn ten percent extra kill XP including playerbot companions",
-  "contract": "Ordinary party XP splitting remains native. Qualifying living nearby members in the same Old School trial add 10% for a 2-player party, 15% for 3 players, and 20% for 4-5 players to each kill XP share. Playerbot companions qualify; solo, non-trial, dead, phased and distant companions do not.",
+  "name": "Old School parties earn a visible size-based kill XP bonus including playerbot companions",
+  "contract": "Ordinary party XP splitting remains native. Qualifying living nearby members in the same Old School trial add 20% for a 2-player party, 30% for 3 players, and 40% for 4-5 players to each kill XP share, and the matching party-size buff is visible. Playerbot companions qualify; solo, non-trial, dead, phased and distant companions do not.",
   "timeout_ms": 120000,
   "location": {
     "map": 0,
@@ -188,6 +188,18 @@
       "target": "oldbot"
     },
     {
+      "action": "wait",
+      "ms": 1100
+    },
+    {
+      "action": "assert",
+      "label": "A two-player Old School party shows its XP bonus as a character buff",
+      "actor": "old",
+      "metric": "aura",
+      "spell": 996160,
+      "equals": 1
+    },
+    {
       "action": "snapshot",
       "actor": "old",
       "metric": "xp",
@@ -230,13 +242,13 @@
     },
     {
       "action": "assert",
-      "label": "Old School human with bot companion gets 50% pace plus 10% extra on native party share",
+      "label": "Old School human with bot companion gets 20% extra on native party share",
       "actor": "old",
       "metric": "xp",
       "relative_to": "old_before",
       "ratio_to": "control_party_gain",
-      "min": 0.53,
-      "max": 0.57
+      "min": 1.18,
+      "max": 1.22
     }
   ]
 }
