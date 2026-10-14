@@ -1,6 +1,7 @@
 // mod-coa-challenges (review split): CoA.Challenges.Scripts.cpp
 // Mechanical split of review-CoAChallenges.cpp; no logic changes.
 #include "CoA.Challenges.Review.h"
+#include "CoA.Challenges.CorpseRuns.h"
 #include "../../mod-coa-needs/src/NeedsChallengeBridge.h"
 #include "RBAC.h"
 #include "KillRewarder.h"
@@ -1169,7 +1170,8 @@ namespace CoAChallenges
 
     bool OldSchoolCreature(Creature const* creature)
     {
-        return creature && !creature->IsCharmedOwnedByPlayerOrPlayer()
+        return creature && creature->GetEntry() != OldSchoolEquipmentCorpseEntry
+            && !creature->IsCharmedOwnedByPlayerOrPlayer()
             && creature->GetCreatureTemplate()->type != CREATURE_TYPE_CRITTER;
     }
 
@@ -3084,6 +3086,12 @@ namespace CoAChallenges
             || !player->GetMap() || player->GetMap()->IsBattlegroundOrArena())
             return;
 
+        if (challenge == 9001)
+        {
+            PreserveOldSchoolCorpseEquipment(player);
+            return;
+        }
+
         struct CorpseItem
         {
             uint8 slot;
@@ -3470,7 +3478,7 @@ namespace CoAChallenges
     class CoAChallengesPlayer : public PlayerScript
     {
     public:
-        CoAChallengesPlayer() : PlayerScript("CoAChallengesPlayer", { PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_SEND_INITIAL_PACKETS_BEFORE_ADD_TO_MAP, PLAYERHOOK_ON_PLAYER_JUST_DIED, PLAYERHOOK_ON_PLAYER_RELEASED_GHOST, PLAYERHOOK_ON_PLAYER_RESURRECT, PLAYERHOOK_CAN_RESURRECT, PLAYERHOOK_CAN_SEND_MAIL, PLAYERHOOK_CAN_JOIN_LFG, PLAYERHOOK_CAN_JOIN_IN_BATTLEGROUND_QUEUE, PLAYERHOOK_CAN_JOIN_IN_ARENA_QUEUE, PLAYERHOOK_CAN_INIT_TRADE, PLAYERHOOK_CAN_PLACE_AUCTION_BID, PLAYERHOOK_ON_BEFORE_SEND_LOOT, PLAYERHOOK_ON_LEVEL_CHANGED, PLAYERHOOK_ON_CREATURE_KILL, PLAYERHOOK_ON_CREATURE_KILLED_BY_PET, PLAYERHOOK_ON_PLAYER_KILLED_BY_CREATURE, PLAYERHOOK_ON_PVP_KILL, PLAYERHOOK_ON_LOOT_ITEM, PLAYERHOOK_ON_PLAYER_COMPLETE_QUEST, PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_CAN_GROUP_INVITE, PLAYERHOOK_CAN_GROUP_ACCEPT, PLAYERHOOK_ON_UPDATE_CRAFTING_SKILL, PLAYERHOOK_ON_UPDATE_GATHERING_SKILL, PLAYERHOOK_ON_BEFORE_QUEST_COMPLETE, PLAYERHOOK_ON_QUEST_COMPUTE_EXP, PLAYERHOOK_ON_GIVE_EXP, PLAYERHOOK_ON_GET_MAX_ALLOWED_LEVEL, PLAYERHOOK_ON_HAS_NO_BONUS_EXPERIENCE, PLAYERHOOK_CAN_LEARN_TALENT, PLAYERHOOK_CAN_USE_ITEM, PLAYERHOOK_CAN_ENTER_MAP, PLAYERHOOK_CAN_EQUIP_ITEM, PLAYERHOOK_CAN_ENTER_MANASTORM, PLAYERHOOK_ON_PLAYER_ENVIRONMENTAL_DAMAGE, PLAYERHOOK_ON_PLAYER_BREATH_INVERTED, PLAYERHOOK_ON_BEFORE_BUY_ITEM_FROM_VENDOR, PLAYERHOOK_CAN_SELL_ITEM, PLAYERHOOK_ON_CAN_UPDATE_SKILL, PLAYERHOOK_ON_UPDATE_SKILL, PLAYERHOOK_ON_PLAYER_PVP_FLAG_CHANGE, PLAYERHOOK_ON_CAN_REGENERATE, PLAYERHOOK_ON_CAN_ENERGIZE, PLAYERHOOK_ON_CAN_GIVE_LEVEL, PLAYERHOOK_ON_BEFORE_TELEPORT, PLAYERHOOK_ON_DELETE_FROM_DB, PLAYERHOOK_ON_BANK_WITHDRAW, PLAYERHOOK_ON_REWARD_KILL_REWARDER, PLAYERHOOK_ON_GIVE_REPUTATION, PLAYERHOOK_PASSED_QUEST_KILLED_MONSTER_CREDIT, PLAYERHOOK_ON_LOAD_FROM_DB, PLAYERHOOK_ON_GET_GAME_MODE_MASK }) { }
+        CoAChallengesPlayer() : PlayerScript("CoAChallengesPlayer", { PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_SEND_INITIAL_PACKETS_BEFORE_ADD_TO_MAP, PLAYERHOOK_ON_PLAYER_JUST_DIED, PLAYERHOOK_ON_PLAYER_RELEASED_GHOST, PLAYERHOOK_ON_PLAYER_RESURRECT, PLAYERHOOK_CAN_RESURRECT, PLAYERHOOK_CAN_REPOP_AT_GRAVEYARD, PLAYERHOOK_CAN_SEND_MAIL, PLAYERHOOK_CAN_JOIN_LFG, PLAYERHOOK_CAN_JOIN_IN_BATTLEGROUND_QUEUE, PLAYERHOOK_CAN_JOIN_IN_ARENA_QUEUE, PLAYERHOOK_CAN_INIT_TRADE, PLAYERHOOK_CAN_PLACE_AUCTION_BID, PLAYERHOOK_ON_BEFORE_SEND_LOOT, PLAYERHOOK_ON_LEVEL_CHANGED, PLAYERHOOK_ON_CREATURE_KILL, PLAYERHOOK_ON_CREATURE_KILLED_BY_PET, PLAYERHOOK_ON_PLAYER_KILLED_BY_CREATURE, PLAYERHOOK_ON_PVP_KILL, PLAYERHOOK_ON_LOOT_ITEM, PLAYERHOOK_ON_PLAYER_COMPLETE_QUEST, PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_CAN_GROUP_INVITE, PLAYERHOOK_CAN_GROUP_ACCEPT, PLAYERHOOK_ON_UPDATE_CRAFTING_SKILL, PLAYERHOOK_ON_UPDATE_GATHERING_SKILL, PLAYERHOOK_ON_BEFORE_QUEST_COMPLETE, PLAYERHOOK_ON_QUEST_COMPUTE_EXP, PLAYERHOOK_ON_GIVE_EXP, PLAYERHOOK_ON_GET_MAX_ALLOWED_LEVEL, PLAYERHOOK_ON_HAS_NO_BONUS_EXPERIENCE, PLAYERHOOK_CAN_LEARN_TALENT, PLAYERHOOK_CAN_USE_ITEM, PLAYERHOOK_CAN_ENTER_MAP, PLAYERHOOK_CAN_EQUIP_ITEM, PLAYERHOOK_CAN_ENTER_MANASTORM, PLAYERHOOK_ON_PLAYER_ENVIRONMENTAL_DAMAGE, PLAYERHOOK_ON_PLAYER_BREATH_INVERTED, PLAYERHOOK_ON_BEFORE_BUY_ITEM_FROM_VENDOR, PLAYERHOOK_CAN_SELL_ITEM, PLAYERHOOK_ON_CAN_UPDATE_SKILL, PLAYERHOOK_ON_UPDATE_SKILL, PLAYERHOOK_ON_PLAYER_PVP_FLAG_CHANGE, PLAYERHOOK_ON_CAN_REGENERATE, PLAYERHOOK_ON_CAN_ENERGIZE, PLAYERHOOK_ON_CAN_GIVE_LEVEL, PLAYERHOOK_ON_BEFORE_TELEPORT, PLAYERHOOK_ON_DELETE_FROM_DB, PLAYERHOOK_ON_BANK_WITHDRAW, PLAYERHOOK_ON_REWARD_KILL_REWARDER, PLAYERHOOK_ON_GIVE_REPUTATION, PLAYERHOOK_PASSED_QUEST_KILLED_MONSTER_CREDIT, PLAYERHOOK_ON_LOAD_FROM_DB, PLAYERHOOK_ON_GET_GAME_MODE_MASK }) { }
 
         bool OnPlayerGetGameModeMask(Player const* player, uint32& mask) override
         {
@@ -3527,22 +3535,33 @@ namespace CoAChallenges
                 player->SetUInt32Value(PLAYER_XP, currentXP);
                 if (player->GetLevel() < startingLevel)
                     NotifyPlayer(player, "Old School: death cost you {} experience and drained you to level {}. "
-                        "Return to your corpse as a spirit to resurrect.", loss, player->GetLevel());
+                        "Release to revive at your bind point, then return alive for your equipment.", loss, player->GetLevel());
                 else
-                    NotifyPlayer(player, "Old School: death cost you {} experience. Return to your corpse as a spirit "
-                        "to resurrect.", loss);
+                    NotifyPlayer(player, "Old School: death cost you {} experience. Release to revive at your bind point, then "
+                        "return alive for your equipment.", loss);
             }
             HandlePlayerDeath(player);
         }
 
         // "Dead forever": block resurrection when the player carries a failed
         // permadeath challenge (Player::ResurrectPlayer early-returns on false).
+        bool OnPlayerCanRepopAtGraveyard(Player* player) override
+        {
+            if (OldSchoolChallenge(player) != 9001 || player->GetSession()->IsBot()
+                || player->IsAlive() || !player->GetMap() || player->GetMap()->IsBattlegroundOrArena())
+                return true;
+            RespawnOldSchoolAtBind(player);
+            return false;
+        }
+
         bool OnPlayerCanResurrect(Player* player) override
         {
             if (!ChallengesEnabled())
                 return true;
             if (HasPermaDeathFailure(player))
                 return false;
+            if (IsOldSchoolBindRespawn(player))
+                return true;
             bool requiresCorpseRun = OldSchoolChallenge(player) == 9001;
             if (!requiresCorpseRun && !player->GetSession()->IsBot() && player->IsInWorld()
                 && !player->IsAlive())
@@ -4531,7 +4550,11 @@ namespace CoAChallenges
 
         void OnPlayerResurrect(Player* player, float /*restore_percent*/, bool& /*applySickness*/) override
         {
-            RecoverOldSchoolEquipment(player);
+            if (!IsOldSchoolBindRespawn(player))
+            {
+                RecoverOldSchoolEquipment(player);
+                RecoverOldSchoolEquipmentAtDeath(player);
+            }
             {
                 std::lock_guard<std::mutex> lock(LastKillerMutex);
                 LastKiller.erase(player->GetGUID().GetCounter());
@@ -4542,6 +4565,7 @@ namespace CoAChallenges
         void OnPlayerUpdate(Player* player, uint32 diff) override
         {
             UpdateOldSchoolEncounterPhase(player);
+            UpdateOldSchoolEquipmentCorpses(player, diff, OldSchoolChallenge(player) == 9001);
             UpdateOldSchoolGroupBonusAura(player, diff);
             SpellbindProcessPending(player);
             HungerUpdate(player, diff);
@@ -4623,6 +4647,9 @@ namespace CoAChallenges
             };
             for (char const* table : kCharTables)
                 trans->Append("DELETE FROM {} WHERE guid = {}", table, guid);
+            trans->Append("DELETE ci FROM coa_old_school_equipment_corpse_item ci "
+                "JOIN coa_old_school_equipment_corpse c ON c.id=ci.corpse WHERE c.owner={}", guid);
+            trans->Append("DELETE FROM coa_old_school_equipment_corpse WHERE owner={}", guid);
             ForgetConditionFlags(guid);
         }
 
@@ -6367,6 +6394,7 @@ void Addmod_coa_challengesScripts()
         std::memory_order_relaxed);
     LocalLevelScaling::CreatureLevelVisibilityChangedOwner.store(&CoAChallenges::RefreshCreatureLevelVisibility,
         std::memory_order_relaxed);
+    CoAChallenges::RegisterOldSchoolEquipmentCorpses();
     new CoAChallenges::CoAChallengesPlayer();
     new CoAChallenges::CoAChallengesWorld();
     new CoAChallenges::CoAChallengesServer();
