@@ -12,6 +12,8 @@ local fixture = Fixture()
 local validated = assert(Model.Validate(fixture))
 assert(Model.PointText(validated.abilities[1]) == "12 qualifying uses to the next proficiency point.")
 assert(string.find(Model.RankText(validated.abilities[1].nextRank), "492 qualifying uses", 1, true))
+assert(string.find(Model.RankText(validated.abilities[1].nextRank),
+    "Proficiency does not block learning.", 1, true))
 fixture.abilities[1].points = 19
 assert(validated.abilities[1].points == 18)
 fixture = Fixture()

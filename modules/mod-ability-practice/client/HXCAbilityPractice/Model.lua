@@ -601,25 +601,29 @@ function Model.RankText(rank, fixed, realmMaximumLevel, characterLevel, acquisit
     end
     if not rank then return "All currently defined ranks learned." end
     local requirement = Model.LevelText(rank.characterLevel, realmMaximumLevel, characterLevel)
-        .. " · Proficiency " .. rank.proficiency
+        .. " · Optional practice target " .. rank.proficiency
+    local acquisition = LearnText(acquisitionSource) .. " Proficiency does not block learning."
     if rank.state == 1 then return "Learned.\n" .. requirement end
-    if rank.state == 2 then return LearnText(acquisitionSource) .. "\n" .. requirement end
+    if rank.state == 2 then return acquisition .. "\n" .. requirement end
     if rank.state == 3 then
         local forecast = rank.practice.status == 1 and (rank.practice.uses
-            .. " qualifying uses to the proficiency requirement.\n")
+            .. " qualifying uses to the optional practice target.\n")
             or (rank.practice.status == 3 and "Practice exceeds the current cap.\n" or "")
-        return "Requires earlier ranks or normal acquisition prerequisites.\n" .. forecast .. requirement
+        return "Requires earlier ranks or normal acquisition prerequisites.\n" .. forecast
+            .. acquisition .. "\n" .. requirement
     end
-    if rank.state == 7 then return "Requirements met.\n" .. requirement end
+    if rank.state == 7 then return acquisition .. "\n" .. requirement end
     if rank.state == 5 then
-        return (rank.rankNumber == 1 and "Waiting for character level.\n" or
-            "Practice requirement met; waiting for character level.\n") .. requirement
+        return "Waiting for character level.\n" .. acquisition .. "\n" .. requirement
     end
-    if rank.practice.status == 3 then return "Beyond your current proficiency cap.\n" .. requirement end
+    if rank.practice.status == 3 then
+        return "Optional practice target exceeds your current cap.\n" .. acquisition .. "\n" .. requirement
+    end
     if rank.practice.status == 1 then
-        return rank.practice.uses .. " qualifying uses remaining under current training rules.\n" .. requirement
+        return rank.practice.uses .. " qualifying uses to the optional practice target.\n"
+            .. acquisition .. "\n" .. requirement
     end
-    return requirement
+    return acquisition .. "\n" .. requirement
 end
 
 function Model.CatchupText(ability, saved)
