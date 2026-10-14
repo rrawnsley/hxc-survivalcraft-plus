@@ -508,7 +508,8 @@ void RestAtCamp(Player* player, State& state, int32 tier, uint32 elapsed)
         SetAura(player, CampRest + index, state.restingCamp == int32(index));
     if (state.restingCamp >= 0)
     {
-        float const recovery = (player->IsSitState() ? 0.01f : 0.005f) * elapsed / 1000.0f;
+        float const tierRecovery = 0.005f + 0.0025f * state.restingCamp;
+        float const recovery = tierRecovery * (player->IsSitState() ? 2.0f : 1.0f) * elapsed / 1000.0f;
         player->ModifyHealth(int32(std::max(1.0f, player->GetMaxHealth() * recovery)));
         if (player->GetMaxPower(POWER_MANA))
             player->ModifyPower(POWER_MANA,
@@ -533,9 +534,13 @@ void RestAtCamp(Player* player, State& state, int32 tier, uint32 elapsed)
                 || sky == WEATHER_STATE_HEAVY_SNOW || sky == WEATHER_STATE_BLACKSNOW;
         }
         if (player->IsAlive() && (state.restingCamp >= 0 || inn) && !exposed)
+        {
+            uint32 const tierRate = state.restingCamp > 0 ? 2u * uint32(state.restingCamp) : 0u;
+            uint32 const fillRate = (player->IsSitState() ? OldSchoolRestedSittingRate : OldSchoolRestedStandingRate)
+                + tierRate * (player->IsSitState() ? 2u : 1u);
             state.oldSchoolRestedMs = std::min(OldSchoolRestedCapMs,
-                state.oldSchoolRestedMs + elapsed *
-                    (player->IsSitState() ? OldSchoolRestedSittingRate : OldSchoolRestedStandingRate));
+                state.oldSchoolRestedMs + elapsed * fillRate);
+        }
         else if (player->IsAlive())
             state.oldSchoolRestedMs = elapsed >= state.oldSchoolRestedMs ? 0 : state.oldSchoolRestedMs - elapsed;
 

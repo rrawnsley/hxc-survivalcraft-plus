@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Old School camps use harvested logs, restore seated players, and enable cooking",
-  "contract": "Survivalist recipes turn harvested Old School logs or ordinary Simple Wood into camp kits; a kit places the camp, restoring seated health and mana, enabling cooking, and replenishing rested kill XP.",
+  "name": "Old School camps use harvested logs, restore nearby players, and grant Camp Rested",
+  "contract": "Survivalist recipes turn harvested Old School logs or ordinary Simple Wood into camp kits; a kit places the camp, restoring nearby health and mana, enabling cooking, and renewing a visible 20-minute kill-XP buff.",
   "timeout_ms": 180000,
   "location": {"map": 1, "x": -751.421, "y": -674.71, "z": -19.1842, "o": 0},
   "players": [
@@ -80,7 +80,9 @@
     {"action": "cast", "actor": "old", "spell": 996106},
     {"action": "assert", "actor": "old", "metric": "owned_gameobject_count", "entry": 1798, "equals": 1, "within_ms": 5000, "label": "Old School Campfire places from the crafted kit"},
     {"action": "assert", "actor": "old", "metric": "item_count", "item": 996211, "equals": 0, "label": "Placement consumes the Campfire Kit"},
-    {"action": "wait", "ms": 2000, "label": "Rested experience replenishes while the player remains near the camp"},
+    {"action": "wait", "ms": 2000, "label": "Camp Rested renews while the player remains near the camp"},
+    {"action": "assert", "actor": "old", "metric": "aura", "spell": 996100, "equals": 1, "within_ms": 5000, "label": "Standing near the camp activates its recovery aura"},
+    {"action": "assert", "actor": "old", "metric": "aura", "spell": 996163, "equals": 1, "within_ms": 5000, "label": "Standing near the camp grants visible Camp Rested"},
     {"action": "snapshot", "actor": "old", "metric": "xp", "save_as": "old_rested_before"},
     {"action": "attack", "actor": "old", "target": "old_rested_wolf_1"},
     {"action": "wait", "ms": 1000, "label": "Allow the con profile to finish scaling before the quick XP sample"},

@@ -1,3 +1,5 @@
+    { 141, 996778, "Shadowglen grell patrol", "named starter grell", 0, 125, true, true },
+    { 141, 996779, "Shadowglen Webwood grove", "named starter webwood spider", 0, 150, true, false },
     { 141, 996737, "Bramblehide furbolg patrol", "named furbolg hunter", 0, 150, true, true },
     { 141, 996738, "Thornscarred grell patrol", "named grell raider", 0, 200, true, true },
     { 141, 996739, "Gnarlmaw hunting grounds", "named feral furbolg", 0, 200, true, true },
