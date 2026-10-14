@@ -12327,7 +12327,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     data.Initialize(SMSG_LOGIN_SETTIMESPEED, 4 + 4 + 4);
     data.AppendPackedTime(AscensionRealmClock::ClientTime());
-    data << AscensionRealmClock::GameSpeed;                  // game speed
+    data << AscensionRealmClock::GameSpeed();                // game speed
     data << uint32(0);                                      // added in 3.1.2
     SendDirectMessage(&data);
 

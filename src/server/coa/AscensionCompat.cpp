@@ -8144,7 +8144,7 @@ public:
     time_t const shown = hour ? SameDayAt(now, *hour, minute.value_or(0)) : now;
     WorldPacket data(SMSG_LOGIN_SETTIMESPEED, 4 + 4 + 4);
     data.AppendPackedTime(shown);
-    data << AscensionRealmClock::GameSpeed;
+    data << AscensionRealmClock::GameSpeed();
     data << uint32(0);
     player->SendDirectMessage(&data);
 

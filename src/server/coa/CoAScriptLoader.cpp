@@ -19,6 +19,7 @@
 #include "AscensionTinkerCombatSymbiosis.h"
 
 void AddAscensionCompatScripts();
+void AddSC_AscensionRealmClock();
 void AddAscensionTravelPermitScripts();
 void AddSC_AscensionRulesets();
 void AddSC_AscensionMercenary();
@@ -368,6 +369,7 @@ void AddCoAScripts()
     AddSC_AscensionReaperDirge();
     AddAscensionTinkerOverloadScripts();
     AddAscensionCompatScripts();
+    AddSC_AscensionRealmClock();
     AddAscensionTravelPermitScripts();
     AddAscensionBarbarianCompletionScripts();
     AddAscensionBarbarianEventScripts();
