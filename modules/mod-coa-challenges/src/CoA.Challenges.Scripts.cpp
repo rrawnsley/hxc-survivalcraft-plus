@@ -1176,6 +1176,15 @@ namespace CoAChallenges
             && creature->GetCreatureTemplate()->type != CREATURE_TYPE_CRITTER;
     }
 
+    uint8 OldSchoolPublicDungeonCategory(Creature const* creature)
+    {
+        if (!creature)
+            return 0;
+
+        auto const* profile = HxcOldSchool::FindZoneProfile(creature->GetZoneId(), creature->GetEntry());
+        return profile ? profile->publicDungeonCategory : 0;
+    }
+
     bool IsOldSchoolMulgoreNamedThreat(Creature const* creature)
     {
         if (!creature || HxcOldSchool::NormalizeZone(creature->GetZoneId()) != AREA_MULGORE)
@@ -1225,7 +1234,7 @@ namespace CoAChallenges
     {
         uint32 ordinaryGearKeepPercent = 25;
         uint32 namedGearKeepPercent = 100;
-        uint32 ordinaryHealthPercent = 1250;
+        uint32 ordinaryHealthPercent = 500;
         float ordinaryDamageMultiplier = 1.25f;
     };
 
@@ -1393,10 +1402,17 @@ namespace CoAChallenges
                 && specific->second.contains(it->itemid);
             if (equipment && item->Quality >= ITEM_QUALITY_UNCOMMON && !creatureReward && !it->needs_quest
                 && urand(1, 100) > keepPercent)
+            {
+                if (it->conditions.empty() && !item->HasFlag(ITEM_FLAG_MULTI_DROP) && loot->unlootedCount)
+                    --loot->unlootedCount;
                 it = loot->items.erase(it);
+            }
             else
                 ++it;
         }
+
+        for (size_t index = 0; index < loot->items.size(); ++index)
+            loot->items[index].itemIndex = uint32(index);
     }
 
     char const* OldSchoolMulgoreNamedThreatName(Creature const* creature)
@@ -1776,7 +1792,7 @@ namespace CoAChallenges
             return 0;
 
         if (auto const* profile = HxcOldSchool::FindZoneProfile(creature->GetZoneId(), creature->GetEntry());
-            profile && profile->named)
+            profile && (profile->named || profile->publicDungeonCategory))
             return profile->threat;
 
         if (IsOldSchoolPlaguelandsNamedThreat(creature))
@@ -1980,7 +1996,7 @@ namespace CoAChallenges
             return 100;
 
         if (auto const* profile = HxcOldSchool::FindZoneProfile(creature->GetZoneId(), creature->GetEntry());
-            profile && profile->named)
+            profile && profile->named && !profile->publicDungeonCategory)
             return profile->reward;
 
         if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) != AREA_THE_BARRENS)
@@ -2023,7 +2039,8 @@ namespace CoAChallenges
 
         if (auto const* profile = HxcOldSchool::FindZoneProfile(creature->GetZoneId(), creature->GetEntry());
             profile && profile->camp)
-            return { profile->camp, profile->role, profile->named ? 0 : profile->threat };
+            return { profile->camp, profile->role,
+                profile->named || profile->publicDungeonCategory ? 0 : profile->threat };
 
         if (HxcOldSchool::NormalizeZone(creature->GetZoneId()) == AREA_EASTERN_PLAGUELANDS)
         {
@@ -2945,8 +2962,11 @@ namespace CoAChallenges
         float const damageRatio = effectiveDamage / std::max(0.01f, nativeDamage);
         float const armorRatio = effective->GenerateArmor(info) / std::max(1.0f, native->GenerateArmor(info));
         bool const dungeon = creature->GetMap()->IsDungeon() && !creature->GetMap()->IsRaid();
-        uint32 const healthPercent = dungeon ? 125 : OldSchoolOptions.ordinaryHealthPercent;
-        float const damageMultiplier = dungeon ? 1.15f : OldSchoolOptions.ordinaryDamageMultiplier;
+        uint8 const publicDungeonCategory = OldSchoolPublicDungeonCategory(creature);
+        uint32 const healthPercent = dungeon ? 125
+            : publicDungeonCategory ? 450 : OldSchoolOptions.ordinaryHealthPercent;
+        float const damageMultiplier = dungeon ? 1.15f
+            : publicDungeonCategory ? 1.25f : OldSchoolOptions.ordinaryDamageMultiplier;
         return { nullptr,
             uint32(std::clamp(double(healthPercent) * healthRatio * noviceScale,
                 1.0, double(UINT32_MAX))),
@@ -3053,29 +3073,46 @@ namespace CoAChallenges
         profile.damageMultiplier *= damageFactor;
         profile.experienceMultiplierHundredths = experienceFactor;
 
+        uint8 const publicDungeonCategory = OldSchoolPublicDungeonCategory(creature);
         switch (creature->GetCreatureTemplate()->rank)
         {
             case CREATURE_ELITE_ELITE:
                 profile.healthPercent = profile.healthPercent * 3 / 2;
                 profile.damageMultiplier *= 1.5f;
-                profile.experienceMultiplierHundredths = (profile.experienceMultiplierHundredths * 3 + 1) / 2;
+                if (!publicDungeonCategory)
+                    profile.experienceMultiplierHundredths = (profile.experienceMultiplierHundredths * 3 + 1) / 2;
                 break;
             case CREATURE_ELITE_RAREELITE:
                 profile.healthPercent *= 2;
                 profile.damageMultiplier *= 2;
-                profile.experienceMultiplierHundredths *= 2;
+                if (!publicDungeonCategory)
+                    profile.experienceMultiplierHundredths *= 2;
                 break;
             case CREATURE_ELITE_WORLDBOSS:
                 profile.con = "Purple boss";
                 profile.healthPercent *= 2;
                 profile.damageMultiplier *= 2;
-                profile.experienceMultiplierHundredths *= 2;
+                if (!publicDungeonCategory)
+                    profile.experienceMultiplierHundredths *= 2;
                 break;
             default:
                 break;
         }
-        profile.experienceMultiplierHundredths *= OldSchoolNamedRewardHundredths(creature);
-        profile.experienceMultiplierHundredths /= 100;
+        if (publicDungeonCategory)
+        {
+            auto const* zoneProfile = HxcOldSchool::FindZoneProfile(creature->GetZoneId(), creature->GetEntry());
+            uint32 const categoryBonus = publicDungeonCategory >= 3 ? 160
+                : publicDungeonCategory == 2 ? 135
+                : zoneProfile && zoneProfile->roaming ? 120
+                : creature->GetCreatureTemplate()->rank == CREATURE_ELITE_ELITE ? 120 : 100;
+            profile.experienceMultiplierHundredths =
+                profile.experienceMultiplierHundredths * 150 * categoryBonus / 10000;
+        }
+        else
+        {
+            profile.experienceMultiplierHundredths *= OldSchoolNamedRewardHundredths(creature);
+            profile.experienceMultiplierHundredths /= 100;
+        }
         if (creature->GetMap()->IsDungeon() && !creature->GetMap()->IsRaid())
             profile.experienceMultiplierHundredths =
                 profile.experienceMultiplierHundredths * 5 / 4;
@@ -3377,7 +3414,8 @@ namespace CoAChallenges
             if (groupSize > state->groupSize)
             {
                 bool const dungeon = creature->GetMap()->IsDungeon() && !creature->GetMap()->IsRaid();
-                float const healthPerMember = dungeon ? 0.1f : 1.0f;
+                float const healthPerMember = dungeon ? 0.1f
+                    : OldSchoolPublicDungeonCategory(creature) ? 0.6f : 1.0f;
                 float const oldHealth = 1.0f + healthPerMember * float(state->groupSize - 1);
                 float const newHealth = 1.0f + healthPerMember * float(groupSize - 1);
                 float const baseHealth = std::max(1.0f, float(creature->GetMaxHealth()) - state->extra);
@@ -3387,7 +3425,7 @@ namespace CoAChallenges
                 ChangeMaxHealthKeepingPct(creature, extra, true);
                 state->extra = extra;
                 state->healthPercent = healthPercent;
-                if (!dungeon)
+                if (!dungeon && !OldSchoolPublicDungeonCategory(creature))
                     state->damageMultiplier *= (1.0f + 0.125f * float(groupSize - 1))
                         / (1.0f + 0.125f * float(state->groupSize - 1));
                 state->groupSize = groupSize;
@@ -3402,8 +3440,11 @@ namespace CoAChallenges
             OldSchoolPowerProfile const profile = GetOldSchoolPowerProfile(attacker, creature);
             uint32 const groupSize = OldSchoolGroupRewardSize(attacker, creature);
             bool const dungeon = creature->GetMap()->IsDungeon() && !creature->GetMap()->IsRaid();
-            float const groupHealth = 1.0f + (dungeon ? 0.1f : 1.0f) * float(groupSize - 1);
-            float const groupDamage = dungeon ? 1.0f : 1.0f + 0.125f * float(groupSize - 1);
+            uint8 const publicDungeonCategory = OldSchoolPublicDungeonCategory(creature);
+            float const groupHealth = 1.0f + (dungeon ? 0.1f : publicDungeonCategory ? 0.6f : 1.0f)
+                * float(groupSize - 1);
+            float const groupDamage = dungeon || publicDungeonCategory ? 1.0f
+                : 1.0f + 0.125f * float(groupSize - 1);
             auto* state = new OldSchoolHealth();
             state->extra = float(creature->GetMaxHealth()) *
                 (profile.healthPercent * groupHealth / 100.0f - 1.0f);
@@ -4812,7 +4853,7 @@ namespace CoAChallenges
             OldSchoolOptions.namedGearKeepPercent = std::min(100u,
                 sConfigMgr->GetOption<uint32>("CoAChallenges.OldSchool.NamedGearDropPercent", 100));
             OldSchoolOptions.ordinaryHealthPercent = std::clamp(
-                sConfigMgr->GetOption<uint32>("CoAChallenges.OldSchool.OrdinaryHealthPercent", 1250), 1u, 10000u);
+                sConfigMgr->GetOption<uint32>("CoAChallenges.OldSchool.OrdinaryHealthPercent", 500), 1u, 10000u);
             OldSchoolOptions.ordinaryDamageMultiplier = std::clamp(
                 sConfigMgr->GetOption<float>("CoAChallenges.OldSchool.OrdinaryDamageMultiplier", 1.25f), 0.1f, 20.0f);
             CoANeeds::ChallengeMaximum = std::max(1.0f,
@@ -5902,7 +5943,13 @@ namespace CoAChallenges
 
             Creature* creature = owner->GetMap()->GetCreature(loot->sourceWorldObjectGUID);
             if (IsOldSchoolGearLoot(creature, owner))
+            {
                 ThinOldSchoolGearLoot(loot, creature);
+                if (creature->GetEntry() == 8554 && loot->items.size() < MAX_NR_LOOT_ITEMS
+                    && sObjectMgr->GetItemTemplate(993040) && urand(1, 100) <= 15)
+                    loot->AddItem(LootStoreItem(993040, 0, 100.0f, false,
+                        creature->GetLootMode(), 0, 1, 1));
+            }
         }
     };
     // GuildScript: block the guild bank list for NO_GUILD_BANK challenges.

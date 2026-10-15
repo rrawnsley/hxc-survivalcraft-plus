@@ -32,6 +32,7 @@ struct ZoneProfile
     uint32 reward;
     bool named;
     bool roaming;
+    uint8 publicDungeonCategory = 0;
 };
 
 inline ZoneProfile const ZoneProfiles[] =

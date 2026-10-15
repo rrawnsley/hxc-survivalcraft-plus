@@ -29,6 +29,7 @@
 #include <chrono>
 #include <cmath>
 #include <ctime>
+#include <list>
 #include <mutex>
 #include <sstream>
 #include <unordered_map>
@@ -48,6 +49,8 @@ constexpr uint32 DodgeAbility = 996016;
 constexpr uint32 WindAbility = 996017;
 constexpr uint32 CampRest = 996100;
 constexpr uint32 CampExperienceAura = 996163;
+constexpr uint32 ConjureCampfire = 570121;
+constexpr uint32 ConjuredBrazier = 194528;
 constexpr uint32 OldSchoolRestedCapMs = 20 * 60 * 1000;
 constexpr uint32 OldSchoolRestedStandingRate = 5;
 constexpr uint32 OldSchoolRestedSittingRate = 10;
@@ -389,7 +392,7 @@ void RecoverWhileSeated(Player* player, State& state, uint32 elapsed)
 {
     bool const resting = CoANeeds::IsOldSchoolTrial &&
         CoANeeds::IsOldSchoolTrial(player->GetGUID().GetCounter()) && player->IsAlive() &&
-        player->IsSitState() && !player->isMoving() && !player->IsInCombat();
+        player->IsSitState() && !player->isMoving();
     SetAura(player, SeatedRecoveryAura, resting);
     if (!resting)
     {
@@ -398,15 +401,17 @@ void RecoverWhileSeated(Player* player, State& state, uint32 elapsed)
         return;
     }
     float const seconds = elapsed / 1000.0f;
-    float const campRecovery = state.restingCamp >= 0 ? 0.005f + 0.0025f * state.restingCamp : 0.0f;
+    float const campRecovery = state.restingCamp >= 0 ? 0.0225f + 0.0025f * state.restingCamp : 0.0f;
     float const recovery = 0.0025f + campRecovery;
     float const manaRecovery = 0.25f + 0.75f *
         std::min(state.displayFood, state.displayWater) / 100.0f;
+    float const foodRecovery = SeatedConsumableRecovery(player, SPELL_AURA_MOD_REGEN);
+    float const drinkRecovery = SeatedConsumableRecovery(player, SPELL_AURA_MOD_POWER_REGEN);
     if (player->GetHealth() < player->GetMaxHealth() &&
         !player->HasAuraTypeWithMiscvalue(SPELL_AURA_PREVENT_REGENERATE_POWER, POWER_HEALTH))
     {
-        state.seatedHealth += (player->GetMaxHealth() * recovery +
-            SeatedConsumableRecovery(player, SPELL_AURA_MOD_REGEN)) * seconds;
+        state.seatedHealth += (player->GetMaxHealth() * (recovery + (foodRecovery > 0.0f ? 0.01f : 0.0f)) +
+            foodRecovery) * seconds;
         int32 const amount = int32(state.seatedHealth);
         state.seatedHealth -= amount;
         player->ModifyHealth(amount);
@@ -416,8 +421,8 @@ void RecoverWhileSeated(Player* player, State& state, uint32 elapsed)
     if (player->GetPower(POWER_MANA) < player->GetMaxPower(POWER_MANA) &&
         !player->HasAuraTypeWithMiscvalue(SPELL_AURA_PREVENT_REGENERATE_POWER, POWER_MANA + 1))
     {
-        state.seatedMana += (player->GetMaxPower(POWER_MANA) * recovery +
-            SeatedConsumableRecovery(player, SPELL_AURA_MOD_POWER_REGEN)) * manaRecovery * seconds;
+        state.seatedMana += (player->GetMaxPower(POWER_MANA) *
+            (recovery + (drinkRecovery > 0.0f ? 0.01f : 0.0f)) + drinkRecovery) * manaRecovery * seconds;
         int32 const amount = int32(state.seatedMana);
         state.seatedMana -= amount;
         player->ModifyPower(POWER_MANA, amount);
@@ -575,6 +580,22 @@ int32 NearbyCamp(Player* player, float* lightDistance = nullptr)
         }
         ++camp;
     }
+    if (IsOldSchoolPlayer(player) && !map->Instanceable())
+    {
+        std::list<GameObject*> braziers;
+        player->GetGameObjectListWithEntryInGrid(braziers, ConjuredBrazier, 20.0f);
+        for (GameObject* fire : braziers)
+        {
+            if (fire->GetSpellId() != ConjureCampfire || !fire->GetOwnerGUID().IsPlayer() ||
+                !player->InSamePhase(fire) || precipitation)
+                continue;
+            float const distance = player->GetExactDist(fire);
+            if (lightDistance)
+                *lightDistance = std::min(*lightDistance, distance);
+            if (player->IsWithinDistInMap(fire, 15.0f))
+                tier = std::max(tier, 0);
+        }
+    }
     return tier;
 }
 
@@ -690,7 +711,7 @@ void RestAtCamp(Player* player, State& state, int32 tier, uint32 elapsed)
 {
     bool const oldSchool = CoANeeds::IsOldSchoolTrial &&
         CoANeeds::IsOldSchoolTrial(player->GetGUID().GetCounter());
-    state.restingCamp = player->IsAlive() && !player->IsInCombat() ? tier : -1;
+    state.restingCamp = player->IsAlive() && (oldSchool || !player->IsInCombat()) ? tier : -1;
     for (uint32 index = 0; index < 3; ++index)
         SetAura(player, CampRest + index, state.restingCamp == int32(index));
     if (state.restingCamp >= 0 && !oldSchool)
@@ -1528,8 +1549,8 @@ public:
             {
                 if (player->IsSitState())
                     player->SetStandState(UNIT_STAND_STATE_STAND);
-                else if (player->IsInCombat() || player->HasUnitState(UNIT_STATE_CONTROLLED))
-                    ChatHandler(player->GetSession()).SendSysMessage("Finish combat before resting.");
+                else if (player->HasUnitState(UNIT_STATE_CONTROLLED))
+                    ChatHandler(player->GetSession()).SendSysMessage("You cannot rest while controlled.");
                 else if (player->isMoving() || player->IsMounted() || player->IsInFlight()
                     || player->IsInWater() || player->IsFlying())
                     ChatHandler(player->GetSession()).SendSysMessage("Stop on dry ground before resting.");
@@ -1552,6 +1573,24 @@ class NeedsUnit : public UnitScript
 public:
     NeedsUnit() : UnitScript("CoANeedsUnit", true,
         { UNITHOOK_ON_DAMAGE, UNITHOOK_ON_BEFORE_HEAL_ABSORB, UNITHOOK_ON_AURA_APPLY, UNITHOOK_ON_AURA_REMOVE }) { }
+
+    uint32 DealDamage(Unit* attacker, Unit* victim, uint32 damage, DamageEffectType type,
+        std::optional<uint32>*) override
+    {
+        Player* player = victim ? victim->ToPlayer() : nullptr;
+        if (!damage || type == DOT || type == NODAMAGE || !attacker || !Affects(player) ||
+            !IsOldSchoolPlayer(player) || !player->IsSitState() || !attacker->IsHostileTo(player))
+            return damage;
+        std::lock_guard<std::recursive_mutex> lock(Mutex);
+        player->SetStandState(UNIT_STAND_STATE_STAND);
+        player->RemoveAurasDueToSpell(SeatedRecoveryAura);
+        if (auto found = States.find(player->GetGUID().GetCounter()); found != States.end())
+        {
+            found->second.seatedHealth = 0.0f;
+            found->second.seatedMana = 0.0f;
+        }
+        return damage;
+    }
 
     void OnBeforeHealAbsorb(HealInfo& heal) override
     {
