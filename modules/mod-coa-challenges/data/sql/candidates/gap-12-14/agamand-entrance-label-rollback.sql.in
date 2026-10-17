@@ -1,0 +1,5 @@
+UPDATE `creature_template`
+SET `name` = 'Agamand Road Scout', `subname` = 'Old School public expedition'
+WHERE @gap12_ready = 1 AND `entry` = 997126
+    AND `name` = 'Agamand Mills - 5 players' AND `subname` = ''
+    AND `gossip_menu_id` = 997126 AND `faction` = 35;
