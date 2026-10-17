@@ -1,0 +1,119 @@
+{
+  "status": "source candidate; not executed; not live; client rendering unobserved",
+  "baseline": "17665abe9d1bf6c0438460f70aba35cb9611f38e plus retained first-three applied migration evidence; does not assert live-current data",
+  "owner": "cloud existing_polish child; disjoint candidate paths",
+  "sql": "modules/mod-coa-challenges/data/sql/candidates/continued-existing-polish/witchwing-named-identity.sql",
+  "sha256": "3881bb246dcb82612cd6ebb19f7dba786bacb2b4e69327c5ab8f28f8446dbf7d",
+  "decision": "Choose one existing harpy model with exactly matching reviewed bounding_radius/combat_reach/gender to preserve native reach. Retain equipment and all gameplay fields. Reject otherwise plausible centaur and Serena variants because model-info reach differs.",
+  "changes": [
+    {
+      "entry": 997035,
+      "name": "Windcaller Shree",
+      "sourceModelDonorEntry": 3280,
+      "oldDisplay": 1350,
+      "proposedModelDonorEntry": 2020,
+      "donorName": "Bloodfeather Wind Witch",
+      "newDisplay": 10869,
+      "equipment": "Stock3280 and2020 have no equip rows in reviewed base; custom equipment remains unchanged. No virtual slot changes.",
+      "modelInfoMatch": {
+        "BoundingRadius": 0.5474,
+        "CombatReach": 1.725,
+        "Gender": 1,
+        "DisplayID_Other_Gender": 0,
+        "VerifiedBuild": 0
+      },
+      "rationale": "Same harpy caster family and caster role; model10869 is not cloned by the current Witchwing3276/3277/3278/3279/3280 roster. Actual distinction and rendering require postdeployment QA."
+    }
+  ],
+  "sourceFiles": [
+    {
+      "path": "data/sql/base/db_world/creature_template_model.sql",
+      "sha256": "acef683affa08ccd91adda3e74ec8307c9c2af5804bb21a88981cb0b583e936a"
+    },
+    {
+      "path": "data/sql/base/db_world/creature_template.sql",
+      "sha256": "0066e4fd35b809986dd325487515087f5a95f4ffe50ea03846c8d8bf5196870a"
+    },
+    {
+      "path": "data/sql/base/db_world/creature_equip_template.sql",
+      "sha256": "877205c149fd447b08f0ff2c65976f20c862cd42f068a6fcc294a76c7108936a"
+    },
+    {
+      "path": "data/sql/updates/pending_db_world/rev_20261014_68_old_school_west_public_dungeons.sql",
+      "sha256": "420a6daf996abad3c87a3566979a064eb6a372f389d1b4fd84a29a8aada19735"
+    },
+    {
+      "path": "data/sql/updates/pending_db_world/rev_20261014_72_old_school_west_runtime_fix.sql",
+      "sha256": "906a39a9eb3c693a517cfd19ad7bf566e774bb90238ab50291898dd8af371a4b"
+    },
+    {
+      "path": "data/sql/updates/pending_db_world/rev_20261016_15_old_school_kolkar_dungeon_polish.sql",
+      "sha256": "0a52cc3760f2627edcfbb2d7b8723a646c7d42e9dbfb7d3aac4f304afcac6b20"
+    },
+    {
+      "path": "data/sql/updates/pending_db_world/rev_20261016_16_old_school_witchwing_dungeon_polish.sql",
+      "sha256": "05473838b409178812acb254292d56400c0c8cb5a880a2d1e03c8ab1ca389dac"
+    },
+    {
+      "path": "data/sql/updates/pending_db_world/rev_20261016_17_old_school_razormane_dungeon_polish.sql",
+      "sha256": "83888d2ad18cef9ed7f55aeafd6b6a4b3d27f27edbbef089ff0b7a3c3c0474ee"
+    },
+    {
+      "path": "data/sql/base/db_world/creature_model_info.sql",
+      "sha256": "03a27c913ac54dea93e3231ee54cbbfb64450d7be108186f3ecbedc2ec2e6196"
+    }
+  ],
+  "exactStockRows": {
+    "data/sql/base/db_world/creature_template_model.sql": [
+      {
+        "line": 1845,
+        "text": "(2020,0,10869,1,1,51831),"
+      },
+      {
+        "line": 3124,
+        "text": "(3280,0,1350,1,1,51831),"
+      }
+    ],
+    "data/sql/base/db_world/creature_template.sql": [
+      {
+        "line": 1767,
+        "text": "(2020,0,0,0,0,0,'Bloodfeather Wind Witch',NULL,NULL,0,9,10,0,514,0,1.38889,0.85714,1,1,18,0,0,1,2000,2000,1,1,1,0,2048,0,0,7,0,2020,2020,0,0,0,6,17,'SmartAI',0,1,1,1,1,1,0,100,1,0,0,'',12340),"
+      },
+      {
+        "line": 2927,
+        "text": "(3280,0,0,0,0,0,'Witchwing Windcaller',NULL,NULL,0,17,18,0,514,0,1.38889,1.14286,1,1,18,0,0,1,2000,2000,1,1,2,0,2048,0,0,7,0,3280,3280,0,0,0,20,47,'SmartAI',1,1,1,1,1,1,0,0,1,0,0,'',12340),"
+      }
+    ],
+    "data/sql/base/db_world/creature_equip_template.sql": [],
+    "data/sql/base/db_world/creature_model_info.sql": [
+      {
+        "line": 942,
+        "text": "(1350,0.5474,1.725,1,0,0),"
+      },
+      {
+        "line": 7319,
+        "text": "(10869,0.5474,1.725,1,0,0),"
+      }
+    ]
+  },
+  "laterUpdateReview": "72 does not write model table. 15 writes model997028 from997023;16 no model table write;17 writes997018 from3902. No model override of997025/997035 in those files. SmartAI and loot in15/16/17 untouched.",
+  "preserved": [
+    "DisplayScale",
+    "Probability",
+    "VerifiedBuild",
+    "equipment",
+    "all spawn/home/facing/path/phase/population",
+    "levels/stats/XP/loot/combat mechanics",
+    "Bristleback guide and teleport"
+  ],
+  "rollbackSql": "UPDATE `creature_template_model`\nSET `CreatureDisplayID` = 1350\nWHERE `CreatureID` = 997035 AND `Idx` = 0 AND `CreatureDisplayID` = 10869;\n",
+  "adjustment": "Reverse only matching display10869 using rollbackSql; source preflight requires expected old1350 and exact reviewed target model-info fields. Guard is per-row and does not prove current live baseline.",
+  "limits": [
+    "Local preflight must confirm both expected current model and target model-info rows; reviewed stock is not live proof.",
+    "Actual render/silhouette QA follows local deployment.",
+    "No ambient SQL: no compatible addon pairing established in bounded source pass.",
+    "Kolkar excluded: sole exact radius/reach match to9443 in base model-info is9443 itself; preserve combat reach rather than use differently sized named centaur.",
+    "Razormane unchanged in this one-target supported subset."
+  ],
+  "verification": "Static SQL codestyle passed for exact SQL candidate. No tests/build/runtime/DB jobs."
+}
