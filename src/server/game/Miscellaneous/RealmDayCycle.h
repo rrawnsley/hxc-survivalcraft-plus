@@ -7,8 +7,8 @@
 
 namespace AscensionRealmClock
 {
-inline constexpr uint32 RealDaylightSeconds = HOUR;
-inline constexpr uint32 RealNightSeconds = 15 * MINUTE;
+inline constexpr uint32 RealDaylightSeconds = 96 * MINUTE;
+inline constexpr uint32 RealNightSeconds = 24 * MINUTE;
 inline constexpr uint32 RealDaySeconds = RealDaylightSeconds + RealNightSeconds;
 
 inline uint32 CycleSeconds()
@@ -22,17 +22,29 @@ inline bool IsDaylight()
     return CycleSeconds() < RealDaylightSeconds;
 }
 
+inline float GameSpeed(bool daylight)
+{
+    float const gameHoursInMinutes = float(12 * HOUR / MINUTE);
+    return daylight ? gameHoursInMinutes / RealDaylightSeconds
+        : gameHoursInMinutes / RealNightSeconds;
+}
+
 inline float GameSpeed()
 {
-    return IsDaylight() ? 0.2f : 0.8f;
+    return GameSpeed(IsDaylight());
+}
+
+inline uint32 TimeOfDaySeconds(uint32 cycleSeconds)
+{
+    uint32 const seconds = cycleSeconds % RealDaySeconds;
+    return seconds < RealDaylightSeconds
+        ? 6 * HOUR + uint32(uint64(seconds) * 12 * HOUR / RealDaylightSeconds)
+        : (18 * HOUR + uint32(uint64(seconds - RealDaylightSeconds) * 12 * HOUR / RealNightSeconds)) % DAY;
 }
 
 inline uint32 TimeOfDaySeconds()
 {
-    uint32 const seconds = CycleSeconds();
-    return seconds < RealDaylightSeconds
-        ? 6 * HOUR + seconds * 12
-        : (18 * HOUR + (seconds - RealDaylightSeconds) * 48) % DAY;
+    return TimeOfDaySeconds(CycleSeconds());
 }
 
 inline uint32 Hour()

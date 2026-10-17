@@ -54,6 +54,7 @@ constexpr uint32 ConjuredBrazier = 194528;
 constexpr uint32 OldSchoolRestedCapMs = 20 * 60 * 1000;
 constexpr uint32 OldSchoolRestedStandingRate = 5;
 constexpr uint32 OldSchoolRestedSittingRate = 10;
+constexpr float NightLightCampExtensionYards = 30.0f;
 constexpr std::array<uint32, 3> OldSchoolCampLogs = { 8210210, 8210211, 8210212 };
 constexpr uint32 Fellowship = 996103;
 constexpr uint32 CampAbility = 996106;
@@ -238,6 +239,9 @@ bool IsNight()
     return AscensionRealmClock::IsDark();
 }
 
+bool Precipitation(Player* player);
+bool IsOldSchoolPlayer(Player const* player);
+
 uint32 NightLight(uint32 mapId, uint32 warmth)
 {
     uint32 index = 0;
@@ -249,12 +253,10 @@ uint32 NightLight(uint32 mapId, uint32 warmth)
         case 571: index = 3; break;
         default: return 0;
     }
-    // The first profile is night; the other two preserve its sky while
-    // gradually warming the ground near a light source.
     return 101001 + index + (warmth == 2 ? 4 : warmth == 1 ? 8 : 0);
 }
 
-void RefreshNightLight(Player* player, State& state, float campDistance = 1000.0f)
+void RefreshNightLight(Player* player, State& state, int32 campTier)
 {
     Map* map = player->FindMap();
     bool outdoors = Config.darkness && map && !map->Instanceable() && player->IsOutdoors() &&
@@ -264,7 +266,7 @@ void RefreshNightLight(Player* player, State& state, float campDistance = 1000.0
         state.torchLit = false;
     SetAura(player, TorchAura, state.torchLit);
     uint32 mapId = map ? map->GetId() : 0;
-    uint32 warmth = state.torchLit || campDistance <= 6.0f ? 2 : campDistance <= 20.0f ? 1 : 0;
+    uint32 warmth = outdoors && state.torchLit ? 2u : outdoors && campTier >= 0 ? 1u : 0u;
     uint32 lightId = outdoors && IsNight() ? NightLight(mapId, warmth) : 0;
     uint32 zoneId = player->GetZoneId();
     if (state.lightSent && state.lightMap == mapId && state.lightZone == zoneId && state.lightId == lightId)
@@ -278,11 +280,17 @@ void RefreshNightLight(Player* player, State& state, float campDistance = 1000.0
     }
     if (map)
     {
+        uint32 transition = 12000;
+        if (!state.lightSent)
+            transition = 1000;
+        else if (!state.lightId || !lightId)
+            transition = 300000;
+        else if (state.lightId != lightId)
+            transition = 30000;
         WorldPacket packet(SMSG_OVERRIDE_LIGHT, 12);
         packet << uint32(GetDefaultMapLight(mapId));
         packet << uint32(lightId);
-        packet << uint32(state.lightSent && state.lightId != lightId && (!state.lightId || !lightId) ? 300000 :
-            state.lightSent ? 12000 : 1000);
+        packet << transition;
         player->SendDirectMessage(&packet);
         state.lightMap = mapId;
         state.lightZone = zoneId;
@@ -479,6 +487,9 @@ void Unlock(Player* player)
     player->learnSpell(SurveyAbility);
     if (player->HasSpell(SplintAbility))
         player->removeSpell(SplintAbility, SPEC_MASK_ALL, false);
+    for (uint32 tier = 0; tier < 3; ++tier)
+        if (player->HasSpell(CampAbility + tier))
+            player->removeSpell(CampAbility + tier, SPEC_MASK_ALL, false);
     if (Config.tools)
     {
         for (uint32 index = 0; index < 8; ++index)
@@ -497,9 +508,6 @@ void Unlock(Player* player)
         player->learnSpell(DodgeAbility);
     if (player->GetLevel() >= 60)
         player->learnSpell(WindAbility);
-    for (uint32 tier = 0; tier < 3; ++tier)
-        if (player->GetPureSkillValue(SurvivalistSkill) >= RecipeSkill(CampAbility + tier))
-            player->learnSpell(CampAbility + tier);
     player->learnSpell(PackAbility);
 }
 
@@ -544,13 +552,13 @@ bool Precipitation(Player* player)
     }
 }
 
-int32 NearbyCamp(Player* player, float* lightDistance = nullptr)
+int32 NearbyCamp(Player* player, float lightExtensionYards = 0.0f, int32* lightTierOut = nullptr)
 {
-    if (lightDistance)
-        *lightDistance = 1000.0f;
     Map* map = player->FindMap();
     if (!map)
         return -1;
+    if (lightTierOut)
+        *lightTierOut = -1;
     uint32 now = uint32(std::time(nullptr));
     int32 tier = -1;
     bool const precipitation = Precipitation(player);
@@ -571,11 +579,11 @@ int32 NearbyCamp(Player* player, float* lightDistance = nullptr)
             }
             if ((!precipitation || camp->second.tier > 0) && player->InSamePhase(fire))
             {
-                float const distance = player->GetExactDist(fire);
-                if (lightDistance)
-                    *lightDistance = std::min(*lightDistance, distance);
-                if (player->IsWithinDistInMap(fire, 15.0f + 5.0f * camp->second.tier))
+                    float const benefitRadius = 15.0f + 5.0f * camp->second.tier;
+                    if (player->IsWithinDistInMap(fire, benefitRadius))
                     tier = std::max(tier, int32(camp->second.tier));
+                    if (lightTierOut && player->IsWithinDistInMap(fire, benefitRadius + lightExtensionYards))
+                        *lightTierOut = std::max(*lightTierOut, int32(camp->second.tier));
             }
         }
         ++camp;
@@ -583,17 +591,17 @@ int32 NearbyCamp(Player* player, float* lightDistance = nullptr)
     if (IsOldSchoolPlayer(player) && !map->Instanceable())
     {
         std::list<GameObject*> braziers;
-        player->GetGameObjectListWithEntryInGrid(braziers, ConjuredBrazier, 20.0f);
+        player->GetGameObjectListWithEntryInGrid(braziers, ConjuredBrazier,
+            lightTierOut ? 20.0f + lightExtensionYards : 20.0f);
         for (GameObject* fire : braziers)
         {
             if (fire->GetSpellId() != ConjureCampfire || !fire->GetOwnerGUID().IsPlayer() ||
                 !player->InSamePhase(fire) || precipitation)
                 continue;
-            float const distance = player->GetExactDist(fire);
-            if (lightDistance)
-                *lightDistance = std::min(*lightDistance, distance);
             if (player->IsWithinDistInMap(fire, 15.0f))
                 tier = std::max(tier, 0);
+            if (lightTierOut && player->IsWithinDistInMap(fire, 15.0f + lightExtensionYards))
+                *lightTierOut = std::max(*lightTierOut, 0);
         }
     }
     return tier;
@@ -673,7 +681,7 @@ void PlaceCamp(Player* player, State& state, uint32 tier)
         return;
     }
     float orientation = player->GetOrientation();
-    GameObject* fire = player->SummonGameObject(tier == 2 ? 1831 : 1798,
+    GameObject* fire = player->SummonGameObject(1798,
         player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), orientation,
         0, 0, std::sin(orientation / 2), std::cos(orientation / 2), Config.campLifetime);
     if (!fire)
@@ -1232,15 +1240,10 @@ public:
             RefreshResourceTracking(player, state);
             return;
         }
-        if (id >= CampAbility && id <= PackAbility)
+        if (id == PackAbility)
         {
-            if (id == PackAbility)
-            {
-                if (!player->IsInCombat())
-                    PackCamp(player);
-            }
-            else
-                PlaceCamp(player, state, id - CampAbility);
+            if (!player->IsInCombat())
+                PackCamp(player);
             Send(player, state);
             return;
         }
@@ -1431,13 +1434,13 @@ public:
         uint64 steady = Milliseconds();
         bool alive = player->IsAlive();
         bool pvp = player->InBattleground() || player->InArena();
-        float campLightDistance = 1000.0f;
-        int32 campTier = NearbyCamp(player, &campLightDistance);
+        int32 lightCampTier = -1;
+        int32 campTier = NearbyCamp(player, NightLightCampExtensionYards, &lightCampTier);
         RestAtCamp(player, state, campTier, elapsed);
         RecoverWhileSeated(player, state, elapsed);
         RefreshResourceTracking(player, state);
         TickWeather(player, state, campTier, elapsed);
-        RefreshNightLight(player, state, campLightDistance);
+        RefreshNightLight(player, state, lightCampTier);
         RefreshInjuries(player, state);
         RefreshProfessions(player);
         if (alive && !pvp && !state.delegated && campTier < 0)
@@ -1775,9 +1778,9 @@ public:
             if (found != States.end() && player->IsAlive())
             {
                 found->second.torchLit = !found->second.torchLit;
-                float campLightDistance = 1000.0f;
-                NearbyCamp(player, &campLightDistance);
-                RefreshNightLight(player, found->second, campLightDistance);
+                int32 lightCampTier = -1;
+                NearbyCamp(player, NightLightCampExtensionYards, &lightCampTier);
+                RefreshNightLight(player, found->second, lightCampTier);
                 ChatHandler(player->GetSession()).SendSysMessage(found->second.torchLit ?
                     "You light your torch." : "You put out your torch.");
             }

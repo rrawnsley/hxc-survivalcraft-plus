@@ -55,6 +55,56 @@
 
 namespace CoAChallenges
 {
+    uint32 OldSchoolChallenge(Player const* player);
+    uint32 OldSchoolTownProjectContributionCount(uint32 questId);
+    uint32 OldSchoolTownProjectContributionGoal(uint32 questId);
+    char const* OldSchoolTownProjectName(uint32 questId);
+    bool AddOldSchoolTownProjectContribution(uint32 questId, uint32& progress);
+    bool IsOldSchoolTownProjectQuest(uint32 questId);
+    uint32 OldSchoolTownProjectExperienceBonusPercent();
+
+    constexpr uint32 QUEST_OLD_SCHOOL_CROSSROADS_WORKSHOP = 255086;
+    constexpr uint32 QUEST_OLD_SCHOOL_BRILL_WORKSHOP = 255091;
+    constexpr uint32 QUEST_OLD_SCHOOL_ANVILMAR_WORKSHOP = 255094;
+    constexpr uint32 QUEST_OLD_SCHOOL_RAZOR_HILL_WORKSHOP = 255127;
+    constexpr uint32 QUEST_OLD_SCHOOL_GOLDSHIRE_WORKSHOP = 255128;
+    constexpr uint32 QUEST_OLD_SCHOOL_THELSAMAR_WORKSHOP = 255140;
+    constexpr uint32 QUEST_OLD_SCHOOL_AUBERDINE_WORKSHOP = 255141;
+    constexpr uint32 QUEST_OLD_SCHOOL_AZURE_WATCH_WORKSHOP = 255142;
+    constexpr uint32 QUEST_OLD_SCHOOL_SEPULCHER_WORKSHOP = 255143;
+    constexpr uint32 QUEST_OLD_SCHOOL_DOLANAAR_WORKSHOP = 255144;
+    constexpr uint32 QUEST_OLD_SCHOOL_CAMP_NARACHE_WORKSHOP = 255145;
+    constexpr uint32 QUEST_OLD_SCHOOL_BLOODHOOF_WORKSHOP = 255146;
+    constexpr uint32 QUEST_OLD_SCHOOL_RATCHET_WORKSHOP = 255149;
+    constexpr uint32 QUEST_OLD_SCHOOL_BOOTY_BAY_WORKSHOP = 255150;
+    constexpr uint32 WORLD_STATE_OLD_SCHOOL_CROSSROADS_WORKSHOP = 990086;
+    constexpr uint32 WORLD_STATE_OLD_SCHOOL_BRILL_WORKSHOP = 990087;
+    constexpr uint32 WORLD_STATE_OLD_SCHOOL_ANVILMAR_WORKSHOP = 990088;
+    constexpr uint32 WORLD_STATE_OLD_SCHOOL_RAZOR_HILL_WORKSHOP = 990089;
+    constexpr uint32 WORLD_STATE_OLD_SCHOOL_GOLDSHIRE_WORKSHOP = 990090;
+    constexpr uint32 WORLD_STATE_OLD_SCHOOL_THELSAMAR_WORKSHOP = 990091;
+    constexpr uint32 WORLD_STATE_OLD_SCHOOL_AUBERDINE_WORKSHOP = 990092;
+    constexpr uint32 WORLD_STATE_OLD_SCHOOL_AZURE_WATCH_WORKSHOP = 990093;
+    constexpr uint32 WORLD_STATE_OLD_SCHOOL_SEPULCHER_WORKSHOP = 990094;
+    constexpr uint32 WORLD_STATE_OLD_SCHOOL_DOLANAAR_WORKSHOP = 990095;
+    constexpr uint32 WORLD_STATE_OLD_SCHOOL_CAMP_NARACHE_WORKSHOP = 990096;
+    constexpr uint32 WORLD_STATE_OLD_SCHOOL_BLOODHOOF_WORKSHOP = 990097;
+    constexpr uint32 WORLD_STATE_OLD_SCHOOL_RATCHET_WORKSHOP = 990098;
+    constexpr uint32 WORLD_STATE_OLD_SCHOOL_BOOTY_BAY_WORKSHOP = 990099;
+    constexpr uint32 OLD_SCHOOL_CROSSROADS_WORKSHOP_GOAL = 20;
+    constexpr uint32 OLD_SCHOOL_BRILL_WORKSHOP_GOAL = 20;
+    constexpr uint32 OLD_SCHOOL_ANVILMAR_WORKSHOP_GOAL = 20;
+    constexpr uint32 OLD_SCHOOL_RAZOR_HILL_WORKSHOP_GOAL = 20;
+    constexpr uint32 OLD_SCHOOL_GOLDSHIRE_WORKSHOP_GOAL = 20;
+    constexpr uint32 OLD_SCHOOL_THELSAMAR_WORKSHOP_GOAL = 20;
+    constexpr uint32 OLD_SCHOOL_AUBERDINE_WORKSHOP_GOAL = 20;
+    constexpr uint32 OLD_SCHOOL_AZURE_WATCH_WORKSHOP_GOAL = 20;
+    constexpr uint32 OLD_SCHOOL_SEPULCHER_WORKSHOP_GOAL = 20;
+    constexpr uint32 OLD_SCHOOL_DOLANAAR_WORKSHOP_GOAL = 20;
+    constexpr uint32 OLD_SCHOOL_CAMP_NARACHE_WORKSHOP_GOAL = 20;
+    constexpr uint32 OLD_SCHOOL_BLOODHOOF_WORKSHOP_GOAL = 20;
+    constexpr uint32 OLD_SCHOOL_RATCHET_WORKSHOP_GOAL = 20;
+    constexpr uint32 OLD_SCHOOL_BOOTY_BAY_WORKSHOP_GOAL = 20;
 
     // Broadcast colors, sampled from the live client's chat (2026-09-13):
     //   [TrialName] = FFA500, player name = 43C6DB, killer/cause = FF0000.

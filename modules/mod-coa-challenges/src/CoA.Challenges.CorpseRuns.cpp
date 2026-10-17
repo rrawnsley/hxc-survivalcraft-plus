@@ -3,6 +3,7 @@
 #include "AllCreatureScript.h"
 #include "CreatureScript.h"
 #include "Corpse.h"
+#include "EventMap.h"
 #include "Map.h"
 #include "ObjectMgr.h"
 #include "PassiveAI.h"
@@ -10,6 +11,12 @@
 #include "TemporarySummon.h"
 #include "Trainer.h"
 #include "WorldScript.h"
+
+#include <algorithm>
+#include <array>
+#include <ctime>
+#include <string>
+#include <vector>
 
 namespace CoAChallenges
 {
@@ -19,9 +26,12 @@ namespace CoAChallenges
     {
         constexpr char const* PlayerCorpseKey = "coa.old_school.equipment_corpses";
         constexpr char const* EquipmentCorpseKey = "coa.old_school.equipment_corpse";
-        constexpr uint32 EquipmentCorpseDisplay = 11400;
+        constexpr uint32 EquipmentCorpseDisplay = 977363;
         constexpr uint32 TrainerRecoverySender = 900101;
         constexpr uint32 TrainerRecoveryAction = 1;
+        constexpr uint32 TrainerMilestoneSender = 900102;
+        constexpr uint32 TrainerMilestoneChoiceSender = 900103;
+        constexpr uint32 TrainerMilestoneChoiceCount = 4;
 
         uint32 TrainerRecoveryPrice(Player const* player)
         {
@@ -42,6 +52,101 @@ namespace CoAChallenges
                 && trainer->IsTrainerValidForPlayer(player);
         }
 
+        std::string MilestoneSupplySetting(uint32 milestone)
+        {
+            return "core.os.disc.m.0." + std::to_string(milestone);
+        }
+
+        std::vector<uint32> PendingMilestoneChoices(Player* player)
+        {
+            std::vector<uint32> milestones;
+            if (!player || player->GetLevel() < 10 || OldSchoolChallenge(player) != 9001)
+                return milestones;
+
+            for (uint32 milestone = 10; milestone <= player->GetLevel() && milestone <= 60; milestone += 10)
+                if (!player->GetPlayerSetting(MilestoneSupplySetting(milestone), 2).value)
+                    milestones.push_back(milestone);
+            return milestones;
+        }
+
+        uint32 MilestoneMaterial(uint32 milestone, uint32 choice)
+        {
+            static constexpr std::array<std::array<uint32, 4>, 6> materials = {{
+                {{ 2589, 2318, 2770, 2447 }},
+                {{ 2592, 2319, 2771, 785 }},
+                {{ 2592, 4234, 2772, 2450 }},
+                {{ 4306, 4234, 2772, 2450 }},
+                {{ 4338, 4235, 3858, 8839 }},
+                {{ 14047, 8170, 10620, 13463 }}
+            }};
+            if (milestone < 10 || milestone > 60 || milestone % 10 || choice >= TrainerMilestoneChoiceCount)
+                return 0;
+            return materials[milestone / 10 - 1][choice];
+        }
+
+        void SendMilestoneChoiceMenu(Player* player, Creature* creature, uint32 milestone)
+        {
+            static constexpr std::array<char const*, 4> categories = {
+                "cloth", "leather", "ore", "herbs"
+            };
+            player->PrepareGossipMenu(creature, creature->GetGossipMenuId(), true);
+            for (uint32 choice = 0; choice < categories.size(); ++choice)
+            {
+                uint32 const itemId = MilestoneMaterial(milestone, choice);
+                ItemTemplate const* item = sObjectMgr->GetItemTemplate(itemId);
+                if (!item)
+                    continue;
+                std::string const label = Acore::StringFormat("Choose 2 {} ({})", categories[choice], item->Name1);
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, label, TrainerMilestoneChoiceSender,
+                    (milestone / 10 - 1) * TrainerMilestoneChoiceCount + choice + 1);
+            }
+            SendGossipMenuFor(player, DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
+        }
+
+        bool HandleMilestoneChoice(Player* player, Creature* creature, uint32 sender, uint32 action)
+        {
+            if (sender == TrainerMilestoneSender)
+            {
+                if (!CanUseRecoveryTrainer(player, creature) || !player->IsWithinDistInMap(creature, 5.0f)
+                    || action < 10 || action > 60 || action % 10)
+                {
+                    CloseGossipMenuFor(player);
+                    return true;
+                }
+                std::vector<uint32> const pending = PendingMilestoneChoices(player);
+                if (std::find(pending.begin(), pending.end(), action) == pending.end())
+                {
+                    CloseGossipMenuFor(player);
+                    return true;
+                }
+                SendMilestoneChoiceMenu(player, creature, action);
+                return true;
+            }
+            if (sender != TrainerMilestoneChoiceSender)
+                return false;
+
+            CloseGossipMenuFor(player);
+            if (!CanUseRecoveryTrainer(player, creature) || !player->IsWithinDistInMap(creature, 5.0f)
+                || action < 1 || action > 6 * TrainerMilestoneChoiceCount)
+                return true;
+
+            uint32 const milestone = ((action - 1) / TrainerMilestoneChoiceCount + 1) * 10;
+            uint32 const choice = (action - 1) % TrainerMilestoneChoiceCount;
+            std::vector<uint32> const pending = PendingMilestoneChoices(player);
+            if (std::find(pending.begin(), pending.end(), milestone) == pending.end())
+                return true;
+
+            uint32 const itemId = MilestoneMaterial(milestone, choice);
+            if (!itemId || !sObjectMgr->GetItemTemplate(itemId) || !player->AddItem(itemId, 2))
+            {
+                NotifyPlayer(player, "Old School: there is no room for your milestone materials.");
+                return true;
+            }
+            player->UpdatePlayerSetting(MilestoneSupplySetting(milestone), 2, 1);
+            NotifyPlayer(player, "Old School: level {} profession materials claimed.", milestone);
+            return true;
+        }
+
         PreparedQueryResult SelectOwnerCorpses(Player* player)
         {
             auto* statement = CharacterDatabase.GetPreparedStatement(CHAR_SEL_COA_OWNER_EQUIPMENT_CORPSES);
@@ -52,13 +157,17 @@ namespace CoAChallenges
         struct EquipmentCorpsePlayerState : DataMap::Base
         {
             uint32 scanRemaining = 0;
+            uint32 recentBindRespawnMs = 0;
             bool bindRespawn = false;
+            bool repeatedBindRespawnDeath = false;
         };
 
         struct EquipmentCorpseState : DataMap::Base
         {
             uint64 id = 0;
             uint32 owner = 0;
+            bool memorial = false;
+            std::string inscription;
         };
 
         std::atomic<uint64> NextEquipmentCorpseId{ 1 };
@@ -74,7 +183,7 @@ namespace CoAChallenges
         }
 
         void AppendCorpseHeader(CharacterDatabaseTransaction const& transaction, Player* player,
-            uint64 id, WorldLocation const& location, uint32 instance)
+            uint64 id, WorldLocation const& location, uint32 instance, bool memorial = false, bool unknownLevel = false)
         {
             auto* statement = CharacterDatabase.GetPreparedStatement(CHAR_INS_COA_EQUIPMENT_CORPSE);
             statement->SetData(0, id);
@@ -87,6 +196,9 @@ namespace CoAChallenges
             statement->SetData(7, location.GetOrientation());
             statement->SetData(8, EquipmentCorpseDisplay);
             statement->SetData(9, uint32(std::time(nullptr)));
+            statement->SetData(10, player->GetName());
+            statement->SetData(11, unknownLevel ? uint8(0) : player->GetLevel());
+            statement->SetData(12, memorial);
             transaction->Append(statement);
         }
 
@@ -126,7 +238,7 @@ namespace CoAChallenges
             }
             uint64 const id = NextEquipmentCorpseId.fetch_add(1);
             CharacterDatabaseTransaction transaction = CharacterDatabase.BeginTransaction();
-            AppendCorpseHeader(transaction, player, id, location, instance);
+            AppendCorpseHeader(transaction, player, id, location, instance, false, true);
             auto* import = CharacterDatabase.GetPreparedStatement(CHAR_INS_COA_EQUIPMENT_CORPSE_LEGACY);
             import->SetData(0, id);
             import->SetData(1, owner);
@@ -239,6 +351,10 @@ namespace CoAChallenges
             select->SetData(0, player->GetGUID().GetCounter());
             select->SetData(1, player->GetMapId());
             select->SetData(2, player->GetInstanceId());
+            select->SetData(3, player->GetPositionX() - 120.0f);
+            select->SetData(4, player->GetPositionX() + 120.0f);
+            select->SetData(5, player->GetPositionY() - 120.0f);
+            select->SetData(6, player->GetPositionY() + 120.0f);
             PreparedQueryResult rows = CharacterDatabase.Query(select);
             if (!rows)
                 return;
@@ -259,18 +375,35 @@ namespace CoAChallenges
                             continue;
                 }
 
-                TempSummon* body = player->SummonCreature(OldSchoolEquipmentCorpseEntry, location,
-                    TEMPSUMMON_MANUAL_DESPAWN);
+                TempSummon* body = player->GetMap()->SummonCreature(OldSchoolEquipmentCorpseEntry, location);
+                if (body)
+                    body->SetTempSummonType(TEMPSUMMON_MANUAL_DESPAWN);
                 if (!body)
                     continue;
                 EquipmentCorpseState* state = body->CustomData.GetDefault<EquipmentCorpseState>(EquipmentCorpseKey);
                 state->id = id;
-                state->owner = player->GetGUID().GetCounter();
+                state->owner = fields[6].Get<uint32>();
+                state->memorial = fields[10].Get<bool>();
+                std::string const name = fields[7].Get<std::string>();
+                uint32 const level = fields[8].Get<uint32>();
+                uint32 const created = fields[9].Get<uint32>();
+                std::time_t const deathTime = created;
+                std::tm date{};
+#ifdef _WIN32
+                gmtime_s(&date, &deathTime);
+#else
+                gmtime_r(&deathTime, &date);
+#endif
+                std::string const identity = name.empty() ? "Fallen adventurer" : name;
+                std::string const levelText = level ? Acore::StringFormat("Level {}", level) : "Level unknown";
+                state->inscription = Acore::StringFormat("{} - {} - {:04}-{:02}-{:02} UTC{}",
+                    identity, levelText, date.tm_year + 1900, date.tm_mon + 1, date.tm_mday,
+                    state->memorial ? " - Old School Hardcore memorial" : "");
                 body->SetOwnerGUID(ObjectGuid::Empty);
                 body->SetPhaseMask(PHASEMASK_ANYWHERE, true);
                 body->SetDisplayId(EquipmentCorpseDisplay);
                 body->SetNativeDisplayId(EquipmentCorpseDisplay);
-                body->SetStandState(UNIT_STAND_STATE_DEAD);
+                body->SetStandState(UNIT_STAND_STATE_STAND);
                 body->SetReactState(REACT_PASSIVE);
                 body->SetUnitFlag(UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC);
                 std::lock_guard<std::mutex> lock(EquipmentCorpseMutex);
@@ -279,6 +412,40 @@ namespace CoAChallenges
             while (rows->NextRow());
         }
 
+        class OldSchoolGravestoneAI : public PassiveAI
+        {
+        public:
+            explicit OldSchoolGravestoneAI(Creature* creature) : PassiveAI(creature)
+            {
+                _events.ScheduleEvent(1, 5s);
+            }
+
+            void UpdateAI(uint32 diff) override
+            {
+                _events.Update(diff);
+                if (!_events.ExecuteEvent())
+                    return;
+                _events.ScheduleEvent(1, 5s);
+                EquipmentCorpseState const* state = me->CustomData.Get<EquipmentCorpseState>(EquipmentCorpseKey);
+                if (!state || state->memorial)
+                    return;
+                auto* select = CharacterDatabase.GetPreparedStatement(CHAR_SEL_COA_EQUIPMENT_CORPSE_HEADER);
+                select->SetData(0, state->id);
+                if (CharacterDatabase.Query(select))
+                    return;
+                {
+                    std::lock_guard<std::mutex> lock(EquipmentCorpseMutex);
+                    if (auto it = EquipmentCorpseGuids.find(state->id); it != EquipmentCorpseGuids.end()
+                        && it->second == me->GetGUID())
+                        EquipmentCorpseGuids.erase(it);
+                }
+                me->DespawnOrUnsummon();
+            }
+
+        private:
+            EventMap _events;
+        };
+
         class OldSchoolEquipmentCorpse : public CreatureScript
         {
         public:
@@ -286,18 +453,21 @@ namespace CoAChallenges
 
             CreatureAI* GetAI(Creature* creature) const override
             {
-                return new PassiveAI(creature);
+                return new OldSchoolGravestoneAI(creature);
             }
 
             bool OnGossipHello(Player* player, Creature* creature) override
             {
                 EquipmentCorpseState const* state = creature->CustomData.Get<EquipmentCorpseState>(EquipmentCorpseKey);
-                if (!state || state->owner != player->GetGUID().GetCounter())
+                if (!state || (!state->memorial && state->owner != player->GetGUID().GetCounter()))
                 {
                     CloseGossipMenuFor(player);
                     return true;
                 }
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Recover my equipment", GOSSIP_SENDER_MAIN, 1);
+                ClearGossipMenuFor(player);
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, state->inscription, GOSSIP_SENDER_MAIN, 0);
+                if (!state->memorial)
+                    AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Recover my equipment", GOSSIP_SENDER_MAIN, 1);
                 SendGossipMenuFor(player, DEFAULT_GOSSIP_MESSAGE, creature->GetGUID());
                 return true;
             }
@@ -307,7 +477,7 @@ namespace CoAChallenges
                 ClearGossipMenuFor(player);
                 CloseGossipMenuFor(player);
                 EquipmentCorpseState const* state = creature->CustomData.Get<EquipmentCorpseState>(EquipmentCorpseKey);
-                if (!state || state->owner != player->GetGUID().GetCounter() || sender != GOSSIP_SENDER_MAIN
+                if (!state || state->memorial || state->owner != player->GetGUID().GetCounter() || sender != GOSSIP_SENDER_MAIN
                     || action != 1 || !player->IsAlive() || player->IsInCombat()
                     || !player->IsWithinDistInMap(creature, 5.0f))
                     return true;
@@ -345,23 +515,42 @@ namespace CoAChallenges
 
             bool CanCreatureGossipHello(Player* player, Creature* creature) override
             {
-                if (!CanUseRecoveryTrainer(player, creature) || !SelectOwnerCorpses(player))
+                if (!CanUseRecoveryTrainer(player, creature))
+                    return false;
+
+                bool const hasCorpses = bool(SelectOwnerCorpses(player));
+                std::vector<uint32> const pendingMilestones = PendingMilestoneChoices(player);
+                if (!hasCorpses && pendingMilestones.empty())
                     return false;
 
                 player->PrepareGossipMenu(creature, creature->GetGossipMenuId(), true);
-                uint32 const price = TrainerRecoveryPrice(player);
-                std::string const label = Acore::StringFormat(
-                    "Recover lost equipment that fits ({} gold, {} silver, {} copper)",
-                    price / 10000, price / 100 % 100, price % 100);
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, label, TrainerRecoverySender,
-                    TrainerRecoveryAction, "Pay the trainer to recover equipment that fits in your bags?",
-                    price, false);
+                if (hasCorpses)
+                {
+                    uint32 const price = TrainerRecoveryPrice(player);
+                    std::string const label = Acore::StringFormat(
+                        "Recover lost equipment that fits ({} gold, {} silver, {} copper)",
+                        price / 10000, price / 100 % 100, price % 100);
+                    AddGossipItemFor(player, GOSSIP_ICON_CHAT, label, TrainerRecoverySender,
+                        TrainerRecoveryAction, "Pay the trainer to recover equipment that fits in your bags?",
+                        price, false);
+                }
+                for (uint32 milestone : pendingMilestones)
+                {
+                    std::string const label = Acore::StringFormat("Choose level {} profession materials", milestone);
+                    AddGossipItemFor(player, GOSSIP_ICON_CHAT, label, TrainerMilestoneSender, milestone);
+                }
                 player->SendPreparedGossip(creature);
                 return true;
             }
 
             bool CanCreatureGossipSelect(Player* player, Creature* creature, uint32 sender, uint32 action) override
             {
+                if (sender == TrainerMilestoneSender || sender == TrainerMilestoneChoiceSender)
+                {
+                    CloseGossipMenuFor(player);
+                    HandleMilestoneChoice(player, creature, sender, action);
+                    return true;
+                }
                 if (sender != TrainerRecoverySender || action != TrainerRecoveryAction)
                     return false;
                 CloseGossipMenuFor(player);
@@ -419,6 +608,22 @@ namespace CoAChallenges
                 return true;
             }
         };
+    }
+
+    void RecordOldSchoolHardcoreMemorial(Player* player)
+    {
+        if (!player || !player->GetSession() || player->GetSession()->IsBot() || OldSchoolChallenge(player) != 9002
+            || !player->IsInWorld() || !player->FindMap() || player->GetMap()->IsBattlegroundOrArena())
+            return;
+
+        WorldLocation const location(player->GetMapId(), player->GetPositionX(), player->GetPositionY(),
+            player->GetPositionZ(), player->GetOrientation());
+        uint64 const id = NextEquipmentCorpseId.fetch_add(1);
+        CharacterDatabaseTransaction transaction = CharacterDatabase.BeginTransaction();
+        AppendCorpseHeader(transaction, player, id, location, player->GetInstanceId(), true);
+        if (!CommitEquipmentTransaction(transaction))
+            LOG_ERROR("module.coa_challenges", "Could not persist Old School Hardcore memorial {} for {}",
+                id, player->GetGUID().ToString());
     }
 
     bool PreserveOldSchoolCorpseEquipment(Player* player)
@@ -497,6 +702,32 @@ namespace CoAChallenges
         return state && state->bindRespawn;
     }
 
+    bool HasRepeatedOldSchoolBindRespawnDeath(Player const* player)
+    {
+        EquipmentCorpsePlayerState const* state = player
+            ? player->CustomData.Get<EquipmentCorpsePlayerState>(PlayerCorpseKey) : nullptr;
+        return state && state->repeatedBindRespawnDeath;
+    }
+
+    void RecordOldSchoolBindRespawnDeath(Player* player)
+    {
+        EquipmentCorpsePlayerState* state = player
+            ? player->CustomData.Get<EquipmentCorpsePlayerState>(PlayerCorpseKey) : nullptr;
+        if (state && state->recentBindRespawnMs)
+            state->repeatedBindRespawnDeath = true;
+    }
+
+    void ClearOldSchoolBindRespawnGuard(Player* player)
+    {
+        EquipmentCorpsePlayerState* state = player
+            ? player->CustomData.Get<EquipmentCorpsePlayerState>(PlayerCorpseKey) : nullptr;
+        if (state)
+        {
+            state->recentBindRespawnMs = 0;
+            state->repeatedBindRespawnDeath = false;
+        }
+    }
+
     bool RespawnOldSchoolAtBind(Player* player)
     {
         if (!player || player->GetSession()->IsBot() || !player->IsInWorld() || player->IsAlive()
@@ -516,6 +747,8 @@ namespace CoAChallenges
         state->bindRespawn = false;
         if (!player->IsAlive())
             return false;
+        state->recentBindRespawnMs = 30000;
+        state->repeatedBindRespawnDeath = false;
         player->SpawnCorpseBones();
         if (!player->TeleportTo(player->m_homebindMapId, player->m_homebindX, player->m_homebindY,
             player->m_homebindZ, 0.0f))
@@ -536,11 +769,16 @@ namespace CoAChallenges
         select->SetData(0, player->GetGUID().GetCounter());
         select->SetData(1, player->GetMapId());
         select->SetData(2, player->GetInstanceId());
+        select->SetData(3, player->GetPositionX() - 5.0f);
+        select->SetData(4, player->GetPositionX() + 5.0f);
+        select->SetData(5, player->GetPositionY() - 5.0f);
+        select->SetData(6, player->GetPositionY() + 5.0f);
         if (PreparedQueryResult rows = CharacterDatabase.Query(select))
             do
             {
                 Field* fields = rows->Fetch();
-                if (player->GetDistance(fields[1].Get<float>(), fields[2].Get<float>(), fields[3].Get<float>()) <= 5.0f)
+                if (!fields[10].Get<bool>() && fields[6].Get<uint32>() == player->GetGUID().GetCounter()
+                    && player->GetDistance(fields[1].Get<float>(), fields[2].Get<float>(), fields[3].Get<float>()) <= 5.0f)
                     RecoverEquipmentCorpse(player, fields[0].Get<uint64>());
             }
             while (rows->NextRow());
@@ -551,13 +789,14 @@ namespace CoAChallenges
         if (!player || player->GetSession()->IsBot() || !player->IsInWorld() || !player->GetMap())
             return;
         EquipmentCorpsePlayerState* state = player->CustomData.GetDefault<EquipmentCorpsePlayerState>(PlayerCorpseKey);
+        state->recentBindRespawnMs = diff >= state->recentBindRespawnMs ? 0 : state->recentBindRespawnMs - diff;
         if (state->scanRemaining > diff)
         {
             state->scanRemaining -= diff;
             return;
         }
         state->scanRemaining = 5000;
-        if (standardTrial && player->HasPlayerFlag(PLAYER_FLAGS_GHOST))
+        if (standardTrial && player->HasPlayerFlag(PLAYER_FLAGS_GHOST) && !state->repeatedBindRespawnDeath)
             RespawnOldSchoolAtBind(player);
         ScanEquipmentCorpses(player);
     }

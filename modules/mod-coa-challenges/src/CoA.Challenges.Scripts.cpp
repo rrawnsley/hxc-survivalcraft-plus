@@ -9,19 +9,82 @@
 #include "AllCreatureScript.h"
 #include "AccountScript.h"
 #include "AreaDefines.h"
+#include "DBCEnums.h"
+#include "DBCStores.h"
 #include "Group.h"
 #include "LocalLevelScaling.h"
+#include "LootMgr.h"
 #include "OldSchoolZoneProfiles.h"
 #include "GlobalScript.h"
 #include "QuestDef.h"
+#include "RealmDayCycle.h"
 
 #include <cmath>
+#include <limits>
 
 using namespace Acore::ChatCommands;
 
 namespace CoAChallenges
 {
+    static constexpr uint32 QUEST_OLD_SCHOOL_RAZORMANE_BOUNTY = 255084;
+    static constexpr uint32 QUEST_OLD_SCHOOL_BRISTLEBACK_BOUNTY = 255085;
+    static constexpr uint32 QUEST_OLD_SCHOOL_TIRAGARDE_BOUNTY = 255087;
+    static constexpr uint32 QUEST_OLD_SCHOOL_VENTURE_MINE_BOUNTY = 255088;
+    static constexpr uint32 QUEST_OLD_SCHOOL_RIVERPAW_BOUNTY = 255089;
+    static constexpr uint32 QUEST_OLD_SCHOOL_AGAMAND_BOUNTY = 255090;
+    static constexpr uint32 QUEST_OLD_SCHOOL_ELWYNN_BOUNTY = 255092;
+    static constexpr uint32 QUEST_OLD_SCHOOL_FROSTMANE_BOUNTY = 255093;
+    static constexpr uint32 QUEST_OLD_SCHOOL_TELDRASSIL_BOUNTY = 255095;
+    static constexpr uint32 QUEST_OLD_SCHOOL_EVERSONG_BOUNTY = 255096;
+    static constexpr uint32 QUEST_OLD_SCHOOL_AZUREMYST_BOUNTY = 255097;
+    static constexpr uint32 QUEST_OLD_SCHOOL_SILVERPINE_BOUNTY = 255098;
+    static constexpr uint32 QUEST_OLD_SCHOOL_LOCH_MODAN_BOUNTY = 255099;
+    static constexpr uint32 QUEST_OLD_SCHOOL_DARKSHORE_BOUNTY = 255100;
+    static constexpr uint32 QUEST_OLD_SCHOOL_DUSKWOOD_BOUNTY = 255101;
+    static constexpr uint32 QUEST_OLD_SCHOOL_GHOSTLANDS_BOUNTY = 255102;
+    static constexpr uint32 QUEST_OLD_SCHOOL_BLOODMYST_BOUNTY = 255103;
+    static constexpr uint32 QUEST_OLD_SCHOOL_REDRIDGE_BOUNTY = 255104;
+    static constexpr uint32 QUEST_OLD_SCHOOL_WETLANDS_BOUNTY = 255105;
+    static constexpr uint32 QUEST_OLD_SCHOOL_BADLANDS_BOUNTY = 255106;
+    static constexpr uint32 QUEST_OLD_SCHOOL_DUSTWALLOW_BOUNTY = 255107;
+    static constexpr uint32 QUEST_OLD_SCHOOL_STRANGLETHORN_BOUNTY = 255108;
+    static constexpr uint32 QUEST_OLD_SCHOOL_FELWOOD_BOUNTY = 255109;
+    static constexpr uint32 QUEST_OLD_SCHOOL_ASHENVALE_BOUNTY = 255118;
+    static constexpr uint32 QUEST_OLD_SCHOOL_THOUSAND_NEEDLES_BOUNTY = 255119;
+    static constexpr uint32 QUEST_OLD_SCHOOL_FERALAS_BOUNTY = 255120;
+    static constexpr uint32 QUEST_OLD_SCHOOL_DESOLACE_BOUNTY = 255121;
+    static constexpr uint32 QUEST_OLD_SCHOOL_STONETALON_BOUNTY = 255122;
+    static constexpr uint32 QUEST_OLD_SCHOOL_HINTERLANDS_BOUNTY = 255123;
+    static constexpr uint32 QUEST_OLD_SCHOOL_TANARIS_BOUNTY = 255124;
+    static constexpr uint32 QUEST_OLD_SCHOOL_BURNING_STEPPES_BOUNTY = 255125;
+    static constexpr uint32 QUEST_OLD_SCHOOL_SWAMP_OF_SORROWS_BOUNTY = 255126;
+    static constexpr uint32 QUEST_OLD_SCHOOL_ARATHI_BOUNTY = 255130;
+    static constexpr uint32 QUEST_OLD_SCHOOL_HILLSBRAD_HORDE_BOUNTY = 255131;
+    static constexpr uint32 QUEST_OLD_SCHOOL_HILLSBRAD_ALLIANCE_BOUNTY = 255132;
+    static constexpr uint32 QUEST_OLD_SCHOOL_ALTERAC_HORDE_BOUNTY = 255133;
+    static constexpr uint32 QUEST_OLD_SCHOOL_ALTERAC_ALLIANCE_BOUNTY = 255134;
+    static constexpr uint32 QUEST_OLD_SCHOOL_BLASTED_LANDS_BOUNTY = 255135;
+    static constexpr uint32 QUEST_OLD_SCHOOL_AZSHARA_BOUNTY = 255136;
+    static constexpr uint32 QUEST_OLD_SCHOOL_SEARING_GORGE_BOUNTY = 255137;
+    static constexpr uint32 QUEST_OLD_SCHOOL_UNGORO_BOUNTY = 255138;
+    static constexpr uint32 QUEST_OLD_SCHOOL_SILITHUS_BOUNTY = 255139;
+    static constexpr uint32 QUEST_OLD_SCHOOL_MOONGLADE_BOUNTY = 255147;
+    static constexpr uint32 QUEST_OLD_SCHOOL_WINTERSPRING_BOUNTY = 255148;
+
+    // Custom trade skills are not included by the core IsProfessionSkill()
+    // helper, but they are real professions in this server and must follow
+    // the same challenge XP and profession restrictions.
+    static bool IsCoAProfessionSkill(uint32 skill)
+    {
+        return IsProfessionSkill(skill)
+            || skill == SKILL_WOODCUTTING
+            || skill == SKILL_WOODWORKING
+            || skill == SKILL_BUSHCRAFT
+            || skill == SKILL_SURVIVALIST;
+    }
+
     uint32 OldSchoolChallenge(Player const* player);
+    void UpdateOldSchoolInitialAreaSupplies(Player* player, uint32 diff);
 
     bool UsesCoreProfessionXP(Player* player)
     {
@@ -1140,6 +1203,81 @@ namespace CoAChallenges
             if (id == 9001 || id == 9002)
                 return id;
         return 0;
+    }
+
+    bool IsOldSchoolHuntQuest(uint32 questId)
+    {
+        return questId == QUEST_OLD_SCHOOL_RAZORMANE_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_BRISTLEBACK_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_TIRAGARDE_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_VENTURE_MINE_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_RIVERPAW_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_AGAMAND_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_ELWYNN_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_FROSTMANE_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_TELDRASSIL_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_EVERSONG_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_AZUREMYST_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_SILVERPINE_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_LOCH_MODAN_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_DARKSHORE_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_DUSKWOOD_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_GHOSTLANDS_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_BLOODMYST_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_REDRIDGE_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_WETLANDS_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_BADLANDS_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_DUSTWALLOW_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_STRANGLETHORN_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_FELWOOD_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_ASHENVALE_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_THOUSAND_NEEDLES_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_FERALAS_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_DESOLACE_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_STONETALON_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_HINTERLANDS_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_TANARIS_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_BURNING_STEPPES_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_SWAMP_OF_SORROWS_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_ARATHI_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_HILLSBRAD_HORDE_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_HILLSBRAD_ALLIANCE_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_ALTERAC_HORDE_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_ALTERAC_ALLIANCE_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_BLASTED_LANDS_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_AZSHARA_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_SEARING_GORGE_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_UNGORO_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_SILITHUS_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_MOONGLADE_BOUNTY
+            || questId == QUEST_OLD_SCHOOL_WINTERSPRING_BOUNTY;
+    }
+
+    std::string OldSchoolHuntCooldownSetting(uint32 questId)
+    {
+        return "core.os.hunt." + std::to_string(questId);
+    }
+
+    uint32 OldSchoolHuntCurrentMinute()
+    {
+        int64 const now = GameTime::GetGameTime().count();
+        return uint32(now / MINUTE);
+    }
+
+    uint32 OldSchoolHuntCooldownExpiryMinute()
+    {
+        int64 const now = GameTime::GetGameTime().count();
+        uint64 const expiry = uint64(now) + 7ULL * AscensionRealmClock::RealDaySeconds;
+        return uint32((expiry + MINUTE - 1) / MINUTE);
+    }
+
+    bool IsOldSchoolHuntOnCooldown(Player const* player, uint32 questId)
+    {
+        if (!player)
+            return false;
+
+        PlayerSettingVector const* settings = player->FindPlayerSettings(OldSchoolHuntCooldownSetting(questId));
+        return settings && !settings->empty() && settings->front().value > OldSchoolHuntCurrentMinute();
     }
 
     constexpr uint32 OldSchoolEncounterPhase = 0x40000000;
@@ -3047,26 +3185,26 @@ namespace CoAChallenges
         }
         else if (levelDifference <= 2)
         {
-            healthFactor = 1.5f;
-            damageFactor = 1.5f;
+            healthFactor = 1.35f;
+            damageFactor = 1.3f;
             experienceFactor = 150;
         }
         else if (levelDifference <= 4)
         {
-            healthFactor = 1.6f;
-            damageFactor = 1.6f;
+            healthFactor = 1.4f;
+            damageFactor = 1.4f;
             experienceFactor = 175;
         }
         else if (levelDifference <= 6)
         {
-            healthFactor = 2.0f;
-            damageFactor = 2.0f;
+            healthFactor = 1.6f;
+            damageFactor = 1.55f;
             experienceFactor = 200;
         }
         else
         {
-            healthFactor = 2.5f;
-            damageFactor = 2.5f;
+            healthFactor = 1.9f;
+            damageFactor = 1.8f;
             experienceFactor = 250;
         }
         profile.healthPercent = uint32(profile.healthPercent * healthFactor);
@@ -3164,10 +3302,32 @@ namespace CoAChallenges
         return std::min(companions + 1, 5u);
     }
 
+    bool OldSchoolHasNearbyNativeGroupRewardCompanion(Player const* player, Creature const* creature)
+    {
+        Group const* group = player ? player->GetGroup() : nullptr;
+        if (!group || !creature)
+            return false;
+
+        // KillRewarder splits XP across every living group member at native reward
+        // distance, even if that member is outside the Old School party counted by
+        // OldSchoolGroupRewardSize (or the group type cannot receive its party aura).
+        // Such a kill is not a solo kill and must not receive the solo XP premium.
+        for (Group::MemberSlot const& slot : group->GetMemberSlots())
+        {
+            Player const* member = ObjectAccessor::FindPlayer(slot.guid);
+            if (member && member != player && member->IsAlive()
+                && member->IsAtGroupRewardDistance(creature))
+                return true;
+        }
+        return false;
+    }
+
     void UpdateOldSchoolGroupBonusAura(Player* player, uint32 diff)
     {
         if (!player)
             return;
+
+        UpdateOldSchoolInitialAreaSupplies(player, diff);
 
         struct RefreshTimer : DataMap::Base
         {
@@ -3206,6 +3366,158 @@ namespace CoAChallenges
                 player->RemoveAurasDueToSpell(aura);
         if (activeAura && !player->HasAura(activeAura))
             player->AddAura(activeAura, player);
+    }
+
+    bool GrantOldSchoolDiscoverySupplies(Player* player, char locationKind, uint32 mapId, uint32 locationId,
+        uint32 rewardLevel = 0, bool allowInstance = false)
+    {
+        if (!player || !player->IsInWorld() || !player->GetSession() || player->GetSession()->IsBot()
+            || !OldSchoolChallenge(player) || player->GetLevel() == 0 || player->GetLevel() > 60
+            || (!allowInstance && (!player->GetMap() || player->GetMap()->IsDungeon()
+                || player->GetMap()->IsBattlegroundOrArena())))
+            return false;
+
+        static constexpr std::array<std::array<uint32, 3>, 6> supplies = {{
+            {{ 117, 159, 2589 }},       // Tough Jerky, Refreshing Spring Water, Linen Cloth
+            {{ 4542, 1205, 2592 }},     // Moist Cornbread, Melon Juice, Wool Cloth
+            {{ 3770, 1708, 2592 }},     // Mutton Chop, Sweet Nectar, Wool Cloth
+            {{ 4601, 1645, 4306 }},     // Soft Banana Bread, Moonberry Juice, Silk Cloth
+            {{ 4599, 8766, 4338 }},     // Cured Ham Steak, Morning Glory Dew, Mageweave Cloth
+            {{ 8950, 8766, 14047 }}     // Homemade Cherry Pie, Morning Glory Dew, Runecloth
+        }};
+        static constexpr std::array<uint32, 3> counts = { 1, 1, 2 };
+
+        uint32 const supplyLevel = rewardLevel ? rewardLevel : player->GetLevel();
+        uint32 const band = std::min<uint32>((supplyLevel - 1) / 10, supplies.size() - 1);
+        std::string settingSource = "core.os.disc.";
+        settingSource += locationKind;
+        settingSource += "." + std::to_string(mapId) + "." + std::to_string(locationId);
+        bool grantedAny = false;
+        bool complete = true;
+        for (uint32 index = 0; index < supplies[band].size(); ++index)
+        {
+            if (locationKind == 'm' && index == 2)
+            {
+                complete = false;
+                continue;
+            }
+            if (player->GetPlayerSetting(settingSource, index).value)
+                continue;
+
+            uint32 const itemId = supplies[band][index];
+            if (!sObjectMgr->GetItemTemplate(itemId))
+            {
+                LOG_ERROR("module.coa_challenges", "Old School discovery reward item {} is missing", itemId);
+                complete = false;
+                continue;
+            }
+            if (player->AddItem(itemId, counts[index]))
+            {
+                player->UpdatePlayerSetting(settingSource, index, 1);
+                grantedAny = true;
+            }
+            else
+                complete = false;
+        }
+
+        if (grantedAny)
+        {
+            if (locationKind == 'm')
+                NotifyPlayer(player, "Old School: level {} food and water earned. Visit a class trainer to choose profession materials.", locationId);
+            else
+                NotifyPlayer(player, "Old School: you found a frontier supply cache at a new location.");
+        }
+        return complete;
+    }
+
+    void UpdateOldSchoolInitialAreaSupplies(Player* player, uint32 diff)
+    {
+        if (!player || !player->IsInWorld() || !player->GetSession() || player->GetSession()->IsBot()
+            || !OldSchoolChallenge(player) || player->GetLevel() == 0 || player->GetLevel() > 60
+            || !player->GetMap() || player->GetMap()->IsDungeon() || player->GetMap()->IsBattlegroundOrArena())
+            return;
+
+        struct InitialAreaSupplies : DataMap::Base
+        {
+            uint32 remaining = 0;
+            uint32 mapId = 0;
+            uint32 areaId = 0;
+            bool complete = false;
+        };
+        InitialAreaSupplies* state = player->CustomData.GetDefault<InitialAreaSupplies>(
+            "coa.old_school.initial_area_supplies");
+        uint32 const mapId = player->GetMapId();
+        uint32 const areaId = player->GetAreaId();
+        if (!areaId)
+            return;
+        if (state->mapId != mapId || state->areaId != areaId)
+        {
+            state->mapId = mapId;
+            state->areaId = areaId;
+            state->remaining = 0;
+            state->complete = false;
+        }
+        if (state->complete)
+            return;
+        if (state->remaining > diff)
+        {
+            state->remaining -= diff;
+            return;
+        }
+        state->remaining = 30000;
+
+        AreaTableEntry const* area = sAreaTableStore.LookupEntry(areaId);
+        if (!area)
+        {
+            state->complete = true;
+            return;
+        }
+        uint32 const restFlag = player->GetTeamId() == TEAM_ALLIANCE
+            ? AREA_FLAG_REST_ZONE_ALLIANCE : AREA_FLAG_REST_ZONE_HORDE;
+        if (!(area->flags & AREA_FLAG_TOWN) && !(area->flags & restFlag) && !area->exploreFlag)
+        {
+            state->complete = true;
+            return;
+        }
+        state->complete = GrantOldSchoolDiscoverySupplies(player, 'a', mapId, areaId);
+    }
+
+    void GrantOldSchoolMilestoneSupplies(Player* player)
+    {
+        if (!player || !player->GetSession() || player->GetSession()->IsBot()
+            || !OldSchoolChallenge(player) || player->GetLevel() < 10)
+            return;
+
+        for (uint32 milestone = 10; milestone <= player->GetLevel() && milestone <= 60; milestone += 10)
+            GrantOldSchoolDiscoverySupplies(player, 'm', 0, milestone, milestone, true);
+    }
+
+    void DiscoverOldSchoolArea(Player* player, uint32 oldArea, uint32 areaId)
+    {
+        if (!player || !player->GetSession() || player->GetSession()->PlayerLoading()
+            || oldArea == 0 || oldArea == areaId || !player->GetMap())
+            return;
+
+        AreaTableEntry const* area = sAreaTableStore.LookupEntry(areaId);
+        if (!area)
+            return;
+
+        uint32 const restFlag = player->GetTeamId() == TEAM_ALLIANCE
+            ? AREA_FLAG_REST_ZONE_ALLIANCE : AREA_FLAG_REST_ZONE_HORDE;
+        bool const isInnOrTown = (area->flags & AREA_FLAG_TOWN) || (area->flags & restFlag);
+        bool const isNotableDiscovery = area->exploreFlag != 0;
+        if (isInnOrTown || isNotableDiscovery)
+            GrantOldSchoolDiscoverySupplies(player, 'a', player->GetMapId(), areaId);
+    }
+
+    void DiscoverOldSchoolFlightPoint(Player const* player, uint32 nodeId)
+    {
+        if (!player)
+            return;
+
+        Player* mutablePlayer = ObjectAccessor::FindPlayer(player->GetGUID());
+        if (mutablePlayer)
+            GrantOldSchoolDiscoverySupplies(mutablePlayer, 't', mutablePlayer->GetMapId(), nodeId);
     }
 
     void MoveOldSchoolEquipmentToCorpse(Player* player)
@@ -3414,8 +3726,7 @@ namespace CoAChallenges
             if (groupSize > state->groupSize)
             {
                 bool const dungeon = creature->GetMap()->IsDungeon() && !creature->GetMap()->IsRaid();
-                float const healthPerMember = dungeon ? 0.1f
-                    : OldSchoolPublicDungeonCategory(creature) ? 0.6f : 1.0f;
+                float const healthPerMember = dungeon ? 0.1f : 0.20f;
                 float const oldHealth = 1.0f + healthPerMember * float(state->groupSize - 1);
                 float const newHealth = 1.0f + healthPerMember * float(groupSize - 1);
                 float const baseHealth = std::max(1.0f, float(creature->GetMaxHealth()) - state->extra);
@@ -3426,8 +3737,8 @@ namespace CoAChallenges
                 state->extra = extra;
                 state->healthPercent = healthPercent;
                 if (!dungeon && !OldSchoolPublicDungeonCategory(creature))
-                    state->damageMultiplier *= (1.0f + 0.125f * float(groupSize - 1))
-                        / (1.0f + 0.125f * float(state->groupSize - 1));
+                    state->damageMultiplier *= (1.0f + 0.02f * float(groupSize - 1))
+                        / (1.0f + 0.02f * float(state->groupSize - 1));
                 state->groupSize = groupSize;
             }
             return;
@@ -3441,10 +3752,10 @@ namespace CoAChallenges
             uint32 const groupSize = OldSchoolGroupRewardSize(attacker, creature);
             bool const dungeon = creature->GetMap()->IsDungeon() && !creature->GetMap()->IsRaid();
             uint8 const publicDungeonCategory = OldSchoolPublicDungeonCategory(creature);
-            float const groupHealth = 1.0f + (dungeon ? 0.1f : publicDungeonCategory ? 0.6f : 1.0f)
+            float const groupHealth = 1.0f + (dungeon ? 0.1f : 0.20f)
                 * float(groupSize - 1);
             float const groupDamage = dungeon || publicDungeonCategory ? 1.0f
-                : 1.0f + 0.125f * float(groupSize - 1);
+                : 1.0f + 0.02f * float(groupSize - 1);
             auto* state = new OldSchoolHealth();
             state->extra = float(creature->GetMaxHealth()) *
                 (profile.healthPercent * groupHealth / 100.0f - 1.0f);
@@ -3544,6 +3855,19 @@ namespace CoAChallenges
         return rank;
     }
 
+    bool IsOldSchoolPublicDungeonEntry(uint32 entry)
+    {
+        static std::unordered_set<uint32> const entries = []
+        {
+            std::unordered_set<uint32> result;
+            for (HxcOldSchool::ZoneProfile const& profile : HxcOldSchool::ZoneProfiles)
+                if (profile.publicDungeonCategory)
+                    result.insert(profile.entry);
+            return result;
+        }();
+        return entries.find(entry) != entries.end();
+    }
+
     std::size_t CreatureQueryRankPos(WorldPacket const& packet)
     {
         std::size_t pos = sizeof(uint32);
@@ -3570,8 +3894,10 @@ namespace CoAChallenges
         if (entry & CreatureQueryRankUnknownEntry)
             return false;
         CreatureTemplate const* creature = sObjectMgr->GetCreatureTemplate(entry);
-        if (!creature || !IsCosmeticEliteEnemy(player, creature)
-            || !PlayerHasRule(player, "CHALLENGE_RULES_TYPE_COSMETIC_ELITE_ENEMIES"))
+        if (!creature || !IsCosmeticEliteEnemy(player, creature))
+            return false;
+        bool const oldSchoolPublicDungeon = OldSchoolChallenge(player) && IsOldSchoolPublicDungeonEntry(entry);
+        if (!oldSchoolPublicDungeon && !PlayerHasRule(player, "CHALLENGE_RULES_TYPE_COSMETIC_ELITE_ENEMIES"))
             return false;
         std::size_t const rankPos = CreatureQueryRankPos(packet);
         if (!rankPos)
@@ -3615,7 +3941,9 @@ namespace CoAChallenges
             return;
         }
 
-        if (!PlayerHasRule(player, "CHALLENGE_RULES_TYPE_COSMETIC_ELITE_ENEMIES"))
+        bool const cosmeticEliteRule = PlayerHasRule(player, "CHALLENGE_RULES_TYPE_COSMETIC_ELITE_ENEMIES");
+        bool const oldSchool = OldSchoolChallenge(player) != 0;
+        if (!cosmeticEliteRule && !oldSchool)
         {
             if (!display)
                 return;
@@ -3630,12 +3958,30 @@ namespace CoAChallenges
             display = player->CustomData.GetDefault<CosmeticEliteDisplay>(CosmeticEliteKey);
         display->timer = CosmeticEliteRefreshMs;
         std::vector<uint32> added;
-        player->DoForAllVisibleWorldObjects([display, &added](WorldObject* object)
+        std::unordered_set<uint32> visibleEntries;
+        player->DoForAllVisibleWorldObjects([&](WorldObject* object)
         {
             if (Creature* creature = object->ToCreature())
-                if (display->entries.insert(creature->GetEntry()).second)
-                    added.push_back(creature->GetEntry());
+            {
+                uint32 const entry = creature->GetEntry();
+                if (cosmeticEliteRule || (oldSchool && IsOldSchoolPublicDungeonEntry(entry)))
+                {
+                    visibleEntries.insert(entry);
+                    if (display->entries.insert(entry).second)
+                        added.push_back(entry);
+                }
+            }
         });
+        for (auto entry = display->entries.begin(); entry != display->entries.end();)
+        {
+            if (!visibleEntries.contains(*entry))
+            {
+                added.push_back(*entry);
+                entry = display->entries.erase(entry);
+            }
+            else
+                ++entry;
+        }
         for (uint32 entry : added)
             ResendCreatureQuery(session, entry);
     }
@@ -3643,7 +3989,7 @@ namespace CoAChallenges
     class CoAChallengesPlayer : public PlayerScript
     {
     public:
-        CoAChallengesPlayer() : PlayerScript("CoAChallengesPlayer", { PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_SEND_INITIAL_PACKETS_BEFORE_ADD_TO_MAP, PLAYERHOOK_ON_PLAYER_JUST_DIED, PLAYERHOOK_ON_PLAYER_RELEASED_GHOST, PLAYERHOOK_ON_PLAYER_RESURRECT, PLAYERHOOK_CAN_RESURRECT, PLAYERHOOK_CAN_REPOP_AT_GRAVEYARD, PLAYERHOOK_CAN_SEND_MAIL, PLAYERHOOK_CAN_JOIN_LFG, PLAYERHOOK_CAN_JOIN_IN_BATTLEGROUND_QUEUE, PLAYERHOOK_CAN_JOIN_IN_ARENA_QUEUE, PLAYERHOOK_CAN_INIT_TRADE, PLAYERHOOK_CAN_PLACE_AUCTION_BID, PLAYERHOOK_ON_BEFORE_SEND_LOOT, PLAYERHOOK_ON_LEVEL_CHANGED, PLAYERHOOK_ON_CREATURE_KILL, PLAYERHOOK_ON_CREATURE_KILLED_BY_PET, PLAYERHOOK_ON_PLAYER_KILLED_BY_CREATURE, PLAYERHOOK_ON_PVP_KILL, PLAYERHOOK_ON_LOOT_ITEM, PLAYERHOOK_ON_PLAYER_COMPLETE_QUEST, PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_CAN_GROUP_INVITE, PLAYERHOOK_CAN_GROUP_ACCEPT, PLAYERHOOK_ON_UPDATE_CRAFTING_SKILL, PLAYERHOOK_ON_UPDATE_GATHERING_SKILL, PLAYERHOOK_ON_BEFORE_QUEST_COMPLETE, PLAYERHOOK_ON_QUEST_COMPUTE_EXP, PLAYERHOOK_ON_GIVE_EXP, PLAYERHOOK_ON_GET_MAX_ALLOWED_LEVEL, PLAYERHOOK_ON_HAS_NO_BONUS_EXPERIENCE, PLAYERHOOK_CAN_LEARN_TALENT, PLAYERHOOK_CAN_USE_ITEM, PLAYERHOOK_CAN_ENTER_MAP, PLAYERHOOK_CAN_EQUIP_ITEM, PLAYERHOOK_CAN_ENTER_MANASTORM, PLAYERHOOK_ON_PLAYER_ENVIRONMENTAL_DAMAGE, PLAYERHOOK_ON_PLAYER_BREATH_INVERTED, PLAYERHOOK_ON_BEFORE_BUY_ITEM_FROM_VENDOR, PLAYERHOOK_CAN_SELL_ITEM, PLAYERHOOK_ON_CAN_UPDATE_SKILL, PLAYERHOOK_ON_UPDATE_SKILL, PLAYERHOOK_ON_PLAYER_PVP_FLAG_CHANGE, PLAYERHOOK_ON_CAN_REGENERATE, PLAYERHOOK_ON_CAN_ENERGIZE, PLAYERHOOK_ON_CAN_GIVE_LEVEL, PLAYERHOOK_ON_BEFORE_TELEPORT, PLAYERHOOK_ON_DELETE_FROM_DB, PLAYERHOOK_ON_BANK_WITHDRAW, PLAYERHOOK_ON_REWARD_KILL_REWARDER, PLAYERHOOK_ON_GIVE_REPUTATION, PLAYERHOOK_PASSED_QUEST_KILLED_MONSTER_CREDIT, PLAYERHOOK_ON_LOAD_FROM_DB, PLAYERHOOK_ON_GET_GAME_MODE_MASK }) { }
+        CoAChallengesPlayer() : PlayerScript("CoAChallengesPlayer", { PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_SEND_INITIAL_PACKETS_BEFORE_ADD_TO_MAP, PLAYERHOOK_ON_PLAYER_JUST_DIED, PLAYERHOOK_ON_PLAYER_RELEASED_GHOST, PLAYERHOOK_ON_PLAYER_RESURRECT, PLAYERHOOK_CAN_RESURRECT, PLAYERHOOK_CAN_REPOP_AT_GRAVEYARD, PLAYERHOOK_CAN_SEND_MAIL, PLAYERHOOK_CAN_JOIN_LFG, PLAYERHOOK_CAN_JOIN_IN_BATTLEGROUND_QUEUE, PLAYERHOOK_CAN_JOIN_IN_ARENA_QUEUE, PLAYERHOOK_CAN_INIT_TRADE, PLAYERHOOK_CAN_PLACE_AUCTION_BID, PLAYERHOOK_ON_BEFORE_SEND_LOOT, PLAYERHOOK_ON_LEVEL_CHANGED, PLAYERHOOK_ON_CREATURE_KILL, PLAYERHOOK_ON_CREATURE_KILLED_BY_PET, PLAYERHOOK_ON_PLAYER_KILLED_BY_CREATURE, PLAYERHOOK_ON_PVP_KILL, PLAYERHOOK_ON_LOOT_ITEM, PLAYERHOOK_ON_PLAYER_COMPLETE_QUEST, PLAYERHOOK_CAN_TAKE_QUEST, PLAYERHOOK_CAN_REWARD_QUEST, PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_CAN_GROUP_INVITE, PLAYERHOOK_CAN_GROUP_ACCEPT, PLAYERHOOK_ON_UPDATE_AREA, PLAYERHOOK_ON_LEARN_TAXI_NODE, PLAYERHOOK_ON_UPDATE_CRAFTING_SKILL, PLAYERHOOK_ON_UPDATE_GATHERING_SKILL, PLAYERHOOK_ON_BEFORE_QUEST_COMPLETE, PLAYERHOOK_ON_QUEST_COMPUTE_EXP, PLAYERHOOK_ON_GIVE_EXP, PLAYERHOOK_ON_GET_MAX_ALLOWED_LEVEL, PLAYERHOOK_ON_HAS_NO_BONUS_EXPERIENCE, PLAYERHOOK_CAN_LEARN_TALENT, PLAYERHOOK_CAN_USE_ITEM, PLAYERHOOK_CAN_ENTER_MAP, PLAYERHOOK_CAN_EQUIP_ITEM, PLAYERHOOK_CAN_ENTER_MANASTORM, PLAYERHOOK_ON_PLAYER_ENVIRONMENTAL_DAMAGE, PLAYERHOOK_ON_PLAYER_BREATH_INVERTED, PLAYERHOOK_ON_BEFORE_BUY_ITEM_FROM_VENDOR, PLAYERHOOK_CAN_SELL_ITEM, PLAYERHOOK_ON_CAN_UPDATE_SKILL, PLAYERHOOK_ON_UPDATE_SKILL, PLAYERHOOK_ON_PLAYER_PVP_FLAG_CHANGE, PLAYERHOOK_ON_CAN_REGENERATE, PLAYERHOOK_ON_CAN_ENERGIZE, PLAYERHOOK_ON_CAN_GIVE_LEVEL, PLAYERHOOK_ON_BEFORE_TELEPORT, PLAYERHOOK_ON_DELETE_FROM_DB, PLAYERHOOK_ON_BANK_WITHDRAW, PLAYERHOOK_ON_REWARD_KILL_REWARDER, PLAYERHOOK_ON_GIVE_REPUTATION, PLAYERHOOK_PASSED_QUEST_KILLED_MONSTER_CREDIT, PLAYERHOOK_ON_LOAD_FROM_DB, PLAYERHOOK_ON_GET_GAME_MODE_MASK }) { }
 
         bool OnPlayerGetGameModeMask(Player const* player, uint32& mask) override
         {
@@ -3658,12 +4004,23 @@ namespace CoAChallenges
             PreloadLoginChallengeRows(player->GetGUID().GetCounter());
         }
 
+        void OnPlayerUpdateArea(Player* player, uint32 oldArea, uint32 newArea) override
+        {
+            DiscoverOldSchoolArea(player, oldArea, newArea);
+        }
+
+        void OnPlayerLearnTaxiNode(Player const* player, uint32 nodeId) override
+        {
+            DiscoverOldSchoolFlightPoint(player, nodeId);
+        }
+
         void OnPlayerLogin(Player* player) override
         {
             if (player->HasPlayerFlag(PLAYER_FLAGS_GHOST) || !player->IsAlive())
                 MoveOldSchoolEquipmentToCorpse(player);
             else
                 RecoverOldSchoolEquipment(player);
+            GrantOldSchoolMilestoneSupplies(player);
         }
 
         // Runs on BOTH login paths (full + re-login-to-in-world; see
@@ -3675,10 +4032,12 @@ namespace CoAChallenges
 
         void OnPlayerJustDied(Player* player) override
         {
+            RecordOldSchoolHardcoreMemorial(player);
             MoveOldSchoolEquipmentToCorpse(player);
             if (OldSchoolChallenge(player) == 9001 && !player->GetSession()->IsBot()
                 && !player->GetMap()->IsBattlegroundOrArena())
             {
+                RecordOldSchoolBindRespawnDeath(player);
                 uint8 const startingLevel = player->GetLevel();
                 uint32 const xp = player->GetUInt32Value(PLAYER_XP);
                 uint64 loss = player->GetUInt32Value(PLAYER_NEXT_LEVEL_XP) / 10;
@@ -3715,6 +4074,11 @@ namespace CoAChallenges
             if (OldSchoolChallenge(player) != 9001 || player->GetSession()->IsBot()
                 || player->IsAlive() || !player->GetMap() || player->GetMap()->IsBattlegroundOrArena())
                 return true;
+            if (HasRepeatedOldSchoolBindRespawnDeath(player))
+            {
+                NotifyPlayer(player, "Old School: you died again shortly after your bind-point recovery. You will remain a ghost so you can choose a safe recovery route instead of repeating that spawn.");
+                return true;
+            }
             RespawnOldSchoolAtBind(player);
             return false;
         }
@@ -4051,7 +4415,7 @@ namespace CoAChallenges
         void OnPlayerUpdateCraftingSkill(Player* player, SkillLineAbilityEntry const* skill, uint32 /*current_level*/, uint32& /*gain*/) override
         {
             // This hook's gain parameter is the profession skill step, not XP.
-            // Record rarity only when the challenge uses the custom profession XP path.
+            // Cache craft rarity only for challenge modes using the module fallback.
             if (player && (OldSchoolChallenge(player)
                 || PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_PROFESSIONS"))
                 && !UsesCoreProfessionXP(player))
@@ -4061,10 +4425,10 @@ namespace CoAChallenges
             }
         }
 
-        void OnPlayerUpdateGatheringSkill(Player* player, uint32 /*skill_id*/, uint32 /*current*/, uint32 /*gray*/, uint32 /*green*/, uint32 /*yellow*/, uint32& /*gain*/) override
+        void OnPlayerUpdateGatheringSkill(Player* player, uint32 skillId, uint32 /*current*/, uint32 /*gray*/, uint32 /*green*/, uint32 /*yellow*/, uint32& /*gain*/) override
         {
             // This hook's gain parameter is the profession skill step, not XP.
-            // Record rarity only when the challenge uses the custom profession XP path.
+            // Cache a flat fallback only for challenge modes without core profession XP.
             if (player && (OldSchoolChallenge(player)
                 || PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_PROFESSIONS"))
                 && !UsesCoreProfessionXP(player))
@@ -4081,17 +4445,19 @@ namespace CoAChallenges
         // blocked with a message in CoAChallengesSpells::OnSpellCheckCast.
         bool OnPlayerCanUpdateSkill(Player* player, uint32 skillId) override
         {
-            return !(player && IsProfessionSkill(skillId)
+            return !(player && IsCoAProfessionSkill(skillId)
                 && PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_PROFESSIONS"));
         }
 
         void OnPlayerUpdateSkill(Player* player, uint32 skillId, uint32 /*value*/, uint32 /*max*/, uint32 /*step*/, uint32 /*newValue*/) override
         {
-            if (!player || !IsProfessionSkill(skillId))
+            if (!player || !IsCoAProfessionSkill(skillId))
                 return;
             if (!PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_PROFESSIONS")
                 && !OldSchoolChallenge(player))
                 return;
+            // Core awards XP on successful crafting/gathering, including Old
+            // School's custom trades. Do not award a second skill-up bonus here.
             if (UsesCoreProfessionXP(player))
                 return;
             uint32 mult = 1;
@@ -4190,9 +4556,9 @@ namespace CoAChallenges
             }
             else if (PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_EXPERIENCE_EXCEPT_PROFESSIONS"))
             {
-                uint8 const professionSource = UsesCoreProfessionXP(player)
-                    ? XPSOURCE_PROFESSION : XPSOURCE_PROFESSION_SKILL;
-                if (xpSource != professionSource)
+                // Core trade skill-ups and the custom profession fallback
+                // report different sources; both are valid profession XP.
+                if (xpSource != XPSOURCE_PROFESSION && xpSource != XPSOURCE_PROFESSION_SKILL)
                     amount = 0;
             }
 
@@ -4223,7 +4589,7 @@ namespace CoAChallenges
                         CoANeeds::ReadOldSchoolRestedSeconds(player->GetGUID().GetCounter()))
                         scaleNumerator = 115;
                     groupSize = OldSchoolGroupRewardSize(player, creature);
-                    if (groupSize == 1)
+                    if (groupSize == 1 && !OldSchoolHasNearbyNativeGroupRewardCompanion(player, creature))
                         soloKillRewardPercent = 160;
                 }
                 scaledAmount *= experienceMultiplierHundredths;
@@ -4241,6 +4607,14 @@ namespace CoAChallenges
                 uint64 accumulated = scaledAmount + progress->remainder;
                 amount = static_cast<uint32>(std::min<uint64>(accumulated / 100000000, UINT32_MAX));
                 progress->remainder = static_cast<uint32>(accumulated % 100000000);
+            }
+
+            if (amount && OldSchoolChallenge(player)
+                && (xpSource == XPSOURCE_PROFESSION || xpSource == XPSOURCE_PROFESSION_SKILL))
+            {
+                uint32 const projectBonus = OldSchoolTownProjectExperienceBonusPercent();
+                amount = static_cast<uint32>(std::min<uint64>(
+                    uint64(amount) * (100 + projectBonus) / 100, UINT32_MAX));
             }
 
             // NO_KILL_CREDIT_UNLESS_AT_DISADVANTAGE ("Punching Up" / Overwhelming
@@ -4547,17 +4921,79 @@ namespace CoAChallenges
         }
 
         // ---- Activation-condition tracking (persistent, once broken stays) ----
-        void OnPlayerBeforeSendLoot(Player* player, ObjectGuid /*lootGuid*/, Loot* /*loot*/) override
+        void OnPlayerBeforeSendLoot(Player* player, ObjectGuid lootGuid, Loot* loot) override
         {
             uint32 const guid = player->GetGUID().GetCounter();
             if (!HasActiveTrial(guid))   // condition gates activation only
                 SetConditionFlag(guid, "LOOTED");
+
+            if (!loot || !loot->gold || !player->GetSession())
+                return;
+
+            ObjectGuid const sourceGuid = loot->sourceWorldObjectGUID ? loot->sourceWorldObjectGUID : lootGuid;
+            Creature* creature = ObjectAccessor::GetCreature(*player, sourceGuid);
+            if (!creature || !(creature->GetPhaseMask() & OldSchoolEncounterPhase))
+                return;
+
+            Group* group = player->GetGroup();
+            if (!group)
+                return;
+
+            std::vector<Player*> humanMembers;
+            uint32 challenge = OldSchoolChallenge(player);
+            if (!challenge)
+                for (GroupReference* reference = group->GetFirstMember(); reference; reference = reference->next())
+                {
+                    Player* member = reference->GetSource();
+                    if (member && member->GetSession() && !member->GetSession()->IsBot()
+                        && OldSchoolChallenge(member))
+                    {
+                        challenge = OldSchoolChallenge(member);
+                        break;
+                    }
+                }
+            if (!challenge)
+                return;
+
+            for (GroupReference* reference = group->GetFirstMember(); reference; reference = reference->next())
+            {
+                Player* member = reference->GetSource();
+                if (!member || !member->GetSession() || member->GetSession()->IsBot()
+                    || !OldSchoolGroupKillCreditEligible(member, challenge, creature))
+                    continue;
+                humanMembers.push_back(member);
+            }
+
+            if (humanMembers.empty())
+                return;
+
+            uint32 const totalCopper = loot->gold;
+            uint32 const share = totalCopper / humanMembers.size();
+            uint32 const remainder = totalCopper % humanMembers.size();
+            loot->gold = 0;
+            loot->NotifyMoneyRemoved();
+            auto grantCopper = [](Player* member, uint32 copper)
+            {
+                while (copper)
+                {
+                    int32 const amount = static_cast<int32>(
+                        std::min<uint32>(copper, std::numeric_limits<int32>::max()));
+                    member->ModifyMoney(amount);
+                    copper -= static_cast<uint32>(amount);
+                }
+            };
+            for (Player* member : humanMembers)
+                if (share)
+                    grantCopper(member, share);
+            if (remainder)
+                grantCopper(humanMembers.front(), remainder);
         }
 
         void OnPlayerLevelChanged(Player* player, uint8 /*oldLevel*/) override
         {
             SetConditionFlag(player->GetGUID().GetCounter(), "LEVELED");
             RestoreLevelUpRegen(player);
+            GrantOldSchoolMilestoneSupplies(player);
             if (CheckObjectiveLevels(player))
                 CompleteAtLevelCap(player);
         }
@@ -4570,6 +5006,13 @@ namespace CoAChallenges
         {
             return !PlayerHasRule(player, "CHALLENGE_RULES_TYPE_NO_KILL_CREDIT_UNLESS_AT_DISADVANTAGE")
                 || (killed && killed->GetLevel() > player->GetLevel());
+        }
+
+        static bool OldSchoolGroupKillCreditEligible(Player const* member, uint32 challenge, Creature const* killed)
+        {
+            return member && challenge && killed && member->IsAlive()
+                && OldSchoolChallenge(member) == challenge && member->InSamePhase(killed)
+                && member->IsAtGroupRewardDistance(killed);
         }
 
         // Credit a kill to the killer AND every group member holding the same
@@ -4590,12 +5033,15 @@ namespace CoAChallenges
                     player->GetName(), killed->GetEntry(), killed->GetLevel(), player->GetLevel());
                 return;
             }
+            uint32 const oldSchoolChallenge = OldSchoolChallenge(player);
             MarkObjectives(player, "CHALLENGE_REQUIREMENT_TYPE_KILL_CREATURE_BEFORE_LEVEL", killed->GetEntry());
             if (group)
                 for (Group::MemberSlot const& slot : group->GetMemberSlots())
                     if (slot.guid != player->GetGUID())
                         if (Player* member = ObjectAccessor::FindPlayer(slot.guid))
                         {
+                            if (oldSchoolChallenge && !OldSchoolGroupKillCreditEligible(member, oldSchoolChallenge, killed))
+                                continue;
                             if (!KillCreditAllowed(member, killed))
                                 continue;
                             LOG_INFO("module.coa_challenges",
@@ -4718,7 +5164,60 @@ namespace CoAChallenges
         void OnPlayerCompleteQuest(Player* player, Quest const* quest) override
         {
             if (quest)
+            {
                 MarkObjectives(player, "CHALLENGE_REQUIREMENT_TYPE_COMPLETE_QUEST_BEFORE_LEVEL", quest->GetQuestId());
+                if (IsOldSchoolTownProjectQuest(quest->GetQuestId())
+                    && OldSchoolChallenge(player) && player->GetSession() && !player->GetSession()->IsBot())
+                {
+                    uint32 progress = 0;
+                    uint32 const questId = quest->GetQuestId();
+                    uint32 const goal = OldSchoolTownProjectContributionGoal(questId);
+                    if (AddOldSchoolTownProjectContribution(questId, progress))
+                    {
+                        char const* projectName = OldSchoolTownProjectName(questId);
+                        if (progress == goal)
+                            NotifyPlayer(player, "Old School: the {} workshop is restored. All Old School characters now gain another 10% profession experience.",
+                                projectName);
+                        else
+                            NotifyPlayer(player, "Old School: {} workshop progress: {}/{} contributions.",
+                                projectName, progress, goal);
+                    }
+                }
+                if (IsOldSchoolHuntQuest(quest->GetQuestId()) && OldSchoolChallenge(player)
+                    && player->GetSession() && !player->GetSession()->IsBot())
+                {
+                    player->UpdatePlayerSetting(OldSchoolHuntCooldownSetting(quest->GetQuestId()), 0,
+                        OldSchoolHuntCooldownExpiryMinute());
+                    player->SaveToDB(false, false);
+                }
+            }
+        }
+
+        bool OnPlayerCanTakeQuest(Player const* player, Quest const* quest) override
+        {
+            if (quest && IsOldSchoolTownProjectQuest(quest->GetQuestId()))
+                return player && player->GetSession() && !player->GetSession()->IsBot()
+                    && OldSchoolChallenge(player)
+                    && OldSchoolTownProjectContributionCount(quest->GetQuestId())
+                        < OldSchoolTownProjectContributionGoal(quest->GetQuestId());
+            if (!quest || !IsOldSchoolHuntQuest(quest->GetQuestId()))
+                return true;
+            if (!player || !player->GetSession() || player->GetSession()->IsBot() || !OldSchoolChallenge(player))
+                return false;
+            return !IsOldSchoolHuntOnCooldown(player, quest->GetQuestId());
+        }
+
+        bool OnPlayerCanRewardQuest(Player const* player, Quest const* quest) override
+        {
+            if (quest && IsOldSchoolTownProjectQuest(quest->GetQuestId()))
+                return player && player->GetSession() && !player->GetSession()->IsBot()
+                    && OldSchoolChallenge(player)
+                    && OldSchoolTownProjectContributionCount(quest->GetQuestId())
+                        < OldSchoolTownProjectContributionGoal(quest->GetQuestId());
+            if (!quest || !IsOldSchoolHuntQuest(quest->GetQuestId()))
+                return true;
+            return player && player->GetSession() && !player->GetSession()->IsBot()
+                && OldSchoolChallenge(player);
         }
 
         void OnPlayerReleasedGhost(Player* player) override
@@ -4730,6 +5229,7 @@ namespace CoAChallenges
         {
             if (!IsOldSchoolBindRespawn(player))
             {
+                ClearOldSchoolBindRespawnGuard(player);
                 RecoverOldSchoolEquipment(player);
                 RecoverOldSchoolEquipmentAtDeath(player);
             }
@@ -4853,7 +5353,7 @@ namespace CoAChallenges
             OldSchoolOptions.namedGearKeepPercent = std::min(100u,
                 sConfigMgr->GetOption<uint32>("CoAChallenges.OldSchool.NamedGearDropPercent", 100));
             OldSchoolOptions.ordinaryHealthPercent = std::clamp(
-                sConfigMgr->GetOption<uint32>("CoAChallenges.OldSchool.OrdinaryHealthPercent", 500), 1u, 10000u);
+                sConfigMgr->GetOption<uint32>("CoAChallenges.OldSchool.OrdinaryHealthPercent", 400), 1u, 10000u);
             OldSchoolOptions.ordinaryDamageMultiplier = std::clamp(
                 sConfigMgr->GetOption<float>("CoAChallenges.OldSchool.OrdinaryDamageMultiplier", 1.25f), 0.1f, 20.0f);
             CoANeeds::ChallengeMaximum = std::max(1.0f,
@@ -4900,7 +5400,7 @@ namespace CoAChallenges
             {
                 Player* player = session ? session->GetPlayer() : nullptr;
                 uint32 skillId = packet.read<uint32>(0);
-                if (player && IsProfessionSkill(skillId)
+                if (player && IsCoAProfessionSkill(skillId)
                     && PlayerHasRule(player, "CHALLENGE_RULES_TYPE_CANNOT_UNLEARN_PROFESSIONS"))
                 {
                     NotifyPlayer(player, "Your profession choices are permanent.");
@@ -6082,7 +6582,7 @@ namespace CoAChallenges
                         break;
                     case SPELL_EFFECT_SKILL_STEP:   // 44: learn a profession rank
                     case SPELL_EFFECT_SKILL:        // 118: learn a skill
-                        if (IsProfessionSkill(uint32(info->Effects[i].MiscValue)))
+                        if (IsCoAProfessionSkill(uint32(info->Effects[i].MiscValue)))
                             professionSpell = true;
                         break;
                     case SPELL_EFFECT_UNLEARN_SPECIALIZATION: // 133: unlearn a profession specialty
@@ -6101,7 +6601,7 @@ namespace CoAChallenges
                 // belong to a profession skill line.
                 SkillLineAbilityMapBounds bounds = sSpellMgr->GetSkillLineAbilityMapBounds(info->Id);
                 for (auto it = bounds.first; it != bounds.second && !professionSpell; ++it)
-                    if (IsProfessionSkill(it->second->SkillLine))
+                    if (IsCoAProfessionSkill(it->second->SkillLine))
                         professionSpell = true;
             }
 

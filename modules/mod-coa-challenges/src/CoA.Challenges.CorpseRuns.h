@@ -9,9 +9,13 @@ namespace CoAChallenges
 {
     constexpr uint32 OldSchoolEquipmentCorpseEntry = 996900;
 
+    void RecordOldSchoolHardcoreMemorial(Player* player);
     bool PreserveOldSchoolCorpseEquipment(Player* player);
     bool RespawnOldSchoolAtBind(Player* player);
     bool IsOldSchoolBindRespawn(Player const* player);
+    bool HasRepeatedOldSchoolBindRespawnDeath(Player const* player);
+    void RecordOldSchoolBindRespawnDeath(Player* player);
+    void ClearOldSchoolBindRespawnGuard(Player* player);
     void RecoverOldSchoolEquipmentAtDeath(Player* player);
     void UpdateOldSchoolEquipmentCorpses(Player* player, uint32 diff, bool standardTrial);
     void RegisterOldSchoolEquipmentCorpses();

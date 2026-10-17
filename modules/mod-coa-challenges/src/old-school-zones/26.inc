@@ -1,0 +1,7 @@
+    { 26, 997400, "Jintha Alor expedition", "Vilebranch axe thrower", 0, 100, false, false, 1 },
+    { 26, 997401, "Jintha Alor expedition", "Vilebranch witch doctor", 0, 100, false, false, 1 },
+    { 26, 997402, "Jintha Alor expedition", "Vilebranch headhunter", 0, 100, false, false, 1 },
+    { 26, 997403, "Jintha Alor expedition", "Vilebranch shadowcaster", 0, 100, false, false, 1 },
+    { 26, 997404, "Jintha Alor expedition", "named soul eater", 4, 150, true, false, 2 },
+    { 26, 997405, "Jintha Alor expedition", "public raid high priest", 7, 175, true, false, 3 },
+    { 26, 997406, "Jintha Alor expedition", "rare Amanzasi devourer", 5, 150, true, false, 2 },
