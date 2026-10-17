@@ -70,6 +70,7 @@
 #include "GlobalScript.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
+#include "Group.h"
 #include "Item.h"
 #include "LootMgr.h"
 #include "Map.h"
@@ -358,11 +359,26 @@ public:
     }
 };
 
+void RecordAward(Player* player, Item* item, ObjectGuid source)
+{
+    if (!player || !item || !source.IsGameObject())
+        return;
+
+    GameObject* go = player->GetMap()->GetGameObject(source);
+    if (!IsWorldforgedPickup(go))
+        return;
+
+    WorldforgedLootStore::Instance().Claim(player, item, go->GetSpawnId(), go->GetEntry());
+    go->ForceValuesUpdateAtIndex(GAMEOBJECT_FLAGS);
+    go->ForceValuesUpdateAtIndex(GAMEOBJECT_DYNAMIC);
+}
+
 class worldforged_pickup_lifecycle : public PlayerScript
 {
 public:
     worldforged_pickup_lifecycle() : PlayerScript("worldforged_pickup_lifecycle",
         {PLAYERHOOK_ON_LOAD_FROM_DB, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_LOOT_ITEM,
+            PLAYERHOOK_ON_GROUP_ROLL_REWARD_ITEM, PLAYERHOOK_ON_MASTER_LOOT_ITEM,
             PLAYERHOOK_ON_COA_PRESTIGE, PLAYERHOOK_ON_COA_PRESTIGE_SAVED}) { }
 
     // Early enough that no gameobject has been sent to this client yet.
@@ -405,22 +421,21 @@ public:
             }
     }
 
-    // The moment the base item leaves a pickup, that pickup is spent for this character -
-    // whether it was clicked, auto-stored or taken through the group window.
     void OnPlayerLootItem(Player* player, Item* item, uint32 /*count*/, ObjectGuid lootguid) override
     {
-        if (!player || !item || !lootguid.IsGameObject())
-            return;
+        RecordAward(player, item, lootguid);
+    }
 
-        GameObject* go = player->GetMap()->GetGameObject(lootguid);
-        if (!IsWorldforgedPickup(go))
-            return;
+    void OnPlayerGroupRollRewardItem(Player* player, Item* item, uint32 /*count*/, RollVote /*voteType*/,
+        Roll* roll) override
+    {
+        if (Loot* loot = roll ? roll->getLoot() : nullptr)
+            RecordAward(player, item, loot->sourceWorldObjectGUID);
+    }
 
-        WorldforgedLootStore::Instance().Claim(player, item, go->GetSpawnId(), go->GetEntry());
-
-        // Make this client re-read the flags, so the pickup goes inert for this viewer now.
-        go->ForceValuesUpdateAtIndex(GAMEOBJECT_FLAGS);
-        go->ForceValuesUpdateAtIndex(GAMEOBJECT_DYNAMIC);
+    void OnPlayerMasterLootItem(Player* player, Item* item, uint32 /*count*/, ObjectGuid lootguid) override
+    {
+        RecordAward(player, item, lootguid);
     }
 };
 
