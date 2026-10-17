@@ -1,0 +1,41 @@
+UPDATE `creature_template`
+SET `minlevel` = 8, `maxlevel` = 8, `rank` = 0,
+    `HealthModifier` = 1, `DamageModifier` = 1, `ExperienceModifier` = 1
+WHERE @gap12_ready = 1 AND `entry` = @gap12_c0 AND `name` = 'Mill Rattleguard' AND `subname` = 'Agamand Mills'
+    AND `minlevel` = 12 AND `maxlevel` = 12 AND `HealthModifier` = 1
+    AND `DamageModifier` = 1.15 AND `ExperienceModifier` = 1;
+
+UPDATE `creature_template`
+SET `minlevel` = 8, `maxlevel` = 8, `rank` = 0,
+    `HealthModifier` = 1, `DamageModifier` = 1, `ExperienceModifier` = 1
+WHERE @gap12_ready = 1 AND `entry` = @gap12_c1 AND `name` = 'Mill Bonecaster' AND `subname` = 'Agamand Mills'
+    AND `minlevel` = 12 AND `maxlevel` = 12 AND `HealthModifier` = 1
+    AND `DamageModifier` = 1.15 AND `ExperienceModifier` = 1;
+
+UPDATE `creature_template`
+SET `minlevel` = 9, `maxlevel` = 9, `rank` = 0,
+    `HealthModifier` = 1, `DamageModifier` = 1, `ExperienceModifier` = 1
+WHERE @gap12_ready = 1 AND `entry` = @gap12_c2 AND `name` = 'Agamand Grave Patrol' AND `subname` = 'Agamand Mills'
+    AND `minlevel` = 13 AND `maxlevel` = 13 AND `HealthModifier` = 1
+    AND `DamageModifier` = 1.15 AND `ExperienceModifier` = 1;
+
+UPDATE `creature_template`
+SET `minlevel` = 9, `maxlevel` = 9, `rank` = 1,
+    `HealthModifier` = 1, `DamageModifier` = 1, `ExperienceModifier` = 1
+WHERE @gap12_ready = 1 AND `entry` = @gap12_c3 AND `name` = 'Gregor''s Bonewarden' AND `subname` = 'Agamand Mills'
+    AND `minlevel` = 13 AND `maxlevel` = 13 AND `HealthModifier` = 1.75
+    AND `DamageModifier` = 1.25 AND `ExperienceModifier` = 1;
+
+UPDATE `creature_template`
+SET `minlevel` = 9, `maxlevel` = 9, `rank` = 1,
+    `HealthModifier` = 1, `DamageModifier` = 1, `ExperienceModifier` = 1
+WHERE @gap12_ready = 1 AND `entry` = @gap12_c4 AND `name` = 'Nissa''s Revenant' AND `subname` = 'Agamand Mills'
+    AND `minlevel` = 13 AND `maxlevel` = 13 AND `HealthModifier` = 1.75
+    AND `DamageModifier` = 1.25 AND `ExperienceModifier` = 1;
+
+UPDATE `creature_template`
+SET `minlevel` = 10, `maxlevel` = 10, `rank` = 1,
+    `HealthModifier` = 1, `DamageModifier` = 1, `ExperienceModifier` = 1
+WHERE @gap12_ready = 1 AND `entry` = @gap12_c5 AND `name` = 'Giant Agamand Boneguard' AND `subname` = 'Agamand Mills'
+    AND `minlevel` = 14 AND `maxlevel` = 14 AND `HealthModifier` = 3
+    AND `DamageModifier` = 1.4 AND `ExperienceModifier` = 1;

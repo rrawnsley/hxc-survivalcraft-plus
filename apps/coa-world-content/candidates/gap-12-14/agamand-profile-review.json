@@ -1,0 +1,99 @@
+{
+  "state": "DRAFT SOURCE REVIEW; NOT COMPILED/APPLIED/LIVE",
+  "scope": "Six existing Agamand public-dungeon templates plus four zone-profile threat offsets and friendly guide name label; no itemdefinitions/loot/newspawns/geometry/XP-runtime helper edits",
+  "baseline": "Published review branch17665abe9d1bf6c0438460f70aba35cb9611f38e; later applied first3 content overlays are separate, no selected Agamand override identified in source70/71",
+  "bindings": {
+    "gap12_c0": 997120,
+    "gap12_c1": 997121,
+    "gap12_c2": 997122,
+    "gap12_c3": 997123,
+    "gap12_c4": 997124,
+    "gap12_c5": 997125
+  },
+  "sourceRecords": [
+    "data/sql/updates/pending_db_world/rev_20261014_70_old_school_seven_public_dungeons.sql:4891-5559",
+    "data/sql/updates/pending_db_world/rev_20261014_71_old_school_seven_public_dungeon_runtime_fix.sql",
+    "modules/mod-coa-challenges/src/old-school-zones/85.inc",
+    "modules/mod-coa-challenges/src/CoA.Challenges.Scripts.cpp:1933-1940",
+    "modules/mod-coa-challenges/src/CoA.Challenges.Scripts.cpp:3070-3077"
+  ],
+  "profileBeforeHash": "b9f2df129a549bf14bd55b9381442b4166b044332d4c453da388f459ab6d3e91",
+  "profileAfterHash": "3bca190309a740ba7e0bd68e670131b6eb17b12b7f3a196ee85e6f098ad12c73",
+  "nativeLevelsBefore": [
+    8,
+    8,
+    9,
+    9,
+    9,
+    10
+  ],
+  "sourceThreatOffsetsBefore": [
+    0,
+    0,
+    4,
+    4,
+    5,
+    6
+  ],
+  "effectiveLevelsBefore": [
+    8,
+    8,
+    13,
+    13,
+    14,
+    16
+  ],
+  "nativeLevelsProposed": [
+    12,
+    12,
+    13,
+    13,
+    13,
+    14
+  ],
+  "sourceThreatOffsetsProposed": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "effectiveLevelsProposed": [
+    12,
+    12,
+    13,
+    13,
+    13,
+    14
+  ],
+  "rawHP": [
+    1,
+    1,
+    1,
+    1.75,
+    1.75,
+    3
+  ],
+  "rawDamage": [
+    1.15,
+    1.15,
+    1.15,
+    1.25,
+    1.25,
+    1.4
+  ],
+  "templateXP": "Preserve1; no extra1.5 atop existingpublic/con/group compensation; no Bristleback10% change copied.",
+  "label": "Existing friendly997126 becomes Agamand Mills -5players, exact oldname/subname/menu/faction guard. No movement/faction/gossip/quest edits.",
+  "releaseCoupling": "Profile source+six guarded SQLupdates must be integrated as one local reviewed release; do not ship85.inc alone or enablegap12_ready with oldcompiledprofile. Current local Narache/shield build is separate; no build requested here.",
+  "rollback": "Restore four original85.inc offsets together with guarded agamand-profile-rollback.sql.in; optional label rollback restores exactoldname/subname. No loot/item/character cleanup.",
+  "validation": "Focused staticSQLstyle passed on exact SQLtemplates via byte-identical scratch.sqlcopies. No tests/build/DB/gameplay. Source review identified and corrected effective-level mismatch.",
+  "preserved": [
+    "Existing11mobspawns+guide, homes/orientations/phases/paths/pools",
+    "Existingnames exceptguideplainlabel",
+    "ExistingSmartAI/mechanics and loot",
+    "Botcurrency/raidXP/coreScripts.cpp",
+    "Bristlebackguide/teleport and alreadyreleasedfirst3content"
+  ],
+  "limitations": "Per-row SQLguards are not atomicbaselineproof. Local owner must preflight allsixrows and sourceprofile before transaction/release. Difficulty, group/raidXP, nativephasecoexistence, clientvisual and activeclassroleloot usefulness unaccepted. New96armor/55weapons and255mergedloot remain separate unbound candidates not included."
+}
