@@ -1,0 +1,1509 @@
+{
+  "schemaVersion": 1,
+  "createdDate": "2026-10-17",
+  "release": {
+    "deployedServerSha256": "2187f3e2a9fd3369529d7ba86bdb613b9c7ea96d44c528dd695b05949af50091",
+    "catalog": "20261016.221640238",
+    "deployedUtc": "2026-10-17T05:22:19.4570421Z",
+    "gameplayAcceptance": "pending",
+    "limits": [
+      "Player gameplay, five-player/bot balance and rendered loot appearance remain unaccepted",
+      "Full12dungeon polish, full1-60 coverage and coordinated class sets are incomplete",
+      "Six larger upstream features deferred; no wholesale upstream merge",
+      "QA: Elwynn entranceguide reported missing whileOldSchool active; existingSQL/model/phase presence is not renderedvisibility proof; candidate18updates textonly",
+      "QA: Bristleback entrance teleport overlaps guideXY and trapsplayer; human deferred placement correction to a later patch; unchanged in thisrelease"
+    ]
+  },
+  "source": {
+    "branch": "codex/coa-live-source-20261016-review",
+    "baseHead": "07ca731b16623f074003bc49aa632f9acdc57823",
+    "upstreamHead": "063d04c3262031b5349156fcc114b20783289639",
+    "includedUpstreamCommitCount": 78,
+    "applicationCounts": {
+      "applied": 77,
+      "adapted": 1
+    },
+    "curationCommits": [
+      {
+        "sha": "60de323ef?",
+        "description": "78 reviewed CoA production patches"
+      },
+      {
+        "sha": "461b4f4fd2c70ef0386c7c750b2534b319be7d60",
+        "description": "Live release migration additions"
+      },
+      {
+        "sha": "4f540ca8c9cd2527b0ba9fa2f32da39dbdf8b4b0",
+        "description": "Local Old School runtime dependencies"
+      }
+    ],
+    "patchCommits": [
+      {
+        "upstreamCommit": "a28a45f2b954ed412c5afa8cf46a59d8c7a8d054",
+        "subject": "fix(DB/CoA): put Xaitoth and his quest markers in the Burning Blade Coven middle hall (#6525) (#7567)",
+        "application": "applied",
+        "patchSha256": "10f020bb6e309dc5a5275ab5223032c33d69fb6c87b5b8609f847a181c5d7931"
+      },
+      {
+        "upstreamCommit": "df10b5b36e230edfa9ffbf06c249b5b28dd479fd",
+        "subject": "fix(CoA/Auction): send the auction deposit rate so items can be posted (#7569)",
+        "application": "applied",
+        "patchSha256": "f4463b00b960e22bf4b263c612a9a58acd10b1be32c822a325ceb16cdcabc3bf"
+      },
+      {
+        "upstreamCommit": "3478cca1d8d602069d077c07c9913a590ddf444c",
+        "subject": "fix(Core/CoA): make the Vanity Pepe perch a bird on the player's head (#7305) (#7572)",
+        "application": "applied",
+        "patchSha256": "b9f5a6085129ca792354475eb02827f0ee0f97f4c12b3bb2452e19b2f81e77ba"
+      },
+      {
+        "upstreamCommit": "a885e4aeeb02b83f155002587cde1d5c7626fdb9",
+        "subject": "fix(CoA/Primalist): use the Ancient of War form display instead of the giant NPC tree (#7579)",
+        "application": "applied",
+        "patchSha256": "eb2ca35b6f6803ae6dbecb3d8e0e301491c3ade1d210263604d317f915ae6332"
+      },
+      {
+        "upstreamCommit": "6dcb71b284b9e6463805e629f65195cea2c4d80f",
+        "subject": "fix(CoA/Worldforged): record pickups awarded by a group roll or the master looter (#7583)",
+        "application": "adapted",
+        "patchSha256": "40e17d128c3e3c83e14abb6459d93ff0cf51a40cb4072f6eb7aad450e9c9913a"
+      },
+      {
+        "upstreamCommit": "a65be06ec62f4a72002f5f73d61cca38d9f475da",
+        "subject": "fix(DB/CoA): make the Mirror Shard always summon the Curse Shard (Refs #7230) (#7593)",
+        "application": "applied",
+        "patchSha256": "700949fdc66a4cda49246cc7c3d59081b14a60bb2ff1c62a5c2ae4f933b59cc3"
+      },
+      {
+        "upstreamCommit": "5a314ad5fbb90d3d87abde8e3f939909a21f7b23",
+        "subject": "fix(CoA/WarcraftReborn): Hunter abilities and talents do what their tooltips say (#7616)",
+        "application": "applied",
+        "patchSha256": "adcccab19f223fa24bea06d2d323b52c8483b70bdb29ecf6da0ce236141c5b9e"
+      },
+      {
+        "upstreamCommit": "b8aaa3158a338f6ff99f9c9452ec5f0008c8d86e",
+        "subject": "fix(DB/CoA): make the Mining Pick, Blacksmith Hammer and Skinning Knife Artifact quality (#7629)",
+        "application": "applied",
+        "patchSha256": "c323e92fd8ac63319c9a1c9d51bbf39289555e449d02914a1ee34dd61deab9e6"
+      },
+      {
+        "upstreamCommit": "293332767b8e59362b9ba6e3c7b5e2060c862e33",
+        "subject": "fix(DB/CoA): offer the Westfall Killing Fields chain in order (Fixes #7622) (#7630)",
+        "application": "applied",
+        "patchSha256": "66e5f30113050e21dbc69ae9a5d760d06b77f8df3530e3f47c8ecf00e49bcfd2"
+      },
+      {
+        "upstreamCommit": "e9913e963e1cd9a275d2387d72ded75da064f464",
+        "subject": "fix(CoA/Tinker): let Rocket Bombardment wait for the turret's next attack (#7633)",
+        "application": "applied",
+        "patchSha256": "d57f6f6450aa67314d981f63673acb477c7306c44e40d62df3cce785b9a421a8"
+      },
+      {
+        "upstreamCommit": "8eaf9ade5678b65d86e6e7e29d8b409439a4cff8",
+        "subject": "fix(CoA): Raid Marker - Removal clears the placed raid markers (#7642)",
+        "application": "applied",
+        "patchSha256": "5ee289b42ffd95d554bd6beb06e8d543ccf2ab6ae2f25e0f689e7c56963501cb"
+      },
+      {
+        "upstreamCommit": "9b705db3ac1b652676e62ee5ecb146bf686b8aa4",
+        "subject": "fix(CoA/Pyromancer): Draconic Aspect keeps the Dracthyr model after login (#7643)",
+        "application": "applied",
+        "patchSha256": "4e38b6fd1781a5fa42fb43a8bcce2f4da38a1dce1b3e6e0509545a7687f65300"
+      },
+      {
+        "upstreamCommit": "ccd9a553000d6f190a20ec33e8b446f0e971f608",
+        "subject": "fix(Scripts/Items): Flask of the North no longer crashes for CoA classes (#7644)",
+        "application": "applied",
+        "patchSha256": "085dfab3113c1c388a091781dd4ea10446913f010325500515a193443674f70f"
+      },
+      {
+        "upstreamCommit": "d8a890c2e5dbf97c731461d9e787a7df869f28dc",
+        "subject": "fix(CoA/World): set the Red Mage Tower table under the Codex of Secrets (#7645)",
+        "application": "applied",
+        "patchSha256": "cc0ed9de1a44b66ce720077e878542043b7de2ac94e32783253282cd6bd6bcb7"
+      },
+      {
+        "upstreamCommit": "2a9a6c73c455150f1101616114f3106e604cf83c",
+        "subject": "fix(DB/CoA): let the Disciple of Naralex start the Wailing Caverns event without the Fanglords (#7646)",
+        "application": "applied",
+        "patchSha256": "fba2b7eb0208c8aa353c98eb22f0b04f4396bae47f79e73fc06b7b3b1ad01cf4"
+      },
+      {
+        "upstreamCommit": "a142e333c9ed439f37b957faee58ec05fa95ae4c",
+        "subject": "fix(CoA/Tinker): let Tinker pets stay passive when the player picks Passive (#7647)",
+        "application": "applied",
+        "patchSha256": "f224c6f7e415075716b18884e6ca95553eb6ab8ba52f881ebfb473a9ce3c177d"
+      },
+      {
+        "upstreamCommit": "7509257a24e7df616e7596b31efdd6c0b0d38e04",
+        "subject": "feat(CoA): announce the official test zones in one grouped line (#7655)",
+        "application": "applied",
+        "patchSha256": "3df92f012549c2106011f36f79d78fac0ceb8fc8d10926f539e6f12063f531d3"
+      },
+      {
+        "upstreamCommit": "322e9a1f1c1681a12080ac3c0d649d80aca5bf61",
+        "subject": "fix(CoA/Dungeons): Targorr's Berserker Leap lands on a player and marks the spot (#7649)",
+        "application": "applied",
+        "patchSha256": "eba3fde6690d62aad3c9f592b2a3e861a8ffd947cc34a1a1c146f1eb2e454058"
+      },
+      {
+        "upstreamCommit": "9d0e5ec277a64cd16fbe7cebb32bce94b8e18998",
+        "subject": "fix(CoA): quests batch 1 - eleven quest, item and achievement fixes (#7653)",
+        "application": "applied",
+        "patchSha256": "b5dd7b1622d3e8247a45f7d07027592fb7b76ebaeb241cb1d5e747c959fc7e26"
+      },
+      {
+        "upstreamCommit": "f694341d673a1c6e86dd7dc58d5eb80e7851765c",
+        "subject": "fix(CoA/Tinker): let I'm The Creator Now apply its buff (#7433) (#7661)",
+        "application": "applied",
+        "patchSha256": "8c8015c10ea4100e5557a1296ac00a0c66ecc478d880e46561806d89b7ed343d"
+      },
+      {
+        "upstreamCommit": "bac01fceb11399fdf5d589ad98ee3287dfa65503",
+        "subject": "fix(CoA/WarcraftReborn): Rogue abilities and talents do what their tooltips say (#7662)",
+        "application": "applied",
+        "patchSha256": "36d57846241eefd6b3f0d6e2a700f79bc901e87e47a7c2d9a5a4d636be0cab0c"
+      },
+      {
+        "upstreamCommit": "d701378a723f011258bb9e0cb67f3d7bedcc13a1",
+        "subject": "fix(CoA/Barbarian): let Whirling Advance follow the movement direction (#7668) (#7681)",
+        "application": "applied",
+        "patchSha256": "560402b4d48d3f7c3a7fc282c587b82b68e8fadb5bd75a118360d3c3409138d7"
+      },
+      {
+        "upstreamCommit": "4b206772aa63ae1269a49f198acf0b81e6d9287b",
+        "subject": "fix(CoA/Ranger): let Horn of Endurance's healing proc fire and heal its owner (#7618) (#7680)",
+        "application": "applied",
+        "patchSha256": "4008a9378c22be65a5d62b3cdfd1b988e03e7da977e76f0c906a3682227f6057"
+      },
+      {
+        "upstreamCommit": "7de31290138f58f6453342d40d8a38195136b87a",
+        "subject": "fix(CoA/Reaper): state Soulrend's Soul Infusion requirement in its tooltip (#7667) (#7678)",
+        "application": "applied",
+        "patchSha256": "8427c7806bb7df310f275ae56ca448b737dec8a97ec31a582f412cd4eedd3ef1"
+      },
+      {
+        "upstreamCommit": "180f814c27fb8cfb80afd727e6955e5d98c77b15",
+        "subject": "fix(DB/CoA): align worldforged pickups with LootCollector find data (#7673)",
+        "application": "applied",
+        "patchSha256": "a7d442cc8112d9c4a294dfbffbb1b33847b7e96ca1075a658da1d4904ff4b1aa"
+      },
+      {
+        "upstreamCommit": "13e1e7fb2c061e6b6264aae38a6411c1004f14c2",
+        "subject": "fix(CoA/Loot): stop equipped gear loot dropping placeholder items (#7624) (#7669)",
+        "application": "applied",
+        "patchSha256": "e5a241ef1b40716dbcdedc15cf3092f578829c553870d8155ecbfa6653c96fc2"
+      },
+      {
+        "upstreamCommit": "d2476a61ca80a469ae3ecfe7185e6618b497b9b9",
+        "subject": "fix(CoA): link mine and interior zones to their graveyards (#7648) (#7664)",
+        "application": "applied",
+        "patchSha256": "526a66b4469d2b2e5b0280da380b036dd02b734975c5215500726676228323bb"
+      },
+      {
+        "upstreamCommit": "01594b417c15440a371971f6e9a93c7f97d0ac06",
+        "subject": "fix(CoA/WitchDoctor): the hidden cauldron helper stops drawing a giant prop (#7675) (#7683)",
+        "application": "applied",
+        "patchSha256": "7410a9b5d4691603af58094b194ab82347476ff9eb32bbcc872ac8eef18747e5"
+      },
+      {
+        "upstreamCommit": "240d032a536cdb5d9b1d1527f9957c56b7cc7fa6",
+        "subject": "fix(Core/Spell): charge percentage Energy costs from base Energy (#7604) (#7703)",
+        "application": "applied",
+        "patchSha256": "2b934ac8bcdfdcf41fbd82e37e311903fc8d96887d6623b51632f9b4f903ad12"
+      },
+      {
+        "upstreamCommit": "d479c55d3661002fba1be218b755aefc69273f32",
+        "subject": "fix(CoA/Ranger): end Falcon's Call's cooldown reset and Falconstrike's inert spellbook entry (#7617) (#7726)",
+        "application": "applied",
+        "patchSha256": "8c4b0c3a9a54c32583a0026f3241e34aed91b8bfc066434147f57edc7dd43a70"
+      },
+      {
+        "upstreamCommit": "f84037bee820496918bfb92645e9bd9678572c87",
+        "subject": "fix(CoA/WarcraftReborn): Priest Holy Nova, Divine Providence and Mind Sear do what their tooltips say (#7730)",
+        "application": "applied",
+        "patchSha256": "2c18bdc076e6d4f3329b9b358de370d1d9101bd5174aeeddf1795b5d53df0498"
+      },
+      {
+        "upstreamCommit": "23cd6a444bb3d4cb405ebd353e372aa8ce18dd06",
+        "subject": "fix(CoA/Quests): put The Sacred Flame's markers on the Ashenvale Moonwell (#7722) (#7731)",
+        "application": "applied",
+        "patchSha256": "9f966c4a64043c283a3ff9437dfdd922343f50c809d7f76cca516fcb8c36ae7b"
+      },
+      {
+        "upstreamCommit": "ce36904f28512adf5a1bf6ef8998cd93492be585",
+        "subject": "fix(CoA/DB): Guard Slip'kik casts Shield Wall once below 30% health (#7670)",
+        "application": "applied",
+        "patchSha256": "244a648b9ffae4d300ec64c29a9605a74baa1946bf7eb28cb3f5705e37494bfe"
+      },
+      {
+        "upstreamCommit": "f58330bde09dda63299b7d8936501bb0bf105cd5",
+        "subject": "fix(CoA/DB): show the shadow portal model for Dreadsteed Portal (#7740)",
+        "application": "applied",
+        "patchSha256": "c17be179016f16c8b3698ac5fde6ec0ae02c71b44b5d3dc11693d1f5eb89c6a3"
+      },
+      {
+        "upstreamCommit": "8e9d96d4a55d154604f724de708bb2148b33b6c0",
+        "subject": "fix(CoA/Runemaster): blink Hurricane's strikes around the target (#7717) (#7745)",
+        "application": "applied",
+        "patchSha256": "3640db49bb36476e55e58711599215a5b73705dc72f88e9bbb47d77f45a402bb"
+      },
+      {
+        "upstreamCommit": "64665572ea776f186a3791d1eaf7e7bf8360c2fd",
+        "subject": "fix(CoA/Runemaster): Hurricane's caster cannot be feared (#7716) (#7748)",
+        "application": "applied",
+        "patchSha256": "5fee24239189c1159e5c258f33c7acbbdb2f5d1b9a145e087f4b0557681a375a"
+      },
+      {
+        "upstreamCommit": "8b2683012d6699b173e82fcb193bca141a356cdc",
+        "subject": "fix(CoA/Quests): quests batch 4 — call board map areas, Goldshire produce, Old History Book markers (#7676)",
+        "application": "applied",
+        "patchSha256": "e8730c50b98a8905c7d8524c2c3f60309c3b2afb84242e372e99519b702ab1d4"
+      },
+      {
+        "upstreamCommit": "f1742262d618f2f7b434e9d8c28336910fb63893",
+        "subject": "fix(CoA/Runemaster): teach Branded to Runic Runemasters at level 50 (#7749)",
+        "application": "applied",
+        "patchSha256": "b24971cbbc1a6bee3e4578131faa5a441af5904f207a99437b02ced3841edd34"
+      },
+      {
+        "upstreamCommit": "a61d536aba391ac9eef8fa0ec8a0da2364b07107",
+        "subject": "fix(CoA): Honored Ancestor, Spectral Warden and Spectral Scythe hit for their level (#7753)",
+        "application": "applied",
+        "patchSha256": "b3ddac431c3b8738fb7cc9409890bab4d75c1196581c44c8b9eca1e406cf8675"
+      },
+      {
+        "upstreamCommit": "a1869fb158e7ae2d628a2d7e208658761513b765",
+        "subject": "fix(CoA/SunCleric): Sun Stride plays its own solar trail (#7718) (#7751)",
+        "application": "applied",
+        "patchSha256": "68a8b31734dfef1d77b0de08351d544afbb82896d6ffb49cc096bb002abf2fc1"
+      },
+      {
+        "upstreamCommit": "1a11d0a7609e41ad571504222cf25a36bdf54861",
+        "subject": "fix(DB/Pyromancer): one seal per Pyromancer on each target (#7754)",
+        "application": "applied",
+        "patchSha256": "2a905e808a770a26ee520d14d0ce965f2a900b83599c2c8d5b32fbcc2774303c"
+      },
+      {
+        "upstreamCommit": "1e1d2b64a8ff19a8c823eee17dea5db8cdaef1d8",
+        "subject": "fix(Scripts/Icecrown): Argent Champions no longer pile up their summons (#7353)",
+        "application": "applied",
+        "patchSha256": "b0da5b645308c7130d146570ea91a6c07ffbf891945433b59337302799398a9c"
+      },
+      {
+        "upstreamCommit": "e7f207c332fdc00e5415dbde5f4e46773efa9f5c",
+        "subject": "fix(Scripts/Ulduar): Filter Slag Pot targets (#6154)",
+        "application": "applied",
+        "patchSha256": "70f71772a5702954b932247c8e86c1e20fd192a7d46a65b23fa6bdc6870b2ef9"
+      },
+      {
+        "upstreamCommit": "464fdd4725c5c0bdc92173968b6be85ec786ae26",
+        "subject": "fix(Core/Time): use steady clock for uptime (#6149)",
+        "application": "applied",
+        "patchSha256": "da662ec5e3271e117bd053cb94ca6a1fef0e611bb0bd6aa744d7fab247a95a49"
+      },
+      {
+        "upstreamCommit": "7da8a54486dd3d769aa81f7da75e6ca274f3cc61",
+        "subject": "fix(Core/Spells): read the 64-bit shapeshift masks for forms above 32 (#5580)",
+        "application": "applied",
+        "patchSha256": "20e2ce30534e0c1f00749f39e58d383c65474a60fb575cbd19f55d908da3c4e7"
+      },
+      {
+        "upstreamCommit": "e055ac5fc8e74ceb827d250caf9462b4ac936c97",
+        "subject": "fix(CoA/Venomancer): prepare form model data that hides weapons (#5137)",
+        "application": "applied",
+        "patchSha256": "05a9ea9cfce3d933773936bd7808cd16f160b62b71aaacf142426bc5e8d8f03a"
+      },
+      {
+        "upstreamCommit": "8ed21f1798286b9901a8bda46d749a5144231800",
+        "subject": "fix(CoA/SunCleric): Bless' tooltips match its behaviour (#7719) (#7759)",
+        "application": "applied",
+        "patchSha256": "509de7d42c12b1b582db226b207cf523d1454d4dfb9d8d50c4bb97112b4b817f"
+      },
+      {
+        "upstreamCommit": "ab05dfdcddd3b1f00ebc52aaa890debc626a0545",
+        "subject": "fix(CoA/DB): add Redridge details shown in the Ascension questing videos (#7757)",
+        "application": "applied",
+        "patchSha256": "8b1342f6a2dfb3d43181a42bbb10e76fed733af6096c12930c164e86882c24aa"
+      },
+      {
+        "upstreamCommit": "dbb02f53c699f87b12a8b465d9671654ef9ceef6",
+        "subject": "fix(CoA/Runemaster): refresh Runeblade from a transformed Primordial Blast; the Book's rows match the client (#7725) (#7765)",
+        "application": "applied",
+        "patchSha256": "29d01371524fe595b994df3ce749124a8850f732d9cf1b5b16b9d9ea2b9fac67"
+      },
+      {
+        "upstreamCommit": "d4b71548aef88a7992b5b4ba76df4b3825b67f35",
+        "subject": "fix(CoA/Tinker): drop capped firepots along the Firepot Drone's whole path (#7772)",
+        "application": "applied",
+        "patchSha256": "c572d32c9e9e4198e4450b8d6131dba3beffc7eb7628e163cd58d09bbd6adc65"
+      },
+      {
+        "upstreamCommit": "b493c5b85d76ed73a1f12d398ab7324ff2e8d8b2",
+        "subject": "fix(CoA): let custom classes on a caster fallback parry (#7774)",
+        "application": "applied",
+        "patchSha256": "171dbd530c29c2190bbb58098d75bf9d9aba47f9d6a16409a4532678d537ba0a"
+      },
+      {
+        "upstreamCommit": "4670ac251d863e999e952cf53dd43e496cb340ba",
+        "subject": "fix(CoA/Reaper): scale Spectral Warden and Spectral Scythe weapon damage with the owner's level (#7773)",
+        "application": "applied",
+        "patchSha256": "29b494df9a9a131f34db254fcc5b584cb47cd310470e085bc008dbe28ff2f82e"
+      },
+      {
+        "upstreamCommit": "e374bb25ae477d0ee12701100183d0846981896b",
+        "subject": "fix(CoA/Pyromancer): let mounting cancel Draconic Aspect and dismount on cast (#7779)",
+        "application": "applied",
+        "patchSha256": "0c68172ca2162bdb52349a7243d56b524738c041e579022aa59963e8621d37b7"
+      },
+      {
+        "upstreamCommit": "17500ca09fc1bc66eaa8288add7e85c783f14f47",
+        "subject": "fix(CoA/WorldBosses): Lord Kazzak on his throne, reached through his shrine (#7781)",
+        "application": "applied",
+        "patchSha256": "237bb2f55a47161b7263af7651e15b7c42a568e60c60fc28302c9bec692ce634"
+      },
+      {
+        "upstreamCommit": "2e1b25054936f9ba4c8f6680ecaa7f405b705e35",
+        "subject": "fix(CoA): count the ranged and off hand slots in the average item level (#7785)",
+        "application": "applied",
+        "patchSha256": "7f8eeda19e4d9b5072b6f1353f0fc49903b8e455eb740cda52aa417e6c670ce6"
+      },
+      {
+        "upstreamCommit": "b4c9be318637894b989974682443822b05724026",
+        "subject": "fix(CoA/Tinker): let the Bomb Toss spending Bombastic skip the global cooldown (#7786)",
+        "application": "applied",
+        "patchSha256": "b5e530c29d1888d9473c7e414924e32ba4220f806284e1fc2b20acad2ccedbe3"
+      },
+      {
+        "upstreamCommit": "6857e59844a7fe443ce87f6cfaddea4a0ab37c2e",
+        "subject": "fix(CoA/Runemaster): apply Blade Rift and keep Runeshroud's main bar (#7792)",
+        "application": "applied",
+        "patchSha256": "64e1fff4c61f796c54f31a9be1165ebefd52767bb51793471fdd869818addc1b"
+      },
+      {
+        "upstreamCommit": "9dc61efcd2672c24b4f2a1caf600d4c7af8839e2",
+        "subject": "fix(DB/CoA): shrink the Hexing Effigy's world doodad model (#7793) (#7800)",
+        "application": "applied",
+        "patchSha256": "d6b0361f90d7fabc9be68b5d4dbfbfae91db4bd0b3d72cf0d170b3f83c74db17"
+      },
+      {
+        "upstreamCommit": "b324c9e2a6ab7b1312ee7844c18e985649490c5e",
+        "subject": "fix(CoA/WarcraftReborn): make Reborn Shaman abilities match their tooltips (#7819)",
+        "application": "applied",
+        "patchSha256": "c390cdb05f627d713584be6578205aee1d9533c544829c7c5230ac464a01f238"
+      },
+      {
+        "upstreamCommit": "8b9c72b5c4c7d48473351959c4454bd82215adb9",
+        "subject": "fix(CoA/Primalist): grant Thane's Rage and Aftershock and scale Seismic Smash damage (#7823) (#7828)",
+        "application": "applied",
+        "patchSha256": "afb6b9dc02d16cc1de39c7f3645762d323a7466c223cd6d2bb7dcdebe5bea964"
+      },
+      {
+        "upstreamCommit": "b7626ed0334f577014fe2cee7fde8eb14bba696b",
+        "subject": "fix(CoA/WarcraftReborn): make Reborn World in Flames and Fire Power match their tooltips (#7833)",
+        "application": "applied",
+        "patchSha256": "481605662ddb07133f47767b5f7db392e4db29cf2bfc3022d0ac8b90d20a1f47"
+      },
+      {
+        "upstreamCommit": "3e0a8c93c0fb099fe4b0d6963bcc47fa86b612f5",
+        "subject": "fix(CoA/SunCleric): keep Gleaming Vigil's health helper applied (#7829) (#7837)",
+        "application": "applied",
+        "patchSha256": "243511a02862903b751b387a3b9baf202d51a6aeec2777b9004d7887fba6a79f"
+      },
+      {
+        "upstreamCommit": "61267138ba762978c2575d06abb89ae1d4329805",
+        "subject": "fix(CoA/Dungeons): Normal boss kits deal Normal damage and come back 10% slower (#7851)",
+        "application": "applied",
+        "patchSha256": "7572fd82eb7fe3d6f69d18a4220c27814b01912012786363d92132e4b5d2f3d3"
+      },
+      {
+        "upstreamCommit": "4eb1e7e3ce2c56d761784463f05a969200a5b19e",
+        "subject": "fix(CoA/WitchDoctor): let Bwonsamdi carry Big Bad Voodoo and keep its amounts (#7788) (#7853)",
+        "application": "applied",
+        "patchSha256": "3f2c1ac7b794cd38cc63a32a6e01c5e2401c87fe8a4986fc2c74d13cd700f824"
+      },
+      {
+        "upstreamCommit": "c05d8cecba3bdaa98d1fb578adfd930e5827a6fd",
+        "subject": "fix(CoA/KnightOfXoroth): send Sacrificial Circle's cleared caster aura to the client (#7585)",
+        "application": "applied",
+        "patchSha256": "7c1f2472c17d0cdda7182ba14f806221f78fbf5d7ec81011e35a163fc49dedac"
+      },
+      {
+        "upstreamCommit": "0297ea72871a8943a6e3627757ddcd263c53aaac",
+        "subject": "fix(Scripts/BlackrockSpire): keep a dead Rend dead and let a wiped stadium event restart (#7582)",
+        "application": "applied",
+        "patchSha256": "cad0e956e2fdd044b6266d894c10a2e774355b76aa4610d0e8a65ed053e0c01a"
+      },
+      {
+        "upstreamCommit": "42286f662499483b882bf9df522945cd10132cb7",
+        "subject": "fix(CoA/Talents): send the action bars back after a talent-window specialization switch (#7574)",
+        "application": "applied",
+        "patchSha256": "d089c13989efe4ab9d8869d8bd857a4324a734c947ea69b52119329031397fbf"
+      },
+      {
+        "upstreamCommit": "83d542b47ebb875266534f6c9ee6c189954f237e",
+        "subject": "fix(Core/GameObject): hand a ritual object to the next user when its first user has left the map (#7584)",
+        "application": "applied",
+        "patchSha256": "4ecfdb9c5df80ed1302264780a1dbc25ada8b74cb7fee62fbe238dafb50d33dd"
+      },
+      {
+        "upstreamCommit": "60db142d4cfc2b8748fc07e989f1fc5f1876d2d8",
+        "subject": "fix(CoA/Runemaster): land Hurricane strikes on the terrain on inclines (#7825) (#7855)",
+        "application": "applied",
+        "patchSha256": "5f0b80bee48b985f3fc4fd235bb3eb985926d91ac52fd9a2a7ba35f82f6bde59"
+      },
+      {
+        "upstreamCommit": "86d4461feb37366f8847143ade9e7c18d5387ae9",
+        "subject": "fix(CoA/Spells): keep replaced ranks on action bars across relogin (#7760) (#7860)",
+        "application": "applied",
+        "patchSha256": "b79c386fc9d4445c9f43a994a0e1e2591e6e5ffb54f04d238062cdf102ea9c3b"
+      },
+      {
+        "upstreamCommit": "5ae6d3d468b7741f0c601991ece57ccf238a1974",
+        "subject": "fix(CoA/Dungeons): stop scaling Shadow Cleave and Throw Food weapon damage twice (#7865)",
+        "application": "applied",
+        "patchSha256": "8eefe2ad7cbb2fa319821b71bc212a43265ab33a38f4d6ad367870cf887e9709"
+      },
+      {
+        "upstreamCommit": "b5fe1230691d88b5d27ff94b5e55345d1118aa79",
+        "subject": "fix(CoA/Templar): keep one Tithe per Templar on each target (#7857) (#7867)",
+        "application": "applied",
+        "patchSha256": "5853632fa35fd39111000f8865921a57a2a28417a9ed3f4a31d06f47fa14d89b"
+      },
+      {
+        "upstreamCommit": "9021f8b741c0bf5e8744c2a918e2152b1e088cf4",
+        "subject": "fix(CoA/Reaper): page Underwalk to the stealth bar without touching shared stealth form (#7842) (#7873)",
+        "application": "applied",
+        "patchSha256": "9238952404900c2214d777fa51d384cee25c71cbbdae92feff9dbb0540a2bead"
+      },
+      {
+        "upstreamCommit": "faeac5e235c50c30ea828d0ab5ac44381465fb6f",
+        "subject": "fix(DB/Dungeons): split Landslide's Gigantic Boulder between the players it hits (#7577)",
+        "application": "applied",
+        "patchSha256": "b07d4634899e2845ce5b78ddfc1cacf14fc8c871e8fabab47b5049f3d8af506a"
+      },
+      {
+        "upstreamCommit": "f146be6c4ad7572d30f6a9797918bd6f742c32ed",
+        "subject": "fix(CoA/Pyromancer): splash Pillar of Flame around the primary target, not on it (#7802) (#7878)",
+        "application": "applied",
+        "patchSha256": "492d898c45bab61f2d87b1613eb83f1576a11b9f6bf0ef41351464ccc8c21330"
+      },
+      {
+        "upstreamCommit": "c037a808ad491e81dd4ea343c447918415c6fb3d",
+        "subject": "feat(Boss/Basalthane): show the live Fire Pillar gameobjects on the pillars (#7879)",
+        "application": "applied",
+        "patchSha256": "254df39801d38def05f8a35c676ebeafd189812624ec81bba3492cfb09e62dfe"
+      },
+      {
+        "upstreamCommit": "7b436e18b79ddc7af8832ad77f1e45eae15738d7",
+        "subject": "fix(CoA/Dungeons): halve the damage of Overlord Wyrmthalak's summoned adds (#7881)",
+        "application": "applied",
+        "patchSha256": "c7a74592c8649c5743338b6795371a8260a357f10e40f870a8b858c1ad6027ee"
+      },
+      {
+        "upstreamCommit": "f6e30667591521c9f4f199a294b7cc4b15573c71",
+        "subject": "fix(CoA/Loot): stop equipped-gear loot from dropping Bloodforged items (#7805) (#7882)",
+        "application": "applied",
+        "patchSha256": "79d5fa1897b7f31d9228145e70eeb0d8b5588daf2c02b34c56229d4dd2b058b7"
+      }
+    ],
+    "fileGroups": {
+      "reviewedPatchFiles": [
+        {
+          "path": "apps/coa-spells/test_venomancer_form_weapons.py",
+          "sha256": "6a8c1254610e242460b32e3c00b90d1e419c9bb631aab7f5f5711ecf9db99223"
+        },
+        {
+          "path": "apps/coa-spells/venomancer_form_weapons.py",
+          "sha256": "026de59906ee48167299a29483529bdfa49c12431f8d6c54c75e51d77882a9d9"
+        },
+        {
+          "path": "data/sql/updates/pending_db_auth/rev_20261014_51_realm_first_gm_rbac_unlink.sql",
+          "sha256": "0893174bfc61adf2dc1be7ce3a747c8124be6c2fd9d9034395233917cac07cb9"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261002_ignis_scorch_slag_pot.sql",
+          "sha256": "1f9a0e86a2b4fe98b8f1ba1697b8bdc124262afc3a9cb85858e0618140f0d25a"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261013_40_landslide_gigantic_boulder_split_damage.sql",
+          "sha256": "9a659806bf2bf11f1868b87b7e011d91c2bcb41840f819aa9e0e11821573cd7b"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_01_ranger_horn_of_endurance.sql",
+          "sha256": "866496f70672a838cc7d0c498925a3238c20d2ca59ad6ca980cf087f40da8a19"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_03_coa_xaitoth_coven_position.sql",
+          "sha256": "4c579636fc7efaf251f15acbcbf3656d244fea25a65a71157847231ca5e50d8b"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_04_pepe_vanity.sql",
+          "sha256": "3af5c007609feacf60e2674e34172446b77a14ea6b517d97da06c8fc84c841ad"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_04_reborn_hunter_tooltips.sql",
+          "sha256": "6b4ed8ddf7df7f67c66fcbc6618c535aa3d201bd4bb621ab4072972e510ff83e"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_05_ancient_of_war_form_creature.sql",
+          "sha256": "ccf6df4183a2692e2870cef7c76471a45f22da8fb67ff4712797418fbdda05a2"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_10_kazzak_throne.sql",
+          "sha256": "ab3140896383975b14903da1755b8185c5984355f3d12d6aa7d34c89df313b77"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_10_mirror_shard_curse_shard_always.sql",
+          "sha256": "de420bcfbe397474eac5810429f1b7bcfb709186c306eead79d6f065d4238aba"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_11_profession_tools_artifact.sql",
+          "sha256": "a7105e38a4b9b702056ed7276b569abc1e24672ddb85762a3d93cb62f4f823ff"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_11_westfall_killing_fields_chain.sql",
+          "sha256": "74eda95252f158157f2638d5abceaaaefd95ecd8e9b0fab734948dab7e81485b"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_20_raid_marker_removal.sql",
+          "sha256": "72d165b554a239cc141b0bcbea6696ab472a6bbed2168fc08711fe388a99a4ca"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_21_reborn_rogue_tooltips.sql",
+          "sha256": "bc00e7f93148228f8196c216a9350c7dc62964b9d814d15f83afd656e4d4f0f5"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_21_wailing_caverns_disciple_gossip.sql",
+          "sha256": "dae4e06831535957f86debb79d23c85764cda9c38673c328fcf9ddd08ed183eb"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_22_red_mage_tower_codex_table.sql",
+          "sha256": "2a595e1defdd6524dce71ba6cf83cf3a8de9c5d867ede3a5dd4da8f28cd9fb4b"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_30_coa_mine_graveyard_zones.sql",
+          "sha256": "6ba3fe73b685a0da0521e2cb3452d6bdae5efc91d692cbcdc74d3432da34597d"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_30_coa_quest_6391_coleman_farthing_rp.sql",
+          "sha256": "dfb6a9848abe492295185e5db4e0b4658b0fff57ce51d34f685f23af041e2047"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_30_targorr_berserker_leap_target.sql",
+          "sha256": "07a6e03fe4586f8e28d0768a44c4d2f83532e9b8133f3044d3d8562fef844efc"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_31_coa_shadewell_spirit_healer.sql",
+          "sha256": "e505a25ec214374dc3a00a20dbe8d72015cc594bf887ca441e11628452ade46b"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_32_coa_interior_graveyard_zones.sql",
+          "sha256": "23d4c4075f4fad3ccd012d996f68104b2d1c33388ac0ce89098b502bbc64c0c0"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_40_coa_quest_6438_defias_disruption_markers.sql",
+          "sha256": "a5dcb8a87b205a6431bc50184073510251ba5904896dd3b904ed0623c97ee1df"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_41_coa_quest_6064_serina_vale_stormwind.sql",
+          "sha256": "db00fbe8c780108cfb26a4306d4bc0b9a5a4982c667564f3cfa4b7eb58b7637c"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_50_coa_realm_first_duplicate_disables.sql",
+          "sha256": "c2fee94ea344be7604a8ea06290263e094509cb586f0d9e353bc89eb6bcadc06"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_60_coa_quest_6330_ashara_sermon.sql",
+          "sha256": "160aea79072712cef2a9c3caf627216bcc9de367c8ceeafd6023464592ff4033"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_80_cuirboulli_boots_display.sql",
+          "sha256": "70fefb12bd147a3da0d6014479a28e12ff17a3f164d5fb21e852f8fb355ecaa3"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_81_red_ribboned_wrapping_paper_display.sql",
+          "sha256": "e0d8343c3ccff19860da0b776a001dbba546a010381048eb811dc9124d880521"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_82_enforcers_jerkin_icon.sql",
+          "sha256": "2ee67312b4d1cb3b805c220d48aebb111793b8d12f3491830db0280c1a0d9cdd"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_90_coa_quest_365_fel_cone_split.sql",
+          "sha256": "f17a4068ee5d349044c8a34eeb685e561254b5ae903e017365865b09a3978c0c"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_91_guard_slipkik_shield_wall.sql",
+          "sha256": "eff5fe6f9d51f8b59a0e82a8110984660e7a6fb39503a7345bd8ca51a5e71f9e"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_92_dreadsteed_portal_display.sql",
+          "sha256": "7bd8dd86e5758344d2ee61d6fd8c73b48eabf29c03af01e4014a85b645699db9"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_95_coa_quest_5682_callboard_poi.sql",
+          "sha256": "9fb65815edd35e80daec9cdaefe54d278b8c8fa60aab0338f2d2fb4a7c53e4dc"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_95_coa_quest_6444_old_history_book.sql",
+          "sha256": "367842cb435d19c7a08c8b23796ba642b5478db9d212be0e6c31e3890cc606a8"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_95_coa_quest_6969_goldshire_produce_quest_link.sql",
+          "sha256": "effe7285d876e349530533a7ce8b4ca138048f5eda6b41d34a49a75e723885ae"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_95_reaper_soulrend_soul_infusion_requirement.sql",
+          "sha256": "e8ed5f80654a58d66e00a99496f4b37d1be1dae44abcb3748b671e93d797efc0"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_95_worldforged_lootcollector_alignment.sql",
+          "sha256": "47f9fc734805a331c0dd76270af89123a75976cd4c449770872cb836d005d562"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_96_witch_doctor_cauldron_hidden_model.sql",
+          "sha256": "2249d5be72046b14f79431685c0a2e54c34bfb373aeec8bf19e0466e7bf19179"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_01_basalthane_fire_pillar_gameobjects.sql",
+          "sha256": "d5b760db3a0cfe0598c589578ac0fdd731acb82e62bdf97c9f66b8a395394280"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_01_ranger_falconstrike_description.sql",
+          "sha256": "a7c7e86985644d43ca6347f6d3c2f73f6badfa5033088064e1361e8ed6960a51"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_02_quest_1195_sacred_flame_moonwell_marker.sql",
+          "sha256": "90e9f65c3a05168e770e99d56726c5808d4fe68e7bb9bb21e6f25d41c603fc1d"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_03_quest_1195_moonwell_area.sql",
+          "sha256": "c89afe77ae1c314a94254d27053e4697e43704f7dc9c0fd5ebb9831bec66d668"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_04_sun_cleric_bless_tooltip.sql",
+          "sha256": "ea6d37e50c6e8050aaeaea990fd99c04d09a5293f935e3879b6b89ed05bafe37"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_05_sun_cleric_bless_mana.sql",
+          "sha256": "4d56bc6c4d73fa748ea4ad006908cc5e7e36a0ce39ca9db3c1030452e78f0a86"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_06_runemaster_runeshroud_action_bar.sql",
+          "sha256": "a9ce1b6fb2523d03f81ba7c197c3d819cbaf45d08cef33b747d2282db7631071"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_07_witchdoctor_hexing_effigy_scale.sql",
+          "sha256": "4f638ab04abb74dfe6e19707647a3225c56c1db9753581f9840e28146e6e7b20"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_10_coa_quest_6260_eldya_display.sql",
+          "sha256": "5429e67746967481535ddd710bcfbb0673f3a23f76140087f5310c00bfa4c46e"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_10_coa_quest_6324_shadewell_oracle_spells.sql",
+          "sha256": "30dbdd5db0ab97661a826942372bfe9a9ea57a4a7597f3a28f07bd678b15e7b3"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_10_coa_quest_6395_mine_egg.sql",
+          "sha256": "d34a8625951c81014b66d68ddd5a5dfbe4c1468c02bd0368774bf27212945c62"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_10_coa_quest_6747_radiant_standin_displays.sql",
+          "sha256": "51fe89e321a5acfcd419a6ca7e16adee6691e79b4fc3cb9df6dc7a0183abcb78"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_10_kazzak_shrine.sql",
+          "sha256": "57ea6628d1d650711e36490b5481e7b41ccc125d97c0a41b713560cb57eaf69e"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_10_reborn_priest_tooltips.sql",
+          "sha256": "6535a9027080789f9567467893bdb895e3de76e58e46cf83ce397738cb77541d"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_20_coa_redridge_video_findings.sql",
+          "sha256": "a14229283ed33b131dfe215141259449bee4eabee1ee0f0c706ac84061c9a26f"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_20_pyromancer_seals_exclusive.sql",
+          "sha256": "56ad0d87448821d699df77edc9ecbc8f255e6f7b6c2411128a82b51886b1abb0"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_30_reborn_shaman_tooltips.sql",
+          "sha256": "929460a69905552bf87291c2989bbea4223620d90efcbb941ac57db6953f0703"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261016_02_pyromancer_pillar_of_flame_primary_target.sql",
+          "sha256": "483997b0921d42b556f2cbaa38512a8c8a2063f28541807140ab1f59f2bdb3a7"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261016_10_dungeon_normal_spell_damage.sql",
+          "sha256": "398ae5e6e831b8e61e75daddebcd97b9f529b299c23df6330214a84f85e5c755"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261016_10_templar_tithe_single_aura.sql",
+          "sha256": "9c4884c7e91f87c270b20c8ac90aac38c37cd1617238e38c64ee8820e6cd7b76"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261016_20_dungeon_weapon_spell_damage.sql",
+          "sha256": "24c98db72a6b47679329c06fce669d25a81d89307b05d2e7a4b1906ddabb3944"
+        },
+        {
+          "path": "docs/coa/README.md",
+          "sha256": "f998d159fbe931127ea977c576b65f639fd4a1f7bb7b5f12f17892e4ac558c13"
+        },
+        {
+          "path": "modules/mod-hero-call-board/src/HeroCallBoard.cpp",
+          "sha256": "1a7a11b734cf8dc08afbe133a49195b5b3a6b809c6feea366db8120ea14ac02a"
+        },
+        {
+          "path": "modules/mod-path-to-ascension/conf/path_to_ascension.conf.dist",
+          "sha256": "ae627711332d0b02a04992b5d46a971b92e7c963bac0c5b2b2e67eb9a18464ec"
+        },
+        {
+          "path": "modules/mod-path-to-ascension/src/PathToAscension.h",
+          "sha256": "d8115f386f1c877d24717815d4f0d64055afa1782a2014cc5fff7f29fa1c2d99"
+        },
+        {
+          "path": "modules/mod-path-to-ascension/src/PathToAscensionProgress.cpp",
+          "sha256": "49097a6b7538cadc24342d0cce3c5a5b44f9ec80645f164014a7a00dbda7a963"
+        },
+        {
+          "path": "modules/mod-path-to-ascension/src/PathToAscensionRewards.cpp",
+          "sha256": "225338f628de9b28a98b77c07a82c539e7624ca3d30e781f29c37fe61c3063e0"
+        },
+        {
+          "path": "modules/mod-spellbook/src/SpellbookNotifyData.h",
+          "sha256": "2ebe785bccf6c1e342dc41087bc62df36d3dc049b74107af6060f5de76ca6d4e"
+        },
+        {
+          "path": "modules/mod-worldforged-pickups/README.md",
+          "sha256": "3134095c869cb5c5e3301f5c5063e594fb705e86dfe8fe86527ac652817b1acb"
+        },
+        {
+          "path": "modules/mod-worldforged-pickups/src/WorldforgedPickups.cpp",
+          "sha256": "a58cf91d619cef894c597bc3f21d58970ffaebfb783a92a7077bbf1bd047fc6b"
+        },
+        {
+          "path": "src/server/coa/AscensionAchievementConditions.cpp",
+          "sha256": "f263beb1bd8f4a4a51ba12546c4278b34a98145f34b288765610f506dfc3dd7f"
+        },
+        {
+          "path": "src/server/coa/AscensionAverageItemLevel.h",
+          "sha256": "be00e14216666f04bc050c4c26e0e248426bb5e1a9a53cc853e72e749e543a45"
+        },
+        {
+          "path": "src/server/coa/AscensionBarbarianAbilities.cpp",
+          "sha256": "292a544cd21b31d3a3a1a7cf49042e58933c30fdc4de73f29fd09e876e9372e9"
+        },
+        {
+          "path": "src/server/coa/AscensionBloodforging.cpp",
+          "sha256": "8699294ee9ca97ea6608cbebcf2f32335228a1941f0571ed6018182361a739b2"
+        },
+        {
+          "path": "src/server/coa/AscensionBloodforging.h",
+          "sha256": "7d2a693753cd4cc592222dd3e86ea4f0236e1b7b8fe2d0d42de789ffddff3920"
+        },
+        {
+          "path": "src/server/coa/AscensionClassMechanics.cpp",
+          "sha256": "bea916595f6a6a7b093126eac281b315dc6477669ed2fafdc25049bee331d908"
+        },
+        {
+          "path": "src/server/coa/AscensionCoAConfig.cpp",
+          "sha256": "44b512bb2919e0bf046b61bf836c00304b6d262fb9364ef8b8c8b86a906a637e"
+        },
+        {
+          "path": "src/server/coa/AscensionCompat.cpp",
+          "sha256": "3be42cf95a582b64a29a6c658820f102305f0296a7d557e972c2eb6c4706603f"
+        },
+        {
+          "path": "src/server/coa/AscensionEquippedGearLoot.cpp",
+          "sha256": "d38494c49c2e68050c1eb497586e7bdf0873941e4f1ec25dda14c9bb9c558fce"
+        },
+        {
+          "path": "src/server/coa/AscensionPepeVanity.cpp",
+          "sha256": "633e451ec652dae391910109203d783cd90d308df90727238b464ce74c013046"
+        },
+        {
+          "path": "src/server/coa/AscensionPrimalistAncientWar.cpp",
+          "sha256": "657363816917cf8d143c0f99e08f88f02df092a8887cb00648385edd6b5e7c11"
+        },
+        {
+          "path": "src/server/coa/AscensionPrimalistSeismicResources.cpp",
+          "sha256": "1ec6bba113200b18d169aaf36633100e19d31b1de6f176ed9720bde94ee47213"
+        },
+        {
+          "path": "src/server/coa/AscensionPyromancer.cpp",
+          "sha256": "e7f082359318eac6e9bfbddf86ed09e8b226e1129c3c7245c74a69cf87fec01e"
+        },
+        {
+          "path": "src/server/coa/AscensionPyromancerAbilities.cpp",
+          "sha256": "44f5f1f9e7d05ed43ea38fcdef3fcf748b755c14e7b202078443a13f576441b0"
+        },
+        {
+          "path": "src/server/coa/AscensionPyromancerAuras.cpp",
+          "sha256": "0f67ba41c9e66c34374962d89d8b99df719ed4d54309793c823e11eb5ad4b0a4"
+        },
+        {
+          "path": "src/server/coa/AscensionPyromancerData.h",
+          "sha256": "37f47389320e4316bed3c88bb571c526e66f6fc377aec030737f3d6c7bd864c7"
+        },
+        {
+          "path": "src/server/coa/AscensionRaidMarkers.cpp",
+          "sha256": "6182d2c0814e945f39bec6da2979df8151b5d25195e50f1e5bf14c79d31f5b83"
+        },
+        {
+          "path": "src/server/coa/AscensionRangerFalconstrike.cpp",
+          "sha256": "7549ef13e39cbf9ce59960fe92b4e4cb8dd3905018bdb0ac7be7618f64056b6b"
+        },
+        {
+          "path": "src/server/coa/AscensionRangerFlowers.cpp",
+          "sha256": "391fee21b4fd94b1218d0f3d975d0c45be082c3766285536a2fa05a845dcec13"
+        },
+        {
+          "path": "src/server/coa/AscensionRangerPetalkeeper.cpp",
+          "sha256": "019f2b71ab4daeede53069ee68503adb815de6b42133e3b6bdbb32b9836ca268"
+        },
+        {
+          "path": "src/server/coa/AscensionReaperSpellContracts.cpp",
+          "sha256": "711560d6cdd854abb56c3b2093150260b3ccd90cd083cf703be513b0c014d8a1"
+        },
+        {
+          "path": "src/server/coa/AscensionReaperTalents.cpp",
+          "sha256": "40aec123e650470a611b8371b8708bb0fccdcc1c7e040fcd58b6bc16616f0211"
+        },
+        {
+          "path": "src/server/coa/AscensionRunemasterHurricane.cpp",
+          "sha256": "8e49bc3b1ad13da6ade4e96e6ed8d864ff5c7f97aaafbc911f1cd36856d4a875"
+        },
+        {
+          "path": "src/server/coa/AscensionRunemasterSecondary.cpp",
+          "sha256": "a25216e4c501d1a8f867d99be2bac385d3b8993e75a7a9702a7bb20f9a7cb31d"
+        },
+        {
+          "path": "src/server/coa/AscensionRunemasterTravel.cpp",
+          "sha256": "7b1a4b4409da8e47ccf256125119fcc30c73a08a65cb31e40596aa1dc9f5d3dc"
+        },
+        {
+          "path": "src/server/coa/AscensionSummonDamage.cpp",
+          "sha256": "4543036fda146e9bf66389768ecdc06fd994fb495b82ac4d68efc328a2c23b94"
+        },
+        {
+          "path": "src/server/coa/AscensionSunCleric.cpp",
+          "sha256": "e6958c3e87f6f663c05a7d42443206d12a4a764cf6bcd2b1b0493abd89abc9d3"
+        },
+        {
+          "path": "src/server/coa/AscensionSunClericAbilities.cpp",
+          "sha256": "fc24bf25e93f0d4c3136936868f9e0aadb27ce252bb34887494e4b6419bc2c3a"
+        },
+        {
+          "path": "src/server/coa/AscensionTaughtAbilityData.h",
+          "sha256": "6b3e1636d059b48e0595bc19941e482df0e5b619d28c6edb1d7fc808157c1209"
+        },
+        {
+          "path": "src/server/coa/AscensionTinkerAbilities.cpp",
+          "sha256": "3345eaf99dadfff9aabbf59400c32f7fbb0013113038663c15922fd77221eff7"
+        },
+        {
+          "path": "src/server/coa/AscensionTinkerContracts.cpp",
+          "sha256": "c2e674eb7f48b59d6c4ed2f414c0663ef8d8e3735718ee5e4bc2300cd68ecfe6"
+        },
+        {
+          "path": "src/server/coa/AscensionTinkerEvents.cpp",
+          "sha256": "41421f64b7f95030a2cac6709daa1584aa3323b3facd37bb682b1936d14cdfba"
+        },
+        {
+          "path": "src/server/coa/AscensionTinkerSummons.cpp",
+          "sha256": "5af2a85125aa19e6c021c95ce790d4b67398c5058a223d9e53f601c0c421813e"
+        },
+        {
+          "path": "src/server/coa/AscensionTravelPermit.cpp",
+          "sha256": "76b0de562523ca4b023187c64d39b691e7c8e892c34e3c5d257609a11f4d753a"
+        },
+        {
+          "path": "src/server/coa/AscensionVultureCultQuests.cpp",
+          "sha256": "4b5e342550fbd02edb7ff5d8a9c393823e90e3f9f1c8d9f3d3368b70c1e83d68"
+        },
+        {
+          "path": "src/server/coa/AscensionWarcraftReborn.cpp",
+          "sha256": "3081994c9ddb97ded7e94a2cefb8ad13c65160456560d8e8d69e75017f048f93"
+        },
+        {
+          "path": "src/server/coa/AscensionWarcraftRebornHunter.cpp",
+          "sha256": "4174bc90977dd188831520bf67a86cfe01a9f3a245b0551300d2b3c7de6be857"
+        },
+        {
+          "path": "src/server/coa/AscensionWarcraftRebornHunter.h",
+          "sha256": "373446dc11582b6a2251b737016c36bbf8719462822e2887aa4bcdd9abcc03b5"
+        },
+        {
+          "path": "src/server/coa/AscensionWarcraftRebornMage.cpp",
+          "sha256": "dbf658821dac59ea25e3c0b0de3119947a597e9502d492f5c1683754ce85b72a"
+        },
+        {
+          "path": "src/server/coa/AscensionWarcraftRebornMage.h",
+          "sha256": "45c68814ce5a08933001d05669bab1719d88252d71613aca475b34951945a18f"
+        },
+        {
+          "path": "src/server/coa/AscensionWarcraftRebornPriest.cpp",
+          "sha256": "bf35e313e90ab425a578f588b076ea259fe307f814ab1ee5c8b22c0df41911da"
+        },
+        {
+          "path": "src/server/coa/AscensionWarcraftRebornPriest.h",
+          "sha256": "702d0cceed1c454f76ad816aec5021e528abc2352b1346747b1b253f5cbe0295"
+        },
+        {
+          "path": "src/server/coa/AscensionWarcraftRebornRogue.cpp",
+          "sha256": "11539ab208c37dbf6d8ca948cc21e665c4e6d5712b27b75f0eaf19e7ad91db85"
+        },
+        {
+          "path": "src/server/coa/AscensionWarcraftRebornRogue.h",
+          "sha256": "29c6f4583bc4bdad96fc1e555f75e1e176ed4c5dff778abfbadae7dbb20d53b0"
+        },
+        {
+          "path": "src/server/coa/AscensionWarcraftRebornRules.cpp",
+          "sha256": "8288960a5239e90823b7f5dd4abd479d9eddda0d5d86568cb69ff6a0050713ef"
+        },
+        {
+          "path": "src/server/coa/AscensionWarcraftRebornShaman.cpp",
+          "sha256": "c37c68e20dcbe78efa94f53cabf3840cae833264d886b0b482b13dc58a45e749"
+        },
+        {
+          "path": "src/server/coa/AscensionWisdomball.cpp",
+          "sha256": "c0cd2e33941a57607645f19bf233cdf151bdd9fa084c0f84338a2458d0594e31"
+        },
+        {
+          "path": "src/server/coa/AscensionWitchDoctorCompletion.cpp",
+          "sha256": "807e6b3d8ec68fe29c1b324403e7b543324a4265ce0f03a4d71e9c7f3064d141"
+        },
+        {
+          "path": "src/server/coa/AscensionWitchDoctorSummons.cpp",
+          "sha256": "3e3adcb9c9d69370b1bbeaff402cd208b7c9fd89c16d47a8f57b016014972ee1"
+        },
+        {
+          "path": "src/server/coa/AscensionWitchHunterCompletion.cpp",
+          "sha256": "93ee99a47cbc788091876db138d6f0fd07dc6164f205c93969dfa6608c0090d3"
+        },
+        {
+          "path": "src/server/coa/AscensionXoroth.h",
+          "sha256": "21d52e0b9c3bda7c6d80108c72c44dd32002a0c50eb0efb9b04f5ece927f1f56"
+        },
+        {
+          "path": "src/server/coa/AscensionXorothContracts.cpp",
+          "sha256": "553bbd85a8889b47381df8c9d2d864c6e5bfb5de936e7396035816c039c171b3"
+        },
+        {
+          "path": "src/server/coa/CoACreatureScaling.cpp",
+          "sha256": "49692cd450d7fe136cfdd25f36d1a665459751a3ebf77a020cd3be79b4f8337e"
+        },
+        {
+          "path": "src/server/coa/CoADungeonBossKit.cpp",
+          "sha256": "80e418a6a6bebf8c4a3a46d7f392cba63571f70289abddc64fc3e43b072c2dd1"
+        },
+        {
+          "path": "src/server/coa/CoADungeonBossSpells.cpp",
+          "sha256": "a023a9518cc16db11e842d3cf4286d111c6e9a9a8ed899a5b81d2c88769a8d6b"
+        },
+        {
+          "path": "src/server/coa/CoADungeonNormal.cpp",
+          "sha256": "5148fe3797eed0317422d9055e44b1f54b66683eed44dbcd3c8cd364fd1437da"
+        },
+        {
+          "path": "src/server/coa/CoADungeonNormal.h",
+          "sha256": "6d4110d262bbf53bd0c76bd4d50de41024541d55565d30481f2cc1d768fe0c28"
+        },
+        {
+          "path": "src/server/coa/CoAScriptLoader.cpp",
+          "sha256": "1ec0b1cd769814be23482bf9f50d3c532d533a602a0c414a02d6b900b719cfd0"
+        },
+        {
+          "path": "src/server/coa/CoATestZoneBonus.cpp",
+          "sha256": "18ff3683f5e9c772f6b8264eb7e36d85414e2897967f71d193d76c7cb137bec1"
+        },
+        {
+          "path": "src/server/coa/conf/coa.conf.dist",
+          "sha256": "8682a32aae342b3dfbd7142b0cdec2eead96ed7410952bd1037d88c11a71ebde"
+        },
+        {
+          "path": "src/server/game/AI/SmartScripts/SmartScript.cpp",
+          "sha256": "07701c9812ac65731ecd37eee53e4a6e535f053d56d5a47cf420030de2da53ec"
+        },
+        {
+          "path": "src/server/game/Entities/GameObject/GameObject.cpp",
+          "sha256": "2b30425402201b3184877669efa3e233155e4922f349c52aa3ab297ab7dfd1cc"
+        },
+        {
+          "path": "src/server/game/Entities/Player/Player.cpp",
+          "sha256": "7d2e05c60f29e7f5d562ba40e3789e4ef501671eb4c4724e499e2cb4c6869bde"
+        },
+        {
+          "path": "src/server/game/Entities/Unit/StatSystem.cpp",
+          "sha256": "5c6e99609ac49cc15a7e7a6a1e01018d73b85d24c038d65aab8e95300d22e776"
+        },
+        {
+          "path": "src/server/game/Entities/Unit/Unit.cpp",
+          "sha256": "ee314451962bd8f11af98f2e5dd3a81179a27d553944218bd2c57009456640c3"
+        },
+        {
+          "path": "src/server/game/Handlers/LootHandler.cpp",
+          "sha256": "32ef00ccbb0e8a34568df006e89f4583d12ae365c80cf3b6e0de560841e37914"
+        },
+        {
+          "path": "src/server/game/Misc/GameGraveyard.cpp",
+          "sha256": "57c1b6dd14e35647a681aad7e46102bb7faf5255c7c3d89ce40a37d9aa59a311"
+        },
+        {
+          "path": "src/server/game/Scripting/ScriptDefines/PlayerScript.cpp",
+          "sha256": "6f2772bc75b2acd0ac3250b3a39c80f22c35ceb73a26fda4df5fd33d9943d064"
+        },
+        {
+          "path": "src/server/game/Scripting/ScriptDefines/PlayerScript.h",
+          "sha256": "b9bc57a882c8b1dd9b83bf02cbe917cb662812fad1ea536fe814414425619b58"
+        },
+        {
+          "path": "src/server/game/Scripting/ScriptMgr.h",
+          "sha256": "ccda7c5d635b99b17f188613bf245ea77eafd3997083c87b02ae7b12a4768d15"
+        },
+        {
+          "path": "src/server/game/Spells/Auras/SpellAuraEffects.cpp",
+          "sha256": "28e2da10911a21f6c2357759be474258fadae06dc85ef52c3b8c77344c85b96b"
+        },
+        {
+          "path": "src/server/game/Spells/Spell.cpp",
+          "sha256": "0c6ee79260d43180db1041e0e269d34eac54b74cdc6133c69b39958518f5ffda"
+        },
+        {
+          "path": "src/server/game/Spells/SpellEffects.cpp",
+          "sha256": "dba77e6d5049bee5ffd88535b148706e5f79a916b5e5eadd0f9c4a564c466ef9"
+        },
+        {
+          "path": "src/server/game/Spells/SpellInfo.cpp",
+          "sha256": "721bdfab5054c7436aae4d8b994f76b45e3877fcdb4e48bb234e14374a55a472"
+        },
+        {
+          "path": "src/server/game/Spells/SpellInfo.h",
+          "sha256": "599769170ef62f41a09d5954dd3a21bedcf583ccedf86777a7d31e84f25131de"
+        },
+        {
+          "path": "src/server/game/Time/GameTime.cpp",
+          "sha256": "8b1b074bf5df898cf9bb93598c2cef054d90ab192e2c67c7d77e251fa533e13f"
+        },
+        {
+          "path": "src/server/scripts/Custom/spell_basalthane.cpp",
+          "sha256": "a9f310f600cdb9ccb9ba230060e9703f806c2f1adb8fc622d511115b5e430bd0"
+        },
+        {
+          "path": "src/server/scripts/EasternKingdoms/BlackrockMountain/BlackrockSpire/boss_gyth.cpp",
+          "sha256": "edf96dd07527dffb5aadc9f547d393e17173920df6d6fd9ec3707be1f93614f0"
+        },
+        {
+          "path": "src/server/scripts/EasternKingdoms/BlackrockMountain/BlackrockSpire/boss_overlord_wyrmthalak.cpp",
+          "sha256": "acf184532dfd6dfbefefbb3eee6bbbabc88a5de95b06e8730bece2729bae5407"
+        },
+        {
+          "path": "src/server/scripts/EasternKingdoms/BlackrockMountain/BlackrockSpire/boss_rend_blackhand.cpp",
+          "sha256": "4106e15b6e6fee402025f7d32112f6119b3f653bf5892528d3f7aeb19f95ed80"
+        },
+        {
+          "path": "src/server/scripts/EasternKingdoms/BlackrockMountain/BlackrockSpire/instance_blackrock_spire.cpp",
+          "sha256": "f34ee23debcf374065c02835a5cf9426e81e579dc34ea1eefc5d33013230d33f"
+        },
+        {
+          "path": "src/server/scripts/EasternKingdoms/zone_stormwind_city.cpp",
+          "sha256": "c48732108b19b11fc2515da9c83cb4e1432c61ff1de774a52555bba2f9e4e04f"
+        },
+        {
+          "path": "src/server/scripts/Kalimdor/OnyxiasLair/instance_onyxias_lair.cpp",
+          "sha256": "7471dcf0c630d871202e87869f03deddb0359171e662fb3f2b1378a69a30ba29"
+        },
+        {
+          "path": "src/server/scripts/Kalimdor/OnyxiasLair/onyxias_lair.h",
+          "sha256": "14fc0bb926c596b7caff394108ded05ed7a797e3ba4b79483b6e11e43b558781"
+        },
+        {
+          "path": "src/server/scripts/Northrend/Ulduar/Ulduar/boss_ignis.cpp",
+          "sha256": "d45b2fe961513254533eedcf15663c156c1de572b5cf3ae9949e4d222822c24d"
+        },
+        {
+          "path": "src/server/scripts/Northrend/zone_icecrown.cpp",
+          "sha256": "a08f3ae699cc91965bfd784be65105930805ca51c7a73367608330ec0bb4f417"
+        },
+        {
+          "path": "src/server/scripts/Spells/spell_hunter.cpp",
+          "sha256": "e122cd26e5c5466bb609f3a8bbb3d53255794686a4791ecd1e9ec9dbf38d61fd"
+        },
+        {
+          "path": "src/server/scripts/Spells/spell_item.cpp",
+          "sha256": "cce79f2379a256b6d139dd1c6c41d115f19c95c279064949ceb1c635a2479232"
+        },
+        {
+          "path": "src/server/scripts/Spells/spell_rogue.cpp",
+          "sha256": "95ab6cbd3f079d121f1b613f8d08066882b9f7b56b71c3a1cf37c5a58dff5712"
+        },
+        {
+          "path": "src/server/scripts/Spells/spell_shaman.cpp",
+          "sha256": "7f4d064d236f5a840762b31fab2538137fac1e015b03c288ab7f15c2fb67392e"
+        },
+        {
+          "path": "src/server/shared/DataStores/DBCfmt.h",
+          "sha256": "6a505003ce22a8bcc52937b10295a4c29d1888148ff5599f4a976f0e2dd6c0fa"
+        },
+        {
+          "path": "src/server/shared/DataStores/DBCStructure.h",
+          "sha256": "7bcc4736dde3425e066c81f9d7cdb18d539b6da369e570fe3a1564bc3277bce4"
+        }
+      ],
+      "liveReleaseMigrations": [
+        {
+          "path": "data/sql/updates/pending_db_auth/rev_20261014_51_realm_first_gm_rbac_unlink.sql",
+          "sha256": "0893174bfc61adf2dc1be7ce3a747c8124be6c2fd9d9034395233917cac07cb9"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261002_ignis_scorch_slag_pot.sql",
+          "sha256": "1f9a0e86a2b4fe98b8f1ba1697b8bdc124262afc3a9cb85858e0618140f0d25a"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261013_40_landslide_gigantic_boulder_split_damage.sql",
+          "sha256": "9a659806bf2bf11f1868b87b7e011d91c2bcb41840f819aa9e0e11821573cd7b"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_01_ranger_horn_of_endurance.sql",
+          "sha256": "866496f70672a838cc7d0c498925a3238c20d2ca59ad6ca980cf087f40da8a19"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_03_coa_xaitoth_coven_position.sql",
+          "sha256": "4c579636fc7efaf251f15acbcbf3656d244fea25a65a71157847231ca5e50d8b"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_04_pepe_vanity.sql",
+          "sha256": "3af5c007609feacf60e2674e34172446b77a14ea6b517d97da06c8fc84c841ad"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_04_reborn_hunter_tooltips.sql",
+          "sha256": "6b4ed8ddf7df7f67c66fcbc6618c535aa3d201bd4bb621ab4072972e510ff83e"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_05_ancient_of_war_form_creature.sql",
+          "sha256": "ccf6df4183a2692e2870cef7c76471a45f22da8fb67ff4712797418fbdda05a2"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_10_kazzak_throne.sql",
+          "sha256": "ab3140896383975b14903da1755b8185c5984355f3d12d6aa7d34c89df313b77"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_10_mirror_shard_curse_shard_always.sql",
+          "sha256": "de420bcfbe397474eac5810429f1b7bcfb709186c306eead79d6f065d4238aba"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_11_profession_tools_artifact.sql",
+          "sha256": "a7105e38a4b9b702056ed7276b569abc1e24672ddb85762a3d93cb62f4f823ff"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_11_westfall_killing_fields_chain.sql",
+          "sha256": "74eda95252f158157f2638d5abceaaaefd95ecd8e9b0fab734948dab7e81485b"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_20_raid_marker_removal.sql",
+          "sha256": "72d165b554a239cc141b0bcbea6696ab472a6bbed2168fc08711fe388a99a4ca"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_21_reborn_rogue_tooltips.sql",
+          "sha256": "bc00e7f93148228f8196c216a9350c7dc62964b9d814d15f83afd656e4d4f0f5"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_21_wailing_caverns_disciple_gossip.sql",
+          "sha256": "dae4e06831535957f86debb79d23c85764cda9c38673c328fcf9ddd08ed183eb"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_22_red_mage_tower_codex_table.sql",
+          "sha256": "2a595e1defdd6524dce71ba6cf83cf3a8de9c5d867ede3a5dd4da8f28cd9fb4b"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_30_coa_mine_graveyard_zones.sql",
+          "sha256": "6ba3fe73b685a0da0521e2cb3452d6bdae5efc91d692cbcdc74d3432da34597d"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_30_coa_quest_6391_coleman_farthing_rp.sql",
+          "sha256": "dfb6a9848abe492295185e5db4e0b4658b0fff57ce51d34f685f23af041e2047"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_30_targorr_berserker_leap_target.sql",
+          "sha256": "07a6e03fe4586f8e28d0768a44c4d2f83532e9b8133f3044d3d8562fef844efc"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_31_coa_shadewell_spirit_healer.sql",
+          "sha256": "e505a25ec214374dc3a00a20dbe8d72015cc594bf887ca441e11628452ade46b"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_32_coa_interior_graveyard_zones.sql",
+          "sha256": "23d4c4075f4fad3ccd012d996f68104b2d1c33388ac0ce89098b502bbc64c0c0"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_40_coa_quest_6438_defias_disruption_markers.sql",
+          "sha256": "a5dcb8a87b205a6431bc50184073510251ba5904896dd3b904ed0623c97ee1df"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_41_coa_quest_6064_serina_vale_stormwind.sql",
+          "sha256": "db00fbe8c780108cfb26a4306d4bc0b9a5a4982c667564f3cfa4b7eb58b7637c"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_50_coa_realm_first_duplicate_disables.sql",
+          "sha256": "c2fee94ea344be7604a8ea06290263e094509cb586f0d9e353bc89eb6bcadc06"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_60_coa_quest_6330_ashara_sermon.sql",
+          "sha256": "160aea79072712cef2a9c3caf627216bcc9de367c8ceeafd6023464592ff4033"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_80_cuirboulli_boots_display.sql",
+          "sha256": "70fefb12bd147a3da0d6014479a28e12ff17a3f164d5fb21e852f8fb355ecaa3"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_81_red_ribboned_wrapping_paper_display.sql",
+          "sha256": "e0d8343c3ccff19860da0b776a001dbba546a010381048eb811dc9124d880521"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_82_enforcers_jerkin_icon.sql",
+          "sha256": "2ee67312b4d1cb3b805c220d48aebb111793b8d12f3491830db0280c1a0d9cdd"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_90_coa_quest_365_fel_cone_split.sql",
+          "sha256": "f17a4068ee5d349044c8a34eeb685e561254b5ae903e017365865b09a3978c0c"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_91_guard_slipkik_shield_wall.sql",
+          "sha256": "eff5fe6f9d51f8b59a0e82a8110984660e7a6fb39503a7345bd8ca51a5e71f9e"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_92_dreadsteed_portal_display.sql",
+          "sha256": "7bd8dd86e5758344d2ee61d6fd8c73b48eabf29c03af01e4014a85b645699db9"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_95_coa_quest_5682_callboard_poi.sql",
+          "sha256": "9fb65815edd35e80daec9cdaefe54d278b8c8fa60aab0338f2d2fb4a7c53e4dc"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_95_coa_quest_6444_old_history_book.sql",
+          "sha256": "367842cb435d19c7a08c8b23796ba642b5478db9d212be0e6c31e3890cc606a8"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_95_coa_quest_6969_goldshire_produce_quest_link.sql",
+          "sha256": "effe7285d876e349530533a7ce8b4ca138048f5eda6b41d34a49a75e723885ae"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_95_reaper_soulrend_soul_infusion_requirement.sql",
+          "sha256": "e8ed5f80654a58d66e00a99496f4b37d1be1dae44abcb3748b671e93d797efc0"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_95_worldforged_lootcollector_alignment.sql",
+          "sha256": "47f9fc734805a331c0dd76270af89123a75976cd4c449770872cb836d005d562"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261014_96_witch_doctor_cauldron_hidden_model.sql",
+          "sha256": "2249d5be72046b14f79431685c0a2e54c34bfb373aeec8bf19e0466e7bf19179"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_01_basalthane_fire_pillar_gameobjects.sql",
+          "sha256": "d5b760db3a0cfe0598c589578ac0fdd731acb82e62bdf97c9f66b8a395394280"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_01_ranger_falconstrike_description.sql",
+          "sha256": "a7c7e86985644d43ca6347f6d3c2f73f6badfa5033088064e1361e8ed6960a51"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_02_quest_1195_sacred_flame_moonwell_marker.sql",
+          "sha256": "90e9f65c3a05168e770e99d56726c5808d4fe68e7bb9bb21e6f25d41c603fc1d"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_03_quest_1195_moonwell_area.sql",
+          "sha256": "c89afe77ae1c314a94254d27053e4697e43704f7dc9c0fd5ebb9831bec66d668"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_04_sun_cleric_bless_tooltip.sql",
+          "sha256": "ea6d37e50c6e8050aaeaea990fd99c04d09a5293f935e3879b6b89ed05bafe37"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_05_sun_cleric_bless_mana.sql",
+          "sha256": "4d56bc6c4d73fa748ea4ad006908cc5e7e36a0ce39ca9db3c1030452e78f0a86"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_06_runemaster_runeshroud_action_bar.sql",
+          "sha256": "a9ce1b6fb2523d03f81ba7c197c3d819cbaf45d08cef33b747d2282db7631071"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_07_witchdoctor_hexing_effigy_scale.sql",
+          "sha256": "4f638ab04abb74dfe6e19707647a3225c56c1db9753581f9840e28146e6e7b20"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_10_coa_quest_6260_eldya_display.sql",
+          "sha256": "5429e67746967481535ddd710bcfbb0673f3a23f76140087f5310c00bfa4c46e"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_10_coa_quest_6324_shadewell_oracle_spells.sql",
+          "sha256": "30dbdd5db0ab97661a826942372bfe9a9ea57a4a7597f3a28f07bd678b15e7b3"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_10_coa_quest_6395_mine_egg.sql",
+          "sha256": "d34a8625951c81014b66d68ddd5a5dfbe4c1468c02bd0368774bf27212945c62"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_10_coa_quest_6747_radiant_standin_displays.sql",
+          "sha256": "51fe89e321a5acfcd419a6ca7e16adee6691e79b4fc3cb9df6dc7a0183abcb78"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_10_kazzak_shrine.sql",
+          "sha256": "57ea6628d1d650711e36490b5481e7b41ccc125d97c0a41b713560cb57eaf69e"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_10_reborn_priest_tooltips.sql",
+          "sha256": "6535a9027080789f9567467893bdb895e3de76e58e46cf83ce397738cb77541d"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_20_coa_redridge_video_findings.sql",
+          "sha256": "a14229283ed33b131dfe215141259449bee4eabee1ee0f0c706ac84061c9a26f"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_20_pyromancer_seals_exclusive.sql",
+          "sha256": "56ad0d87448821d699df77edc9ecbc8f255e6f7b6c2411128a82b51886b1abb0"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261015_30_reborn_shaman_tooltips.sql",
+          "sha256": "929460a69905552bf87291c2989bbea4223620d90efcbb941ac57db6953f0703"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261016_02_pyromancer_pillar_of_flame_primary_target.sql",
+          "sha256": "483997b0921d42b556f2cbaa38512a8c8a2063f28541807140ab1f59f2bdb3a7"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261016_10_dungeon_normal_spell_damage.sql",
+          "sha256": "398ae5e6e831b8e61e75daddebcd97b9f529b299c23df6330214a84f85e5c755"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261016_10_templar_tithe_single_aura.sql",
+          "sha256": "9c4884c7e91f87c270b20c8ac90aac38c37cd1617238e38c64ee8820e6cd7b76"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261016_15_old_school_kolkar_dungeon_polish.sql",
+          "sha256": "0a52cc3760f2627edcfbb2d7b8723a646c7d42e9dbfb7d3aac4f304afcac6b20"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261016_16_old_school_witchwing_dungeon_polish.sql",
+          "sha256": "05473838b409178812acb254292d56400c0c8cb5a880a2d1e03c8ab1ca389dac"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261016_17_old_school_razormane_dungeon_polish.sql",
+          "sha256": "83888d2ad18cef9ed7f55aeafd6b6a4b3d27f27edbbef089ff0b7a3c3c0474ee"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261016_18_old_school_first_three_refinement.sql",
+          "sha256": "358b9bbeed36ccf980c81be27b38167ac8eb3c150a1fdc474279dbba02a75f0d"
+        },
+        {
+          "path": "data/sql/updates/pending_db_world/rev_20261016_20_dungeon_weapon_spell_damage.sql",
+          "sha256": "24c98db72a6b47679329c06fce669d25a81d89307b05d2e7a4b1906ddabb3944"
+        }
+      ],
+      "localRuntimeDependencies": [
+        {
+          "path": "modules/mod-coa-challenges/src/CoA.Challenges.CorpseRuns.cpp",
+          "sha256": "2515a8ae891e6c68e7afc4685a3ba6eddb1998a142e4b652e9c9f6f4e98a24a9"
+        },
+        {
+          "path": "modules/mod-coa-challenges/src/CoA.Challenges.CorpseRuns.h",
+          "sha256": "ed8f414da23efcf0be5f16db4c2d6843d88f6a455578064d57e91d2680ae2c4f"
+        },
+        {
+          "path": "modules/mod-coa-challenges/src/CoA.Challenges.Professions.cpp",
+          "sha256": "1201acaed1cc90bca3f87afe5e1d979ed20bd39f67e646512d7b09c0930e400a"
+        },
+        {
+          "path": "modules/mod-coa-challenges/src/CoA.Challenges.Review.h",
+          "sha256": "9b0e4c3cb5036211b9104fd64d3ce7aab7d6813b704b5b3e3aca0f60b8e6ee3b"
+        },
+        {
+          "path": "modules/mod-coa-challenges/src/CoA.Challenges.Scripts.cpp",
+          "sha256": "b7fa1e2f6488aec3fb9d84feefec1a2e8be6a5ac429946dfc134b654d63ea51e"
+        },
+        {
+          "path": "modules/mod-coa-challenges/src/OldSchoolZoneProfiles.h",
+          "sha256": "5747b93a02d7dfe0f2962fa0efdfb63168c50b19f2022a53173f2d01aee99260"
+        },
+        {
+          "path": "modules/mod-coa-challenges/src/old-school-zones/17.inc",
+          "sha256": "2d4817b31bb2ebc29e9400231bf53d126c8f02e8f21dde0b9be0e131fc228bfe"
+        },
+        {
+          "path": "modules/mod-coa-challenges/src/old-school-zones/28.inc",
+          "sha256": "9bd1a3c0f39d00a308003dc3e06f2c6adda29ef71f4d19a83047d58e486565c3"
+        },
+        {
+          "path": "modules/mod-coa-challenges/src/old-school-zones/139.inc",
+          "sha256": "bd79f61f34b824d3d761f1c852c3d93e980f91e3d291afb10a687739daf9cf80"
+        },
+        {
+          "path": "modules/mod-coa-challenges/src/old-school-zones/26.inc",
+          "sha256": "dce2b8d3e945837e8cab04332ace0510a926f6b72438ddcbbfd6c0996bbe24a9"
+        },
+        {
+          "path": "modules/mod-coa-needs/src/CoANeeds.cpp",
+          "sha256": "b366d9ffc78c189fbc69ee3c00803a0aae433e3bd7584538a07947d74e1aceff"
+        },
+        {
+          "path": "src/server/game/Entities/Player/PlayerUpdates.cpp",
+          "sha256": "36f287c9051fcf257d478029213c10ce98de65ef8f1a5b01f1de0c1ab3c8264e"
+        },
+        {
+          "path": "src/server/game/Miscellaneous/RealmDayCycle.h",
+          "sha256": "2ef48a43dc5a6fdcfe28502d88d0fad5062618af6a892025f9c7b5a67a66677b"
+        }
+      ]
+    }
+  },
+  "playerbots": {
+    "repository": "hxc-mod-playerbots",
+    "branch": "codex/coa-live-playerbots-20261016-review",
+    "baseHead": "45a8e60dd840a622ee6e32332c9ae57a2b22f862",
+    "reviewCommit": "07a177bd480ecc94976965756240e0d8d744475a",
+    "files": [
+      {
+        "path": "src/Bot/Factory/RandomPlayerbotFactory.cpp",
+        "sha256": "de8bac2d2312b39550785a8370f6d4c1a50c56b8733c772e17438e425b9efb55"
+      },
+      {
+        "path": "src/Ai/Base/Actions/AddLootAction.h",
+        "sha256": "df9082ddd2d0fdeff2785c0b82281405093f6997554f8da4df1fd935a589545c"
+      },
+      {
+        "path": "src/Ai/Base/Actions/AddLootAction.cpp",
+        "sha256": "6e3c33a6ccbdf4ff2b36e1423b9e1b2803571868aeeedc3ed514f1cb874b5c47"
+      },
+      {
+        "path": "src/Mgr/Item/LootObjectStack.h",
+        "sha256": "04a7d86bd271bdb40d12bbf821ef11eb77dc787437d5e6057332ce7c3297f634"
+      },
+      {
+        "path": "src/Ai/Base/Actions/UseMeetingStoneAction.cpp",
+        "sha256": "30d9cab3557eb934ff88058417ceb986addfd3095cf11fed31f690e0f0e06696"
+      },
+      {
+        "path": "src/Mgr/Item/LootObjectStack.cpp",
+        "sha256": "8470b75dff9957ea2b6abcf480559102043f9530685619b75576f736a7b917b8"
+      },
+      {
+        "path": "src/Bot/Factory/RandomPlayerbotFactory.h",
+        "sha256": "6c8ddfd1227862376a36ef810bd6585cd191dd12b0276acf2681c7b6ae26b24d"
+      }
+    ]
+  },
+  "verification": {
+    "patchPaths": 161,
+    "migrationPaths": 62,
+    "localRuntimeDependencies": 13,
+    "playerbotsFiles": 7,
+    "allHashesVerified": true,
+    "fullSourceTreeHashRecorded": false,
+    "buildOrTestsRun": false,
+    "deploymentPerformed": false
+  }
+}
